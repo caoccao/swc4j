@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -43,7 +42,7 @@ public final class TsAsExpressionGenerator {
         if (innerType == null) innerType = "Ljava/lang/Object;";
 
         // Generate code for the inner expression
-        ExpressionGenerator.generate(compiler, code, cp, asExpr.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, cp, asExpr.getExpr(), null);
 
         // Unbox if the inner expression is a wrapper type
         TypeConversionUtils.unboxWrapperType(code, cp, innerType);

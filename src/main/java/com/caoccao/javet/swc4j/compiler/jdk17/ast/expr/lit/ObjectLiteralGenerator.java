@@ -117,7 +117,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor {
                     valueReturnType = ReturnTypeInfo.of("Ljava/util/LinkedHashMap;", genericTypeInfo.getNestedTypeInfo());
                 }
 
-                callback.generateExpr(compiler, code, cp, valueExpr, valueReturnType);
+                callback.generateExpr(code, cp, valueExpr, valueReturnType);
                 // Stack: [map, map, key, value]
 
                 // Box primitive values to Object
@@ -153,7 +153,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor {
                     valueType = "Ljava/lang/Object;";
                 }
 
-                callback.generateExpr(compiler, code, cp, ident, null);
+                callback.generateExpr(code, cp, ident, null);
                 // Stack: [map, map, key, value]
 
                 // Box primitive values to Object
@@ -179,7 +179,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor {
 
                 // Generate the spread expression (should evaluate to a Map)
                 ISwc4jAstExpr spreadExpr = spread.getExpr();
-                callback.generateExpr(compiler, code, cp, spreadExpr, null);
+                callback.generateExpr(code, cp, spreadExpr, null);
                 // Stack: [map, map, spreadMap]
 
                 // Call map.putAll(spreadMap) to merge all properties
@@ -234,7 +234,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor {
             }
 
             // Generate the expression
-            callback.generateExpr(compiler, code, cp, expr, null);
+            callback.generateExpr(code, cp, expr, null);
             // Stack: [expr_result]
 
             // Phase 2.1: Convert to appropriate key type based on Record type

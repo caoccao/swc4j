@@ -27,7 +27,6 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
@@ -173,7 +172,7 @@ public final class DoWhileStatementGenerator {
                     boolean generated = generateDirectConditionalJumpToBody(compiler, code, cp, binExpr, bodyLabel);
                     if (!generated) {
                         // Fallback: generate boolean expression and use ifne (jump if TRUE)
-                        ExpressionGenerator.generate(compiler, code, cp, testExpr, null);
+                        compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
                         code.ifne(0); // Placeholder - jump back if TRUE
                         int backwardJumpOffsetPos = code.getCurrentOffset() - 2;
                         int backwardJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -182,7 +181,7 @@ public final class DoWhileStatementGenerator {
                     }
                 } else {
                     // Non-binary expression: generate as boolean and use ifne
-                    ExpressionGenerator.generate(compiler, code, cp, testExpr, null);
+                    compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
                     code.ifne(0); // Placeholder - jump back if TRUE
                     int backwardJumpOffsetPos = code.getCurrentOffset() - 2;
                     int backwardJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -252,10 +251,10 @@ public final class DoWhileStatementGenerator {
         }
 
         // Generate left operand
-        ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
+        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
 
         // Generate right operand
-        ExpressionGenerator.generate(compiler, code, cp, binExpr.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
 
         // Generate comparison - jump BACK to body if condition is TRUE (inverted from while)
         // For do-while with "i < 10", we want to jump back if "i < 10" is TRUE, so use if_icmplt

@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSeqExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -28,23 +29,22 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * Generator for sequence expressions (comma operator).
  * Evaluates all expressions in sequence, leaving only the last value on the stack.
  */
-public final class SeqExpressionGenerator {
-    private SeqExpressionGenerator() {
+public final class SeqExpressionGenerator extends BaseAstProcessor {
+    public SeqExpressionGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
     /**
      * Generate bytecode for a sequence expression (comma operator).
      * Evaluates all expressions in sequence, leaving only the last value on the stack.
      *
-     * @param compiler       the compiler
      * @param code           the code builder
      * @param cp             the constant pool
      * @param seqExpr        the sequence expression AST node
      * @param returnTypeInfo return type information
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSeqExpr seqExpr,
@@ -56,7 +56,7 @@ public final class SeqExpressionGenerator {
             boolean isLast = (i == exprs.size() - 1);
 
             // Generate the expression
-            ExpressionGenerator.generate(compiler, code, cp, expr, isLast ? returnTypeInfo : null);
+            compiler.getExpressionGenerator().generate(code, cp, expr, isLast ? returnTypeInfo : null);
 
             // Pop the result of non-last expressions (they're evaluated for side effects only)
             if (!isLast) {

@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.VariableAnalyzer;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.MethodGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -36,20 +37,31 @@ import java.util.Map;
 public sealed abstract class ByteCodeCompiler permits
         ByteCodeCompiler17 {
     protected final ArrayLiteralGenerator arrayLiteralGenerator;
+    protected final AssignExpressionGenerator assignExpressionGenerator;
     protected final AstProcessor astProcessor;
+    protected final BinaryExpressionGenerator binaryExpressionGenerator;
     protected final BoolLiteralGenerator boolLiteralGenerator;
+    protected final CallExpressionGenerator callExpressionGenerator;
     protected final ClassGenerator classGenerator;
+    protected final ConditionalExpressionGenerator conditionalExpressionGenerator;
+    protected final ExpressionGenerator expressionGenerator;
+    protected final IdentifierGenerator identifierGenerator;
+    protected final MemberExpressionGenerator memberExpressionGenerator;
     protected final ByteCodeCompilerMemory memory;
     protected final MethodGenerator methodGenerator;
     protected final NullLiteralGenerator nullLiteralGenerator;
     protected final NumberLiteralGenerator numberLiteralGenerator;
     protected final ObjectLiteralGenerator objectLiteralGenerator;
     protected final ByteCodeCompilerOptions options;
+    protected final ParenExpressionGenerator parenExpressionGenerator;
     protected final Swc4jParseOptions parseOptions;
+    protected final SeqExpressionGenerator seqExpressionGenerator;
     protected final StringLiteralGenerator stringLiteralGenerator;
     protected final Swc4j swc4j;
     protected final TypeAliasCollector typeAliasCollector;
     protected final TypeResolver typeResolver;
+    protected final UnaryExpressionGenerator unaryExpressionGenerator;
+    protected final UpdateExpressionGenerator updateExpressionGenerator;
     protected final VariableAnalyzer variableAnalyzer;
 
 
@@ -62,16 +74,27 @@ public sealed abstract class ByteCodeCompiler permits
         swc4j = new Swc4j();
 
         arrayLiteralGenerator = new ArrayLiteralGenerator(this);
+        assignExpressionGenerator = new AssignExpressionGenerator(this);
         astProcessor = new AstProcessor(this);
+        binaryExpressionGenerator = new BinaryExpressionGenerator(this);
         boolLiteralGenerator = new BoolLiteralGenerator(this);
+        callExpressionGenerator = new CallExpressionGenerator(this);
         classGenerator = new ClassGenerator(this);
+        conditionalExpressionGenerator = new ConditionalExpressionGenerator(this);
+        expressionGenerator = new ExpressionGenerator(this);
+        identifierGenerator = new IdentifierGenerator(this);
+        memberExpressionGenerator = new MemberExpressionGenerator(this);
         methodGenerator = new MethodGenerator(this);
         nullLiteralGenerator = new NullLiteralGenerator(this);
         numberLiteralGenerator = new NumberLiteralGenerator(this);
         objectLiteralGenerator = new ObjectLiteralGenerator(this);
+        parenExpressionGenerator = new ParenExpressionGenerator(this);
+        seqExpressionGenerator = new SeqExpressionGenerator(this);
         stringLiteralGenerator = new StringLiteralGenerator(this);
         typeAliasCollector = new TypeAliasCollector(this);
         typeResolver = new TypeResolver(this);
+        unaryExpressionGenerator = new UnaryExpressionGenerator(this);
+        updateExpressionGenerator = new UpdateExpressionGenerator(this);
         variableAnalyzer = new VariableAnalyzer(this);
     }
 
@@ -93,16 +116,44 @@ public sealed abstract class ByteCodeCompiler permits
         return arrayLiteralGenerator;
     }
 
+    public AssignExpressionGenerator getAssignExpressionGenerator() {
+        return assignExpressionGenerator;
+    }
+
     public AstProcessor getAstProcessor() {
         return astProcessor;
+    }
+
+    public BinaryExpressionGenerator getBinaryExpressionGenerator() {
+        return binaryExpressionGenerator;
     }
 
     public BoolLiteralGenerator getBoolLiteralGenerator() {
         return boolLiteralGenerator;
     }
 
+    public CallExpressionGenerator getCallExpressionGenerator() {
+        return callExpressionGenerator;
+    }
+
     public ClassGenerator getClassGenerator() {
         return classGenerator;
+    }
+
+    public ConditionalExpressionGenerator getConditionalExpressionGenerator() {
+        return conditionalExpressionGenerator;
+    }
+
+    public ExpressionGenerator getExpressionGenerator() {
+        return expressionGenerator;
+    }
+
+    public IdentifierGenerator getIdentifierGenerator() {
+        return identifierGenerator;
+    }
+
+    public MemberExpressionGenerator getMemberExpressionGenerator() {
+        return memberExpressionGenerator;
     }
 
     public ByteCodeCompilerMemory getMemory() {
@@ -129,6 +180,14 @@ public sealed abstract class ByteCodeCompiler permits
         return options;
     }
 
+    public ParenExpressionGenerator getParenExpressionGenerator() {
+        return parenExpressionGenerator;
+    }
+
+    public SeqExpressionGenerator getSeqExpressionGenerator() {
+        return seqExpressionGenerator;
+    }
+
     public StringLiteralGenerator getStringLiteralGenerator() {
         return stringLiteralGenerator;
     }
@@ -139,6 +198,14 @@ public sealed abstract class ByteCodeCompiler permits
 
     public TypeResolver getTypeResolver() {
         return typeResolver;
+    }
+
+    public UnaryExpressionGenerator getUnaryExpressionGenerator() {
+        return unaryExpressionGenerator;
+    }
+
+    public UpdateExpressionGenerator getUpdateExpressionGenerator() {
+        return updateExpressionGenerator;
     }
 
     public VariableAnalyzer getVariableAnalyzer() {

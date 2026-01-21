@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -31,12 +32,12 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class AssignExpressionGenerator {
-    private AssignExpressionGenerator() {
+public final class AssignExpressionGenerator extends BaseAstProcessor {
+    public AssignExpressionGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstAssignExpr assignExpr) throws Swc4jByteCodeCompilerException {
@@ -50,8 +51,8 @@ public final class AssignExpressionGenerator {
                 // Java array operations
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                     // arr[index] = value - array element assignment
-                    ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [array]
-                    ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // Stack: [array, index]
+                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [array]
+                    compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [array, index]
 
                     // Convert index to int if needed
                     String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
@@ -61,7 +62,7 @@ public final class AssignExpressionGenerator {
 
                     // Generate the value to store
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                    ExpressionGenerator.generate(compiler, code, cp, assignExpr.getRight(), null); // Stack: [array, index, value]
+                    compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null); // Stack: [array, index, value]
 
                     // Unbox if needed
                     TypeConversionUtils.unboxWrapperType(code, cp, valueType);
@@ -106,9 +107,9 @@ public final class AssignExpressionGenerator {
                 // Check if it's arr[index] = value
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                     // arr[index] = value -> arr.set(index, value)
-                    ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
-                    ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // Stack: [ArrayList, index]
-                    ExpressionGenerator.generate(compiler, code, cp, assignExpr.getRight(), null); // Stack: [ArrayList, index, value]
+                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
+                    compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [ArrayList, index]
+                    compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null); // Stack: [ArrayList, index, value]
 
                     // Box value if needed
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
@@ -134,7 +135,7 @@ public final class AssignExpressionGenerator {
                         // arr.length = newLength
                         // Special case: arr.length = 0 -> arr.clear()
                         if (assignExpr.getRight() instanceof Swc4jAstNumber number && number.getValue() == 0.0) {
-                            ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
+                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
                             int clearMethod = cp.addMethodRef("java/util/ArrayList", "clear", "()V");
                             code.invokevirtual(clearMethod); // Stack: []
                             // Assignment expression should return the assigned value (0 in this case)
@@ -148,12 +149,12 @@ public final class AssignExpressionGenerator {
                             int newLength = (int) number.getValue();
 
                             // Call arr.subList(newLength, arr.size()).clear()
-                            ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
+                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
                             code.dup(); // Stack: [ArrayList, ArrayList] - keep one for potential use
                             code.iconst(newLength); // Stack: [ArrayList, ArrayList, newLength]
 
                             // Get arr.size() - need to load ArrayList again
-                            ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [ArrayList, ArrayList, newLength, ArrayList]
+                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList, ArrayList, newLength, ArrayList]
                             int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
                             code.invokevirtual(sizeMethod); // Stack: [ArrayList, ArrayList, newLength, size]
 
@@ -180,8 +181,8 @@ public final class AssignExpressionGenerator {
                 // Check if it's obj[key] = value (computed property)
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                     // obj[key] = value -> map.put(key, value)
-                    ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [LinkedHashMap]
-                    ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // Stack: [LinkedHashMap, key]
+                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [LinkedHashMap]
+                    compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [LinkedHashMap, key]
 
                     // Box primitive keys if needed
                     String keyType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
@@ -190,7 +191,7 @@ public final class AssignExpressionGenerator {
                         TypeConversionUtils.boxPrimitiveType(code, cp, keyType, wrapperType);
                     }
 
-                    ExpressionGenerator.generate(compiler, code, cp, assignExpr.getRight(), null); // Stack: [LinkedHashMap, key, value]
+                    compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null); // Stack: [LinkedHashMap, key, value]
 
                     // Box primitive values if needed
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
@@ -210,11 +211,11 @@ public final class AssignExpressionGenerator {
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
                     // obj.prop = value -> map.put("prop", value)
-                    ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [LinkedHashMap]
+                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [LinkedHashMap]
                     int keyIndex = cp.addString(propName);
                     code.ldc(keyIndex); // Stack: [LinkedHashMap, "prop"]
 
-                    ExpressionGenerator.generate(compiler, code, cp, assignExpr.getRight(), null); // Stack: [LinkedHashMap, "prop", value]
+                    compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null); // Stack: [LinkedHashMap, "prop", value]
 
                     // Box primitive values if needed
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
@@ -244,7 +245,7 @@ public final class AssignExpressionGenerator {
 
             if (op == Swc4jAstAssignOp.Assign) {
                 // Simple assignment: x = value
-                ExpressionGenerator.generate(compiler, code, cp, assignExpr.getRight(), null);
+                compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
 
                 // Convert to the variable's type if needed
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
@@ -267,7 +268,7 @@ public final class AssignExpressionGenerator {
                 }
 
                 // Generate the right-hand side expression
-                ExpressionGenerator.generate(compiler, code, cp, assignExpr.getRight(), null);
+                compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
 
                 // Convert to the variable's type if needed
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());

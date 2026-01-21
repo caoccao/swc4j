@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUpdateExpr;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -31,11 +32,12 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class UpdateExpressionGenerator {
-    private UpdateExpressionGenerator() {
+public final class UpdateExpressionGenerator extends BaseAstProcessor {
+    public UpdateExpressionGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
-    private static void addPrimitive(CodeBuilder code, String primitiveType) {
+    private void addPrimitive(CodeBuilder code, String primitiveType) {
         switch (primitiveType) {
             case "I", "B", "S", "C" -> code.iadd();
             case "J" -> code.ladd();
@@ -44,15 +46,14 @@ public final class UpdateExpressionGenerator {
         }
     }
 
-    private static void duplicatePrimitive(CodeBuilder code, String primitiveType) {
+    private void duplicatePrimitive(CodeBuilder code, String primitiveType) {
         switch (primitiveType) {
             case "J", "D" -> code.dup2(); // long and double take 2 stack slots
             default -> code.dup();         // all others take 1 slot
         }
     }
 
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstUpdateExpr updateExpr,
@@ -61,10 +62,10 @@ public final class UpdateExpressionGenerator {
         // Check what kind of operand we have
         if (updateExpr.getArg() instanceof Swc4jAstIdent ident) {
             // Phase 1: Local variables
-            handleLocalVariable(compiler, code, cp, updateExpr, ident, returnTypeInfo);
+            handleLocalVariable(code, cp, updateExpr, ident, returnTypeInfo);
         } else if (updateExpr.getArg() instanceof Swc4jAstMemberExpr memberExpr) {
             // Phase 2: Member access (obj.prop++ or arr[i]++)
-            handleMemberAccess(compiler, code, cp, updateExpr, memberExpr, returnTypeInfo);
+            handleMemberAccess(code, cp, updateExpr, memberExpr, returnTypeInfo);
         } else {
             throw new Swc4jByteCodeCompilerException(
                     "Update expressions only support identifiers and member expressions, got: " + updateExpr.getArg().getClass().getSimpleName());
@@ -74,7 +75,7 @@ public final class UpdateExpressionGenerator {
     /**
      * Generate appropriate array load instruction based on element type.
      */
-    private static void generateArrayLoad(CodeBuilder code, String elementType) {
+    private void generateArrayLoad(CodeBuilder code, String elementType) {
         switch (elementType) {
             case "Z", "B" -> code.baload(); // boolean and byte
             case "C" -> code.caload(); // char
@@ -90,7 +91,7 @@ public final class UpdateExpressionGenerator {
     /**
      * Generate appropriate array store instruction based on element type.
      */
-    private static void generateArrayStore(CodeBuilder code, String elementType) {
+    private void generateArrayStore(CodeBuilder code, String elementType) {
         switch (elementType) {
             case "Z", "B" -> code.bastore(); // boolean and byte
             case "C" -> code.castore(); // char
@@ -103,7 +104,7 @@ public final class UpdateExpressionGenerator {
         }
     }
 
-    private static void generateBox(CodeBuilder code, ClassWriter.ConstantPool cp, String primitiveType, String wrapperType) {
+    private void generateBox(CodeBuilder code, ClassWriter.ConstantPool cp, String primitiveType, String wrapperType) {
         String className = wrapperType.substring(1, wrapperType.length() - 1); // Remove L and ;
         String descriptor = "(" + primitiveType + ")" + wrapperType;
         int methodRef = cp.addMethodRef(className, "valueOf", descriptor);
@@ -114,7 +115,7 @@ public final class UpdateExpressionGenerator {
      * General code generation for non-int numeric types (long, float, double, wrappers).
      * Always leaves a value on the stack (either old value for postfix or new value for prefix).
      */
-    private static void generateGeneralUpdate(
+    private void generateGeneralUpdate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             String varType,
@@ -174,7 +175,7 @@ public final class UpdateExpressionGenerator {
      * Optimized code generation for int variables using iinc instruction.
      * Always leaves a value on the stack (either old value for postfix or new value for prefix).
      */
-    private static void generateIntUpdate(
+    private void generateIntUpdate(
             CodeBuilder code,
             int varIndex,
             boolean isIncrement,
@@ -193,7 +194,7 @@ public final class UpdateExpressionGenerator {
         }
     }
 
-    private static void generateUnbox(CodeBuilder code, ClassWriter.ConstantPool cp, String wrapperType, String primitiveType) {
+    private void generateUnbox(CodeBuilder code, ClassWriter.ConstantPool cp, String wrapperType, String primitiveType) {
         String methodName = switch (primitiveType) {
             case "I" -> "intValue";
             case "J" -> "longValue";
@@ -213,8 +214,7 @@ public final class UpdateExpressionGenerator {
     /**
      * Handle update on ArrayList element: arr[index]++.
      */
-    private static void handleArrayListUpdate(
-            ByteCodeCompiler compiler,
+    private void handleArrayListUpdate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstMemberExpr memberExpr,
@@ -223,8 +223,8 @@ public final class UpdateExpressionGenerator {
             boolean isPrefix) throws Swc4jByteCodeCompilerException {
 
         // Step 1: Get current value from ArrayList
-        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // [ArrayList]
-        ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // [ArrayList, index]
+        compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // [ArrayList]
+        compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // [ArrayList, index]
 
         // Convert index to int if needed
         String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
@@ -266,11 +266,11 @@ public final class UpdateExpressionGenerator {
         // Stack is now: [new_Integer] (postfix) or [new_Integer, new_Integer] (prefix)
 
         // Generate ArrayList reference
-        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null);
+        compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
         // Stack: [new_Integer, ArrayList] or [new_Integer, new_Integer, ArrayList]
 
         // Load index
-        ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null);
 
         // Convert index to int if needed
         if (indexType != null && !"I".equals(indexType)) {
@@ -314,8 +314,7 @@ public final class UpdateExpressionGenerator {
     /**
      * Handle update on LinkedHashMap property: obj.prop++ or obj[key]++.
      */
-    private static void handleLinkedHashMapUpdate(
-            ByteCodeCompiler compiler,
+    private void handleLinkedHashMapUpdate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstMemberExpr memberExpr,
@@ -338,7 +337,7 @@ public final class UpdateExpressionGenerator {
         }
 
         // Step 1: Get current value from map
-        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // [map or Object]
+        compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // [map or Object]
 
         // Cast to LinkedHashMap if the type is Object (for nested properties)
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
@@ -349,7 +348,7 @@ public final class UpdateExpressionGenerator {
 
         if (isComputedKey) {
             Swc4jAstComputedPropName computedProp = (Swc4jAstComputedPropName) memberExpr.getProp();
-            ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // [map, key]
+            compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // [map, key]
             // Box key if primitive
             String keyType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
             if (keyType != null && TypeConversionUtils.isPrimitiveType(keyType)) {
@@ -396,7 +395,7 @@ public final class UpdateExpressionGenerator {
         // Stack is now: [new_Integer] (postfix) or [new_Integer, new_Integer] (prefix)
 
         // Generate map reference
-        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null);
+        compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
         // Stack: [new_Integer, map or Object] or [new_Integer, new_Integer, map or Object]
 
         // Cast to LinkedHashMap if the type is Object (for nested properties)
@@ -409,7 +408,7 @@ public final class UpdateExpressionGenerator {
         // Load key
         if (isComputedKey) {
             Swc4jAstComputedPropName computedProp = (Swc4jAstComputedPropName) memberExpr.getProp();
-            ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null);
             // Box key if primitive
             String keyType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
             if (keyType != null && TypeConversionUtils.isPrimitiveType(keyType)) {
@@ -458,8 +457,7 @@ public final class UpdateExpressionGenerator {
     /**
      * Handle update expression on local variable (Phase 1).
      */
-    private static void handleLocalVariable(
-            ByteCodeCompiler compiler,
+    private void handleLocalVariable(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstUpdateExpr updateExpr,
@@ -507,8 +505,7 @@ public final class UpdateExpressionGenerator {
      * Handle update expression on member access (Phase 2).
      * Supports obj.prop++ and obj[key]++.
      */
-    private static void handleMemberAccess(
-            ByteCodeCompiler compiler,
+    private void handleMemberAccess(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstUpdateExpr updateExpr,
@@ -521,14 +518,14 @@ public final class UpdateExpressionGenerator {
 
         // Handle LinkedHashMap (object literals): obj.prop++ or obj[key]++
         if ("Ljava/util/LinkedHashMap;".equals(objType)) {
-            handleLinkedHashMapUpdate(compiler, code, cp, memberExpr, isIncrement, isPrefix);
+            handleLinkedHashMapUpdate(code, cp, memberExpr, isIncrement, isPrefix);
             return;
         }
 
         // Handle ArrayList: arr[index]++
         if ("Ljava/util/ArrayList;".equals(objType)) {
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
-                handleArrayListUpdate(compiler, code, cp, memberExpr, computedProp, isIncrement, isPrefix);
+                handleArrayListUpdate(code, cp, memberExpr, computedProp, isIncrement, isPrefix);
                 return;
             }
         }
@@ -536,7 +533,7 @@ public final class UpdateExpressionGenerator {
         // Handle native Java arrays: arr[index]++ for int[], Object[], etc.
         if (objType != null && objType.startsWith("[")) {
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
-                handleNativeArrayUpdate(compiler, code, cp, memberExpr, computedProp, objType, isIncrement, isPrefix);
+                handleNativeArrayUpdate(code, cp, memberExpr, computedProp, objType, isIncrement, isPrefix);
                 return;
             }
         }
@@ -544,7 +541,7 @@ public final class UpdateExpressionGenerator {
         // Handle Object type (nested properties like obj.inner.count++ where obj.inner returns Object)
         // Assume it's a LinkedHashMap since that's what object literals compile to
         if ("Ljava/lang/Object;".equals(objType)) {
-            handleLinkedHashMapUpdate(compiler, code, cp, memberExpr, isIncrement, isPrefix);
+            handleLinkedHashMapUpdate(code, cp, memberExpr, isIncrement, isPrefix);
             return;
         }
 
@@ -556,8 +553,7 @@ public final class UpdateExpressionGenerator {
      * Handle update on native Java array element: arr[index]++ for int[], long[], etc.
      * Currently supports only primitive arrays (int[], long[], double[], etc.).
      */
-    private static void handleNativeArrayUpdate(
-            ByteCodeCompiler compiler,
+    private void handleNativeArrayUpdate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstMemberExpr memberExpr,
@@ -579,8 +575,8 @@ public final class UpdateExpressionGenerator {
         // Use dup2 early for both prefix and postfix to avoid complex stack manipulation
 
         // Step 1: Load array and index
-        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // [array]
-        ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // [array, index]
+        compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // [array]
+        compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // [array, index]
 
         // Convert index to int if needed
         String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
@@ -644,7 +640,7 @@ public final class UpdateExpressionGenerator {
         // Stack now has return value: new value for prefix, old value for postfix
     }
 
-    private static void loadOne(CodeBuilder code, String primitiveType) {
+    private void loadOne(CodeBuilder code, String primitiveType) {
         switch (primitiveType) {
             case "I", "B", "S", "C" -> code.iconst(1);
             case "J" -> code.lconst(1L);
@@ -653,7 +649,7 @@ public final class UpdateExpressionGenerator {
         }
     }
 
-    private static void loadPrimitive(CodeBuilder code, String primitiveType, int varIndex) {
+    private void loadPrimitive(CodeBuilder code, String primitiveType, int varIndex) {
         switch (primitiveType) {
             case "I", "B", "S", "C" -> code.iload(varIndex);
             case "J" -> code.lload(varIndex);
@@ -662,7 +658,7 @@ public final class UpdateExpressionGenerator {
         }
     }
 
-    private static void storePrimitive(CodeBuilder code, String primitiveType, int varIndex) {
+    private void storePrimitive(CodeBuilder code, String primitiveType, int varIndex) {
         switch (primitiveType) {
             case "I", "B", "S", "C" -> code.istore(varIndex);
             case "J" -> code.lstore(varIndex);
@@ -671,7 +667,7 @@ public final class UpdateExpressionGenerator {
         }
     }
 
-    private static void subtractPrimitive(CodeBuilder code, String primitiveType) {
+    private void subtractPrimitive(CodeBuilder code, String primitiveType) {
         switch (primitiveType) {
             case "I", "B", "S", "C" -> code.isub();
             case "J" -> code.lsub();
@@ -680,7 +676,7 @@ public final class UpdateExpressionGenerator {
         }
     }
 
-    private static String unwrapType(String wrapperType) {
+    private String unwrapType(String wrapperType) {
         return switch (wrapperType) {
             case "Ljava/lang/Integer;" -> "I";
             case "Ljava/lang/Long;" -> "J";

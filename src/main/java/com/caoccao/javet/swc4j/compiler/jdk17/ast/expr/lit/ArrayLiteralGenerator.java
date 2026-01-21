@@ -72,7 +72,7 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor {
                         ISwc4jAstExpr elemExpr = elem.getExpr();
 
                         // Generate code for the spread expression (should be an array/collection)
-                        callback.generateExpr(compiler, code, cp, elemExpr, null);
+                        callback.generateExpr(code, cp, elemExpr, null);
 
                         // Call ArrayList.addAll(Collection) to add all elements
                         code.invokevirtual(arrayListAddAll);
@@ -85,7 +85,7 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor {
                         String elemType = compiler.getTypeResolver().inferTypeFromExpr(elemExpr);
                         if (elemType == null) elemType = "Ljava/lang/Object;";
 
-                        callback.generateExpr(compiler, code, cp, elemExpr, null);
+                        callback.generateExpr(code, cp, elemExpr, null);
 
                         // Box primitives to objects
                         if ("I".equals(elemType) || "Z".equals(elemType) || "B".equals(elemType) ||
@@ -151,7 +151,7 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor {
                 String exprType = compiler.getTypeResolver().inferTypeFromExpr(elemExpr);
                 if (exprType == null) exprType = "Ljava/lang/Object;";
 
-                callback.generateExpr(compiler, code, cp, elemExpr, null);
+                callback.generateExpr(code, cp, elemExpr, null);
 
                 // Unbox if needed
                 TypeConversionUtils.unboxWrapperType(code, cp, exprType);

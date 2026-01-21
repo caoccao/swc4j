@@ -19,18 +19,19 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class CallExpressionGenerator {
-    private CallExpressionGenerator() {
+public final class CallExpressionGenerator extends BaseAstProcessor {
+    public CallExpressionGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
@@ -47,7 +48,7 @@ public final class CallExpressionGenerator {
                 throw new Swc4jByteCodeCompilerException("Method '" + methodName + "()' not supported on Java arrays - arrays have fixed size");
             } else if ("Ljava/util/ArrayList;".equals(objType)) {
                 // Generate code for the object (ArrayList)
-                ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null);
+                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
 
                 // Get the method name
                 String methodName = null;
@@ -60,7 +61,7 @@ public final class CallExpressionGenerator {
                         // arr.push(value) -> arr.add(value)
                         if (!callExpr.getArgs().isEmpty()) {
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
                             // Box if primitive
                             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
                             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
@@ -104,7 +105,7 @@ public final class CallExpressionGenerator {
                             code.iconst(0); // Index 0
 
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
                             // Box if primitive
                             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
                             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
@@ -121,7 +122,7 @@ public final class CallExpressionGenerator {
                         // Returns int: index or -1 if not found
                         if (!callExpr.getArgs().isEmpty()) {
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
                             // Box argument if primitive
                             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
                             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
@@ -142,7 +143,7 @@ public final class CallExpressionGenerator {
                         // Returns int: last index or -1 if not found
                         if (!callExpr.getArgs().isEmpty()) {
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
                             // Box argument if primitive
                             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
                             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
@@ -163,7 +164,7 @@ public final class CallExpressionGenerator {
                         // Returns boolean: true if element exists, false otherwise
                         if (!callExpr.getArgs().isEmpty()) {
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
                             // Box argument if primitive
                             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
                             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
@@ -238,7 +239,7 @@ public final class CallExpressionGenerator {
 
                         // Generate index argument
                         var indexArg = callExpr.getArgs().get(0);
-                        ExpressionGenerator.generate(compiler, code, cp, indexArg.getExpr(), null);
+                        compiler.getExpressionGenerator().generate(code, cp, indexArg.getExpr(), null);
 
                         // Unbox index if needed
                         String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
@@ -249,7 +250,7 @@ public final class CallExpressionGenerator {
 
                         // Generate value argument
                         var valueArg = callExpr.getArgs().get(1);
-                        ExpressionGenerator.generate(compiler, code, cp, valueArg.getExpr(), null);
+                        compiler.getExpressionGenerator().generate(code, cp, valueArg.getExpr(), null);
 
                         // Box value if primitive
                         String valueType = compiler.getTypeResolver().inferTypeFromExpr(valueArg.getExpr());
@@ -281,7 +282,7 @@ public final class CallExpressionGenerator {
                         } else if (argCount == 1) {
                             // One argument: toSpliced(start) - remove from start to end
                             var startArg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
 
                             // Unbox if Integer
                             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -301,7 +302,7 @@ public final class CallExpressionGenerator {
                             // Two or more arguments: toSpliced(start, deleteCount, ...items)
                             // Generate start parameter
                             var startArg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
 
                             // Unbox if Integer
                             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -313,7 +314,7 @@ public final class CallExpressionGenerator {
 
                             // Generate deleteCount parameter
                             var deleteCountArg = callExpr.getArgs().get(1);
-                            ExpressionGenerator.generate(compiler, code, cp, deleteCountArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, deleteCountArg.getExpr(), null);
 
                             // Unbox if Integer
                             String deleteCountType = compiler.getTypeResolver().inferTypeFromExpr(deleteCountArg.getExpr());
@@ -341,7 +342,7 @@ public final class CallExpressionGenerator {
                                     // Stack: ArrayList, start, deleteCount, itemsList, itemsList
 
                                     var itemArg = callExpr.getArgs().get(i);
-                                    ExpressionGenerator.generate(compiler, code, cp, itemArg.getExpr(), null);
+                                    compiler.getExpressionGenerator().generate(code, cp, itemArg.getExpr(), null);
                                     // Stack: ArrayList, start, deleteCount, itemsList, itemsList, item
 
                                     // Box if primitive
@@ -381,7 +382,7 @@ public final class CallExpressionGenerator {
                         } else {
                             // Get separator argument
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
 
                             // If the separator is not a String, convert it
                             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
@@ -406,7 +407,7 @@ public final class CallExpressionGenerator {
                         if (!callExpr.getArgs().isEmpty()) {
                             // Get the second array argument
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
 
                             // Call ArrayApiUtils.concat(ArrayList, ArrayList)
                             int concatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "concat",
@@ -474,7 +475,7 @@ public final class CallExpressionGenerator {
                             // Stack: ArrayList
 
                             var startArg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
                             // Stack: ArrayList, start
 
                             // Need to unbox if Integer
@@ -519,7 +520,7 @@ public final class CallExpressionGenerator {
                             // Stack: ArrayList
 
                             var startArg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
                             // Stack: ArrayList, start
 
                             // Unbox if Integer
@@ -531,7 +532,7 @@ public final class CallExpressionGenerator {
                             // Stack: ArrayList, start
 
                             var endArg = callExpr.getArgs().get(1);
-                            ExpressionGenerator.generate(compiler, code, cp, endArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
                             // Stack: ArrayList, start, end
 
                             // Unbox if Integer
@@ -569,7 +570,7 @@ public final class CallExpressionGenerator {
                         } else if (argCount == 1) {
                             // One argument: splice(start) - remove from start to end
                             var startArg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
 
                             // Unbox if Integer
                             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -590,7 +591,7 @@ public final class CallExpressionGenerator {
                             // Two or more arguments: splice(start, deleteCount, ...items)
                             // Generate start parameter
                             var startArg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
 
                             // Unbox if Integer
                             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -602,7 +603,7 @@ public final class CallExpressionGenerator {
 
                             // Generate deleteCount parameter
                             var deleteCountArg = callExpr.getArgs().get(1);
-                            ExpressionGenerator.generate(compiler, code, cp, deleteCountArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, deleteCountArg.getExpr(), null);
 
                             // Unbox if Integer
                             String deleteCountType = compiler.getTypeResolver().inferTypeFromExpr(deleteCountArg.getExpr());
@@ -630,7 +631,7 @@ public final class CallExpressionGenerator {
                                     // Stack: ArrayList, ArrayList, start, deleteCount, itemsList, itemsList
 
                                     var itemArg = callExpr.getArgs().get(i);
-                                    ExpressionGenerator.generate(compiler, code, cp, itemArg.getExpr(), null);
+                                    compiler.getExpressionGenerator().generate(code, cp, itemArg.getExpr(), null);
                                     // Stack: ArrayList, ArrayList, start, deleteCount, itemsList, itemsList, item
 
                                     // Box if primitive
@@ -679,7 +680,7 @@ public final class CallExpressionGenerator {
 
                         // Generate the value argument
                         var valueArg = callExpr.getArgs().get(0);
-                        ExpressionGenerator.generate(compiler, code, cp, valueArg.getExpr(), null);
+                        compiler.getExpressionGenerator().generate(code, cp, valueArg.getExpr(), null);
                         // Stack: ArrayList, value
 
                         // Box primitive value if needed
@@ -700,7 +701,7 @@ public final class CallExpressionGenerator {
                         } else if (argCount == 2) {
                             // fill(value, start) - fill from start to end
                             var startArg = callExpr.getArgs().get(1);
-                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
                             // Stack: ArrayList, value, start
 
                             // Unbox if needed
@@ -719,7 +720,7 @@ public final class CallExpressionGenerator {
                         } else {
                             // fill(value, start, end) - three arguments
                             var startArg = callExpr.getArgs().get(1);
-                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
 
                             // Unbox start if needed
                             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -730,7 +731,7 @@ public final class CallExpressionGenerator {
                             // Stack: ArrayList, value, start
 
                             var endArg = callExpr.getArgs().get(2);
-                            ExpressionGenerator.generate(compiler, code, cp, endArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
 
                             // Unbox end if needed
                             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
@@ -763,7 +764,7 @@ public final class CallExpressionGenerator {
 
                         // Generate the target argument
                         var targetArg = callExpr.getArgs().get(0);
-                        ExpressionGenerator.generate(compiler, code, cp, targetArg.getExpr(), null);
+                        compiler.getExpressionGenerator().generate(code, cp, targetArg.getExpr(), null);
                         // Stack: ArrayList, target
 
                         // Unbox target if needed
@@ -776,7 +777,7 @@ public final class CallExpressionGenerator {
 
                         // Generate the start argument
                         var startArg = callExpr.getArgs().get(1);
-                        ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null);
+                        compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
                         // Stack: ArrayList, target, start
 
                         // Unbox start if needed
@@ -799,7 +800,7 @@ public final class CallExpressionGenerator {
                         } else {
                             // copyWithin(target, start, end) - three arguments
                             var endArg = callExpr.getArgs().get(2);
-                            ExpressionGenerator.generate(compiler, code, cp, endArg.getExpr(), null);
+                            compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
 
                             // Unbox end if needed
                             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());

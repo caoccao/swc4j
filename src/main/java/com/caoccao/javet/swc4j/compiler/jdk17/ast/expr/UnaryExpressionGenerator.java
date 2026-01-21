@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -30,12 +31,12 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class UnaryExpressionGenerator {
-    private UnaryExpressionGenerator() {
+public final class UnaryExpressionGenerator extends BaseAstProcessor {
+    public UnaryExpressionGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstUnaryExpr unaryExpr,
@@ -51,7 +52,7 @@ public final class UnaryExpressionGenerator {
                 // Bang operator requires boolean operand
                 if ("Z".equals(argType) || "Ljava/lang/Boolean;".equals(argType)) {
                     // Generate the operand
-                    ExpressionGenerator.generate(compiler, code, cp, arg, null);
+                    compiler.getExpressionGenerator().generate(code, cp, arg, null);
 
                     // Unbox if wrapper type
                     TypeConversionUtils.unboxWrapperType(code, cp, argType);
@@ -97,8 +98,8 @@ public final class UnaryExpressionGenerator {
                     } else if ("Ljava/util/ArrayList;".equals(objType)) {
                         if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                             // delete arr[index] -> arr.remove(index)
-                            ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
-                            ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // Stack: [ArrayList, index]
+                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
+                            compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [ArrayList, index]
 
                             // Call ArrayList.remove(int)
                             int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
@@ -243,7 +244,7 @@ public final class UnaryExpressionGenerator {
                     }
                 } else {
                     // For complex expressions, generate the expression first then negate
-                    ExpressionGenerator.generate(compiler, code, cp, arg, null);
+                    compiler.getExpressionGenerator().generate(code, cp, arg, null);
 
                     String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
                     // Handle null type - should not happen for negation, default to int
@@ -304,7 +305,7 @@ public final class UnaryExpressionGenerator {
                 }
 
                 // For numeric types, just generate the expression
-                ExpressionGenerator.generate(compiler, code, cp, arg, null);
+                compiler.getExpressionGenerator().generate(code, cp, arg, null);
 
                 // Check if argType is a wrapper before unboxing
                 boolean isWrapper = !argType.equals(primitiveType);

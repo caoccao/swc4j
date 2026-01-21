@@ -27,7 +27,6 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
@@ -155,14 +154,14 @@ public final class WhileStatementGenerator {
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
                 } else {
                     // Fallback: generate boolean expression and use ifeq
-                    ExpressionGenerator.generate(compiler, code, cp, testExpr, null);
+                    compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
                     code.ifeq(0); // Placeholder
                     condJumpOffsetPos = code.getCurrentOffset() - 2;
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
                 }
             } else {
                 // Non-binary expression: generate as boolean and use ifeq
-                ExpressionGenerator.generate(compiler, code, cp, testExpr, null);
+                compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
                 code.ifeq(0); // Placeholder
                 condJumpOffsetPos = code.getCurrentOffset() - 2;
                 condJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -257,10 +256,10 @@ public final class WhileStatementGenerator {
         }
 
         // Generate left operand
-        ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
+        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
 
         // Generate right operand
-        ExpressionGenerator.generate(compiler, code, cp, binExpr.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
 
         // Generate inverted comparison (jump to end if condition is FALSE)
         // For "i < 10", we want to exit if "i >= 10", so use if_icmpge

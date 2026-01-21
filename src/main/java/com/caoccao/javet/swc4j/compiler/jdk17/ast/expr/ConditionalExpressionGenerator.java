@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCondExpr;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -25,14 +26,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class ConditionalExpressionGenerator {
-    private ConditionalExpressionGenerator() {
+public final class ConditionalExpressionGenerator extends BaseAstProcessor {
+    public ConditionalExpressionGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
     /**
      * Convert a value on the stack from sourceType to targetType.
      */
-    private static void convertToCommonType(
+    private void convertToCommonType(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             String sourceType,
@@ -69,7 +71,7 @@ public final class ConditionalExpressionGenerator {
      * Phase 1: Simple implementation - both types must be the same.
      * Future phases will add type coercion and widening.
      */
-    private static String findCommonType(String type1, String type2) throws Swc4jByteCodeCompilerException {
+    private String findCommonType(String type1, String type2) throws Swc4jByteCodeCompilerException {
         // Handle null types
         if (type1 == null && type2 == null) {
             return null; // Both null
@@ -102,8 +104,7 @@ public final class ConditionalExpressionGenerator {
         return "Ljava/lang/Object;";
     }
 
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstCondExpr condExpr,
@@ -117,7 +118,7 @@ public final class ConditionalExpressionGenerator {
         String commonType = findCommonType(consType, altType);
 
         // Evaluate the test condition
-        ExpressionGenerator.generate(compiler, code, cp, condExpr.getTest(), null);
+        compiler.getExpressionGenerator().generate(code, cp, condExpr.getTest(), null);
 
         // Pattern:
         //   [test expression]          // Stack: [boolean]
@@ -134,7 +135,7 @@ public final class ConditionalExpressionGenerator {
         int ifeqOpcodePos = code.getCurrentOffset() - 3;
 
         // True branch (consequent)
-        ExpressionGenerator.generate(compiler, code, cp, condExpr.getCons(), null);
+        compiler.getExpressionGenerator().generate(code, cp, condExpr.getCons(), null);
         // Convert to common type if needed
         convertToCommonType(code, cp, consType, commonType);
 
@@ -145,7 +146,7 @@ public final class ConditionalExpressionGenerator {
 
         // False branch (alternate)
         int elseLabel = code.getCurrentOffset();
-        ExpressionGenerator.generate(compiler, code, cp, condExpr.getAlt(), null);
+        compiler.getExpressionGenerator().generate(code, cp, condExpr.getAlt(), null);
         // Convert to common type if needed
         convertToCommonType(code, cp, altType, commonType);
 
@@ -174,7 +175,7 @@ public final class ConditionalExpressionGenerator {
     /**
      * Get the rank of a primitive type for widening comparison.
      */
-    private static int getPrimitiveRank(String type) {
+    private int getPrimitiveRank(String type) {
         return switch (type) {
             case "B" -> 1; // byte
             case "S" -> 2; // short
@@ -192,7 +193,7 @@ public final class ConditionalExpressionGenerator {
      * Widening hierarchy: byte → short → int → long → float → double
      * char → int
      */
-    private static String widenPrimitiveTypes(String type1, String type2) {
+    private String widenPrimitiveTypes(String type1, String type2) {
         // If same type, no widening needed
         if (type1.equals(type2)) {
             return type1;

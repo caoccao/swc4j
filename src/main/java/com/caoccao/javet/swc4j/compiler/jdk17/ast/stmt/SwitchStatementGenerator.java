@@ -32,7 +32,6 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.EnumRegistry;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
@@ -402,7 +401,7 @@ public final class SwitchStatementGenerator {
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         // Generate discriminant expression (boxed value on stack)
-        ExpressionGenerator.generate(compiler, code, cp, switchStmt.getDiscriminant(), null);
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
 
         // Call appropriate unboxing method
         int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
@@ -426,7 +425,7 @@ public final class SwitchStatementGenerator {
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         // Generate discriminant expression
-        ExpressionGenerator.generate(compiler, code, cp, switchStmt.getDiscriminant(), null);
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
 
         // Call ordinal() method to get int value
         // ordinal() is defined in java.lang.Enum and returns int
@@ -452,7 +451,7 @@ public final class SwitchStatementGenerator {
         List<CaseInfo> cases = analyzeCases(switchStmt);
 
         // 2. Evaluate discriminant (push value onto stack)
-        ExpressionGenerator.generate(compiler, code, cp, switchStmt.getDiscriminant(), null);
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
 
         if (cases.isEmpty()) {
             // Empty switch - just pop the discriminant value
@@ -814,7 +813,7 @@ public final class SwitchStatementGenerator {
 
         if (stringCases.isEmpty()) {
             // Empty switch - just evaluate discriminant for side effects
-            ExpressionGenerator.generate(compiler, code, cp, switchStmt.getDiscriminant(), null);
+            compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
             code.pop();
             return;
         }
@@ -845,7 +844,7 @@ public final class SwitchStatementGenerator {
 
         // 3. Store discriminant in local variable
         int strLocal = context.getLocalVariableTable().allocateVariable("$switch$str", "Ljava/lang/String;");
-        ExpressionGenerator.generate(compiler, code, cp, switchStmt.getDiscriminant(), null);
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
         code.astore(strLocal);
 
         // 4. Create temp variable for position, initialized to -1

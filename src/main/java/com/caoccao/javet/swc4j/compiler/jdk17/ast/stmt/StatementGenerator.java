@@ -25,7 +25,6 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -120,7 +119,7 @@ public final class StatementGenerator {
             ClassWriter.ConstantPool cp,
             Swc4jAstExprStmt exprStmt) throws Swc4jByteCodeCompilerException {
         ISwc4jAstExpr expr = exprStmt.getExpr();
-        ExpressionGenerator.generate(compiler, code, cp, expr, null);
+        compiler.getExpressionGenerator().generate(code, cp, expr, null);
 
         // Assignment and update expressions leave values on the stack that need to be popped
         // Call expressions handle their own return values (already popped if needed)
@@ -149,7 +148,7 @@ public final class StatementGenerator {
 
         if (returnStmt.getArg().isPresent()) {
             // Generate the return value expression
-            ExpressionGenerator.generate(compiler, code, cp, returnStmt.getArg().get(),
+            compiler.getExpressionGenerator().generate(code, cp, returnStmt.getArg().get(),
                     returnTypeInfo);
 
             // Generate the appropriate return instruction

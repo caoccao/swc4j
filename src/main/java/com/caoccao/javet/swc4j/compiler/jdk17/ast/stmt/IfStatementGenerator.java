@@ -22,7 +22,6 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -102,7 +101,7 @@ public final class IfStatementGenerator {
             Swc4jAstIfStmt ifStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // Evaluate the test condition
-        ExpressionGenerator.generate(compiler, code, cp, ifStmt.getTest(), null);
+        compiler.getExpressionGenerator().generate(code, cp, ifStmt.getTest(), null);
 
         if (ifStmt.getAlt().isEmpty()) {
             // Simple if without else

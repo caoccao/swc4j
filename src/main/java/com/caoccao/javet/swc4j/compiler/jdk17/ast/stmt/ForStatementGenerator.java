@@ -28,7 +28,6 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
@@ -163,14 +162,14 @@ public final class ForStatementGenerator {
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
                 } else {
                     // Fallback: generate boolean expression and use ifeq
-                    ExpressionGenerator.generate(compiler, code, cp, testExpr, null);
+                    compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
                     code.ifeq(0); // Placeholder
                     condJumpOffsetPos = code.getCurrentOffset() - 2;
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
                 }
             } else {
                 // Non-binary expression: generate as boolean and use ifeq
-                ExpressionGenerator.generate(compiler, code, cp, testExpr, null);
+                compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
                 code.ifeq(0); // Placeholder
                 condJumpOffsetPos = code.getCurrentOffset() - 2;
                 condJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -293,10 +292,10 @@ public final class ForStatementGenerator {
         }
 
         // Generate left operand
-        ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
+        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
 
         // Generate right operand
-        ExpressionGenerator.generate(compiler, code, cp, binExpr.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
 
         // Generate inverted comparison (jump to end if condition is FALSE)
         // For "i < 10", we want to exit if "i >= 10", so use if_icmpge
@@ -338,7 +337,7 @@ public final class ForStatementGenerator {
             }
             VarDeclGenerator.generate(compiler, code, cp, varDecl);
         } else if (init instanceof ISwc4jAstExpr expr) {
-            ExpressionGenerator.generate(compiler, code, cp, expr, null);
+            compiler.getExpressionGenerator().generate(code, cp, expr, null);
 
             // Pop the result of the init expression if it leaves a value on the stack
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
@@ -361,7 +360,7 @@ public final class ForStatementGenerator {
             ClassWriter.ConstantPool cp,
             ISwc4jAstExpr updateExpr) throws Swc4jByteCodeCompilerException {
 
-        ExpressionGenerator.generate(compiler, code, cp, updateExpr, null);
+        compiler.getExpressionGenerator().generate(code, cp, updateExpr, null);
 
         // Pop the result of the update expression if it leaves a value on the stack
         // This includes AssignExpr (i = 5), UpdateExpr (i++), and SeqExpr (i++, j--)

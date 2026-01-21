@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -26,12 +27,12 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.ts.TsAsExpressionGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class ExpressionGenerator {
-    private ExpressionGenerator() {
+public final class ExpressionGenerator extends BaseAstProcessor {
+    public ExpressionGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             ISwc4jAstExpr expr,
@@ -48,29 +49,29 @@ public final class ExpressionGenerator {
         } else if (expr instanceof Swc4jAstNull nullLit) {
             compiler.getNullLiteralGenerator().generate(code, cp, nullLit, returnTypeInfo);
         } else if (expr instanceof Swc4jAstArrayLit arrayLit) {
-            compiler.getArrayLiteralGenerator().generate(code, cp, arrayLit, returnTypeInfo, ExpressionGenerator::generate);
+            compiler.getArrayLiteralGenerator().generate(code, cp, arrayLit, returnTypeInfo, this::generate);
         } else if (expr instanceof Swc4jAstObjectLit objectLit) {
-            compiler.getObjectLiteralGenerator().generate(code, cp, objectLit, returnTypeInfo, ExpressionGenerator::generate);
+            compiler.getObjectLiteralGenerator().generate(code, cp, objectLit, returnTypeInfo, this::generate);
         } else if (expr instanceof Swc4jAstIdent ident) {
-            IdentifierGenerator.generate(compiler, code, cp, ident, returnTypeInfo);
+            compiler.getIdentifierGenerator().generate(code, cp, ident, returnTypeInfo);
         } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
-            MemberExpressionGenerator.generate(compiler, code, cp, memberExpr);
+            compiler.getMemberExpressionGenerator().generate(code, cp, memberExpr);
         } else if (expr instanceof Swc4jAstCallExpr callExpr) {
-            CallExpressionGenerator.generate(compiler, code, cp, callExpr);
+            compiler.getCallExpressionGenerator().generate(code, cp, callExpr);
         } else if (expr instanceof Swc4jAstAssignExpr assignExpr) {
-            AssignExpressionGenerator.generate(compiler, code, cp, assignExpr);
+            compiler.getAssignExpressionGenerator().generate(code, cp, assignExpr);
         } else if (expr instanceof Swc4jAstBinExpr binExpr) {
-            BinaryExpressionGenerator.generate(compiler, code, cp, binExpr, returnTypeInfo);
+            compiler.getBinaryExpressionGenerator().generate(code, cp, binExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
-            UnaryExpressionGenerator.generate(compiler, code, cp, unaryExpr, returnTypeInfo);
+            compiler.getUnaryExpressionGenerator().generate(code, cp, unaryExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstUpdateExpr updateExpr) {
-            UpdateExpressionGenerator.generate(compiler, code, cp, updateExpr, returnTypeInfo);
+            compiler.getUpdateExpressionGenerator().generate(code, cp, updateExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstCondExpr condExpr) {
-            ConditionalExpressionGenerator.generate(compiler, code, cp, condExpr, returnTypeInfo);
+            compiler.getConditionalExpressionGenerator().generate(code, cp, condExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
-            ParenExpressionGenerator.generate(compiler, code, cp, parenExpr, returnTypeInfo, ExpressionGenerator::generate);
+            compiler.getParenExpressionGenerator().generate(code, cp, parenExpr, returnTypeInfo, this::generate);
         } else if (expr instanceof Swc4jAstSeqExpr seqExpr) {
-            SeqExpressionGenerator.generate(compiler, code, cp, seqExpr, returnTypeInfo);
+            compiler.getSeqExpressionGenerator().generate(code, cp, seqExpr, returnTypeInfo);
         } else {
             throw new Swc4jByteCodeCompilerException("Unsupported expression type: " + expr.getClass().getSimpleName());
         }

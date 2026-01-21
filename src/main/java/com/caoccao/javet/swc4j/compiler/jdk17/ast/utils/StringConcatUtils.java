@@ -181,7 +181,7 @@ public final class StringConcatUtils {
 
         // Append all operands
         for (int i = 0; i < operands.size(); i++) {
-            callback.generateExpr(compiler, code, cp, operands.get(i), null);
+            callback.generateExpr(code, cp, operands.get(i), null);
             appendOperandToStringBuilder(code, cp, operandTypes.get(i), appendString, appendInt, appendChar);
         }
 
@@ -192,7 +192,6 @@ public final class StringConcatUtils {
     @FunctionalInterface
     public interface ExpressionGeneratorCallback {
         void generateExpr(
-                ByteCodeCompiler compiler,
                 CodeBuilder code,
                 ClassWriter.ConstantPool cp,
                 ISwc4jAstExpr expr,

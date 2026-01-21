@@ -19,18 +19,19 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class MemberExpressionGenerator {
-    private MemberExpressionGenerator() {
+public final class MemberExpressionGenerator extends BaseAstProcessor {
+    public MemberExpressionGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstMemberExpr memberExpr) throws Swc4jByteCodeCompilerException {
@@ -41,8 +42,8 @@ public final class MemberExpressionGenerator {
             // Java array operations
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                 // arr[index] - array element access
-                ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [array]
-                ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // Stack: [array, index]
+                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [array]
+                compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [array, index]
 
                 // Convert index to int if needed
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
@@ -70,7 +71,7 @@ public final class MemberExpressionGenerator {
                 String propName = propIdent.getSym();
                 if ("length".equals(propName)) {
                     // arr.length - use arraylength instruction
-                    ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [array]
+                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [array]
                     code.arraylength(); // Stack: [int]
                     return;
                 }
@@ -80,8 +81,8 @@ public final class MemberExpressionGenerator {
             // Check if it's a computed property (arr[index]) or named property (arr.length)
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                 // arr[index] -> arr.get(index)
-                ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
-                ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // Stack: [ArrayList, index]
+                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
+                compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [ArrayList, index]
 
                 // Call ArrayList.get(int)
                 int getMethod = cp.addMethodRef("java/util/ArrayList", "get", "(I)Ljava/lang/Object;");
@@ -94,7 +95,7 @@ public final class MemberExpressionGenerator {
                 String propName = propIdent.getSym();
                 if ("length".equals(propName)) {
                     // arr.length -> arr.size()
-                    ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
+                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
                     int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
                     code.invokevirtual(sizeMethod); // Stack: [int]
                     return;
@@ -106,7 +107,7 @@ public final class MemberExpressionGenerator {
             // Check if it's a computed property (obj[key]) or named property (obj.prop)
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                 // obj[key] -> map.get(key)
-                ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [LinkedHashMap or Object]
+                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [LinkedHashMap or Object]
 
                 // Cast to LinkedHashMap if type is Object
                 if ("Ljava/lang/Object;".equals(objType)) {
@@ -114,7 +115,7 @@ public final class MemberExpressionGenerator {
                     code.checkcast(linkedHashMapClass); // Stack: [LinkedHashMap]
                 }
 
-                ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // Stack: [LinkedHashMap, key]
+                compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [LinkedHashMap, key]
 
                 // Box primitive keys if needed
                 String keyType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
@@ -133,7 +134,7 @@ public final class MemberExpressionGenerator {
             if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                 String propName = propIdent.getSym();
                 // obj.prop -> map.get("prop")
-                ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [LinkedHashMap or Object]
+                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [LinkedHashMap or Object]
 
                 // Cast to LinkedHashMap if type is Object
                 if ("Ljava/lang/Object;".equals(objType)) {

@@ -26,7 +26,6 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.GenericTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -59,7 +58,7 @@ public final class VarDeclGenerator {
                     GenericTypeInfo genericTypeInfo = context.getGenericTypeInfoMap().get(varName);
                     ReturnTypeInfo varTypeInfo = ReturnTypeInfo.of(localVar.type(), genericTypeInfo);
 
-                    ExpressionGenerator.generate(compiler, code, cp, init, varTypeInfo);
+                    compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
 
                     // Store the value in the local variable
                     switch (localVar.type()) {
