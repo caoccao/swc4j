@@ -23,9 +23,9 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUpdateExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
@@ -57,16 +57,15 @@ public final class UpdateExpressionGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstUpdateExpr updateExpr,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         // Check what kind of operand we have
         if (updateExpr.getArg() instanceof Swc4jAstIdent ident) {
             // Phase 1: Local variables
-            handleLocalVariable(compiler, code, cp, updateExpr, ident, returnTypeInfo, context);
+            handleLocalVariable(compiler, code, cp, updateExpr, ident, returnTypeInfo);
         } else if (updateExpr.getArg() instanceof Swc4jAstMemberExpr memberExpr) {
             // Phase 2: Member access (obj.prop++ or arr[i]++)
-            handleMemberAccess(compiler, code, cp, updateExpr, memberExpr, returnTypeInfo, context);
+            handleMemberAccess(compiler, code, cp, updateExpr, memberExpr, returnTypeInfo);
         } else {
             throw new Swc4jByteCodeCompilerException(
                     "Update expressions only support identifiers and member expressions, got: " + updateExpr.getArg().getClass().getSimpleName());
@@ -222,15 +221,14 @@ public final class UpdateExpressionGenerator {
             Swc4jAstMemberExpr memberExpr,
             Swc4jAstComputedPropName computedProp,
             boolean isIncrement,
-            boolean isPrefix,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            boolean isPrefix) throws Swc4jByteCodeCompilerException {
 
         // Step 1: Get current value from ArrayList
-        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null, context); // [ArrayList]
-        ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null, context); // [ArrayList, index]
+        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // [ArrayList]
+        ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // [ArrayList, index]
 
         // Convert index to int if needed
-        String indexType = TypeResolver.inferTypeFromExpr(compiler, computedProp.getExpr(), context);
+        String indexType = TypeResolver.inferTypeFromExpr(compiler, computedProp.getExpr());
         if (indexType != null && !"I".equals(indexType)) {
             TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
         }
@@ -269,11 +267,11 @@ public final class UpdateExpressionGenerator {
         // Stack is now: [new_Integer] (postfix) or [new_Integer, new_Integer] (prefix)
 
         // Generate ArrayList reference
-        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null, context);
+        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null);
         // Stack: [new_Integer, ArrayList] or [new_Integer, new_Integer, ArrayList]
 
         // Load index
-        ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null, context);
+        ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null);
 
         // Convert index to int if needed
         if (indexType != null && !"I".equals(indexType)) {
@@ -323,8 +321,7 @@ public final class UpdateExpressionGenerator {
             ClassWriter.ConstantPool cp,
             Swc4jAstMemberExpr memberExpr,
             boolean isIncrement,
-            boolean isPrefix,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            boolean isPrefix) throws Swc4jByteCodeCompilerException {
 
         // Determine the property name/key
         String propertyName = null;
@@ -342,10 +339,10 @@ public final class UpdateExpressionGenerator {
         }
 
         // Step 1: Get current value from map
-        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null, context); // [map or Object]
+        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // [map or Object]
 
         // Cast to LinkedHashMap if the type is Object (for nested properties)
-        String objType = TypeResolver.inferTypeFromExpr(compiler, memberExpr.getObj(), context);
+        String objType = TypeResolver.inferTypeFromExpr(compiler, memberExpr.getObj());
         if ("Ljava/lang/Object;".equals(objType)) {
             int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
             code.checkcast(linkedHashMapClass); // [LinkedHashMap]
@@ -353,9 +350,9 @@ public final class UpdateExpressionGenerator {
 
         if (isComputedKey) {
             Swc4jAstComputedPropName computedProp = (Swc4jAstComputedPropName) memberExpr.getProp();
-            ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null, context); // [map, key]
+            ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // [map, key]
             // Box key if primitive
-            String keyType = TypeResolver.inferTypeFromExpr(compiler, computedProp.getExpr(), context);
+            String keyType = TypeResolver.inferTypeFromExpr(compiler, computedProp.getExpr());
             if (keyType != null && TypeConversionUtils.isPrimitiveType(keyType)) {
                 TypeConversionUtils.boxPrimitiveType(code, cp, keyType, TypeConversionUtils.getWrapperType(keyType));
             }
@@ -400,7 +397,7 @@ public final class UpdateExpressionGenerator {
         // Stack is now: [new_Integer] (postfix) or [new_Integer, new_Integer] (prefix)
 
         // Generate map reference
-        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null, context);
+        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null);
         // Stack: [new_Integer, map or Object] or [new_Integer, new_Integer, map or Object]
 
         // Cast to LinkedHashMap if the type is Object (for nested properties)
@@ -413,9 +410,9 @@ public final class UpdateExpressionGenerator {
         // Load key
         if (isComputedKey) {
             Swc4jAstComputedPropName computedProp = (Swc4jAstComputedPropName) memberExpr.getProp();
-            ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null, context);
+            ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null);
             // Box key if primitive
-            String keyType = TypeResolver.inferTypeFromExpr(compiler, computedProp.getExpr(), context);
+            String keyType = TypeResolver.inferTypeFromExpr(compiler, computedProp.getExpr());
             if (keyType != null && TypeConversionUtils.isPrimitiveType(keyType)) {
                 TypeConversionUtils.boxPrimitiveType(code, cp, keyType, TypeConversionUtils.getWrapperType(keyType));
             }
@@ -468,8 +465,8 @@ public final class UpdateExpressionGenerator {
             ClassWriter.ConstantPool cp,
             Swc4jAstUpdateExpr updateExpr,
             Swc4jAstIdent ident,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
 
         String varName = ident.getSym();
         LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
@@ -517,23 +514,22 @@ public final class UpdateExpressionGenerator {
             ClassWriter.ConstantPool cp,
             Swc4jAstUpdateExpr updateExpr,
             Swc4jAstMemberExpr memberExpr,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
-        String objType = TypeResolver.inferTypeFromExpr(compiler, memberExpr.getObj(), context);
+        String objType = TypeResolver.inferTypeFromExpr(compiler, memberExpr.getObj());
         boolean isIncrement = updateExpr.getOp() == Swc4jAstUpdateOp.PlusPlus;
         boolean isPrefix = updateExpr.isPrefix();
 
         // Handle LinkedHashMap (object literals): obj.prop++ or obj[key]++
         if ("Ljava/util/LinkedHashMap;".equals(objType)) {
-            handleLinkedHashMapUpdate(compiler, code, cp, memberExpr, isIncrement, isPrefix, context);
+            handleLinkedHashMapUpdate(compiler, code, cp, memberExpr, isIncrement, isPrefix);
             return;
         }
 
         // Handle ArrayList: arr[index]++
         if ("Ljava/util/ArrayList;".equals(objType)) {
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
-                handleArrayListUpdate(compiler, code, cp, memberExpr, computedProp, isIncrement, isPrefix, context);
+                handleArrayListUpdate(compiler, code, cp, memberExpr, computedProp, isIncrement, isPrefix);
                 return;
             }
         }
@@ -541,7 +537,7 @@ public final class UpdateExpressionGenerator {
         // Handle native Java arrays: arr[index]++ for int[], Object[], etc.
         if (objType != null && objType.startsWith("[")) {
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
-                handleNativeArrayUpdate(compiler, code, cp, memberExpr, computedProp, objType, isIncrement, isPrefix, context);
+                handleNativeArrayUpdate(compiler, code, cp, memberExpr, computedProp, objType, isIncrement, isPrefix);
                 return;
             }
         }
@@ -549,7 +545,7 @@ public final class UpdateExpressionGenerator {
         // Handle Object type (nested properties like obj.inner.count++ where obj.inner returns Object)
         // Assume it's a LinkedHashMap since that's what object literals compile to
         if ("Ljava/lang/Object;".equals(objType)) {
-            handleLinkedHashMapUpdate(compiler, code, cp, memberExpr, isIncrement, isPrefix, context);
+            handleLinkedHashMapUpdate(compiler, code, cp, memberExpr, isIncrement, isPrefix);
             return;
         }
 
@@ -569,8 +565,7 @@ public final class UpdateExpressionGenerator {
             Swc4jAstComputedPropName computedProp,
             String arrayType,
             boolean isIncrement,
-            boolean isPrefix,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            boolean isPrefix) throws Swc4jByteCodeCompilerException {
 
         // Determine element type from array type descriptor
         // e.g., "[I" -> "I" (int), "[J" -> "J" (long)
@@ -585,11 +580,11 @@ public final class UpdateExpressionGenerator {
         // Use dup2 early for both prefix and postfix to avoid complex stack manipulation
 
         // Step 1: Load array and index
-        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null, context); // [array]
-        ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null, context); // [array, index]
+        ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // [array]
+        ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // [array, index]
 
         // Convert index to int if needed
-        String indexType = TypeResolver.inferTypeFromExpr(compiler, computedProp.getExpr(), context);
+        String indexType = TypeResolver.inferTypeFromExpr(compiler, computedProp.getExpr());
         if (indexType != null && !"I".equals(indexType)) {
             TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
         }

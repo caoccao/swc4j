@@ -24,9 +24,11 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
+import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
@@ -108,7 +110,6 @@ public final class DoWhileStatementGenerator {
      * @param cp             the constant pool
      * @param doWhileStmt    the do-while statement AST node
      * @param returnTypeInfo return type information for the enclosing method
-     * @param context        compilation context
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     public static void generate(
@@ -116,9 +117,8 @@ public final class DoWhileStatementGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstDoWhileStmt doWhileStmt,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
-        generate(compiler, code, cp, doWhileStmt, null, returnTypeInfo, context);
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        generate(compiler, code, cp, doWhileStmt, null, returnTypeInfo);
     }
 
     /**
@@ -130,7 +130,6 @@ public final class DoWhileStatementGenerator {
      * @param doWhileStmt    the do-while statement AST node
      * @param labelName      the label name (null for unlabeled loops)
      * @param returnTypeInfo return type information for the enclosing method
-     * @param context        compilation context
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     public static void generate(
@@ -139,22 +138,22 @@ public final class DoWhileStatementGenerator {
             ClassWriter.ConstantPool cp,
             Swc4jAstDoWhileStmt doWhileStmt,
             String labelName,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // 1. Mark body label (loop entry point - body executes first)
         int bodyLabel = code.getCurrentOffset();
 
         // 2. Create label info for break and continue
-        CompilationContext.LoopLabelInfo breakLabel = new CompilationContext.LoopLabelInfo(labelName);
-        CompilationContext.LoopLabelInfo continueLabel = new CompilationContext.LoopLabelInfo(labelName);
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
+        LoopLabelInfo continueLabel = new LoopLabelInfo(labelName);
 
         // Push labels onto stack before generating body
         context.pushBreakLabel(breakLabel);
         context.pushContinueLabel(continueLabel);
 
         // 3. Generate body and check if it can fall through
-        StatementGenerator.generate(compiler, code, cp, doWhileStmt.getBody(), returnTypeInfo, context);
+        StatementGenerator.generate(compiler, code, cp, doWhileStmt.getBody(), returnTypeInfo);
         boolean bodyCanFallThrough = canFallThrough(doWhileStmt.getBody());
 
         // 4. Mark test label (continue target - before test evaluation)
@@ -172,10 +171,10 @@ public final class DoWhileStatementGenerator {
             if (!isInfiniteLoop) {
                 // Generate conditional test - jump BACK to body if TRUE (inverted from while)
                 if (testExpr instanceof Swc4jAstBinExpr binExpr) {
-                    boolean generated = generateDirectConditionalJumpToBody(compiler, code, cp, binExpr, bodyLabel, context);
+                    boolean generated = generateDirectConditionalJumpToBody(compiler, code, cp, binExpr, bodyLabel);
                     if (!generated) {
                         // Fallback: generate boolean expression and use ifne (jump if TRUE)
-                        ExpressionGenerator.generate(compiler, code, cp, testExpr, null, context);
+                        ExpressionGenerator.generate(compiler, code, cp, testExpr, null);
                         code.ifne(0); // Placeholder - jump back if TRUE
                         int backwardJumpOffsetPos = code.getCurrentOffset() - 2;
                         int backwardJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -184,7 +183,7 @@ public final class DoWhileStatementGenerator {
                     }
                 } else {
                     // Non-binary expression: generate as boolean and use ifne
-                    ExpressionGenerator.generate(compiler, code, cp, testExpr, null, context);
+                    ExpressionGenerator.generate(compiler, code, cp, testExpr, null);
                     code.ifne(0); // Placeholder - jump back if TRUE
                     int backwardJumpOffsetPos = code.getCurrentOffset() - 2;
                     int backwardJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -207,13 +206,13 @@ public final class DoWhileStatementGenerator {
         breakLabel.setTargetOffset(endLabel);
 
         // 7. Patch all break statements to jump to end label
-        for (CompilationContext.LoopLabelInfo.PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
             int offset = endLabel - patchInfo.opcodePos();
             code.patchShort(patchInfo.offsetPos(), offset);
         }
 
         // 8. Patch all continue statements to jump to test label
-        for (CompilationContext.LoopLabelInfo.PatchInfo patchInfo : continueLabel.getPatchPositions()) {
+        for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
             int offset = testLabel - patchInfo.opcodePos();
             code.patchShort(patchInfo.offsetPos(), offset);
         }
@@ -235,8 +234,7 @@ public final class DoWhileStatementGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstBinExpr binExpr,
-            int bodyLabel,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            int bodyLabel) throws Swc4jByteCodeCompilerException {
 
         Swc4jAstBinaryOp op = binExpr.getOp();
 
@@ -246,8 +244,8 @@ public final class DoWhileStatementGenerator {
         }
 
         // Get operand types
-        String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft(), context);
-        String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight(), context);
+        String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
+        String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
 
         // Only handle int comparisons for now (most common case)
         if (!"I".equals(leftType) || !"I".equals(rightType)) {
@@ -255,10 +253,10 @@ public final class DoWhileStatementGenerator {
         }
 
         // Generate left operand
-        ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null, context);
+        ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
 
         // Generate right operand
-        ExpressionGenerator.generate(compiler, code, cp, binExpr.getRight(), null, context);
+        ExpressionGenerator.generate(compiler, code, cp, binExpr.getRight(), null);
 
         // Generate comparison - jump BACK to body if condition is TRUE (inverted from while)
         // For do-while with "i < 10", we want to jump back if "i < 10" is TRUE, so use if_icmplt

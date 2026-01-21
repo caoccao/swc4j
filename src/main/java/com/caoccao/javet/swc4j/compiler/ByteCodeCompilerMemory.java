@@ -16,14 +16,32 @@
 
 package com.caoccao.javet.swc4j.compiler;
 
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public final class ByteCodeCompilerMemory {
+    private final CompilationContext compilationContext;
     private final Map<String, String> typeAliasMap;
 
     public ByteCodeCompilerMemory() {
+        compilationContext = new CompilationContext();
         typeAliasMap = new HashMap<>();
+    }
+
+    public void reset() {
+        compilationContext.reset();
+        typeAliasMap.clear();
+    }
+
+    /**
+     * Get the current CompilationContext.
+     *
+     * @return the current compilation context
+     */
+    public CompilationContext getCompilationContext() {
+        return compilationContext;
     }
 
     public Map<String, String> getTypeAliasMap() {

@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -52,18 +53,20 @@ public final class MethodGenerator {
         if (bodyOpt.isPresent()) {
             try {
                 Swc4jAstBlockStmt body = bodyOpt.get();
-                CompilationContext context = new CompilationContext();
+
+                // Create a new compilation context for this method
+                CompilationContext context = compiler.getMemory().getCompilationContext();
 
                 // Analyze function parameters and allocate local variable slots
-                VariableAnalyzer.analyzeParameters(compiler, function, context);
+                VariableAnalyzer.analyzeParameters(compiler, function);
 
                 // Analyze variable declarations and infer types
-                VariableAnalyzer.analyzeVariableDeclarations(compiler, body, context);
+                VariableAnalyzer.analyzeVariableDeclarations(compiler, body);
 
                 // Determine return type from method body or explicit annotation
-                ReturnTypeInfo returnTypeInfo = TypeResolver.analyzeReturnType(compiler, function, body, context);
+                ReturnTypeInfo returnTypeInfo = TypeResolver.analyzeReturnType(compiler, function, body);
                 String descriptor = generateDescriptor(compiler, function, returnTypeInfo);
-                CodeBuilder code = generateCode(compiler, cp, body, returnTypeInfo, context);
+                CodeBuilder code = generateCode(compiler, cp, body, returnTypeInfo);
 
                 int accessFlags = 0x0001; // ACC_PUBLIC
                 if (method.isStatic()) {
@@ -120,13 +123,12 @@ public final class MethodGenerator {
             ByteCodeCompiler compiler,
             ClassWriter.ConstantPool cp,
             Swc4jAstBlockStmt body,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CodeBuilder code = new CodeBuilder();
 
         // Process statements in the method body
         for (ISwc4jAstStmt stmt : body.getStmts()) {
-            StatementGenerator.generate(compiler, code, cp, stmt, returnTypeInfo, context);
+            StatementGenerator.generate(compiler, code, cp, stmt, returnTypeInfo);
         }
 
         return code;

@@ -18,9 +18,10 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBreakStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -44,17 +45,16 @@ public final class BreakStatementGenerator {
      * @param code      the code builder
      * @param cp        the constant pool
      * @param breakStmt the break statement AST node
-     * @param context   compilation context
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     public static void generate(
             ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
-            Swc4jAstBreakStmt breakStmt,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            Swc4jAstBreakStmt breakStmt) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
 
-        CompilationContext.LoopLabelInfo breakLabel;
+        LoopLabelInfo breakLabel;
 
         // Check if this is a labeled break
         if (breakStmt.getLabel().isPresent()) {

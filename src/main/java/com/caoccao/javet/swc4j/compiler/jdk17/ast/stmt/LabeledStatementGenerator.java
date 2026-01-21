@@ -21,9 +21,9 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstForStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstLabeledStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstWhileStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -53,7 +53,6 @@ public final class LabeledStatementGenerator {
      * @param cp             the constant pool
      * @param labeledStmt    the labeled statement AST node
      * @param returnTypeInfo return type information for the enclosing method
-     * @param context        compilation context
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     public static void generate(
@@ -61,9 +60,7 @@ public final class LabeledStatementGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstLabeledStmt labeledStmt,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
-
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // Extract label name
         String labelName = labeledStmt.getLabel().getSym();
 
@@ -72,17 +69,17 @@ public final class LabeledStatementGenerator {
 
         if (body instanceof Swc4jAstForStmt forStmt) {
             // Generate labeled for loop
-            ForStatementGenerator.generate(compiler, code, cp, forStmt, labelName, returnTypeInfo, context);
+            ForStatementGenerator.generate(compiler, code, cp, forStmt, labelName, returnTypeInfo);
         } else if (body instanceof Swc4jAstWhileStmt whileStmt) {
             // Generate labeled while loop
-            WhileStatementGenerator.generate(compiler, code, cp, whileStmt, labelName, returnTypeInfo, context);
+            WhileStatementGenerator.generate(compiler, code, cp, whileStmt, labelName, returnTypeInfo);
         } else if (body instanceof Swc4jAstDoWhileStmt doWhileStmt) {
             // Generate labeled do-while loop
-            DoWhileStatementGenerator.generate(compiler, code, cp, doWhileStmt, labelName, returnTypeInfo, context);
+            DoWhileStatementGenerator.generate(compiler, code, cp, doWhileStmt, labelName, returnTypeInfo);
         } else {
             // For other statement types, just generate the body
             // (labels on non-loop statements are allowed but don't affect code generation)
-            StatementGenerator.generate(compiler, code, cp, body, returnTypeInfo, context);
+            StatementGenerator.generate(compiler, code, cp, body, returnTypeInfo);
         }
     }
 }

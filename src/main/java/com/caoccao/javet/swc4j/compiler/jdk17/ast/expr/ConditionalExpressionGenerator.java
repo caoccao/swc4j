@@ -18,9 +18,9 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCondExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
@@ -109,18 +109,17 @@ public final class ConditionalExpressionGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstCondExpr condExpr,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         // Infer types for type conversion
-        String consType = TypeResolver.inferTypeFromExpr(compiler, condExpr.getCons(), context);
-        String altType = TypeResolver.inferTypeFromExpr(compiler, condExpr.getAlt(), context);
+        String consType = TypeResolver.inferTypeFromExpr(compiler, condExpr.getCons());
+        String altType = TypeResolver.inferTypeFromExpr(compiler, condExpr.getAlt());
 
         // Find common type between branches
         String commonType = findCommonType(consType, altType);
 
         // Evaluate the test condition
-        ExpressionGenerator.generate(compiler, code, cp, condExpr.getTest(), null, context);
+        ExpressionGenerator.generate(compiler, code, cp, condExpr.getTest(), null);
 
         // Pattern:
         //   [test expression]          // Stack: [boolean]
@@ -137,7 +136,7 @@ public final class ConditionalExpressionGenerator {
         int ifeqOpcodePos = code.getCurrentOffset() - 3;
 
         // True branch (consequent)
-        ExpressionGenerator.generate(compiler, code, cp, condExpr.getCons(), null, context);
+        ExpressionGenerator.generate(compiler, code, cp, condExpr.getCons(), null);
         // Convert to common type if needed
         convertToCommonType(code, cp, consType, commonType);
 
@@ -148,7 +147,7 @@ public final class ConditionalExpressionGenerator {
 
         // False branch (alternate)
         int elseLabel = code.getCurrentOffset();
-        ExpressionGenerator.generate(compiler, code, cp, condExpr.getAlt(), null, context);
+        ExpressionGenerator.generate(compiler, code, cp, condExpr.getAlt(), null);
         // Convert to common type if needed
         convertToCommonType(code, cp, altType, commonType);
 

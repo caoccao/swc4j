@@ -20,9 +20,9 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -130,21 +130,20 @@ public final class StringConcatUtils {
             ByteCodeCompiler compiler,
             ISwc4jAstExpr expr,
             List<ISwc4jAstExpr> operands,
-            List<String> operandTypes,
-            CompilationContext context) {
+            List<String> operandTypes) {
         // If this expression is a binary Add that results in a String, collect its operands
         if (expr instanceof Swc4jAstBinExpr binExpr && binExpr.getOp() == Swc4jAstBinaryOp.Add) {
-            String exprType = TypeResolver.inferTypeFromExpr(compiler, expr, context);
+            String exprType = TypeResolver.inferTypeFromExpr(compiler, expr);
             if ("Ljava/lang/String;".equals(exprType)) {
                 // This is a string concatenation - collect operands recursively
-                collectOperands(compiler, binExpr.getLeft(), operands, operandTypes, context);
-                collectOperands(compiler, binExpr.getRight(), operands, operandTypes, context);
+                collectOperands(compiler, binExpr.getLeft(), operands, operandTypes);
+                collectOperands(compiler, binExpr.getRight(), operands, operandTypes);
                 return;
             }
         }
         // Not a string concatenation - add this expression as an operand
         operands.add(expr);
-        String operandType = TypeResolver.inferTypeFromExpr(compiler, expr, context);
+        String operandType = TypeResolver.inferTypeFromExpr(compiler, expr);
         // If type is null (e.g., for null literal), default to Object
         operandTypes.add(operandType != null ? operandType : "Ljava/lang/Object;");
     }
@@ -157,7 +156,6 @@ public final class StringConcatUtils {
             ISwc4jAstExpr right,
             String leftType,
             String rightType,
-            CompilationContext context,
             ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
         // Use StringBuilder for string concatenation
         // new StringBuilder
@@ -177,7 +175,7 @@ public final class StringConcatUtils {
         List<String> operandTypes = new ArrayList<>();
 
         // Collect operands from left side
-        collectOperands(compiler, left, operands, operandTypes, context);
+        collectOperands(compiler, left, operands, operandTypes);
 
         // Add right operand
         operands.add(right);
@@ -185,7 +183,7 @@ public final class StringConcatUtils {
 
         // Append all operands
         for (int i = 0; i < operands.size(); i++) {
-            callback.generateExpr(compiler, code, cp, operands.get(i), null, context);
+            callback.generateExpr(compiler, code, cp, operands.get(i), null);
             appendOperandToStringBuilder(code, cp, operandTypes.get(i), appendString, appendInt, appendChar);
         }
 
@@ -200,7 +198,6 @@ public final class StringConcatUtils {
                 CodeBuilder code,
                 ClassWriter.ConstantPool cp,
                 ISwc4jAstExpr expr,
-                ReturnTypeInfo returnTypeInfo,
-                CompilationContext context) throws Swc4jByteCodeCompilerException;
+                ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException;
     }
 }

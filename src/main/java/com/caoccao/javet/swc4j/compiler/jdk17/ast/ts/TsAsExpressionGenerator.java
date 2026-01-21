@@ -18,9 +18,9 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstTsAsExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
@@ -36,17 +36,16 @@ public final class TsAsExpressionGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstTsAsExpr asExpr,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // Handle explicit type cast (e.g., a as double)
-        String targetType = TypeResolver.inferTypeFromExpr(compiler, asExpr, context);
-        String innerType = TypeResolver.inferTypeFromExpr(compiler, asExpr.getExpr(), context);
+        String targetType = TypeResolver.inferTypeFromExpr(compiler, asExpr);
+        String innerType = TypeResolver.inferTypeFromExpr(compiler, asExpr.getExpr());
         // Handle null types - should not happen for cast expressions, but default to Object if it does
         if (targetType == null) targetType = "Ljava/lang/Object;";
         if (innerType == null) innerType = "Ljava/lang/Object;";
 
         // Generate code for the inner expression
-        ExpressionGenerator.generate(compiler, code, cp, asExpr.getExpr(), null, context);
+        ExpressionGenerator.generate(compiler, code, cp, asExpr.getExpr(), null);
 
         // Unbox if the inner expression is a wrapper type
         TypeConversionUtils.unboxWrapperType(code, cp, innerType);

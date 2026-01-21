@@ -31,6 +31,7 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsKeywordType;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -44,8 +45,7 @@ public final class TypeResolver {
     public static ReturnTypeInfo analyzeReturnType(
             ByteCodeCompiler compiler,
             Swc4jAstFunction function,
-            Swc4jAstBlockStmt body,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            Swc4jAstBlockStmt body) throws Swc4jByteCodeCompilerException {
         // Check for explicit return type annotation first
         var returnTypeOpt = function.getReturnType();
         if (returnTypeOpt.isPresent()) {
@@ -62,7 +62,7 @@ public final class TypeResolver {
                 if (argOpt.isPresent()) {
                     ISwc4jAstExpr arg = argOpt.get();
                     // Use inferTypeFromExpr for general type inference
-                    String type = inferTypeFromExpr(compiler, arg, context);
+                    String type = inferTypeFromExpr(compiler, arg);
                     // If type is null (e.g., for null literal), default to Object
                     if (type == null) {
                         type = "Ljava/lang/Object;";
@@ -131,8 +131,7 @@ public final class TypeResolver {
     public static String extractType(
             ByteCodeCompiler compiler,
             Swc4jAstBindingIdent bindingIdent,
-            Optional<ISwc4jAstExpr> init,
-            CompilationContext context) {
+            Optional<ISwc4jAstExpr> init) {
         // Check for explicit type annotation
         var typeAnn = bindingIdent.getTypeAnn();
         if (typeAnn.isPresent()) {
@@ -142,7 +141,7 @@ public final class TypeResolver {
 
         // Type inference from initializer
         if (init.isPresent()) {
-            String type = inferTypeFromExpr(compiler, init.get(), context);
+            String type = inferTypeFromExpr(compiler, init.get());
             // If type is null (e.g., for null literal), default to Object
             return type != null ? type : "Ljava/lang/Object;";
         }
@@ -268,13 +267,11 @@ public final class TypeResolver {
      *
      * @param compiler the compiler
      * @param key      Property name AST node
-     * @param context  Compilation context
      * @return JVM type descriptor (e.g., "Ljava/lang/String;", "Ljava/lang/Integer;", "D")
      */
     public static String inferKeyType(
             ByteCodeCompiler compiler,
-            ISwc4jAstPropName key,
-            CompilationContext context) {
+            ISwc4jAstPropName key) {
         if (key == null) {
             return "Ljava/lang/String;"; // Default to String
         }
@@ -321,7 +318,7 @@ public final class TypeResolver {
         // Computed property names - infer from expression
         if (key instanceof Swc4jAstComputedPropName computed) {
             ISwc4jAstExpr expr = computed.getExpr();
-            String inferredType = inferTypeFromExpr(compiler, expr, context);
+            String inferredType = inferTypeFromExpr(compiler, expr);
             return inferredType != null ? inferredType : "Ljava/lang/String;";
         }
 
@@ -331,12 +328,12 @@ public final class TypeResolver {
 
     public static String inferTypeFromExpr(
             ByteCodeCompiler compiler,
-            ISwc4jAstExpr expr,
-            CompilationContext context) {
+            ISwc4jAstExpr expr) {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
         if (expr instanceof Swc4jAstCondExpr condExpr) {
             // Conditional expression: infer type from both branches and find common type
-            String consType = inferTypeFromExpr(compiler, condExpr.getCons(), context);
-            String altType = inferTypeFromExpr(compiler, condExpr.getAlt(), context);
+            String consType = inferTypeFromExpr(compiler, condExpr.getCons());
+            String altType = inferTypeFromExpr(compiler, condExpr.getAlt());
             return findCommonType(consType, altType);
         } else if (expr instanceof Swc4jAstTsAsExpr asExpr) {
             // Explicit type cast - return the cast target type
@@ -349,7 +346,7 @@ public final class TypeResolver {
                 }
             }
             // If we can't determine the cast type, fall back to inferring from the expression
-            return inferTypeFromExpr(compiler, asExpr.getExpr(), context);
+            return inferTypeFromExpr(compiler, asExpr.getExpr());
         } else if (expr instanceof Swc4jAstNumber number) {
             double value = number.getValue();
             if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
@@ -370,7 +367,7 @@ public final class TypeResolver {
             return "Ljava/util/LinkedHashMap;";
         } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
             // Member expression - handle array-like properties
-            String objType = inferTypeFromExpr(compiler, memberExpr.getObj(), context);
+            String objType = inferTypeFromExpr(compiler, memberExpr.getObj());
 
             if (objType != null && objType.startsWith("[")) {
                 // Java array operations
@@ -410,20 +407,20 @@ public final class TypeResolver {
                     String varName = bindingIdent.getId().getSym();
                     return context.getInferredTypes().getOrDefault(varName, "Ljava/lang/Object;");
                 }
-                return inferTypeFromExpr(compiler, assignExpr.getRight(), context);
+                return inferTypeFromExpr(compiler, assignExpr.getRight());
             }
             // Simple assignment - result type is the right operand type
-            return inferTypeFromExpr(compiler, assignExpr.getRight(), context);
+            return inferTypeFromExpr(compiler, assignExpr.getRight());
         } else if (expr instanceof Swc4jAstIdent ident) {
             return context.getInferredTypes().getOrDefault(ident.getSym(), "Ljava/lang/Object;");
         } else if (expr instanceof Swc4jAstUpdateExpr updateExpr) {
             // Update expression (++/--) returns the type of the operand
-            return inferTypeFromExpr(compiler, updateExpr.getArg(), context);
+            return inferTypeFromExpr(compiler, updateExpr.getArg());
         } else if (expr instanceof Swc4jAstBinExpr binExpr) {
             switch (binExpr.getOp()) {
                 case Add -> {
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -435,8 +432,8 @@ public final class TypeResolver {
                     return getWidenedType(leftType, rightType);
                 }
                 case Sub -> {
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -444,8 +441,8 @@ public final class TypeResolver {
                     return getWidenedType(leftType, rightType);
                 }
                 case Mul -> {
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -453,8 +450,8 @@ public final class TypeResolver {
                     return getWidenedType(leftType, rightType);
                 }
                 case Div -> {
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -462,8 +459,8 @@ public final class TypeResolver {
                     return getWidenedType(leftType, rightType);
                 }
                 case Mod -> {
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -477,7 +474,7 @@ public final class TypeResolver {
                 case LShift -> {
                     // Left shift returns the type of the left operand (int or long)
                     // For JavaScript semantics, we convert to int (ToInt32), but JVM supports both
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     // Get primitive type
@@ -491,7 +488,7 @@ public final class TypeResolver {
                 case RShift -> {
                     // Right shift returns the type of the left operand (int or long)
                     // Same semantics as left shift
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     // Get primitive type
@@ -505,7 +502,7 @@ public final class TypeResolver {
                 case ZeroFillRShift -> {
                     // Zero-fill right shift returns the type of the left operand (int or long)
                     // Same semantics as other shift operations
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     // Get primitive type
@@ -518,8 +515,8 @@ public final class TypeResolver {
                 }
                 case BitAnd -> {
                     // Bitwise AND uses type widening - result is wider of the two operand types
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -528,8 +525,8 @@ public final class TypeResolver {
                 }
                 case BitOr -> {
                     // Bitwise OR uses type widening - result is wider of the two operand types
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -538,8 +535,8 @@ public final class TypeResolver {
                 }
                 case BitXor -> {
                     // Bitwise XOR uses type widening - result is wider of the two operand types
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -553,14 +550,14 @@ public final class TypeResolver {
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             // For unary expressions, infer type from the argument
-            return inferTypeFromExpr(compiler, unaryExpr.getArg(), context);
+            return inferTypeFromExpr(compiler, unaryExpr.getArg());
         } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
             // For parenthesized expressions, infer type from the inner expression
-            return inferTypeFromExpr(compiler, parenExpr.getExpr(), context);
+            return inferTypeFromExpr(compiler, parenExpr.getExpr());
         } else if (expr instanceof Swc4jAstCallExpr callExpr) {
             // For call expressions, try to infer the return type
             if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
-                String objType = inferTypeFromExpr(compiler, memberExpr.getObj(), context);
+                String objType = inferTypeFromExpr(compiler, memberExpr.getObj());
 
                 // ArrayList methods
                 if ("Ljava/util/ArrayList;".equals(objType)) {
@@ -593,7 +590,7 @@ public final class TypeResolver {
             // Sequence expression returns the type of the last expression
             var exprs = seqExpr.getExprs();
             if (!exprs.isEmpty()) {
-                return inferTypeFromExpr(compiler, exprs.get(exprs.size() - 1), context);
+                return inferTypeFromExpr(compiler, exprs.get(exprs.size() - 1));
             }
             return "V"; // Empty sequence - void
         }

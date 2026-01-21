@@ -20,15 +20,18 @@ import java.util.*;
 
 public class LocalVariableTable {
     // All allocated variables for maxLocals calculation
-    private final List<LocalVariable> allVariables = new ArrayList<>();
+    private final List<LocalVariable> allVariables;
     // List of scope maps - index 0 is outermost, last index is innermost (current) scope
     // Variables are looked up from innermost to outermost - no copying needed
-    private final List<Map<String, LocalVariable>> scopes = new ArrayList<>();
-    private int nextIndex = 1; // 0 is reserved for 'this'
+    private final List<Map<String, LocalVariable>> scopes;
+    private int nextIndex; // 0 is reserved for 'this'
 
     public LocalVariableTable() {
+        allVariables = new ArrayList<>();
+        scopes = new ArrayList<>();
         // Initialize with a base scope
         scopes.add(new HashMap<>());
+        nextIndex = 1;
     }
 
     public LocalVariable addExistingVariableToCurrentScope(String name, String type) {
@@ -83,5 +86,12 @@ public class LocalVariableTable {
             }
         }
         return null;
+    }
+
+    public void reset() {
+        allVariables.clear();
+        scopes.clear();
+        scopes.add(new HashMap<>());
+        nextIndex = 1;
     }
 }

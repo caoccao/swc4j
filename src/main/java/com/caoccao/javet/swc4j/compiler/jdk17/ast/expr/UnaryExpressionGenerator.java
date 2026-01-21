@@ -23,9 +23,9 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
@@ -41,20 +41,19 @@ public final class UnaryExpressionGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstUnaryExpr unaryExpr,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         Swc4jAstUnaryOp op = unaryExpr.getOp();
 
         switch (op) {
             case Bang -> {
                 // Handle logical NOT operator (!)
                 ISwc4jAstExpr arg = unaryExpr.getArg();
-                String argType = TypeResolver.inferTypeFromExpr(compiler, arg, context);
+                String argType = TypeResolver.inferTypeFromExpr(compiler, arg);
 
                 // Bang operator requires boolean operand
                 if ("Z".equals(argType) || "Ljava/lang/Boolean;".equals(argType)) {
                     // Generate the operand
-                    ExpressionGenerator.generate(compiler, code, cp, arg, null, context);
+                    ExpressionGenerator.generate(compiler, code, cp, arg, null);
 
                     // Unbox if wrapper type
                     TypeConversionUtils.unboxWrapperType(code, cp, argType);
@@ -92,7 +91,7 @@ public final class UnaryExpressionGenerator {
                 // Handle delete operator (e.g., delete arr[1])
                 ISwc4jAstExpr arg = unaryExpr.getArg();
                 if (arg instanceof Swc4jAstMemberExpr memberExpr) {
-                    String objType = TypeResolver.inferTypeFromExpr(compiler, memberExpr.getObj(), context);
+                    String objType = TypeResolver.inferTypeFromExpr(compiler, memberExpr.getObj());
 
                     if (objType != null && objType.startsWith("[")) {
                         // Java array - delete not supported
@@ -100,8 +99,8 @@ public final class UnaryExpressionGenerator {
                     } else if ("Ljava/util/ArrayList;".equals(objType)) {
                         if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                             // delete arr[index] -> arr.remove(index)
-                            ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null, context); // Stack: [ArrayList]
-                            ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null, context); // Stack: [ArrayList, index]
+                            ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
+                            ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // Stack: [ArrayList, index]
 
                             // Call ArrayList.remove(int)
                             int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
@@ -246,9 +245,9 @@ public final class UnaryExpressionGenerator {
                     }
                 } else {
                     // For complex expressions, generate the expression first then negate
-                    ExpressionGenerator.generate(compiler, code, cp, arg, null, context);
+                    ExpressionGenerator.generate(compiler, code, cp, arg, null);
 
-                    String argType = TypeResolver.inferTypeFromExpr(compiler, arg, context);
+                    String argType = TypeResolver.inferTypeFromExpr(compiler, arg);
                     // Handle null type - should not happen for negation, default to int
                     if (argType == null) argType = "I";
 
@@ -277,7 +276,7 @@ public final class UnaryExpressionGenerator {
             case Plus -> {
                 // Handle unary plus (numeric coercion) - essentially a no-op for numeric types
                 ISwc4jAstExpr arg = unaryExpr.getArg();
-                String argType = TypeResolver.inferTypeFromExpr(compiler, arg, context);
+                String argType = TypeResolver.inferTypeFromExpr(compiler, arg);
 
                 // Handle null type
                 if (argType == null) argType = "I";
@@ -307,7 +306,7 @@ public final class UnaryExpressionGenerator {
                 }
 
                 // For numeric types, just generate the expression
-                ExpressionGenerator.generate(compiler, code, cp, arg, null, context);
+                ExpressionGenerator.generate(compiler, code, cp, arg, null);
 
                 // Check if argType is a wrapper before unboxing
                 boolean isWrapper = !argType.equals(primitiveType);

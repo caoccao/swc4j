@@ -19,9 +19,9 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSeqExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -43,7 +43,6 @@ public final class SeqExpressionGenerator {
      * @param cp             the constant pool
      * @param seqExpr        the sequence expression AST node
      * @param returnTypeInfo return type information
-     * @param context        compilation context
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     public static void generate(
@@ -51,8 +50,7 @@ public final class SeqExpressionGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSeqExpr seqExpr,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         var exprs = seqExpr.getExprs();
         for (int i = 0; i < exprs.size(); i++) {
@@ -60,11 +58,11 @@ public final class SeqExpressionGenerator {
             boolean isLast = (i == exprs.size() - 1);
 
             // Generate the expression
-            ExpressionGenerator.generate(compiler, code, cp, expr, isLast ? returnTypeInfo : null, context);
+            ExpressionGenerator.generate(compiler, code, cp, expr, isLast ? returnTypeInfo : null);
 
             // Pop the result of non-last expressions (they're evaluated for side effects only)
             if (!isLast) {
-                String exprType = TypeResolver.inferTypeFromExpr(compiler, expr, context);
+                String exprType = TypeResolver.inferTypeFromExpr(compiler, expr);
                 if (exprType != null && !"V".equals(exprType)) {
                     if ("D".equals(exprType) || "J".equals(exprType)) {
                         code.pop2();

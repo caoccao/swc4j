@@ -18,9 +18,9 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
@@ -35,8 +35,8 @@ public final class IdentifierGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstIdent ident,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
         String varName = ident.getSym();
         LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
         if (localVar != null) {

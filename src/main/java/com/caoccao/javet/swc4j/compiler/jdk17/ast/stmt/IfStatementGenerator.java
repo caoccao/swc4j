@@ -19,9 +19,9 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -94,7 +94,6 @@ public final class IfStatementGenerator {
      * @param cp             the constant pool
      * @param ifStmt         the if statement AST node
      * @param returnTypeInfo return type information for the enclosing method
-     * @param context        compilation context
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     public static void generate(
@@ -102,18 +101,16 @@ public final class IfStatementGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstIfStmt ifStmt,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
-
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // Evaluate the test condition
-        ExpressionGenerator.generate(compiler, code, cp, ifStmt.getTest(), null, context);
+        ExpressionGenerator.generate(compiler, code, cp, ifStmt.getTest(), null);
 
         if (ifStmt.getAlt().isEmpty()) {
             // Simple if without else
-            generateSimpleIf(compiler, code, cp, ifStmt, returnTypeInfo, context);
+            generateSimpleIf(compiler, code, cp, ifStmt, returnTypeInfo);
         } else {
             // If-else
-            generateIfElse(compiler, code, cp, ifStmt, returnTypeInfo, context);
+            generateIfElse(compiler, code, cp, ifStmt, returnTypeInfo);
         }
     }
 
@@ -122,8 +119,7 @@ public final class IfStatementGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstIfStmt ifStmt,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         // Jump to else branch if condition is false (0)
         code.ifeq(0); // Placeholder
@@ -131,7 +127,7 @@ public final class IfStatementGenerator {
         int ifeqOpcodePos = code.getCurrentOffset() - 3;
 
         // Generate consequent (then branch)
-        StatementGenerator.generate(compiler, code, cp, ifStmt.getCons(), returnTypeInfo, context);
+        StatementGenerator.generate(compiler, code, cp, ifStmt.getCons(), returnTypeInfo);
 
         // Check if consequent ends with unconditional jump - if so, no need for goto
         boolean consEndsWithJump = endsWithUnconditionalJump(ifStmt.getCons());
@@ -148,7 +144,7 @@ public final class IfStatementGenerator {
 
         // Generate alternate (else branch)
         int elseLabel = code.getCurrentOffset();
-        StatementGenerator.generate(compiler, code, cp, ifStmt.getAlt().get(), returnTypeInfo, context);
+        StatementGenerator.generate(compiler, code, cp, ifStmt.getAlt().get(), returnTypeInfo);
 
         // End of if-else statement
         int endLabel = code.getCurrentOffset();
@@ -169,8 +165,7 @@ public final class IfStatementGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstIfStmt ifStmt,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         // Jump to end if condition is false (0)
         code.ifeq(0); // Placeholder, will patch offset later
@@ -178,7 +173,7 @@ public final class IfStatementGenerator {
         int ifeqOpcodePos = code.getCurrentOffset() - 3;
 
         // Generate consequent (then branch)
-        StatementGenerator.generate(compiler, code, cp, ifStmt.getCons(), returnTypeInfo, context);
+        StatementGenerator.generate(compiler, code, cp, ifStmt.getCons(), returnTypeInfo);
 
         // End of if statement
         int endLabel = code.getCurrentOffset();
