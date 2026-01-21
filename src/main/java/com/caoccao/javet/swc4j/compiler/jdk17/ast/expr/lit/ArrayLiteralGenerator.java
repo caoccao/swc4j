@@ -19,11 +19,9 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
-import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -83,7 +81,7 @@ public final class ArrayLiteralGenerator {
                         code.dup(); // Duplicate ArrayList reference
                         // Generate code for the element expression - ensure it's boxed
                         ISwc4jAstExpr elemExpr = elem.getExpr();
-                        String elemType = TypeResolver.inferTypeFromExpr(compiler, elemExpr);
+                        String elemType = compiler.getTypeResolver().inferTypeFromExpr(elemExpr);
                         if (elemType == null) elemType = "Ljava/lang/Object;";
 
                         callback.generateExpr(compiler, code, cp, elemExpr, null);
@@ -150,7 +148,7 @@ public final class ArrayLiteralGenerator {
                 code.iconst(index);  // Push index
 
                 // Generate the element value
-                String exprType = TypeResolver.inferTypeFromExpr(compiler, elemExpr);
+                String exprType = compiler.getTypeResolver().inferTypeFromExpr(elemExpr);
                 if (exprType == null) exprType = "Ljava/lang/Object;";
 
                 callback.generateExpr(compiler, code, cp, elemExpr, null);

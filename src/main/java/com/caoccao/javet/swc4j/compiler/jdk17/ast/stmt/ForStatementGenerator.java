@@ -25,14 +25,13 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
-import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
-import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
-import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
+import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -285,8 +284,8 @@ public final class ForStatementGenerator {
         }
 
         // Get operand types
-        String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-        String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+        String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+        String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
 
         // Only handle int comparisons for now (most common case)
         if (!"I".equals(leftType) || !"I".equals(rightType)) {
@@ -333,7 +332,7 @@ public final class ForStatementGenerator {
                 ISwc4jAstPat name = declarator.getName();
                 if (name instanceof Swc4jAstBindingIdent bindingIdent) {
                     String varName = bindingIdent.getId().getSym();
-                    String varType = TypeResolver.extractType(compiler, bindingIdent, declarator.getInit());
+                    String varType = compiler.getTypeResolver().extractType(bindingIdent, declarator.getInit());
                     context.getLocalVariableTable().addExistingVariableToCurrentScope(varName, varType);
                 }
             }
@@ -342,7 +341,7 @@ public final class ForStatementGenerator {
             ExpressionGenerator.generate(compiler, code, cp, expr, null);
 
             // Pop the result of the init expression if it leaves a value on the stack
-            String exprType = TypeResolver.inferTypeFromExpr(compiler, expr);
+            String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
             if (exprType != null && !"V".equals(exprType)) {
                 if ("D".equals(exprType) || "J".equals(exprType)) {
                     code.pop2();
@@ -366,7 +365,7 @@ public final class ForStatementGenerator {
 
         // Pop the result of the update expression if it leaves a value on the stack
         // This includes AssignExpr (i = 5), UpdateExpr (i++), and SeqExpr (i++, j--)
-        String updateType = TypeResolver.inferTypeFromExpr(compiler, updateExpr);
+        String updateType = compiler.getTypeResolver().inferTypeFromExpr(updateExpr);
         if (updateType != null && !"V".equals(updateType)) {
             if ("D".equals(updateType) || "J".equals(updateType)) {
                 code.pop2();

@@ -22,11 +22,9 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
-import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -128,7 +126,7 @@ public final class StatementGenerator {
         // Call expressions handle their own return values (already popped if needed)
         if (expr instanceof Swc4jAstAssignExpr || expr instanceof Swc4jAstUpdateExpr) {
             // Assignment and update expressions leave the value on the stack
-            String exprType = TypeResolver.inferTypeFromExpr(compiler, expr);
+            String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
             if (exprType != null && !("V".equals(exprType))) {
                 // Expression leaves a value, pop it
                 // Use pop2 for wide types (double, long)

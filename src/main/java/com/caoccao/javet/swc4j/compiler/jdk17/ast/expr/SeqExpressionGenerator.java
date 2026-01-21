@@ -19,11 +19,9 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSeqExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
-import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -62,7 +60,7 @@ public final class SeqExpressionGenerator {
 
             // Pop the result of non-last expressions (they're evaluated for side effects only)
             if (!isLast) {
-                String exprType = TypeResolver.inferTypeFromExpr(compiler, expr);
+                String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
                 if (exprType != null && !"V".equals(exprType)) {
                     if ("D".equals(exprType) || "J".equals(exprType)) {
                         code.pop2();

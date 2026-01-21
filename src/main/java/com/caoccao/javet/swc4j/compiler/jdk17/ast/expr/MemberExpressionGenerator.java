@@ -20,10 +20,8 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
-import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -37,7 +35,7 @@ public final class MemberExpressionGenerator {
             ClassWriter.ConstantPool cp,
             Swc4jAstMemberExpr memberExpr) throws Swc4jByteCodeCompilerException {
         // Handle member access on arrays (e.g., arr.length or arr[index])
-        String objType = TypeResolver.inferTypeFromExpr(compiler, memberExpr.getObj());
+        String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
 
         if (objType != null && objType.startsWith("[")) {
             // Java array operations
@@ -47,7 +45,7 @@ public final class MemberExpressionGenerator {
                 ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // Stack: [array, index]
 
                 // Convert index to int if needed
-                String indexType = TypeResolver.inferTypeFromExpr(compiler, computedProp.getExpr());
+                String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                 if (indexType != null && !"I".equals(indexType)) {
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
                 }
@@ -119,7 +117,7 @@ public final class MemberExpressionGenerator {
                 ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // Stack: [LinkedHashMap, key]
 
                 // Box primitive keys if needed
-                String keyType = TypeResolver.inferTypeFromExpr(compiler, computedProp.getExpr());
+                String keyType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                 if (keyType != null && TypeConversionUtils.isPrimitiveType(keyType)) {
                     String wrapperType = TypeConversionUtils.getWrapperType(keyType);
                     TypeConversionUtils.boxPrimitiveType(code, cp, keyType, wrapperType);

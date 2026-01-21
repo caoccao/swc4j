@@ -26,6 +26,7 @@ import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsEnumDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt.EnumGenerator;
@@ -35,19 +36,19 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public final class AstProcessor {
-    private AstProcessor() {
+public final class AstProcessor extends BaseAstProcessor {
+    public AstProcessor(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
-    public static String getModuleName(ISwc4jAstTsModuleName moduleName) {
+    public String getModuleName(ISwc4jAstTsModuleName moduleName) {
         if (moduleName instanceof Swc4jAstStr str) {
             return str.getValue();
         }
         return moduleName.toString();
     }
 
-    public static void processClassDecl(
-            ByteCodeCompiler compiler,
+    public void processClassDecl(
             Swc4jAstClassDecl classDecl,
             String currentPackage,
             Map<String, byte[]> byteCodeMap) throws Swc4jByteCodeCompilerException {
@@ -63,7 +64,7 @@ public final class AstProcessor {
         }
     }
 
-    public static void processEnumDecl(
+    public void processEnumDecl(
             Swc4jAstTsEnumDecl enumDecl,
             String currentPackage,
             Map<String, byte[]> byteCodeMap) throws Swc4jByteCodeCompilerException {
@@ -81,55 +82,51 @@ public final class AstProcessor {
         }
     }
 
-    public static void processModuleItems(
-            ByteCodeCompiler compiler,
+    public void processModuleItems(
             List<ISwc4jAstModuleItem> items,
             String currentPackage,
             Map<String, byte[]> byteCodeMap) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstModuleItem item : items) {
             if (item instanceof Swc4jAstTsModuleDecl moduleDecl) {
-                processTsModuleDecl(compiler, moduleDecl, currentPackage, byteCodeMap);
+                processTsModuleDecl(moduleDecl, currentPackage, byteCodeMap);
             } else if (item instanceof Swc4jAstExportDecl exportDecl) {
                 ISwc4jAstDecl decl = exportDecl.getDecl();
                 if (decl instanceof Swc4jAstClassDecl classDecl) {
-                    processClassDecl(compiler, classDecl, currentPackage, byteCodeMap);
+                    processClassDecl(classDecl, currentPackage, byteCodeMap);
                 } else if (decl instanceof Swc4jAstTsModuleDecl tsModuleDecl) {
-                    processTsModuleDecl(compiler, tsModuleDecl, currentPackage, byteCodeMap);
+                    processTsModuleDecl(tsModuleDecl, currentPackage, byteCodeMap);
                 } else if (decl instanceof Swc4jAstTsEnumDecl enumDecl) {
                     processEnumDecl(enumDecl, currentPackage, byteCodeMap);
                 }
             } else if (item instanceof ISwc4jAstStmt stmt) {
-                processStmt(compiler, stmt, currentPackage, byteCodeMap);
+                processStmt(stmt, currentPackage, byteCodeMap);
             }
         }
     }
 
-    public static void processStmt(
-            ByteCodeCompiler compiler,
+    public void processStmt(
             ISwc4jAstStmt stmt,
             String currentPackage,
             Map<String, byte[]> byteCodeMap) throws Swc4jByteCodeCompilerException {
         if (stmt instanceof Swc4jAstTsModuleDecl moduleDecl) {
-            processTsModuleDecl(compiler, moduleDecl, currentPackage, byteCodeMap);
+            processTsModuleDecl(moduleDecl, currentPackage, byteCodeMap);
         } else if (stmt instanceof Swc4jAstClassDecl classDecl) {
-            processClassDecl(compiler, classDecl, currentPackage, byteCodeMap);
+            processClassDecl(classDecl, currentPackage, byteCodeMap);
         } else if (stmt instanceof Swc4jAstTsEnumDecl enumDecl) {
             processEnumDecl(enumDecl, currentPackage, byteCodeMap);
         }
     }
 
-    public static void processStmts(
-            ByteCodeCompiler compiler,
+    public void processStmts(
             List<ISwc4jAstStmt> stmts,
             String currentPackage,
             Map<String, byte[]> byteCodeMap) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstStmt stmt : stmts) {
-            processStmt(compiler, stmt, currentPackage, byteCodeMap);
+            processStmt(stmt, currentPackage, byteCodeMap);
         }
     }
 
-    public static void processTsModuleDecl(
-            ByteCodeCompiler compiler,
+    public void processTsModuleDecl(
             Swc4jAstTsModuleDecl moduleDecl,
             String currentPackage,
             Map<String, byte[]> byteCodeMap) throws Swc4jByteCodeCompilerException {
@@ -140,7 +137,7 @@ public final class AstProcessor {
 
         var bodyOpt = moduleDecl.getBody();
         if (bodyOpt.isPresent() && bodyOpt.get() instanceof Swc4jAstTsModuleBlock moduleBlock) {
-            processModuleItems(compiler, moduleBlock.getBody(), newPackage, byteCodeMap);
+            processModuleItems(moduleBlock.getBody(), newPackage, byteCodeMap);
         }
     }
 }

@@ -24,12 +24,11 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
-import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
-import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class AssignExpressionGenerator {
@@ -45,7 +44,7 @@ public final class AssignExpressionGenerator {
         // Handle assignments like arr[1] = value or arr.length = 0
         var left = assignExpr.getLeft();
         if (left instanceof Swc4jAstMemberExpr memberExpr) {
-            String objType = TypeResolver.inferTypeFromExpr(compiler, memberExpr.getObj());
+            String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
 
             if (objType != null && objType.startsWith("[")) {
                 // Java array operations
@@ -55,13 +54,13 @@ public final class AssignExpressionGenerator {
                     ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // Stack: [array, index]
 
                     // Convert index to int if needed
-                    String indexType = TypeResolver.inferTypeFromExpr(compiler, computedProp.getExpr());
+                    String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                     if (indexType != null && !"I".equals(indexType)) {
                         TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
                     }
 
                     // Generate the value to store
-                    String valueType = TypeResolver.inferTypeFromExpr(compiler, assignExpr.getRight());
+                    String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
                     ExpressionGenerator.generate(compiler, code, cp, assignExpr.getRight(), null); // Stack: [array, index, value]
 
                     // Unbox if needed
@@ -112,7 +111,7 @@ public final class AssignExpressionGenerator {
                     ExpressionGenerator.generate(compiler, code, cp, assignExpr.getRight(), null); // Stack: [ArrayList, index, value]
 
                     // Box value if needed
-                    String valueType = TypeResolver.inferTypeFromExpr(compiler, assignExpr.getRight());
+                    String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
                     if (TypeConversionUtils.isPrimitiveType(valueType)) {
                         String wrapperType = TypeConversionUtils.getWrapperType(valueType);
                         // wrapperType is already in the form "Ljava/lang/Integer;" so use it directly
@@ -185,7 +184,7 @@ public final class AssignExpressionGenerator {
                     ExpressionGenerator.generate(compiler, code, cp, computedProp.getExpr(), null); // Stack: [LinkedHashMap, key]
 
                     // Box primitive keys if needed
-                    String keyType = TypeResolver.inferTypeFromExpr(compiler, computedProp.getExpr());
+                    String keyType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                     if (keyType != null && TypeConversionUtils.isPrimitiveType(keyType)) {
                         String wrapperType = TypeConversionUtils.getWrapperType(keyType);
                         TypeConversionUtils.boxPrimitiveType(code, cp, keyType, wrapperType);
@@ -194,7 +193,7 @@ public final class AssignExpressionGenerator {
                     ExpressionGenerator.generate(compiler, code, cp, assignExpr.getRight(), null); // Stack: [LinkedHashMap, key, value]
 
                     // Box primitive values if needed
-                    String valueType = TypeResolver.inferTypeFromExpr(compiler, assignExpr.getRight());
+                    String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
                     if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
                         String wrapperType = TypeConversionUtils.getWrapperType(valueType);
                         TypeConversionUtils.boxPrimitiveType(code, cp, valueType, wrapperType);
@@ -218,7 +217,7 @@ public final class AssignExpressionGenerator {
                     ExpressionGenerator.generate(compiler, code, cp, assignExpr.getRight(), null); // Stack: [LinkedHashMap, "prop", value]
 
                     // Box primitive values if needed
-                    String valueType = TypeResolver.inferTypeFromExpr(compiler, assignExpr.getRight());
+                    String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
                     if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
                         String wrapperType = TypeConversionUtils.getWrapperType(valueType);
                         TypeConversionUtils.boxPrimitiveType(code, cp, valueType, wrapperType);
@@ -248,7 +247,7 @@ public final class AssignExpressionGenerator {
                 ExpressionGenerator.generate(compiler, code, cp, assignExpr.getRight(), null);
 
                 // Convert to the variable's type if needed
-                String valueType = TypeResolver.inferTypeFromExpr(compiler, assignExpr.getRight());
+                String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
                 if (valueType != null && !valueType.equals(varType)) {
                     TypeConversionUtils.unboxWrapperType(code, cp, valueType);
                     String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
@@ -271,7 +270,7 @@ public final class AssignExpressionGenerator {
                 ExpressionGenerator.generate(compiler, code, cp, assignExpr.getRight(), null);
 
                 // Convert to the variable's type if needed
-                String valueType = TypeResolver.inferTypeFromExpr(compiler, assignExpr.getRight());
+                String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
                 if (valueType != null && !valueType.equals(varType)) {
                     TypeConversionUtils.unboxWrapperType(code, cp, valueType);
                     String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);

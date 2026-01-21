@@ -18,6 +18,10 @@ package com.caoccao.javet.swc4j.compiler;
 
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
+import com.caoccao.javet.swc4j.compiler.jdk17.AstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.TypeAliasCollector;
+import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
+import com.caoccao.javet.swc4j.compiler.jdk17.VariableAnalyzer;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
@@ -28,10 +32,15 @@ import java.util.Map;
 
 public sealed abstract class ByteCodeCompiler permits
         ByteCodeCompiler17 {
+    protected final AstProcessor astProcessor;
     protected final ByteCodeCompilerMemory memory;
     protected final ByteCodeCompilerOptions options;
     protected final Swc4jParseOptions parseOptions;
     protected final Swc4j swc4j;
+    protected final TypeAliasCollector typeAliasCollector;
+    protected final TypeResolver typeResolver;
+    protected final VariableAnalyzer variableAnalyzer;
+
 
     ByteCodeCompiler(ByteCodeCompilerOptions options) {
         this.options = AssertionUtils.notNull(options, "options");
@@ -40,6 +49,11 @@ public sealed abstract class ByteCodeCompiler permits
         parseOptions = new Swc4jParseOptions()
                 .setCaptureAst(true);
         swc4j = new Swc4j();
+
+        astProcessor = new AstProcessor(this);
+        typeAliasCollector = new TypeAliasCollector(this);
+        typeResolver = new TypeResolver(this);
+        variableAnalyzer = new VariableAnalyzer(this);
     }
 
     public static ByteCodeCompiler of(ByteCodeCompilerOptions options) {
@@ -56,11 +70,27 @@ public sealed abstract class ByteCodeCompiler permits
 
     abstract Map<String, byte[]> compileProgram(ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException;
 
+    public AstProcessor getAstProcessor() {
+        return astProcessor;
+    }
+
     public ByteCodeCompilerMemory getMemory() {
         return memory;
     }
 
     public ByteCodeCompilerOptions getOptions() {
         return options;
+    }
+
+    public TypeAliasCollector getTypeAliasCollector() {
+        return typeAliasCollector;
+    }
+
+    public TypeResolver getTypeResolver() {
+        return typeResolver;
+    }
+
+    public VariableAnalyzer getVariableAnalyzer() {
+        return variableAnalyzer;
     }
 }

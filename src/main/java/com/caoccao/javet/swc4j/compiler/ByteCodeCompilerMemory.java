@@ -30,11 +30,6 @@ public final class ByteCodeCompilerMemory {
         typeAliasMap = new HashMap<>();
     }
 
-    public void reset() {
-        compilationContext.reset();
-        typeAliasMap.clear();
-    }
-
     /**
      * Get the current CompilationContext.
      *
@@ -46,5 +41,14 @@ public final class ByteCodeCompilerMemory {
 
     public Map<String, String> getTypeAliasMap() {
         return typeAliasMap;
+    }
+
+    public void reset() {
+        compilationContext.reset();
+        typeAliasMap.clear();
+    }
+
+    public void resetCompilationContext() {
+        compilationContext.reset();
     }
 }

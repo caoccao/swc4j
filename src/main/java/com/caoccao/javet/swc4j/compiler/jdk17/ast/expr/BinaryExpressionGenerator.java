@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
-import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
@@ -43,8 +42,8 @@ public final class BinaryExpressionGenerator {
         String resultType = null;
         switch (binExpr.getOp()) {
             case Add -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -62,7 +61,7 @@ public final class BinaryExpressionGenerator {
                     resultType = "Ljava/lang/String;";
                 } else {
                     // Determine the widened result type
-                    resultType = TypeResolver.inferTypeFromExpr(compiler, binExpr);
+                    resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                     // Generate left operand
                     ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
@@ -84,14 +83,14 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case Sub -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the widened result type
-                resultType = TypeResolver.inferTypeFromExpr(compiler, binExpr);
+                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                 // Generate left operand
                 ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
@@ -112,14 +111,14 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case Mul -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the widened result type
-                resultType = TypeResolver.inferTypeFromExpr(compiler, binExpr);
+                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                 // Generate left operand
                 ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
@@ -140,14 +139,14 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case Div -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the widened result type
-                resultType = TypeResolver.inferTypeFromExpr(compiler, binExpr);
+                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                 // Generate left operand
                 ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
@@ -168,14 +167,14 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case Mod -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the widened result type
-                resultType = TypeResolver.inferTypeFromExpr(compiler, binExpr);
+                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                 // Generate left operand
                 ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
@@ -196,8 +195,8 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case Exp -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -218,14 +217,14 @@ public final class BinaryExpressionGenerator {
                 code.invokestatic(mathPowRef);
             }
             case LShift -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the result type based on left operand
-                resultType = TypeResolver.inferTypeFromExpr(compiler, binExpr);
+                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                 // Generate left operand and convert to result type (int or long)
                 ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
@@ -249,14 +248,14 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case RShift -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the result type based on left operand
-                resultType = TypeResolver.inferTypeFromExpr(compiler, binExpr);
+                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                 // Generate left operand and convert to result type (int or long)
                 ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
@@ -280,14 +279,14 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case ZeroFillRShift -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the result type based on left operand
-                resultType = TypeResolver.inferTypeFromExpr(compiler, binExpr);
+                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                 // Generate left operand and convert to result type (int or long)
                 ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
@@ -311,14 +310,14 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case BitAnd -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the widened result type
-                resultType = TypeResolver.inferTypeFromExpr(compiler, binExpr);
+                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                 // Generate left operand
                 ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
@@ -337,14 +336,14 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case BitOr -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the widened result type
-                resultType = TypeResolver.inferTypeFromExpr(compiler, binExpr);
+                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                 // Generate left operand
                 ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
@@ -363,14 +362,14 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case BitXor -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the widened result type
-                resultType = TypeResolver.inferTypeFromExpr(compiler, binExpr);
+                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                 // Generate left operand
                 ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
@@ -389,8 +388,8 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case EqEq, EqEqEq -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -481,8 +480,8 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case NotEq, NotEqEq -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -578,8 +577,8 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case Lt, LtEq -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -680,8 +679,8 @@ public final class BinaryExpressionGenerator {
                 }
             }
             case Gt, GtEq -> {
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -790,8 +789,8 @@ public final class BinaryExpressionGenerator {
                 resultType = "Z";
 
                 // Get types of operands
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
 
                 // Generate left operand
                 ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);
@@ -849,8 +848,8 @@ public final class BinaryExpressionGenerator {
                 resultType = "Z";
 
                 // Get types of operands
-                String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft());
-                String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight());
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
 
                 // Generate left operand
                 ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null);

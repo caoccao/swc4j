@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstForStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstLabeledStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstWhileStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
-import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;

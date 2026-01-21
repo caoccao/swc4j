@@ -27,7 +27,6 @@ import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
-import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.GenericTypeInfo;
@@ -35,6 +34,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -105,7 +105,7 @@ public final class ObjectLiteralGenerator {
 
                 // Generate value
                 ISwc4jAstExpr valueExpr = kvProp.getValue();
-                String valueType = TypeResolver.inferTypeFromExpr(compiler, valueExpr);
+                String valueType = compiler.getTypeResolver().inferTypeFromExpr(valueExpr);
                 if (valueType == null) {
                     valueType = "Ljava/lang/Object;";
                 }
@@ -148,7 +148,7 @@ public final class ObjectLiteralGenerator {
                 // Stack: [map, map, key]
 
                 // Generate value - the identifier refers to a variable with that name
-                String valueType = TypeResolver.inferTypeFromExpr(compiler, ident);
+                String valueType = compiler.getTypeResolver().inferTypeFromExpr(ident);
                 if (valueType == null) {
                     valueType = "Ljava/lang/Object;";
                 }
@@ -229,7 +229,7 @@ public final class ObjectLiteralGenerator {
             // Computed property name: {[expr]: value}
             // Phase 2.1: Generate expression and convert to appropriate type (String or Number)
             ISwc4jAstExpr expr = computed.getExpr();
-            String exprType = TypeResolver.inferTypeFromExpr(compiler, expr);
+            String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
             if (exprType == null) {
                 exprType = "Ljava/lang/Object;";
             }
@@ -437,7 +437,7 @@ public final class ObjectLiteralGenerator {
         ISwc4jAstExpr valueExpr = kvProp.getValue();
 
         // Validate key type
-        String actualKeyType = TypeResolver.inferKeyType(compiler, key);
+        String actualKeyType = compiler.getTypeResolver().inferKeyType(key);
         String expectedKeyType = genericTypeInfo.getKeyType();
 
         // Special handling for primitive wrapper keys: if expected type is a primitive wrapper,
@@ -461,7 +461,7 @@ public final class ObjectLiteralGenerator {
         }
 
         // Validate value type
-        String actualValueType = TypeResolver.inferTypeFromExpr(compiler, valueExpr);
+        String actualValueType = compiler.getTypeResolver().inferTypeFromExpr(valueExpr);
         if (actualValueType == null) {
             actualValueType = "Ljava/lang/Object;";
         }
@@ -516,7 +516,7 @@ public final class ObjectLiteralGenerator {
         }
 
         // Validate value type (the identifier's inferred type)
-        String actualValueType = TypeResolver.inferTypeFromExpr(compiler, ident);
+        String actualValueType = compiler.getTypeResolver().inferTypeFromExpr(ident);
         if (actualValueType == null) {
             actualValueType = "Ljava/lang/Object;";
         }
@@ -543,7 +543,7 @@ public final class ObjectLiteralGenerator {
         ISwc4jAstExpr spreadExpr = spread.getExpr();
 
         // Infer the type of the spread expression
-        String spreadType = TypeResolver.inferTypeFromExpr(compiler, spreadExpr);
+        String spreadType = compiler.getTypeResolver().inferTypeFromExpr(spreadExpr);
         if (spreadType == null) {
             spreadType = "Ljava/lang/Object;";
         }

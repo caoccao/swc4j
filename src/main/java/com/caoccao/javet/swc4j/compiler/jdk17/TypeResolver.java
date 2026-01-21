@@ -30,123 +30,18 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsArrayType;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsKeywordType;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
-import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
 import java.util.Optional;
 
-public final class TypeResolver {
-    private TypeResolver() {
-    }
-
-    public static ReturnTypeInfo analyzeReturnType(
-            ByteCodeCompiler compiler,
-            Swc4jAstFunction function,
-            Swc4jAstBlockStmt body) throws Swc4jByteCodeCompilerException {
-        // Check for explicit return type annotation first
-        var returnTypeOpt = function.getReturnType();
-        if (returnTypeOpt.isPresent()) {
-            var returnTypeAnn = returnTypeOpt.get();
-            var tsType = returnTypeAnn.getTypeAnn();
-            String descriptor = mapTsTypeToDescriptor(compiler, tsType);
-            return ReturnTypeInfo.of(descriptor);
-        }
-
-        // Fall back to type inference from return statement
-        for (ISwc4jAstStmt stmt : body.getStmts()) {
-            if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
-                var argOpt = returnStmt.getArg();
-                if (argOpt.isPresent()) {
-                    ISwc4jAstExpr arg = argOpt.get();
-                    // Use inferTypeFromExpr for general type inference
-                    String type = inferTypeFromExpr(compiler, arg);
-                    // If type is null (e.g., for null literal), default to Object
-                    if (type == null) {
-                        type = "Ljava/lang/Object;";
-                    }
-                    return ReturnTypeInfo.of(type);
-                }
-                return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
-            }
-        }
-        return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
-    }
-
-    /**
-     * Extract GenericTypeInfo from a BindingIdent's type annotation if it's a Record type.
-     * Phase 2: Support for {@code Record<K, V>} type validation
-     *
-     * @param compiler     the compiler
-     * @param bindingIdent binding identifier with potential type annotation
-     * @return GenericTypeInfo if the type annotation is a Record type, null otherwise
-     */
-    public static GenericTypeInfo extractGenericTypeInfo(
-            ByteCodeCompiler compiler,
-            Swc4jAstBindingIdent bindingIdent) {
-        var typeAnn = bindingIdent.getTypeAnn();
-        if (typeAnn.isEmpty()) {
-            return null;
-        }
-
-        ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
-
-        // Check if it's a Record type by calling parseRecordType
-        // parseRecordType returns null if it's not a Record type
-        return parseRecordType(compiler, tsType);
-    }
-
-    /**
-     * Extract type from parameter pattern (regular param or varargs).
-     */
-    public static String extractParameterType(
-            ByteCodeCompiler compiler,
-            ISwc4jAstPat pat) {
-        if (pat instanceof Swc4jAstRestPat restPat) {
-            // Varargs parameter - extract type from RestPat's type annotation
-            var typeAnn = restPat.getTypeAnn();
-            if (typeAnn.isPresent()) {
-                ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
-                // RestPat type annotation is already an array type (int[])
-                // We need to map it to the corresponding JVM array descriptor
-                return mapTsTypeToDescriptor(compiler, tsType);
-            }
-            // Default to Object[] for untyped varargs
-            return "[Ljava/lang/Object;";
-        } else if (pat instanceof Swc4jAstBindingIdent bindingIdent) {
-            // Regular parameter - extract type from type annotation
-            var typeAnn = bindingIdent.getTypeAnn();
-            if (typeAnn.isPresent()) {
-                ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
-                return mapTsTypeToDescriptor(compiler, tsType);
-            }
-            // Default to Object for untyped parameters
-            return "Ljava/lang/Object;";
-        }
-        return "Ljava/lang/Object;";
-    }
-
-    public static String extractType(
-            ByteCodeCompiler compiler,
-            Swc4jAstBindingIdent bindingIdent,
-            Optional<ISwc4jAstExpr> init) {
-        // Check for explicit type annotation
-        var typeAnn = bindingIdent.getTypeAnn();
-        if (typeAnn.isPresent()) {
-            ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
-            return mapTsTypeToDescriptor(compiler, tsType);
-        }
-
-        // Type inference from initializer
-        if (init.isPresent()) {
-            String type = inferTypeFromExpr(compiler, init.get());
-            // If type is null (e.g., for null literal), default to Object
-            return type != null ? type : "Ljava/lang/Object;";
-        }
-
-        return "Ljava/lang/Object;"; // Default
+public final class TypeResolver extends BaseAstProcessor {
+    public TypeResolver(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
     /**
@@ -253,348 +148,6 @@ public final class TypeResolver {
             case "D" -> "Ljava/lang/Double;";
             default -> null;
         };
-    }
-
-    /**
-     * Infer the JVM type descriptor for an object literal property key.
-     * <p>
-     * Handles different property name types:
-     * - IdentName → String (identifier keys are always strings)
-     * - Str → String (string literal keys)
-     * - Number → Integer, Long, or Double based on the actual numeric value
-     * - BigInt → Long or BigInteger based on size
-     * - ComputedPropName → Inferred from the computed expression
-     *
-     * @param compiler the compiler
-     * @param key      Property name AST node
-     * @return JVM type descriptor (e.g., "Ljava/lang/String;", "Ljava/lang/Integer;", "D")
-     */
-    public static String inferKeyType(
-            ByteCodeCompiler compiler,
-            ISwc4jAstPropName key) {
-        if (key == null) {
-            return "Ljava/lang/String;"; // Default to String
-        }
-
-        // IdentName keys are always strings
-        if (key instanceof Swc4jAstIdentName) {
-            return "Ljava/lang/String;";
-        }
-
-        // String literal keys
-        if (key instanceof Swc4jAstStr) {
-            return "Ljava/lang/String;";
-        }
-
-        // Numeric keys - infer specific numeric type
-        if (key instanceof Swc4jAstNumber number) {
-            double value = number.getValue();
-
-            // Check if it's a whole number (no decimal part)
-            if (value == Math.floor(value) && !Double.isInfinite(value)) {
-                // It's an integer value
-                long longValue = (long) value;
-
-                // Check if it fits in an int
-                if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
-                    return "Ljava/lang/Integer;";
-                }
-
-                // It needs a long
-                return "Ljava/lang/Long;";
-            }
-
-            // It has a decimal part - use Double
-            return "Ljava/lang/Double;";
-        }
-
-        // BigInt keys - always Long or BigInteger
-        if (key instanceof Swc4jAstBigInt bigInt) {
-            // For now, default to Long
-            // In the future, could parse the BigInt value and choose BigInteger if needed
-            return "Ljava/lang/Long;";
-        }
-
-        // Computed property names - infer from expression
-        if (key instanceof Swc4jAstComputedPropName computed) {
-            ISwc4jAstExpr expr = computed.getExpr();
-            String inferredType = inferTypeFromExpr(compiler, expr);
-            return inferredType != null ? inferredType : "Ljava/lang/String;";
-        }
-
-        // Default to String for any unknown key type
-        return "Ljava/lang/String;";
-    }
-
-    public static String inferTypeFromExpr(
-            ByteCodeCompiler compiler,
-            ISwc4jAstExpr expr) {
-        CompilationContext context = compiler.getMemory().getCompilationContext();
-        if (expr instanceof Swc4jAstCondExpr condExpr) {
-            // Conditional expression: infer type from both branches and find common type
-            String consType = inferTypeFromExpr(compiler, condExpr.getCons());
-            String altType = inferTypeFromExpr(compiler, condExpr.getAlt());
-            return findCommonType(consType, altType);
-        } else if (expr instanceof Swc4jAstTsAsExpr asExpr) {
-            // Explicit type cast - return the cast target type
-            var tsType = asExpr.getTypeAnn();
-            if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
-                ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
-                if (entityName instanceof Swc4jAstIdent ident) {
-                    String typeName = ident.getSym();
-                    return mapTypeNameToDescriptor(compiler, typeName);
-                }
-            }
-            // If we can't determine the cast type, fall back to inferring from the expression
-            return inferTypeFromExpr(compiler, asExpr.getExpr());
-        } else if (expr instanceof Swc4jAstNumber number) {
-            double value = number.getValue();
-            if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
-                return "I";
-            }
-            return "D";
-        } else if (expr instanceof Swc4jAstBool) {
-            return "Z";
-        } else if (expr instanceof Swc4jAstNull) {
-            // null has no specific type - it's compatible with any reference type
-            // Return null to indicate that the type should be determined by context
-            return null;
-        } else if (expr instanceof Swc4jAstArrayLit) {
-            // Array literal - maps to ArrayList
-            return "Ljava/util/ArrayList;";
-        } else if (expr instanceof Swc4jAstObjectLit) {
-            // Object literal - maps to LinkedHashMap
-            return "Ljava/util/LinkedHashMap;";
-        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
-            // Member expression - handle array-like properties
-            String objType = inferTypeFromExpr(compiler, memberExpr.getObj());
-
-            if (objType != null && objType.startsWith("[")) {
-                // Java array operations
-                if (memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
-                    // arr[index] returns the element type
-                    return objType.substring(1); // Remove leading "["
-                }
-                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-                    String propName = propIdent.getSym();
-                    if ("length".equals(propName)) {
-                        return "I"; // arr.length returns int
-                    }
-                }
-            } else if ("Ljava/util/ArrayList;".equals(objType)) {
-                // ArrayList operations
-                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-                    String propName = propIdent.getSym();
-                    if ("length".equals(propName)) {
-                        return "I"; // arr.length returns int
-                    }
-                }
-            } else if ("Ljava/util/LinkedHashMap;".equals(objType)) {
-                // LinkedHashMap operations (object literal member access)
-                // map.get() returns Object
-                return "Ljava/lang/Object;";
-            }
-            return "Ljava/lang/Object;";
-        } else if (expr instanceof Swc4jAstStr) {
-            return "Ljava/lang/String;";
-        } else if (expr instanceof Swc4jAstAssignExpr assignExpr) {
-            // For compound assignments (+=, -=, etc.), the result is the type of the left operand
-            // For simple assignment (=), the result is the type of the right operand
-            if (assignExpr.getOp() != Swc4jAstAssignOp.Assign) {
-                // Compound assignment - result type is the left operand (variable) type
-                var left = assignExpr.getLeft();
-                if (left instanceof Swc4jAstBindingIdent bindingIdent) {
-                    String varName = bindingIdent.getId().getSym();
-                    return context.getInferredTypes().getOrDefault(varName, "Ljava/lang/Object;");
-                }
-                return inferTypeFromExpr(compiler, assignExpr.getRight());
-            }
-            // Simple assignment - result type is the right operand type
-            return inferTypeFromExpr(compiler, assignExpr.getRight());
-        } else if (expr instanceof Swc4jAstIdent ident) {
-            return context.getInferredTypes().getOrDefault(ident.getSym(), "Ljava/lang/Object;");
-        } else if (expr instanceof Swc4jAstUpdateExpr updateExpr) {
-            // Update expression (++/--) returns the type of the operand
-            return inferTypeFromExpr(compiler, updateExpr.getArg());
-        } else if (expr instanceof Swc4jAstBinExpr binExpr) {
-            switch (binExpr.getOp()) {
-                case Add -> {
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
-                    // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
-                    // String concatenation - if either operand is String, result is String
-                    if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
-                        return "Ljava/lang/String;";
-                    }
-                    // Numeric addition - use type widening rules
-                    return getWidenedType(leftType, rightType);
-                }
-                case Sub -> {
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
-                    // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
-                    // Numeric subtraction - use type widening rules
-                    return getWidenedType(leftType, rightType);
-                }
-                case Mul -> {
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
-                    // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
-                    // Numeric multiplication - use type widening rules
-                    return getWidenedType(leftType, rightType);
-                }
-                case Div -> {
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
-                    // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
-                    // Numeric division - use type widening rules
-                    return getWidenedType(leftType, rightType);
-                }
-                case Mod -> {
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
-                    // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
-                    // Numeric modulo - use type widening rules
-                    return getWidenedType(leftType, rightType);
-                }
-                case Exp -> {
-                    // Exponentiation always returns double (Math.pow returns double)
-                    return "D";
-                }
-                case LShift -> {
-                    // Left shift returns the type of the left operand (int or long)
-                    // For JavaScript semantics, we convert to int (ToInt32), but JVM supports both
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
-                    // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    // Get primitive type
-                    String primitiveType = getPrimitiveType(leftType);
-                    // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
-                    if ("J".equals(primitiveType)) {
-                        return "J";
-                    }
-                    return "I";
-                }
-                case RShift -> {
-                    // Right shift returns the type of the left operand (int or long)
-                    // Same semantics as left shift
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
-                    // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    // Get primitive type
-                    String primitiveType = getPrimitiveType(leftType);
-                    // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
-                    if ("J".equals(primitiveType)) {
-                        return "J";
-                    }
-                    return "I";
-                }
-                case ZeroFillRShift -> {
-                    // Zero-fill right shift returns the type of the left operand (int or long)
-                    // Same semantics as other shift operations
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
-                    // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    // Get primitive type
-                    String primitiveType = getPrimitiveType(leftType);
-                    // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
-                    if ("J".equals(primitiveType)) {
-                        return "J";
-                    }
-                    return "I";
-                }
-                case BitAnd -> {
-                    // Bitwise AND uses type widening - result is wider of the two operand types
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
-                    // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
-                    // Use type widening rules (int & long → long, etc.)
-                    return getWidenedType(leftType, rightType);
-                }
-                case BitOr -> {
-                    // Bitwise OR uses type widening - result is wider of the two operand types
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
-                    // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
-                    // Use type widening rules (int | long → long, etc.)
-                    return getWidenedType(leftType, rightType);
-                }
-                case BitXor -> {
-                    // Bitwise XOR uses type widening - result is wider of the two operand types
-                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft());
-                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight());
-                    // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
-                    // Use type widening rules (int ^ long → long, etc.)
-                    return getWidenedType(leftType, rightType);
-                }
-                case EqEq, EqEqEq, NotEq, NotEqEq, Lt, LtEq, Gt, GtEq, LogicalAnd, LogicalOr -> {
-                    // Equality, inequality, relational comparisons, and logical operations return boolean
-                    return "Z";
-                }
-            }
-        } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
-            // For unary expressions, infer type from the argument
-            return inferTypeFromExpr(compiler, unaryExpr.getArg());
-        } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
-            // For parenthesized expressions, infer type from the inner expression
-            return inferTypeFromExpr(compiler, parenExpr.getExpr());
-        } else if (expr instanceof Swc4jAstCallExpr callExpr) {
-            // For call expressions, try to infer the return type
-            if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
-                String objType = inferTypeFromExpr(compiler, memberExpr.getObj());
-
-                // ArrayList methods
-                if ("Ljava/util/ArrayList;".equals(objType)) {
-                    if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-                        String methodName = propIdent.getSym();
-                        // Methods that return ArrayList
-                        switch (methodName) {
-                            case "concat", "reverse", "sort", "slice", "splice", "fill", "copyWithin", "toReversed",
-                                 "toSorted", "with", "toSpliced" -> {
-                                return "Ljava/util/ArrayList;";
-                            }
-                            case "join", "toString", "toLocaleString" -> {
-                                return "Ljava/lang/String;";
-                            }
-                            case "indexOf", "lastIndexOf" -> {
-                                return "I";
-                            }
-                            case "includes" -> {
-                                return "Z";
-                            }
-                            case "pop", "shift" -> {
-                                return "Ljava/lang/Object;";
-                            }
-                        }
-                    }
-                }
-            }
-            return "Ljava/lang/Object;";
-        } else if (expr instanceof Swc4jAstSeqExpr seqExpr) {
-            // Sequence expression returns the type of the last expression
-            var exprs = seqExpr.getExprs();
-            if (!exprs.isEmpty()) {
-                return inferTypeFromExpr(compiler, exprs.get(exprs.size() - 1));
-            }
-            return "V"; // Empty sequence - void
-        }
-        return "Ljava/lang/Object;";
     }
 
     /**
@@ -743,12 +296,452 @@ public final class TypeResolver {
         };
     }
 
-    public static String mapTsTypeToDescriptor(
-            ByteCodeCompiler compiler,
+    public ReturnTypeInfo analyzeReturnType(
+            Swc4jAstFunction function,
+            Swc4jAstBlockStmt body) throws Swc4jByteCodeCompilerException {
+        // Check for explicit return type annotation first
+        var returnTypeOpt = function.getReturnType();
+        if (returnTypeOpt.isPresent()) {
+            var returnTypeAnn = returnTypeOpt.get();
+            var tsType = returnTypeAnn.getTypeAnn();
+            String descriptor = mapTsTypeToDescriptor(tsType);
+            return ReturnTypeInfo.of(descriptor);
+        }
+
+        // Fall back to type inference from return statement
+        for (ISwc4jAstStmt stmt : body.getStmts()) {
+            if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
+                var argOpt = returnStmt.getArg();
+                if (argOpt.isPresent()) {
+                    ISwc4jAstExpr arg = argOpt.get();
+                    // Use inferTypeFromExpr for general type inference
+                    String type = inferTypeFromExpr(arg);
+                    // If type is null (e.g., for null literal), default to Object
+                    if (type == null) {
+                        type = "Ljava/lang/Object;";
+                    }
+                    return ReturnTypeInfo.of(type);
+                }
+                return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
+            }
+        }
+        return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
+    }
+
+    /**
+     * Extract GenericTypeInfo from a BindingIdent's type annotation if it's a Record type.
+     * Phase 2: Support for {@code Record<K, V>} type validation
+     *
+     * @param bindingIdent binding identifier with potential type annotation
+     * @return GenericTypeInfo if the type annotation is a Record type, null otherwise
+     */
+    public GenericTypeInfo extractGenericTypeInfo(
+            Swc4jAstBindingIdent bindingIdent) {
+        var typeAnn = bindingIdent.getTypeAnn();
+        if (typeAnn.isEmpty()) {
+            return null;
+        }
+
+        ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
+
+        // Check if it's a Record type by calling parseRecordType
+        // parseRecordType returns null if it's not a Record type
+        return parseRecordType(tsType);
+    }
+
+    /**
+     * Extract type from parameter pattern (regular param or varargs).
+     */
+    public String extractParameterType(
+            ISwc4jAstPat pat) {
+        if (pat instanceof Swc4jAstRestPat restPat) {
+            // Varargs parameter - extract type from RestPat's type annotation
+            var typeAnn = restPat.getTypeAnn();
+            if (typeAnn.isPresent()) {
+                ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
+                // RestPat type annotation is already an array type (int[])
+                // We need to map it to the corresponding JVM array descriptor
+                return mapTsTypeToDescriptor(tsType);
+            }
+            // Default to Object[] for untyped varargs
+            return "[Ljava/lang/Object;";
+        } else if (pat instanceof Swc4jAstBindingIdent bindingIdent) {
+            // Regular parameter - extract type from type annotation
+            var typeAnn = bindingIdent.getTypeAnn();
+            if (typeAnn.isPresent()) {
+                ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
+                return mapTsTypeToDescriptor(tsType);
+            }
+            // Default to Object for untyped parameters
+            return "Ljava/lang/Object;";
+        }
+        return "Ljava/lang/Object;";
+    }
+
+    public String extractType(
+            Swc4jAstBindingIdent bindingIdent,
+            Optional<ISwc4jAstExpr> init) {
+        // Check for explicit type annotation
+        var typeAnn = bindingIdent.getTypeAnn();
+        if (typeAnn.isPresent()) {
+            ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
+            return mapTsTypeToDescriptor(tsType);
+        }
+
+        // Type inference from initializer
+        if (init.isPresent()) {
+            String type = inferTypeFromExpr(init.get());
+            // If type is null (e.g., for null literal), default to Object
+            return type != null ? type : "Ljava/lang/Object;";
+        }
+
+        return "Ljava/lang/Object;"; // Default
+    }
+
+    /**
+     * Infer the JVM type descriptor for an object literal property key.
+     * <p>
+     * Handles different property name types:
+     * - IdentName → String (identifier keys are always strings)
+     * - Str → String (string literal keys)
+     * - Number → Integer, Long, or Double based on the actual numeric value
+     * - BigInt → Long or BigInteger based on size
+     * - ComputedPropName → Inferred from the computed expression
+     *
+     * @param key Property name AST node
+     * @return JVM type descriptor (e.g., "Ljava/lang/String;", "Ljava/lang/Integer;", "D")
+     */
+    public String inferKeyType(
+            ISwc4jAstPropName key) {
+        if (key == null) {
+            return "Ljava/lang/String;"; // Default to String
+        }
+
+        // IdentName keys are always strings
+        if (key instanceof Swc4jAstIdentName) {
+            return "Ljava/lang/String;";
+        }
+
+        // String literal keys
+        if (key instanceof Swc4jAstStr) {
+            return "Ljava/lang/String;";
+        }
+
+        // Numeric keys - infer specific numeric type
+        if (key instanceof Swc4jAstNumber number) {
+            double value = number.getValue();
+
+            // Check if it's a whole number (no decimal part)
+            if (value == Math.floor(value) && !Double.isInfinite(value)) {
+                // It's an integer value
+                long longValue = (long) value;
+
+                // Check if it fits in an int
+                if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
+                    return "Ljava/lang/Integer;";
+                }
+
+                // It needs a long
+                return "Ljava/lang/Long;";
+            }
+
+            // It has a decimal part - use Double
+            return "Ljava/lang/Double;";
+        }
+
+        // BigInt keys - always Long or BigInteger
+        if (key instanceof Swc4jAstBigInt bigInt) {
+            // For now, default to Long
+            // In the future, could parse the BigInt value and choose BigInteger if needed
+            return "Ljava/lang/Long;";
+        }
+
+        // Computed property names - infer from expression
+        if (key instanceof Swc4jAstComputedPropName computed) {
+            ISwc4jAstExpr expr = computed.getExpr();
+            String inferredType = inferTypeFromExpr(expr);
+            return inferredType != null ? inferredType : "Ljava/lang/String;";
+        }
+
+        // Default to String for any unknown key type
+        return "Ljava/lang/String;";
+    }
+
+    public String inferTypeFromExpr(
+            ISwc4jAstExpr expr) {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+        if (expr instanceof Swc4jAstCondExpr condExpr) {
+            // Conditional expression: infer type from both branches and find common type
+            String consType = inferTypeFromExpr(condExpr.getCons());
+            String altType = inferTypeFromExpr(condExpr.getAlt());
+            return findCommonType(consType, altType);
+        } else if (expr instanceof Swc4jAstTsAsExpr asExpr) {
+            // Explicit type cast - return the cast target type
+            var tsType = asExpr.getTypeAnn();
+            if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
+                ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
+                if (entityName instanceof Swc4jAstIdent ident) {
+                    String typeName = ident.getSym();
+                    return mapTypeNameToDescriptor(typeName);
+                }
+            }
+            // If we can't determine the cast type, fall back to inferring from the expression
+            return inferTypeFromExpr(asExpr.getExpr());
+        } else if (expr instanceof Swc4jAstNumber number) {
+            double value = number.getValue();
+            if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
+                return "I";
+            }
+            return "D";
+        } else if (expr instanceof Swc4jAstBool) {
+            return "Z";
+        } else if (expr instanceof Swc4jAstNull) {
+            // null has no specific type - it's compatible with any reference type
+            // Return null to indicate that the type should be determined by context
+            return null;
+        } else if (expr instanceof Swc4jAstArrayLit) {
+            // Array literal - maps to ArrayList
+            return "Ljava/util/ArrayList;";
+        } else if (expr instanceof Swc4jAstObjectLit) {
+            // Object literal - maps to LinkedHashMap
+            return "Ljava/util/LinkedHashMap;";
+        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
+            // Member expression - handle array-like properties
+            String objType = inferTypeFromExpr(memberExpr.getObj());
+
+            if (objType != null && objType.startsWith("[")) {
+                // Java array operations
+                if (memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
+                    // arr[index] returns the element type
+                    return objType.substring(1); // Remove leading "["
+                }
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String propName = propIdent.getSym();
+                    if ("length".equals(propName)) {
+                        return "I"; // arr.length returns int
+                    }
+                }
+            } else if ("Ljava/util/ArrayList;".equals(objType)) {
+                // ArrayList operations
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String propName = propIdent.getSym();
+                    if ("length".equals(propName)) {
+                        return "I"; // arr.length returns int
+                    }
+                }
+            } else if ("Ljava/util/LinkedHashMap;".equals(objType)) {
+                // LinkedHashMap operations (object literal member access)
+                // map.get() returns Object
+                return "Ljava/lang/Object;";
+            }
+            return "Ljava/lang/Object;";
+        } else if (expr instanceof Swc4jAstStr) {
+            return "Ljava/lang/String;";
+        } else if (expr instanceof Swc4jAstAssignExpr assignExpr) {
+            // For compound assignments (+=, -=, etc.), the result is the type of the left operand
+            // For simple assignment (=), the result is the type of the right operand
+            if (assignExpr.getOp() != Swc4jAstAssignOp.Assign) {
+                // Compound assignment - result type is the left operand (variable) type
+                var left = assignExpr.getLeft();
+                if (left instanceof Swc4jAstBindingIdent bindingIdent) {
+                    String varName = bindingIdent.getId().getSym();
+                    return context.getInferredTypes().getOrDefault(varName, "Ljava/lang/Object;");
+                }
+                return inferTypeFromExpr(assignExpr.getRight());
+            }
+            // Simple assignment - result type is the right operand type
+            return inferTypeFromExpr(assignExpr.getRight());
+        } else if (expr instanceof Swc4jAstIdent ident) {
+            return context.getInferredTypes().getOrDefault(ident.getSym(), "Ljava/lang/Object;");
+        } else if (expr instanceof Swc4jAstUpdateExpr updateExpr) {
+            // Update expression (++/--) returns the type of the operand
+            return inferTypeFromExpr(updateExpr.getArg());
+        } else if (expr instanceof Swc4jAstBinExpr binExpr) {
+            switch (binExpr.getOp()) {
+                case Add -> {
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(binExpr.getRight());
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // String concatenation - if either operand is String, result is String
+                    if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
+                        return "Ljava/lang/String;";
+                    }
+                    // Numeric addition - use type widening rules
+                    return getWidenedType(leftType, rightType);
+                }
+                case Sub -> {
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(binExpr.getRight());
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // Numeric subtraction - use type widening rules
+                    return getWidenedType(leftType, rightType);
+                }
+                case Mul -> {
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(binExpr.getRight());
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // Numeric multiplication - use type widening rules
+                    return getWidenedType(leftType, rightType);
+                }
+                case Div -> {
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(binExpr.getRight());
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // Numeric division - use type widening rules
+                    return getWidenedType(leftType, rightType);
+                }
+                case Mod -> {
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(binExpr.getRight());
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // Numeric modulo - use type widening rules
+                    return getWidenedType(leftType, rightType);
+                }
+                case Exp -> {
+                    // Exponentiation always returns double (Math.pow returns double)
+                    return "D";
+                }
+                case LShift -> {
+                    // Left shift returns the type of the left operand (int or long)
+                    // For JavaScript semantics, we convert to int (ToInt32), but JVM supports both
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    // Get primitive type
+                    String primitiveType = getPrimitiveType(leftType);
+                    // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
+                    if ("J".equals(primitiveType)) {
+                        return "J";
+                    }
+                    return "I";
+                }
+                case RShift -> {
+                    // Right shift returns the type of the left operand (int or long)
+                    // Same semantics as left shift
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    // Get primitive type
+                    String primitiveType = getPrimitiveType(leftType);
+                    // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
+                    if ("J".equals(primitiveType)) {
+                        return "J";
+                    }
+                    return "I";
+                }
+                case ZeroFillRShift -> {
+                    // Zero-fill right shift returns the type of the left operand (int or long)
+                    // Same semantics as other shift operations
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    // Get primitive type
+                    String primitiveType = getPrimitiveType(leftType);
+                    // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
+                    if ("J".equals(primitiveType)) {
+                        return "J";
+                    }
+                    return "I";
+                }
+                case BitAnd -> {
+                    // Bitwise AND uses type widening - result is wider of the two operand types
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(binExpr.getRight());
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // Use type widening rules (int & long → long, etc.)
+                    return getWidenedType(leftType, rightType);
+                }
+                case BitOr -> {
+                    // Bitwise OR uses type widening - result is wider of the two operand types
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(binExpr.getRight());
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // Use type widening rules (int | long → long, etc.)
+                    return getWidenedType(leftType, rightType);
+                }
+                case BitXor -> {
+                    // Bitwise XOR uses type widening - result is wider of the two operand types
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(binExpr.getRight());
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // Use type widening rules (int ^ long → long, etc.)
+                    return getWidenedType(leftType, rightType);
+                }
+                case EqEq, EqEqEq, NotEq, NotEqEq, Lt, LtEq, Gt, GtEq, LogicalAnd, LogicalOr -> {
+                    // Equality, inequality, relational comparisons, and logical operations return boolean
+                    return "Z";
+                }
+            }
+        } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
+            // For unary expressions, infer type from the argument
+            return inferTypeFromExpr(unaryExpr.getArg());
+        } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
+            // For parenthesized expressions, infer type from the inner expression
+            return inferTypeFromExpr(parenExpr.getExpr());
+        } else if (expr instanceof Swc4jAstCallExpr callExpr) {
+            // For call expressions, try to infer the return type
+            if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
+                String objType = inferTypeFromExpr(memberExpr.getObj());
+
+                // ArrayList methods
+                if ("Ljava/util/ArrayList;".equals(objType)) {
+                    if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                        String methodName = propIdent.getSym();
+                        // Methods that return ArrayList
+                        switch (methodName) {
+                            case "concat", "reverse", "sort", "slice", "splice", "fill", "copyWithin", "toReversed",
+                                 "toSorted", "with", "toSpliced" -> {
+                                return "Ljava/util/ArrayList;";
+                            }
+                            case "join", "toString", "toLocaleString" -> {
+                                return "Ljava/lang/String;";
+                            }
+                            case "indexOf", "lastIndexOf" -> {
+                                return "I";
+                            }
+                            case "includes" -> {
+                                return "Z";
+                            }
+                            case "pop", "shift" -> {
+                                return "Ljava/lang/Object;";
+                            }
+                        }
+                    }
+                }
+            }
+            return "Ljava/lang/Object;";
+        } else if (expr instanceof Swc4jAstSeqExpr seqExpr) {
+            // Sequence expression returns the type of the last expression
+            var exprs = seqExpr.getExprs();
+            if (!exprs.isEmpty()) {
+                return inferTypeFromExpr(exprs.get(exprs.size() - 1));
+            }
+            return "V"; // Empty sequence - void
+        }
+        return "Ljava/lang/Object;";
+    }
+
+    public String mapTsTypeToDescriptor(
             ISwc4jAstTsType tsType) {
         if (tsType instanceof Swc4jAstTsArrayType arrayType) {
             // type[] syntax - maps to Java array
-            String elemType = mapTsTypeToDescriptor(compiler, arrayType.getElemType());
+            String elemType = mapTsTypeToDescriptor(arrayType.getElemType());
             return "[" + elemType;
         } else if (tsType instanceof Swc4jAstTsKeywordType keywordType) {
             // Handle TypeScript keyword types (boolean, number, string, etc.)
@@ -774,15 +767,14 @@ public final class TypeResolver {
                     // Record<K, V> syntax - maps to LinkedHashMap
                     return "Ljava/util/LinkedHashMap;";
                 }
-                return mapTypeNameToDescriptor(compiler, typeName);
+                return mapTypeNameToDescriptor(typeName);
             }
         }
         // Default to Object for unknown types
         return "Ljava/lang/Object;";
     }
 
-    public static String mapTypeNameToDescriptor(
-            ByteCodeCompiler compiler,
+    public String mapTypeNameToDescriptor(
             String typeName) {
         // Resolve type alias first
         String resolvedType = compiler.getMemory().getTypeAliasMap().getOrDefault(typeName, typeName);
@@ -801,7 +793,7 @@ public final class TypeResolver {
             case "void" -> "V";
             default -> {
                 // Check if this is an enum type - resolve to fully qualified name
-                String qualifiedName = resolveEnumTypeName(compiler, resolvedType);
+                String qualifiedName = resolveEnumTypeName(resolvedType);
                 yield "L" + qualifiedName.replace('.', '/') + ";";
             }
         };
@@ -815,12 +807,10 @@ public final class TypeResolver {
      * - {@code Record<number, string>} → GenericTypeInfo.of("Ljava/lang/Integer;", "Ljava/lang/String;")
      * - {@code Record<string, Record<string, number>>} → GenericTypeInfo.ofNested(...)
      *
-     * @param compiler the compiler
-     * @param tsType   TypeScript type annotation (expected to be TsTypeRef with type params)
+     * @param tsType TypeScript type annotation (expected to be TsTypeRef with type params)
      * @return GenericTypeInfo containing key and value type descriptors, or null if not a Record type
      */
-    public static GenericTypeInfo parseRecordType(
-            ByteCodeCompiler compiler,
+    public GenericTypeInfo parseRecordType(
             ISwc4jAstTsType tsType) {
         if (!(tsType instanceof Swc4jAstTsTypeRef typeRef)) {
             return null;
@@ -854,20 +844,20 @@ public final class TypeResolver {
 
         // Parse key type (first parameter)
         ISwc4jAstTsType keyTsType = params.get(0);
-        String keyType = mapTsTypeToDescriptor(compiler, keyTsType);
+        String keyType = mapTsTypeToDescriptor(keyTsType);
 
         // Parse value type (second parameter)
         ISwc4jAstTsType valueTsType = params.get(1);
 
         // Check if value type is a nested Record
-        GenericTypeInfo nestedInfo = parseRecordType(compiler, valueTsType);
+        GenericTypeInfo nestedInfo = parseRecordType(valueTsType);
         if (nestedInfo != null) {
             // Nested Record type: Record<K, Record<K2, V2>>
             return GenericTypeInfo.ofNested(keyType, nestedInfo);
         }
 
         // Simple Record type: Record<K, V>
-        String valueType = mapTsTypeToDescriptor(compiler, valueTsType);
+        String valueType = mapTsTypeToDescriptor(valueTsType);
         return GenericTypeInfo.of(keyType, valueType);
     }
 
@@ -876,8 +866,7 @@ public final class TypeResolver {
      * If the type is an enum registered in EnumRegistry, returns the qualified name.
      * Otherwise, returns the type name as-is with package prefix if available.
      */
-    private static String resolveEnumTypeName(
-            ByteCodeCompiler compiler,
+    private String resolveEnumTypeName(
             String typeName) {
         // If already qualified (contains '.'), return as-is
         if (typeName.contains(".")) {

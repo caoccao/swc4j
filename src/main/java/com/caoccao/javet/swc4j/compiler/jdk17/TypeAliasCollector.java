@@ -22,40 +22,38 @@ import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsTypeAliasDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsQualifiedName;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 
 import java.util.List;
 
-public final class TypeAliasCollector {
-    private TypeAliasCollector() {
+public final class TypeAliasCollector extends BaseAstProcessor {
+    public TypeAliasCollector(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
-    public static void collectFromModuleItems(
-            ByteCodeCompiler compiler,
-            List<ISwc4jAstModuleItem> items) {
+    public void collectFromModuleItems(List<ISwc4jAstModuleItem> items) {
         for (ISwc4jAstModuleItem item : items) {
             if (item instanceof Swc4jAstExportDecl exportDecl) {
                 ISwc4jAstDecl decl = exportDecl.getDecl();
                 if (decl instanceof Swc4jAstTsTypeAliasDecl typeAliasDecl) {
-                    processTypeAlias(compiler, typeAliasDecl);
+                    processTypeAlias(typeAliasDecl);
                 }
             } else if (item instanceof Swc4jAstTsTypeAliasDecl typeAliasDecl) {
-                processTypeAlias(compiler, typeAliasDecl);
+                processTypeAlias(typeAliasDecl);
             }
         }
     }
 
-    public static void collectFromStmts(ByteCodeCompiler compiler, List<ISwc4jAstStmt> stmts) {
+    public void collectFromStmts(List<ISwc4jAstStmt> stmts) {
         for (ISwc4jAstStmt stmt : stmts) {
             if (stmt instanceof Swc4jAstTsTypeAliasDecl typeAliasDecl) {
-                processTypeAlias(compiler, typeAliasDecl);
+                processTypeAlias(typeAliasDecl);
             }
         }
     }
 
-    private static void processTypeAlias(
-            ByteCodeCompiler compiler,
-            Swc4jAstTsTypeAliasDecl typeAliasDecl) {
+    private void processTypeAlias(Swc4jAstTsTypeAliasDecl typeAliasDecl) {
         String aliasName = typeAliasDecl.getId().getSym();
         ISwc4jAstTsType typeAnn = typeAliasDecl.getTypeAnn();
 
@@ -69,7 +67,7 @@ public final class TypeAliasCollector {
         }
     }
 
-    private static String resolveEntityName(ISwc4jAstTsEntityName entityName) {
+    private String resolveEntityName(ISwc4jAstTsEntityName entityName) {
         if (entityName instanceof Swc4jAstIdent ident) {
             return ident.getSym();
         } else if (entityName instanceof Swc4jAstTsQualifiedName qualifiedName) {
