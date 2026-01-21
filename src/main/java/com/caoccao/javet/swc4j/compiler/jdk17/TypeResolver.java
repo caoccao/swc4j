@@ -496,6 +496,8 @@ public final class TypeResolver {
             return "D";
         } else if (expr instanceof Swc4jAstBool) {
             return "Z";
+        } else if (expr instanceof Swc4jAstBigInt) {
+            return "Ljava/math/BigInteger;";
         } else if (expr instanceof Swc4jAstNull) {
             // null has no specific type - it's compatible with any reference type
             // Return null to indicate that the type should be determined by context
@@ -799,6 +801,7 @@ public final class TypeResolver {
             case "double" -> "D";
             case "java.lang.String", "String" -> "Ljava/lang/String;";
             case "java.lang.Object", "Object" -> "Ljava/lang/Object;";
+            case "java.math.BigInteger", "BigInteger" -> "Ljava/math/BigInteger;";
             case "void" -> "V";
             default -> {
                 // Check if this is an enum type - resolve to fully qualified name

@@ -41,6 +41,7 @@ public sealed abstract class ByteCodeCompiler permits
     protected final ArrayLiteralGenerator arrayLiteralGenerator;
     protected final AssignExpressionGenerator assignExpressionGenerator;
     protected final AstProcessor astProcessor;
+    protected final BigIntLiteralGenerator bigIntLiteralGenerator;
     protected final BinaryExpressionGenerator binaryExpressionGenerator;
     protected final BoolLiteralGenerator boolLiteralGenerator;
     protected final BreakStatementGenerator breakStatementGenerator;
@@ -91,6 +92,7 @@ public sealed abstract class ByteCodeCompiler permits
         assignExpressionGenerator = new AssignExpressionGenerator(this);
         astProcessor = new AstProcessor(this);
         binaryExpressionGenerator = new BinaryExpressionGenerator(this);
+        bigIntLiteralGenerator = new BigIntLiteralGenerator(this);
         boolLiteralGenerator = new BoolLiteralGenerator(this);
         breakStatementGenerator = new BreakStatementGenerator(this);
         callExpressionGenerator = new CallExpressionGenerator(this);
@@ -148,6 +150,10 @@ public sealed abstract class ByteCodeCompiler permits
 
     public AstProcessor getAstProcessor() {
         return astProcessor;
+    }
+
+    public BigIntLiteralGenerator getBigIntLiteralGenerator() {
+        return bigIntLiteralGenerator;
     }
 
     public BinaryExpressionGenerator getBinaryExpressionGenerator() {

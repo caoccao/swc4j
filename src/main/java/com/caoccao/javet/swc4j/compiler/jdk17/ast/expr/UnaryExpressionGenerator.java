@@ -17,9 +17,11 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBigInt;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
@@ -30,6 +32,8 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
+import java.math.BigInteger;
 
 public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUnaryExpr> {
     public UnaryExpressionGenerator(ByteCodeCompiler compiler) {
@@ -243,6 +247,22 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                             }
                         }
                     }
+                } else if (arg instanceof Swc4jAstBigInt bigInt) {
+                    // Handle BigInt negation
+                    // Get the current value (with its sign applied)
+                    BigInteger value = bigInt.getValue();
+                    if (bigInt.getSign() == Swc4jAstBigIntSign.Minus) {
+                        value = value.negate();
+                    }
+                    // Apply the unary minus operator
+                    value = value.negate();
+
+                    // Create a new BigInt with NoSign and the negated value
+                    Swc4jAstBigInt negatedBigInt = Swc4jAstBigInt.create();
+                    negatedBigInt.setValue(value);
+                    negatedBigInt.setSign(Swc4jAstBigIntSign.NoSign);
+
+                    compiler.getBigIntLiteralGenerator().generate(code, cp, negatedBigInt, returnTypeInfo);
                 } else {
                     // For complex expressions, generate the expression first then negate
                     compiler.getExpressionGenerator().generate(code, cp, arg, null);
@@ -276,6 +296,13 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
             case Plus -> {
                 // Handle unary plus (numeric coercion) - essentially a no-op for numeric types
                 ISwc4jAstExpr arg = unaryExpr.getArg();
+
+                // Special case for BigInt: +123n is just 123n (no-op)
+                if (arg instanceof Swc4jAstBigInt bigInt) {
+                    compiler.getBigIntLiteralGenerator().generate(code, cp, bigInt, returnTypeInfo);
+                    return;
+                }
+
                 String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
 
                 // Handle null type

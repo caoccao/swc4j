@@ -104,6 +104,52 @@ public final class IdentifierGenerator extends BaseAstProcessor<Swc4jAstIdent> {
                     }
                 }
             }
+
+            // Handle unboxing/conversion if needed (object to primitive)
+            if (returnTypeInfo != null && returnTypeInfo.type() != ReturnType.OBJECT && returnTypeInfo.type() != ReturnType.STRING) {
+                // Need to convert from object type to primitive
+                if ("Ljava/math/BigInteger;".equals(localVar.type())) {
+                    // Convert BigInteger to primitive
+                    String targetDescriptor = returnTypeInfo.getPrimitiveTypeDescriptor();
+                    if (targetDescriptor == null) return;
+                    switch (targetDescriptor) {
+                        case "I": // int
+                            int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
+                            code.invokevirtual(intValueRef);
+                            break;
+                        case "J": // long
+                            int longValueRef = cp.addMethodRef("java/math/BigInteger", "longValue", "()J");
+                            code.invokevirtual(longValueRef);
+                            break;
+                        case "D": // double
+                            int doubleValueRef = cp.addMethodRef("java/math/BigInteger", "doubleValue", "()D");
+                            code.invokevirtual(doubleValueRef);
+                            break;
+                        case "F": // float
+                            int floatValueRef = cp.addMethodRef("java/math/BigInteger", "floatValue", "()F");
+                            code.invokevirtual(floatValueRef);
+                            break;
+                        case "B": // byte
+                            int byteValueRef = cp.addMethodRef("java/math/BigInteger", "byteValue", "()B");
+                            code.invokevirtual(byteValueRef);
+                            break;
+                        case "S": // short
+                            int shortValueRef = cp.addMethodRef("java/math/BigInteger", "shortValue", "()S");
+                            code.invokevirtual(shortValueRef);
+                            break;
+                        case "Z": // boolean
+                            // BigInteger.equals(ZERO) - zero is false, non-zero is true
+                            int zeroFieldRef = cp.addFieldRef("java/math/BigInteger", "ZERO", "Ljava/math/BigInteger;");
+                            code.getstatic(zeroFieldRef);
+                            int equalsRef = cp.addMethodRef("java/math/BigInteger", "equals", "(Ljava/lang/Object;)Z");
+                            code.invokevirtual(equalsRef);
+                            // Invert: equals returns 1 for zero (false), 0 for non-zero (true)
+                            code.iconst(1);
+                            code.ixor();
+                            break;
+                    }
+                }
+            }
         }
     }
 }

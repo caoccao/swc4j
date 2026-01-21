@@ -38,7 +38,7 @@ public record ByteCodeCompilerOptions(
                 "Short", "java.lang.Short"
         ));
         DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
-                "BigInteger", "java.lang.BigInteger",
+                "BigInteger", "java.math.BigInteger",
                 "String", "java.lang.String",
                 "Object", "java.lang.Object",
                 "void", "void"

@@ -43,6 +43,8 @@ public final class ExpressionGenerator extends BaseAstProcessor<ISwc4jAstExpr> {
             compiler.getStringLiteralGenerator().generate(code, cp, str, returnTypeInfo);
         } else if (expr instanceof Swc4jAstNumber number) {
             compiler.getNumberLiteralGenerator().generate(code, cp, number, returnTypeInfo);
+        } else if (expr instanceof Swc4jAstBigInt bigInt) {
+            compiler.getBigIntLiteralGenerator().generate(code, cp, bigInt, returnTypeInfo);
         } else if (expr instanceof Swc4jAstBool bool) {
             compiler.getBoolLiteralGenerator().generate(code, cp, bool, returnTypeInfo);
         } else if (expr instanceof Swc4jAstNull nullLit) {
