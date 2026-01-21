@@ -530,6 +530,14 @@ public final class TypeResolver {
                         return "I"; // arr.length returns int
                     }
                 }
+            } else if ("Ljava/lang/String;".equals(objType)) {
+                // String operations
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String propName = propIdent.getSym();
+                    if ("length".equals(propName)) {
+                        return "I"; // str.length returns int
+                    }
+                }
             } else if ("Ljava/util/LinkedHashMap;".equals(objType)) {
                 // LinkedHashMap operations (object literal member access)
                 // map.get() returns Object

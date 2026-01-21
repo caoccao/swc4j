@@ -104,6 +104,18 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
                     return;
                 }
             }
+        } else if ("Ljava/lang/String;".equals(objType)) {
+            // String operations
+            if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                String propName = propIdent.getSym();
+                if ("length".equals(propName)) {
+                    // str.length -> str.length()
+                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [String]
+                    int lengthMethod = cp.addMethodRef("java/lang/String", "length", "()I");
+                    code.invokevirtual(lengthMethod); // Stack: [int]
+                    return;
+                }
+            }
         } else if ("Ljava/util/LinkedHashMap;".equals(objType) || "Ljava/lang/Object;".equals(objType)) {
             // LinkedHashMap operations (object literal member access)
             // Also handle Object type (for nested properties where map values are typed as Object)

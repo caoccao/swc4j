@@ -4,11 +4,14 @@
 
 This document outlines the implementation plan for supporting JavaScript/TypeScript string literals (`Swc4jAstStr`) and compiling them to JVM bytecode as **Java Strings** or **char/Character** primitives.
 
-**Current Status:** 🟢 **FULLY IMPLEMENTED** (Comprehensive test coverage complete)
+**Current Status:** 🟢 **FULLY IMPLEMENTED** (Comprehensive test coverage complete + string.length support)
 
-**Implementation File:** ✅ [StringLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/StringLiteralGenerator.java)
+**Implementation Files:**
+- ✅ [StringLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/StringLiteralGenerator.java)
+- ✅ [MemberExpressionGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/MemberExpressionGenerator.java) (String.length support)
+- ✅ [TypeResolver.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/TypeResolver.java) (String.length type inference)
 
-**Test Files:** ✅ 67 passing tests across 6 test files (see Test Organization section)
+**Test Files:** ✅ 82 passing tests across 7 test files (see Test Organization section)
 
 **AST Definition:** [Swc4jAstStr.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr.java)
 
@@ -18,15 +21,17 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 This implementation successfully enables full TypeScript string literal support in swc4j with JVM bytecode generation. Key accomplishments:
 
-- ✅ **67 passing tests** across 6 organized test files
+- ✅ **82 passing tests** across 7 organized test files
 - ✅ **Three conversion modes**: String (default), char (primitive), Character (boxed)
+- ✅ **String.length property**: Full support with automatic type inference (returns int)
 - ✅ **Full Unicode support**: Including emojis, international characters, and surrogate pairs
 - ✅ **All escape sequences**: \n, \t, \r, \\, \', \", \b, \f, \0
 - ✅ **Large char value fix**: Proper bytecode generation for char values up to \uFFFF (65535)
 - ✅ **Edge case handling**: Empty strings, multi-character to char, very long strings
 - ✅ **Type-based conversion**: Automatic conversion based on return type annotations
+- ✅ **Type inference**: String.length correctly infers int return type without explicit annotation
 
-The implementation is production-ready for all string literal use cases. Features requiring other AST node support (property access, method calls, concatenation) are intentionally out of scope and documented for future work.
+The implementation is production-ready for all string literal use cases including property access (.length). Features requiring other AST node support (method calls, concatenation) are intentionally out of scope and documented for future work.
 
 ### Files Modified
 
@@ -58,12 +63,14 @@ Tests follow the standard pattern for literal value tests, using simple `assertE
 ### Implementation Checklist
 
 ✅ **Implementation complete** - StringLiteralGenerator.java handles all three modes (String, char, Character)
-✅ **67 tests implemented** - All edge cases covered across 6 organized test files
+✅ **String.length support** - MemberExpressionGenerator + TypeResolver handle String.length property
+✅ **82 tests implemented** - All edge cases covered across 7 organized test files (67 literals + 15 length)
 ✅ **All tests passing** - No failures, no regressions
 ✅ **Javadoc passing** - No errors in documentation generation
 ✅ **Following existing patterns** - Tests use `assertEquals()` for simple values (consistent with TestCompileAstNull, etc.)
-✅ **Comprehensive coverage** - Basic literals, escapes, Unicode, char/Character conversion, edge cases
-✅ **Bytecode generation** - Proper JVM bytecode for all cases (ldc, iconst, sipush, invokestatic)
+✅ **Comprehensive coverage** - Basic literals, escapes, Unicode, char/Character conversion, edge cases, property access
+✅ **Bytecode generation** - Proper JVM bytecode for all cases (ldc, iconst, sipush, invokestatic, invokevirtual for String.length)
+✅ **Type inference** - String.length correctly infers int return type without explicit annotation
 ✅ **JDK 17 support** - Implementation targets JDK 17 as required
 
 **Note on Assertions:** String literal tests correctly use simple `assertEquals()` for primitive/String values. The `Map.of()`/`SimpleMap.of()` pattern is only applicable for tests returning Map objects (e.g., object literal tests), not for simple value returns.
@@ -966,10 +973,19 @@ The following tests were **intentionally excluded** as they require features bey
    - Very long strings (1000+ chars)
    - **Note:** 3 tests removed (property access out of scope)
 
-7. ❌ **TestCompileAstStrConstPool.java** - Phase 7 (Not implemented)
+7. ✅ **TestCompileAstStrLength.java** - Phase 7 (15 tests) **NEW**
+   - String.length property access
+   - Empty string, single char, multiple chars
+   - Variables with .length access
+   - Escape sequences, Unicode, emojis in length
+   - Type inference (returns int without annotation)
+   - Very long strings, special characters
+   - **Implementation:** MemberExpressionGenerator + TypeResolver
+
+8. ❌ **TestCompileAstStrConstPool.java** - Phase 8 (Not implemented)
    - Constant pool optimization handled automatically by JVM
 
-8. ❌ **TestCompileAstStrConversion.java** - Phase 8 (Not implemented)
+9. ❌ **TestCompileAstStrConversion.java** - Phase 9 (Not implemented)
    - Type coercion requires other AST node support (method calls, etc.)
 
 **Total: 67 passing tests across 6 files** (Phases 1-6 complete)
