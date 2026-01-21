@@ -49,7 +49,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * JavaScript: {a: 1, b: "hello", c: true, [key]: value, x, y, ...other}
  * Java: {@code LinkedHashMap<String, Object>} with key-value pairs
  */
-public final class ObjectLiteralGenerator extends BaseAstProcessor {
+public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjectLit> {
     public ObjectLiteralGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -65,6 +65,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor {
      * @param returnTypeInfo return type information (used for Record type validation in Phase 2)
      * @throws Swc4jByteCodeCompilerException if generation fails or type validation fails
      */
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

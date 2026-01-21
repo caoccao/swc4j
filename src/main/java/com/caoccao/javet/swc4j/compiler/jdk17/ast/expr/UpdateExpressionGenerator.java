@@ -32,7 +32,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class UpdateExpressionGenerator extends BaseAstProcessor {
+public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUpdateExpr> {
     public UpdateExpressionGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -53,6 +53,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor {
         }
     }
 
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

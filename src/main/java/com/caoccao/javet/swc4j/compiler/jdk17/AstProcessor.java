@@ -26,7 +26,6 @@ import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsEnumDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
-import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -34,9 +33,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public final class AstProcessor extends BaseAstProcessor {
+public final class AstProcessor {
+    private final ByteCodeCompiler compiler;
+
     public AstProcessor(ByteCodeCompiler compiler) {
-        super(compiler);
+        this.compiler = compiler;
     }
 
     public String getModuleName(ISwc4jAstTsModuleName moduleName) {

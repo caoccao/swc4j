@@ -29,7 +29,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * Generator for sequence expressions (comma operator).
  * Evaluates all expressions in sequence, leaving only the last value on the stack.
  */
-public final class SeqExpressionGenerator extends BaseAstProcessor {
+public final class SeqExpressionGenerator extends BaseAstProcessor<Swc4jAstSeqExpr> {
     public SeqExpressionGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -44,6 +44,7 @@ public final class SeqExpressionGenerator extends BaseAstProcessor {
      * @param returnTypeInfo return type information
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

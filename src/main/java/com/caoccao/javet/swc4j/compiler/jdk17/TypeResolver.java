@@ -30,7 +30,6 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsArrayType;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsKeywordType;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
-import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
@@ -39,9 +38,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import java.util.List;
 import java.util.Optional;
 
-public final class TypeResolver extends BaseAstProcessor {
+public final class TypeResolver {
+    private final ByteCodeCompiler compiler;
+
     public TypeResolver(ByteCodeCompiler compiler) {
-        super(compiler);
+        this.compiler = compiler;
     }
 
     /**

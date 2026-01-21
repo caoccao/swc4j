@@ -53,7 +53,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * - Body always executes at least once
  * - Continue jumps to test label (before condition evaluation)
  */
-public final class DoWhileStatementGenerator extends BaseAstProcessor {
+public final class DoWhileStatementGenerator extends BaseAstProcessor<Swc4jAstDoWhileStmt> {
     public DoWhileStatementGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -111,6 +111,7 @@ public final class DoWhileStatementGenerator extends BaseAstProcessor {
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

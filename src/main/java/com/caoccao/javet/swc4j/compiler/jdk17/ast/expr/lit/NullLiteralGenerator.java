@@ -24,11 +24,12 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class NullLiteralGenerator extends BaseAstProcessor {
+public final class NullLiteralGenerator extends BaseAstProcessor<Swc4jAstNull> {
     public NullLiteralGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

@@ -26,17 +26,17 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class ExpressionGenerator extends BaseAstProcessor {
+public final class ExpressionGenerator extends BaseAstProcessor<ISwc4jAstExpr> {
     public ExpressionGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             ISwc4jAstExpr expr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-
         if (expr instanceof Swc4jAstTsAsExpr tsAsExpr) {
             compiler.getTsAsExpressionGenerator().generate(code, cp, tsAsExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstStr str) {
@@ -54,11 +54,11 @@ public final class ExpressionGenerator extends BaseAstProcessor {
         } else if (expr instanceof Swc4jAstIdent ident) {
             compiler.getIdentifierGenerator().generate(code, cp, ident, returnTypeInfo);
         } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
-            compiler.getMemberExpressionGenerator().generate(code, cp, memberExpr);
+            compiler.getMemberExpressionGenerator().generate(code, cp, memberExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstCallExpr callExpr) {
-            compiler.getCallExpressionGenerator().generate(code, cp, callExpr);
+            compiler.getCallExpressionGenerator().generate(code, cp, callExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstAssignExpr assignExpr) {
-            compiler.getAssignExpressionGenerator().generate(code, cp, assignExpr);
+            compiler.getAssignExpressionGenerator().generate(code, cp, assignExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstBinExpr binExpr) {
             compiler.getBinaryExpressionGenerator().generate(code, cp, binExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {

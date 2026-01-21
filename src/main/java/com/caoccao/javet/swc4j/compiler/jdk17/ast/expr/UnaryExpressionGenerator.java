@@ -31,11 +31,12 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class UnaryExpressionGenerator extends BaseAstProcessor {
+public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUnaryExpr> {
     public UnaryExpressionGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

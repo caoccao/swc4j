@@ -25,11 +25,12 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class BoolLiteralGenerator extends BaseAstProcessor {
+public final class BoolLiteralGenerator extends BaseAstProcessor<Swc4jAstBool> {
     public BoolLiteralGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

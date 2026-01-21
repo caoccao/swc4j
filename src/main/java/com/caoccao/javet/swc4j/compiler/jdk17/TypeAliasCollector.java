@@ -22,14 +22,15 @@ import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsTypeAliasDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsQualifiedName;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
-import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 
 import java.util.List;
 
-public final class TypeAliasCollector extends BaseAstProcessor {
+public final class TypeAliasCollector {
+    private final ByteCodeCompiler compiler;
+
     public TypeAliasCollector(ByteCodeCompiler compiler) {
-        super(compiler);
+        this.compiler = compiler;
     }
 
     public void collectFromModuleItems(List<ISwc4jAstModuleItem> items) {

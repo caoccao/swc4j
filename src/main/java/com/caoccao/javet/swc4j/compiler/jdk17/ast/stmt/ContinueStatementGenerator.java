@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -36,7 +37,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  *   goto UPDATE_LABEL      // Jump to continue target
  * </pre>
  */
-public final class ContinueStatementGenerator extends BaseAstProcessor {
+public final class ContinueStatementGenerator extends BaseAstProcessor<Swc4jAstContinueStmt> {
     public ContinueStatementGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -44,15 +45,18 @@ public final class ContinueStatementGenerator extends BaseAstProcessor {
     /**
      * Generate bytecode for a continue statement.
      *
-     * @param code         the code builder
-     * @param cp           the constant pool
-     * @param continueStmt the continue statement AST node
+     * @param code           the code builder
+     * @param cp             the constant pool
+     * @param continueStmt   the continue statement AST node
+     * @param returnTypeInfo return type information (unused for continue statements)
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
-            Swc4jAstContinueStmt continueStmt) throws Swc4jByteCodeCompilerException {
+            Swc4jAstContinueStmt continueStmt,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         LoopLabelInfo continueLabel;

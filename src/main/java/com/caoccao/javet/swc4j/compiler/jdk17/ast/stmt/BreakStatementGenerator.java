@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -35,7 +36,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  *   goto END_LABEL         // Jump to break target
  * </pre>
  */
-public final class BreakStatementGenerator extends BaseAstProcessor {
+public final class BreakStatementGenerator extends BaseAstProcessor<Swc4jAstBreakStmt> {
     public BreakStatementGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -43,15 +44,18 @@ public final class BreakStatementGenerator extends BaseAstProcessor {
     /**
      * Generate bytecode for a break statement.
      *
-     * @param code      the code builder
-     * @param cp        the constant pool
-     * @param breakStmt the break statement AST node
+     * @param code           the code builder
+     * @param cp             the constant pool
+     * @param breakStmt      the break statement AST node
+     * @param returnTypeInfo return type information (unused for break statements)
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
-            Swc4jAstBreakStmt breakStmt) throws Swc4jByteCodeCompilerException {
+            Swc4jAstBreakStmt breakStmt,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         LoopLabelInfo breakLabel;

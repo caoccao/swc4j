@@ -45,7 +45,7 @@ import java.util.*;
  * <p>
  * Handles both tableswitch (dense cases) and lookupswitch (sparse cases).
  */
-public final class SwitchStatementGenerator extends BaseAstProcessor {
+public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwitchStmt> {
     private static final double DENSITY_THRESHOLD = 0.5;
     private static final int MAX_TABLE_SWITCH_RANGE = 10000;
 
@@ -340,6 +340,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor {
      * Generate bytecode for a switch statement.
      * Supports integer, string, enum, boxed types, and primitive promotion.
      */
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

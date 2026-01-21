@@ -26,7 +26,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class ConditionalExpressionGenerator extends BaseAstProcessor {
+public final class ConditionalExpressionGenerator extends BaseAstProcessor<Swc4jAstCondExpr> {
     public ConditionalExpressionGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -104,6 +104,7 @@ public final class ConditionalExpressionGenerator extends BaseAstProcessor {
         return "Ljava/lang/Object;";
     }
 
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

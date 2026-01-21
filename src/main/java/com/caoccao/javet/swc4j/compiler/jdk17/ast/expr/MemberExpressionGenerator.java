@@ -23,18 +23,21 @@ import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class MemberExpressionGenerator extends BaseAstProcessor {
+public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMemberExpr> {
     public MemberExpressionGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
-            Swc4jAstMemberExpr memberExpr) throws Swc4jByteCodeCompilerException {
+            Swc4jAstMemberExpr memberExpr,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // Handle member access on arrays (e.g., arr.length or arr[index])
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
 

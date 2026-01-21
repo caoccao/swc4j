@@ -25,13 +25,14 @@ import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstSwitchCase;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.*;
-import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 
-public final class VariableAnalyzer extends BaseAstProcessor {
+public final class VariableAnalyzer {
+    private final ByteCodeCompiler compiler;
+
     public VariableAnalyzer(ByteCodeCompiler compiler) {
-        super(compiler);
+        this.compiler = compiler;
     }
 
     /**

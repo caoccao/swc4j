@@ -16,10 +16,22 @@
 
 package com.caoccao.javet.swc4j.compiler;
 
-public abstract class BaseAstProcessor {
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
+import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
+public abstract class BaseAstProcessor<AST extends ISwc4jAst> {
     protected final ByteCodeCompiler compiler;
 
     public BaseAstProcessor(ByteCodeCompiler compiler) {
         this.compiler = compiler;
     }
+
+    public abstract void generate(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            AST ast,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException;
 }

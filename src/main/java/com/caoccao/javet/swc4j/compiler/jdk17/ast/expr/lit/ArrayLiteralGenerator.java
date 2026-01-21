@@ -28,11 +28,12 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.Optional;
 
-public final class ArrayLiteralGenerator extends BaseAstProcessor {
+public final class ArrayLiteralGenerator extends BaseAstProcessor<Swc4jAstArrayLit> {
     public ArrayLiteralGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

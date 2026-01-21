@@ -24,11 +24,12 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class ParenExpressionGenerator extends BaseAstProcessor {
+public final class ParenExpressionGenerator extends BaseAstProcessor<Swc4jAstParenExpr> {
     public ParenExpressionGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

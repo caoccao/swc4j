@@ -47,7 +47,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  *   END_LABEL:             // Break target
  * </pre>
  */
-public final class WhileStatementGenerator extends BaseAstProcessor {
+public final class WhileStatementGenerator extends BaseAstProcessor<Swc4jAstWhileStmt> {
     public WhileStatementGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -105,6 +105,7 @@ public final class WhileStatementGenerator extends BaseAstProcessor {
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

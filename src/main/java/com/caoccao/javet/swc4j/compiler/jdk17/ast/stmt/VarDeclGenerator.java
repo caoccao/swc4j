@@ -30,15 +30,17 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class VarDeclGenerator extends BaseAstProcessor {
+public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
     public VarDeclGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
-            Swc4jAstVarDecl varDecl) throws Swc4jByteCodeCompilerException {
+            Swc4jAstVarDecl varDecl,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
         for (Swc4jAstVarDeclarator declarator : varDecl.getDecls()) {
             ISwc4jAstPat name = declarator.getName();

@@ -30,11 +30,12 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class BinaryExpressionGenerator extends BaseAstProcessor {
+public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBinExpr> {
     public BinaryExpressionGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

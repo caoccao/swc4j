@@ -25,11 +25,12 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class NumberLiteralGenerator extends BaseAstProcessor {
+public final class NumberLiteralGenerator extends BaseAstProcessor<Swc4jAstNumber> {
     public NumberLiteralGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,

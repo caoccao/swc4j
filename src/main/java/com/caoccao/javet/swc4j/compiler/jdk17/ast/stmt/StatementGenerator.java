@@ -32,7 +32,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * Main dispatcher for statement code generation.
  * Delegates to specialized generators based on statement type.
  */
-public final class StatementGenerator extends BaseAstProcessor {
+public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
     public StatementGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -46,6 +46,7 @@ public final class StatementGenerator extends BaseAstProcessor {
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
@@ -56,7 +57,7 @@ public final class StatementGenerator extends BaseAstProcessor {
         }
 
         if (stmt instanceof Swc4jAstVarDecl varDecl) {
-            compiler.getVarDeclGenerator().generate(code, cp, varDecl);
+            compiler.getVarDeclGenerator().generate(code, cp, varDecl, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstExprStmt exprStmt) {
             generateExprStmt(code, cp, exprStmt);
         } else if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
@@ -70,9 +71,9 @@ public final class StatementGenerator extends BaseAstProcessor {
         } else if (stmt instanceof Swc4jAstDoWhileStmt doWhileStmt) {
             compiler.getDoWhileStatementGenerator().generate(code, cp, doWhileStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstBreakStmt breakStmt) {
-            compiler.getBreakStatementGenerator().generate(code, cp, breakStmt);
+            compiler.getBreakStatementGenerator().generate(code, cp, breakStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstContinueStmt continueStmt) {
-            compiler.getContinueStatementGenerator().generate(code, cp, continueStmt);
+            compiler.getContinueStatementGenerator().generate(code, cp, continueStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstLabeledStmt labeledStmt) {
             compiler.getLabeledStatementGenerator().generate(code, cp, labeledStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstBlockStmt blockStmt) {

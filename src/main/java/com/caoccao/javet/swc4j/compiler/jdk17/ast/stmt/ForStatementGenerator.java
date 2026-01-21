@@ -50,7 +50,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  *   END_LABEL:             // Break target
  * </pre>
  */
-public final class ForStatementGenerator extends BaseAstProcessor {
+public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStmt> {
     public ForStatementGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -108,6 +108,7 @@ public final class ForStatementGenerator extends BaseAstProcessor {
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
+    @Override
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
@@ -330,7 +331,7 @@ public final class ForStatementGenerator extends BaseAstProcessor {
                     context.getLocalVariableTable().addExistingVariableToCurrentScope(varName, varType);
                 }
             }
-            compiler.getVarDeclGenerator().generate(code, cp, varDecl);
+            compiler.getVarDeclGenerator().generate(code, cp, varDecl, null);
         } else if (init instanceof ISwc4jAstExpr expr) {
             compiler.getExpressionGenerator().generate(code, cp, expr, null);
 

@@ -24,7 +24,6 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEnumMemberId;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsEnumDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsEnumMember;
-import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -34,9 +33,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class EnumGenerator extends BaseAstProcessor {
+public final class EnumGenerator {
+    private final ByteCodeCompiler compiler;
+
     public EnumGenerator(ByteCodeCompiler compiler) {
-        super(compiler);
+        this.compiler = compiler;
     }
 
     private EnumInfo analyzeEnumMembers(List<Swc4jAstTsEnumMember> members)
