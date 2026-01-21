@@ -26,6 +26,7 @@ import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -49,8 +50,9 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * JavaScript: {a: 1, b: "hello", c: true, [key]: value, x, y, ...other}
  * Java: {@code LinkedHashMap<String, Object>} with key-value pairs
  */
-public final class ObjectLiteralGenerator {
-    private ObjectLiteralGenerator() {
+public final class ObjectLiteralGenerator extends BaseAstProcessor {
+    public ObjectLiteralGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
     /**
@@ -58,7 +60,6 @@ public final class ObjectLiteralGenerator {
      * Phase 1-4: Basic implementation with computed property names, shorthand, and spread - no type annotation, default to {@code LinkedHashMap<String, Object>}
      * Phase 2: Type validation for {@code Record<K, V>} types
      *
-     * @param compiler       the compiler
      * @param code           code builder for bytecode generation
      * @param cp             constant pool
      * @param objectLit      object literal AST node
@@ -66,8 +67,7 @@ public final class ObjectLiteralGenerator {
      * @param callback       callback for generating nested expressions
      * @throws Swc4jByteCodeCompilerException if generation fails or type validation fails
      */
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstObjectLit objectLit,
@@ -92,7 +92,7 @@ public final class ObjectLiteralGenerator {
             if (prop instanceof Swc4jAstKeyValueProp kvProp) {
                 // Phase 2: Validate key and value types against Record<K, V> if present
                 if (genericTypeInfo != null) {
-                    validateKeyValueProperty(compiler, kvProp, genericTypeInfo);
+                    validateKeyValueProperty(kvProp, genericTypeInfo);
                 }
 
                 // Duplicate map reference for put() call
@@ -100,7 +100,7 @@ public final class ObjectLiteralGenerator {
 
                 // Generate key
                 String expectedKeyType = genericTypeInfo != null ? genericTypeInfo.getKeyType() : null;
-                generateKey(compiler, code, cp, kvProp.getKey(), expectedKeyType, callback);
+                generateKey(code, cp, kvProp.getKey(), expectedKeyType, callback);
                 // Stack: [map, map, key]
 
                 // Generate value
@@ -136,7 +136,7 @@ public final class ObjectLiteralGenerator {
 
                 // Phase 2: Validate shorthand property types against Record<K, V> if present
                 if (genericTypeInfo != null) {
-                    validateShorthandProperty(compiler, ident, genericTypeInfo);
+                    validateShorthandProperty(ident, genericTypeInfo);
                 }
 
                 code.dup(); // Stack: [map, map]
@@ -172,7 +172,7 @@ public final class ObjectLiteralGenerator {
 
                 // Phase 4: Validate spread source type against Record<K, V> if present
                 if (genericTypeInfo != null) {
-                    validateSpreadElement(compiler, spread, genericTypeInfo);
+                    validateSpreadElement(spread, genericTypeInfo);
                 }
 
                 code.dup(); // Stack: [map, map]
@@ -194,8 +194,7 @@ public final class ObjectLiteralGenerator {
         // LinkedHashMap instance is left on stack for return/assignment
     }
 
-    private static void generateKey(
-            ByteCodeCompiler compiler,
+    private void generateKey(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             ISwc4jAstPropName key,
@@ -292,7 +291,7 @@ public final class ObjectLiteralGenerator {
      * @param expectedKeyType expected key type descriptor (determines which wrapper to use)
      * @throws Swc4jByteCodeCompilerException if generation fails
      */
-    private static void generateNumericKey(
+    private void generateNumericKey(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstNumber num,
@@ -384,7 +383,7 @@ public final class ObjectLiteralGenerator {
      * @param key property key AST node
      * @return property name as string
      */
-    private static String getPropertyName(ISwc4jAstPropName key) {
+    private String getPropertyName(ISwc4jAstPropName key) {
         if (key instanceof Swc4jAstIdentName identName) {
             return identName.getSym();
         } else if (key instanceof Swc4jAstStr str) {
@@ -404,7 +403,7 @@ public final class ObjectLiteralGenerator {
      * @param typeDescriptor JVM type descriptor
      * @return true if type is a primitive wrapper or primitive (not String)
      */
-    private static boolean isPrimitiveKeyType(String typeDescriptor) {
+    private boolean isPrimitiveKeyType(String typeDescriptor) {
         if (typeDescriptor == null) {
             return false;
         }
@@ -429,8 +428,7 @@ public final class ObjectLiteralGenerator {
                 "C".equals(typeDescriptor);
     }
 
-    private static void validateKeyValueProperty(
-            ByteCodeCompiler compiler,
+    private void validateKeyValueProperty(
             Swc4jAstKeyValueProp kvProp,
             GenericTypeInfo genericTypeInfo) throws Swc4jByteCodeCompilerException {
         ISwc4jAstPropName key = kvProp.getKey();
@@ -474,9 +472,9 @@ public final class ObjectLiteralGenerator {
             GenericTypeInfo nestedTypeInfo = genericTypeInfo.getNestedTypeInfo();
             for (var nestedProp : nestedObjLit.getProps()) {
                 if (nestedProp instanceof Swc4jAstKeyValueProp nestedKvProp) {
-                    validateKeyValueProperty(compiler, nestedKvProp, nestedTypeInfo);
+                    validateKeyValueProperty(nestedKvProp, nestedTypeInfo);
                 } else if (nestedProp instanceof Swc4jAstIdent nestedIdent) {
-                    validateShorthandProperty(compiler, nestedIdent, nestedTypeInfo);
+                    validateShorthandProperty(nestedIdent, nestedTypeInfo);
                 }
                 // Spread elements in nested objects would need special handling
                 // For now, we skip validation for spread (will use runtime types)
@@ -496,8 +494,7 @@ public final class ObjectLiteralGenerator {
         }
     }
 
-    private static void validateShorthandProperty(
-            ByteCodeCompiler compiler,
+    private void validateShorthandProperty(
             Swc4jAstIdent ident,
             GenericTypeInfo genericTypeInfo) throws Swc4jByteCodeCompilerException {
         String propertyName = ident.getSym();
@@ -533,8 +530,7 @@ public final class ObjectLiteralGenerator {
         }
     }
 
-    private static void validateSpreadElement(
-            ByteCodeCompiler compiler,
+    private void validateSpreadElement(
             Swc4jAstSpreadElement spread,
             GenericTypeInfo genericTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();

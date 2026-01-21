@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -26,28 +27,9 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
 
-public final class ClassGenerator {
-    private ClassGenerator() {
-    }
-
-    public static byte[] generateBytecode(
-            ByteCodeCompiler compiler,
-            String internalClassName,
-            Swc4jAstClass clazz) throws IOException, Swc4jByteCodeCompilerException {
-        ClassWriter classWriter = new ClassWriter(internalClassName);
-        ClassWriter.ConstantPool cp = classWriter.getConstantPool();
-
-        // Generate default constructor
-        generateDefaultConstructor(classWriter, cp);
-
-        // Generate methods
-        for (ISwc4jAstClassMember member : clazz.getBody()) {
-            if (member instanceof Swc4jAstClassMethod method) {
-                MethodGenerator.generate(compiler, classWriter, cp, method);
-            }
-        }
-
-        return classWriter.toByteArray();
+public final class ClassGenerator extends BaseAstProcessor {
+    public ClassGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
     public static void generateDefaultConstructor(ClassWriter classWriter, ClassWriter.ConstantPool cp) {
@@ -67,5 +49,24 @@ public final class ClassGenerator {
                 1, // max stack
                 1  // max locals (this)
         );
+    }
+
+    public byte[] generateBytecode(
+            String internalClassName,
+            Swc4jAstClass clazz) throws IOException, Swc4jByteCodeCompilerException {
+        ClassWriter classWriter = new ClassWriter(internalClassName);
+        ClassWriter.ConstantPool cp = classWriter.getConstantPool();
+
+        // Generate default constructor
+        generateDefaultConstructor(classWriter, cp);
+
+        // Generate methods
+        for (ISwc4jAstClassMember member : clazz.getBody()) {
+            if (member instanceof Swc4jAstClassMethod method) {
+                compiler.getMethodGenerator().generate(classWriter, cp, method);
+            }
+        }
+
+        return classWriter.toByteArray();
     }
 }

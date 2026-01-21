@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -28,12 +29,12 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.Optional;
 
-public final class ArrayLiteralGenerator {
-    private ArrayLiteralGenerator() {
+public final class ArrayLiteralGenerator extends BaseAstProcessor {
+    public ArrayLiteralGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstArrayLit arrayLit,
@@ -46,7 +47,7 @@ public final class ArrayLiteralGenerator {
 
         if (isJavaArray) {
             // Generate Java array
-            generateJavaArray(compiler, code, cp, arrayLit, returnTypeInfo.descriptor(), callback);
+            generateJavaArray(code, cp, arrayLit, returnTypeInfo.descriptor(), callback);
         } else {
             // Array literal - convert to ArrayList
             int arrayListClass = cp.addClass("java/util/ArrayList");
@@ -103,8 +104,7 @@ public final class ArrayLiteralGenerator {
         }
     }
 
-    private static void generateJavaArray(
-            ByteCodeCompiler compiler,
+    private void generateJavaArray(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstArrayLit arrayLit,

@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -35,12 +36,12 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
 
-public final class MethodGenerator {
-    private MethodGenerator() {
+public final class MethodGenerator extends BaseAstProcessor {
+    public MethodGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
             Swc4jAstClassMethod method) throws Swc4jByteCodeCompilerException {
@@ -66,8 +67,8 @@ public final class MethodGenerator {
 
                 // Determine return type from method body or explicit annotation
                 ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, body);
-                String descriptor = generateDescriptor(compiler, function, returnTypeInfo);
-                CodeBuilder code = generateCode(compiler, cp, body, returnTypeInfo);
+                String descriptor = generateDescriptor(function, returnTypeInfo);
+                CodeBuilder code = generateCode(cp, body, returnTypeInfo);
 
                 int accessFlags = 0x0001; // ACC_PUBLIC
                 if (method.isStatic()) {
@@ -120,8 +121,7 @@ public final class MethodGenerator {
         }
     }
 
-    public static CodeBuilder generateCode(
-            ByteCodeCompiler compiler,
+    public CodeBuilder generateCode(
             ClassWriter.ConstantPool cp,
             Swc4jAstBlockStmt body,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
@@ -135,8 +135,7 @@ public final class MethodGenerator {
         return code;
     }
 
-    public static String generateDescriptor(
-            ByteCodeCompiler compiler,
+    public String generateDescriptor(
             Swc4jAstFunction function,
             ReturnTypeInfo returnTypeInfo) {
         // Build parameter descriptors

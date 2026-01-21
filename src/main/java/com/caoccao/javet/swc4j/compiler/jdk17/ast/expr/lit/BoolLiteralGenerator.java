@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -24,12 +25,12 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class BoolLiteralGenerator {
-    private BoolLiteralGenerator() {
+public final class BoolLiteralGenerator extends BaseAstProcessor {
+    public BoolLiteralGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstBool bool,

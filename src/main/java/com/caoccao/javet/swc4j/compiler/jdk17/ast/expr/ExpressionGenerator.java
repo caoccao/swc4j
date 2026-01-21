@@ -23,7 +23,6 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.ts.TsAsExpressionGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -41,17 +40,17 @@ public final class ExpressionGenerator {
         if (expr instanceof Swc4jAstTsAsExpr tsAsExpr) {
             TsAsExpressionGenerator.generate(compiler, code, cp, tsAsExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstStr str) {
-            StringLiteralGenerator.generate(compiler, code, cp, str, returnTypeInfo);
+            compiler.getStringLiteralGenerator().generate(code, cp, str, returnTypeInfo);
         } else if (expr instanceof Swc4jAstNumber number) {
-            NumberLiteralGenerator.generate(compiler, code, cp, number, returnTypeInfo);
+            compiler.getNumberLiteralGenerator().generate(code, cp, number, returnTypeInfo);
         } else if (expr instanceof Swc4jAstBool bool) {
-            BoolLiteralGenerator.generate(compiler, code, cp, bool, returnTypeInfo);
+            compiler.getBoolLiteralGenerator().generate(code, cp, bool, returnTypeInfo);
         } else if (expr instanceof Swc4jAstNull nullLit) {
-            NullLiteralGenerator.generate(compiler, code, cp, nullLit, returnTypeInfo);
+            compiler.getNullLiteralGenerator().generate(code, cp, nullLit, returnTypeInfo);
         } else if (expr instanceof Swc4jAstArrayLit arrayLit) {
-            ArrayLiteralGenerator.generate(compiler, code, cp, arrayLit, returnTypeInfo, ExpressionGenerator::generate);
+            compiler.getArrayLiteralGenerator().generate(code, cp, arrayLit, returnTypeInfo, ExpressionGenerator::generate);
         } else if (expr instanceof Swc4jAstObjectLit objectLit) {
-            ObjectLiteralGenerator.generate(compiler, code, cp, objectLit, returnTypeInfo, ExpressionGenerator::generate);
+            compiler.getObjectLiteralGenerator().generate(code, cp, objectLit, returnTypeInfo, ExpressionGenerator::generate);
         } else if (expr instanceof Swc4jAstIdent ident) {
             IdentifierGenerator.generate(compiler, code, cp, ident, returnTypeInfo);
         } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
