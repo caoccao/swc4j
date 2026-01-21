@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.jdk17;
+package com.caoccao.javet.swc4j.compiler.memory;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
@@ -31,27 +31,33 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import java.util.*;
 
 /**
- * Registry for enum declarations and their member ordinals.
- * Used to resolve enum member expressions in switch statements.
+ * Global registry for type declarations (enums, classes, interfaces).
+ * Stores fully qualified type information and works with ScopedTypeRegistry for name resolution.
+ * <p>
+ * Types must be referenced by fully qualified names unless they come from explicit imports.
+ * Uses a ScopedTypeRegistry to resolve imported/aliased type names based on current scope.
  */
-public final class EnumRegistry {
-    // Global registry: qualified enum name -> member name -> ordinal
-    private static final Map<String, Map<String, Integer>> enumRegistry = new HashMap<>();
+public final class TypeRegistry {
+    // Enum registry: qualified enum name -> member name -> ordinal
+    private final Map<String, Map<String, Integer>> enumRegistry;
+    private final ScopedTypeRegistry scopedTypeRegistry;
 
-    private EnumRegistry() {
+    public TypeRegistry(ScopedTypeRegistry scopedTypeRegistry) {
+        this.enumRegistry = new HashMap<>();
+        this.scopedTypeRegistry = scopedTypeRegistry;
     }
 
     /**
-     * Clear the enum registry (for testing).
+     * Clear the type registry (for testing).
      */
-    public static void clear() {
+    public void clear() {
         enumRegistry.clear();
     }
 
     /**
-     * Collect enum declarations from module items.
+     * Collect type declarations from module items.
      */
-    public static void collectFromModuleItems(List<ISwc4jAstModuleItem> items, String currentPackage)
+    public void collectFromModuleItems(List<ISwc4jAstModuleItem> items, String currentPackage)
             throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstModuleItem item : items) {
             if (item instanceof Swc4jAstTsModuleDecl moduleDecl) {
@@ -78,9 +84,9 @@ public final class EnumRegistry {
     }
 
     /**
-     * Collect enum declarations from statements.
+     * Collect type declarations from statements.
      */
-    public static void collectFromStmts(List<ISwc4jAstStmt> stmts, String currentPackage)
+    public void collectFromStmts(List<ISwc4jAstStmt> stmts, String currentPackage)
             throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstStmt stmt : stmts) {
             if (stmt instanceof Swc4jAstTsEnumDecl enumDecl) {
@@ -96,46 +102,37 @@ public final class EnumRegistry {
         }
     }
 
-    public static Set<String> getEnumNameSet() {
-        return enumRegistry.keySet();
-    }
-
     /**
      * Get the ordinal value for an enum member.
+     * Resolution order:
+     * 1. Check scoped type registry for imported/aliased name
+     * 2. Try exact match with fully qualified name
+     * 3. Fall back to searching all enums for matching simple name
      *
-     * @param enumName   qualified or unqualified enum name (e.g., "com.Color" or "Color")
+     * @param enumName   enum name (qualified, unqualified, or imported alias)
      * @param memberName enum member name (e.g., "RED")
      * @return ordinal value, or null if not found
      */
-    public static Integer getMemberOrdinal(String enumName, String memberName) {
-        // Try exact match first
-        Map<String, Integer> members = enumRegistry.get(enumName);
-        if (members != null) {
-            return members.get(memberName);
-        }
-
-        // If not found, try to find enum by unqualified name
-        // E.g., if enumName is "Color", search for "*.Color"
-        for (Map.Entry<String, Map<String, Integer>> entry : enumRegistry.entrySet()) {
-            String qualifiedName = entry.getKey();
-            // Check if qualified name ends with ".enumName" or equals enumName
-            if (qualifiedName.equals(enumName) || qualifiedName.endsWith("." + enumName)) {
-                members = entry.getValue();
-                Integer ordinal = members.get(memberName);
-                if (ordinal != null) {
-                    return ordinal;
-                }
+    public Integer getEnumMemberOrdinal(String enumName, String memberName) {
+        String resolvedName = resolveTypeName(enumName);
+        if (resolvedName != null) {
+            Map<String, Integer> members = enumRegistry.get(resolvedName);
+            if (members != null) {
+                return members.get(memberName);
             }
         }
-
         return null;
     }
 
-    private static String getModuleName(Swc4jAstTsModuleDecl moduleDecl) {
+    public Set<String> getEnumNameSet() {
+        return enumRegistry.keySet();
+    }
+
+    private String getModuleName(Swc4jAstTsModuleDecl moduleDecl) {
         return moduleDecl.getId().toString();
     }
 
-    private static void processEnumDecl(Swc4jAstTsEnumDecl enumDecl, String currentPackage)
+    private void processEnumDecl(Swc4jAstTsEnumDecl enumDecl, String currentPackage)
             throws Swc4jByteCodeCompilerException {
         if (enumDecl.isDeclare()) {
             return; // Skip ambient declarations
@@ -160,5 +157,28 @@ public final class EnumRegistry {
         }
 
         enumRegistry.put(qualifiedName, memberOrdinals);
+
+        // Register the simple name as an alias in the scoped type registry
+        // This allows the type to be referenced by its simple name within its declaration scope
+        scopedTypeRegistry.registerAlias(enumName, qualifiedName);
+    }
+
+    /**
+     * Resolve a type name to its fully qualified form.
+     * Uses scoped type registry for resolution (imports and local type declarations).
+     * If not found in scopes, assumes the name is already fully qualified.
+     *
+     * @param typeName the type name (imported alias or fully qualified)
+     * @return the fully qualified name, or the original name if not found in scopes
+     */
+    public String resolveTypeName(String typeName) {
+        // Check scoped type registry (for imports and local declarations)
+        String scopedResolution = scopedTypeRegistry.resolve(typeName);
+        if (scopedResolution != null) {
+            return scopedResolution;
+        }
+
+        // If not found in scopes, assume it's already fully qualified
+        return typeName;
     }
 }

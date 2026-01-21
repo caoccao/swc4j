@@ -876,7 +876,7 @@ public final class TypeResolver {
 
         // Try to find the enum in the registry by checking if any member exists
         // We use a dummy member name since we just want to know if the enum exists
-        for (String qualifiedName : EnumRegistry.getEnumNameSet()) {
+        for (String qualifiedName : compiler.getMemory().getTypeRegistry().getEnumNameSet()) {
             if (qualifiedName.endsWith("." + typeName)) {
                 return qualifiedName;
             }

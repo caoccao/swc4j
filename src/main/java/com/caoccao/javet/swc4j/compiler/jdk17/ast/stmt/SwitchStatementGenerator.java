@@ -31,7 +31,6 @@ import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.EnumRegistry;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
@@ -331,8 +330,8 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             return null;
         }
 
-        // Look up in enum registry
-        Integer ordinal = EnumRegistry.getMemberOrdinal(enumName, memberName);
+        // Look up in type registry
+        Integer ordinal = compiler.getMemory().getTypeRegistry().getEnumMemberOrdinal(enumName, memberName);
         return ordinal;
     }
 

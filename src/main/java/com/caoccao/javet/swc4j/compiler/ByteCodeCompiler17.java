@@ -19,7 +19,6 @@ package com.caoccao.javet.swc4j.compiler;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
-import com.caoccao.javet.swc4j.compiler.jdk17.EnumRegistry;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.HashMap;
@@ -35,15 +34,15 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
         Map<String, byte[]> byteCodeMap = new HashMap<>();
 
         if (program instanceof Swc4jAstModule module) {
-            // First pass: collect type aliases and enum declarations
+            // First pass: collect type aliases and type declarations
             typeAliasCollector.collectFromModuleItems(module.getBody());
-            EnumRegistry.collectFromModuleItems(module.getBody(), options.packagePrefix());
+            memory.getTypeRegistry().collectFromModuleItems(module.getBody(), options.packagePrefix());
             // Second pass: generate bytecode
             astProcessor.processModuleItems(module.getBody(), options.packagePrefix(), byteCodeMap);
         } else if (program instanceof Swc4jAstScript script) {
-            // First pass: collect type aliases and enum declarations
+            // First pass: collect type aliases and type declarations
             typeAliasCollector.collectFromStmts(script.getBody());
-            EnumRegistry.collectFromStmts(script.getBody(), options.packagePrefix());
+            memory.getTypeRegistry().collectFromStmts(script.getBody(), options.packagePrefix());
             // Second pass: generate bytecode
             astProcessor.processStmts(script.getBody(), options.packagePrefix(), byteCodeMap);
         }

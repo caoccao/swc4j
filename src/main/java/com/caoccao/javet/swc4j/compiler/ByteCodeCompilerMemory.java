@@ -17,16 +17,22 @@
 package com.caoccao.javet.swc4j.compiler;
 
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.memory.ScopedTypeRegistry;
+import com.caoccao.javet.swc4j.compiler.memory.TypeRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public final class ByteCodeCompilerMemory {
     private final CompilationContext compilationContext;
+    private final ScopedTypeRegistry scopedTypeRegistry;
     private final Map<String, String> typeAliasMap;
+    private final TypeRegistry typeRegistry;
 
     public ByteCodeCompilerMemory() {
         compilationContext = new CompilationContext();
+        scopedTypeRegistry = new ScopedTypeRegistry();
+        typeRegistry = new TypeRegistry(scopedTypeRegistry);
         typeAliasMap = new HashMap<>();
     }
 
@@ -39,12 +45,22 @@ public final class ByteCodeCompilerMemory {
         return compilationContext;
     }
 
+    public ScopedTypeRegistry getScopedTypeRegistry() {
+        return scopedTypeRegistry;
+    }
+
     public Map<String, String> getTypeAliasMap() {
         return typeAliasMap;
     }
 
+    public TypeRegistry getTypeRegistry() {
+        return typeRegistry;
+    }
+
     public void reset() {
         compilationContext.reset();
+        scopedTypeRegistry.clear();
+        typeRegistry.clear();
         typeAliasMap.clear();
     }
 
