@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.stmt.*;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -46,8 +47,9 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  *   END_LABEL:             // Break target
  * </pre>
  */
-public final class WhileStatementGenerator {
-    private WhileStatementGenerator() {
+public final class WhileStatementGenerator extends BaseAstProcessor {
+    public WhileStatementGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
     /**
@@ -55,7 +57,7 @@ public final class WhileStatementGenerator {
      * A statement cannot fall through if it always ends with break, return, or throw.
      * Note: continue CAN fall through to the test, so it's not considered terminal here.
      */
-    private static boolean canFallThrough(ISwc4jAstStmt stmt) {
+    private boolean canFallThrough(ISwc4jAstStmt stmt) {
         if (stmt instanceof Swc4jAstBreakStmt) {
             return false; // break always exits
         }
@@ -97,26 +99,23 @@ public final class WhileStatementGenerator {
     /**
      * Generate bytecode for a while statement (unlabeled).
      *
-     * @param compiler       the compiler
      * @param code           the code builder
      * @param cp             the constant pool
      * @param whileStmt      the while statement AST node
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstWhileStmt whileStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(compiler, code, cp, whileStmt, null, returnTypeInfo);
+        generate(code, cp, whileStmt, null, returnTypeInfo);
     }
 
     /**
      * Generate bytecode for a while statement (potentially labeled).
      *
-     * @param compiler       the compiler
      * @param code           the code builder
      * @param cp             the constant pool
      * @param whileStmt      the while statement AST node
@@ -124,8 +123,7 @@ public final class WhileStatementGenerator {
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstWhileStmt whileStmt,
@@ -148,7 +146,7 @@ public final class WhileStatementGenerator {
             // Generate conditional test for normal while loops
             // Try to generate direct conditional jump (like javac does)
             if (testExpr instanceof Swc4jAstBinExpr binExpr) {
-                boolean generated = generateDirectConditionalJump(compiler, code, cp, binExpr);
+                boolean generated = generateDirectConditionalJump(code, cp, binExpr);
                 if (generated) {
                     condJumpOffsetPos = code.getCurrentOffset() - 2;
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -178,7 +176,7 @@ public final class WhileStatementGenerator {
         context.pushContinueLabel(continueLabel);
 
         // 4. Generate body and check if it can fall through
-        StatementGenerator.generate(compiler, code, cp, whileStmt.getBody(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, cp, whileStmt.getBody(), returnTypeInfo);
         boolean bodyCanFallThrough = canFallThrough(whileStmt.getBody());
 
         // 5. Mark continue label (continue jumps to test label for while loops)
@@ -233,8 +231,7 @@ public final class WhileStatementGenerator {
      *
      * @return true if direct jump was generated, false if caller should use fallback
      */
-    private static boolean generateDirectConditionalJump(
-            ByteCodeCompiler compiler,
+    private boolean generateDirectConditionalJump(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstBinExpr binExpr) throws Swc4jByteCodeCompilerException {
@@ -281,7 +278,7 @@ public final class WhileStatementGenerator {
     /**
      * Check if the operator is a comparison operator.
      */
-    private static boolean isComparisonOp(Swc4jAstBinaryOp op) {
+    private boolean isComparisonOp(Swc4jAstBinaryOp op) {
         return op == Swc4jAstBinaryOp.Lt ||
                 op == Swc4jAstBinaryOp.LtEq ||
                 op == Swc4jAstBinaryOp.Gt ||
@@ -296,7 +293,7 @@ public final class WhileStatementGenerator {
      * Check if the test expression is a constant true.
      * This includes boolean literal true and numeric constant 1.
      */
-    private static boolean isConstantTrue(ISwc4jAstExpr testExpr) {
+    private boolean isConstantTrue(ISwc4jAstExpr testExpr) {
         if (testExpr instanceof Swc4jAstBool bool) {
             return bool.isValue();
         }

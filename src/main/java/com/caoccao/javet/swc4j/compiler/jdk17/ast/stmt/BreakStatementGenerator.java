@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBreakStmt;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -34,21 +35,20 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  *   goto END_LABEL         // Jump to break target
  * </pre>
  */
-public final class BreakStatementGenerator {
-    private BreakStatementGenerator() {
+public final class BreakStatementGenerator extends BaseAstProcessor {
+    public BreakStatementGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
     /**
      * Generate bytecode for a break statement.
      *
-     * @param compiler  the compiler
      * @param code      the code builder
      * @param cp        the constant pool
      * @param breakStmt the break statement AST node
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstBreakStmt breakStmt) throws Swc4jByteCodeCompilerException {

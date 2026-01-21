@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.stmt.*;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -52,8 +53,9 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * - Body always executes at least once
  * - Continue jumps to test label (before condition evaluation)
  */
-public final class DoWhileStatementGenerator {
-    private DoWhileStatementGenerator() {
+public final class DoWhileStatementGenerator extends BaseAstProcessor {
+    public DoWhileStatementGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
     /**
@@ -61,7 +63,7 @@ public final class DoWhileStatementGenerator {
      * A statement cannot fall through if it always ends with break, return, or throw.
      * Note: continue CAN fall through to the test, so it's not considered terminal here.
      */
-    private static boolean canFallThrough(ISwc4jAstStmt stmt) {
+    private boolean canFallThrough(ISwc4jAstStmt stmt) {
         if (stmt instanceof Swc4jAstBreakStmt) {
             return false; // break always exits
         }
@@ -103,26 +105,23 @@ public final class DoWhileStatementGenerator {
     /**
      * Generate bytecode for a do-while statement (unlabeled).
      *
-     * @param compiler       the compiler
      * @param code           the code builder
      * @param cp             the constant pool
      * @param doWhileStmt    the do-while statement AST node
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstDoWhileStmt doWhileStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(compiler, code, cp, doWhileStmt, null, returnTypeInfo);
+        generate(code, cp, doWhileStmt, null, returnTypeInfo);
     }
 
     /**
      * Generate bytecode for a do-while statement (potentially labeled).
      *
-     * @param compiler       the compiler
      * @param code           the code builder
      * @param cp             the constant pool
      * @param doWhileStmt    the do-while statement AST node
@@ -130,8 +129,7 @@ public final class DoWhileStatementGenerator {
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstDoWhileStmt doWhileStmt,
@@ -151,7 +149,7 @@ public final class DoWhileStatementGenerator {
         context.pushContinueLabel(continueLabel);
 
         // 3. Generate body and check if it can fall through
-        StatementGenerator.generate(compiler, code, cp, doWhileStmt.getBody(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, cp, doWhileStmt.getBody(), returnTypeInfo);
         boolean bodyCanFallThrough = canFallThrough(doWhileStmt.getBody());
 
         // 4. Mark test label (continue target - before test evaluation)
@@ -169,7 +167,7 @@ public final class DoWhileStatementGenerator {
             if (!isInfiniteLoop) {
                 // Generate conditional test - jump BACK to body if TRUE (inverted from while)
                 if (testExpr instanceof Swc4jAstBinExpr binExpr) {
-                    boolean generated = generateDirectConditionalJumpToBody(compiler, code, cp, binExpr, bodyLabel);
+                    boolean generated = generateDirectConditionalJumpToBody(code, cp, binExpr, bodyLabel);
                     if (!generated) {
                         // Fallback: generate boolean expression and use ifne (jump if TRUE)
                         compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
@@ -227,8 +225,7 @@ public final class DoWhileStatementGenerator {
      *
      * @return true if direct jump was generated, false if caller should use fallback
      */
-    private static boolean generateDirectConditionalJumpToBody(
-            ByteCodeCompiler compiler,
+    private boolean generateDirectConditionalJumpToBody(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstBinExpr binExpr,
@@ -282,7 +279,7 @@ public final class DoWhileStatementGenerator {
     /**
      * Check if the operator is a comparison operator.
      */
-    private static boolean isComparisonOp(Swc4jAstBinaryOp op) {
+    private boolean isComparisonOp(Swc4jAstBinaryOp op) {
         return op == Swc4jAstBinaryOp.Lt ||
                 op == Swc4jAstBinaryOp.LtEq ||
                 op == Swc4jAstBinaryOp.Gt ||
@@ -297,7 +294,7 @@ public final class DoWhileStatementGenerator {
      * Check if the test expression is a constant true.
      * This includes boolean literal true and numeric constant 1.
      */
-    private static boolean isConstantTrue(ISwc4jAstExpr testExpr) {
+    private boolean isConstantTrue(ISwc4jAstExpr testExpr) {
         if (testExpr instanceof Swc4jAstBool bool) {
             return bool.isValue();
         }

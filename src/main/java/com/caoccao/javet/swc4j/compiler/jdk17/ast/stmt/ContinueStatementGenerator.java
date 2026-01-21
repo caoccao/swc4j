@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstContinueStmt;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -35,21 +36,20 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  *   goto UPDATE_LABEL      // Jump to continue target
  * </pre>
  */
-public final class ContinueStatementGenerator {
-    private ContinueStatementGenerator() {
+public final class ContinueStatementGenerator extends BaseAstProcessor {
+    public ContinueStatementGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
     /**
      * Generate bytecode for a continue statement.
      *
-     * @param compiler     the compiler
      * @param code         the code builder
      * @param cp           the constant pool
      * @param continueStmt the continue statement AST node
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstContinueStmt continueStmt) throws Swc4jByteCodeCompilerException {

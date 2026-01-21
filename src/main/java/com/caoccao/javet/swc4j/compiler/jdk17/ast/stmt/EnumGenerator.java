@@ -24,6 +24,8 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEnumMemberId;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsEnumDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsEnumMember;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -32,11 +34,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class EnumGenerator {
-    private EnumGenerator() {
+public final class EnumGenerator extends BaseAstProcessor {
+    public EnumGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
-    private static EnumInfo analyzeEnumMembers(List<Swc4jAstTsEnumMember> members)
+    private EnumInfo analyzeEnumMembers(List<Swc4jAstTsEnumMember> members)
             throws Swc4jByteCodeCompilerException {
         List<EnumMemberInfo> memberInfos = new ArrayList<>();
         Boolean isStringEnum = null;
@@ -119,13 +122,13 @@ public final class EnumGenerator {
         return new EnumInfo(memberInfos, Boolean.TRUE.equals(isStringEnum));
     }
 
-    private static String convertMemberNameToJavaConvention(String tsName) {
+    private String convertMemberNameToJavaConvention(String tsName) {
         // Convert TypeScript enum member names to Java enum constant naming convention
         // TypeScript: Up, Down → Java: UP, DOWN
         return tsName.toUpperCase();
     }
 
-    public static byte[] generateBytecode(
+    public byte[] generateBytecode(
             String internalClassName,
             Swc4jAstTsEnumDecl enumDecl) throws IOException, Swc4jByteCodeCompilerException {
         // Check if ambient declaration (no bytecode generation)
@@ -196,7 +199,7 @@ public final class EnumGenerator {
         return classWriter.toByteArray();
     }
 
-    private static void generateConstructor(
+    private void generateConstructor(
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
             String internalClassName,
@@ -240,7 +243,7 @@ public final class EnumGenerator {
         );
     }
 
-    private static void generateFromValueMethod(
+    private void generateFromValueMethod(
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
             String internalClassName,
@@ -437,7 +440,7 @@ public final class EnumGenerator {
         );
     }
 
-    private static void generateGetValueMethod(
+    private void generateGetValueMethod(
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
             String internalClassName,
@@ -467,7 +470,7 @@ public final class EnumGenerator {
         );
     }
 
-    private static void generateStaticInitializer(
+    private void generateStaticInitializer(
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
             String internalClassName,
@@ -577,7 +580,7 @@ public final class EnumGenerator {
         );
     }
 
-    private static void generateValueOfMethod(
+    private void generateValueOfMethod(
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
             String internalClassName) {
@@ -606,7 +609,7 @@ public final class EnumGenerator {
         );
     }
 
-    private static void generateValuesMethod(
+    private void generateValuesMethod(
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
             String internalClassName) {
@@ -631,7 +634,7 @@ public final class EnumGenerator {
         );
     }
 
-    private static int parseIntValue(String raw) throws Swc4jByteCodeCompilerException {
+    private int parseIntValue(String raw) throws Swc4jByteCodeCompilerException {
         try {
             // Handle different number formats
             if (raw.startsWith("0x") || raw.startsWith("0X")) {

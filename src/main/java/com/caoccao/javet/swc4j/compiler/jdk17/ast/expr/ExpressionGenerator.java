@@ -24,7 +24,6 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.ts.TsAsExpressionGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class ExpressionGenerator extends BaseAstProcessor {
@@ -39,7 +38,7 @@ public final class ExpressionGenerator extends BaseAstProcessor {
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         if (expr instanceof Swc4jAstTsAsExpr tsAsExpr) {
-            TsAsExpressionGenerator.generate(compiler, code, cp, tsAsExpr, returnTypeInfo);
+            compiler.getTsAsExpressionGenerator().generate(code, cp, tsAsExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstStr str) {
             compiler.getStringLiteralGenerator().generate(code, cp, str, returnTypeInfo);
         } else if (expr instanceof Swc4jAstNumber number) {

@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.stmt.*;
+import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -46,8 +47,9 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  *   END_LABEL:
  * </pre>
  */
-public final class IfStatementGenerator {
-    private IfStatementGenerator() {
+public final class IfStatementGenerator extends BaseAstProcessor {
+    public IfStatementGenerator(ByteCodeCompiler compiler) {
+        super(compiler);
     }
 
     /**
@@ -57,7 +59,7 @@ public final class IfStatementGenerator {
      * @param stmt the statement to check
      * @return true if the statement ends with an unconditional control transfer
      */
-    private static boolean endsWithUnconditionalJump(ISwc4jAstStmt stmt) {
+    private boolean endsWithUnconditionalJump(ISwc4jAstStmt stmt) {
         if (stmt instanceof Swc4jAstReturnStmt) {
             return true;
         }
@@ -87,15 +89,13 @@ public final class IfStatementGenerator {
     /**
      * Generate bytecode for an if statement.
      *
-     * @param compiler       the compiler
      * @param code           the code builder
      * @param cp             the constant pool
      * @param ifStmt         the if statement AST node
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public static void generate(
-            ByteCodeCompiler compiler,
+    public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstIfStmt ifStmt,
@@ -105,15 +105,14 @@ public final class IfStatementGenerator {
 
         if (ifStmt.getAlt().isEmpty()) {
             // Simple if without else
-            generateSimpleIf(compiler, code, cp, ifStmt, returnTypeInfo);
+            generateSimpleIf(code, cp, ifStmt, returnTypeInfo);
         } else {
             // If-else
-            generateIfElse(compiler, code, cp, ifStmt, returnTypeInfo);
+            generateIfElse(code, cp, ifStmt, returnTypeInfo);
         }
     }
 
-    private static void generateIfElse(
-            ByteCodeCompiler compiler,
+    private void generateIfElse(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstIfStmt ifStmt,
@@ -125,7 +124,7 @@ public final class IfStatementGenerator {
         int ifeqOpcodePos = code.getCurrentOffset() - 3;
 
         // Generate consequent (then branch)
-        StatementGenerator.generate(compiler, code, cp, ifStmt.getCons(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, cp, ifStmt.getCons(), returnTypeInfo);
 
         // Check if consequent ends with unconditional jump - if so, no need for goto
         boolean consEndsWithJump = endsWithUnconditionalJump(ifStmt.getCons());
@@ -142,7 +141,7 @@ public final class IfStatementGenerator {
 
         // Generate alternate (else branch)
         int elseLabel = code.getCurrentOffset();
-        StatementGenerator.generate(compiler, code, cp, ifStmt.getAlt().get(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, cp, ifStmt.getAlt().get(), returnTypeInfo);
 
         // End of if-else statement
         int endLabel = code.getCurrentOffset();
@@ -158,8 +157,7 @@ public final class IfStatementGenerator {
         }
     }
 
-    private static void generateSimpleIf(
-            ByteCodeCompiler compiler,
+    private void generateSimpleIf(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstIfStmt ifStmt,
@@ -171,7 +169,7 @@ public final class IfStatementGenerator {
         int ifeqOpcodePos = code.getCurrentOffset() - 3;
 
         // Generate consequent (then branch)
-        StatementGenerator.generate(compiler, code, cp, ifStmt.getCons(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, cp, ifStmt.getCons(), returnTypeInfo);
 
         // End of if statement
         int endLabel = code.getCurrentOffset();

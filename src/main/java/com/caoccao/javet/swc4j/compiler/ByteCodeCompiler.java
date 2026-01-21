@@ -26,6 +26,8 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.MethodGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit.*;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt.*;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.ts.TsAsExpressionGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
@@ -41,11 +43,18 @@ public sealed abstract class ByteCodeCompiler permits
     protected final AstProcessor astProcessor;
     protected final BinaryExpressionGenerator binaryExpressionGenerator;
     protected final BoolLiteralGenerator boolLiteralGenerator;
+    protected final BreakStatementGenerator breakStatementGenerator;
     protected final CallExpressionGenerator callExpressionGenerator;
     protected final ClassGenerator classGenerator;
     protected final ConditionalExpressionGenerator conditionalExpressionGenerator;
+    protected final ContinueStatementGenerator continueStatementGenerator;
+    protected final DoWhileStatementGenerator doWhileStatementGenerator;
+    protected final EnumGenerator enumGenerator;
     protected final ExpressionGenerator expressionGenerator;
+    protected final ForStatementGenerator forStatementGenerator;
     protected final IdentifierGenerator identifierGenerator;
+    protected final IfStatementGenerator ifStatementGenerator;
+    protected final LabeledStatementGenerator labeledStatementGenerator;
     protected final MemberExpressionGenerator memberExpressionGenerator;
     protected final ByteCodeCompilerMemory memory;
     protected final MethodGenerator methodGenerator;
@@ -56,13 +65,18 @@ public sealed abstract class ByteCodeCompiler permits
     protected final ParenExpressionGenerator parenExpressionGenerator;
     protected final Swc4jParseOptions parseOptions;
     protected final SeqExpressionGenerator seqExpressionGenerator;
+    protected final StatementGenerator statementGenerator;
     protected final StringLiteralGenerator stringLiteralGenerator;
     protected final Swc4j swc4j;
+    protected final SwitchStatementGenerator switchStatementGenerator;
+    protected final TsAsExpressionGenerator tsAsExpressionGenerator;
     protected final TypeAliasCollector typeAliasCollector;
     protected final TypeResolver typeResolver;
     protected final UnaryExpressionGenerator unaryExpressionGenerator;
     protected final UpdateExpressionGenerator updateExpressionGenerator;
+    protected final VarDeclGenerator varDeclGenerator;
     protected final VariableAnalyzer variableAnalyzer;
+    protected final WhileStatementGenerator whileStatementGenerator;
 
 
     ByteCodeCompiler(ByteCodeCompilerOptions options) {
@@ -78,11 +92,18 @@ public sealed abstract class ByteCodeCompiler permits
         astProcessor = new AstProcessor(this);
         binaryExpressionGenerator = new BinaryExpressionGenerator(this);
         boolLiteralGenerator = new BoolLiteralGenerator(this);
+        breakStatementGenerator = new BreakStatementGenerator(this);
         callExpressionGenerator = new CallExpressionGenerator(this);
         classGenerator = new ClassGenerator(this);
         conditionalExpressionGenerator = new ConditionalExpressionGenerator(this);
+        continueStatementGenerator = new ContinueStatementGenerator(this);
+        doWhileStatementGenerator = new DoWhileStatementGenerator(this);
+        enumGenerator = new EnumGenerator(this);
         expressionGenerator = new ExpressionGenerator(this);
+        forStatementGenerator = new ForStatementGenerator(this);
         identifierGenerator = new IdentifierGenerator(this);
+        ifStatementGenerator = new IfStatementGenerator(this);
+        labeledStatementGenerator = new LabeledStatementGenerator(this);
         memberExpressionGenerator = new MemberExpressionGenerator(this);
         methodGenerator = new MethodGenerator(this);
         nullLiteralGenerator = new NullLiteralGenerator(this);
@@ -90,12 +111,17 @@ public sealed abstract class ByteCodeCompiler permits
         objectLiteralGenerator = new ObjectLiteralGenerator(this);
         parenExpressionGenerator = new ParenExpressionGenerator(this);
         seqExpressionGenerator = new SeqExpressionGenerator(this);
+        statementGenerator = new StatementGenerator(this);
         stringLiteralGenerator = new StringLiteralGenerator(this);
+        switchStatementGenerator = new SwitchStatementGenerator(this);
+        tsAsExpressionGenerator = new TsAsExpressionGenerator(this);
         typeAliasCollector = new TypeAliasCollector(this);
         typeResolver = new TypeResolver(this);
         unaryExpressionGenerator = new UnaryExpressionGenerator(this);
         updateExpressionGenerator = new UpdateExpressionGenerator(this);
+        varDeclGenerator = new VarDeclGenerator(this);
         variableAnalyzer = new VariableAnalyzer(this);
+        whileStatementGenerator = new WhileStatementGenerator(this);
     }
 
     public static ByteCodeCompiler of(ByteCodeCompilerOptions options) {
@@ -132,6 +158,10 @@ public sealed abstract class ByteCodeCompiler permits
         return boolLiteralGenerator;
     }
 
+    public BreakStatementGenerator getBreakStatementGenerator() {
+        return breakStatementGenerator;
+    }
+
     public CallExpressionGenerator getCallExpressionGenerator() {
         return callExpressionGenerator;
     }
@@ -144,12 +174,36 @@ public sealed abstract class ByteCodeCompiler permits
         return conditionalExpressionGenerator;
     }
 
+    public ContinueStatementGenerator getContinueStatementGenerator() {
+        return continueStatementGenerator;
+    }
+
+    public DoWhileStatementGenerator getDoWhileStatementGenerator() {
+        return doWhileStatementGenerator;
+    }
+
+    public EnumGenerator getEnumGenerator() {
+        return enumGenerator;
+    }
+
     public ExpressionGenerator getExpressionGenerator() {
         return expressionGenerator;
     }
 
+    public ForStatementGenerator getForStatementGenerator() {
+        return forStatementGenerator;
+    }
+
     public IdentifierGenerator getIdentifierGenerator() {
         return identifierGenerator;
+    }
+
+    public IfStatementGenerator getIfStatementGenerator() {
+        return ifStatementGenerator;
+    }
+
+    public LabeledStatementGenerator getLabeledStatementGenerator() {
+        return labeledStatementGenerator;
     }
 
     public MemberExpressionGenerator getMemberExpressionGenerator() {
@@ -188,8 +242,20 @@ public sealed abstract class ByteCodeCompiler permits
         return seqExpressionGenerator;
     }
 
+    public StatementGenerator getStatementGenerator() {
+        return statementGenerator;
+    }
+
     public StringLiteralGenerator getStringLiteralGenerator() {
         return stringLiteralGenerator;
+    }
+
+    public SwitchStatementGenerator getSwitchStatementGenerator() {
+        return switchStatementGenerator;
+    }
+
+    public TsAsExpressionGenerator getTsAsExpressionGenerator() {
+        return tsAsExpressionGenerator;
     }
 
     public TypeAliasCollector getTypeAliasCollector() {
@@ -208,7 +274,15 @@ public sealed abstract class ByteCodeCompiler permits
         return updateExpressionGenerator;
     }
 
+    public VarDeclGenerator getVarDeclGenerator() {
+        return varDeclGenerator;
+    }
+
     public VariableAnalyzer getVariableAnalyzer() {
         return variableAnalyzer;
+    }
+
+    public WhileStatementGenerator getWhileStatementGenerator() {
+        return whileStatementGenerator;
     }
 }
