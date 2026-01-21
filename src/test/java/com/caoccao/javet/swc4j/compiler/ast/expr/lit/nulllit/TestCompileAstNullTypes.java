@@ -31,11 +31,11 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullWithCharacterType(JdkVersion jdkVersion) throws Exception {
+    public void testNullWithBooleanArrayType(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Character {
+                    test(): boolean[] {
                       return null
                     }
                   }
@@ -63,11 +63,27 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullWithShortType(JdkVersion jdkVersion) throws Exception {
+    public void testNullWithCharacterType(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Short {
+                    test(): Character {
+                      return null
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertNull(classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNullWithDoubleArrayType(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): double[] {
                       return null
                     }
                   }
@@ -111,22 +127,6 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullWithStringArrayType(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): String[] {
-                      return null
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testNullWithObjectArrayType(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -143,11 +143,11 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullWithBooleanArrayType(JdkVersion jdkVersion) throws Exception {
+    public void testNullWithShortType(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): boolean[] {
+                    test(): Short {
                       return null
                     }
                   }
@@ -159,11 +159,11 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullWithDoubleArrayType(JdkVersion jdkVersion) throws Exception {
+    public void testNullWithStringArrayType(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): double[] {
+                    test(): String[] {
                       return null
                     }
                   }

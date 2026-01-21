@@ -14,110 +14,131 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.ast.expr.lit;
+package com.caoccao.javet.swc4j.compiler.ast.expr.lit.number;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestCompileAstNull extends BaseTestCompileSuite {
+/**
+ * Tests for double number literals.
+ * Phase 3 part 2: Double Values (7 tests)
+ */
+public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullAssignedToVariable(JdkVersion jdkVersion) throws Exception {
+    public void testDoubleNegative(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test() {
-                      const x = null
-                      return x
+                    test(): double {
+                      return -123.456
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertEquals(-123.456, (double) classA.getMethod("test").invoke(instance), 0.001);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullWithIntegerTypeAnnotation(JdkVersion jdkVersion) throws Exception {
+    public void testDoubleOne(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): double {
+                      return 1.0
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(1.0, (double) classA.getMethod("test").invoke(instance), 0.0);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDoublePositive(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): double {
+                      return 123.456
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123.456, (double) classA.getMethod("test").invoke(instance), 0.001);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDoubleSmallDecimal(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): double {
+                      return 0.000001
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(0.000001, (double) classA.getMethod("test").invoke(instance), 0.0000001);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDoubleZero(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): double {
+                      return 0.0
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(0.0, (double) classA.getMethod("test").invoke(instance), 0.0);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnDoubleWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: Integer = null
+                      var a: double = 123.456
                       return a
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertEquals(123.456D, (double) classA.getMethod("test").invoke(instance), 0.00001D);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testReturnNull(JdkVersion jdkVersion) throws Exception {
+    public void testReturnDoubleWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test() {
-                      return null
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testReturnNullWithAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Object = null
-                      return a
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testReturnNullWithAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): Object {
-                      return null
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testReturnNullWithStringFunctionAnnotation(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): String {
-                      return null
+                    test(): double {
+                      return 123.456
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertEquals(123.456D, (double) classA.getMethod("test").invoke(instance), 0.00001D);
     }
 }

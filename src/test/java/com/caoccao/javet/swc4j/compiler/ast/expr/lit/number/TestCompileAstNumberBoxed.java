@@ -14,180 +14,228 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.ast.expr.lit.nulllit;
+package com.caoccao.javet.swc4j.compiler.ast.expr.lit.number;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Tests for basic null literal functionality.
- * Phase 1: Basic Null Literals (10 tests)
+ * Tests for boxed number types (Integer, Long, Float, Double, Byte, Short).
+ * Phase 6: Boxed Types (12 tests)
  */
-public class TestCompileAstNullBasic extends BaseTestCompileSuite {
+public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
+
+    // Integer boxed tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullConstAnnotation(JdkVersion jdkVersion) throws Exception {
+    public void testReturnByteObjectWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const value: String = null
-                      return value
+                      const a: Byte = 100
+                      return a
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertEquals((byte) 100, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullDirectReturn(JdkVersion jdkVersion) throws Exception {
+    public void testReturnByteObjectWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Byte {
+                      return 127
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals((byte) 127, classA.getMethod("test").invoke(instance));
+    }
+
+    // Long boxed tests
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnDoubleObjectWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      return null
+                      const a: Double = 123.5
+                      return a
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertEquals(123.5, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullFunctionAnnotation(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): Integer {
-                      return null
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNullToVariable(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const x = null
-                      return x
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNullWithBooleanType(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): Boolean {
-                      return null
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNullWithDoubleType(JdkVersion jdkVersion) throws Exception {
+    public void testReturnDoubleObjectWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Double {
-                      return null
+                      return 123.5
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertEquals(123.5, classA.getMethod("test").invoke(instance));
+    }
+
+    // Float boxed tests
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnFloatObjectWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Float = 123.5
+                      return a
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123.5f, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullWithIntegerType(JdkVersion jdkVersion) throws Exception {
+    public void testReturnFloatObjectWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Float {
+                      return 123.5
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123.5f, classA.getMethod("test").invoke(instance));
+    }
+
+    // Double boxed tests
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnIntegerObjectWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Integer = 123
+                      return a
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnIntegerObjectWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Integer {
-                      return null
+                      return 123
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertEquals(123, classA.getMethod("test").invoke(instance));
+    }
+
+    // Byte boxed tests
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnLongObjectWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Long = 123
+                      return a
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123L, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullWithLongType(JdkVersion jdkVersion) throws Exception {
+    public void testReturnLongObjectWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Long {
-                      return null
+                      return 123
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertEquals(123L, classA.getMethod("test").invoke(instance));
+    }
+
+    // Short boxed tests
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnShortObjectWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Short = 123
+                      return a
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals((short) 123, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullWithObjectType(JdkVersion jdkVersion) throws Exception {
+    public void testReturnShortObjectWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Object {
-                      return null
+                    test(): Short {
+                      return 123
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNullWithStringType(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): String {
-                      return null
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertEquals((short) 123, classA.getMethod("test").invoke(instance));
     }
 }

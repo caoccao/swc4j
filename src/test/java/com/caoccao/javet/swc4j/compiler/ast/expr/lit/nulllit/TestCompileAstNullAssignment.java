@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
@@ -32,47 +31,31 @@ public class TestCompileAstNullAssignment extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testNullChainedAssignment(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a = null
+                      const b = a
+                      const c = b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertNull(classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testNullConstAssignment(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const value = null
-                      return value
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNullLetAssignment(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      let value = null
-                      return value
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNullReassignment(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): String {
-                      let value: String = "test"
-                      value = null
                       return value
                     }
                   }
@@ -102,15 +85,13 @@ public class TestCompileAstNullAssignment extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullChainedAssignment(JdkVersion jdkVersion) throws Exception {
+    public void testNullFromNullVariable(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test() {
-                      const a = null
-                      const b = a
-                      const c = b
-                      return c
+                    test(): Object {
+                      const nullValue = null
+                      return nullValue
                     }
                   }
                 }""");
@@ -121,13 +102,32 @@ public class TestCompileAstNullAssignment extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullFromNullVariable(JdkVersion jdkVersion) throws Exception {
+    public void testNullLetAssignment(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Object {
-                      const nullValue = null
-                      return nullValue
+                    test() {
+                      let value = null
+                      return value
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertNull(classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNullMixedWithValues(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a = "test"
+                      const b = null
+                      const c = 42
+                      return b
                     }
                   }
                 }""");
@@ -157,15 +157,14 @@ public class TestCompileAstNullAssignment extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullMixedWithValues(JdkVersion jdkVersion) throws Exception {
+    public void testNullReassignment(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test() {
-                      const a = "test"
-                      const b = null
-                      const c = 42
-                      return b
+                    test(): String {
+                      let value: String = "test"
+                      value = null
+                      return value
                     }
                   }
                 }""");
