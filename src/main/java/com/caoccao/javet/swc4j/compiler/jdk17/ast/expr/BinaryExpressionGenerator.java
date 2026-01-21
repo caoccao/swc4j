@@ -57,8 +57,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor {
                             cp,
                             binExpr.getLeft(), binExpr.getRight(),
                             leftType,
-                            rightType,
-                            compiler.getExpressionGenerator()::generate);
+                            rightType);
                     resultType = "Ljava/lang/String;";
                 } else {
                     // Determine the widened result type

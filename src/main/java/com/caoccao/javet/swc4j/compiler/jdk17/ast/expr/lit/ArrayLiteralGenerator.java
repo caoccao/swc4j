@@ -23,7 +23,6 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -38,8 +37,7 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstArrayLit arrayLit,
-            ReturnTypeInfo returnTypeInfo,
-            StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // Check if we should generate a Java array or ArrayList
         boolean isJavaArray = returnTypeInfo != null &&
                 returnTypeInfo.descriptor() != null &&
@@ -47,7 +45,7 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor {
 
         if (isJavaArray) {
             // Generate Java array
-            generateJavaArray(code, cp, arrayLit, returnTypeInfo.descriptor(), callback);
+            generateJavaArray(code, cp, arrayLit, returnTypeInfo.descriptor());
         } else {
             // Array literal - convert to ArrayList
             int arrayListClass = cp.addClass("java/util/ArrayList");
@@ -72,7 +70,7 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor {
                         ISwc4jAstExpr elemExpr = elem.getExpr();
 
                         // Generate code for the spread expression (should be an array/collection)
-                        callback.generateExpr(code, cp, elemExpr, null);
+                        compiler.getExpressionGenerator().generate(code, cp, elemExpr, null);
 
                         // Call ArrayList.addAll(Collection) to add all elements
                         code.invokevirtual(arrayListAddAll);
@@ -85,7 +83,7 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor {
                         String elemType = compiler.getTypeResolver().inferTypeFromExpr(elemExpr);
                         if (elemType == null) elemType = "Ljava/lang/Object;";
 
-                        callback.generateExpr(code, cp, elemExpr, null);
+                        compiler.getExpressionGenerator().generate(code, cp, elemExpr, null);
 
                         // Box primitives to objects
                         if ("I".equals(elemType) || "Z".equals(elemType) || "B".equals(elemType) ||
@@ -108,8 +106,7 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstArrayLit arrayLit,
-            String arrayDescriptor,
-            StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
+            String arrayDescriptor) throws Swc4jByteCodeCompilerException {
         // Extract element type from array descriptor (e.g., "[I" -> "I", "[Ljava/lang/String;" -> "Ljava/lang/String;")
         String elemType = arrayDescriptor.substring(1);
 
@@ -151,7 +148,7 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor {
                 String exprType = compiler.getTypeResolver().inferTypeFromExpr(elemExpr);
                 if (exprType == null) exprType = "Ljava/lang/Object;";
 
-                callback.generateExpr(code, cp, elemExpr, null);
+                compiler.getExpressionGenerator().generate(code, cp, elemExpr, null);
 
                 // Unbox if needed
                 TypeConversionUtils.unboxWrapperType(code, cp, exprType);

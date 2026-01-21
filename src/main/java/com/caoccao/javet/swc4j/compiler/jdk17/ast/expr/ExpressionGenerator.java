@@ -48,9 +48,9 @@ public final class ExpressionGenerator extends BaseAstProcessor {
         } else if (expr instanceof Swc4jAstNull nullLit) {
             compiler.getNullLiteralGenerator().generate(code, cp, nullLit, returnTypeInfo);
         } else if (expr instanceof Swc4jAstArrayLit arrayLit) {
-            compiler.getArrayLiteralGenerator().generate(code, cp, arrayLit, returnTypeInfo, this::generate);
+            compiler.getArrayLiteralGenerator().generate(code, cp, arrayLit, returnTypeInfo);
         } else if (expr instanceof Swc4jAstObjectLit objectLit) {
-            compiler.getObjectLiteralGenerator().generate(code, cp, objectLit, returnTypeInfo, this::generate);
+            compiler.getObjectLiteralGenerator().generate(code, cp, objectLit, returnTypeInfo);
         } else if (expr instanceof Swc4jAstIdent ident) {
             compiler.getIdentifierGenerator().generate(code, cp, ident, returnTypeInfo);
         } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
@@ -68,7 +68,7 @@ public final class ExpressionGenerator extends BaseAstProcessor {
         } else if (expr instanceof Swc4jAstCondExpr condExpr) {
             compiler.getConditionalExpressionGenerator().generate(code, cp, condExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
-            compiler.getParenExpressionGenerator().generate(code, cp, parenExpr, returnTypeInfo, this::generate);
+            compiler.getParenExpressionGenerator().generate(code, cp, parenExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstSeqExpr seqExpr) {
             compiler.getSeqExpressionGenerator().generate(code, cp, seqExpr, returnTypeInfo);
         } else {

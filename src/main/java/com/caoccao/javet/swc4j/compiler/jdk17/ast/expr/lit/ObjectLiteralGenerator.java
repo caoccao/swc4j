@@ -33,7 +33,6 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.GenericTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -64,14 +63,13 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor {
      * @param cp             constant pool
      * @param objectLit      object literal AST node
      * @param returnTypeInfo return type information (used for Record type validation in Phase 2)
-     * @param callback       callback for generating nested expressions
      * @throws Swc4jByteCodeCompilerException if generation fails or type validation fails
      */
     public void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstObjectLit objectLit,
-            ReturnTypeInfo returnTypeInfo, StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         // Phase 2: Extract generic type info for Record type validation
         GenericTypeInfo genericTypeInfo = returnTypeInfo != null ? returnTypeInfo.genericTypeInfo() : null;
@@ -100,7 +98,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor {
 
                 // Generate key
                 String expectedKeyType = genericTypeInfo != null ? genericTypeInfo.getKeyType() : null;
-                generateKey(code, cp, kvProp.getKey(), expectedKeyType, callback);
+                generateKey(code, cp, kvProp.getKey(), expectedKeyType);
                 // Stack: [map, map, key]
 
                 // Generate value
@@ -117,7 +115,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor {
                     valueReturnType = ReturnTypeInfo.of("Ljava/util/LinkedHashMap;", genericTypeInfo.getNestedTypeInfo());
                 }
 
-                callback.generateExpr(code, cp, valueExpr, valueReturnType);
+                compiler.getExpressionGenerator().generate(code, cp, valueExpr, valueReturnType);
                 // Stack: [map, map, key, value]
 
                 // Box primitive values to Object
@@ -153,7 +151,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor {
                     valueType = "Ljava/lang/Object;";
                 }
 
-                callback.generateExpr(code, cp, ident, null);
+                compiler.getExpressionGenerator().generate(code, cp, ident, null);
                 // Stack: [map, map, key, value]
 
                 // Box primitive values to Object
@@ -179,7 +177,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor {
 
                 // Generate the spread expression (should evaluate to a Map)
                 ISwc4jAstExpr spreadExpr = spread.getExpr();
-                callback.generateExpr(code, cp, spreadExpr, null);
+                compiler.getExpressionGenerator().generate(code, cp, spreadExpr, null);
                 // Stack: [map, map, spreadMap]
 
                 // Call map.putAll(spreadMap) to merge all properties
@@ -198,7 +196,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             ISwc4jAstPropName key,
-            String expectedKeyType, StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
+            String expectedKeyType) throws Swc4jByteCodeCompilerException {
 
         // Phase 2.1: Check if we should generate primitive wrapper keys (not String)
         boolean nonStringKeys = isPrimitiveKeyType(expectedKeyType);
@@ -234,7 +232,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor {
             }
 
             // Generate the expression
-            callback.generateExpr(code, cp, expr, null);
+            compiler.getExpressionGenerator().generate(code, cp, expr, null);
             // Stack: [expr_result]
 
             // Phase 2.1: Convert to appropriate key type based on Record type

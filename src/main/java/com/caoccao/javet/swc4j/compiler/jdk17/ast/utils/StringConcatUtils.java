@@ -153,8 +153,7 @@ public final class StringConcatUtils {
             ISwc4jAstExpr left,
             ISwc4jAstExpr right,
             String leftType,
-            String rightType,
-            ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
+            String rightType) throws Swc4jByteCodeCompilerException {
         // Use StringBuilder for string concatenation
         // new StringBuilder
         int stringBuilderClass = cp.addClass("java/lang/StringBuilder");
@@ -181,20 +180,11 @@ public final class StringConcatUtils {
 
         // Append all operands
         for (int i = 0; i < operands.size(); i++) {
-            callback.generateExpr(code, cp, operands.get(i), null);
+            compiler.getExpressionGenerator().generate(code, cp, operands.get(i), null);
             appendOperandToStringBuilder(code, cp, operandTypes.get(i), appendString, appendInt, appendChar);
         }
 
         // Call toString()
         code.invokevirtual(toString);
-    }
-
-    @FunctionalInterface
-    public interface ExpressionGeneratorCallback {
-        void generateExpr(
-                CodeBuilder code,
-                ClassWriter.ConstantPool cp,
-                ISwc4jAstExpr expr,
-                ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException;
     }
 }
