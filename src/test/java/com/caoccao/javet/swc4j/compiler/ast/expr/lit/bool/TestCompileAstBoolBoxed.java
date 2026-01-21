@@ -14,179 +14,190 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.ast.expr.lit.str;
+package com.caoccao.javet.swc4j.compiler.ast.expr.lit.bool;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tests for basic string literal functionality.
- * Phase 1: Basic String Literals (10 tests)
+ * Tests for Boolean (boxed) conversion.
+ * Phase 2: Boolean (Boxed) Conversion (10 tests)
  */
-public class TestCompileAstStrBasic extends BaseTestCompileSuite {
+public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testReturnStr(JdkVersion jdkVersion) throws Exception {
+    public void testBooleanBoxedAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      return 'test'
+                      const flag: Boolean = true
+                      return flag
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("test", classA.getMethod("test").invoke(instance));
+        assertTrue((Boolean) classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStringAlphanumeric(JdkVersion jdkVersion) throws Exception {
+    public void testBooleanBoxedAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): string {
-                      return "abc123xyz"
+                    test(): Boolean {
+                      return true
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("abc123xyz", classA.getMethod("test").invoke(instance));
+        assertTrue((Boolean) classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStringAssignmentAndReturn(JdkVersion jdkVersion) throws Exception {
+    public void testBooleanBoxedConstFalse(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): string {
-                      const msg = "test message"
-                      return msg
+                    test(): Boolean {
+                      const flag: Boolean = false
+                      return flag
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("test message", classA.getMethod("test").invoke(instance));
+        assertFalse((Boolean) classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStringEmpty(JdkVersion jdkVersion) throws Exception {
+    public void testBooleanBoxedConstTrue(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): string {
-                      return ""
+                    test(): Boolean {
+                      const flag: Boolean = true
+                      return flag
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("", classA.getMethod("test").invoke(instance));
+        assertTrue((Boolean) classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStringMixedCase(JdkVersion jdkVersion) throws Exception {
+    public void testBooleanBoxedFalse(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): string {
-                      return "HeLLo WoRLd"
+                    test(): Boolean {
+                      return false
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("HeLLo WoRLd", classA.getMethod("test").invoke(instance));
+        assertFalse((Boolean) classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStringMultipleCharacters(JdkVersion jdkVersion) throws Exception {
+    public void testBooleanBoxedFalseMultiple(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): string {
-                      return "hello world"
+                    test(): Boolean {
+                      const a: Boolean = false
+                      const b: Boolean = false
+                      return a
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("hello world", classA.getMethod("test").invoke(instance));
+        assertFalse((Boolean) classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStringNumeric(JdkVersion jdkVersion) throws Exception {
+    public void testBooleanBoxedMixed(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): string {
-                      return "12345"
+                    test(): Boolean {
+                      const a: Boolean = true
+                      const b: Boolean = false
+                      return a
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("12345", classA.getMethod("test").invoke(instance));
+        assertTrue((Boolean) classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStringPunctuation(JdkVersion jdkVersion) throws Exception {
+    public void testBooleanBoxedReturnFalse(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): string {
-                      return "Hello, World!"
+                    test(): Boolean {
+                      const a: Boolean = true
+                      const b: Boolean = false
+                      return b
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("Hello, World!", classA.getMethod("test").invoke(instance));
+        assertFalse((Boolean) classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStringSingleCharacter(JdkVersion jdkVersion) throws Exception {
+    public void testBooleanBoxedTrue(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): string {
-                      return "a"
+                    test(): Boolean {
+                      return true
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("a", classA.getMethod("test").invoke(instance));
+        assertTrue((Boolean) classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStringWithSpaces(JdkVersion jdkVersion) throws Exception {
+    public void testBooleanBoxedTrueMultiple(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): string {
-                      return "  hello  "
+                    test(): Boolean {
+                      const a: Boolean = true
+                      const b: Boolean = true
+                      return a
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("  hello  ", classA.getMethod("test").invoke(instance));
+        assertTrue((Boolean) classA.getMethod("test").invoke(instance));
     }
 }
