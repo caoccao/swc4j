@@ -26,7 +26,12 @@ This document outlines the implementation plan for supporting switch statements 
 
 Integer switches use optimal tableswitch/lookupswitch selection based on case density.
 
-**Dependencies:** ✅ TypeScript enum support (TsEnumDecl) - COMPLETED (2026-01-19)
+**Recent Updates:**
+- ✅ **2026-01-21:** Type resolution architecture redesigned with `TypeRegistry` and `ScopedTypeRegistry` for proper import/alias handling in enum switches
+
+**Dependencies:**
+- ✅ TypeScript enum support (TsEnumDecl) - COMPLETED (2026-01-19)
+- ✅ Type resolution system (TypeRegistry + ScopedTypeRegistry) - COMPLETED (2026-01-21)
 
 **Currently Supported Discriminant Types:**
 1. ✅ **int** - Direct tableswitch/lookupswitch (FULLY IMPLEMENTED - 59/59 tests)
@@ -60,9 +65,9 @@ switch (expression) {
 
 ---
 
-## Implementation Summary (2026-01-20)
+## Implementation Summary
 
-### What's Been Implemented
+### What's Been Implemented (Updated 2026-01-21)
 
 **Core Infrastructure:**
 1. ✅ `SwitchStatementGenerator.java` - Main generator for switch statements
@@ -70,17 +75,33 @@ switch (expression) {
    - Case analysis and duplicate detection
    - Fall-through detection and proper bytecode generation
    - Default clause handling in any position
+   - Enum switch support with ordinal() conversion
 
-2. ✅ `StackMapGenerator` enhancements
+2. ✅ `TypeRegistry.java` - Type resolution system (2026-01-21)
+   - Global registry for all type declarations (enums, classes, interfaces)
+   - Stores enum member ordinals for switch case resolution
+   - Works with ScopedTypeRegistry for import/alias resolution
+
+3. ✅ `ScopedTypeRegistry.java` - Scoped type aliasing (2026-01-21)
+   - Stack-based scope management matching TypeScript semantics
+   - Handles `import { A } from 'module'` statements
+   - Resolves type names from innermost to outermost scope
+   - Automatic cleanup when scopes exit
+
+4. ✅ `ByteCodeCompilerMemory.java` - Memory management
+   - Manages TypeRegistry and ScopedTypeRegistry lifecycle
+   - Coordinates type collection and resolution phases
+
+5. ✅ `StackMapGenerator` enhancements
    - Added tableswitch (0xAA) and lookupswitch (0xAB) instruction support
    - Proper branch target identification for all case labels
    - Fixed method parameter initialization in initial frames
 
-3. ✅ `VariableAnalyzer` updates
+6. ✅ `VariableAnalyzer` updates
    - Switch case body analysis for variable declarations
    - Proper scope handling for variables declared in cases
 
-4. ✅ `CodeBuilder` additions
+7. ✅ `CodeBuilder` additions
    - Bytecode generation for tableswitch and lookupswitch
    - Byte patching for forward reference resolution
 
@@ -120,6 +141,10 @@ All tests are parameterized with `JdkVersion.class` to ensure compatibility acro
 - ✅ Primitive type switches (byte, short, char) with automatic promotion to int
 - ✅ Character literal case labels (e.g., `case 'a':`)
 - ✅ Enum switches using ordinal() conversion with enum member expression case labels (e.g., `case Color.RED:`)
+- ✅ Type resolution system for enum names (TypeRegistry + ScopedTypeRegistry)
+  - Resolves enum names through scoped import/alias lookup
+  - Supports fully qualified names and imported aliases
+  - Matches TypeScript scoping semantics
 - ✅ Fall-through semantics for all switch types
 - ✅ Multiple empty case labels sharing a body
 - ✅ Default clause in any position
@@ -1765,6 +1790,34 @@ if (density >= 0.5) {  // 50% threshold
 
 Enum switches have **highest priority** and use ordinal() values:
 
+**Type Resolution Architecture (2026-01-21):**
+
+Enum type name resolution uses a two-tier registry system:
+1. **TypeRegistry** - Global registry storing all type declarations by fully qualified name
+2. **ScopedTypeRegistry** - Layered scope stack for resolving imports and local type aliases
+
+```java
+// TypeRegistry stores enums by fully qualified name
+typeRegistry.register("com.example.Color", enumMembers);
+
+// ScopedTypeRegistry handles imports and aliases
+scopedTypeRegistry.registerAlias("Color", "com.example.Color");
+
+// Resolution: "Color" -> "com.example.Color" via scoped lookup
+String qualifiedName = typeRegistry.resolveTypeName("Color");
+// Returns: "com.example.Color"
+```
+
+**Import handling:**
+```typescript
+import { Color } from 'com.example';
+// Registers: "Color" -> "com.example.Color" in current scope
+
+switch (myColor) {
+  case Color.RED: ...   // "Color" resolves to "com.example.Color"
+}
+```
+
 **Step 1: Detect enum type:**
 ```java
 if (discriminantType instanceof EnumType) {
@@ -1773,13 +1826,24 @@ if (discriminantType instanceof EnumType) {
 }
 ```
 
-**Step 2: Generate ordinal() call:**
+**Step 2: Resolve enum member expression:**
+```java
+// Case label: Color.RED
+// 1. Extract enum name "Color" from member expression
+// 2. Resolve via TypeRegistry.resolveTypeName("Color")
+//    - Checks ScopedTypeRegistry (for imports/aliases)
+//    - Falls back to assuming fully qualified name
+// 3. Look up member "RED" in resolved enum type
+Integer ordinal = typeRegistry.getEnumMemberOrdinal("Color", "RED");
+```
+
+**Step 3: Generate ordinal() call:**
 ```
 aload <enum var>
 invokevirtual <EnumClass>.ordinal()I  // Returns int
 ```
 
-**Step 3: Map case values to ordinal values:**
+**Step 4: Map case values to ordinal values:**
 ```java
 // Case values are enum constants like Color.RED
 // Convert to ordinal values at compile time
@@ -1791,7 +1855,7 @@ for (CaseInfo caseInfo : cases) {
 }
 ```
 
-**Step 4: Generate tableswitch or lookupswitch:**
+**Step 5: Generate tableswitch or lookupswitch:**
 ```
 // After ordinal() call, switch stack has int value
 // Use standard int switch logic (tableswitch or lookupswitch)
@@ -1810,6 +1874,12 @@ tableswitch {
 - Type-safe at compile time
 - No runtime type checking needed
 - Leverages existing int switch infrastructure
+- Proper import/alias resolution via scoped type registry
+
+**Implementation Files:**
+- `TypeRegistry.java` - Global type registry with enum member ordinal lookup
+- `ScopedTypeRegistry.java` - Stack-based scope registry for imports and aliases
+- `ByteCodeCompilerMemory.java` - Manages type registry and scoped registry lifecycle
 
 ### Boxed Type Switch Compilation
 

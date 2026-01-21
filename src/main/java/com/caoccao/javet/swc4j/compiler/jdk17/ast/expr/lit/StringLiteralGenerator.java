@@ -43,7 +43,15 @@ public final class StringLiteralGenerator extends BaseAstProcessor<Swc4jAstStr> 
             // Convert string to char - use first character
             if (value.length() > 0) {
                 char charValue = value.charAt(0);
-                code.iconst(charValue);
+                // For large char values (> 32767), use ldc instead of iconst
+                // iconst range: -32768 to 32767 (sipush max)
+                // char range: 0 to 65535
+                if (charValue <= 32767) {
+                    code.iconst(charValue);
+                } else {
+                    int charIndex = cp.addInteger(charValue);
+                    code.ldc(charIndex);
+                }
                 // Box to Character if needed
                 if (returnTypeInfo.type() == ReturnType.OBJECT && "Ljava/lang/Character;".equals(returnTypeInfo.descriptor())) {
                     int valueOfRef = cp.addMethodRef("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
