@@ -60,6 +60,27 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                             leftType,
                             rightType);
                     resultType = "Ljava/lang/String;";
+                } else if (isBigInteger(leftType) || isBigInteger(rightType)) {
+                    // BigInteger addition
+                    resultType = "Ljava/math/BigInteger;";
+
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (!isBigInteger(leftType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        convertToBigInteger(code, cp, leftType);
+                    }
+
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (!isBigInteger(rightType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        convertToBigInteger(code, cp, rightType);
+                    }
+
+                    // Call BigInteger.add()
+                    int addRef = cp.addMethodRef("java/math/BigInteger", "add", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    code.invokevirtual(addRef);
                 } else {
                     // Determine the widened result type
                     resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
@@ -90,25 +111,48 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                // Determine the widened result type
-                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+                if (isBigInteger(leftType) || isBigInteger(rightType)) {
+                    // BigInteger subtraction
+                    resultType = "Ljava/math/BigInteger;";
 
-                // Generate left operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (!isBigInteger(leftType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        convertToBigInteger(code, cp, leftType);
+                    }
 
-                // Generate right operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (!isBigInteger(rightType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        convertToBigInteger(code, cp, rightType);
+                    }
 
-                // Generate appropriate sub instruction based on result type
-                switch (resultType) {
-                    case "I" -> code.isub();
-                    case "J" -> code.lsub();
-                    case "F" -> code.fsub();
-                    case "D" -> code.dsub();
+                    // Call BigInteger.subtract()
+                    int subRef = cp.addMethodRef("java/math/BigInteger", "subtract", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    code.invokevirtual(subRef);
+                } else {
+                    // Determine the widened result type
+                    resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+
+                    // Generate appropriate sub instruction based on result type
+                    switch (resultType) {
+                        case "I" -> code.isub();
+                        case "J" -> code.lsub();
+                        case "F" -> code.fsub();
+                        case "D" -> code.dsub();
+                    }
                 }
             }
             case Mul -> {
@@ -118,25 +162,48 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                // Determine the widened result type
-                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+                if (isBigInteger(leftType) || isBigInteger(rightType)) {
+                    // BigInteger multiplication
+                    resultType = "Ljava/math/BigInteger;";
 
-                // Generate left operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (!isBigInteger(leftType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        convertToBigInteger(code, cp, leftType);
+                    }
 
-                // Generate right operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (!isBigInteger(rightType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        convertToBigInteger(code, cp, rightType);
+                    }
 
-                // Generate appropriate mul instruction based on result type
-                switch (resultType) {
-                    case "I" -> code.imul();
-                    case "J" -> code.lmul();
-                    case "F" -> code.fmul();
-                    case "D" -> code.dmul();
+                    // Call BigInteger.multiply()
+                    int mulRef = cp.addMethodRef("java/math/BigInteger", "multiply", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    code.invokevirtual(mulRef);
+                } else {
+                    // Determine the widened result type
+                    resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+
+                    // Generate appropriate mul instruction based on result type
+                    switch (resultType) {
+                        case "I" -> code.imul();
+                        case "J" -> code.lmul();
+                        case "F" -> code.fmul();
+                        case "D" -> code.dmul();
+                    }
                 }
             }
             case Div -> {
@@ -146,25 +213,48 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                // Determine the widened result type
-                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+                if (isBigInteger(leftType) || isBigInteger(rightType)) {
+                    // BigInteger division
+                    resultType = "Ljava/math/BigInteger;";
 
-                // Generate left operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (!isBigInteger(leftType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        convertToBigInteger(code, cp, leftType);
+                    }
 
-                // Generate right operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (!isBigInteger(rightType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        convertToBigInteger(code, cp, rightType);
+                    }
 
-                // Generate appropriate div instruction based on result type
-                switch (resultType) {
-                    case "I" -> code.idiv();
-                    case "J" -> code.ldiv();
-                    case "F" -> code.fdiv();
-                    case "D" -> code.ddiv();
+                    // Call BigInteger.divide()
+                    int divRef = cp.addMethodRef("java/math/BigInteger", "divide", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    code.invokevirtual(divRef);
+                } else {
+                    // Determine the widened result type
+                    resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+
+                    // Generate appropriate div instruction based on result type
+                    switch (resultType) {
+                        case "I" -> code.idiv();
+                        case "J" -> code.ldiv();
+                        case "F" -> code.fdiv();
+                        case "D" -> code.ddiv();
+                    }
                 }
             }
             case Mod -> {
@@ -174,25 +264,48 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                // Determine the widened result type
-                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+                if (isBigInteger(leftType) || isBigInteger(rightType)) {
+                    // BigInteger modulo
+                    resultType = "Ljava/math/BigInteger;";
 
-                // Generate left operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (!isBigInteger(leftType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        convertToBigInteger(code, cp, leftType);
+                    }
 
-                // Generate right operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (!isBigInteger(rightType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        convertToBigInteger(code, cp, rightType);
+                    }
 
-                // Generate appropriate rem instruction based on result type
-                switch (resultType) {
-                    case "I" -> code.irem();
-                    case "J" -> code.lrem();
-                    case "F" -> code.frem();
-                    case "D" -> code.drem();
+                    // Call BigInteger.remainder()
+                    int remRef = cp.addMethodRef("java/math/BigInteger", "remainder", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    code.invokevirtual(remRef);
+                } else {
+                    // Determine the widened result type
+                    resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+
+                    // Generate appropriate rem instruction based on result type
+                    switch (resultType) {
+                        case "I" -> code.irem();
+                        case "J" -> code.lrem();
+                        case "F" -> code.frem();
+                        case "D" -> code.drem();
+                    }
                 }
             }
             case Exp -> {
@@ -201,21 +314,45 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
-                resultType = "D"; // Math.pow returns double
 
-                // Generate left operand (base) and convert to double
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), "D");
+                if (isBigInteger(leftType)) {
+                    // BigInteger exponentiation
+                    resultType = "Ljava/math/BigInteger;";
 
-                // Generate right operand (exponent) and convert to double
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "D");
+                    // Generate left operand (base)
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
 
-                // Call Math.pow(double, double)
-                int mathPowRef = cp.addMethodRef("java/lang/Math", "pow", "(DD)D");
-                code.invokestatic(mathPowRef);
+                    // Generate right operand (exponent) and convert to int
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (isBigInteger(rightType)) {
+                        // Convert BigInteger to int using intValue()
+                        int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
+                        code.invokevirtual(intValueRef);
+                    } else {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                    }
+
+                    // Call BigInteger.pow(int)
+                    int powRef = cp.addMethodRef("java/math/BigInteger", "pow", "(I)Ljava/math/BigInteger;");
+                    code.invokevirtual(powRef);
+                } else {
+                    resultType = "D"; // Math.pow returns double
+
+                    // Generate left operand (base) and convert to double
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), "D");
+
+                    // Generate right operand (exponent) and convert to double
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "D");
+
+                    // Call Math.pow(double, double)
+                    int mathPowRef = cp.addMethodRef("java/lang/Math", "pow", "(DD)D");
+                    code.invokestatic(mathPowRef);
+                }
             }
             case LShift -> {
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
@@ -224,27 +361,50 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                // Determine the result type based on left operand
-                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+                if (isBigInteger(leftType)) {
+                    // BigInteger left shift
+                    resultType = "Ljava/math/BigInteger;";
 
-                // Generate left operand and convert to result type (int or long)
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
 
-                // Generate right operand (shift amount) and convert to int
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                    // Generate right operand (shift amount) and convert to int
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (isBigInteger(rightType)) {
+                        // Convert BigInteger to int using intValue()
+                        int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
+                        code.invokevirtual(intValueRef);
+                    } else {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                    }
 
-                // Generate appropriate shift instruction based on result type
-                switch (resultType) {
-                    case "I" -> code.ishl();
-                    case "J" -> code.lshl();
-                    default -> {
-                        // For other types (byte, short, char, float, double), convert to int first
-                        // This matches JavaScript ToInt32 semantics
-                        code.ishl();
+                    // Call BigInteger.shiftLeft(int)
+                    int shiftLeftRef = cp.addMethodRef("java/math/BigInteger", "shiftLeft", "(I)Ljava/math/BigInteger;");
+                    code.invokevirtual(shiftLeftRef);
+                } else {
+                    // Determine the result type based on left operand
+                    resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+
+                    // Generate left operand and convert to result type (int or long)
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+
+                    // Generate right operand (shift amount) and convert to int
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+
+                    // Generate appropriate shift instruction based on result type
+                    switch (resultType) {
+                        case "I" -> code.ishl();
+                        case "J" -> code.lshl();
+                        default -> {
+                            // For other types (byte, short, char, float, double), convert to int first
+                            // This matches JavaScript ToInt32 semantics
+                            code.ishl();
+                        }
                     }
                 }
             }
@@ -255,27 +415,50 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                // Determine the result type based on left operand
-                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+                if (isBigInteger(leftType)) {
+                    // BigInteger right shift
+                    resultType = "Ljava/math/BigInteger;";
 
-                // Generate left operand and convert to result type (int or long)
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
 
-                // Generate right operand (shift amount) and convert to int
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                    // Generate right operand (shift amount) and convert to int
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (isBigInteger(rightType)) {
+                        // Convert BigInteger to int using intValue()
+                        int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
+                        code.invokevirtual(intValueRef);
+                    } else {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                    }
 
-                // Generate appropriate shift instruction based on result type
-                switch (resultType) {
-                    case "I" -> code.ishr();
-                    case "J" -> code.lshr();
-                    default -> {
-                        // For other types (byte, short, char, float, double), convert to int first
-                        // This matches JavaScript ToInt32 semantics
-                        code.ishr();
+                    // Call BigInteger.shiftRight(int)
+                    int shiftRightRef = cp.addMethodRef("java/math/BigInteger", "shiftRight", "(I)Ljava/math/BigInteger;");
+                    code.invokevirtual(shiftRightRef);
+                } else {
+                    // Determine the result type based on left operand
+                    resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+
+                    // Generate left operand and convert to result type (int or long)
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+
+                    // Generate right operand (shift amount) and convert to int
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+
+                    // Generate appropriate shift instruction based on result type
+                    switch (resultType) {
+                        case "I" -> code.ishr();
+                        case "J" -> code.lshr();
+                        default -> {
+                            // For other types (byte, short, char, float, double), convert to int first
+                            // This matches JavaScript ToInt32 semantics
+                            code.ishr();
+                        }
                     }
                 }
             }
@@ -286,27 +469,51 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                // Determine the result type based on left operand
-                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+                if (isBigInteger(leftType)) {
+                    // BigInteger unsigned right shift - not directly supported
+                    // Use shiftRight for signed shift (limitation documented)
+                    resultType = "Ljava/math/BigInteger;";
 
-                // Generate left operand and convert to result type (int or long)
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
 
-                // Generate right operand (shift amount) and convert to int
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                    // Generate right operand (shift amount) and convert to int
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (isBigInteger(rightType)) {
+                        // Convert BigInteger to int using intValue()
+                        int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
+                        code.invokevirtual(intValueRef);
+                    } else {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                    }
 
-                // Generate appropriate unsigned shift instruction based on result type
-                switch (resultType) {
-                    case "I" -> code.iushr();
-                    case "J" -> code.lushr();
-                    default -> {
-                        // For other types (byte, short, char, float, double), convert to int first
-                        // This matches JavaScript ToInt32 semantics
-                        code.iushr();
+                    // Call BigInteger.shiftRight(int) - note: this is signed shift
+                    int shiftRightRef = cp.addMethodRef("java/math/BigInteger", "shiftRight", "(I)Ljava/math/BigInteger;");
+                    code.invokevirtual(shiftRightRef);
+                } else {
+                    // Determine the result type based on left operand
+                    resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+
+                    // Generate left operand and convert to result type (int or long)
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+
+                    // Generate right operand (shift amount) and convert to int
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+
+                    // Generate appropriate unsigned shift instruction based on result type
+                    switch (resultType) {
+                        case "I" -> code.iushr();
+                        case "J" -> code.lushr();
+                        default -> {
+                            // For other types (byte, short, char, float, double), convert to int first
+                            // This matches JavaScript ToInt32 semantics
+                            code.iushr();
+                        }
                     }
                 }
             }
@@ -317,23 +524,46 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                // Determine the widened result type
-                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+                if (isBigInteger(leftType) || isBigInteger(rightType)) {
+                    // BigInteger bitwise AND
+                    resultType = "Ljava/math/BigInteger;";
 
-                // Generate left operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (!isBigInteger(leftType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        convertToBigInteger(code, cp, leftType);
+                    }
 
-                // Generate right operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (!isBigInteger(rightType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        convertToBigInteger(code, cp, rightType);
+                    }
 
-                // Generate appropriate bitwise AND instruction based on result type
-                switch (resultType) {
-                    case "I" -> code.iand();
-                    case "J" -> code.land();
+                    // Call BigInteger.and()
+                    int andRef = cp.addMethodRef("java/math/BigInteger", "and", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    code.invokevirtual(andRef);
+                } else {
+                    // Determine the widened result type
+                    resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+
+                    // Generate appropriate bitwise AND instruction based on result type
+                    switch (resultType) {
+                        case "I" -> code.iand();
+                        case "J" -> code.land();
+                    }
                 }
             }
             case BitOr -> {
@@ -343,23 +573,46 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                // Determine the widened result type
-                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+                if (isBigInteger(leftType) || isBigInteger(rightType)) {
+                    // BigInteger bitwise OR
+                    resultType = "Ljava/math/BigInteger;";
 
-                // Generate left operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (!isBigInteger(leftType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        convertToBigInteger(code, cp, leftType);
+                    }
 
-                // Generate right operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (!isBigInteger(rightType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        convertToBigInteger(code, cp, rightType);
+                    }
 
-                // Generate appropriate bitwise OR instruction based on result type
-                switch (resultType) {
-                    case "I" -> code.ior();
-                    case "J" -> code.lor();
+                    // Call BigInteger.or()
+                    int orRef = cp.addMethodRef("java/math/BigInteger", "or", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    code.invokevirtual(orRef);
+                } else {
+                    // Determine the widened result type
+                    resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+
+                    // Generate appropriate bitwise OR instruction based on result type
+                    switch (resultType) {
+                        case "I" -> code.ior();
+                        case "J" -> code.lor();
+                    }
                 }
             }
             case BitXor -> {
@@ -369,23 +622,46 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                // Determine the widened result type
-                resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+                if (isBigInteger(leftType) || isBigInteger(rightType)) {
+                    // BigInteger bitwise XOR
+                    resultType = "Ljava/math/BigInteger;";
 
-                // Generate left operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (!isBigInteger(leftType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        convertToBigInteger(code, cp, leftType);
+                    }
 
-                // Generate right operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (!isBigInteger(rightType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        convertToBigInteger(code, cp, rightType);
+                    }
 
-                // Generate appropriate bitwise XOR instruction based on result type
-                switch (resultType) {
-                    case "I" -> code.ixor();
-                    case "J" -> code.lxor();
+                    // Call BigInteger.xor()
+                    int xorRef = cp.addMethodRef("java/math/BigInteger", "xor", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    code.invokevirtual(xorRef);
+                } else {
+                    // Determine the widened result type
+                    resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
+
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
+
+                    // Generate appropriate bitwise XOR instruction based on result type
+                    switch (resultType) {
+                        case "I" -> code.ixor();
+                        case "J" -> code.lxor();
+                    }
                 }
             }
             case EqEq, EqEqEq -> {
@@ -398,20 +674,41 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 // Result type for comparison is always boolean
                 resultType = "Z";
 
-                // Determine the comparison type (widen to common type for primitives)
-                String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
-                String leftPrimitive = TypeConversionUtils.getPrimitiveType(leftType);
-                String rightPrimitive = TypeConversionUtils.getPrimitiveType(rightType);
+                // Check for BigInteger comparison
+                if (isBigInteger(leftType) || isBigInteger(rightType)) {
+                    // BigInteger equality
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (!isBigInteger(leftType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        convertToBigInteger(code, cp, leftType);
+                    }
 
-                // Check if both are primitive types (NOT wrappers - those use Objects.equals)
-                boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
-                        rightType.equals(rightPrimitive) &&
-                        (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
-                                leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
-                                leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
-                                leftPrimitive.equals("C") || leftPrimitive.equals("Z"));
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (!isBigInteger(rightType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        convertToBigInteger(code, cp, rightType);
+                    }
 
-                if (isPrimitiveComparison) {
+                    // Call BigInteger.equals()
+                    int equalsRef = cp.addMethodRef("java/math/BigInteger", "equals", "(Ljava/lang/Object;)Z");
+                    code.invokevirtual(equalsRef);
+                } else {
+                    // Determine the comparison type (widen to common type for primitives)
+                    String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
+                    String leftPrimitive = TypeConversionUtils.getPrimitiveType(leftType);
+                    String rightPrimitive = TypeConversionUtils.getPrimitiveType(rightType);
+
+                    // Check if both are primitive types (NOT wrappers - those use Objects.equals)
+                    boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
+                            rightType.equals(rightPrimitive) &&
+                            (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
+                                    leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
+                                    leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
+                                    leftPrimitive.equals("C") || leftPrimitive.equals("Z"));
+
+                    if (isPrimitiveComparison) {
                     // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
                     ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(comparisonType);
 
@@ -475,9 +772,10 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     // Generate right operand
                     compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
 
-                    // Objects.equals returns boolean (Z) which is represented as 0 or 1
-                    int equalsRef = cp.addMethodRef("java/util/Objects", "equals", "(Ljava/lang/Object;Ljava/lang/Object;)Z");
-                    code.invokestatic(equalsRef);
+                        // Objects.equals returns boolean (Z) which is represented as 0 or 1
+                        int equalsRef = cp.addMethodRef("java/util/Objects", "equals", "(Ljava/lang/Object;Ljava/lang/Object;)Z");
+                        code.invokestatic(equalsRef);
+                    }
                 }
             }
             case NotEq, NotEqEq -> {
@@ -490,20 +788,44 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 // Result type for comparison is always boolean
                 resultType = "Z";
 
-                // Determine the comparison type (widen to common type for primitives)
-                String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
-                String leftPrimitive = TypeConversionUtils.getPrimitiveType(leftType);
-                String rightPrimitive = TypeConversionUtils.getPrimitiveType(rightType);
+                // Check for BigInteger comparison
+                if (isBigInteger(leftType) || isBigInteger(rightType)) {
+                    // BigInteger inequality
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (!isBigInteger(leftType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        convertToBigInteger(code, cp, leftType);
+                    }
 
-                // Check if both are primitive types (NOT wrappers - those use Objects.equals)
-                boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
-                        rightType.equals(rightPrimitive) &&
-                        (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
-                                leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
-                                leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
-                                leftPrimitive.equals("C") || leftPrimitive.equals("Z"));
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (!isBigInteger(rightType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        convertToBigInteger(code, cp, rightType);
+                    }
 
-                if (isPrimitiveComparison) {
+                    // Call BigInteger.equals() and invert result
+                    int equalsRef = cp.addMethodRef("java/math/BigInteger", "equals", "(Ljava/lang/Object;)Z");
+                    code.invokevirtual(equalsRef);
+                    // Invert: 0 -> 1, 1 -> 0
+                    code.iconst(1);
+                    code.ixor();
+                } else {
+                    // Determine the comparison type (widen to common type for primitives)
+                    String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
+                    String leftPrimitive = TypeConversionUtils.getPrimitiveType(leftType);
+                    String rightPrimitive = TypeConversionUtils.getPrimitiveType(rightType);
+
+                    // Check if both are primitive types (NOT wrappers - those use Objects.equals)
+                    boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
+                            rightType.equals(rightPrimitive) &&
+                            (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
+                                    leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
+                                    leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
+                                    leftPrimitive.equals("C") || leftPrimitive.equals("Z"));
+
+                    if (isPrimitiveComparison) {
                     // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
                     ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(comparisonType);
 
@@ -571,10 +893,11 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     int equalsRef = cp.addMethodRef("java/util/Objects", "equals", "(Ljava/lang/Object;Ljava/lang/Object;)Z");
                     code.invokestatic(equalsRef);
 
-                    // Invert the result: 0 -> 1, 1 -> 0
-                    // We can use: iconst_1, ixor (XOR with 1 flips the bit)
-                    code.iconst(1);
-                    code.ixor();
+                        // Invert the result: 0 -> 1, 1 -> 0
+                        // We can use: iconst_1, ixor (XOR with 1 flips the bit)
+                        code.iconst(1);
+                        code.ixor();
+                    }
                 }
             }
             case Lt, LtEq -> {
@@ -587,20 +910,56 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 // Result type for comparison is always boolean
                 resultType = "Z";
 
-                // Determine the comparison type (widen to common type for primitives)
-                String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
-                String leftPrimitive = TypeConversionUtils.getPrimitiveType(leftType);
-                String rightPrimitive = TypeConversionUtils.getPrimitiveType(rightType);
+                // Check for BigInteger comparison
+                if (isBigInteger(leftType) || isBigInteger(rightType)) {
+                    // BigInteger less than / less than or equal
+                    boolean isLtEq = binExpr.getOp() == Swc4jAstBinaryOp.LtEq;
 
-                // Check if both are primitive types (NOT wrappers)
-                boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
-                        rightType.equals(rightPrimitive) &&
-                        (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
-                                leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
-                                leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
-                                leftPrimitive.equals("C"));
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (!isBigInteger(leftType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        convertToBigInteger(code, cp, leftType);
+                    }
 
-                if (isPrimitiveComparison) {
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (!isBigInteger(rightType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        convertToBigInteger(code, cp, rightType);
+                    }
+
+                    // Call BigInteger.compareTo() - returns -1, 0, or 1
+                    int compareToRef = cp.addMethodRef("java/math/BigInteger", "compareTo", "(Ljava/math/BigInteger;)I");
+                    code.invokevirtual(compareToRef);
+
+                    // Check result: < 0 for Lt, <= 0 for LtEq
+                    // Use hardcoded offsets (same pattern as primitive comparisons)
+                    if (isLtEq) {
+                        // result <= 0: if result > 0, jump to iconst_0
+                        code.ifgt(7);
+                    } else {
+                        // result < 0: if result >= 0, jump to iconst_0
+                        code.ifge(7);
+                    }
+                    code.iconst(1);        // condition true: push 1
+                    code.gotoLabel(4);     // jump over iconst_0
+                    code.iconst(0);        // condition false: push 0
+                } else {
+                    // Determine the comparison type (widen to common type for primitives)
+                    String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
+                    String leftPrimitive = TypeConversionUtils.getPrimitiveType(leftType);
+                    String rightPrimitive = TypeConversionUtils.getPrimitiveType(rightType);
+
+                    // Check if both are primitive types (NOT wrappers)
+                    boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
+                            rightType.equals(rightPrimitive) &&
+                            (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
+                                    leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
+                                    leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
+                                    leftPrimitive.equals("C"));
+
+                    if (isPrimitiveComparison) {
                     // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
                     ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(comparisonType);
 
@@ -672,11 +1031,12 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                             code.iconst(0);    // condition false: push 0
                         }
                     }
-                } else {
-                    // Object comparison: not supported for < or <=
-                    throw new Swc4jByteCodeCompilerException(
-                            "Less than comparison not supported for non-primitive types. " +
-                                    "Use comparable types or implement Comparable interface.");
+                    } else {
+                        // Object comparison: not supported for < or <=
+                        throw new Swc4jByteCodeCompilerException(
+                                "Less than comparison not supported for non-primitive types. " +
+                                        "Use comparable types or implement Comparable interface.");
+                    }
                 }
             }
             case Gt, GtEq -> {
@@ -689,20 +1049,56 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 // Result type for comparison is always boolean
                 resultType = "Z";
 
-                // Determine the comparison type (widen to common type for primitives)
-                String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
-                String leftPrimitive = TypeConversionUtils.getPrimitiveType(leftType);
-                String rightPrimitive = TypeConversionUtils.getPrimitiveType(rightType);
+                // Check for BigInteger comparison
+                if (isBigInteger(leftType) || isBigInteger(rightType)) {
+                    // BigInteger greater than / greater than or equal
+                    boolean isGtEq = binExpr.getOp() == Swc4jAstBinaryOp.GtEq;
 
-                // Check if both are primitive types (NOT wrappers)
-                boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
-                        rightType.equals(rightPrimitive) &&
-                        (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
-                                leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
-                                leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
-                                leftPrimitive.equals("C"));
+                    // Generate left operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (!isBigInteger(leftType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        convertToBigInteger(code, cp, leftType);
+                    }
 
-                if (isPrimitiveComparison) {
+                    // Generate right operand
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (!isBigInteger(rightType)) {
+                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        convertToBigInteger(code, cp, rightType);
+                    }
+
+                    // Call BigInteger.compareTo() - returns -1, 0, or 1
+                    int compareToRef = cp.addMethodRef("java/math/BigInteger", "compareTo", "(Ljava/math/BigInteger;)I");
+                    code.invokevirtual(compareToRef);
+
+                    // Check result: > 0 for Gt, >= 0 for GtEq
+                    // Use hardcoded offsets (same pattern as primitive comparisons)
+                    if (isGtEq) {
+                        // result >= 0: if result < 0, jump to iconst_0
+                        code.iflt(7);
+                    } else {
+                        // result > 0: if result <= 0, jump to iconst_0
+                        code.ifle(7);
+                    }
+                    code.iconst(1);        // condition true: push 1
+                    code.gotoLabel(4);     // jump over iconst_0
+                    code.iconst(0);        // condition false: push 0
+                } else {
+                    // Determine the comparison type (widen to common type for primitives)
+                    String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
+                    String leftPrimitive = TypeConversionUtils.getPrimitiveType(leftType);
+                    String rightPrimitive = TypeConversionUtils.getPrimitiveType(rightType);
+
+                    // Check if both are primitive types (NOT wrappers)
+                    boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
+                            rightType.equals(rightPrimitive) &&
+                            (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
+                                    leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
+                                    leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
+                                    leftPrimitive.equals("C"));
+
+                    if (isPrimitiveComparison) {
                     // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
                     ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(comparisonType);
 
@@ -774,11 +1170,12 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                             code.iconst(0);    // condition false: push 0
                         }
                     }
-                } else {
-                    // Object comparison: not supported for > or >=
-                    throw new Swc4jByteCodeCompilerException(
-                            "Greater than comparison not supported for non-primitive types. " +
-                                    "Use comparable types or implement Comparable interface.");
+                    } else {
+                        // Object comparison: not supported for > or >=
+                        throw new Swc4jByteCodeCompilerException(
+                                "Greater than comparison not supported for non-primitive types. " +
+                                        "Use comparable types or implement Comparable interface.");
+                    }
                 }
             }
             case LogicalAnd -> {
@@ -918,5 +1315,30 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
         return expr instanceof Swc4jAstNumber &&
                 (targetType.equals("I") || targetType.equals("J") ||
                         targetType.equals("F") || targetType.equals("D"));
+    }
+
+    /**
+     * Check if a type is BigInteger.
+     */
+    private boolean isBigInteger(String type) {
+        return "Ljava/math/BigInteger;".equals(type);
+    }
+
+    /**
+     * Convert a primitive value on the stack to BigInteger.
+     * Stack before: [primitive value]
+     * Stack after: [BigInteger]
+     */
+    private void convertToBigInteger(CodeBuilder code, ClassWriter.ConstantPool cp, String fromType) {
+        String primitiveType = TypeConversionUtils.getPrimitiveType(fromType);
+
+        // Convert to long first if needed
+        if (!"J".equals(primitiveType)) {
+            TypeConversionUtils.convertPrimitiveType(code, primitiveType, "J");
+        }
+
+        // Call BigInteger.valueOf(long)
+        int valueOfRef = cp.addMethodRef("java/math/BigInteger", "valueOf", "(J)Ljava/math/BigInteger;");
+        code.invokestatic(valueOfRef);
     }
 }

@@ -334,6 +334,7 @@ public class StackMapGenerator {
             case 0x38:
             case 0x39:
             case 0x3A: // *store
+            case 0xBC: // newarray (1 byte type)
                 return 2;
             case 0x11: // sipush
             case 0x13: // ldc_w (2 byte index)
@@ -354,10 +355,17 @@ public class StackMapGenerator {
             case 0xA5:
             case 0xA6: // if_acmp<cond>
             case 0xA7: // goto
+            case 0xB2: // getstatic
+            case 0xB3: // putstatic
+            case 0xB4: // getfield
+            case 0xB5: // putfield
             case 0xB6:
             case 0xB7:
             case 0xB8: // invoke*
+            case 0xBB: // new (2 byte class index)
             case 0xBD: // anewarray
+            case 0xC0: // checkcast
+            case 0xC1: // instanceof
             case 0xC6:
             case 0xC7: // ifnull, ifnonnull
                 return 3;
@@ -846,15 +854,60 @@ public class StackMapGenerator {
 
             // Method calls - simplified (pop args, push result)
             case 0xB6: // invokevirtual
-            case 0xB7: // invokespecial
-            case 0xB8: // invokestatic
-                // For simplicity: pop receiver + 2 args (covers most common cases like equals(Object))
-                // and push integer for boolean-returning methods like equals
-                // This is a simplification - proper implementation would parse method descriptor
-                if (stack.size() >= 2) stack.remove(stack.size() - 1); // pop arg
-                if (!stack.isEmpty() && opcode != 0xB8) stack.remove(stack.size() - 1); // pop receiver (except static)
-                // equals() returns boolean (represented as int in JVM)
+                // invokevirtual: pop receiver (+ possibly args) and push result
+                // Common cases:
+                // - hashCode() - no args, returns int
+                // - equals(Object) - 1 arg, returns boolean
+                // - compareTo(Object) - 1 arg, returns int
+                // Heuristic: if 2+ items on stack, pop 2 (receiver + 1 arg), else pop 1 (receiver only)
+                if (stack.size() >= 2) {
+                    stack.remove(stack.size() - 1); // pop arg
+                    stack.remove(stack.size() - 1); // pop receiver
+                } else if (!stack.isEmpty()) {
+                    stack.remove(stack.size() - 1); // pop receiver (no args case like hashCode())
+                }
                 stack.add(VerificationType.integer());
+                break;
+            case 0xB7: // invokespecial
+                // invokespecial is usually <init> which returns void
+                // Pop receiver and 1 arg (common case: BigInteger(String))
+                if (stack.size() >= 2) {
+                    stack.remove(stack.size() - 1); // pop arg
+                    stack.remove(stack.size() - 1); // pop receiver (one of the dup'd references)
+                }
+                // Don't push anything - <init> returns void
+                break;
+            case 0xB8: // invokestatic
+                // invokestatic: pop args based on stack contents
+                // Common cases:
+                // - BigInteger.valueOf(long) - pop 1 long, push Object
+                // - Objects.equals(a, b) - pop 2 args, push boolean
+                // Heuristic: if top of stack is LONG or DOUBLE, pop 1 and push object
+                // Otherwise pop 2 and push integer
+                if (!stack.isEmpty()) {
+                    VerificationType top = stack.get(stack.size() - 1);
+                    if (top.tag == LONG || top.tag == DOUBLE) {
+                        // valueOf(long) or similar - pop 1, push object
+                        stack.remove(stack.size() - 1);
+                        stack.add(VerificationType.object("java/math/BigInteger"));
+                    } else if (stack.size() >= 2) {
+                        // Objects.equals or similar - pop 2, push int
+                        stack.remove(stack.size() - 1);
+                        stack.remove(stack.size() - 1);
+                        stack.add(VerificationType.integer());
+                    } else {
+                        // Single arg static method - pop 1, push int
+                        stack.remove(stack.size() - 1);
+                        stack.add(VerificationType.integer());
+                    }
+                }
+                break;
+
+            // Object creation
+            case 0xBB: // new
+                // new pushes an uninitialized object reference onto the stack
+                // For simplicity, we treat it as a regular object
+                stack.add(VerificationType.object("java/lang/Object"));
                 break;
 
             // Type conversions

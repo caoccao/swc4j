@@ -579,6 +579,10 @@ public final class TypeResolver {
                     if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
                         return "Ljava/lang/String;";
                     }
+                    // BigInteger operations - if either operand is BigInteger, result is BigInteger
+                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
+                        return "Ljava/math/BigInteger;";
+                    }
                     // Numeric addition - use type widening rules
                     return getWidenedType(leftType, rightType);
                 }
@@ -588,6 +592,10 @@ public final class TypeResolver {
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // BigInteger operations - if either operand is BigInteger, result is BigInteger
+                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
+                        return "Ljava/math/BigInteger;";
+                    }
                     // Numeric subtraction - use type widening rules
                     return getWidenedType(leftType, rightType);
                 }
@@ -597,6 +605,10 @@ public final class TypeResolver {
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // BigInteger operations - if either operand is BigInteger, result is BigInteger
+                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
+                        return "Ljava/math/BigInteger;";
+                    }
                     // Numeric multiplication - use type widening rules
                     return getWidenedType(leftType, rightType);
                 }
@@ -606,6 +618,10 @@ public final class TypeResolver {
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // BigInteger operations - if either operand is BigInteger, result is BigInteger
+                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
+                        return "Ljava/math/BigInteger;";
+                    }
                     // Numeric division - use type widening rules
                     return getWidenedType(leftType, rightType);
                 }
@@ -615,10 +631,19 @@ public final class TypeResolver {
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // BigInteger operations - if either operand is BigInteger, result is BigInteger
+                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
+                        return "Ljava/math/BigInteger;";
+                    }
                     // Numeric modulo - use type widening rules
                     return getWidenedType(leftType, rightType);
                 }
                 case Exp -> {
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    // BigInteger exponentiation - if base is BigInteger, result is BigInteger
+                    if ("Ljava/math/BigInteger;".equals(leftType)) {
+                        return "Ljava/math/BigInteger;";
+                    }
                     // Exponentiation always returns double (Math.pow returns double)
                     return "D";
                 }
@@ -628,6 +653,10 @@ public final class TypeResolver {
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
+                    // BigInteger shift - if left is BigInteger, result is BigInteger
+                    if ("Ljava/math/BigInteger;".equals(leftType)) {
+                        return "Ljava/math/BigInteger;";
+                    }
                     // Get primitive type
                     String primitiveType = getPrimitiveType(leftType);
                     // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
@@ -642,6 +671,10 @@ public final class TypeResolver {
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
+                    // BigInteger shift - if left is BigInteger, result is BigInteger
+                    if ("Ljava/math/BigInteger;".equals(leftType)) {
+                        return "Ljava/math/BigInteger;";
+                    }
                     // Get primitive type
                     String primitiveType = getPrimitiveType(leftType);
                     // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
@@ -656,6 +689,10 @@ public final class TypeResolver {
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
+                    // BigInteger shift - if left is BigInteger, result is BigInteger
+                    if ("Ljava/math/BigInteger;".equals(leftType)) {
+                        return "Ljava/math/BigInteger;";
+                    }
                     // Get primitive type
                     String primitiveType = getPrimitiveType(leftType);
                     // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
@@ -671,6 +708,10 @@ public final class TypeResolver {
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // BigInteger operations - if either operand is BigInteger, result is BigInteger
+                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
+                        return "Ljava/math/BigInteger;";
+                    }
                     // Use type widening rules (int & long → long, etc.)
                     return getWidenedType(leftType, rightType);
                 }
@@ -681,6 +722,10 @@ public final class TypeResolver {
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // BigInteger operations - if either operand is BigInteger, result is BigInteger
+                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
+                        return "Ljava/math/BigInteger;";
+                    }
                     // Use type widening rules (int | long → long, etc.)
                     return getWidenedType(leftType, rightType);
                 }
@@ -691,6 +736,10 @@ public final class TypeResolver {
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // BigInteger operations - if either operand is BigInteger, result is BigInteger
+                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
+                        return "Ljava/math/BigInteger;";
+                    }
                     // Use type widening rules (int ^ long → long, etc.)
                     return getWidenedType(leftType, rightType);
                 }

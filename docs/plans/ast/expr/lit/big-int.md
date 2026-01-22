@@ -19,7 +19,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **AST Definition:** ✅ [Swc4jAstBigInt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBigInt.java)
 
-**Last Updated:** 2026-01-22 - Implementation complete, all tests passing
+**Last Updated:** 2026-01-22 - Literal support complete (80/80 tests passing), binary operations complete (64/64 tests passing)
 
 ---
 
@@ -360,14 +360,57 @@ Similarly for other primitives:
 2. **Sign enum** - ✅ Swc4jAstBigIntSign exists
 3. **Conversion methods** - ✅ asInt(), asLong(), etc. in AST
 
-### ❌ Out of Scope (Requires Other Features)
-1. **BigInt arithmetic** - Addition, subtraction, multiplication, etc.
-2. **BigInt comparisons** - <, >, ===, etc.
-3. **BigInt bitwise operations** - &, |, ^, <<, >>
-4. **BigInt in collections** - Arrays, objects
-5. **BigInt method calls** - toString(), valueOf(), etc.
-6. **BigInt type coercion** - Implicit conversions
-7. **BigInt operations** - All binary/unary operators
+### 🚧 BigInt Binary Operations (Partially Implemented)
+
+**Status:** Implemented in BinaryExpressionGenerator.java with some limitations
+
+**Arithmetic Operations (✅ WORKING):**
+- ✅ Addition (`+`) - Uses BigInteger.add(BigInteger val)
+- ✅ Subtraction (`-`) - Uses BigInteger.subtract(BigInteger val)
+- ✅ Multiplication (`*`) - Uses BigInteger.multiply(BigInteger val)
+- ✅ Division (`/`) - Uses BigInteger.divide(BigInteger val)
+- ✅ Modulo (`%`) - Uses BigInteger.remainder(BigInteger val)
+- ✅ Exponentiation (`**`) - Uses BigInteger.pow(int exponent)
+
+**Comparison Operations (✅ WORKING):**
+- ✅ Equals (`==`, `===`) - Uses BigInteger.equals(Object val)
+- ✅ Not equals (`!=`, `!==`) - Negates BigInteger.equals()
+- ✅ Less than (`<`) - Uses BigInteger.compareTo() with ifge branching
+- ✅ Less than or equal (`<=`) - Uses BigInteger.compareTo() with ifgt branching
+- ✅ Greater than (`>`) - Uses BigInteger.compareTo() with ifle branching
+- ✅ Greater than or equal (`>=`) - Uses BigInteger.compareTo() with iflt branching
+
+**Bitwise Operations (✅ WORKING):**
+- ✅ Bitwise AND (`&`) - Uses BigInteger.and(BigInteger val)
+- ✅ Bitwise OR (`|`) - Uses BigInteger.or(BigInteger val)
+- ✅ Bitwise XOR (`^`) - Uses BigInteger.xor(BigInteger val)
+- ✅ Left shift (`<<`) - Uses BigInteger.shiftLeft(int n)
+- ✅ Right shift (`>>`) - Uses BigInteger.shiftRight(int n)
+- ⚠️ Unsigned right shift (`>>>`) - Uses BigInteger.shiftRight() (signed) - limitation of BigInteger
+
+**Type Inference:**
+- ✅ Automatic BigInteger return type inference for all BigInt operations
+- Functions returning BigInt expressions don't need explicit `: BigInteger` annotations
+- Example: `test() { return 5n * 7n }` automatically infers BigInteger return type
+- Supported for: arithmetic (+, -, *, /, %, **), bitwise (&, |, ^, <<, >>), mixed with primitives
+
+**Test Coverage:**
+- Binary operations: `TestCompileBinExprBigInt.java` (41 comprehensive tests, including comparisons)
+- Addition tests: `TestCompileBinExprAdd.java` (6 BigInt tests)
+- Subtraction tests: `TestCompileBinExprSub.java` (3 BigInt tests)
+- Type inference: `TestBigIntTypeInference.java` (14 tests)
+- **Total: 64 binary operation tests + 80 literal tests = 144 BigInt tests passing**
+
+**Recent Fixes (January 22, 2026):**
+- ✅ Fixed comparison operators (<, <=, >, >=) by using hardcoded branch offsets instead of placeholder/patch pattern
+- ✅ Fixed StackMapGenerator to properly handle `new` opcode for BigInteger object creation
+- ✅ Fixed method invocation simulation in StackMapGenerator for correct stackmap frames
+- ✅ All comparison tests now passing - no more VerifyError issues
+
+### ❌ Out of Scope
+1. **BigInt in collections** - Arrays, objects
+2. **BigInt method calls** - toString(), valueOf(), etc.
+3. **BigInt type coercion** - Implicit Number↔BigInt conversions
 
 ---
 
@@ -676,7 +719,8 @@ All planned features have been successfully implemented:
 
 ### 📝 Implementation Notes
 
-- **Complete implementation**: All core BigInt features working perfectly
+**Current Status (Literals):**
+- **Complete implementation**: All core BigInt literal features working perfectly
 - **Comprehensive testing**: All 80 tests passing
 - **All formats supported**: Decimal, hex (0x), octal (0o), binary (0b), and underscore separators
 - **Java BigInteger**: Successfully maps JavaScript BigInt to java.math.BigInteger
@@ -686,4 +730,16 @@ All planned features have been successfully implemented:
 - **String-based**: BigInteger constructed from string representation with appropriate radix
 - **Optimized**: Uses static constants for common values (0, 1, 10)
 - **Robust parsing**: Handles all JavaScript BigInt literal formats correctly
+
+**Binary Operations Status:**
+- ✅ **Arithmetic operations**: Fully implemented - BigInteger.add(), subtract(), multiply(), divide(), remainder(), pow()
+- ✅ **Comparison operations**: Fully implemented - BigInteger.compareTo() and equals()
+- ✅ **Bitwise operations**: Fully implemented - BigInteger.and(), or(), xor(), shiftLeft(), shiftRight()
+- **Implementation location**: BinaryExpressionGenerator.java
+- **Test location**: TestCompileBinExpr*.java files
+- **See**: docs/plans/ast/expr/binary-expr.md for detailed implementation plan
+
+**Next Phase:**
+- Special operations: NullishCoalescing (??), InstanceOf, In
+- These require significant architectural changes beyond current scope
 

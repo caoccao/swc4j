@@ -4,7 +4,9 @@
 
 This document outlines the implementation plan for supporting all 25 binary operations defined in `Swc4jAstBinaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 22 of 25 operations implemented (88% complete)
+**Current Status:** 22 of 25 operations implemented for primitives and BigInt (88% complete)
+
+**Primitive Support (Implemented):**
 - ✅ **Add (`+`)** - Fully implemented with numeric addition and string concatenation
 - ✅ **Sub (`-`)** - Fully implemented with type widening and null handling
 - ✅ **Mul (`*`)** - Fully implemented with type widening and null handling
@@ -27,7 +29,10 @@ This document outlines the implementation plan for supporting all 25 binary oper
 - ✅ **GtEq (`>=`)** - Fully implemented with primitive comparisons using if_icmplt/iflt for branching
 - ✅ **LogicalAnd (`&&`)** - Fully implemented with short-circuit evaluation and Boolean unboxing
 - ✅ **LogicalOr (`||`)** - Fully implemented with short-circuit evaluation and Boolean unboxing
-- ❌ **3 operations remaining**
+
+**BigInt Support (Implemented):**
+- ✅ All 22 operations above have BigInt support using BigInteger methods
+- ❌ **3 special operations remaining** (NullishCoalescing, InstanceOf, In)
 
 **Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
@@ -64,6 +69,140 @@ This document outlines the implementation plan for supporting all 25 binary oper
 | 21 | NullishCoalescing | `??` | Special | ❌ Not Implemented | High |
 | 11 | InstanceOf | `instanceof` | Special | ❌ Not Implemented | Very High |
 | 10 | In | `in` | Special | ❌ Not Implemented | Very High |
+
+---
+
+## BigInt Operations Support
+
+### Overview
+
+All 22 implemented binary operations need to be extended to support `BigInteger` (Java's arbitrary-precision integer type, mapped from TypeScript/JavaScript BigInt literals like `123n`).
+
+### Implementation Strategy
+
+For operations involving BigInteger operands:
+
+1. **Type Detection:** Check if either operand is `Ljava/math/BigInteger;`
+2. **Type Promotion:** If one operand is BigInteger, convert the other to BigInteger
+3. **Operation Mapping:** Use corresponding BigInteger methods:
+   - Arithmetic: `add()`, `subtract()`, `multiply()`, `divide()`, `remainder()`, `pow()`
+   - Bitwise: `and()`, `or()`, `xor()`, `shiftLeft()`, `shiftRight()`
+   - Comparison: `compareTo()`, `equals()`
+
+### BigInteger Method Reference
+
+**Arithmetic Operations:**
+```java
+BigInteger.add(BigInteger val)           // Addition: a + b
+BigInteger.subtract(BigInteger val)      // Subtraction: a - b
+BigInteger.multiply(BigInteger val)      // Multiplication: a * b
+BigInteger.divide(BigInteger val)        // Division: a / b (integer division)
+BigInteger.remainder(BigInteger val)     // Modulo: a % b
+BigInteger.pow(int exponent)             // Exponentiation: a ** b (exponent must be int)
+```
+
+**Bitwise Operations:**
+```java
+BigInteger.and(BigInteger val)           // Bitwise AND: a & b
+BigInteger.or(BigInteger val)            // Bitwise OR: a | b
+BigInteger.xor(BigInteger val)           // Bitwise XOR: a ^ b
+BigInteger.shiftLeft(int n)              // Left shift: a << b
+BigInteger.shiftRight(int n)             // Right shift: a >> b
+BigInteger.not()                         // Bitwise NOT: ~a
+```
+
+**Comparison Operations:**
+```java
+BigInteger.compareTo(BigInteger val)     // Returns -1, 0, or 1
+BigInteger.equals(Object val)            // Equality check
+```
+
+### Bytecode Generation Pattern
+
+**Example: BigInt Addition (`100n + 200n`)**
+
+```java
+// Generate left operand
+<generate 100n>                          // Stack: [BigInteger(100)]
+
+// Generate right operand
+<generate 200n>                          // Stack: [BigInteger(100), BigInteger(200)]
+
+// Call BigInteger.add method
+int addRef = cp.addMethodRef(
+    "java/math/BigInteger",
+    "add",
+    "(Ljava/math/BigInteger;)Ljava/math/BigInteger;"
+);
+code.invokevirtual(addRef);              // Stack: [BigInteger(300)]
+```
+
+**Example: BigInt Comparison (`100n < 200n`)**
+
+```java
+// Generate left operand
+<generate 100n>                          // Stack: [BigInteger(100)]
+
+// Generate right operand
+<generate 200n>                          // Stack: [BigInteger(100), BigInteger(200)]
+
+// Call BigInteger.compareTo
+int compareRef = cp.addMethodRef(
+    "java/math/BigInteger",
+    "compareTo",
+    "(Ljava/math/BigInteger;)I"
+);
+code.invokevirtual(compareRef);          // Stack: [int (-1, 0, or 1)]
+
+// Compare result with 0 for less than
+code.iflt(trueLabel);                    // Jump if < 0 (less than)
+code.iconst(0);                          // Push false
+code.gotoLabel(endLabel);
+// trueLabel:
+code.iconst(1);                          // Push true
+// endLabel:
+```
+
+### Mixed Type Operations
+
+**BigInt with Primitive:**
+- Convert primitive to BigInteger before operation
+- Use `BigInteger.valueOf(long val)` for conversion
+
+**Example: `100n + 50` (BigInt + int)**
+```java
+<generate 100n>                          // Stack: [BigInteger(100)]
+<generate 50>                            // Stack: [BigInteger(100), int(50)]
+code.i2l();                              // Convert int to long
+int valueOfRef = cp.addMethodRef(
+    "java/math/BigInteger",
+    "valueOf",
+    "(J)Ljava/math/BigInteger;"
+);
+code.invokestatic(valueOfRef);           // Stack: [BigInteger(100), BigInteger(50)]
+// Then perform addition as usual
+```
+
+### Edge Cases for BigInt Operations
+
+1. **Division by Zero:** `BigInteger.divide()` throws `ArithmeticException`
+2. **Exponentiation:** `pow()` requires int exponent (not BigInteger)
+3. **Unsigned Right Shift (`>>>`):** Not natively supported by BigInteger
+4. **Shift Amount:** Must convert BigInteger shift amount to int
+5. **Comparison Results:** Always return boolean (not BigInteger)
+
+### Test Requirements
+
+Each operation needs tests for:
+- [ ] BigInt op BigInt (both operands BigInt)
+- [ ] BigInt op primitive (mixed types)
+- [ ] primitive op BigInt (mixed types, reversed)
+- [ ] Large values exceeding long range
+- [ ] Edge values (0, 1, -1, MAX_LONG, MIN_LONG)
+- [ ] Negative values
+- [ ] Division by zero (for `/` and `%`)
+- [ ] Comparison operations returning boolean
+- [ ] Bitwise operations on negative BigInts
 
 ---
 
@@ -897,6 +1036,31 @@ checkcast               - Cast to type (throws ClassCastException)
 
 ---
 
-*Last Updated: January 13, 2026*
-*Status: Implementation Phase*
-*Next Step: Implement comparison operators (Lt, LtEq, Gt, GtEq)*
+*Last Updated: January 22, 2026*
+*Status: Primitive and BigInt operations complete*
+*Next Step: Implement remaining special operations (NullishCoalescing, InstanceOf, In)*
+
+**BigInt Implementation Status:**
+- ✅ Arithmetic operations (+ - * / % **) - WORKING (20 tests)
+- ✅ Equality operations (== === != !==) - WORKING (4 tests)
+- ✅ Bitwise operations (& | ^ << >> >>>) - WORKING (7 tests)
+- ✅ Comparison operations (< <= > >=) - WORKING (7 tests) - Fixed stackmap frame issue
+- ✅ Type inference - Automatic BigInteger return type inference (14 tests)
+
+**Type Inference:**
+- Functions returning BigInt expressions automatically infer BigInteger return type
+- No explicit `: BigInteger` annotation needed
+- Works for all arithmetic, bitwise, shift, and comparison operations
+- Mixed operations with primitives also infer BigInteger correctly
+
+**Test Coverage:**
+- Comprehensive test suite: `TestCompileBinExprBigInt.java` (41 tests)
+- Individual operation tests: `TestCompileBinExprAdd.java` (6 tests), `TestCompileBinExprSub.java` (3 tests)
+- Type inference: `TestBigIntTypeInference.java` (14 tests)
+- All 64 BigInt binary operation tests passing (including type inference)
+
+**Recent Fixes (January 22, 2026):**
+- Fixed BigInt comparison operators (<, <=, >, >=) using hardcoded branch offsets instead of placeholder/patch pattern
+- Fixed StackMapGenerator to properly handle `new` opcode and method invocations
+- Added instruction size handling for new, getfield, putfield, getstatic, putstatic, checkcast, instanceof, newarray
+- Improved invokevirtual, invokespecial, and invokestatic simulation for correct stackmap frame generation
