@@ -18,25 +18,28 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
-import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.CallExpressionForArrayGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.CallExpressionForArrayListGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.CallExpressionForJavaClassGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.CallExpressionForStringGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCallExpr> {
     private final CallExpressionForArrayGenerator arrayGenerator;
     private final CallExpressionForArrayListGenerator arrayListGenerator;
+    private final CallExpressionForJavaClassGenerator javaClassGenerator;
     private final CallExpressionForStringGenerator stringGenerator;
 
     public CallExpressionGenerator(ByteCodeCompiler compiler) {
         super(compiler);
         arrayGenerator = new CallExpressionForArrayGenerator(compiler);
         arrayListGenerator = new CallExpressionForArrayListGenerator(compiler);
+        javaClassGenerator = new CallExpressionForJavaClassGenerator(compiler);
         stringGenerator = new CallExpressionForStringGenerator(compiler);
     }
 
@@ -46,8 +49,14 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
             ClassWriter.ConstantPool cp,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        // Handle method calls on arrays, strings, etc.
+        // Handle method calls on arrays, strings, Java classes, etc.
         if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
+            // Check for Java class method calls first
+            if (javaClassGenerator.isJavaClassMethodCall(callExpr)) {
+                javaClassGenerator.generate(code, cp, callExpr, returnTypeInfo);
+                return;
+            }
+
             String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
             if (arrayGenerator.isTypeSupported(objType)) {
                 arrayGenerator.generate(code, cp, callExpr, returnTypeInfo);

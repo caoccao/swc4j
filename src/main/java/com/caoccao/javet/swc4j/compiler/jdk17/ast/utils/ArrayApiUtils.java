@@ -16,9 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Utility class for Java array operations similar to JavaScript Array methods.
@@ -162,7 +161,7 @@ public final class ArrayApiUtils {
             return false;
         }
         for (Object element : array) {
-            if (element == null ? value == null : element.equals(value)) {
+            if (Objects.equals(element, value)) {
                 return true;
             }
         }
@@ -242,7 +241,7 @@ public final class ArrayApiUtils {
             return -1;
         }
         for (int i = 0; i < array.length; i++) {
-            if (array[i] == null ? value == null : array[i].equals(value)) {
+            if (Objects.equals(array[i], value)) {
                 return i;
             }
         }
@@ -418,7 +417,7 @@ public final class ArrayApiUtils {
             return -1;
         }
         for (int i = array.length - 1; i >= 0; i--) {
-            if (array[i] == null ? value == null : array[i].equals(value)) {
+            if (Objects.equals(array[i], value)) {
                 return i;
             }
         }
@@ -556,7 +555,7 @@ public final class ArrayApiUtils {
     @SuppressWarnings("unchecked")
     public static Object[] sort(Object[] array) {
         if (array != null && array.length > 0) {
-            Arrays.sort(array, (Comparator<Object>) (o1, o2) -> {
+            Arrays.sort(array, (o1, o2) -> {
                 if (o1 == null && o2 == null) return 0;
                 if (o1 == null) return -1;
                 if (o2 == null) return 1;

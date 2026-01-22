@@ -18,14 +18,15 @@ package com.caoccao.javet.swc4j.compiler;
 
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
-import com.caoccao.javet.swc4j.compiler.jdk17.AstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeAliasCollector;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.VariableAnalyzer;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.AstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.MethodGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit.*;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ImportDeclProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.ts.TsAsExpressionGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -55,6 +56,7 @@ public sealed abstract class ByteCodeCompiler permits
     protected final ForStatementGenerator forStatementGenerator;
     protected final IdentifierGenerator identifierGenerator;
     protected final IfStatementGenerator ifStatementGenerator;
+    protected final ImportDeclProcessor importDeclProcessor;
     protected final LabeledStatementGenerator labeledStatementGenerator;
     protected final MemberExpressionGenerator memberExpressionGenerator;
     protected final ByteCodeCompilerMemory memory;
@@ -106,6 +108,7 @@ public sealed abstract class ByteCodeCompiler permits
         forStatementGenerator = new ForStatementGenerator(this);
         identifierGenerator = new IdentifierGenerator(this);
         ifStatementGenerator = new IfStatementGenerator(this);
+        importDeclProcessor = new ImportDeclProcessor(this);
         labeledStatementGenerator = new LabeledStatementGenerator(this);
         memberExpressionGenerator = new MemberExpressionGenerator(this);
         methodGenerator = new MethodGenerator(this);
@@ -208,6 +211,10 @@ public sealed abstract class ByteCodeCompiler permits
 
     public IfStatementGenerator getIfStatementGenerator() {
         return ifStatementGenerator;
+    }
+
+    public ImportDeclProcessor getImportDeclProcessor() {
+        return importDeclProcessor;
     }
 
     public LabeledStatementGenerator getLabeledStatementGenerator() {

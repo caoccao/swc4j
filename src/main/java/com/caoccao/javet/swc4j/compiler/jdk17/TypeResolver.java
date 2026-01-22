@@ -759,6 +759,19 @@ public final class TypeResolver {
             if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
                 String objType = inferTypeFromExpr(memberExpr.getObj());
 
+                // Check if the object is a Java class identifier
+                if (memberExpr.getObj() instanceof Swc4jAstIdent objIdent) {
+                    String className = objIdent.getSym();
+                    var javaClassInfo = compiler.getMemory().getScopedJavaClassRegistry().resolve(className);
+                    if (javaClassInfo != null && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                        String methodName = propIdent.getSym();
+                        var methodInfo = javaClassInfo.getMethod(methodName);
+                        if (methodInfo != null) {
+                            return methodInfo.returnType();
+                        }
+                    }
+                }
+
                 // ArrayList methods
                 if ("Ljava/util/ArrayList;".equals(objType)) {
                     if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
@@ -818,8 +831,9 @@ public final class TypeResolver {
                         String methodName = propIdent.getSym();
                         return switch (methodName) {
                             // String return types
-                            case "charAt", "substring", "slice", "substr", "toLowerCase", "toUpperCase", "trim", "trimStart", "trimLeft", "trimEnd", "trimRight", "concat", "repeat", "replace", "replaceAll", "padStart", "padEnd" ->
-                                    "Ljava/lang/String;";
+                            case "charAt", "substring", "slice", "substr", "toLowerCase", "toUpperCase", "trim",
+                                 "trimStart", "trimLeft", "trimEnd", "trimRight", "concat", "repeat", "replace",
+                                 "replaceAll", "padStart", "padEnd" -> "Ljava/lang/String;";
                             // int return types
                             case "indexOf", "lastIndexOf", "charCodeAt", "codePointAt", "search" -> "I";
                             // boolean return types

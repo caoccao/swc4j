@@ -164,7 +164,7 @@ public final class StringApiUtils {
         if (str == null || index < 0 || index >= str.length()) {
             return -1; // Represent NaN as -1
         }
-        return (int) str.charAt(index);
+        return str.charAt(index);
     }
 
     public static void collectOperands(
@@ -229,6 +229,80 @@ public final class StringApiUtils {
 
         // Call toString()
         code.invokevirtual(toString);
+    }
+
+    /**
+     * JavaScript-compatible match() that finds matches using a regex pattern.
+     * Returns ArrayList of matches, or null if no match found.
+     * Note: JavaScript match() with global flag returns all matches,
+     * without global flag returns match with groups. This implementation
+     * returns the first match with all captured groups.
+     *
+     * @param str     the string to search in
+     * @param pattern the regex pattern
+     * @return ArrayList of matched groups (index 0 is full match), or null if no match
+     */
+    public static ArrayList<String> match(String str, String pattern) {
+        if (str == null || pattern == null) {
+            return null;
+        }
+
+        try {
+            Pattern p = Pattern.compile(pattern);
+            Matcher m = p.matcher(str);
+
+            if (m.find()) {
+                ArrayList<String> result = new ArrayList<>();
+                // Add the full match (group 0)
+                result.add(m.group(0));
+                // Add all captured groups
+                for (int i = 1; i <= m.groupCount(); i++) {
+                    result.add(m.group(i));
+                }
+                return result;
+            }
+            return null;
+        } catch (PatternSyntaxException e) {
+            // Invalid regex pattern - return null
+            return null;
+        }
+    }
+
+    /**
+     * JavaScript-compatible matchAll() that finds all matches using a regex pattern.
+     * Returns ArrayList of all matches, where each match is an ArrayList containing
+     * the full match and all captured groups.
+     *
+     * @param str     the string to search in
+     * @param pattern the regex pattern
+     * @return ArrayList of matches, each containing [fullMatch, group1, group2, ...]
+     */
+    public static ArrayList<ArrayList<String>> matchAll(String str, String pattern) {
+        if (str == null || pattern == null) {
+            return new ArrayList<>();
+        }
+
+        try {
+            Pattern p = Pattern.compile(pattern);
+            Matcher m = p.matcher(str);
+            ArrayList<ArrayList<String>> results = new ArrayList<>();
+
+            while (m.find()) {
+                ArrayList<String> match = new ArrayList<>();
+                // Add the full match (group 0)
+                match.add(m.group(0));
+                // Add all captured groups
+                for (int i = 1; i <= m.groupCount(); i++) {
+                    match.add(m.group(i));
+                }
+                results.add(match);
+            }
+
+            return results;
+        } catch (PatternSyntaxException e) {
+            // Invalid regex pattern - return empty list
+            return new ArrayList<>();
+        }
     }
 
     /**
@@ -317,6 +391,33 @@ public final class StringApiUtils {
         }
 
         return str.substring(0, index) + replacement + str.substring(index + search.length());
+    }
+
+    /**
+     * JavaScript-compatible search() that returns the index of the first regex match.
+     * Returns -1 if no match found.
+     *
+     * @param str     the string to search in
+     * @param pattern the regex pattern
+     * @return index of first match, or -1 if no match
+     */
+    public static int search(String str, String pattern) {
+        if (str == null || pattern == null) {
+            return -1;
+        }
+
+        try {
+            Pattern p = Pattern.compile(pattern);
+            Matcher m = p.matcher(str);
+
+            if (m.find()) {
+                return m.start();
+            }
+            return -1;
+        } catch (PatternSyntaxException e) {
+            // Invalid regex pattern - return -1
+            return -1;
+        }
     }
 
     /**
@@ -414,9 +515,7 @@ public final class StringApiUtils {
 
         if (limit > 0 && parts.length > limit) {
             // Take only first 'limit' elements
-            for (int i = 0; i < limit; i++) {
-                result.add(parts[i]);
-            }
+            result.addAll(Arrays.asList(parts).subList(0, limit));
         } else {
             result.addAll(Arrays.asList(parts));
         }
@@ -518,6 +617,30 @@ public final class StringApiUtils {
     }
 
     /**
+     * JavaScript-compatible test() that tests if a regex pattern matches.
+     * Note: In JavaScript, test() is actually a RegExp method, but we implement
+     * it as a String method for convenience.
+     *
+     * @param str     the string to test
+     * @param pattern the regex pattern
+     * @return true if pattern matches, false otherwise
+     */
+    public static boolean test(String str, String pattern) {
+        if (str == null || pattern == null) {
+            return false;
+        }
+
+        try {
+            Pattern p = Pattern.compile(pattern);
+            Matcher m = p.matcher(str);
+            return m.find();
+        } catch (PatternSyntaxException e) {
+            // Invalid regex pattern - return false
+            return false;
+        }
+    }
+
+    /**
      * JavaScript-compatible trimEnd (also known as trimRight) that removes trailing whitespace.
      * Uses Java 11+ stripTrailing() for proper Unicode whitespace handling.
      *
@@ -545,130 +668,5 @@ public final class StringApiUtils {
         }
         // Use stripLeading() which handles Unicode whitespace properly (JDK 11+)
         return str.stripLeading();
-    }
-
-    /**
-     * JavaScript-compatible match() that finds matches using a regex pattern.
-     * Returns ArrayList of matches, or null if no match found.
-     * Note: JavaScript match() with global flag returns all matches,
-     * without global flag returns match with groups. This implementation
-     * returns the first match with all captured groups.
-     *
-     * @param str     the string to search in
-     * @param pattern the regex pattern
-     * @return ArrayList of matched groups (index 0 is full match), or null if no match
-     */
-    public static ArrayList<String> match(String str, String pattern) {
-        if (str == null || pattern == null) {
-            return null;
-        }
-
-        try {
-            Pattern p = Pattern.compile(pattern);
-            Matcher m = p.matcher(str);
-
-            if (m.find()) {
-                ArrayList<String> result = new ArrayList<>();
-                // Add the full match (group 0)
-                result.add(m.group(0));
-                // Add all captured groups
-                for (int i = 1; i <= m.groupCount(); i++) {
-                    result.add(m.group(i));
-                }
-                return result;
-            }
-            return null;
-        } catch (PatternSyntaxException e) {
-            // Invalid regex pattern - return null
-            return null;
-        }
-    }
-
-    /**
-     * JavaScript-compatible matchAll() that finds all matches using a regex pattern.
-     * Returns ArrayList of all matches, where each match is an ArrayList containing
-     * the full match and all captured groups.
-     *
-     * @param str     the string to search in
-     * @param pattern the regex pattern
-     * @return ArrayList of matches, each containing [fullMatch, group1, group2, ...]
-     */
-    public static ArrayList<ArrayList<String>> matchAll(String str, String pattern) {
-        if (str == null || pattern == null) {
-            return new ArrayList<>();
-        }
-
-        try {
-            Pattern p = Pattern.compile(pattern);
-            Matcher m = p.matcher(str);
-            ArrayList<ArrayList<String>> results = new ArrayList<>();
-
-            while (m.find()) {
-                ArrayList<String> match = new ArrayList<>();
-                // Add the full match (group 0)
-                match.add(m.group(0));
-                // Add all captured groups
-                for (int i = 1; i <= m.groupCount(); i++) {
-                    match.add(m.group(i));
-                }
-                results.add(match);
-            }
-
-            return results;
-        } catch (PatternSyntaxException e) {
-            // Invalid regex pattern - return empty list
-            return new ArrayList<>();
-        }
-    }
-
-    /**
-     * JavaScript-compatible search() that returns the index of the first regex match.
-     * Returns -1 if no match found.
-     *
-     * @param str     the string to search in
-     * @param pattern the regex pattern
-     * @return index of first match, or -1 if no match
-     */
-    public static int search(String str, String pattern) {
-        if (str == null || pattern == null) {
-            return -1;
-        }
-
-        try {
-            Pattern p = Pattern.compile(pattern);
-            Matcher m = p.matcher(str);
-
-            if (m.find()) {
-                return m.start();
-            }
-            return -1;
-        } catch (PatternSyntaxException e) {
-            // Invalid regex pattern - return -1
-            return -1;
-        }
-    }
-
-    /**
-     * JavaScript-compatible test() that tests if a regex pattern matches.
-     * Note: In JavaScript, test() is actually a RegExp method, but we implement
-     * it as a String method for convenience.
-     *
-     * @param str     the string to test
-     * @param pattern the regex pattern
-     * @return true if pattern matches, false otherwise
-     */
-    public static boolean test(String str, String pattern) {
-        if (str == null || pattern == null) {
-            return false;
-        }
-
-        try {
-            Pattern p = Pattern.compile(pattern);
-            Matcher m = p.matcher(str);
-            return m.find();
-        } catch (PatternSyntaxException e) {
-            // Invalid regex pattern - return false
-            return false;
-        }
     }
 }

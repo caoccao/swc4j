@@ -33,20 +33,32 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
     Map<String, byte[]> compileProgram(ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException {
         Map<String, byte[]> byteCodeMap = new HashMap<>();
 
-        if (program instanceof Swc4jAstModule module) {
-            // First pass: collect type aliases and type declarations
-            typeAliasCollector.collectFromModuleItems(module.getBody());
-            memory.getTypeRegistry().collectFromModuleItems(module.getBody(), options.packagePrefix());
-            // Second pass: generate bytecode
-            astProcessor.processModuleItems(module.getBody(), options.packagePrefix(), byteCodeMap);
-        } else if (program instanceof Swc4jAstScript script) {
-            // First pass: collect type aliases and type declarations
-            typeAliasCollector.collectFromStmts(script.getBody());
-            memory.getTypeRegistry().collectFromStmts(script.getBody(), options.packagePrefix());
-            // Second pass: generate bytecode
-            astProcessor.processStmts(script.getBody(), options.packagePrefix(), byteCodeMap);
-        }
+        // Enter a new scope for this file
+        memory.getScopedJavaClassRegistry().enterScope();
 
-        return byteCodeMap;
+        try {
+            if (program instanceof Swc4jAstModule module) {
+                // First pass: process imports
+                importDeclProcessor.processImports(module.getBody());
+                // Second pass: collect type aliases and type declarations
+                typeAliasCollector.collectFromModuleItems(module.getBody());
+                memory.getTypeRegistry().collectFromModuleItems(module.getBody(), options.packagePrefix());
+                // Third pass: generate bytecode
+                astProcessor.processModuleItems(module.getBody(), options.packagePrefix(), byteCodeMap);
+            } else if (program instanceof Swc4jAstScript script) {
+                // First pass: process imports (scripts typically don't have imports, but support it anyway)
+                importDeclProcessor.processImports(script.getBody());
+                // Second pass: collect type aliases and type declarations
+                typeAliasCollector.collectFromStmts(script.getBody());
+                memory.getTypeRegistry().collectFromStmts(script.getBody(), options.packagePrefix());
+                // Third pass: generate bytecode
+                astProcessor.processStmts(script.getBody(), options.packagePrefix(), byteCodeMap);
+            }
+
+            return byteCodeMap;
+        } finally {
+            // Always exit the scope, even if an exception occurs
+            memory.getScopedJavaClassRegistry().exitScope();
+        }
     }
 }
