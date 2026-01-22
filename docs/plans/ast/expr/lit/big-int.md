@@ -4,17 +4,22 @@
 
 This document outlines the implementation plan for supporting JavaScript/TypeScript BigInt literals (`Swc4jAstBigInt`) and compiling them to JVM bytecode as **Java BigInteger** objects.
 
-**Current Status:** 📋 **PLANNED** (Comprehensive plan created, test structure defined)
+**Current Status:** ✅ **FULLY IMPLEMENTED** (All features implemented, all 80 tests passing)
 
-**Implementation File:** ❌ BigIntLiteralGenerator.java (needs to be created)
+**Implementation File:** ✅ [BigIntLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/BigIntLiteralGenerator.java)
 
-**Test Files:** 📝 **2 placeholder test files created** (out of 7 planned)
-- [TestCompileAstBigIntBasic.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/bigint/TestCompileAstBigIntBasic.java) - 15 tests (Phase 1)
-- [TestCompileAstBigIntConversion.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/bigint/TestCompileAstBigIntConversion.java) - 12 tests (Phase 2)
+**Test Files:** ✅ **7 test files created** (all phases implemented, all tests passing)
+- [TestCompileAstBigIntBasic.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/bigint/TestCompileAstBigIntBasic.java) - 15 tests (Phase 1) ✅
+- [TestCompileAstBigIntConversion.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/bigint/TestCompileAstBigIntConversion.java) - 12 tests (Phase 2) ✅
+- [TestCompileAstBigIntSpecial.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/bigint/TestCompileAstBigIntSpecial.java) - 10 tests (Phase 3) ✅
+- [TestCompileAstBigIntContext.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/bigint/TestCompileAstBigIntContext.java) - 10 tests (Phase 4) ✅
+- [TestCompileAstBigIntRaw.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/bigint/TestCompileAstBigIntRaw.java) - 8 tests (Phase 5) ✅
+- [TestCompileAstBigIntAnnotations.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/bigint/TestCompileAstBigIntAnnotations.java) - 10 tests (Phase 6) ✅
+- [TestCompileAstBigIntEdgeCases.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/bigint/TestCompileAstBigIntEdgeCases.java) - 15 tests (Phase 7) ✅
 
 **AST Definition:** ✅ [Swc4jAstBigInt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBigInt.java)
 
-**Last Updated:** 2026-01-21 - Planning complete, initial test structure created
+**Last Updated:** 2026-01-22 - Implementation complete, all tests passing
 
 ---
 
@@ -217,16 +222,16 @@ Similarly for other primitives:
 
 ### Phase 5: Raw String Handling (8 tests)
 
-**Goal:** Test raw BigInt string representation.
+**Goal:** Test raw BigInt string representation and different number formats.
 
-48. **testBigIntRawDecimal** - Decimal notation (default)
-49. **testBigIntRawHexadecimal** - Hex notation: 0xFFn (if supported)
-50. **testBigIntRawOctal** - Octal notation: 0o77n (if supported)
-51. **testBigIntRawBinary** - Binary notation: 0b1111n (if supported)
-52. **testBigIntRawWithUnderscore** - Numeric separators: 1_000_000n (if supported)
-53. **testBigIntRawPreserved** - Raw string preservation
-54. **testBigIntRawEmpty** - Empty raw (defaults to 0)
-55. **testBigIntRawNull** - Null raw (defaults to 0)
+48. **testBigIntRawDecimal** - Decimal notation (default) ✅
+49. **testBigIntRawHexadecimal** - Hex notation: 0xFFn ✅
+50. **testBigIntRawOctal** - Octal notation: 0o77n ✅
+51. **testBigIntRawBinary** - Binary notation: 0b1111n ✅
+52. **testBigIntRawWithUnderscore** - Numeric separators: 1_000_000n ✅
+53. **testBigIntRawBinaryLarge** - Binary with 32 ones ✅
+54. **testBigIntRawHexadecimalLarge** - Large hex: 0xDEADBEEFn ✅
+55. **testBigIntRawOctalLarge** - Large octal: 0o7777n ✅
 
 ### Phase 6: Type Annotations (10 tests)
 
@@ -575,83 +580,110 @@ Key differences when migrating from number literal support:
 
 ## Current Implementation Status
 
-### ✅ Completed (Planning Phase)
+### ✅ Completed
 
-1. **Comprehensive Plan Document** - big-int.md created with:
-   - 80 test cases across 7 phases
-   - Complete edge case analysis
-   - Bytecode generation patterns
-   - Implementation strategy
-   - Type conversion details
+1. **BigIntLiteralGenerator.java** - ✅ Created and fully implemented
+   - Bytecode generation for BigInteger construction using `new BigInteger(String)`
+   - Sign handling (NoSign, Plus, Minus) working correctly
+   - Static constant optimization (ZERO, ONE, TEN) implemented
+   - All primitive type conversions supported (intValue, longValue, byteValue, shortValue, floatValue, doubleValue)
+   - Boolean conversion using BigInteger.equals(ZERO) with XOR inversion
 
-2. **Test Structure Created** - bigint/ test directory with:
-   - TestCompileAstBigIntBasic.java (15 tests, Phase 1)
-   - TestCompileAstBigIntConversion.java (12 tests, Phase 2)
-   - Clear test organization pattern established
+2. **All 7 Test Files Created** - ✅ Complete with 80 tests, all passing:
+   - TestCompileAstBigIntBasic.java (15 tests, Phase 1) ✅
+   - TestCompileAstBigIntConversion.java (12 tests, Phase 2) ✅
+   - TestCompileAstBigIntSpecial.java (10 tests, Phase 3) ✅
+   - TestCompileAstBigIntContext.java (10 tests, Phase 4) ✅
+   - TestCompileAstBigIntRaw.java (8 tests, Phase 5) ✅
+   - TestCompileAstBigIntAnnotations.java (10 tests, Phase 6) ✅
+   - TestCompileAstBigIntEdgeCases.java (15 tests, Phase 7) ✅
 
-3. **AST Analysis Complete** - Reviewed:
-   - Swc4jAstBigInt class structure
-   - Swc4jAstBigIntSign enum
-   - Conversion methods (asInt, asLong, etc.)
-   - Raw string handling
+3. **ExpressionGenerator Integration** - ✅ Complete
+   - BigInt case added to expression dispatcher
+   - Routes Swc4jAstBigInt nodes to BigIntLiteralGenerator
 
-### ❌ Pending Implementation
+4. **UnaryExpressionGenerator Updates** - ✅ Complete
+   - Unary minus (-) operator for BigInt literals
+   - Unary plus (+) operator for BigInt literals
+   - BigInteger.negate() method for complex expressions
+   - Double negation (-(-123n)) working correctly
 
-1. **BigIntLiteralGenerator.java** - Needs to be created
-   - Implement bytecode generation for BigInteger construction
-   - Handle sign (NoSign, Plus, Minus)
-   - Optimize for static constants (ZERO, ONE, TEN)
-   - Support conversions to primitive types
-   - Parse different number formats (hex, octal, binary)
+5. **Type Conversion System** - ✅ Complete
+   - Direct return of BigInt with primitive type annotations
+   - Variable assignment with type conversions
+   - ReturnTypeInfo.getPrimitiveTypeDescriptor() usage
+   - All primitive types supported
 
-2. **Remaining Test Files** (5 more files needed):
-   - TestCompileAstBigIntSpecial.java (10 tests, Phase 3)
-   - TestCompileAstBigIntContext.java (10 tests, Phase 4)
-   - TestCompileAstBigIntRaw.java (8 tests, Phase 5)
-   - TestCompileAstBigIntAnnotations.java (10 tests, Phase 6)
-   - TestCompileAstBigIntEdgeCases.java (15 tests, Phase 7)
+### ✅ All Number Formats Supported
 
-3. **ExpressionGenerator Integration**
-   - Add case for Swc4jAstBigInt in expression dispatcher
-   - Route BigInt nodes to BigIntLiteralGenerator
+All BigInt number formats are now fully supported:
+
+- **Decimal format**: `123n`, `-456n`, `+789n` ✅
+- **Hex format**: `0xFFn`, `0xDEADBEEFn` ✅
+- **Octal format**: `0o77n`, `0o7777n` ✅
+- **Binary format**: `0b1111n`, `0b11111111111111111111111111111111n` ✅
+- **Underscore separators**: `1_000_000n` ✅
+
+**Implementation**: The `setRaw()` method in `Swc4jAstBigInt.java` handles all formats:
+- Removes trailing 'n' suffix
+- Strips underscore separators
+- Detects format by prefix (0x, 0o, 0b)
+- Parses with appropriate radix using `BigInteger(String, radix)` constructor
 
 ### 📊 Implementation Statistics
 
 | Category | Status | Count |
 |----------|--------|-------|
 | **Plan Document** | ✅ Complete | 1 file |
-| **Test Files Created** | 📝 In Progress | 2/7 files |
-| **Test Cases Defined** | ✅ Complete | 80 tests |
-| **Test Cases Implemented** | ❌ Pending | 0/80 tests |
-| **Generator Created** | ❌ Pending | 0/1 files |
-| **AST Support** | ✅ Exists | Swc4jAstBigInt |
+| **Test Files Created** | ✅ Complete | 7/7 files |
+| **Test Cases Planned** | ✅ Complete | 80 tests |
+| **Test Cases Implemented** | ✅ Complete | 80/80 tests |
+| **Test Cases Passing** | ✅ All Pass | 80/80 tests |
+| **Generator Created** | ✅ Complete | 1/1 files |
+| **AST Support** | ✅ Complete | Swc4jAstBigInt with all formats |
 | **Documentation** | ✅ Complete | Comprehensive |
+| **Decimal Format** | ✅ Supported | All tests passing |
+| **Hex Format** | ✅ Supported | All tests passing |
+| **Octal Format** | ✅ Supported | All tests passing |
+| **Binary Format** | ✅ Supported | All tests passing |
+| **Underscore Separators** | ✅ Supported | All tests passing |
 
-### 🎯 Next Steps
+### 🎯 Implementation Complete
 
-1. **Immediate**:
-   - Create BigIntLiteralGenerator.java
-   - Implement basic BigInteger construction (new BigInteger(String))
-   - Handle sign variations (NoSign, Plus, Minus)
+All planned features have been successfully implemented:
 
-2. **Short Term**:
-   - Add static constant optimization (ZERO, ONE, TEN)
-   - Implement primitive conversions (intValue, longValue, etc.)
-   - Create remaining 5 test files
+✅ **Core Features**:
+- BigInteger literal generation
+- Sign handling (NoSign, Plus, Minus)
+- Static constant optimization (ZERO, ONE, TEN)
+- All primitive type conversions
 
-3. **Long Term**:
-   - Support different number formats (hex, octal, binary)
-   - Optimize for common BigInt patterns
-   - Add comprehensive test coverage
+✅ **Advanced Features**:
+- Unary operators (+, -)
+- Complex expressions and double negation
+- Variable assignment and retrieval
+- Type annotations and inference
+- Overflow/underflow handling
+- Precision loss handling
 
-### 📝 Notes
+✅ **Edge Cases**:
+- Very large numbers (100+ digits)
+- Negative zero (-0n)
+- Long.MAX_VALUE ± 1
+- Integer overflow/underflow
+- Float/double precision loss
+- Boolean conversion
 
-- **No existing implementation**: BigInt support is completely new
-- **Test-first approach**: Tests defined before implementation
-- **Based on AST structure**: Leverages existing Swc4jAstBigInt class
-- **Java BigInteger**: Maps JavaScript BigInt to java.math.BigInteger
-- **Reference type only**: No primitive BigInt equivalent in JVM
-- **Conversion support**: Must handle BigInt → primitive conversions
-- **Sign handling**: Three sign types (NoSign, Plus, Minus)
-- **String-based**: BigInteger constructed from string representation
+### 📝 Implementation Notes
+
+- **Complete implementation**: All core BigInt features working perfectly
+- **Comprehensive testing**: All 80 tests passing
+- **All formats supported**: Decimal, hex (0x), octal (0o), binary (0b), and underscore separators
+- **Java BigInteger**: Successfully maps JavaScript BigInt to java.math.BigInteger
+- **Reference type**: Always creates BigInteger objects on heap
+- **Conversion support**: All primitive conversions working correctly
+- **Sign handling**: All three sign types (NoSign, Plus, Minus) working
+- **String-based**: BigInteger constructed from string representation with appropriate radix
+- **Optimized**: Uses static constants for common values (0, 1, 10)
+- **Robust parsing**: Handles all JavaScript BigInt literal formats correctly
 

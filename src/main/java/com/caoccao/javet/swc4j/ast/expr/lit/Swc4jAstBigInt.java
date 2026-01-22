@@ -137,9 +137,30 @@ public class Swc4jAstBigInt
 
     public Swc4jAstBigInt setRaw(String raw) {
         this.raw = Optional.ofNullable(raw);
-        value = StringUtils.isEmpty(raw)
-                ? BigInteger.ZERO
-                : new BigInteger(raw.substring(0, raw.length() - ISwc4jConstants.N.length()));
+        if (StringUtils.isEmpty(raw)) {
+            value = BigInteger.ZERO;
+        } else {
+            // Remove the trailing 'n' suffix
+            String numStr = raw.substring(0, raw.length() - ISwc4jConstants.N.length());
+
+            // Remove underscores if present (numeric separators)
+            numStr = numStr.replace("_", "");
+
+            // Parse based on prefix
+            if (numStr.startsWith("0x") || numStr.startsWith("0X")) {
+                // Hexadecimal format: 0xFFn
+                value = new BigInteger(numStr.substring(2), 16);
+            } else if (numStr.startsWith("0o") || numStr.startsWith("0O")) {
+                // Octal format: 0o77n
+                value = new BigInteger(numStr.substring(2), 8);
+            } else if (numStr.startsWith("0b") || numStr.startsWith("0B")) {
+                // Binary format: 0b1111n
+                value = new BigInteger(numStr.substring(2), 2);
+            } else {
+                // Decimal format (default)
+                value = new BigInteger(numStr);
+            }
+        }
         return this;
     }
 

@@ -43,7 +43,8 @@ public final class BigIntLiteralGenerator extends BaseAstProcessor<Swc4jAstBigIn
      * Calls appropriate conversion method (intValue, longValue, etc.).
      */
     private void convertToPrimitive(CodeBuilder code, ClassWriter.ConstantPool cp, ReturnTypeInfo returnTypeInfo) {
-        String descriptor = returnTypeInfo.descriptor();
+        String descriptor = returnTypeInfo.getPrimitiveTypeDescriptor();
+        if (descriptor == null) return;
 
         switch (descriptor) {
             case "I": // int

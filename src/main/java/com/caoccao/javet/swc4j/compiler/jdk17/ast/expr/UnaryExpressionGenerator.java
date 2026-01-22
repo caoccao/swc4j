@@ -271,25 +271,32 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                     // Handle null type - should not happen for negation, default to int
                     if (argType == null) argType = "I";
 
-                    // Check if argType is a wrapper before unboxing
-                    boolean isWrapper = !argType.equals(TypeConversionUtils.getPrimitiveType(argType));
+                    // Handle BigInteger negation
+                    if ("Ljava/math/BigInteger;".equals(argType)) {
+                        // Call BigInteger.negate() method
+                        int negateRef = cp.addMethodRef("java/math/BigInteger", "negate", "()Ljava/math/BigInteger;");
+                        code.invokevirtual(negateRef);
+                    } else {
+                        // Check if argType is a wrapper before unboxing
+                        boolean isWrapper = !argType.equals(TypeConversionUtils.getPrimitiveType(argType));
 
-                    // Unbox wrapper types before negation
-                    TypeConversionUtils.unboxWrapperType(code, cp, argType);
+                        // Unbox wrapper types before negation
+                        TypeConversionUtils.unboxWrapperType(code, cp, argType);
 
-                    // Get the primitive type for determining which negation instruction to use
-                    String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
+                        // Get the primitive type for determining which negation instruction to use
+                        String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
 
-                    switch (primitiveType) {
-                        case "D" -> code.dneg();
-                        case "F" -> code.fneg();
-                        case "J" -> code.lneg();
-                        default -> code.ineg();
-                    }
+                        switch (primitiveType) {
+                            case "D" -> code.dneg();
+                            case "F" -> code.fneg();
+                            case "J" -> code.lneg();
+                            default -> code.ineg();
+                        }
 
-                    // Box back to wrapper type if original was wrapper
-                    if (isWrapper) {
-                        TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, argType);
+                        // Box back to wrapper type if original was wrapper
+                        if (isWrapper) {
+                            TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, argType);
+                        }
                     }
                 }
             }
