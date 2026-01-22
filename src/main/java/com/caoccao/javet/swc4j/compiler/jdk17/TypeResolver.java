@@ -785,6 +785,33 @@ public final class TypeResolver {
                     }
                 }
 
+                // Java array methods
+                if (objType != null && objType.startsWith("[")) {
+                    if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                        String methodName = propIdent.getSym();
+                        String elementType = objType.substring(1); // Remove leading "["
+                        switch (methodName) {
+                            case "reverse", "sort", "fill" -> {
+                                // Methods that mutate and return the same array type
+                                return objType;
+                            }
+                            case "toReversed", "toSorted" -> {
+                                // Methods that return a new array of the same type
+                                return objType;
+                            }
+                            case "join", "toString" -> {
+                                return "Ljava/lang/String;";
+                            }
+                            case "indexOf", "lastIndexOf" -> {
+                                return "I";
+                            }
+                            case "includes" -> {
+                                return "Z";
+                            }
+                        }
+                    }
+                }
+
                 // String methods
                 if ("Ljava/lang/String;".equals(objType)) {
                     if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {

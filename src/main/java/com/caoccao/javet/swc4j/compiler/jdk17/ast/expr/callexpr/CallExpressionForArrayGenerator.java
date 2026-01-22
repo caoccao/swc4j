@@ -27,6 +27,18 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * Generator for call expressions on Java arrays.
+ * <p>
+ * Supported operations on Java arrays:
+ * - .length property access (handled by MemberExpressionGenerator)
+ * - Index access arr[i] (handled by MemberExpressionGenerator)
+ * - Index assignment arr[i] = value (handled by AssignExpressionGenerator)
+ * - indexOf, lastIndexOf, includes, reverse, sort, toReversed, toSorted, join, fill, toString (handled here)
+ * <p>
+ * Note: Java arrays have fixed size and do not support dynamic methods like push(), pop(), splice(), etc.
+ * For dynamic arrays with these methods, use ArrayList instead.
+ */
 public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4jAstCallExpr> {
     public CallExpressionForArrayGenerator(ByteCodeCompiler compiler) {
         super(compiler);
@@ -39,776 +51,446 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
-            // Generate code for the object (ArrayList)
-            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
-
             // Get the method name
             String methodName = null;
             if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                 methodName = propIdent.getSym();
             }
 
+            // Get array type
+            String arrayType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
+            String elementType = arrayType.substring(1); // Remove leading "["
+            String arrayTypeName = getArrayTypeName(arrayType);
+
+            // Generate code for the array object
+            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+
             switch (methodName) {
-                case "push" -> {
-                    // arr.push(value) -> arr.add(value)
-                    if (!callExpr.getArgs().isEmpty()) {
-                        var arg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-                        // Box if primitive
-                        String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-                        if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-                            TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
-                        }
-                        int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
-                        code.invokevirtual(addMethod);
-                        code.pop(); // Pop the boolean return value
-                    }
-                }
-                case "pop" -> {
-                    // arr.pop() -> arr.remove(arr.size() - 1)
-                    // Returns the removed element
-                    code.dup(); // Duplicate ArrayList reference for size() call
-
-                    int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
-                    code.invokevirtual(sizeMethod); // Get size
-
-                    code.iconst(1);
-                    code.isub(); // size - 1
-
-                    int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
-                    code.invokevirtual(removeMethod); // Returns removed element
-                }
-                case "shift" -> {
-                    // arr.shift() -> arr.remove(0)
-                    // Returns the removed element
-                    code.iconst(0); // Index 0
-
-                    int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
-                    code.invokevirtual(removeMethod); // Returns removed element
-                }
-                case "unshift" -> {
-                    // arr.unshift(value) -> arr.add(0, value)
-                    if (!callExpr.getArgs().isEmpty()) {
-                        code.iconst(0); // Index 0
-
-                        var arg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-                        // Box if primitive
-                        String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-                        if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-                            TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
-                        }
-
-                        int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(ILjava/lang/Object;)V");
-                        code.invokevirtual(addMethod);
-                    }
-                }
-                case "indexOf" -> {
-                    // arr.indexOf(elem) -> arr.indexOf(elem)
-                    // Returns int: index or -1 if not found
-                    if (!callExpr.getArgs().isEmpty()) {
-                        var arg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-                        // Box argument if primitive
-                        String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-                        if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-                            TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
-                        }
-
-                        int indexOfMethod = cp.addMethodRef("java/util/ArrayList", "indexOf", "(Ljava/lang/Object;)I");
-                        code.invokevirtual(indexOfMethod); // Returns int index
-                    } else {
-                        // No argument - pop ArrayList ref and return -1
-                        code.pop();
-                        code.iconst(-1);
-                    }
-                }
-                case "lastIndexOf" -> {
-                    // arr.lastIndexOf(elem) -> arr.lastIndexOf(elem)
-                    // Returns int: last index or -1 if not found
-                    if (!callExpr.getArgs().isEmpty()) {
-                        var arg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-                        // Box argument if primitive
-                        String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-                        if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-                            TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
-                        }
-
-                        int lastIndexOfMethod = cp.addMethodRef("java/util/ArrayList", "lastIndexOf", "(Ljava/lang/Object;)I");
-                        code.invokevirtual(lastIndexOfMethod); // Returns int index
-                    } else {
-                        // No argument - pop ArrayList ref and return -1
-                        code.pop();
-                        code.iconst(-1);
-                    }
-                }
-                case "includes" -> {
-                    // arr.includes(elem) -> arr.contains(elem)
-                    // Returns boolean: true if element exists, false otherwise
-                    if (!callExpr.getArgs().isEmpty()) {
-                        var arg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-                        // Box argument if primitive
-                        String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-                        if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-                            TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
-                        }
-
-                        int containsMethod = cp.addMethodRef("java/util/ArrayList", "contains", "(Ljava/lang/Object;)Z");
-                        code.invokevirtual(containsMethod); // Returns boolean
-                    } else {
-                        // No argument - pop ArrayList ref and return false
-                        code.pop();
-                        code.iconst(0); // false
-                    }
-                }
-                case "reverse" -> {
-                    // arr.reverse() -> Collections.reverse(arr); returns void but we keep arr on stack
-                    // JavaScript's reverse() returns the array itself (for chaining)
-                    code.dup(); // Duplicate array reference for return
-
-                    int reverseMethod = cp.addMethodRef("java/util/Collections", "reverse", "(Ljava/util/List;)V");
-                    code.invokestatic(reverseMethod); // Reverse in place
-
-                    // The duplicated array reference is now on top of stack, ready to return
-                }
-                case "toReversed" -> {
-                    // arr.toReversed() -> ArrayApiUtils.toReversed(arr)
-                    // Returns new reversed array without modifying original (ES2023)
-                    // Stack: ArrayList
-
-                    // Call ArrayApiUtils.toReversed(ArrayList)
-                    int toReversedMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "toReversed",
-                            "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
-                    code.invokestatic(toReversedMethod);
-                    // Stack: new ArrayList (reversed)
-                }
-                case "sort" -> {
-                    // arr.sort() -> Collections.sort(arr); returns void but we keep arr on stack
-                    // JavaScript's sort() returns the array itself (for chaining)
-                    code.dup(); // Duplicate array reference for return
-
-                    int sortMethod = cp.addMethodRef("java/util/Collections", "sort", "(Ljava/util/List;)V");
-                    code.invokestatic(sortMethod); // Sort in place
-
-                    // The duplicated array reference is now on top of stack, ready to return
-                }
-                case "toSorted" -> {
-                    // arr.toSorted() -> ArrayApiUtils.toSorted(arr)
-                    // Returns new sorted array without modifying original (ES2023)
-                    // Stack: ArrayList
-
-                    // Call ArrayApiUtils.toSorted(ArrayList)
-                    int toSortedMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "toSorted",
-                            "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
-                    code.invokestatic(toSortedMethod);
-                    // Stack: new ArrayList (sorted)
-                }
-                case "with" -> {
-                    // arr.with(index, value) -> ArrayApiUtils.with(arr, index, value)
-                    // Returns new array with one element changed (ES2023)
-                    // Stack: ArrayList
-
-                    if (callExpr.getArgs().size() < 2) {
-                        throw new Swc4jByteCodeCompilerException("with() requires two arguments (index, value)");
-                    }
-
-                    // Generate index argument
-                    var indexArg = callExpr.getArgs().get(0);
-                    compiler.getExpressionGenerator().generate(code, cp, indexArg.getExpr(), null);
-
-                    // Unbox index if needed
-                    String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
-                    if ("Ljava/lang/Integer;".equals(indexType)) {
-                        int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                        code.invokevirtual(intValueMethod);
-                    }
-
-                    // Generate value argument
-                    var valueArg = callExpr.getArgs().get(1);
-                    compiler.getExpressionGenerator().generate(code, cp, valueArg.getExpr(), null);
-
-                    // Box value if primitive
-                    String valueType = compiler.getTypeResolver().inferTypeFromExpr(valueArg.getExpr());
-                    if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
-                        TypeConversionUtils.boxPrimitiveType(code, cp, valueType, TypeConversionUtils.getWrapperType(valueType));
-                    }
-
-                    // Stack: ArrayList, index (int), value (Object)
-                    // Call ArrayApiUtils.with(ArrayList, int, Object)
-                    int withMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "with",
-                            "(Ljava/util/ArrayList;ILjava/lang/Object;)Ljava/util/ArrayList;");
-                    code.invokestatic(withMethod);
-                    // Stack: new ArrayList (with element changed)
-                }
-                case "toSpliced" -> {
-                    // arr.toSpliced(start, deleteCount, ...items) -> ArrayApiUtils.toSpliced(arr, start, deleteCount, items)
-                    // Returns new array with elements removed/inserted (ES2023 non-mutating)
-                    // Stack: ArrayList
-
-                    int argCount = callExpr.getArgs().size();
-
-                    if (argCount == 0) {
-                        // No arguments: toSpliced() - returns copy with no changes
-                        code.iconst(0);  // start = 0
-                        code.iconst(0);  // deleteCount = 0
-                        code.aconst_null();  // items = null
-                    } else if (argCount == 1) {
-                        // One argument: toSpliced(start) - remove from start to end
-                        var startArg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
-
-                        // Unbox if Integer
-                        String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(startType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, start
-
-                        // deleteCount = Integer.MAX_VALUE (remove all after start)
-                        code.ldc(cp.addInteger(Integer.MAX_VALUE));
-                        // Stack: ArrayList, start, deleteCount
-
-                        code.aconst_null();  // items = null
-                        // Stack: ArrayList, start, deleteCount, null
-                    } else {
-                        // Two or more arguments: toSpliced(start, deleteCount, ...items)
-                        // Generate start parameter
-                        var startArg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
-
-                        // Unbox if Integer
-                        String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(startType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, start
-
-                        // Generate deleteCount parameter
-                        var deleteCountArg = callExpr.getArgs().get(1);
-                        compiler.getExpressionGenerator().generate(code, cp, deleteCountArg.getExpr(), null);
-
-                        // Unbox if Integer
-                        String deleteCountType = compiler.getTypeResolver().inferTypeFromExpr(deleteCountArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(deleteCountType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, start, deleteCount
-
-                        // Create ArrayList for items to insert (if any)
-                        if (argCount > 2) {
-                            // Create new ArrayList for items
-                            int arrayListClass = cp.addClass("java/util/ArrayList");
-                            int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
-                            int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
-
-                            code.newInstance(arrayListClass);
-                            code.dup();
-                            code.invokespecial(arrayListInit);
-                            // Stack: ArrayList, start, deleteCount, itemsList
-
-                            // Add each item to the items ArrayList
-                            for (int i = 2; i < argCount; i++) {
-                                code.dup();  // Duplicate itemsList for add() call
-                                // Stack: ArrayList, start, deleteCount, itemsList, itemsList
-
-                                var itemArg = callExpr.getArgs().get(i);
-                                compiler.getExpressionGenerator().generate(code, cp, itemArg.getExpr(), null);
-                                // Stack: ArrayList, start, deleteCount, itemsList, itemsList, item
-
-                                // Box if primitive
-                                String itemType = compiler.getTypeResolver().inferTypeFromExpr(itemArg.getExpr());
-                                if (itemType != null && TypeConversionUtils.isPrimitiveType(itemType)) {
-                                    TypeConversionUtils.boxPrimitiveType(code, cp, itemType, TypeConversionUtils.getWrapperType(itemType));
-                                }
-
-                                code.invokevirtual(addMethod);
-                                code.pop();  // Pop the boolean return value
-                                // Stack: ArrayList, start, deleteCount, itemsList
-                            }
-                            // Stack: ArrayList, start, deleteCount, itemsList
-                        } else {
-                            // No items to insert
-                            code.aconst_null();
-                            // Stack: ArrayList, start, deleteCount, null
-                        }
-                    }
-
-                    // Call ArrayApiUtils.toSpliced(ArrayList, int, int, ArrayList)
-                    int toSplicedMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "toSpliced",
-                            "(Ljava/util/ArrayList;IILjava/util/ArrayList;)Ljava/util/ArrayList;");
-                    code.invokestatic(toSplicedMethod);
-                    // Stack: new ArrayList (with modifications applied)
-                }
-                case "join" -> {
-                    // arr.join(sep) -> ArrayHelper.join(arr, sep)
-                    // JavaScript's join() returns a string
-                    // Default separator is "," if not provided
-
-                    if (callExpr.getArgs().isEmpty()) {
-                        // No separator provided - use default ","
-                        code.ldc(cp.addString(","));
-                    } else {
-                        // Get separator argument
-                        var arg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-
-                        // If the separator is not a String, convert it
-                        String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-                        if (argType != null && !"Ljava/lang/String;".equals(argType)) {
-                            // Convert to string using String.valueOf()
-                            int valueOfMethod = cp.addMethodRef("java/lang/String", "valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
-                            code.invokestatic(valueOfMethod);
-                        }
-                    }
-
-                    // Call ArrayHelper.join(ArrayList, String)
-                    int joinMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "join",
-                            "(Ljava/util/List;Ljava/lang/String;)Ljava/lang/String;");
-                    code.invokestatic(joinMethod);
-                }
-                case "concat" -> {
-                    // arr.concat(arr2) -> ArrayApiUtils.concat(arr, arr2)
-                    // JavaScript's concat() returns a new array
-
-                    if (!callExpr.getArgs().isEmpty()) {
-                        // Get the second array argument
-                        var arg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-
-                        // Call ArrayApiUtils.concat(ArrayList, ArrayList)
-                        int concatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "concat",
-                                "(Ljava/util/ArrayList;Ljava/util/ArrayList;)Ljava/util/ArrayList;");
-                        code.invokestatic(concatMethod);
-                    } else {
-                        // No argument - just return a copy of the array
-                        int arrayListClass = cp.addClass("java/util/ArrayList");
-                        int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V");
-
-                        code.newInstance(arrayListClass)
-                                .dup_x1()  // Duplicate new ArrayList ref, place it below the original array
-                                .swap()    // Swap to get: new ArrayList, original array, new ArrayList
-                                .invokespecial(arrayListInit);  // Call ArrayList(Collection)
-                    }
-                }
-                case "slice" -> {
-                    // arr.slice(start, end) -> ArrayApiUtils.slice(arr, start, end)
-                    // JavaScript's slice() returns a new array with extracted elements
-
-                    int argCount = callExpr.getArgs().size();
-
-                    if (argCount == 0) {
-                        // No arguments: arr.slice() - copy entire array
-                        // Stack: ArrayList
-                        code.iconst(0);  // start = 0
-                        // Stack: ArrayList, 0
-
-                        code.dup_x1();  // Duplicate start, place below ArrayList
-                        // Stack: 0, ArrayList, 0
-
-                        code.pop();  // Remove top 0
-                        // Stack: 0, ArrayList
-
-                        code.dup();  // Duplicate ArrayList for size() call
-                        // Stack: 0, ArrayList, ArrayList
-
-                        int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
-                        code.invokevirtual(sizeMethod);  // Get size
-                        // Stack: 0, ArrayList, size
-
-                        // Now we need: ArrayList, start, end
-                        // Current stack: 0, ArrayList, size
-                        // Reorder to: ArrayList, 0, size
-
-                        code.dup_x2();  // Duplicate size, place it before ArrayList
-                        // Stack: size, 0, ArrayList, size
-
-                        code.pop();  // Remove top size
-                        // Stack: size, 0, ArrayList
-
-                        code.dup_x2();  // Duplicate ArrayList
-                        // Stack: ArrayList, size, 0, ArrayList
-
-                        code.pop();  // Remove top ArrayList
-                        // Stack: ArrayList, size, 0
-
-                        code.swap();  // Swap to get: ArrayList, 0, size
-                        // Stack: ArrayList, 0, size
-
-                    } else if (argCount == 1) {
-                        // One argument: arr.slice(start) - from start to end
-                        // Stack: ArrayList
-
-                        var startArg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
-                        // Stack: ArrayList, start
-
-                        // Need to unbox if Integer
-                        String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(startType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, start (int)
-
-                        code.dup_x1();  // Duplicate start
-                        // Stack: start, ArrayList, start
-
-                        code.pop();  // Remove top start
-                        // Stack: start, ArrayList
-
-                        code.dup();  // Duplicate ArrayList for size() call
-                        // Stack: start, ArrayList, ArrayList
-
-                        int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
-                        code.invokevirtual(sizeMethod);  // Get size
-                        // Stack: start, ArrayList, size
-
-                        // Reorder to: ArrayList, start, size
-                        code.dup_x2();  // Duplicate size
-                        // Stack: size, start, ArrayList, size
-
-                        code.pop();  // Remove top size
-                        // Stack: size, start, ArrayList
-
-                        code.dup_x2();  // Duplicate ArrayList
-                        // Stack: ArrayList, size, start, ArrayList
-
-                        code.pop();  // Remove top ArrayList
-                        // Stack: ArrayList, size, start
-
-                        code.swap();  // Swap to get: ArrayList, start, size
-                        // Stack: ArrayList, start, size
-
-                    } else {
-                        // Two arguments: arr.slice(start, end)
-                        // Stack: ArrayList
-
-                        var startArg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
-                        // Stack: ArrayList, start
-
-                        // Unbox if Integer
-                        String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(startType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, start
-
-                        var endArg = callExpr.getArgs().get(1);
-                        compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
-                        // Stack: ArrayList, start, end
-
-                        // Unbox if Integer
-                        String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(endType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, start, end
-                    }
-
-                    // Call ArrayApiUtils.slice(ArrayList, int, int)
-                    int sliceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "slice",
-                            "(Ljava/util/ArrayList;II)Ljava/util/ArrayList;");
-                    code.invokestatic(sliceMethod);
-                }
-                case "splice" -> {
-                    // arr.splice(start, deleteCount, ...items) -> ArrayApiUtils.splice(arr, start, deleteCount, items)
-                    // JavaScript's splice() mutates the array and returns removed elements
-
-                    int argCount = callExpr.getArgs().size();
-
-                    // Stack: ArrayList
-                    // Keep ArrayList reference for later (splice mutates it)
-                    code.dup();
-                    // Stack: ArrayList, ArrayList
-
-                    if (argCount == 0) {
-                        // No arguments: splice() - remove nothing, return empty array
-                        code.iconst(0);  // start = 0
-                        code.iconst(0);  // deleteCount = 0
-                        code.aconst_null();  // items = null
-                    } else if (argCount == 1) {
-                        // One argument: splice(start) - remove from start to end
-                        var startArg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
-
-                        // Unbox if Integer
-                        String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(startType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, ArrayList, start
-
-                        // deleteCount = array.length - start (remove all after start)
-                        // We need to calculate this, but for simplicity, use Integer.MAX_VALUE
-                        code.ldc(cp.addInteger(Integer.MAX_VALUE));
-                        // Stack: ArrayList, ArrayList, start, deleteCount
-
-                        code.aconst_null();  // items = null
-                        // Stack: ArrayList, ArrayList, start, deleteCount, null
-                    } else {
-                        // Two or more arguments: splice(start, deleteCount, ...items)
-                        // Generate start parameter
-                        var startArg = callExpr.getArgs().get(0);
-                        compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
-
-                        // Unbox if Integer
-                        String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(startType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, ArrayList, start
-
-                        // Generate deleteCount parameter
-                        var deleteCountArg = callExpr.getArgs().get(1);
-                        compiler.getExpressionGenerator().generate(code, cp, deleteCountArg.getExpr(), null);
-
-                        // Unbox if Integer
-                        String deleteCountType = compiler.getTypeResolver().inferTypeFromExpr(deleteCountArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(deleteCountType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, ArrayList, start, deleteCount
-
-                        // Create ArrayList for items to insert (if any)
-                        if (argCount > 2) {
-                            // Create new ArrayList for items
-                            int arrayListClass = cp.addClass("java/util/ArrayList");
-                            int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
-                            int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
-
-                            code.newInstance(arrayListClass);
-                            code.dup();
-                            code.invokespecial(arrayListInit);
-                            // Stack: ArrayList, ArrayList, start, deleteCount, itemsList
-
-                            // Add each item to the items ArrayList
-                            for (int i = 2; i < argCount; i++) {
-                                code.dup();  // Duplicate itemsList for add() call
-                                // Stack: ArrayList, ArrayList, start, deleteCount, itemsList, itemsList
-
-                                var itemArg = callExpr.getArgs().get(i);
-                                compiler.getExpressionGenerator().generate(code, cp, itemArg.getExpr(), null);
-                                // Stack: ArrayList, ArrayList, start, deleteCount, itemsList, itemsList, item
-
-                                // Box if primitive
-                                String itemType = compiler.getTypeResolver().inferTypeFromExpr(itemArg.getExpr());
-                                if (itemType != null && TypeConversionUtils.isPrimitiveType(itemType)) {
-                                    TypeConversionUtils.boxPrimitiveType(code, cp, itemType, TypeConversionUtils.getWrapperType(itemType));
-                                }
-
-                                code.invokevirtual(addMethod);
-                                code.pop();  // Pop the boolean return value
-                                // Stack: ArrayList, ArrayList, start, deleteCount, itemsList
-                            }
-                            // Stack: ArrayList, ArrayList, start, deleteCount, itemsList
-                        } else {
-                            // No items to insert
-                            code.aconst_null();
-                            // Stack: ArrayList, ArrayList, start, deleteCount, null
-                        }
-                    }
-
-                    // Call ArrayApiUtils.splice(ArrayList, int, int, ArrayList)
-                    int spliceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "splice",
-                            "(Ljava/util/ArrayList;IILjava/util/ArrayList;)Ljava/util/ArrayList;");
-                    code.invokestatic(spliceMethod);
-                    // Stack: ArrayList, removedElements
-
-                    // Splice returns the removed elements, but we also kept the original array on stack
-                    // JavaScript splice returns removed elements, so we need to pop the original array and keep removed
-                    code.swap();  // Swap to get: removedElements, ArrayList
-                    code.pop();   // Pop the original ArrayList
-                    // Stack: removedElements
-                }
-                case "fill" -> {
-                    // arr.fill(value, start, end) -> ArrayApiUtils.fill(arr, value, [start], [end])
-                    // Returns the array itself (mutates in place)
-                    int argCount = callExpr.getArgs().size();
-
-                    if (argCount == 0) {
-                        // No value provided - throw error
-                        throw new Swc4jByteCodeCompilerException("fill() requires at least one argument (value)");
-                    }
-
-                    // Stack starts with: ArrayList
-
-                    // Generate the value argument
-                    var valueArg = callExpr.getArgs().get(0);
-                    compiler.getExpressionGenerator().generate(code, cp, valueArg.getExpr(), null);
-                    // Stack: ArrayList, value
-
-                    // Box primitive value if needed
-                    String valueType = compiler.getTypeResolver().inferTypeFromExpr(valueArg.getExpr());
-                    if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
-                        TypeConversionUtils.boxPrimitiveType(code, cp, valueType, TypeConversionUtils.getWrapperType(valueType));
-                    }
-                    // Stack: ArrayList, value (Object)
-
-                    if (argCount == 1) {
-                        // fill(value) - fill entire array
-                        // Stack: ArrayList, value
-                        // Call ArrayApiUtils.fill(ArrayList, Object)
-                        int fillMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "fill",
-                                "(Ljava/util/ArrayList;Ljava/lang/Object;)Ljava/util/ArrayList;");
-                        code.invokestatic(fillMethod);
-
-                    } else if (argCount == 2) {
-                        // fill(value, start) - fill from start to end
-                        var startArg = callExpr.getArgs().get(1);
-                        compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
-                        // Stack: ArrayList, value, start
-
-                        // Unbox if needed
-                        String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(startType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, value, start
-
-                        // Call ArrayApiUtils.fill(ArrayList, Object, int)
-                        int fillMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "fill",
-                                "(Ljava/util/ArrayList;Ljava/lang/Object;I)Ljava/util/ArrayList;");
-                        code.invokestatic(fillMethod);
-
-                    } else {
-                        // fill(value, start, end) - three arguments
-                        var startArg = callExpr.getArgs().get(1);
-                        compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
-
-                        // Unbox start if needed
-                        String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(startType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, value, start
-
-                        var endArg = callExpr.getArgs().get(2);
-                        compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
-
-                        // Unbox end if needed
-                        String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(endType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, value, start, end
-
-                        // Call ArrayApiUtils.fill(ArrayList, Object, int, int)
-                        int fillMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "fill",
-                                "(Ljava/util/ArrayList;Ljava/lang/Object;II)Ljava/util/ArrayList;");
-                        code.invokestatic(fillMethod);
-                    }
-                    // Stack: ArrayList (returned)
-                }
-                case "copyWithin" -> {
-                    // arr.copyWithin(target, start, end) -> ArrayApiUtils.copyWithin(arr, target, start, [end])
-                    // Returns the array itself (mutates in place)
-                    int argCount = callExpr.getArgs().size();
-
-                    if (argCount < 2) {
-                        // Need at least target and start
-                        throw new Swc4jByteCodeCompilerException("copyWithin() requires at least two arguments (target, start)");
-                    }
-
-                    // Stack starts with: ArrayList
-
-                    // Generate the target argument
-                    var targetArg = callExpr.getArgs().get(0);
-                    compiler.getExpressionGenerator().generate(code, cp, targetArg.getExpr(), null);
-                    // Stack: ArrayList, target
-
-                    // Unbox target if needed
-                    String targetType = compiler.getTypeResolver().inferTypeFromExpr(targetArg.getExpr());
-                    if ("Ljava/lang/Integer;".equals(targetType)) {
-                        int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                        code.invokevirtual(intValueMethod);
-                    }
-                    // Stack: ArrayList, target (int)
-
-                    // Generate the start argument
-                    var startArg = callExpr.getArgs().get(1);
-                    compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
-                    // Stack: ArrayList, target, start
-
-                    // Unbox start if needed
-                    String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-                    if ("Ljava/lang/Integer;".equals(startType)) {
-                        int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                        code.invokevirtual(intValueMethod);
-                    }
-                    // Stack: ArrayList, target, start
-
-                    if (argCount == 2) {
-                        // copyWithin(target, start) - copy from start to end
-                        // Stack: ArrayList, target, start
-
-                        // Call ArrayApiUtils.copyWithin(ArrayList, int, int)
-                        int copyWithinMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "copyWithin",
-                                "(Ljava/util/ArrayList;II)Ljava/util/ArrayList;");
-                        code.invokestatic(copyWithinMethod);
-
-                    } else {
-                        // copyWithin(target, start, end) - three arguments
-                        var endArg = callExpr.getArgs().get(2);
-                        compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
-
-                        // Unbox end if needed
-                        String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-                        if ("Ljava/lang/Integer;".equals(endType)) {
-                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                            code.invokevirtual(intValueMethod);
-                        }
-                        // Stack: ArrayList, target, start, end
-
-                        // Call ArrayApiUtils.copyWithin(ArrayList, int, int, int)
-                        int copyWithinMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "copyWithin",
-                                "(Ljava/util/ArrayList;III)Ljava/util/ArrayList;");
-                        code.invokestatic(copyWithinMethod);
-                    }
-                    // Stack: ArrayList (returned)
-                }
-                case "toString" -> {
-                    // arr.toString() -> ArrayApiUtils.arrayToString(arr)
-                    // Returns string representation (comma-separated values)
-                    // Stack: ArrayList
-
-                    // Call ArrayApiUtils.arrayToString(List)
-                    int toStringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "arrayToString",
-                            "(Ljava/util/List;)Ljava/lang/String;");
-                    code.invokestatic(toStringMethod);
-                    // Stack: String
-                }
-                case "toLocaleString" -> {
-                    // arr.toLocaleString() -> ArrayApiUtils.arrayToLocaleString(arr)
-                    // Returns locale-specific string representation (comma-separated values)
-                    // Stack: ArrayList
-
-                    // Call ArrayApiUtils.arrayToLocaleString(List)
-                    int toLocaleStringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "arrayToLocaleString",
-                            "(Ljava/util/List;)Ljava/lang/String;");
-                    code.invokestatic(toLocaleStringMethod);
-                    // Stack: String
-                }
-                default ->
-                        throw new Swc4jByteCodeCompilerException("Method '" + methodName + "()' not supported on String");
+                case "fill" -> generateFill(code, cp, callExpr, elementType);
+                case "includes" -> generateIncludes(code, cp, callExpr, elementType);
+                case "indexOf" -> generateIndexOf(code, cp, callExpr, elementType);
+                case "join" -> generateJoin(code, cp, callExpr, elementType);
+                case "lastIndexOf" -> generateLastIndexOf(code, cp, callExpr, elementType);
+                case "reverse" -> generateReverse(code, cp, elementType);
+                case "sort" -> generateSort(code, cp, elementType);
+                case "toReversed" -> generateToReversed(code, cp, elementType);
+                case "toSorted" -> generateToSorted(code, cp, elementType);
+                case "toString" -> generateToString(code, cp, elementType);
+                default -> throw new Swc4jByteCodeCompilerException(
+                        "Method '" + methodName + "()' is not supported on Java arrays (" + arrayTypeName + "). " +
+                                "Java arrays only support: .length property and index access arr[i].");
             }
+            return;
+        }
+
+        throw new Swc4jByteCodeCompilerException("Invalid call expression on Java array");
+    }
+
+    private void generateFill(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
+        // arr.fill(value) -> ArrayApiUtils.fill(arr, value)
+        if (callExpr.getArgs().isEmpty()) {
+            code.pop(); // Pop array reference
+            return;
+        }
+
+        // Cast reference type arrays to Object[] for the method call
+        if (elementType.startsWith("L")) {
+            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            code.checkcast(objectArrayClass);
+        }
+
+        var arg = callExpr.getArgs().get(0);
+        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+
+        // For reference types, cast to Object; for primitives, unbox and convert
+        if (elementType.startsWith("L")) {
+            // Reference type - already an Object, no conversion needed
+        } else {
+            // Primitive type - unbox if needed and convert to element type
+            String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
+            TypeConversionUtils.unboxWrapperType(code, cp, argType);
+            String argPrimitive = TypeConversionUtils.getPrimitiveType(argType);
+            TypeConversionUtils.convertPrimitiveType(code, argPrimitive, elementType);
+        }
+
+        // Call ArrayApiUtils.fill
+        String methodSignature = getArrayApiUtilsFillSignature(elementType);
+        int fillMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "fill", methodSignature);
+        code.invokestatic(fillMethod);
+
+        // Cast back to original type if reference type
+        if (elementType.startsWith("L")) {
+            String originalArrayDescriptor = "[" + elementType;
+            int originalArrayClass = cp.addClass(originalArrayDescriptor);
+            code.checkcast(originalArrayClass);
         }
     }
 
+    private void generateIncludes(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
+        // arr.includes(value) -> ArrayApiUtils.includes(arr, value)
+        if (callExpr.getArgs().isEmpty()) {
+            code.pop(); // Pop array reference
+            code.iconst(0); // Return false
+            return;
+        }
+
+        // Cast reference type arrays to Object[] for the method call
+        if (elementType.startsWith("L")) {
+            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            code.checkcast(objectArrayClass);
+        }
+
+        var arg = callExpr.getArgs().get(0);
+        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+
+        // For reference types, cast to Object; for primitives, unbox and convert
+        if (elementType.startsWith("L")) {
+            // Reference type - already an Object, no conversion needed
+        } else {
+            // Primitive type - unbox if needed and convert to element type
+            String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
+            TypeConversionUtils.unboxWrapperType(code, cp, argType);
+            String argPrimitive = TypeConversionUtils.getPrimitiveType(argType);
+            TypeConversionUtils.convertPrimitiveType(code, argPrimitive, elementType);
+        }
+
+        // Call ArrayApiUtils.includes
+        String methodSignature = getArrayApiUtilsSearchSignature("includes", elementType, "Z");
+        int includesMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "includes", methodSignature);
+        code.invokestatic(includesMethod);
+    }
+
+    private void generateIndexOf(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
+        // arr.indexOf(value) -> ArrayApiUtils.indexOf(arr, value)
+        if (callExpr.getArgs().isEmpty()) {
+            code.pop(); // Pop array reference
+            code.iconst(-1); // Return -1
+            return;
+        }
+
+        // Cast reference type arrays to Object[] for the method call
+        if (elementType.startsWith("L")) {
+            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            code.checkcast(objectArrayClass);
+        }
+
+        var arg = callExpr.getArgs().get(0);
+        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+
+        // For reference types, cast to Object; for primitives, unbox and convert
+        if (elementType.startsWith("L")) {
+            // Reference type - already an Object, no conversion needed
+        } else {
+            // Primitive type - unbox if needed and convert to element type
+            String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
+            TypeConversionUtils.unboxWrapperType(code, cp, argType);
+            String argPrimitive = TypeConversionUtils.getPrimitiveType(argType);
+            TypeConversionUtils.convertPrimitiveType(code, argPrimitive, elementType);
+        }
+
+        // Call ArrayApiUtils.indexOf
+        String methodSignature = getArrayApiUtilsSearchSignature("indexOf", elementType, "I");
+        int indexOfMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "indexOf", methodSignature);
+        code.invokestatic(indexOfMethod);
+    }
+
+    private void generateJoin(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
+        // arr.join(separator) -> ArrayApiUtils.join(arr, separator)
+        // Cast reference type arrays to Object[] for the method call
+        if (elementType.startsWith("L")) {
+            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            code.checkcast(objectArrayClass);
+        }
+
+        if (callExpr.getArgs().isEmpty()) {
+            // Default separator is ","
+            int commaIndex = cp.addString(",");
+            code.ldc(commaIndex);
+        } else {
+            var arg = callExpr.getArgs().get(0);
+            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+        }
+
+        // Call ArrayApiUtils.join
+        String methodSignature = getArrayApiUtilsJoinSignature(elementType);
+        int joinMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "join", methodSignature);
+        code.invokestatic(joinMethod);
+    }
+
+    private void generateLastIndexOf(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
+        // arr.lastIndexOf(value) -> ArrayApiUtils.lastIndexOf(arr, value)
+        if (callExpr.getArgs().isEmpty()) {
+            code.pop(); // Pop array reference
+            code.iconst(-1); // Return -1
+            return;
+        }
+
+        // Cast reference type arrays to Object[] for the method call
+        if (elementType.startsWith("L")) {
+            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            code.checkcast(objectArrayClass);
+        }
+
+        var arg = callExpr.getArgs().get(0);
+        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+
+        // For reference types, cast to Object; for primitives, unbox and convert
+        if (elementType.startsWith("L")) {
+            // Reference type - already an Object, no conversion needed
+        } else {
+            // Primitive type - unbox if needed and convert to element type
+            String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
+            TypeConversionUtils.unboxWrapperType(code, cp, argType);
+            String argPrimitive = TypeConversionUtils.getPrimitiveType(argType);
+            TypeConversionUtils.convertPrimitiveType(code, argPrimitive, elementType);
+        }
+
+        // Call ArrayApiUtils.lastIndexOf
+        String methodSignature = getArrayApiUtilsSearchSignature("lastIndexOf", elementType, "I");
+        int lastIndexOfMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "lastIndexOf", methodSignature);
+        code.invokestatic(lastIndexOfMethod);
+    }
+
+    private void generateReverse(CodeBuilder code, ClassWriter.ConstantPool cp, String elementType) {
+        // arr.reverse() -> ArrayApiUtils.reverse(arr)
+        // Cast reference type arrays to Object[] for the method call
+        if (elementType.startsWith("L")) {
+            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            code.checkcast(objectArrayClass);
+        }
+
+        String methodSignature = getArrayApiUtilsSignature("reverse", elementType);
+        int reverseMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "reverse", methodSignature);
+        code.invokestatic(reverseMethod);
+
+        // Cast back to original type if reference type
+        if (elementType.startsWith("L")) {
+            String originalArrayDescriptor = "[" + elementType;
+            int originalArrayClass = cp.addClass(originalArrayDescriptor);
+            code.checkcast(originalArrayClass);
+        }
+    }
+
+    private void generateSort(CodeBuilder code, ClassWriter.ConstantPool cp, String elementType) {
+        // arr.sort() -> ArrayApiUtils.sort(arr)
+        // Cast reference type arrays to Object[] for the method call
+        if (elementType.startsWith("L")) {
+            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            code.checkcast(objectArrayClass);
+        }
+
+        String methodSignature = getArrayApiUtilsSignature("sort", elementType);
+        int sortMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "sort", methodSignature);
+        code.invokestatic(sortMethod);
+
+        // Cast back to original type if reference type
+        if (elementType.startsWith("L")) {
+            String originalArrayDescriptor = "[" + elementType;
+            int originalArrayClass = cp.addClass(originalArrayDescriptor);
+            code.checkcast(originalArrayClass);
+        }
+    }
+
+    private void generateToReversed(CodeBuilder code, ClassWriter.ConstantPool cp, String elementType) {
+        // arr.toReversed() -> ArrayApiUtils.toReversed(arr)
+        // Cast reference type arrays to Object[] for the method call
+        if (elementType.startsWith("L")) {
+            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            code.checkcast(objectArrayClass);
+        }
+
+        String methodSignature = getArrayApiUtilsSignature("toReversed", elementType);
+        int toReversedMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "toReversed", methodSignature);
+        code.invokestatic(toReversedMethod);
+
+        // Cast back to original type if reference type
+        if (elementType.startsWith("L")) {
+            String originalArrayDescriptor = "[" + elementType;
+            int originalArrayClass = cp.addClass(originalArrayDescriptor);
+            code.checkcast(originalArrayClass);
+        }
+    }
+
+    private void generateToSorted(CodeBuilder code, ClassWriter.ConstantPool cp, String elementType) {
+        // arr.toSorted() -> ArrayApiUtils.toSorted(arr)
+        // Cast reference type arrays to Object[] for the method call
+        if (elementType.startsWith("L")) {
+            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            code.checkcast(objectArrayClass);
+        }
+
+        String methodSignature = getArrayApiUtilsSignature("toSorted", elementType);
+        int toSortedMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "toSorted", methodSignature);
+        code.invokestatic(toSortedMethod);
+
+        // Cast back to original type if reference type
+        if (elementType.startsWith("L")) {
+            String originalArrayDescriptor = "[" + elementType;
+            int originalArrayClass = cp.addClass(originalArrayDescriptor);
+            code.checkcast(originalArrayClass);
+        }
+    }
+
+    private void generateToString(CodeBuilder code, ClassWriter.ConstantPool cp, String elementType) {
+        // arr.toString() -> ArrayApiUtils.toString(arr)
+        // Cast reference type arrays to Object[] for the method call
+        if (elementType.startsWith("L")) {
+            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            code.checkcast(objectArrayClass);
+        }
+
+        String methodSignature = getArrayApiUtilsToStringSignature(elementType);
+        int toStringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "toString", methodSignature);
+        code.invokestatic(toStringMethod);
+    }
+
+    /**
+     * Get method signature for ArrayApiUtils fill methods.
+     * For example: fill(int[], int) returns int[], fill(Object[], Object) returns Object[]
+     */
+    private String getArrayApiUtilsFillSignature(String elementType) {
+        String arrayDescriptor;
+        String valueType;
+        if (elementType.startsWith("L")) {
+            // Reference type - use Object[] signature
+            arrayDescriptor = "[Ljava/lang/Object;";
+            valueType = "Ljava/lang/Object;";
+        } else {
+            // Primitive type
+            arrayDescriptor = "[" + elementType;
+            valueType = elementType;
+        }
+        return "(" + arrayDescriptor + valueType + ")" + arrayDescriptor;
+    }
+
+    /**
+     * Get method signature for ArrayApiUtils join/toString methods.
+     * For example: join(int[], String) returns String, join(Object[], String) returns String
+     */
+    private String getArrayApiUtilsJoinSignature(String elementType) {
+        String arrayDescriptor;
+        if (elementType.startsWith("L")) {
+            // Reference type - use Object[] signature
+            arrayDescriptor = "[Ljava/lang/Object;";
+        } else {
+            // Primitive type
+            arrayDescriptor = "[" + elementType;
+        }
+        return "(" + arrayDescriptor + "Ljava/lang/String;)Ljava/lang/String;";
+    }
+
+    /**
+     * Get method signature for ArrayApiUtils search methods (indexOf, lastIndexOf, includes).
+     * For example: indexOf(int[], int) returns int, includes(int[], int) returns boolean
+     * For Object arrays: indexOf(Object[], Object) returns int
+     */
+    private String getArrayApiUtilsSearchSignature(String methodName, String elementType, String returnType) {
+        // For reference types, convert to Object[] signature
+        String arrayDescriptor;
+        String paramType;
+
+        if (elementType.startsWith("L")) {
+            // Reference type - use Object[] signature
+            arrayDescriptor = "[Ljava/lang/Object;";
+            paramType = "Ljava/lang/Object;";
+        } else {
+            // Primitive type - use the primitive type
+            arrayDescriptor = "[" + elementType;
+            paramType = elementType;
+        }
+        return "(" + arrayDescriptor + paramType + ")" + returnType;
+    }
+
+    /**
+     * Get method signature for ArrayApiUtils methods that take and return the same array type.
+     * For example: reverse(int[]) returns int[], reverse(Object[]) returns Object[]
+     */
+    private String getArrayApiUtilsSignature(String methodName, String elementType) {
+        String arrayDescriptor;
+        if (elementType.startsWith("L")) {
+            // Reference type - use Object[] signature
+            arrayDescriptor = "[Ljava/lang/Object;";
+        } else {
+            // Primitive type
+            arrayDescriptor = "[" + elementType;
+        }
+        return "(" + arrayDescriptor + ")" + arrayDescriptor;
+    }
+
+    /**
+     * Get method signature for ArrayApiUtils toString methods.
+     * For example: toString(int[]) returns String, toString(Object[]) returns String
+     */
+    private String getArrayApiUtilsToStringSignature(String elementType) {
+        String arrayDescriptor;
+        if (elementType.startsWith("L")) {
+            // Reference type - use Object[] signature
+            arrayDescriptor = "[Ljava/lang/Object;";
+        } else {
+            // Primitive type
+            arrayDescriptor = "[" + elementType;
+        }
+        return "(" + arrayDescriptor + ")Ljava/lang/String;";
+    }
+
+    /**
+     * Gets a human-readable array type name for error messages.
+     *
+     * @param arrayDescriptor the array type descriptor (e.g., "[I", "[[Ljava/lang/String;")
+     * @return human-readable type name (e.g., "int[]", "String[][]")
+     */
+    private String getArrayTypeName(String arrayDescriptor) {
+        if (arrayDescriptor == null || !arrayDescriptor.startsWith("[")) {
+            return "unknown array type";
+        }
+
+        int dimensions = 0;
+        int index = 0;
+        while (index < arrayDescriptor.length() && arrayDescriptor.charAt(index) == '[') {
+            dimensions++;
+            index++;
+        }
+
+        String brackets = "[]".repeat(dimensions);
+
+        if (index >= arrayDescriptor.length()) {
+            return "array" + brackets;
+        }
+
+        char typeChar = arrayDescriptor.charAt(index);
+        String elementType = switch (typeChar) {
+            case 'Z' -> "boolean";
+            case 'B' -> "byte";
+            case 'C' -> "char";
+            case 'S' -> "short";
+            case 'I' -> "int";
+            case 'J' -> "long";
+            case 'F' -> "float";
+            case 'D' -> "double";
+            case 'L' -> {
+                // Reference type - extract class name
+                int semicolonIndex = arrayDescriptor.indexOf(';', index);
+                if (semicolonIndex > index) {
+                    String className = arrayDescriptor.substring(index + 1, semicolonIndex);
+                    // Get simple class name (after last /)
+                    int lastSlash = className.lastIndexOf('/');
+                    yield lastSlash >= 0 ? className.substring(lastSlash + 1) : className;
+                }
+                yield "Object";
+            }
+            default -> "unknown";
+        };
+
+        return elementType + brackets;
+    }
+
+    /**
+     * Checks if this generator supports the given type.
+     *
+     * @param type the type descriptor
+     * @return true if the type is a Java array (starts with '[')
+     */
     public boolean isTypeSupported(String type) {
-        return "Ljava/util/ArrayList;".equals(type);
+        return type != null && type.startsWith("[");
     }
 }

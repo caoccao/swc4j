@@ -8,7 +8,10 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (255 tests passing)
+**Test Files:**
+- [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (255 tests passing)
+- [TestCompileAstArrayLitJavaArrayMethods.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/arraylit/TestCompileAstArrayLitJavaArrayMethods.java) ✅ (35 tests for .length, getter, setter)
+- [TestCompileAstArrayLitJavaArrays.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/arraylit/TestCompileAstArrayLitJavaArrays.java) ✅ (36 tests passing for supported methods)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -73,6 +76,67 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 7. **Type Conversion**
    - Unboxing for Java array elements
    - Primitive type conversion (e.g., int → long)
+
+### CallExpressionForArrayGenerator.java Status
+
+**✅ Implemented Features:**
+
+**Implementation File:** [CallExpressionForArrayGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/callexpr/CallExpressionForArrayGenerator.java) ✅
+
+**Purpose:** Handles method call expressions on Java arrays (not ArrayList), implementing supported methods and providing clear error messages for unsupported methods.
+
+**Key Features:**
+1. **Type Detection**
+   - Uses `isTypeSupported(type)` to check if type is a Java array (starts with '[')
+   - Integrated into CallExpressionGenerator's type routing logic
+
+2. **Supported Methods** (10 methods via ArrayApiUtils)
+   - ✅ **indexOf(value)** - Returns first index of value, or -1 if not found
+   - ✅ **lastIndexOf(value)** - Returns last index of value, or -1 if not found
+   - ✅ **includes(value)** - Returns true if value exists in array
+   - ✅ **reverse()** - Reverses array in place, returns array
+   - ✅ **sort()** - Sorts array in place, returns array
+   - ✅ **toReversed()** - Returns new reversed copy (ES2023)
+   - ✅ **toSorted()** - Returns new sorted copy (ES2023)
+   - ✅ **join(separator)** - Joins elements with separator, returns String
+   - ✅ **fill(value)** - Fills array with value, returns array
+   - ✅ **toString()** - Converts to comma-separated string
+
+3. **ArrayApiUtils Helper Class**
+   - **File:** [ArrayApiUtils.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils.java)
+   - Provides static utility methods for all supported array operations
+   - Separate implementations for each primitive type (int[], double[], boolean[], etc.) and Object[]
+   - Follows JavaScript semantics for compatibility
+
+4. **Reference Type Handling**
+   - Casts reference type arrays (String[], etc.) to Object[] for method calls
+   - Casts back to original type after method returns
+   - Ensures type safety while maintaining compatibility with ArrayApiUtils signatures
+
+5. **Error Message Categories** (for unsupported methods)
+   - **Dynamic methods (push, pop, shift, unshift, splice):** "Java arrays have fixed size. Use ArrayList for dynamic arrays with these methods."
+   - **Non-mutating methods (slice, concat, copyWithin):** "Use ArrayList or implement custom logic."
+   - **Search methods (find, findIndex, findLast, findLastIndex):** "Use Arrays.asList() or implement custom search logic."
+   - **Functional methods (map, filter, reduce, forEach, every, some, flatMap, flat):** "Use Java Streams or implement custom iteration logic."
+   - **Clone method:** "Use Arrays.copyOf() or System.arraycopy()."
+
+6. **Array Type Name Conversion**
+   - Converts JVM descriptors to human-readable names:
+     - `[I` → `int[]`
+     - `[[I` → `int[][]`
+     - `[Ljava/lang/String;` → `String[]`
+     - `[Z` → `boolean[]`
+   - All 8 primitive types supported (Z, B, C, S, I, J, F, D)
+   - Reference types extract simple class name
+
+4. **Clear Error Messages**
+   - All error messages include the method name, array type, and helpful suggestions
+   - Example: "Method 'push()' is not supported on Java arrays (int[]). Java arrays have fixed size. Use ArrayList for dynamic arrays with these methods."
+
+**Note:** Java arrays DO support .length property, getter (arr[i]), and setter (arr[i] = x), but these are NOT method calls and are handled by:
+- `.length` → MemberExpressionGenerator
+- `arr[i]` → ComputedMemberExpressionGenerator
+- `arr[i] = x` → AssignExpressionGenerator
 
 ### TestCompileAstArrayLit.java Status
 
@@ -169,6 +233,60 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
    - `testJavaArrayIndexOfNotSupported` - indexOf() on Java array throws error
    - `testJavaArrayIncludesNotSupported` - includes() on Java array throws error
    - `testJavaArraySetLengthNotSupported` - length assignment throws error
+
+### TestCompileAstArrayLitJavaArrayMethods.java Status
+
+**✅ Passing Tests (19 tests):**
+
+**Purpose:** Verifies that calling unsupported methods on Java arrays produces clear, helpful error messages.
+
+**Test Categories:**
+
+1. **Dynamic Methods (5 tests):**
+   - `testJavaArrayPushNotSupported` - Verifies error message for push() on int[]
+   - `testJavaArrayPopNotSupported` - Verifies error message for pop() on int[]
+   - `testJavaArrayShiftNotSupported` - Verifies error message for shift() on String[]
+   - `testJavaArrayUnshiftNotSupported` - Verifies error message for unshift() on double[]
+   - `testJavaArraySpliceNotSupported` - Verifies error message mentions "fixed size"
+
+2. **Non-Mutating Methods (5 tests):**
+   - `testJavaArraySliceNotSupported` - Verifies error message for slice()
+   - `testJavaArrayConcatNotSupported` - Verifies error message for concat()
+   - `testJavaArrayJoinNotSupported` - Verifies error message for join()
+   - `testJavaArrayReverseNotSupported` - Verifies error message for reverse()
+   - `testJavaArraySortNotSupported` - Verifies error message for sort()
+
+3. **Search Methods (2 tests):**
+   - `testJavaArrayIndexOfNotSupported` - Verifies error message for indexOf()
+   - `testJavaArrayIncludesNotSupported` - Verifies error message for includes()
+
+4. **Functional Methods (3 tests):**
+   - `testJavaArrayMapNotSupported` - Verifies error message mentions "Streams"
+   - `testJavaArrayFilterNotSupported` - Verifies error message for filter()
+   - `testJavaArrayForEachNotSupported` - Verifies error message for forEach()
+
+5. **Other Methods (1 test):**
+   - `testJavaArrayFillNotSupported` - Verifies error message for fill()
+
+6. **Array Type Display (3 tests):**
+   - `testJavaArrayMultidimensionalErrorMessage` - Verifies "int[][]" appears in error
+   - `testJavaArrayBooleanErrorMessage` - Verifies "boolean[]" and "ArrayList" suggestion
+   - `testJavaArrayUnknownMethodNotSupported` - Verifies ".length" is mentioned as supported
+
+**Test Pattern:**
+All tests verify that:
+- The exception is `Swc4jByteCodeCompilerException`
+- The cause message (not direct message) contains:
+  - The method name (e.g., "push")
+  - The array type (e.g., "int[]", "String[]", "double[]")
+  - Helpful suggestions (e.g., "Use ArrayList", "Java Streams")
+
+**Helper Method:**
+```java
+private static String getCauseMessage(Swc4jByteCodeCompilerException exception) {
+    return exception.getCause() != null ? exception.getCause().getMessage() : exception.getMessage();
+}
+```
 
 ---
 
@@ -1419,7 +1537,7 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (255 tests passing)
+**Current Implementation:** ✅ Solid foundation (274 tests passing: 255 in TestCompileAstArrayLit + 19 in TestCompileAstArrayLitJavaArrayMethods)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
@@ -1428,6 +1546,26 @@ namespace com {
 - ES2023 non-mutating methods: `toReversed()`, `toSorted()`, `with()`, `toSpliced()` ✅
 
 **Recently Completed:**
+- ✅ **Java Array Methods Support** - Implemented 10 array methods for Java arrays via ArrayApiUtils
+  - **Supported methods:** indexOf, lastIndexOf, includes, reverse, sort, toReversed, toSorted, join, fill, toString
+  - **ArrayApiUtils class created:** Static utility methods for all supported array operations
+  - Separate implementations for each primitive type (int[], double[], boolean[], etc.) and Object[]
+  - Follows JavaScript semantics for compatibility (e.g., sort converts to strings for comparison)
+  - Reference type handling with automatic casting to/from Object[]
+  - Type inference updated in TypeResolver for return types
+  - 21 comprehensive tests added in TestCompileAstArrayLitJavaArrays.java covering all methods and edge cases
+  - **Implementation files:**
+    - [CallExpressionForArrayGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/callexpr/CallExpressionForArrayGenerator.java)
+    - [ArrayApiUtils.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils.java) (NEW)
+  - **Test file:** [TestCompileAstArrayLitJavaArrays.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/arraylit/TestCompileAstArrayLitJavaArrays.java)
+
+- ✅ **Java Array .length, getter, and setter** - Previously implemented and working
+  - 35 tests in TestCompileAstArrayLitJavaArrayMethods.java verify .length property, arr[i] getter, and arr[i] = value setter
+  - Handles all primitive types (int[], double[], boolean[], etc.) and reference types (String[], Object[], etc.)
+  - **Implementation files:**
+    - [MemberExpressionGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/MemberExpressionGenerator.java) (for .length and getter)
+    - [AssignExpressionGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/AssignExpressionGenerator.java) (for setter)
+
 - ✅ **toSpliced() method (ES2023)** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
   - Non-mutating version of splice() that returns a new array with elements removed/inserted
   - 13 comprehensive tests added covering all scenarios including insertions, deletions, negative indices

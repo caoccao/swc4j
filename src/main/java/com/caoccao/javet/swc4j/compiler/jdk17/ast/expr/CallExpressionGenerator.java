@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.compiler.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
@@ -25,16 +24,19 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.CallExpressionForArrayGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.CallExpressionForArrayListGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.CallExpressionForStringGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCallExpr> {
     private final CallExpressionForArrayGenerator arrayGenerator;
+    private final CallExpressionForArrayListGenerator arrayListGenerator;
     private final CallExpressionForStringGenerator stringGenerator;
 
     public CallExpressionGenerator(ByteCodeCompiler compiler) {
         super(compiler);
         arrayGenerator = new CallExpressionForArrayGenerator(compiler);
+        arrayListGenerator = new CallExpressionForArrayListGenerator(compiler);
         stringGenerator = new CallExpressionForStringGenerator(compiler);
     }
 
@@ -44,19 +46,14 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
             ClassWriter.ConstantPool cp,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        // Handle method calls on arrays (e.g., arr.push(value))
+        // Handle method calls on arrays, strings, etc.
         if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
             String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
-
-            if (objType != null && objType.startsWith("[")) {
-                // Java array - method calls not supported
-                String methodName = null;
-                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-                    methodName = propIdent.getSym();
-                }
-                throw new Swc4jByteCodeCompilerException("Method '" + methodName + "()' not supported on Java arrays - arrays have fixed size");
-            } else if (arrayGenerator.isTypeSupported(objType)) {
+            if (arrayGenerator.isTypeSupported(objType)) {
                 arrayGenerator.generate(code, cp, callExpr, returnTypeInfo);
+                return;
+            } else if (arrayListGenerator.isTypeSupported(objType)) {
+                arrayListGenerator.generate(code, cp, callExpr, returnTypeInfo);
                 return;
             } else if (stringGenerator.isTypeSupported(objType)) {
                 stringGenerator.generate(code, cp, callExpr, returnTypeInfo);

@@ -18,118 +18,119 @@ package com.caoccao.javet.swc4j.compiler.ast.expr.lit.arraylit;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
-import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for Java native arrays and unsupported operations on Java arrays.
  */
 public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
-
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testJavaArrayBooleanOperations(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): boolean {
+                      const arr: boolean[] = [true, false, true, false]
+                      return arr.includes(true)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(true, classA.getMethod("test").invoke(instance));
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArrayConcatNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          const b: int[] = [4, 5, 6]
-                          return a.concat(b)
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for concat on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
+    public void testJavaArrayDoubleOperations(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): double {
+                      const arr: double[] = [3.14, 2.71, 1.41]
+                      arr.sort()
+                      return arr[0]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(1.41, (double) classA.getMethod("test").invoke(instance), 0.001);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArrayCopyWithinNotSupported(JdkVersion jdkVersion) {
-        assertThrows(Swc4jByteCodeCompilerException.class, () -> {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const arr: int[] = [1, 2, 3, 4, 5]
-                          arr.copyWithin(0, 2)
-                          return arr
-                        }
-                      }
-                    }""");
-        });
+    public void testJavaArrayFillInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const arr: int[] = [1, 2, 3, 4, 5]
+                      arr.fill(0)
+                      return arr[2]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(0, classA.getMethod("test").invoke(instance));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArrayDeleteNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          delete a[1]
-                          return a
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for delete on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("Delete operator not supported on Java arrays"), "Expected error about delete, got: " + message);
-        }
+    public void testJavaArrayFillString(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const arr: String[] = ["a", "b", "c"]
+                      arr.fill("x")
+                      return arr[1]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("x", classA.getMethod("test").invoke(instance));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArrayFillNotSupported(JdkVersion jdkVersion) {
-        assertThrows(Swc4jByteCodeCompilerException.class, () -> {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const arr: int[] = [1, 2, 3, 4, 5]
-                          arr.fill(0)
-                          return arr
-                        }
-                      }
-                    }""");
-        });
+    public void testJavaArrayIncludesFalse(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): boolean {
+                      const arr: int[] = [10, 20, 30]
+                      return arr.includes(99)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(false, classA.getMethod("test").invoke(instance));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArrayIncludesNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          return a.includes(2)
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for includes on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
+    public void testJavaArrayIncludesTrue(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): boolean {
+                      const arr: int[] = [10, 20, 30]
+                      return arr.includes(20)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(true, classA.getMethod("test").invoke(instance));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -148,27 +149,56 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
         assertEquals(20, classA.getMethod("test").invoke(instance));
     }
 
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testJavaArrayIndexOfInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const arr: int[] = [10, 20, 30, 20, 10]
+                      return arr.indexOf(20)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(1, classA.getMethod("test").invoke(instance));
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArrayIndexOfNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          return a.indexOf(2)
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for indexOf on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
+    public void testJavaArrayIndexOfNotFound(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const arr: int[] = [10, 20, 30]
+                      return arr.indexOf(99)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(-1, classA.getMethod("test").invoke(instance));
     }
 
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testJavaArrayIndexOfString(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const arr: String[] = ["apple", "banana", "cherry"]
+                      return arr.indexOf("banana")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(1, classA.getMethod("test").invoke(instance));
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -188,48 +218,90 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
         assertEquals(99, classA.getMethod("test").invoke(instance));
     }
 
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testJavaArrayJoinEmpty(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const arr: int[] = [1, 2, 3]
+                      return arr.join("")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("123", classA.getMethod("test").invoke(instance));
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArrayJoinNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          return a.join(",")
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for join on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
+    public void testJavaArrayJoinInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const arr: int[] = [1, 2, 3, 4, 5]
+                      return arr.join(",")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("1,2,3,4,5", classA.getMethod("test").invoke(instance));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArrayLastIndexOfNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          return a.lastIndexOf(2)
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for lastIndexOf on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
+    public void testJavaArrayJoinString(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const arr: String[] = ["apple", "banana", "cherry"]
+                      return arr.join(" - ")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("apple - banana - cherry", classA.getMethod("test").invoke(instance));
     }
 
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testJavaArrayLastIndexOfInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const arr: int[] = [10, 20, 30, 20, 10]
+                      return arr.lastIndexOf(20)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(3, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testJavaArrayLastIndexOfNotFound(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const arr: int[] = [10, 20, 30]
+                      return arr.lastIndexOf(99)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(-1, classA.getMethod("test").invoke(instance));
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -248,262 +320,145 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
         assertEquals(5, classA.getMethod("test").invoke(instance));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArrayPopNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          a.pop()
-                          return a
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for pop on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
+    public void testJavaArrayReverseInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const arr: int[] = [1, 2, 3, 4, 5]
+                      arr.reverse()
+                      return arr[0]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(5, classA.getMethod("test").invoke(instance));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArrayPushNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          a.push(4)
-                          return a
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for push on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
+    public void testJavaArrayReverseString(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const arr: String[] = ["a", "b", "c"]
+                      arr.reverse()
+                      return arr[0]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("c", classA.getMethod("test").invoke(instance));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArrayReverseNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          a.reverse()
-                          return a
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for reverse on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
+    public void testJavaArraySortInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const arr: int[] = [3, 1, 4, 1, 5, 9, 2, 6]
+                      arr.sort()
+                      return arr[0]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(1, classA.getMethod("test").invoke(instance));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArraySetLengthNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          a.length = 0
-                          return a
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for setting length on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("Cannot set length on Java array"), "Expected error about setting length, got: " + message);
-        }
+    public void testJavaArraySortString(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const arr: String[] = ["cherry", "apple", "banana"]
+                      arr.sort()
+                      return arr[0]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("apple", classA.getMethod("test").invoke(instance));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArrayShiftNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          a.shift()
-                          return a
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for shift on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
+    public void testJavaArrayToReversedInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const arr: int[] = [1, 2, 3, 4, 5]
+                      const reversed: int[] = arr.toReversed()
+                      return reversed[0] + arr[0]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(6, classA.getMethod("test").invoke(instance)); // reversed[0] is 5, arr[0] is still 1
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArraySliceNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3, 4, 5]
-                          return a.slice(1, 3)
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for slice on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
+    public void testJavaArrayToSortedInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const arr: int[] = [3, 1, 4, 1, 5]
+                      const sorted: int[] = arr.toSorted()
+                      return sorted[0] + arr[0]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(4, classA.getMethod("test").invoke(instance)); // sorted[0] is 1, arr[0] is still 3
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArraySortNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [3, 1, 2]
-                          a.sort()
-                          return a
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for sort on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
+    public void testJavaArrayToStringBoolean(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const arr: boolean[] = [true, false, true]
+                      return arr.toString()
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("true,false,true", classA.getMethod("test").invoke(instance));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testJavaArraySpliceNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3, 4, 5]
-                          return a.splice(1, 2)
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for splice on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
-    }
-
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testJavaArrayToLocaleStringNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          return a.toLocaleString()
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for toLocaleString on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
-    }
-
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testJavaArrayToReversedNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          return a.toReversed()
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for toReversed on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
-    }
-
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testJavaArrayToSortedNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [3, 1, 2]
-                          return a.toSorted()
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for toSorted on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
-    }
-
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testJavaArrayUnshiftNotSupported(JdkVersion jdkVersion) {
-        try {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const a: int[] = [1, 2, 3]
-                          a.unshift(0)
-                          return a
-                        }
-                      }
-                    }""");
-            fail("Should throw exception for unshift on Java array");
-        } catch (Exception e) {
-            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
-            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
-        }
+    public void testJavaArrayToStringInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const arr: int[] = [1, 2, 3]
+                      return arr.toString()
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("1,2,3", classA.getMethod("test").invoke(instance));
     }
 }

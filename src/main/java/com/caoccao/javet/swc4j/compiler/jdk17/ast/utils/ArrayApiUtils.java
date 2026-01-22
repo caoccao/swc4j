@@ -16,12 +16,13 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
- * Utility class for ArrayList operations similar to JavaScript Array methods.
+ * Utility class for Java array operations similar to JavaScript Array methods.
+ * Handles both primitive arrays (int[], double[], etc.) and reference arrays (Object[]).
  */
 public final class ArrayApiUtils {
     private ArrayApiUtils() {
@@ -29,386 +30,690 @@ public final class ArrayApiUtils {
     }
 
     /**
-     * Convert ArrayList to locale-specific string representation.
-     * JavaScript equivalent: arr.toLocaleString()
-     * JavaScript arrays use comma-separated values with locale-specific formatting: "1,2,3"
-     * Note: This implementation uses the default locale for formatting.
-     * Future enhancement: Support custom locale parameter.
-     *
-     * @param list the ArrayList to convert
-     * @return the locale-specific string representation (comma-separated values)
-     */
-    public static String arrayToLocaleString(List<?> list) {
-        if (list == null || list.isEmpty()) {
-            return "";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < list.size(); i++) {
-            if (i > 0) {
-                sb.append(",");
-            }
-            Object element = list.get(i);
-            if (element != null) {
-                // Use String.valueOf for basic conversion
-                // Future enhancement: Use locale-specific formatting for numbers/dates
-                sb.append(element);
-            }
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * Convert ArrayList to string representation.
-     * JavaScript equivalent: arr.toString()
-     * JavaScript arrays use comma-separated values without brackets: "1,2,3"
-     * This differs from Java's ArrayList.toString() which returns "[1, 2, 3]"
-     *
-     * @param list the ArrayList to convert
-     * @return the string representation (comma-separated values)
-     */
-    public static String arrayToString(List<?> list) {
-        // JavaScript's toString() is equivalent to join(",")
-        return join(list, ",");
-    }
-
-    /**
-     * Concatenate two ArrayLists into a new ArrayList.
-     * JavaScript equivalent: arr1.concat(arr2)
-     *
-     * @param list1 the first ArrayList
-     * @param list2 the second ArrayList to concatenate
-     * @return a new ArrayList containing all elements from both lists
-     */
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Object> concat(ArrayList<?> list1, ArrayList<?> list2) {
-        ArrayList<Object> result = new ArrayList<>();
-
-        if (list1 != null) {
-            result.addAll(list1);
-        }
-
-        if (list2 != null) {
-            result.addAll(list2);
-        }
-
-        return result;
-    }
-
-    /**
-     * Copy part of ArrayList to another location within the same ArrayList.
-     * JavaScript equivalent: arr.copyWithin(target, start)
-     *
-     * @param list   the ArrayList to modify (mutated in place)
-     * @param target the index at which to copy the sequence to (negative values count from end)
-     * @param start  the beginning index to start copying from (negative values count from end)
-     * @return the modified ArrayList (same reference as input)
-     */
-    public static ArrayList<Object> copyWithin(ArrayList<Object> list, int target, int start) {
-        return copyWithin(list, target, start, list == null ? 0 : list.size());
-    }
-
-    /**
-     * Copy part of ArrayList to another location within the same ArrayList.
-     * JavaScript equivalent: arr.copyWithin(target, start, end)
-     *
-     * @param list   the ArrayList to modify (mutated in place)
-     * @param target the index at which to copy the sequence to (negative values count from end)
-     * @param start  the beginning index to start copying from (negative values count from end)
-     * @param end    the ending index to stop copying from (exclusive, negative values count from end)
-     * @return the modified ArrayList (same reference as input)
-     */
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Object> copyWithin(ArrayList<Object> list, int target, int start, int end) {
-        if (list == null || list.isEmpty()) {
-            return list;
-        }
-
-        int length = list.size();
-
-        // Handle negative indices
-        int actualTarget = target < 0 ? Math.max(0, length + target) : Math.min(target, length);
-        int actualStart = start < 0 ? Math.max(0, length + start) : Math.min(start, length);
-        int actualEnd = end < 0 ? Math.max(0, length + end) : Math.min(end, length);
-
-        // Calculate copy length
-        int copyLength = Math.min(actualEnd - actualStart, length - actualTarget);
-
-        if (copyLength <= 0) {
-            return list;
-        }
-
-        // Copy elements to temporary list to avoid overwriting during copy
-        ArrayList<Object> temp = new ArrayList<>();
-        for (int i = 0; i < copyLength; i++) {
-            temp.add(list.get(actualStart + i));
-        }
-
-        // Write elements to target position
-        for (int i = 0; i < copyLength; i++) {
-            list.set(actualTarget + i, temp.get(i));
-        }
-
-        return list;
-    }
-
-    /**
-     * Fill all or part of an ArrayList with a static value.
-     * JavaScript equivalent: arr.fill(value, start, end)
-     *
-     * @param list  the ArrayList to modify (mutated in place)
-     * @param value the value to fill
-     * @param start the beginning index (inclusive), negative values count from end
-     * @param end   the ending index (exclusive), negative values count from end
-     * @return the modified ArrayList (same reference as input)
-     */
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Object> fill(ArrayList<Object> list, Object value, int start, int end) {
-        if (list == null || list.isEmpty()) {
-            return list;
-        }
-
-        int length = list.size();
-
-        // Handle negative indices
-        int actualStart = start < 0 ? Math.max(0, length + start) : Math.min(start, length);
-        int actualEnd = end < 0 ? Math.max(0, length + end) : Math.min(end, length);
-
-        // Fill elements from start to end (exclusive)
-        for (int i = actualStart; i < actualEnd; i++) {
-            list.set(i, value);
-        }
-
-        return list;
-    }
-
-    /**
-     * Fill entire ArrayList with a static value.
+     * Fill an int array with a static value.
      * JavaScript equivalent: arr.fill(value)
      *
-     * @param list  the ArrayList to modify (mutated in place)
+     * @param array the int array to modify (mutated in place)
      * @param value the value to fill
-     * @return the modified ArrayList (same reference as input)
+     * @return the modified array (same reference as input)
      */
-    public static ArrayList<Object> fill(ArrayList<Object> list, Object value) {
-        return fill(list, value, 0, list == null ? 0 : list.size());
+    public static int[] fill(int[] array, int value) {
+        if (array != null) {
+            Arrays.fill(array, value);
+        }
+        return array;
     }
 
     /**
-     * Fill ArrayList from start index to end with a static value.
-     * JavaScript equivalent: arr.fill(value, start)
+     * Fill a double array with a static value.
+     * JavaScript equivalent: arr.fill(value)
      *
-     * @param list  the ArrayList to modify (mutated in place)
+     * @param array the double array to modify (mutated in place)
      * @param value the value to fill
-     * @param start the beginning index (inclusive), negative values count from end
-     * @return the modified ArrayList (same reference as input)
+     * @return the modified array (same reference as input)
      */
-    public static ArrayList<Object> fill(ArrayList<Object> list, Object value, int start) {
-        return fill(list, value, start, list == null ? 0 : list.size());
+    public static double[] fill(double[] array, double value) {
+        if (array != null) {
+            Arrays.fill(array, value);
+        }
+        return array;
     }
 
     /**
-     * Join ArrayList elements into a string with the specified separator.
+     * Fill a boolean array with a static value.
+     * JavaScript equivalent: arr.fill(value)
+     *
+     * @param array the boolean array to modify (mutated in place)
+     * @param value the value to fill
+     * @return the modified array (same reference as input)
+     */
+    public static boolean[] fill(boolean[] array, boolean value) {
+        if (array != null) {
+            Arrays.fill(array, value);
+        }
+        return array;
+    }
+
+    /**
+     * Fill an Object array with a static value.
+     * JavaScript equivalent: arr.fill(value)
+     *
+     * @param array the Object array to modify (mutated in place)
+     * @param value the value to fill
+     * @return the modified array (same reference as input)
+     */
+    public static Object[] fill(Object[] array, Object value) {
+        if (array != null) {
+            Arrays.fill(array, value);
+        }
+        return array;
+    }
+
+    /**
+     * Check if an int array contains a value.
+     * JavaScript equivalent: arr.includes(value)
+     *
+     * @param array the int array to search
+     * @param value the value to find
+     * @return true if the value exists in the array, false otherwise
+     */
+    public static boolean includes(int[] array, int value) {
+        if (array == null) {
+            return false;
+        }
+        for (int element : array) {
+            if (element == value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if a double array contains a value.
+     * JavaScript equivalent: arr.includes(value)
+     *
+     * @param array the double array to search
+     * @param value the value to find
+     * @return true if the value exists in the array, false otherwise
+     */
+    public static boolean includes(double[] array, double value) {
+        if (array == null) {
+            return false;
+        }
+        for (double element : array) {
+            if (Double.compare(element, value) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if a boolean array contains a value.
+     * JavaScript equivalent: arr.includes(value)
+     *
+     * @param array the boolean array to search
+     * @param value the value to find
+     * @return true if the value exists in the array, false otherwise
+     */
+    public static boolean includes(boolean[] array, boolean value) {
+        if (array == null) {
+            return false;
+        }
+        for (boolean element : array) {
+            if (element == value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if an Object array contains a value.
+     * JavaScript equivalent: arr.includes(value)
+     *
+     * @param array the Object array to search
+     * @param value the value to find
+     * @return true if the value exists in the array, false otherwise
+     */
+    public static boolean includes(Object[] array, Object value) {
+        if (array == null) {
+            return false;
+        }
+        for (Object element : array) {
+            if (element == null ? value == null : element.equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Find the first index of a value in an int array.
+     * JavaScript equivalent: arr.indexOf(value)
+     *
+     * @param array the int array to search
+     * @param value the value to find
+     * @return the index of the first occurrence, or -1 if not found
+     */
+    public static int indexOf(int[] array, int value) {
+        if (array == null) {
+            return -1;
+        }
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Find the first index of a value in a double array.
+     * JavaScript equivalent: arr.indexOf(value)
+     *
+     * @param array the double array to search
+     * @param value the value to find
+     * @return the index of the first occurrence, or -1 if not found
+     */
+    public static int indexOf(double[] array, double value) {
+        if (array == null) {
+            return -1;
+        }
+        for (int i = 0; i < array.length; i++) {
+            if (Double.compare(array[i], value) == 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Find the first index of a value in a boolean array.
+     * JavaScript equivalent: arr.indexOf(value)
+     *
+     * @param array the boolean array to search
+     * @param value the value to find
+     * @return the index of the first occurrence, or -1 if not found
+     */
+    public static int indexOf(boolean[] array, boolean value) {
+        if (array == null) {
+            return -1;
+        }
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Find the first index of a value in an Object array.
+     * JavaScript equivalent: arr.indexOf(value)
+     *
+     * @param array the Object array to search
+     * @param value the value to find
+     * @return the index of the first occurrence, or -1 if not found
+     */
+    public static int indexOf(Object[] array, Object value) {
+        if (array == null) {
+            return -1;
+        }
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == null ? value == null : array[i].equals(value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Join int array elements into a string with the specified separator.
      * JavaScript equivalent: arr.join(separator)
      *
-     * @param list      the ArrayList to join
+     * @param array     the int array to join
      * @param separator the separator string (default is "," if null)
      * @return the joined string
      */
-    public static String join(List<?> list, String separator) {
-        if (list == null || list.isEmpty()) {
+    public static String join(int[] array, String separator) {
+        if (array == null || array.length == 0) {
             return "";
         }
 
-        // Use "," as default separator if not provided
         String sep = (separator != null) ? separator : ",";
-
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < list.size(); i++) {
+        for (int i = 0; i < array.length; i++) {
             if (i > 0) {
                 sb.append(sep);
             }
-            // Convert element to string (null becomes "null" in JavaScript)
-            sb.append(list.get(i));
+            sb.append(array[i]);
         }
-
         return sb.toString();
     }
 
     /**
-     * Extract a section of an ArrayList and return it as a new ArrayList.
-     * JavaScript equivalent: arr.slice(start, end)
+     * Join double array elements into a string with the specified separator.
+     * JavaScript equivalent: arr.join(separator)
      *
-     * @param list  the ArrayList to slice
-     * @param start the beginning index (inclusive), negative values count from end
-     * @param end   the ending index (exclusive), negative values count from end
-     * @return a new ArrayList containing the extracted elements
+     * @param array     the double array to join
+     * @param separator the separator string (default is "," if null)
+     * @return the joined string
      */
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Object> slice(ArrayList<?> list, int start, int end) {
-        if (list == null || list.isEmpty()) {
-            return new ArrayList<>();
+    public static String join(double[] array, String separator) {
+        if (array == null || array.length == 0) {
+            return "";
         }
 
-        int length = list.size();
-
-        // Handle negative indices
-        int actualStart = start < 0 ? Math.max(0, length + start) : Math.min(start, length);
-        int actualEnd = end < 0 ? Math.max(0, length + end) : Math.min(end, length);
-
-        // If start >= end, return empty array
-        if (actualStart >= actualEnd) {
-            return new ArrayList<>();
+        String sep = (separator != null) ? separator : ",";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                sb.append(sep);
+            }
+            sb.append(array[i]);
         }
-
-        // Create new ArrayList from subList
-        return new ArrayList<>(list.subList(actualStart, actualEnd));
+        return sb.toString();
     }
 
     /**
-     * Remove and/or insert elements at a specific position in an ArrayList.
-     * JavaScript equivalent: arr.splice(start, deleteCount, ...items)
+     * Join boolean array elements into a string with the specified separator.
+     * JavaScript equivalent: arr.join(separator)
      *
-     * @param list        the ArrayList to modify (mutated in place)
-     * @param start       the beginning index, negative values count from end
-     * @param deleteCount the number of elements to remove
-     * @param items       the ArrayList of items to insert (can be null or empty)
-     * @return a new ArrayList containing the removed elements
+     * @param array     the boolean array to join
+     * @param separator the separator string (default is "," if null)
+     * @return the joined string
      */
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Object> splice(ArrayList<Object> list, int start, int deleteCount, ArrayList<?> items) {
-        if (list == null) {
-            return new ArrayList<>();
+    public static String join(boolean[] array, String separator) {
+        if (array == null || array.length == 0) {
+            return "";
         }
 
-        int length = list.size();
-
-        // Handle negative start index
-        int actualStart = start < 0 ? Math.max(0, length + start) : Math.min(start, length);
-
-        // Clamp deleteCount to valid range
-        int actualDeleteCount = Math.max(0, Math.min(deleteCount, length - actualStart));
-
-        // Collect removed elements
-        ArrayList<Object> removed = new ArrayList<>();
-        for (int i = 0; i < actualDeleteCount; i++) {
-            removed.add(list.remove(actualStart));
+        String sep = (separator != null) ? separator : ",";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                sb.append(sep);
+            }
+            sb.append(array[i]);
         }
-
-        // Insert new items at the position
-        if (items != null && !items.isEmpty()) {
-            list.addAll(actualStart, items);
-        }
-
-        return removed;
+        return sb.toString();
     }
 
     /**
-     * Create a reversed copy of the ArrayList without modifying the original.
+     * Join Object array elements into a string with the specified separator.
+     * JavaScript equivalent: arr.join(separator)
+     *
+     * @param array     the Object array to join
+     * @param separator the separator string (default is "," if null)
+     * @return the joined string
+     */
+    public static String join(Object[] array, String separator) {
+        if (array == null || array.length == 0) {
+            return "";
+        }
+
+        String sep = (separator != null) ? separator : ",";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                sb.append(sep);
+            }
+            sb.append(array[i]);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Find the last index of a value in an int array.
+     * JavaScript equivalent: arr.lastIndexOf(value)
+     *
+     * @param array the int array to search
+     * @param value the value to find
+     * @return the index of the last occurrence, or -1 if not found
+     */
+    public static int lastIndexOf(int[] array, int value) {
+        if (array == null) {
+            return -1;
+        }
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (array[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Find the last index of a value in a double array.
+     * JavaScript equivalent: arr.lastIndexOf(value)
+     *
+     * @param array the double array to search
+     * @param value the value to find
+     * @return the index of the last occurrence, or -1 if not found
+     */
+    public static int lastIndexOf(double[] array, double value) {
+        if (array == null) {
+            return -1;
+        }
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (Double.compare(array[i], value) == 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Find the last index of a value in a boolean array.
+     * JavaScript equivalent: arr.lastIndexOf(value)
+     *
+     * @param array the boolean array to search
+     * @param value the value to find
+     * @return the index of the last occurrence, or -1 if not found
+     */
+    public static int lastIndexOf(boolean[] array, boolean value) {
+        if (array == null) {
+            return -1;
+        }
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (array[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Find the last index of a value in an Object array.
+     * JavaScript equivalent: arr.lastIndexOf(value)
+     *
+     * @param array the Object array to search
+     * @param value the value to find
+     * @return the index of the last occurrence, or -1 if not found
+     */
+    public static int lastIndexOf(Object[] array, Object value) {
+        if (array == null) {
+            return -1;
+        }
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (array[i] == null ? value == null : array[i].equals(value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Reverse an int array in place.
+     * JavaScript equivalent: arr.reverse()
+     *
+     * @param array the int array to reverse (mutated in place)
+     * @return the modified array (same reference as input)
+     */
+    public static int[] reverse(int[] array) {
+        if (array == null || array.length <= 1) {
+            return array;
+        }
+        int left = 0;
+        int right = array.length - 1;
+        while (left < right) {
+            int temp = array[left];
+            array[left] = array[right];
+            array[right] = temp;
+            left++;
+            right--;
+        }
+        return array;
+    }
+
+    /**
+     * Reverse a double array in place.
+     * JavaScript equivalent: arr.reverse()
+     *
+     * @param array the double array to reverse (mutated in place)
+     * @return the modified array (same reference as input)
+     */
+    public static double[] reverse(double[] array) {
+        if (array == null || array.length <= 1) {
+            return array;
+        }
+        int left = 0;
+        int right = array.length - 1;
+        while (left < right) {
+            double temp = array[left];
+            array[left] = array[right];
+            array[right] = temp;
+            left++;
+            right--;
+        }
+        return array;
+    }
+
+    /**
+     * Reverse a boolean array in place.
+     * JavaScript equivalent: arr.reverse()
+     *
+     * @param array the boolean array to reverse (mutated in place)
+     * @return the modified array (same reference as input)
+     */
+    public static boolean[] reverse(boolean[] array) {
+        if (array == null || array.length <= 1) {
+            return array;
+        }
+        int left = 0;
+        int right = array.length - 1;
+        while (left < right) {
+            boolean temp = array[left];
+            array[left] = array[right];
+            array[right] = temp;
+            left++;
+            right--;
+        }
+        return array;
+    }
+
+    /**
+     * Reverse an Object array in place.
+     * JavaScript equivalent: arr.reverse()
+     *
+     * @param array the Object array to reverse (mutated in place)
+     * @return the modified array (same reference as input)
+     */
+    public static Object[] reverse(Object[] array) {
+        if (array == null || array.length <= 1) {
+            return array;
+        }
+        int left = 0;
+        int right = array.length - 1;
+        while (left < right) {
+            Object temp = array[left];
+            array[left] = array[right];
+            array[right] = temp;
+            left++;
+            right--;
+        }
+        return array;
+    }
+
+    /**
+     * Sort an int array in place.
+     * JavaScript equivalent: arr.sort()
+     *
+     * @param array the int array to sort (mutated in place)
+     * @return the modified array (same reference as input)
+     */
+    public static int[] sort(int[] array) {
+        if (array != null) {
+            Arrays.sort(array);
+        }
+        return array;
+    }
+
+    /**
+     * Sort a double array in place.
+     * JavaScript equivalent: arr.sort()
+     *
+     * @param array the double array to sort (mutated in place)
+     * @return the modified array (same reference as input)
+     */
+    public static double[] sort(double[] array) {
+        if (array != null) {
+            Arrays.sort(array);
+        }
+        return array;
+    }
+
+    /**
+     * Sort an Object array in place.
+     * JavaScript equivalent: arr.sort()
+     * Note: Elements must be Comparable, otherwise ClassCastException will be thrown.
+     *
+     * @param array the Object array to sort (mutated in place)
+     * @return the modified array (same reference as input)
+     */
+    @SuppressWarnings("unchecked")
+    public static Object[] sort(Object[] array) {
+        if (array != null && array.length > 0) {
+            Arrays.sort(array, (Comparator<Object>) (o1, o2) -> {
+                if (o1 == null && o2 == null) return 0;
+                if (o1 == null) return -1;
+                if (o2 == null) return 1;
+                // Convert to strings and compare (JavaScript behavior)
+                return o1.toString().compareTo(o2.toString());
+            });
+        }
+        return array;
+    }
+
+    /**
+     * Create a reversed copy of an int array.
      * JavaScript equivalent: arr.toReversed() (ES2023)
      *
-     * @param list the ArrayList to reverse
-     * @return a new ArrayList with elements in reversed order
+     * @param array the int array to reverse
+     * @return a new reversed array
      */
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Object> toReversed(ArrayList<?> list) {
-        if (list == null || list.isEmpty()) {
-            return new ArrayList<>();
+    public static int[] toReversed(int[] array) {
+        if (array == null) {
+            return null;
         }
-
-        // Create a copy of the list
-        ArrayList<Object> result = new ArrayList<>(list);
-
-        // Reverse the copy
-        Collections.reverse(result);
-
-        return result;
+        int[] result = array.clone();
+        return reverse(result);
     }
 
     /**
-     * Create a sorted copy of the ArrayList without modifying the original.
+     * Create a reversed copy of a double array.
+     * JavaScript equivalent: arr.toReversed() (ES2023)
+     *
+     * @param array the double array to reverse
+     * @return a new reversed array
+     */
+    public static double[] toReversed(double[] array) {
+        if (array == null) {
+            return null;
+        }
+        double[] result = array.clone();
+        return reverse(result);
+    }
+
+    /**
+     * Create a reversed copy of a boolean array.
+     * JavaScript equivalent: arr.toReversed() (ES2023)
+     *
+     * @param array the boolean array to reverse
+     * @return a new reversed array
+     */
+    public static boolean[] toReversed(boolean[] array) {
+        if (array == null) {
+            return null;
+        }
+        boolean[] result = array.clone();
+        return reverse(result);
+    }
+
+    /**
+     * Create a reversed copy of an Object array.
+     * JavaScript equivalent: arr.toReversed() (ES2023)
+     *
+     * @param array the Object array to reverse
+     * @return a new reversed array
+     */
+    public static Object[] toReversed(Object[] array) {
+        if (array == null) {
+            return null;
+        }
+        Object[] result = array.clone();
+        return reverse(result);
+    }
+
+    /**
+     * Create a sorted copy of an int array.
      * JavaScript equivalent: arr.toSorted() (ES2023)
      *
-     * @param list the ArrayList to sort
-     * @return a new ArrayList with elements in sorted order
+     * @param array the int array to sort
+     * @return a new sorted array
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static ArrayList<Object> toSorted(ArrayList<?> list) {
-        if (list == null || list.isEmpty()) {
-            return new ArrayList<>();
+    public static int[] toSorted(int[] array) {
+        if (array == null) {
+            return null;
         }
-
-        // Create a copy of the list
-        ArrayList<Object> result = new ArrayList<>(list);
-
-        // Sort the copy (requires elements to be Comparable)
-        // Using raw type to avoid compilation error
-        Collections.sort((List) result);
-
-        return result;
+        int[] result = array.clone();
+        return sort(result);
     }
 
     /**
-     * Create a copy of the ArrayList with elements removed and/or inserted.
-     * JavaScript equivalent: arr.toSpliced(start, deleteCount, ...items) (ES2023)
-     * This is the non-mutating version of splice() that returns the modified array.
+     * Create a sorted copy of a double array.
+     * JavaScript equivalent: arr.toSorted() (ES2023)
      *
-     * @param list        the ArrayList to copy
-     * @param start       the beginning index, negative values count from end
-     * @param deleteCount the number of elements to remove
-     * @param items       the ArrayList of items to insert (can be null or empty)
-     * @return a new ArrayList with the modifications applied
+     * @param array the double array to sort
+     * @return a new sorted array
      */
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Object> toSpliced(ArrayList<?> list, int start, int deleteCount, ArrayList<?> items) {
-        if (list == null) {
-            return new ArrayList<>();
+    public static double[] toSorted(double[] array) {
+        if (array == null) {
+            return null;
         }
-
-        // Create a copy of the list
-        ArrayList<Object> result = new ArrayList<>(list);
-
-        // Call splice on the copy (splice mutates and returns removed elements)
-        splice(result, start, deleteCount, items);
-
-        // Return the modified copy (not the removed elements)
-        return result;
+        double[] result = array.clone();
+        return sort(result);
     }
 
     /**
-     * Create a copy of the ArrayList with a single element changed.
-     * JavaScript equivalent: arr.with(index, value) (ES2023)
+     * Create a sorted copy of an Object array.
+     * JavaScript equivalent: arr.toSorted() (ES2023)
      *
-     * @param list  the ArrayList to copy
-     * @param index the index to change (negative values count from end)
-     * @param value the new value for the element
-     * @return a new ArrayList with the element at index changed to value
+     * @param array the Object array to sort
+     * @return a new sorted array
      */
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Object> with(ArrayList<?> list, int index, Object value) {
-        if (list == null || list.isEmpty()) {
-            return new ArrayList<>();
+    public static Object[] toSorted(Object[] array) {
+        if (array == null) {
+            return null;
         }
+        Object[] result = array.clone();
+        return sort(result);
+    }
 
-        int length = list.size();
+    /**
+     * Convert an int array to string representation.
+     * JavaScript equivalent: arr.toString()
+     * JavaScript arrays use comma-separated values without brackets: "1,2,3"
+     *
+     * @param array the int array to convert
+     * @return the string representation (comma-separated values)
+     */
+    public static String toString(int[] array) {
+        return join(array, ",");
+    }
 
-        // Handle negative indices
-        int actualIndex = index < 0 ? length + index : index;
+    /**
+     * Convert a double array to string representation.
+     * JavaScript equivalent: arr.toString()
+     *
+     * @param array the double array to convert
+     * @return the string representation (comma-separated values)
+     */
+    public static String toString(double[] array) {
+        return join(array, ",");
+    }
 
-        // Check bounds
-        if (actualIndex < 0 || actualIndex >= length) {
-            // JavaScript throws RangeError for out of bounds
-            // We'll return a copy without modification for now
-            return new ArrayList<>(list);
-        }
+    /**
+     * Convert a boolean array to string representation.
+     * JavaScript equivalent: arr.toString()
+     *
+     * @param array the boolean array to convert
+     * @return the string representation (comma-separated values)
+     */
+    public static String toString(boolean[] array) {
+        return join(array, ",");
+    }
 
-        // Create a copy of the list
-        ArrayList<Object> result = new ArrayList<>(list);
-
-        // Set the element at the specified index
-        result.set(actualIndex, value);
-
-        return result;
+    /**
+     * Convert an Object array to string representation.
+     * JavaScript equivalent: arr.toString()
+     *
+     * @param array the Object array to convert
+     * @return the string representation (comma-separated values)
+     */
+    public static String toString(Object[] array) {
+        return join(array, ",");
     }
 }
