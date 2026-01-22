@@ -784,6 +784,25 @@ public final class TypeResolver {
                         }
                     }
                 }
+
+                // String methods
+                if ("Ljava/lang/String;".equals(objType)) {
+                    if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                        String methodName = propIdent.getSym();
+                        return switch (methodName) {
+                            // String return types
+                            case "charAt", "substring", "slice", "toLowerCase", "toUpperCase", "trim", "concat", "repeat", "replace", "replaceAll", "padStart", "padEnd" ->
+                                    "Ljava/lang/String;";
+                            // int return types
+                            case "indexOf", "lastIndexOf", "charCodeAt" -> "I";
+                            // boolean return types
+                            case "startsWith", "endsWith", "includes" -> "Z";
+                            // ArrayList return type (split)
+                            case "split" -> "Ljava/util/ArrayList;";
+                            default -> "Ljava/lang/Object;";
+                        };
+                    }
+                }
             }
             return "Ljava/lang/Object;";
         } else if (expr instanceof Swc4jAstSeqExpr seqExpr) {

@@ -849,6 +849,470 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
                         return;
                     }
                 }
+            } else if ("Ljava/lang/String;".equals(objType)) {
+                // Generate code for the object (String)
+                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+
+                // Get the method name
+                String methodName = null;
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    methodName = propIdent.getSym();
+                }
+
+                switch (methodName) {
+                    // Priority 1: Direct Java equivalents
+                    case "indexOf" -> {
+                        // str.indexOf(searchString) or str.indexOf(searchString, position)
+                        if (callExpr.getArgs().isEmpty()) {
+                            // No arguments - return -1
+                            code.pop(); // Pop string reference
+                            code.iconst(-1);
+                            return;
+                        }
+
+                        // First argument: search string
+                        var searchArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+
+                        if (callExpr.getArgs().size() > 1) {
+                            // Second argument: fromIndex
+                            var fromIndexArg = callExpr.getArgs().get(1);
+                            compiler.getExpressionGenerator().generate(code, cp, fromIndexArg.getExpr(), null);
+
+                            // Unbox if Integer
+                            String fromIndexType = compiler.getTypeResolver().inferTypeFromExpr(fromIndexArg.getExpr());
+                            if ("Ljava/lang/Integer;".equals(fromIndexType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+
+                            // Call indexOf(String, int)
+                            int indexOfMethod = cp.addMethodRef("java/lang/String", "indexOf", "(Ljava/lang/String;I)I");
+                            code.invokevirtual(indexOfMethod);
+                        } else {
+                            // Call indexOf(String)
+                            int indexOfMethod = cp.addMethodRef("java/lang/String", "indexOf", "(Ljava/lang/String;)I");
+                            code.invokevirtual(indexOfMethod);
+                        }
+                        return;
+                    }
+                    case "lastIndexOf" -> {
+                        // str.lastIndexOf(searchString) or str.lastIndexOf(searchString, position)
+                        if (callExpr.getArgs().isEmpty()) {
+                            // No arguments - return -1
+                            code.pop();
+                            code.iconst(-1);
+                            return;
+                        }
+
+                        var searchArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+
+                        if (callExpr.getArgs().size() > 1) {
+                            var fromIndexArg = callExpr.getArgs().get(1);
+                            compiler.getExpressionGenerator().generate(code, cp, fromIndexArg.getExpr(), null);
+
+                            String fromIndexType = compiler.getTypeResolver().inferTypeFromExpr(fromIndexArg.getExpr());
+                            if ("Ljava/lang/Integer;".equals(fromIndexType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+
+                            int lastIndexOfMethod = cp.addMethodRef("java/lang/String", "lastIndexOf", "(Ljava/lang/String;I)I");
+                            code.invokevirtual(lastIndexOfMethod);
+                        } else {
+                            int lastIndexOfMethod = cp.addMethodRef("java/lang/String", "lastIndexOf", "(Ljava/lang/String;)I");
+                            code.invokevirtual(lastIndexOfMethod);
+                        }
+                        return;
+                    }
+                    case "toLowerCase" -> {
+                        // str.toLowerCase()
+                        int toLowerMethod = cp.addMethodRef("java/lang/String", "toLowerCase", "()Ljava/lang/String;");
+                        code.invokevirtual(toLowerMethod);
+                        return;
+                    }
+                    case "toUpperCase" -> {
+                        // str.toUpperCase()
+                        int toUpperMethod = cp.addMethodRef("java/lang/String", "toUpperCase", "()Ljava/lang/String;");
+                        code.invokevirtual(toUpperMethod);
+                        return;
+                    }
+                    case "trim" -> {
+                        // str.trim()
+                        int trimMethod = cp.addMethodRef("java/lang/String", "trim", "()Ljava/lang/String;");
+                        code.invokevirtual(trimMethod);
+                        return;
+                    }
+                    case "concat" -> {
+                        // str.concat(str1, str2, ...) - chain multiple concat calls
+                        if (callExpr.getArgs().isEmpty()) {
+                            // No arguments - return original string (already on stack)
+                            return;
+                        }
+
+                        // For each argument, call concat
+                        for (var arg : callExpr.getArgs()) {
+                            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                            int concatMethod = cp.addMethodRef("java/lang/String", "concat", "(Ljava/lang/String;)Ljava/lang/String;");
+                            code.invokevirtual(concatMethod);
+                            // Stack now has result, which becomes receiver for next concat
+                        }
+                        return;
+                    }
+                    case "startsWith" -> {
+                        // str.startsWith(searchString) or str.startsWith(searchString, position)
+                        if (callExpr.getArgs().isEmpty()) {
+                            code.pop();
+                            code.iconst(0); // false
+                            return;
+                        }
+
+                        var searchArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+
+                        if (callExpr.getArgs().size() > 1) {
+                            // With position
+                            var posArg = callExpr.getArgs().get(1);
+                            compiler.getExpressionGenerator().generate(code, cp, posArg.getExpr(), null);
+
+                            String posType = compiler.getTypeResolver().inferTypeFromExpr(posArg.getExpr());
+                            if ("Ljava/lang/Integer;".equals(posType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+
+                            int startsWithMethod = cp.addMethodRef("java/lang/String", "startsWith", "(Ljava/lang/String;I)Z");
+                            code.invokevirtual(startsWithMethod);
+                        } else {
+                            int startsWithMethod = cp.addMethodRef("java/lang/String", "startsWith", "(Ljava/lang/String;)Z");
+                            code.invokevirtual(startsWithMethod);
+                        }
+                        return;
+                    }
+                    case "endsWith" -> {
+                        // str.endsWith(searchString)
+                        if (callExpr.getArgs().isEmpty()) {
+                            code.pop();
+                            code.iconst(0); // false
+                            return;
+                        }
+
+                        var searchArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+
+                        int endsWithMethod = cp.addMethodRef("java/lang/String", "endsWith", "(Ljava/lang/String;)Z");
+                        code.invokevirtual(endsWithMethod);
+                        return;
+                    }
+                    case "includes" -> {
+                        // str.includes(searchString)
+                        if (callExpr.getArgs().isEmpty()) {
+                            code.pop();
+                            code.iconst(0); // false
+                            return;
+                        }
+
+                        var searchArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+
+                        int containsMethod = cp.addMethodRef("java/lang/String", "contains", "(Ljava/lang/CharSequence;)Z");
+                        code.invokevirtual(containsMethod);
+                        return;
+                    }
+                    case "repeat" -> {
+                        // str.repeat(count)
+                        if (callExpr.getArgs().isEmpty()) {
+                            // No count - return empty string
+                            code.pop();
+                            int emptyStrIndex = cp.addString("");
+                            code.ldc(emptyStrIndex);
+                            return;
+                        }
+
+                        var countArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, countArg.getExpr(), null);
+
+                        // Unbox if Integer
+                        String countType = compiler.getTypeResolver().inferTypeFromExpr(countArg.getExpr());
+                        if ("Ljava/lang/Integer;".equals(countType)) {
+                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                            code.invokevirtual(intValueMethod);
+                        }
+
+                        // Call String.repeat(int) - Available in JDK 11+
+                        int repeatMethod = cp.addMethodRef("java/lang/String", "repeat", "(I)Ljava/lang/String;");
+                        code.invokevirtual(repeatMethod);
+                        return;
+                    }
+                    case "replaceAll" -> {
+                        // str.replaceAll(search, replacement)
+                        // Use Java's replace(CharSequence, CharSequence) which replaces ALL
+                        if (callExpr.getArgs().size() < 2) {
+                            return;
+                        }
+
+                        var searchArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+
+                        var replacementArg = callExpr.getArgs().get(1);
+                        compiler.getExpressionGenerator().generate(code, cp, replacementArg.getExpr(), null);
+
+                        int replaceMethod = cp.addMethodRef("java/lang/String", "replace", "(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Ljava/lang/String;");
+                        code.invokevirtual(replaceMethod);
+                        return;
+                    }
+
+                    // Priority 2: Methods needing edge case handling via StringApiUtils
+                    case "charAt" -> {
+                        // Use StringApiUtils.charAt to handle bounds checking
+                        if (!callExpr.getArgs().isEmpty()) {
+                            var indexArg = callExpr.getArgs().get(0);
+                            compiler.getExpressionGenerator().generate(code, cp, indexArg.getExpr(), null);
+
+                            // Unbox if Integer wrapper
+                            String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
+                            if ("Ljava/lang/Integer;".equals(indexType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+
+                            // Call StringApiUtils.charAt(String, int) -> String
+                            int charAtMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "charAt", "(Ljava/lang/String;I)Ljava/lang/String;");
+                            code.invokestatic(charAtMethod);
+                        } else {
+                            // No argument - pop string and push empty string
+                            code.pop();
+                            int emptyStrIndex = cp.addString("");
+                            code.ldc(emptyStrIndex);
+                        }
+                        return;
+                    }
+                    case "substring" -> {
+                        // Use StringApiUtils.substring to handle edge cases
+                        if (callExpr.getArgs().isEmpty()) {
+                            // No arguments - return whole string
+                            return;
+                        }
+
+                        var startArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+
+                        String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
+                        if ("Ljava/lang/Integer;".equals(startType)) {
+                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                            code.invokevirtual(intValueMethod);
+                        }
+
+                        if (callExpr.getArgs().size() > 1) {
+                            // Two arguments: substring(start, end)
+                            var endArg = callExpr.getArgs().get(1);
+                            compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
+
+                            String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
+                            if ("Ljava/lang/Integer;".equals(endType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+
+                            // Call StringApiUtils.substring(String, int, int)
+                            int substringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "substring", "(Ljava/lang/String;II)Ljava/lang/String;");
+                            code.invokestatic(substringMethod);
+                        } else {
+                            // One argument: substring(start)
+                            int substringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "substring", "(Ljava/lang/String;I)Ljava/lang/String;");
+                            code.invokestatic(substringMethod);
+                        }
+                        return;
+                    }
+                    case "slice" -> {
+                        // Use StringApiUtils.slice to handle negative indices
+                        if (callExpr.getArgs().isEmpty()) {
+                            // No arguments - return whole string
+                            return;
+                        }
+
+                        var startArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+
+                        String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
+                        if ("Ljava/lang/Integer;".equals(startType)) {
+                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                            code.invokevirtual(intValueMethod);
+                        }
+
+                        if (callExpr.getArgs().size() > 1) {
+                            // Two arguments: slice(start, end)
+                            var endArg = callExpr.getArgs().get(1);
+                            compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
+
+                            String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
+                            if ("Ljava/lang/Integer;".equals(endType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+
+                            // Call StringApiUtils.slice(String, int, int)
+                            int sliceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "slice", "(Ljava/lang/String;II)Ljava/lang/String;");
+                            code.invokestatic(sliceMethod);
+                        } else {
+                            // One argument: slice(start)
+                            int sliceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "slice", "(Ljava/lang/String;I)Ljava/lang/String;");
+                            code.invokestatic(sliceMethod);
+                        }
+                        return;
+                    }
+                    case "split" -> {
+                        // Returns ArrayList<String> (JavaScript returns Array)
+                        if (callExpr.getArgs().isEmpty()) {
+                            // No separator - call StringApiUtils.split with null separator
+                            code.aconst_null();
+
+                            // Call StringApiUtils.split(String, String) -> ArrayList<String>
+                            int splitMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "split", "(Ljava/lang/String;Ljava/lang/String;)Ljava/util/ArrayList;");
+                            code.invokestatic(splitMethod);
+                            return;
+                        }
+
+                        var separatorArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, separatorArg.getExpr(), null);
+
+                        if (callExpr.getArgs().size() > 1) {
+                            // With limit
+                            var limitArg = callExpr.getArgs().get(1);
+                            compiler.getExpressionGenerator().generate(code, cp, limitArg.getExpr(), null);
+
+                            String limitType = compiler.getTypeResolver().inferTypeFromExpr(limitArg.getExpr());
+                            if ("Ljava/lang/Integer;".equals(limitType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+
+                            // Call StringApiUtils.split(String, String, int) -> ArrayList<String>
+                            int splitMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "split", "(Ljava/lang/String;Ljava/lang/String;I)Ljava/util/ArrayList;");
+                            code.invokestatic(splitMethod);
+                        } else {
+                            // Without limit
+                            // Call StringApiUtils.split(String, String) -> ArrayList<String>
+                            int splitMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "split", "(Ljava/lang/String;Ljava/lang/String;)Ljava/util/ArrayList;");
+                            code.invokestatic(splitMethod);
+                        }
+                        return;
+                    }
+                    case "replace" -> {
+                        // Use StringApiUtils.replace to match JavaScript behavior (first occurrence only, literal)
+                        if (callExpr.getArgs().size() < 2) {
+                            // Not enough arguments - return original string
+                            return;
+                        }
+
+                        var searchArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+
+                        var replacementArg = callExpr.getArgs().get(1);
+                        compiler.getExpressionGenerator().generate(code, cp, replacementArg.getExpr(), null);
+
+                        // Call StringApiUtils.replace(String, String, String)
+                        int replaceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "replace", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+                        code.invokestatic(replaceMethod);
+                        return;
+                    }
+
+                    // Priority 3: Complex methods requiring helper utilities
+                    case "charCodeAt" -> {
+                        // Use StringApiUtils.charCodeAt
+                        if (callExpr.getArgs().isEmpty()) {
+                            // No index - return -1 (NaN)
+                            code.pop();
+                            code.iconst(-1);
+                            return;
+                        }
+
+                        var indexArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, indexArg.getExpr(), null);
+
+                        String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
+                        if ("Ljava/lang/Integer;".equals(indexType)) {
+                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                            code.invokevirtual(intValueMethod);
+                        }
+
+                        // Call StringApiUtils.charCodeAt(String, int) -> int
+                        int charCodeAtMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "charCodeAt", "(Ljava/lang/String;I)I");
+                        code.invokestatic(charCodeAtMethod);
+                        return;
+                    }
+                    case "padStart" -> {
+                        // Use StringApiUtils.padStart
+                        if (callExpr.getArgs().isEmpty()) {
+                            // No arguments - return original string
+                            return;
+                        }
+
+                        var targetLengthArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, targetLengthArg.getExpr(), null);
+
+                        String lengthType = compiler.getTypeResolver().inferTypeFromExpr(targetLengthArg.getExpr());
+                        if ("Ljava/lang/Integer;".equals(lengthType)) {
+                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                            code.invokevirtual(intValueMethod);
+                        }
+
+                        if (callExpr.getArgs().size() > 1) {
+                            // Custom pad string
+                            var padStringArg = callExpr.getArgs().get(1);
+                            compiler.getExpressionGenerator().generate(code, cp, padStringArg.getExpr(), null);
+
+                            // Call StringApiUtils.padStart(String, int, String)
+                            int padStartMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "padStart", "(Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;");
+                            code.invokestatic(padStartMethod);
+                        } else {
+                            // Default pad string " "
+                            int spaceIndex = cp.addString(" ");
+                            code.ldc(spaceIndex);
+
+                            int padStartMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "padStart", "(Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;");
+                            code.invokestatic(padStartMethod);
+                        }
+                        return;
+                    }
+                    case "padEnd" -> {
+                        // Use StringApiUtils.padEnd
+                        if (callExpr.getArgs().isEmpty()) {
+                            // No arguments - return original string
+                            return;
+                        }
+
+                        var targetLengthArg = callExpr.getArgs().get(0);
+                        compiler.getExpressionGenerator().generate(code, cp, targetLengthArg.getExpr(), null);
+
+                        String lengthType = compiler.getTypeResolver().inferTypeFromExpr(targetLengthArg.getExpr());
+                        if ("Ljava/lang/Integer;".equals(lengthType)) {
+                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                            code.invokevirtual(intValueMethod);
+                        }
+
+                        if (callExpr.getArgs().size() > 1) {
+                            // Custom pad string
+                            var padStringArg = callExpr.getArgs().get(1);
+                            compiler.getExpressionGenerator().generate(code, cp, padStringArg.getExpr(), null);
+
+                            // Call StringApiUtils.padEnd(String, int, String)
+                            int padEndMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "padEnd", "(Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;");
+                            code.invokestatic(padEndMethod);
+                        } else {
+                            // Default pad string " "
+                            int spaceIndex = cp.addString(" ");
+                            code.ldc(spaceIndex);
+
+                            int padEndMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "padEnd", "(Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;");
+                            code.invokestatic(padEndMethod);
+                        }
+                        return;
+                    }
+
+                    default -> throw new Swc4jByteCodeCompilerException("Method '" + methodName + "()' not supported on String");
+                }
             }
         }
         // For unsupported call expressions, throw an error for now

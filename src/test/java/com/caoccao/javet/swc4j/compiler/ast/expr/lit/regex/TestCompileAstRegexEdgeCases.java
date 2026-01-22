@@ -26,19 +26,19 @@ import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for basic regex patterns.
- * Phase 1: Basic Patterns (15 tests)
+ * Tests for edge cases and variable contexts.
+ * Phase 5: Edge Cases + Phase 6: Variable Contexts
  */
-public class TestCompileRegexBasic extends BaseTestCompileSuite {
+public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexAnchors(JdkVersion jdkVersion) throws Exception {
+    public void testRegexComplexCharClass(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
-                      return /^start/
+                      return /[a-zA-Z0-9_\\-.+]/
                     }
                   }
                 }""");
@@ -46,18 +46,18 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
-        assertEquals("^start", pattern.pattern());
-        assertEquals(0, pattern.flags());
+        assertEquals("[a-zA-Z0-9_\\-.+]", pattern.pattern());
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexCharacterClass(JdkVersion jdkVersion) throws Exception {
+    public void testRegexConst(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
-                      return /[a-z0-9]/
+                      const r: Pattern = /pattern/i
+                      return r
                     }
                   }
                 }""");
@@ -65,17 +65,18 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
-        assertEquals("[a-z0-9]", pattern.pattern());
+        assertEquals("pattern", pattern.pattern());
+        assertEquals(Pattern.CASE_INSENSITIVE, pattern.flags());
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexDigits(JdkVersion jdkVersion) throws Exception {
+    public void testRegexDeeplyNestedGroups(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
-                      return /\\d+/
+                      return /((((((((((a))))))))))/
                     }
                   }
                 }""");
@@ -83,18 +84,17 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
-        assertEquals("\\d+", pattern.pattern());
-        assertEquals(0, pattern.flags());
+        assertEquals("((((((((((a))))))))))", pattern.pattern());
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexDot(JdkVersion jdkVersion) throws Exception {
+    public void testRegexEmptyPattern(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
-                      return /./
+                      return /(?:)/
                     }
                   }
                 }""");
@@ -102,17 +102,38 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
-        assertEquals(".", pattern.pattern());
+        // Empty non-capturing group
+        assertEquals("(?:)", pattern.pattern());
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexEscapes(JdkVersion jdkVersion) throws Exception {
+    public void testRegexInferredType(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      return /pattern/
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        Object result = classA.getMethod("test").invoke(instance);
+        assertInstanceOf(Pattern.class, result);
+        Pattern pattern = (Pattern) result;
+        assertEquals("pattern", pattern.pattern());
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRegexLet(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
-                      return /\\n\\t\\r/
+                      let r: Pattern = /test/
+                      return r
                     }
                   }
                 }""");
@@ -120,17 +141,17 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
-        assertEquals("\\n\\t\\r", pattern.pattern());
+        assertEquals("test", pattern.pattern());
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexGroups(JdkVersion jdkVersion) throws Exception {
+    public void testRegexManyAlternations(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
-                      return /(abc)/
+                      return /a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z/
                     }
                   }
                 }""");
@@ -138,17 +159,22 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
-        assertEquals("(abc)", pattern.pattern());
+        assertTrue(pattern.matcher("a").matches());
+        assertTrue(pattern.matcher("z").matches());
+        assertFalse(pattern.matcher("1").matches());
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexHexEscape(JdkVersion jdkVersion) throws Exception {
+    public void testRegexMultipleRegex(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
-                      return /\\x41/
+                      const r1 = /first/
+                      const r2 = /second/i
+                      const r3 = /third/m
+                      return r3
                     }
                   }
                 }""");
@@ -156,12 +182,13 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
-        assertEquals("\\x41", pattern.pattern());
+        assertEquals("third", pattern.pattern());
+        assertEquals(Pattern.MULTILINE, pattern.flags());
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexNegatedClass(JdkVersion jdkVersion) throws Exception {
+    public void testRegexNegatedCharClass(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
@@ -179,12 +206,14 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexNonCapturingGroup(JdkVersion jdkVersion) throws Exception {
+    public void testRegexReassignment(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
-                      return /(?:abc)/
+                      let r = /first/
+                      r = /second/
+                      return r
                     }
                   }
                 }""");
@@ -192,39 +221,17 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
-        assertEquals("(?:abc)", pattern.pattern());
+        assertEquals("second", pattern.pattern());
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexQuantifiers(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    testStar(): Pattern { return /a*/ }
-                    testPlus(): Pattern { return /a+/ }
-                    testQuestion(): Pattern { return /a?/ }
-                    testExact(): Pattern { return /a{3}/ }
-                    testRange(): Pattern { return /a{2,5}/ }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("a*", ((Pattern) classA.getMethod("testStar").invoke(instance)).pattern());
-        assertEquals("a+", ((Pattern) classA.getMethod("testPlus").invoke(instance)).pattern());
-        assertEquals("a?", ((Pattern) classA.getMethod("testQuestion").invoke(instance)).pattern());
-        assertEquals("a{3}", ((Pattern) classA.getMethod("testExact").invoke(instance)).pattern());
-        assertEquals("a{2,5}", ((Pattern) classA.getMethod("testRange").invoke(instance)).pattern());
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testRegexSimple(JdkVersion jdkVersion) throws Exception {
+    public void testRegexReturn(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
-                      return /abc/
+                      return /pattern/
                     }
                   }
                 }""");
@@ -232,18 +239,17 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
-        assertEquals("abc", pattern.pattern());
-        assertEquals(0, pattern.flags());
+        assertEquals("pattern", pattern.pattern());
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexUnicodeEscape(JdkVersion jdkVersion) throws Exception {
+    public void testRegexSlashInPattern(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
-                      return /\\u0041/
+                      return /[/]/
                     }
                   }
                 }""");
@@ -251,17 +257,18 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
-        assertEquals("\\u0041", pattern.pattern());
+        assertEquals("[/]", pattern.pattern());
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexWhitespace(JdkVersion jdkVersion) throws Exception {
+    public void testRegexTypeAnnotation(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
-                      return /\\s+/
+                      const r: Pattern = /test/
+                      return r
                     }
                   }
                 }""");
@@ -269,17 +276,18 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
-        assertEquals("\\s+", pattern.pattern());
+        assertEquals("test", pattern.pattern());
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexWords(JdkVersion jdkVersion) throws Exception {
+    public void testRegexVariable(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
-                      return /\\w+/
+                      const r = /pattern/
+                      return r
                     }
                   }
                 }""");
@@ -287,6 +295,29 @@ public class TestCompileRegexBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
-        assertEquals("\\w+", pattern.pattern());
+        assertEquals("pattern", pattern.pattern());
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRegexVeryLongPattern(JdkVersion jdkVersion) throws Exception {
+        // Create a very long pattern (100+ characters)
+        StringBuilder pattern = new StringBuilder();
+        for (int i = 0; i < 100; i++) {
+            pattern.append("a");
+        }
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Pattern {
+                      return /%s/
+                    }
+                  }
+                }""".formatted(pattern.toString()));
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        Pattern result = (Pattern) classA.getMethod("test").invoke(instance);
+        assertNotNull(result);
+        assertEquals(pattern.toString(), result.pattern());
     }
 }

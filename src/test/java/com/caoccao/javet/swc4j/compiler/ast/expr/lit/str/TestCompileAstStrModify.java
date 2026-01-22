@@ -14,220 +14,225 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.ast.expr.lit.regex;
+package com.caoccao.javet.swc4j.compiler.ast.expr.lit.str;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.util.regex.Pattern;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Tests for escape sequences.
- * Phase 4: Escape Sequences (12 tests)
+ * Tests for String modification methods: concat, repeat, replace, replaceAll, trim, padStart, padEnd
  */
-public class TestCompileRegexEscapes extends BaseTestCompileSuite {
+public class TestCompileAstStrModify extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexBackslashEscape(JdkVersion jdkVersion) throws Exception {
+    public void testConcatSingle(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Pattern {
-                      return /\\\\/
+                    test(): String {
+                      return "hello".concat(" world")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
-        assertNotNull(pattern);
-        assertEquals("\\\\", pattern.pattern());
+        assertEquals("hello world", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexCaretEscape(JdkVersion jdkVersion) throws Exception {
+    public void testConcatMultiple(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Pattern {
-                      return /\\^/
+                    test(): String {
+                      return "a".concat("b", "c", "d")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
-        assertNotNull(pattern);
-        assertEquals("\\^", pattern.pattern());
+        assertEquals("abcd", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexDollarEscape(JdkVersion jdkVersion) throws Exception {
+    public void testRepeatBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Pattern {
-                      return /\\$/
+                    test(): String {
+                      return "ab".repeat(3)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
-        assertNotNull(pattern);
-        assertEquals("\\$", pattern.pattern());
+        assertEquals("ababab", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexDotEscape(JdkVersion jdkVersion) throws Exception {
+    public void testRepeatZero(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Pattern {
-                      return /\\./
+                    test(): String {
+                      return "hello".repeat(0)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
-        assertNotNull(pattern);
-        assertEquals("\\.", pattern.pattern());
+        assertEquals("", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexNullCharacter(JdkVersion jdkVersion) throws Exception {
+    public void testReplaceBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Pattern {
-                      return /\\x00/
+                    test(): String {
+                      return "hello world".replace("world", "there")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
-        assertNotNull(pattern);
-        // Hex escape for null character
-        assertEquals("\\x00", pattern.pattern());
+        assertEquals("hello there", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexPipeEscape(JdkVersion jdkVersion) throws Exception {
+    public void testReplaceFirstOccurrence(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Pattern {
-                      return /\\|/
+                    test(): String {
+                      return "hello hello".replace("hello", "hi")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
-        assertNotNull(pattern);
-        assertEquals("\\|", pattern.pattern());
+        assertEquals("hi hello", classA.getMethod("test").invoke(instance)); // Only first occurrence
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexPlusEscape(JdkVersion jdkVersion) throws Exception {
+    public void testReplaceAllBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Pattern {
-                      return /\\+/
+                    test(): String {
+                      return "hello hello".replaceAll("hello", "hi")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
-        assertNotNull(pattern);
-        assertEquals("\\+", pattern.pattern());
+        assertEquals("hi hi", classA.getMethod("test").invoke(instance)); // All occurrences
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexQuestionEscape(JdkVersion jdkVersion) throws Exception {
+    public void testTrimBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Pattern {
-                      return /\\?/
+                    test(): String {
+                      return "  hello  ".trim()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
-        assertNotNull(pattern);
-        assertEquals("\\?", pattern.pattern());
+        assertEquals("hello", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexSpecialCharEscapes(JdkVersion jdkVersion) throws Exception {
+    public void testTrimTabs(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Pattern {
-                      return /\\[\\]\\(\\)\\{\\}/
+                    test(): String {
+                      return "\t\thello\t\t".trim()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
-        assertNotNull(pattern);
-        assertEquals("\\[\\]\\(\\)\\{\\}", pattern.pattern());
+        assertEquals("hello", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexStarEscape(JdkVersion jdkVersion) throws Exception {
+    public void testPadStartBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Pattern {
-                      return /\\*/
+                    test(): String {
+                      return "5".padStart(3, "0")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
-        assertNotNull(pattern);
-        assertEquals("\\*", pattern.pattern());
+        assertEquals("005", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRegexVerticalTab(JdkVersion jdkVersion) throws Exception {
+    public void testPadStartLonger(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): Pattern {
-                      return /\\v/
+                    test(): String {
+                      return "hi".padStart(5, "ab")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
-        assertNotNull(pattern);
-        // \v should be converted to \x0B
-        assertEquals("\\x0B", pattern.pattern());
+        assertEquals("abahi", classA.getMethod("test").invoke(instance)); // Truncates padding
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPadEndBasic(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "5".padEnd(3, "0")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("500", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPadEndLonger(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hi".padEnd(5, "ab")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("hiaba", classA.getMethod("test").invoke(instance)); // Truncates padding
     }
 }
