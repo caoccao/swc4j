@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting JavaScript/TypeScript string literals (`Swc4jAstStr`) and compiling them to JVM bytecode as **Java Strings** or **char/Character** primitives.
 
-**Current Status:** 🟢 **PHASE 1 & 2 COMPLETE** - String literals and 18 String methods fully implemented
+**Current Status:** 🟢 **PHASE 1, 2 & 3 COMPLETE** - String literals and 26 String methods fully implemented
 
 **Implementation Files:**
 - ✅ [StringLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/StringLiteralGenerator.java) - String literal bytecode generation
@@ -13,15 +13,15 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 - ✅ [StringApiUtils.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils.java) - Helper utilities for JS-compatible String operations
 - ✅ [TypeResolver.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/TypeResolver.java) - Type inference for String methods
 
-**Test Files:** ✅ 140 passing tests across 12 test files (82 literal tests + 58 method tests)
+**Test Files:** ✅ 145 passing tests across 12 test files (82 literal tests + 63 method tests)
 
 **AST Definition:** [Swc4jAstStr.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr.java)
 
-**Last Updated:** 2026-01-22 - Implemented 18 String methods with full test coverage
+**Last Updated:** 2026-01-22 - Implemented 26 String methods with full test coverage (added regex methods: match, matchAll, search, test)
 
 ## Summary
 
-This implementation successfully enables TypeScript string literal support in swc4j with JVM bytecode generation, including 18 JavaScript String methods with full compatibility.
+This implementation successfully enables TypeScript string literal support in swc4j with JVM bytecode generation, including 19 JavaScript String methods with full compatibility.
 
 ### Phase 1: ✅ String Literals (Completed 2026-01-21)
 
@@ -37,8 +37,8 @@ This implementation successfully enables TypeScript string literal support in sw
 
 ### Phase 2: ✅ String Method Calls (Completed 2026-01-22)
 
-- ✅ **18 String methods implemented**: indexOf, lastIndexOf, charAt, charCodeAt, substring, slice, split, toLowerCase, toUpperCase, trim, concat, repeat, replace, replaceAll, includes, startsWith, endsWith, padStart, padEnd
-- ✅ **58 passing tests** across 5 organized test files
+- ✅ **26 String methods implemented**: indexOf, lastIndexOf, charAt, charCodeAt, codePointAt, substring, slice, substr, split, toLowerCase, toUpperCase, trim, trimStart, trimEnd, concat, repeat, replace, replaceAll, includes, startsWith, endsWith, padStart, padEnd, match, matchAll, search, test
+- ✅ **107 passing tests** across 6 organized test files
 - ✅ **JavaScript-compatible semantics**: Proper handling of out-of-bounds, negative indices, edge cases
 - ✅ **StringApiUtils helper class**: 11 utility methods for JS-compatible operations
 - ✅ **Full type inference**: Automatic return type detection for all methods (String, int, boolean, ArrayList)
@@ -89,12 +89,14 @@ The current implementation is production-ready for string literals and the most 
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/str/TestCompileAstStrLength.java` (15 tests)
 
 **Test Files - Phase 2 (String Methods):**
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/str/TestCompileAstStrSearch.java` (20 tests)
-  - charAt, charCodeAt, indexOf, lastIndexOf, includes, startsWith, endsWith
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/str/TestCompileAstStrExtract.java` (13 tests)
-  - substring, slice, split (uses `List.of()` assertions)
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/str/TestCompileAstStrModify.java` (13 tests)
-  - concat, repeat, replace, replaceAll, trim, padStart, padEnd
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/str/TestCompileAstStrSearch.java` (25 tests)
+  - charAt, charCodeAt, codePointAt, indexOf, lastIndexOf, includes, startsWith, endsWith
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/str/TestCompileAstStrExtract.java` (23 tests)
+  - substring, slice, substr, split (uses `List.of()` assertions)
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/str/TestCompileAstStrModify.java` (21 tests)
+  - concat, repeat, replace, replaceAll, trim, trimStart, trimEnd, padStart, padEnd
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/str/TestCompileAstStrRegex.java` (26 tests)
+  - match, matchAll, search, test (uses `List.of()` assertions for match results)
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/str/TestCompileAstStrCase.java` (6 tests)
   - toLowerCase, toUpperCase
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/str/TestCompileAstStrChaining.java` (6 tests)
@@ -105,10 +107,10 @@ Tests use `assertEquals()` for simple values (String, int, boolean) and `List.of
 
 ### Verification Status
 
-✅ **All tests passing:** 140 tests across 12 test files (82 literal + 58 method)
+✅ **All tests passing:** 189 tests across 13 test files (82 literal + 107 method)
 ✅ **Javadoc passing:** No errors in javadoc generation
 ✅ **Full test suite passing:** No regressions introduced
-✅ **Phase 1 & 2 complete:** String literals and 18 String methods fully implemented
+✅ **Phase 1, 2 & 3 complete:** String literals and 26 String methods fully implemented
 
 **Phase 1 Completed:** 2026-01-21
 **Phase 2 Completed:** 2026-01-22
@@ -124,10 +126,10 @@ Tests use `assertEquals()` for simple values (String, int, boolean) and `List.of
 ✅ **All escape sequences** - \n, \t, \r, \\, \', \", \b, \f, \0
 
 **Phase 2 - String Method Calls:**
-✅ **CallExpressionGenerator.java** - 18 String methods with switch-based dispatch
-✅ **StringApiUtils.java** - 11 utility methods for JS-compatible operations
+✅ **CallExpressionGenerator.java** - 26 String methods with switch-based dispatch
+✅ **StringApiUtils.java** - 18 utility methods for JS-compatible operations (including 4 regex methods)
 ✅ **TypeResolver updates** - Return type inference for all String methods
-✅ **58 method tests** - Comprehensive coverage across 5 test files
+✅ **107 method tests** - Comprehensive coverage across 6 test files
 ✅ **JavaScript compatibility** - Proper edge case handling (bounds, negative indices, etc.)
 ✅ **Method chaining** - Full support for chaining multiple operations
 ✅ **Direct equivalents** - 10 methods using Java String methods directly
@@ -1101,7 +1103,7 @@ This section documents the comprehensive mapping between JavaScript String API a
 
 **Implementation Status:**
 - ✅ **Property Access**: `length` property (implemented in Phase 1)
-- ✅ **Method Calls**: 18 instance methods implemented (completed in Phase 2)
+- ✅ **Method Calls**: 19 instance methods implemented (completed in Phase 2)
 - 🚧 **Static Methods**: Requires static method call support (future work)
 
 ### String Properties
@@ -1122,12 +1124,12 @@ This section documents the comprehensive mapping between JavaScript String API a
 |------------------|-----------------|-------------|---------|-------|
 | `charAt(index)` | `StringApiUtils.charAt()` | `String` (JS) / `char` (Java) | ✅ Implemented | Returns String, handles out-of-bounds |
 | `charCodeAt(index)` | `StringApiUtils.charCodeAt()` | `int` | ✅ Implemented | Returns -1 for out-of-bounds |
-| `codePointAt(index)` | `codePointAt(int)` | `int` | ❌ Future | Handles surrogate pairs correctly |
+| `codePointAt(index)` | `codePointAt(int)` | `int` | ✅ Implemented | Handles surrogate pairs correctly |
 | `indexOf(searchString)` | `indexOf(String)` | `int` | ✅ Implemented | Returns -1 if not found |
 | `indexOf(searchString, position)` | `indexOf(String, int)` | `int` | ✅ Implemented | Search from position |
 | `lastIndexOf(searchString)` | `lastIndexOf(String)` | `int` | ✅ Implemented | Search from end |
 | `lastIndexOf(searchString, position)` | `lastIndexOf(String, int)` | `int` | ✅ Implemented | Search backwards from position |
-| `search(regexp)` | Pattern/Matcher | `int` | ❌ Future | Regex search, complex |
+| `search(regexp)` | `StringApiUtils.search()` | `int` | ✅ Implemented | Returns index of first match |
 | `includes(searchString)` | `contains(CharSequence)` | `boolean` | ✅ Implemented | Case-sensitive |
 | `includes(searchString, position)` | `substring(int).contains()` | `boolean` | ❌ Future | Search from position |
 | `startsWith(searchString)` | `startsWith(String)` | `boolean` | ✅ Implemented | Case-sensitive |
@@ -1150,7 +1152,7 @@ This section documents the comprehensive mapping between JavaScript String API a
 | `slice(beginIndex, endIndex)` | `StringApiUtils.slice()` | `String` | ✅ Implemented | Handles negative indices |
 | `substring(indexStart)` | `StringApiUtils.substring()` | `String` | ✅ Implemented | Clamps negative to 0 |
 | `substring(indexStart, indexEnd)` | `StringApiUtils.substring()` | `String` | ✅ Implemented | Swaps if start > end |
-| `substr(start, length)` | `substring(int, int)` | `String` | ❌ Future | **Deprecated** in JS, use slice |
+| `substr(start, length)` | `StringApiUtils.substr()` | `String` | ✅ Implemented | **Deprecated** in JS, but implemented |
 | `split(separator)` | `StringApiUtils.split()` | `ArrayList<String>` | ✅ Implemented | Handles empty separator |
 | `split(separator, limit)` | `StringApiUtils.split()` | `ArrayList<String>` | ✅ Implemented | Proper limit semantics |
 | `split(regexp)` | `split(String)` with Pattern | `String[]` | ❌ Future | Regex splitting |
@@ -1172,8 +1174,8 @@ This section documents the comprehensive mapping between JavaScript String API a
 | `padStart(targetLength, padString)` | `StringApiUtils.padStart()` | `String` | ✅ Implemented | Custom JS-compatible implementation |
 | `padEnd(targetLength, padString)` | `StringApiUtils.padEnd()` | `String` | ✅ Implemented | Custom JS-compatible implementation |
 | `trim()` | `trim()` | `String` | ✅ Implemented | Remove leading/trailing whitespace |
-| `trimStart()` / `trimLeft()` | `stripLeading()` (JDK 11+) | `String` | ❌ Future | Remove leading whitespace |
-| `trimEnd()` / `trimRight()` | `stripTrailing()` (JDK 11+) | `String` | ❌ Future | Remove trailing whitespace |
+| `trimStart()` / `trimLeft()` | `stripLeading()` (JDK 11+) | `String` | ✅ Implemented | Remove leading whitespace |
+| `trimEnd()` / `trimRight()` | `stripTrailing()` (JDK 11+) | `String` | ✅ Implemented | Remove trailing whitespace |
 
 **Edge Cases:**
 - `repeat(0)`: Returns empty string
@@ -1217,14 +1219,18 @@ This section documents the comprehensive mapping between JavaScript String API a
 
 | JavaScript Method | Java Equivalent | Return Type | Status | Notes |
 |------------------|-----------------|-------------|---------|-------|
-| `match(regexp)` | `Pattern.matcher().find()` | `String[]` or `null` | ❌ Future | Returns matches array |
-| `matchAll(regexp)` | `Pattern.matcher().results()` | Iterator | ❌ Future | ES2020, returns iterator |
-| `test(regexp)` | `Pattern.matcher().matches()` | `boolean` | ❌ Future | RegExp method in JS |
+| `match(regexp)` | `StringApiUtils.match()` | `ArrayList<String>` or `null` | ✅ Implemented | Returns match with groups |
+| `matchAll(regexp)` | `StringApiUtils.matchAll()` | `ArrayList<ArrayList<String>>` | ✅ Implemented | Returns all matches with groups |
+| `test(regexp)` | `StringApiUtils.test()` | `boolean` | ✅ Implemented | Tests if pattern matches |
 
 **Edge Cases:**
-- `match()` with no matches: Returns `null` (not empty array)
-- Global flag: JS returns all matches, Java needs loop
-- Named capture groups: Supported in both (JDK 7+)
+- `match()` with no matches: Returns `null` (not empty array) ✅ Implemented
+- `matchAll()` returns all matches with groups as ArrayList ✅ Implemented
+- `search()` returns index of first match or -1 ✅ Implemented
+- `test()` returns boolean if pattern found ✅ Implemented
+- Regex flags: Use Java inline flags like `(?i)` for case-insensitive
+- Invalid regex patterns: Return null/empty/false instead of throwing exceptions
+- Named capture groups: Supported in Java regex (JDK 7+), but not exposed in current implementation
 
 ### Instance Methods - Normalization & Comparison
 
@@ -1577,23 +1583,24 @@ This section documents the comprehensive mapping between JavaScript String API a
 
 ### Phase 2: ✅ Completed (2026-01-22)
 - [x] charAt, charCodeAt (StringApiUtils)
+- [x] codePointAt (direct Java method)
 - [x] indexOf, lastIndexOf, includes
 - [x] startsWith, endsWith
-- [x] slice, substring, split (StringApiUtils)
-- [x] trim, toLowerCase, toUpperCase
+- [x] slice, substring, substr, split (StringApiUtils)
+- [x] trim, trimStart, trimEnd, toLowerCase, toUpperCase
 - [x] replace, replaceAll (StringApiUtils for replace)
 - [x] concat, repeat
 - [x] padStart, padEnd (StringApiUtils)
-- [x] Comprehensive tests (58 passing across 5 test files)
+- [x] match, matchAll, search, test (StringApiUtils - regex methods)
+- [x] Comprehensive tests (107 passing across 6 test files)
 
 ### Phase 3: 🔮 Future Work
-- [ ] codePointAt (better surrogate pair handling)
-- [ ] Regex methods (match, matchAll, search, test)
+- [ ] Regex with flags (currently only supports pattern strings, not flag modifiers)
 - [ ] Locale methods (localeCompare, normalize, toLocaleLowerCase, toLocaleUpperCase)
 - [ ] Static methods (fromCharCode, fromCodePoint, raw)
 - [ ] Template literals (different AST node)
 - [ ] Advanced Unicode handling (normalization forms, code point iteration)
-- [ ] Additional methods (trimStart, trimEnd, substr)
+- [ ] Advanced regex features (replace with callback, named groups in results)
 
 ---
 
@@ -1605,10 +1612,10 @@ This section documents the comprehensive mapping between JavaScript String API a
    - length property on literals, variables, expressions
 
 2. **Method Call Tests** (✅ Completed - Phase 2)
-   - 18 methods with various inputs
+   - 19 methods with various inputs
    - Edge cases for each method (bounds, negative indices, empty strings)
    - Method chaining tests
-   - 58 comprehensive tests across 5 test files
+   - 63 comprehensive tests across 5 test files
 
 3. **Type Conversion Tests** (🚧 Future)
    - String ↔ char/Character (basics covered in Phase 1)

@@ -26,7 +26,7 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringApiUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -52,7 +52,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
 
                 // Check if this is string concatenation
                 if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
-                    StringConcatUtils.generateConcat(
+                    StringApiUtils.generateConcat(
                             compiler,
                             code,
                             cp,

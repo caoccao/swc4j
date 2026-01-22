@@ -16,8 +16,20 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
+import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Utility class for String operations matching JavaScript String API semantics.
@@ -31,6 +43,98 @@ public final class StringApiUtils {
      * Private constructor to prevent instantiation.
      */
     private StringApiUtils() {
+    }
+
+    public static void appendOperandToStringBuilder(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            String operandType,
+            int appendString,
+            int appendInt,
+            int appendChar) throws Swc4jByteCodeCompilerException {
+        switch (operandType) {
+            case "Ljava/lang/String;" -> code.invokevirtual(appendString);
+            case "I", "B", "S" -> code.invokevirtual(appendInt); // int, byte, short all use append(int)
+            case "C" -> code.invokevirtual(appendChar);
+            case "J" -> {
+                // long
+                int appendLong = cp.addMethodRef("java/lang/StringBuilder", "append", "(J)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendLong);
+            }
+            case "F" -> {
+                // float
+                int appendFloat = cp.addMethodRef("java/lang/StringBuilder", "append", "(F)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendFloat);
+            }
+            case "D" -> {
+                // double
+                int appendDouble = cp.addMethodRef("java/lang/StringBuilder", "append", "(D)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendDouble);
+            }
+            case "Z" -> {
+                // boolean
+                int appendBoolean = cp.addMethodRef("java/lang/StringBuilder", "append", "(Z)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendBoolean);
+            }
+            case "Ljava/lang/Character;" -> {
+                // Unbox Character to char
+                int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
+                code.invokevirtual(charValueRef);
+                code.invokevirtual(appendChar);
+            }
+            case "Ljava/lang/Byte;", "Ljava/lang/Short;", "Ljava/lang/Integer;" -> {
+                // Unbox to int, then append
+                String wrapperClass = operandType.substring(1, operandType.length() - 1); // Remove L and ;
+                String methodName = switch (operandType) {
+                    case "Ljava/lang/Byte;" -> "byteValue";
+                    case "Ljava/lang/Short;" -> "shortValue";
+                    case "Ljava/lang/Integer;" -> "intValue";
+                    default -> throw new Swc4jByteCodeCompilerException("Unexpected type: " + operandType);
+                };
+                String returnType = switch (operandType) {
+                    case "Ljava/lang/Byte;" -> "B";
+                    case "Ljava/lang/Short;" -> "S";
+                    case "Ljava/lang/Integer;" -> "I";
+                    default -> throw new Swc4jByteCodeCompilerException("Unexpected type: " + operandType);
+                };
+                int unboxRef = cp.addMethodRef(wrapperClass, methodName, "()" + returnType);
+                code.invokevirtual(unboxRef);
+                code.invokevirtual(appendInt); // byte, short, int all use append(int)
+            }
+            case "Ljava/lang/Long;" -> {
+                // Unbox Long to long
+                int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
+                code.invokevirtual(longValueRef);
+                int appendLong = cp.addMethodRef("java/lang/StringBuilder", "append", "(J)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendLong);
+            }
+            case "Ljava/lang/Float;" -> {
+                // Unbox Float to float
+                int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
+                code.invokevirtual(floatValueRef);
+                int appendFloat = cp.addMethodRef("java/lang/StringBuilder", "append", "(F)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendFloat);
+            }
+            case "Ljava/lang/Double;" -> {
+                // Unbox Double to double
+                int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
+                code.invokevirtual(doubleValueRef);
+                int appendDouble = cp.addMethodRef("java/lang/StringBuilder", "append", "(D)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendDouble);
+            }
+            case "Ljava/lang/Boolean;" -> {
+                // Unbox Boolean to boolean
+                int booleanValueRef = cp.addMethodRef("java/lang/Boolean", "booleanValue", "()Z");
+                code.invokevirtual(booleanValueRef);
+                int appendBoolean = cp.addMethodRef("java/lang/StringBuilder", "append", "(Z)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendBoolean);
+            }
+            default -> {
+                // For any other object type, use append(Object)
+                int appendObject = cp.addMethodRef("java/lang/StringBuilder", "append", "(Ljava/lang/Object;)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendObject);
+            }
+        }
     }
 
     /**
@@ -61,6 +165,70 @@ public final class StringApiUtils {
             return -1; // Represent NaN as -1
         }
         return (int) str.charAt(index);
+    }
+
+    public static void collectOperands(
+            ByteCodeCompiler compiler,
+            ISwc4jAstExpr expr,
+            List<ISwc4jAstExpr> operands,
+            List<String> operandTypes) {
+        // If this expression is a binary Add that results in a String, collect its operands
+        if (expr instanceof Swc4jAstBinExpr binExpr && binExpr.getOp() == Swc4jAstBinaryOp.Add) {
+            String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
+            if ("Ljava/lang/String;".equals(exprType)) {
+                // This is a string concatenation - collect operands recursively
+                collectOperands(compiler, binExpr.getLeft(), operands, operandTypes);
+                collectOperands(compiler, binExpr.getRight(), operands, operandTypes);
+                return;
+            }
+        }
+        // Not a string concatenation - add this expression as an operand
+        operands.add(expr);
+        String operandType = compiler.getTypeResolver().inferTypeFromExpr(expr);
+        // If type is null (e.g., for null literal), default to Object
+        operandTypes.add(operandType != null ? operandType : "Ljava/lang/Object;");
+    }
+
+    public static void generateConcat(
+            ByteCodeCompiler compiler,
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            ISwc4jAstExpr left,
+            ISwc4jAstExpr right,
+            String leftType,
+            String rightType) throws Swc4jByteCodeCompilerException {
+        // Use StringBuilder for string concatenation
+        // new StringBuilder
+        int stringBuilderClass = cp.addClass("java/lang/StringBuilder");
+        int stringBuilderInit = cp.addMethodRef("java/lang/StringBuilder", "<init>", "()V");
+        int appendString = cp.addMethodRef("java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
+        int appendInt = cp.addMethodRef("java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;");
+        int appendChar = cp.addMethodRef("java/lang/StringBuilder", "append", "(C)Ljava/lang/StringBuilder;");
+        int toString = cp.addMethodRef("java/lang/StringBuilder", "toString", "()Ljava/lang/String;");
+
+        code.newInstance(stringBuilderClass)
+                .dup()
+                .invokespecial(stringBuilderInit);
+
+        // Flatten the operands - if left is also a string concatenation, collect all operands
+        List<ISwc4jAstExpr> operands = new ArrayList<>();
+        List<String> operandTypes = new ArrayList<>();
+
+        // Collect operands from left side
+        collectOperands(compiler, left, operands, operandTypes);
+
+        // Add right operand
+        operands.add(right);
+        operandTypes.add(rightType);
+
+        // Append all operands
+        for (int i = 0; i < operands.size(); i++) {
+            compiler.getExpressionGenerator().generate(code, cp, operands.get(i), null);
+            appendOperandToStringBuilder(code, cp, operandTypes.get(i), appendString, appendInt, appendChar);
+        }
+
+        // Call toString()
+        code.invokevirtual(toString);
     }
 
     /**
@@ -256,6 +424,50 @@ public final class StringApiUtils {
     }
 
     /**
+     * JavaScript-compatible substr that extracts substring from start with given length.
+     * Note: This method is deprecated in JavaScript but still widely used.
+     * - Negative start counts from end
+     * - Negative length is treated as 0
+     * - Length beyond string end is clamped
+     *
+     * @param str    the string
+     * @param start  start index (negative counts from end)
+     * @param length number of characters to extract
+     * @return substring
+     */
+    public static String substr(String str, int start, int length) {
+        if (str == null) {
+            return "";
+        }
+
+        int strLength = str.length();
+
+        // Handle negative start (count from end)
+        int actualStart = start < 0 ? Math.max(0, strLength + start) : start;
+
+        // If start is beyond string length, return empty string
+        if (actualStart >= strLength) {
+            return "";
+        }
+
+        // Negative or zero length returns empty string
+        if (length <= 0) {
+            return "";
+        }
+
+        // Calculate end position, handling potential overflow
+        int end;
+        if (length >= strLength - actualStart) {
+            // Length is large enough to go to end of string (or would overflow)
+            end = strLength;
+        } else {
+            end = actualStart + length;
+        }
+
+        return str.substring(actualStart, end);
+    }
+
+    /**
      * JavaScript-compatible substring from start to end of string.
      *
      * @param str   the string
@@ -303,5 +515,160 @@ public final class StringApiUtils {
         }
 
         return str.substring(actualStart, actualEnd);
+    }
+
+    /**
+     * JavaScript-compatible trimEnd (also known as trimRight) that removes trailing whitespace.
+     * Uses Java 11+ stripTrailing() for proper Unicode whitespace handling.
+     *
+     * @param str the string
+     * @return string with trailing whitespace removed
+     */
+    public static String trimEnd(String str) {
+        if (str == null) {
+            return "";
+        }
+        // Use stripTrailing() which handles Unicode whitespace properly (JDK 11+)
+        return str.stripTrailing();
+    }
+
+    /**
+     * JavaScript-compatible trimStart (also known as trimLeft) that removes leading whitespace.
+     * Uses Java 11+ stripLeading() for proper Unicode whitespace handling.
+     *
+     * @param str the string
+     * @return string with leading whitespace removed
+     */
+    public static String trimStart(String str) {
+        if (str == null) {
+            return "";
+        }
+        // Use stripLeading() which handles Unicode whitespace properly (JDK 11+)
+        return str.stripLeading();
+    }
+
+    /**
+     * JavaScript-compatible match() that finds matches using a regex pattern.
+     * Returns ArrayList of matches, or null if no match found.
+     * Note: JavaScript match() with global flag returns all matches,
+     * without global flag returns match with groups. This implementation
+     * returns the first match with all captured groups.
+     *
+     * @param str     the string to search in
+     * @param pattern the regex pattern
+     * @return ArrayList of matched groups (index 0 is full match), or null if no match
+     */
+    public static ArrayList<String> match(String str, String pattern) {
+        if (str == null || pattern == null) {
+            return null;
+        }
+
+        try {
+            Pattern p = Pattern.compile(pattern);
+            Matcher m = p.matcher(str);
+
+            if (m.find()) {
+                ArrayList<String> result = new ArrayList<>();
+                // Add the full match (group 0)
+                result.add(m.group(0));
+                // Add all captured groups
+                for (int i = 1; i <= m.groupCount(); i++) {
+                    result.add(m.group(i));
+                }
+                return result;
+            }
+            return null;
+        } catch (PatternSyntaxException e) {
+            // Invalid regex pattern - return null
+            return null;
+        }
+    }
+
+    /**
+     * JavaScript-compatible matchAll() that finds all matches using a regex pattern.
+     * Returns ArrayList of all matches, where each match is an ArrayList containing
+     * the full match and all captured groups.
+     *
+     * @param str     the string to search in
+     * @param pattern the regex pattern
+     * @return ArrayList of matches, each containing [fullMatch, group1, group2, ...]
+     */
+    public static ArrayList<ArrayList<String>> matchAll(String str, String pattern) {
+        if (str == null || pattern == null) {
+            return new ArrayList<>();
+        }
+
+        try {
+            Pattern p = Pattern.compile(pattern);
+            Matcher m = p.matcher(str);
+            ArrayList<ArrayList<String>> results = new ArrayList<>();
+
+            while (m.find()) {
+                ArrayList<String> match = new ArrayList<>();
+                // Add the full match (group 0)
+                match.add(m.group(0));
+                // Add all captured groups
+                for (int i = 1; i <= m.groupCount(); i++) {
+                    match.add(m.group(i));
+                }
+                results.add(match);
+            }
+
+            return results;
+        } catch (PatternSyntaxException e) {
+            // Invalid regex pattern - return empty list
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * JavaScript-compatible search() that returns the index of the first regex match.
+     * Returns -1 if no match found.
+     *
+     * @param str     the string to search in
+     * @param pattern the regex pattern
+     * @return index of first match, or -1 if no match
+     */
+    public static int search(String str, String pattern) {
+        if (str == null || pattern == null) {
+            return -1;
+        }
+
+        try {
+            Pattern p = Pattern.compile(pattern);
+            Matcher m = p.matcher(str);
+
+            if (m.find()) {
+                return m.start();
+            }
+            return -1;
+        } catch (PatternSyntaxException e) {
+            // Invalid regex pattern - return -1
+            return -1;
+        }
+    }
+
+    /**
+     * JavaScript-compatible test() that tests if a regex pattern matches.
+     * Note: In JavaScript, test() is actually a RegExp method, but we implement
+     * it as a String method for convenience.
+     *
+     * @param str     the string to test
+     * @param pattern the regex pattern
+     * @return true if pattern matches, false otherwise
+     */
+    public static boolean test(String str, String pattern) {
+        if (str == null || pattern == null) {
+            return false;
+        }
+
+        try {
+            Pattern p = Pattern.compile(pattern);
+            Matcher m = p.matcher(str);
+            return m.find();
+        } catch (PatternSyntaxException e) {
+            // Invalid regex pattern - return false
+            return false;
+        }
     }
 }

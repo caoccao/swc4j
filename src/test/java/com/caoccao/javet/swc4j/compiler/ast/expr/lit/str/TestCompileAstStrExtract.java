@@ -26,72 +26,56 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Tests for String extraction methods: substring, slice, split
+ * Tests for String extraction methods: substring, slice, substr, split
  */
 public class TestCompileAstStrExtract extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSubstringOneArg(JdkVersion jdkVersion) throws Exception {
+    public void testSliceBothNegative(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): String {
-                      return "hello world".substring(6)
+                      return "hello world".slice(-5, -1)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("world", classA.getMethod("test").invoke(instance));
+        assertEquals("worl", classA.getMethod("test").invoke(instance)); // slice(-5, -1)
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSubstringTwoArgs(JdkVersion jdkVersion) throws Exception {
+    public void testSliceNegativeEnd(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): String {
-                      return "hello world".substring(0, 5)
+                      return "hello world".slice(0, -6)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("hello", classA.getMethod("test").invoke(instance));
+        assertEquals("hello", classA.getMethod("test").invoke(instance)); // All but last 6
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSubstringSwap(JdkVersion jdkVersion) throws Exception {
+    public void testSliceNegativeStart(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): String {
-                      return "hello".substring(3, 1)
+                      return "hello world".slice(-5)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("el", classA.getMethod("test").invoke(instance)); // JavaScript swaps arguments
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSubstringNegative(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): String {
-                      return "hello".substring(-2, 3)
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("hel", classA.getMethod("test").invoke(instance)); // Negative clamped to 0
+        assertEquals("world", classA.getMethod("test").invoke(instance)); // Last 5 characters
     }
 
     @ParameterizedTest
@@ -128,50 +112,18 @@ public class TestCompileAstStrExtract extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSliceNegativeStart(JdkVersion jdkVersion) throws Exception {
+    public void testSplitComma(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): String {
-                      return "hello world".slice(-5)
+                    test() {
+                      return "a,b,c".split(",")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("world", classA.getMethod("test").invoke(instance)); // Last 5 characters
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSliceNegativeEnd(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): String {
-                      return "hello world".slice(0, -6)
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("hello", classA.getMethod("test").invoke(instance)); // All but last 6
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSliceBothNegative(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): String {
-                      return "hello world".slice(-5, -1)
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("worl", classA.getMethod("test").invoke(instance)); // slice(-5, -1)
+        assertEquals(List.of("a", "b", "c"), classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -208,22 +160,6 @@ public class TestCompileAstStrExtract extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSplitComma(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      return "a,b,c".split(",")
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of("a", "b", "c"), classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testSplitWithLimit(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -236,5 +172,213 @@ public class TestCompileAstStrExtract extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of("a", "b"), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstrBasic(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hello world".substr(0, 5)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("hello", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstrEmpty(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "".substr(0, 5)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstrExceedLength(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hello".substr(2, 100)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("llo", classA.getMethod("test").invoke(instance)); // Clamps to end
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstrNegativeLength(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hello".substr(2, -1)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("", classA.getMethod("test").invoke(instance)); // Negative length returns empty
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstrNegativeStart(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hello world".substr(-5, 5)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("world", classA.getMethod("test").invoke(instance)); // Counts from end
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstrNegativeStartExceed(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hello".substr(-10, 3)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("hel", classA.getMethod("test").invoke(instance)); // Negative beyond start -> 0
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstrOneArg(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hello world".substr(6)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("world", classA.getMethod("test").invoke(instance)); // Extract to end
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstrStartBeyond(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hello".substr(10, 3)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("", classA.getMethod("test").invoke(instance)); // Start beyond length
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstrZeroLength(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hello".substr(2, 0)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("", classA.getMethod("test").invoke(instance)); // Zero length
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstringNegative(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hello".substring(-2, 3)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("hel", classA.getMethod("test").invoke(instance)); // Negative clamped to 0
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstringOneArg(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hello world".substring(6)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("world", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstringSwap(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hello".substring(3, 1)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("el", classA.getMethod("test").invoke(instance)); // JavaScript swaps arguments
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubstringTwoArgs(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return "hello world".substring(0, 5)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("hello", classA.getMethod("test").invoke(instance));
     }
 }

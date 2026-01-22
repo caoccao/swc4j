@@ -791,14 +791,14 @@ public final class TypeResolver {
                         String methodName = propIdent.getSym();
                         return switch (methodName) {
                             // String return types
-                            case "charAt", "substring", "slice", "toLowerCase", "toUpperCase", "trim", "concat", "repeat", "replace", "replaceAll", "padStart", "padEnd" ->
+                            case "charAt", "substring", "slice", "substr", "toLowerCase", "toUpperCase", "trim", "trimStart", "trimLeft", "trimEnd", "trimRight", "concat", "repeat", "replace", "replaceAll", "padStart", "padEnd" ->
                                     "Ljava/lang/String;";
                             // int return types
-                            case "indexOf", "lastIndexOf", "charCodeAt" -> "I";
+                            case "indexOf", "lastIndexOf", "charCodeAt", "codePointAt", "search" -> "I";
                             // boolean return types
-                            case "startsWith", "endsWith", "includes" -> "Z";
-                            // ArrayList return type (split)
-                            case "split" -> "Ljava/util/ArrayList;";
+                            case "startsWith", "endsWith", "includes", "test" -> "Z";
+                            // ArrayList return type (split, match, matchAll)
+                            case "split", "match", "matchAll" -> "Ljava/util/ArrayList;";
                             default -> "Ljava/lang/Object;";
                         };
                     }

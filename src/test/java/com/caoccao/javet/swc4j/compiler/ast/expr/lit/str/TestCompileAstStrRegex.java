@@ -21,277 +21,214 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * Tests for String search methods: charAt, charCodeAt, codePointAt, indexOf, lastIndexOf, includes, startsWith, endsWith
+ * Tests for String regex methods: match, matchAll, search, test
  */
-public class TestCompileAstStrSearch extends BaseTestCompileSuite {
+public class TestCompileAstStrRegex extends BaseTestCompileSuite {
 
+    // matchAll() tests
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testCharAtBasic(JdkVersion jdkVersion) throws Exception {
+    public void testMatchAllBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): String {
-                      return "hello".charAt(1)
+                    test() {
+                      return "cat bat rat".matchAll("\\\\w+at")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("e", classA.getMethod("test").invoke(instance));
+        assertEquals(
+                List.of(List.of("cat"), List.of("bat"), List.of("rat")),
+                classA.getMethod("test").invoke(instance)
+        );
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testCharAtFirst(JdkVersion jdkVersion) throws Exception {
+    public void testMatchAllEmpty(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): String {
-                      return "hello".charAt(0)
+                    test() {
+                      return "".matchAll("\\\\w+")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("h", classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testCharAtLast(JdkVersion jdkVersion) throws Exception {
+    public void testMatchAllGroups(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): String {
-                      return "hello".charAt(4)
+                    test() {
+                      return "a1 b2 c3".matchAll("(\\\\w)(\\\\d)")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("o", classA.getMethod("test").invoke(instance));
+        assertEquals(
+                List.of(
+                        List.of("a1", "a", "1"),
+                        List.of("b2", "b", "2"),
+                        List.of("c3", "c", "3")
+                ),
+                classA.getMethod("test").invoke(instance)
+        );
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testCharAtNegative(JdkVersion jdkVersion) throws Exception {
+    public void testMatchAllNoMatch(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): String {
-                      return "hello".charAt(-1)
+                    test() {
+                      return "hello".matchAll("\\\\d+")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("", classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testCharAtOutOfBounds(JdkVersion jdkVersion) throws Exception {
+    public void testMatchAllOverlapping(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): String {
-                      return "hello".charAt(10)
+                    test() {
+                      return "aaa".matchAll("a+")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("", classA.getMethod("test").invoke(instance));
+        // Should match "aaa" once, not three separate "a"s
+        assertEquals(List.of(List.of("aaa")), classA.getMethod("test").invoke(instance));
+    }
+
+    // match() tests
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMatchBasic(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      return "hello world".match("world")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of("world"), classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testCharCodeAtBasic(JdkVersion jdkVersion) throws Exception {
+    public void testMatchCaseInsensitive(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      return "Hello World".match("(?i)hello")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of("Hello"), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMatchDigits(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      return "abc123def".match("\\\\d+")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of("123"), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMatchEmpty(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      return "".match("\\\\w+")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertNull(classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMatchGroups(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      return "hello world".match("(\\\\w+) (\\\\w+)")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of("hello world", "hello", "world"), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMatchNoMatch(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      return "hello world".match("xyz")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertNull(classA.getMethod("test").invoke(instance));
+    }
+
+    // search() tests
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSearchBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      return "A".charCodeAt(0)
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(65, classA.getMethod("test").invoke(instance)); // ASCII 'A' = 65
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testCharCodeAtOutOfBounds(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      return "hello".charCodeAt(10)
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(-1, classA.getMethod("test").invoke(instance)); // -1 represents NaN
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testCodePointAtBasic(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      return "A".codePointAt(0)
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(65, classA.getMethod("test").invoke(instance)); // ASCII 'A' = 65
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testCodePointAtEmoji(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      return "😀".codePointAt(0)
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0x1F600, classA.getMethod("test").invoke(instance)); // Grinning face emoji
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testCodePointAtMiddle(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      return "hello".codePointAt(2)
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(108, classA.getMethod("test").invoke(instance)); // 'l' = 108
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testCodePointAtSurrogatePair(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      return "🚀world".codePointAt(0)
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0x1F680, classA.getMethod("test").invoke(instance)); // Rocket emoji
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testCodePointAtUnicode(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      return "你好".codePointAt(0)
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0x4F60, classA.getMethod("test").invoke(instance)); // Chinese character '你'
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEndsWithFalse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): boolean {
-                      return "world".endsWith("hello")
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEndsWithTrue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): boolean {
-                      return "hello world".endsWith("world")
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testIncludesFalse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): boolean {
-                      return "hello".includes("xyz")
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testIncludesTrue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): boolean {
-                      return "hello world".includes("world")
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testIndexOfBasic(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      return "hello world".indexOf("world")
+                      return "hello world".search("world")
                     }
                   }
                 }""");
@@ -302,12 +239,12 @@ public class TestCompileAstStrSearch extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIndexOfFirstOccurrence(JdkVersion jdkVersion) throws Exception {
+    public void testSearchBeginning(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      return "hello hello".indexOf("hello")
+                      return "hello world".search("^hello")
                     }
                   }
                 }""");
@@ -318,12 +255,28 @@ public class TestCompileAstStrSearch extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIndexOfNotFound(JdkVersion jdkVersion) throws Exception {
+    public void testSearchDigits(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      return "hello".indexOf("xyz")
+                      return "abc123def".search("\\\\d")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(3, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSearchEmpty(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      return "".search("\\\\w")
                     }
                   }
                 }""");
@@ -334,12 +287,12 @@ public class TestCompileAstStrSearch extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIndexOfWithPosition(JdkVersion jdkVersion) throws Exception {
+    public void testSearchEnd(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      return "hello hello".indexOf("hello", 3)
+                      return "hello world".search("world$")
                     }
                   }
                 }""");
@@ -350,28 +303,12 @@ public class TestCompileAstStrSearch extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLastIndexOfBasic(JdkVersion jdkVersion) throws Exception {
+    public void testSearchNoMatch(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      return "hello hello".lastIndexOf("hello")
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(6, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testLastIndexOfNotFound(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      return "hello".lastIndexOf("xyz")
+                      return "hello world".search("xyz")
                     }
                   }
                 }""");
@@ -380,30 +317,15 @@ public class TestCompileAstStrSearch extends BaseTestCompileSuite {
         assertEquals(-1, classA.getMethod("test").invoke(instance));
     }
 
+    // test() tests
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStartsWithFalse(JdkVersion jdkVersion) throws Exception {
+    public void testTestBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): boolean {
-                      return "hello".startsWith("world")
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testStartsWithPosition(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): boolean {
-                      return "hello world".startsWith("world", 6)
+                      return "hello world".test("world")
                     }
                   }
                 }""");
@@ -414,12 +336,92 @@ public class TestCompileAstStrSearch extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStartsWithTrue(JdkVersion jdkVersion) throws Exception {
+    public void testTestCaseInsensitive(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): boolean {
-                      return "hello world".startsWith("hello")
+                      return "Hello".test("(?i)hello")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(true, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTestDigits(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): boolean {
+                      return "abc123".test("\\\\d+")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(true, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTestEmpty(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): boolean {
+                      return "".test("\\\\w")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(false, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTestNoMatch(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): boolean {
+                      return "hello world".test("xyz")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(false, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTestPartialMatch(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): boolean {
+                      return "hello world".test("^world")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(false, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTestWhitespace(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): boolean {
+                      return "hello world".test("\\\\s")
                     }
                   }
                 }""");

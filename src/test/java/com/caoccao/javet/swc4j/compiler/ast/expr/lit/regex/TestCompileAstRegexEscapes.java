@@ -23,7 +23,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Tests for escape sequences.
