@@ -65,6 +65,7 @@ public sealed abstract class ByteCodeCompiler permits
     protected final ByteCodeCompilerOptions options;
     protected final ParenExpressionGenerator parenExpressionGenerator;
     protected final Swc4jParseOptions parseOptions;
+    protected final RegexLiteralGenerator regexLiteralGenerator;
     protected final SeqExpressionGenerator seqExpressionGenerator;
     protected final StatementGenerator statementGenerator;
     protected final StringLiteralGenerator stringLiteralGenerator;
@@ -112,6 +113,7 @@ public sealed abstract class ByteCodeCompiler permits
         numberLiteralGenerator = new NumberLiteralGenerator(this);
         objectLiteralGenerator = new ObjectLiteralGenerator(this);
         parenExpressionGenerator = new ParenExpressionGenerator(this);
+        regexLiteralGenerator = new RegexLiteralGenerator(this);
         seqExpressionGenerator = new SeqExpressionGenerator(this);
         statementGenerator = new StatementGenerator(this);
         stringLiteralGenerator = new StringLiteralGenerator(this);
@@ -242,6 +244,10 @@ public sealed abstract class ByteCodeCompiler permits
 
     public ParenExpressionGenerator getParenExpressionGenerator() {
         return parenExpressionGenerator;
+    }
+
+    public RegexLiteralGenerator getRegexLiteralGenerator() {
+        return regexLiteralGenerator;
     }
 
     public SeqExpressionGenerator getSeqExpressionGenerator() {

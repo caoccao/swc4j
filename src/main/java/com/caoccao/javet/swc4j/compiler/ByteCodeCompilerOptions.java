@@ -39,6 +39,7 @@ public record ByteCodeCompilerOptions(
         ));
         DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
                 "BigInteger", "java.math.BigInteger",
+                "Pattern", "java.util.regex.Pattern",
                 "String", "java.lang.String",
                 "Object", "java.lang.Object",
                 "void", "void"
