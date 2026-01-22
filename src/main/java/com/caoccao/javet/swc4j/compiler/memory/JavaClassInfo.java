@@ -136,37 +136,11 @@ public final class JavaClassInfo {
     /**
      * Gets the first method with the given name.
      * This is a fallback when exact type information is not available.
-     * Prefer using getMethod(String, List<String>) for proper overload resolution.
+     * Prefer using {@code getMethod(String, List<String>)} for proper overload resolution.
      */
     public MethodInfo getMethod(String methodName) {
         List<MethodInfo> overloads = methods.get(methodName);
         return overloads != null && !overloads.isEmpty() ? overloads.get(0) : null;
-    }
-
-    /**
-     * Gets the best matching method for the given method name and argument count.
-     * This is less precise than getMethod(String, List<String>) but useful as a fallback.
-     *
-     * @deprecated Use getMethod(String, List<String>) for proper type-based resolution
-     */
-    @Deprecated
-    public MethodInfo getMethod(String methodName, int argCount) {
-        List<MethodInfo> overloads = methods.get(methodName);
-        if (overloads == null) {
-            return null;
-        }
-
-        // Find method with matching parameter count
-        for (MethodInfo method : overloads) {
-            String descriptor = method.descriptor();
-            int paramCount = countParameters(descriptor);
-            if (paramCount == argCount) {
-                return method;
-            }
-        }
-
-        // If no exact match, return the first one
-        return overloads.isEmpty() ? null : overloads.get(0);
     }
 
     /**
