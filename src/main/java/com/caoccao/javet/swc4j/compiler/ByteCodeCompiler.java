@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler;
 
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
+import com.caoccao.javet.swc4j.compiler.jdk17.EnumCollector;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeAliasCollector;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.VariableAnalyzer;
@@ -51,6 +52,7 @@ public sealed abstract class ByteCodeCompiler permits
     protected final ConditionalExpressionGenerator conditionalExpressionGenerator;
     protected final ContinueStatementGenerator continueStatementGenerator;
     protected final DoWhileStatementGenerator doWhileStatementGenerator;
+    protected final EnumCollector enumCollector;
     protected final EnumGenerator enumGenerator;
     protected final ExpressionGenerator expressionGenerator;
     protected final ForStatementGenerator forStatementGenerator;
@@ -86,7 +88,8 @@ public sealed abstract class ByteCodeCompiler permits
     ByteCodeCompiler(ByteCodeCompilerOptions options) {
         this.options = AssertionUtils.notNull(options, "options");
         memory = new ByteCodeCompilerMemory();
-        memory.getTypeAliasMap().putAll(options.typeAliasMap());
+        // Inject type aliases from options into the global scope
+        memory.getScopedTypeAliasRegistry().getGlobalScope().putAll(options.typeAliasMap());
         parseOptions = new Swc4jParseOptions()
                 .setCaptureAst(true);
         swc4j = new Swc4j();
@@ -103,6 +106,7 @@ public sealed abstract class ByteCodeCompiler permits
         conditionalExpressionGenerator = new ConditionalExpressionGenerator(this);
         continueStatementGenerator = new ContinueStatementGenerator(this);
         doWhileStatementGenerator = new DoWhileStatementGenerator(this);
+        enumCollector = new EnumCollector(this);
         enumGenerator = new EnumGenerator(this);
         expressionGenerator = new ExpressionGenerator(this);
         forStatementGenerator = new ForStatementGenerator(this);
@@ -193,6 +197,10 @@ public sealed abstract class ByteCodeCompiler permits
 
     public DoWhileStatementGenerator getDoWhileStatementGenerator() {
         return doWhileStatementGenerator;
+    }
+
+    public EnumCollector getEnumCollector() {
+        return enumCollector;
     }
 
     public EnumGenerator getEnumGenerator() {

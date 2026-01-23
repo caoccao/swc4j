@@ -28,6 +28,16 @@ public record ByteCodeCompilerOptions(
 
     static {
         DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
+                "boolean", "boolean",
+                "byte", "byte",
+                "char", "char",
+                "double", "double",
+                "float", "float",
+                "int", "int",
+                "long", "long",
+                "short", "short"
+        ));
+        DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
                 "Boolean", "java.lang.Boolean",
                 "Byte", "java.lang.Byte",
                 "Character", "java.lang.Character",

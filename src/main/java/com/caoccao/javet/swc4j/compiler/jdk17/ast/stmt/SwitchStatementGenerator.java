@@ -330,8 +330,14 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             return null;
         }
 
-        // Look up in type registry
-        Integer ordinal = compiler.getMemory().getTypeRegistry().getEnumMemberOrdinal(enumName, memberName);
+        // Resolve enum name to qualified name using type registry
+        String qualifiedEnumName = compiler.getMemory().getScopedTypeAliasRegistry().resolve(enumName);
+        if (qualifiedEnumName == null) {
+            qualifiedEnumName = enumName; // Use as-is if not found
+        }
+
+        // Look up in scoped enum registry using qualified name
+        Integer ordinal = compiler.getMemory().getScopedEnumRegistry().getEnumMemberOrdinal(qualifiedEnumName, memberName);
         return ordinal;
     }
 

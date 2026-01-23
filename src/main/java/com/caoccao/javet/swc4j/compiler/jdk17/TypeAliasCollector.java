@@ -63,8 +63,11 @@ public final class TypeAliasCollector {
 
             String targetType = resolveEntityName(entityName);
             // Resolve the target type if it's also an alias
-            String resolvedType = compiler.getMemory().getTypeAliasMap().getOrDefault(targetType, targetType);
-            compiler.getMemory().getTypeAliasMap().put(aliasName, resolvedType);
+            String resolvedType = compiler.getMemory().getScopedTypeAliasRegistry().resolve(targetType);
+            if (resolvedType == null) {
+                resolvedType = targetType;
+            }
+            compiler.getMemory().getScopedTypeAliasRegistry().put(aliasName, resolvedType);
         }
     }
 

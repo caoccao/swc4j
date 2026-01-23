@@ -29,15 +29,14 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
     @Override
     void compileProgram(ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException {
         // Enter a new scope for this file
-        memory.getScopedJavaClassRegistry().enterScope();
-
+        memory.enterScope();
         try {
             if (program instanceof Swc4jAstModule module) {
                 // First pass: process imports
                 importDeclProcessor.processImports(module.getBody());
                 // Second pass: collect type aliases and type declarations
                 typeAliasCollector.collectFromModuleItems(module.getBody());
-                memory.getTypeRegistry().collectFromModuleItems(module.getBody(), options.packagePrefix());
+                enumCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
                 // Third pass: generate bytecode
                 astProcessor.processModuleItems(module.getBody(), options.packagePrefix());
             } else if (program instanceof Swc4jAstScript script) {
@@ -45,13 +44,13 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 importDeclProcessor.processImports(script.getBody());
                 // Second pass: collect type aliases and type declarations
                 typeAliasCollector.collectFromStmts(script.getBody());
-                memory.getTypeRegistry().collectFromStmts(script.getBody(), options.packagePrefix());
+                enumCollector.collectFromStmts(script.getBody(), options.packagePrefix());
                 // Third pass: generate bytecode
                 astProcessor.processStmts(script.getBody(), options.packagePrefix());
             }
         } finally {
             // Always exit the scope, even if an exception occurs
-            memory.getScopedJavaClassRegistry().exitScope();
+            memory.exitScope();
         }
     }
 }

@@ -897,20 +897,20 @@ public final class TypeResolver {
     public String mapTypeNameToDescriptor(
             String typeName) {
         // Resolve type alias first
-        String resolvedType = compiler.getMemory().getTypeAliasMap().getOrDefault(typeName, typeName);
+        String resolvedType = compiler.getMemory().getScopedTypeAliasRegistry().resolve(typeName);
+        if (resolvedType == null) {
+            resolvedType = typeName;
+        }
 
         return switch (resolvedType) {
-            case "int" -> "I";
             case "boolean" -> "Z";
             case "byte" -> "B";
             case "char" -> "C";
-            case "short" -> "S";
-            case "long" -> "J";
-            case "float" -> "F";
             case "double" -> "D";
-            case "java.lang.String", "String" -> "Ljava/lang/String;";
-            case "java.lang.Object", "Object" -> "Ljava/lang/Object;";
-            case "java.math.BigInteger", "BigInteger" -> "Ljava/math/BigInteger;";
+            case "float" -> "F";
+            case "int" -> "I";
+            case "long" -> "J";
+            case "short" -> "S";
             case "void" -> "V";
             default -> {
                 // Check if this is an enum type - resolve to fully qualified name
@@ -987,16 +987,16 @@ public final class TypeResolver {
      * If the type is an enum registered in EnumRegistry, returns the qualified name.
      * Otherwise, returns the type name as-is with package prefix if available.
      */
-    private String resolveEnumTypeName(
-            String typeName) {
+    private String resolveEnumTypeName(String typeName) {
         // If already qualified (contains '.'), return as-is
         if (typeName.contains(".")) {
             return typeName;
         }
 
+
         // Try to find the enum in the registry by checking if any member exists
         // We use a dummy member name since we just want to know if the enum exists
-        for (String qualifiedName : compiler.getMemory().getTypeRegistry().getEnumNameSet()) {
+        for (String qualifiedName : compiler.getMemory().getScopedEnumRegistry().getAllEnumNames()) {
             if (qualifiedName.endsWith("." + typeName)) {
                 return qualifiedName;
             }

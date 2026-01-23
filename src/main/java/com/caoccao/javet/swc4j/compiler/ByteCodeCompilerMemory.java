@@ -17,9 +17,9 @@
 package com.caoccao.javet.swc4j.compiler;
 
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.memory.ScopedEnumRegistry;
 import com.caoccao.javet.swc4j.compiler.memory.ScopedJavaClassRegistry;
-import com.caoccao.javet.swc4j.compiler.memory.ScopedTypeRegistry;
-import com.caoccao.javet.swc4j.compiler.memory.TypeRegistry;
+import com.caoccao.javet.swc4j.compiler.memory.ScopedTypeAliasRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,18 +27,28 @@ import java.util.Map;
 public final class ByteCodeCompilerMemory {
     private final Map<String, byte[]> byteCodeMap;
     private final CompilationContext compilationContext;
+    private final ScopedEnumRegistry scopedEnumRegistry;
     private final ScopedJavaClassRegistry scopedJavaClassRegistry;
-    private final ScopedTypeRegistry scopedTypeRegistry;
-    private final Map<String, String> typeAliasMap;
-    private final TypeRegistry typeRegistry;
+    private final ScopedTypeAliasRegistry scopedTypeAliasRegistry;
 
     public ByteCodeCompilerMemory() {
         byteCodeMap = new HashMap<>();
         compilationContext = new CompilationContext();
+        scopedEnumRegistry = new ScopedEnumRegistry();
         scopedJavaClassRegistry = new ScopedJavaClassRegistry();
-        scopedTypeRegistry = new ScopedTypeRegistry();
-        typeRegistry = new TypeRegistry(scopedTypeRegistry);
-        typeAliasMap = new HashMap<>();
+        scopedTypeAliasRegistry = new ScopedTypeAliasRegistry();
+    }
+
+    public void enterScope() {
+        scopedEnumRegistry.enterScope();
+//        scopedJavaClassRegistry.enterScope();
+        scopedTypeAliasRegistry.enterScope();
+    }
+
+    public void exitScope() {
+        scopedEnumRegistry.exitScope();
+//        scopedJavaClassRegistry.exitScope();
+        scopedTypeAliasRegistry.exitScope();
     }
 
     /**
@@ -59,29 +69,24 @@ public final class ByteCodeCompilerMemory {
         return compilationContext;
     }
 
+    public ScopedEnumRegistry getScopedEnumRegistry() {
+        return scopedEnumRegistry;
+    }
+
     public ScopedJavaClassRegistry getScopedJavaClassRegistry() {
         return scopedJavaClassRegistry;
     }
 
-    public ScopedTypeRegistry getScopedTypeRegistry() {
-        return scopedTypeRegistry;
-    }
-
-    public Map<String, String> getTypeAliasMap() {
-        return typeAliasMap;
-    }
-
-    public TypeRegistry getTypeRegistry() {
-        return typeRegistry;
+    public ScopedTypeAliasRegistry getScopedTypeAliasRegistry() {
+        return scopedTypeAliasRegistry;
     }
 
     public void reset() {
         byteCodeMap.clear();
         compilationContext.reset();
+        scopedEnumRegistry.clear();
         scopedJavaClassRegistry.clear();
-        scopedTypeRegistry.clear();
-        typeRegistry.clear();
-        typeAliasMap.clear();
+        scopedTypeAliasRegistry.clear();
     }
 
     public void resetCompilationContext() {
