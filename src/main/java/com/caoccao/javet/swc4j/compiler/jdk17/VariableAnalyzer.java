@@ -27,6 +27,7 @@ import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class VariableAnalyzer {
     private final ByteCodeCompiler compiler;
@@ -63,7 +64,7 @@ public final class VariableAnalyzer {
         }
     }
 
-    private void analyzeStatement(ISwc4jAstStmt stmt) {
+    private void analyzeStatement(ISwc4jAstStmt stmt) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         if (stmt instanceof Swc4jAstVarDecl varDecl) {
@@ -115,7 +116,7 @@ public final class VariableAnalyzer {
         }
     }
 
-    private void analyzeVarDecl(Swc4jAstVarDecl varDecl) {
+    private void analyzeVarDecl(Swc4jAstVarDecl varDecl) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         for (Swc4jAstVarDeclarator declarator : varDecl.getDecls()) {
@@ -135,7 +136,7 @@ public final class VariableAnalyzer {
         }
     }
 
-    public void analyzeVariableDeclarations(Swc4jAstBlockStmt body) {
+    public void analyzeVariableDeclarations(Swc4jAstBlockStmt body) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstStmt stmt : body.getStmts()) {
             analyzeStatement(stmt);
         }

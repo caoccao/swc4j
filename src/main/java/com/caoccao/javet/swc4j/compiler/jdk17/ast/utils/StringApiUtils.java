@@ -171,7 +171,7 @@ public final class StringApiUtils {
             ByteCodeCompiler compiler,
             ISwc4jAstExpr expr,
             List<ISwc4jAstExpr> operands,
-            List<String> operandTypes) {
+            List<String> operandTypes) throws Swc4jByteCodeCompilerException {
         // If this expression is a binary Add that results in a String, collect its operands
         if (expr instanceof Swc4jAstBinExpr binExpr && binExpr.getOp() == Swc4jAstBinaryOp.Add) {
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);

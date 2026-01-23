@@ -23,14 +23,19 @@ import java.util.Stack;
 /**
  * Manages Java class registrations in a scoped manner.
  * Each scope represents a file being compiled, preventing import leakage between files.
+ * Also tracks TypeScript class method signatures for type inference.
  */
 public final class ScopedJavaClassRegistry {
     private final Stack<Map<String, JavaClassInfo>> scopeStack;
+    // Map from "qualifiedClassName.methodName(paramDescriptors)" to return type descriptor for TS classes
+    // Example: "com.example.MyClass.test()I" -> "I"
+    private final Map<String, String> tsClassMethodSignatures;
 
     public ScopedJavaClassRegistry() {
         scopeStack = new Stack<>();
         // Push global scope
         scopeStack.push(new HashMap<>());
+        tsClassMethodSignatures = new HashMap<>();
     }
 
     /**
@@ -41,6 +46,7 @@ public final class ScopedJavaClassRegistry {
             scopeStack.pop();
         }
         scopeStack.peek().clear();
+        tsClassMethodSignatures.clear();
     }
 
     /**
@@ -80,6 +86,23 @@ public final class ScopedJavaClassRegistry {
     }
 
     /**
+     * Registers a TypeScript class method signature.
+     *
+     * @param qualifiedClassName fully qualified class name (e.g., "com.example.MyClass")
+     * @param methodName         method name
+     * @param descriptor         full method descriptor (e.g., "()I", "(Ljava/lang/String;)V")
+     */
+    public void registerTSClassMethod(String qualifiedClassName, String methodName, String descriptor) {
+        // Extract parameter part from descriptor (up to and including ')')
+        int returnTypeStart = descriptor.lastIndexOf(')') + 1;
+        String paramDescriptor = descriptor.substring(0, returnTypeStart);
+        String returnType = descriptor.substring(returnTypeStart);
+        // Key uses only parameter types, not return type
+        String key = qualifiedClassName + "." + methodName + paramDescriptor;
+        tsClassMethodSignatures.put(key, returnType);
+    }
+
+    /**
      * Resolves a Java class by alias, searching from innermost to outermost scope.
      *
      * @param className the class alias to resolve
@@ -95,5 +118,18 @@ public final class ScopedJavaClassRegistry {
             }
         }
         return null;
+    }
+
+    /**
+     * Resolves a TypeScript class method return type.
+     *
+     * @param qualifiedClassName fully qualified class name
+     * @param methodName         method name
+     * @param paramDescriptor    parameter descriptor only (e.g., "()", "(Ljava/lang/String;)")
+     * @return return type descriptor, or null if not found
+     */
+    public String resolveTSClassMethodReturnType(String qualifiedClassName, String methodName, String paramDescriptor) {
+        String key = qualifiedClassName + "." + methodName + paramDescriptor;
+        return tsClassMethodSignatures.get(key);
     }
 }

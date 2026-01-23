@@ -25,21 +25,21 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.CallExpressionForArrayGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.CallExpressionForArrayListGenerator;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.CallExpressionForJavaClassGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.CallExpressionForClassGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.CallExpressionForStringGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCallExpr> {
     private final CallExpressionForArrayGenerator arrayGenerator;
     private final CallExpressionForArrayListGenerator arrayListGenerator;
-    private final CallExpressionForJavaClassGenerator javaClassGenerator;
+    private final CallExpressionForClassGenerator classGenerator;
     private final CallExpressionForStringGenerator stringGenerator;
 
     public CallExpressionGenerator(ByteCodeCompiler compiler) {
         super(compiler);
         arrayGenerator = new CallExpressionForArrayGenerator(compiler);
         arrayListGenerator = new CallExpressionForArrayListGenerator(compiler);
-        javaClassGenerator = new CallExpressionForJavaClassGenerator(compiler);
+        classGenerator = new CallExpressionForClassGenerator(compiler);
         stringGenerator = new CallExpressionForStringGenerator(compiler);
     }
 
@@ -49,13 +49,9 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
             ClassWriter.ConstantPool cp,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        // Handle method calls on arrays, strings, Java classes, etc.
+        // Handle method calls on arrays, strings, Java classes, TypeScript classes, etc.
         if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
-            // Check for Java class method calls first
-            if (javaClassGenerator.isJavaClassMethodCall(callExpr)) {
-                javaClassGenerator.generate(code, cp, callExpr, returnTypeInfo);
-                return;
-            }
+            // Check for Java class method calls first (static methods)
 
             String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
             if (arrayGenerator.isTypeSupported(objType)) {
@@ -66,6 +62,9 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
                 return;
             } else if (stringGenerator.isTypeSupported(objType)) {
                 stringGenerator.generate(code, cp, callExpr, returnTypeInfo);
+                return;
+            } else if (classGenerator.isTypeSupported(objType)) {
+                classGenerator.generate(code, cp, callExpr, returnTypeInfo);
                 return;
             }
         }

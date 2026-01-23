@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler;
 
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
+import com.caoccao.javet.swc4j.compiler.jdk17.ClassCollector;
 import com.caoccao.javet.swc4j.compiler.jdk17.EnumCollector;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeAliasCollector;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
@@ -48,6 +49,7 @@ public sealed abstract class ByteCodeCompiler permits
     protected final BoolLiteralGenerator boolLiteralGenerator;
     protected final BreakStatementGenerator breakStatementGenerator;
     protected final CallExpressionGenerator callExpressionGenerator;
+    protected final ClassCollector classCollector;
     protected final ClassGenerator classGenerator;
     protected final ConditionalExpressionGenerator conditionalExpressionGenerator;
     protected final ContinueStatementGenerator continueStatementGenerator;
@@ -63,6 +65,7 @@ public sealed abstract class ByteCodeCompiler permits
     protected final MemberExpressionGenerator memberExpressionGenerator;
     protected final ByteCodeCompilerMemory memory;
     protected final MethodGenerator methodGenerator;
+    protected final NewExpressionGenerator newExpressionGenerator;
     protected final NullLiteralGenerator nullLiteralGenerator;
     protected final NumberLiteralGenerator numberLiteralGenerator;
     protected final ObjectLiteralGenerator objectLiteralGenerator;
@@ -102,6 +105,7 @@ public sealed abstract class ByteCodeCompiler permits
         boolLiteralGenerator = new BoolLiteralGenerator(this);
         breakStatementGenerator = new BreakStatementGenerator(this);
         callExpressionGenerator = new CallExpressionGenerator(this);
+        classCollector = new ClassCollector(this);
         classGenerator = new ClassGenerator(this);
         conditionalExpressionGenerator = new ConditionalExpressionGenerator(this);
         continueStatementGenerator = new ContinueStatementGenerator(this);
@@ -116,6 +120,7 @@ public sealed abstract class ByteCodeCompiler permits
         labeledStatementGenerator = new LabeledStatementGenerator(this);
         memberExpressionGenerator = new MemberExpressionGenerator(this);
         methodGenerator = new MethodGenerator(this);
+        newExpressionGenerator = new NewExpressionGenerator(this);
         nullLiteralGenerator = new NullLiteralGenerator(this);
         numberLiteralGenerator = new NumberLiteralGenerator(this);
         objectLiteralGenerator = new ObjectLiteralGenerator(this);
@@ -183,6 +188,10 @@ public sealed abstract class ByteCodeCompiler permits
         return callExpressionGenerator;
     }
 
+    public ClassCollector getClassCollector() {
+        return classCollector;
+    }
+
     public ClassGenerator getClassGenerator() {
         return classGenerator;
     }
@@ -241,6 +250,10 @@ public sealed abstract class ByteCodeCompiler permits
 
     public MethodGenerator getMethodGenerator() {
         return methodGenerator;
+    }
+
+    public NewExpressionGenerator getNewExpressionGenerator() {
+        return newExpressionGenerator;
     }
 
     public NullLiteralGenerator getNullLiteralGenerator() {

@@ -381,7 +381,7 @@ public final class TypeResolver {
 
     public String extractType(
             Swc4jAstBindingIdent bindingIdent,
-            Optional<ISwc4jAstExpr> init) {
+            Optional<ISwc4jAstExpr> init) throws Swc4jByteCodeCompilerException {
         // Check for explicit type annotation
         var typeAnn = bindingIdent.getTypeAnn();
         if (typeAnn.isPresent()) {
@@ -413,7 +413,7 @@ public final class TypeResolver {
      * @return JVM type descriptor (e.g., "Ljava/lang/String;", "Ljava/lang/Integer;", "D")
      */
     public String inferKeyType(
-            ISwc4jAstPropName key) {
+            ISwc4jAstPropName key) throws Swc4jByteCodeCompilerException {
         if (key == null) {
             return "Ljava/lang/String;"; // Default to String
         }
@@ -469,7 +469,7 @@ public final class TypeResolver {
     }
 
     public String inferTypeFromExpr(
-            ISwc4jAstExpr expr) {
+            ISwc4jAstExpr expr) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
         if (expr instanceof Swc4jAstCondExpr condExpr) {
             // Conditional expression: infer type from both branches and find common type
@@ -488,6 +488,22 @@ public final class TypeResolver {
             }
             // If we can't determine the cast type, fall back to inferring from the expression
             return inferTypeFromExpr(asExpr.getExpr());
+        } else if (expr instanceof Swc4jAstNewExpr newExpr) {
+            // Constructor call - infer type from the callee (class name)
+            ISwc4jAstExpr callee = newExpr.getCallee();
+            if (callee instanceof Swc4jAstIdent ident) {
+                String className = ident.getSym();
+                // Resolve the class name using type alias registry
+                String resolvedType = compiler.getMemory().getScopedTypeAliasRegistry().resolve(className);
+                if (resolvedType != null) {
+                    // Convert qualified name to descriptor: com.example.Foo -> Lcom/example/Foo;
+                    return "L" + resolvedType.replace('.', '/') + ";";
+                }
+                // If not found in type alias registry, assume it's a class in the current package
+                return mapTypeNameToDescriptor(className);
+            }
+            // If we can't determine the constructor type, return Object
+            return "Ljava/lang/Object;";
         } else if (expr instanceof Swc4jAstNumber number) {
             double value = number.getValue();
             if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
@@ -842,6 +858,41 @@ public final class TypeResolver {
                             case "split", "match", "matchAll" -> "Ljava/util/ArrayList;";
                             default -> "Ljava/lang/Object;";
                         };
+                    }
+                }
+
+                // Check if it's a TypeScript class method call (after checking known Java APIs)
+                if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
+                    // Exclude known Java types
+                    if (!objType.startsWith("Ljava/") && !objType.startsWith("Ljavax/")) {
+                        // Get the qualified class name from the object type
+                        String qualifiedClassName = objType.substring(1, objType.length() - 1).replace('/', '.');
+                        if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                            String methodName = propIdent.getSym();
+                            // Build parameter descriptor from call arguments
+                            StringBuilder paramDescriptors = new StringBuilder();
+                            for (var arg : callExpr.getArgs()) {
+                                if (arg.getSpread().isPresent()) {
+                                    throw new Swc4jByteCodeCompilerException(
+                                        "Spread arguments not supported in TypeScript class method calls");
+                                }
+                                String argType = inferTypeFromExpr(arg.getExpr());
+                                if (argType == null) {
+                                    argType = "Ljava/lang/Object;";
+                                }
+                                paramDescriptors.append(argType);
+                            }
+                            String paramDescriptor = "(" + paramDescriptors + ")";
+                            String returnType = compiler.getMemory().getScopedJavaClassRegistry()
+                                .resolveTSClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
+                            if (returnType != null) {
+                                return returnType;
+                            }
+                            // Cannot infer return type - require explicit annotation
+                            throw new Swc4jByteCodeCompilerException(
+                                "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
+                                ". Please add explicit return type annotation to the method.");
+                        }
                     }
                 }
             }

@@ -36,6 +36,7 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 importDeclProcessor.processImports(module.getBody());
                 // Second pass: collect type aliases and type declarations
                 typeAliasCollector.collectFromModuleItems(module.getBody());
+                classCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
                 enumCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
                 // Third pass: generate bytecode
                 astProcessor.processModuleItems(module.getBody(), options.packagePrefix());
@@ -44,6 +45,7 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 importDeclProcessor.processImports(script.getBody());
                 // Second pass: collect type aliases and type declarations
                 typeAliasCollector.collectFromStmts(script.getBody());
+                classCollector.collectFromStmts(script.getBody(), options.packagePrefix());
                 enumCollector.collectFromStmts(script.getBody(), options.packagePrefix());
                 // Third pass: generate bytecode
                 astProcessor.processStmts(script.getBody(), options.packagePrefix());
