@@ -695,6 +695,13 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder instanceof_(int classRefIndex) {
+        code.add((byte) (0xC1)); // instanceof
+        code.add((byte) (classRefIndex >> 8)); // high byte
+        code.add((byte) (classRefIndex & 0xFF)); // low byte
+        return this;
+    }
+
     public CodeBuilder invokeinterface(int methodRefIndex, int count) {
         code.add((byte) (0xB9)); // invokeinterface
         writeShort(methodRefIndex);

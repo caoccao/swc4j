@@ -55,8 +55,8 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
         if (resolvedType == null) {
             // If not found in type alias registry, assume it's in the current package
             resolvedType = compiler.getOptions().packagePrefix().isEmpty()
-                ? className
-                : compiler.getOptions().packagePrefix() + "." + className;
+                    ? className
+                    : compiler.getOptions().packagePrefix() + "." + className;
         }
 
         // Convert qualified name to internal name: com.example.Foo -> com/example/Foo

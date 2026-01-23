@@ -52,28 +52,6 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testExistingVariableWithArray(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      const arr = [10, 20, 30]
-                      let index: int
-                      for (index in arr) {
-                        // index is accessible here
-                      }
-                      return index
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // Last index should be 2
-        assertEquals(2, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testExistingVariableEmptyObject(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -119,6 +97,29 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         // First loop last key: "b", second loop last key: "y"
         assertEquals("b,y", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testExistingVariableWithArray(JdkVersion jdkVersion) throws Exception {
+        // For-in returns string indices in JavaScript semantics
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): string {
+                      const arr = [10, 20, 30]
+                      let index: string
+                      for (index in arr) {
+                        // index is accessible here
+                      }
+                      return index
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // Last index should be "2" (string)
+        assertEquals("2", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest

@@ -104,8 +104,8 @@ public final class ClassCollector {
                     // Analyze the return type
                     var function = method.getFunction();
                     var bodyOpt = function.getBody();
-                    if (bodyOpt.isPresent() && bodyOpt.get() instanceof Swc4jAstBlockStmt) {
-                        Swc4jAstBlockStmt blockStmt = (Swc4jAstBlockStmt) bodyOpt.get();
+                    if (bodyOpt.isPresent()) {
+                        Swc4jAstBlockStmt blockStmt = bodyOpt.get();
                         ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, blockStmt);
 
                         // Build full method descriptor with parameters
@@ -133,7 +133,7 @@ public final class ClassCollector {
 
                         // Register method signature in ScopedJavaClassRegistry
                         compiler.getMemory().getScopedJavaClassRegistry()
-                            .registerTSClassMethod(qualifiedName, methodName, fullDescriptor);
+                                .registerTSClassMethod(qualifiedName, methodName, fullDescriptor);
                     }
                 } catch (Swc4jByteCodeCompilerException e) {
                     // Ignore methods that can't be analyzed

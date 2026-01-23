@@ -125,6 +125,48 @@ public class StackMapGenerator {
         return new FrameData(resultTypes, resultClassNames);
     }
 
+    /**
+     * Count the number of stack slots consumed by method arguments.
+     * Long and double take 2 slots, everything else takes 1.
+     */
+    private int countMethodArgSlots(String descriptor) {
+        int count = 0;
+        int i = 1; // Skip opening '('
+        while (i < descriptor.length() && descriptor.charAt(i) != ')') {
+            char c = descriptor.charAt(i);
+            if (c == 'J' || c == 'D') {
+                count += 2; // Long and double take 2 slots
+                i++;
+            } else if (c == 'L') {
+                count++;
+                // Skip to ';'
+                while (i < descriptor.length() && descriptor.charAt(i) != ';') {
+                    i++;
+                }
+                i++; // Skip ';'
+            } else if (c == '[') {
+                count++;
+                i++;
+                // Skip array element type
+                while (i < descriptor.length() && descriptor.charAt(i) == '[') {
+                    i++;
+                }
+                if (i < descriptor.length() && descriptor.charAt(i) == 'L') {
+                    while (i < descriptor.length() && descriptor.charAt(i) != ';') {
+                        i++;
+                    }
+                    i++; // Skip ';'
+                } else {
+                    i++; // Skip primitive type
+                }
+            } else {
+                count++; // Other primitives take 1 slot
+                i++;
+            }
+        }
+        return count;
+    }
+
     private Frame createInitialFrame() {
         List<VerificationType> locals = new ArrayList<>();
         if (!isStatic) {
@@ -482,12 +524,26 @@ public class StackMapGenerator {
             }
         } else if (opcode >= 0xAC && opcode <= 0xB1) { // return instructions
             // No next offset
+        } else if (opcode == 0xBF) { // athrow
+            // No next offset - exception is thrown
         } else {
             // Normal instruction - continue to next
             offsets.add(pc + getInstructionSize(pc, opcode));
         }
 
         return offsets;
+    }
+
+    /**
+     * Extract the return type from a method descriptor.
+     * Returns everything after ')'.
+     */
+    private String getReturnType(String descriptor) {
+        int parenIndex = descriptor.indexOf(')');
+        if (parenIndex >= 0 && parenIndex + 1 < descriptor.length()) {
+            return descriptor.substring(parenIndex + 1);
+        }
+        return "V"; // Default to void
     }
 
     private int getTableSwitchSize(int pc) {
@@ -504,6 +560,19 @@ public class StackMapGenerator {
         int tableSize = (high - low + 1) * 4;
 
         return baseSize + tableSize;
+    }
+
+    /**
+     * Check if opcode is an unconditional exit (return or throw).
+     */
+    private boolean isUnconditionalExit(int opcode) {
+        return opcode == 0xAC // ireturn
+                || opcode == 0xAD // lreturn
+                || opcode == 0xAE // freturn
+                || opcode == 0xAF // dreturn
+                || opcode == 0xB0 // areturn
+                || opcode == 0xB1 // return (void)
+                || opcode == 0xBF; // athrow
     }
 
     /**
@@ -570,25 +639,39 @@ public class StackMapGenerator {
         return VerificationType.top();
     }
 
+    /**
+     * Push the appropriate verification type onto the stack based on return type.
+     */
+    private void pushReturnType(List<VerificationType> stack, String returnType) {
+        if (returnType == null || returnType.isEmpty() || returnType.equals("V")) {
+            // Void return - don't push anything
+            return;
+        }
+        char c = returnType.charAt(0);
+        switch (c) {
+            case 'Z', 'B', 'C', 'S', 'I' -> stack.add(VerificationType.integer());
+            case 'J' -> stack.add(VerificationType.long_());
+            case 'F' -> stack.add(VerificationType.float_());
+            case 'D' -> stack.add(VerificationType.double_());
+            case 'L' -> {
+                // Object type - extract class name (remove L and ;)
+                String className = returnType.substring(1, returnType.length() - 1);
+                stack.add(VerificationType.object(className));
+            }
+            case '[' -> {
+                // Array type
+                stack.add(VerificationType.object(returnType));
+            }
+            default -> stack.add(VerificationType.object("java/lang/Object"));
+        }
+    }
+
     private int readInt(int offset) {
         if (offset + 4 > bytecode.length) return 0;
         return ((bytecode[offset] & 0xFF) << 24) |
                 ((bytecode[offset + 1] & 0xFF) << 16) |
                 ((bytecode[offset + 2] & 0xFF) << 8) |
                 (bytecode[offset + 3] & 0xFF);
-    }
-
-    /**
-     * Check if opcode is an unconditional exit (return or throw).
-     */
-    private boolean isUnconditionalExit(int opcode) {
-        return opcode == 0xAC // ireturn
-                || opcode == 0xAD // lreturn
-                || opcode == 0xAE // freturn
-                || opcode == 0xAF // dreturn
-                || opcode == 0xB0 // areturn
-                || opcode == 0xB1 // return (void)
-                || opcode == 0xBF; // athrow
     }
 
     private Frame simulateInstruction(Frame frame, int pc) {
@@ -897,86 +980,86 @@ public class StackMapGenerator {
             case 0xB6: // invokevirtual
             case 0xB7: // invokespecial
             case 0xB8: // invokestatic
-                {
-                    // Get method reference index from bytecode
-                    int methodIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
+            {
+                // Get method reference index from bytecode
+                int methodIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
 
-                    // Look up method descriptor from constant pool
-                    String methodDescriptor = (constantPool != null) ? constantPool.getMethodDescriptor(methodIndex) : null;
+                // Look up method descriptor from constant pool
+                String methodDescriptor = (constantPool != null) ? constantPool.getMethodDescriptor(methodIndex) : null;
 
-                    if (methodDescriptor != null) {
-                        // Parse descriptor to get argument count and return type
-                        // Format: (args)return e.g., "(Ljava/lang/String;)Ljava/lang/String;"
-                        int argCount = countMethodArgSlots(methodDescriptor);
-                        String returnType = getReturnType(methodDescriptor);
+                if (methodDescriptor != null) {
+                    // Parse descriptor to get argument count and return type
+                    // Format: (args)return e.g., "(Ljava/lang/String;)Ljava/lang/String;"
+                    int argCount = countMethodArgSlots(methodDescriptor);
+                    String returnType = getReturnType(methodDescriptor);
 
-                        // Pop arguments (and receiver for non-static)
-                        int totalPops = argCount;
-                        if (opcode != 0xB8) { // Non-static methods also pop receiver
-                            totalPops++;
-                        }
-                        for (int i = 0; i < totalPops && !stack.isEmpty(); i++) {
-                            stack.remove(stack.size() - 1);
-                        }
+                    // Pop arguments (and receiver for non-static)
+                    int totalPops = argCount;
+                    if (opcode != 0xB8) { // Non-static methods also pop receiver
+                        totalPops++;
+                    }
+                    for (int i = 0; i < totalPops && !stack.isEmpty(); i++) {
+                        stack.remove(stack.size() - 1);
+                    }
 
-                        // Push return type
-                        pushReturnType(stack, returnType);
+                    // Push return type
+                    pushReturnType(stack, returnType);
+                } else {
+                    // Fallback: clear stack and use heuristics
+                    stack.clear();
+                    int nextPc = pc + 3;
+                    int nextOpcode = (nextPc < bytecode.length) ? (bytecode[nextPc] & 0xFF) : 0;
+                    if (nextOpcode == 0x57 || nextOpcode == 0x58) {
+                        stack.add(VerificationType.object("java/lang/Object"));
+                    } else if (nextOpcode == 0x59) {
+                        stack.add(VerificationType.object("java/lang/Object"));
+                    } else if (opcode == 0xB7) {
+                        // void return for invokespecial
                     } else {
-                        // Fallback: clear stack and use heuristics
-                        stack.clear();
-                        int nextPc = pc + 3;
-                        int nextOpcode = (nextPc < bytecode.length) ? (bytecode[nextPc] & 0xFF) : 0;
-                        if (nextOpcode == 0x57 || nextOpcode == 0x58) {
-                            stack.add(VerificationType.object("java/lang/Object"));
-                        } else if (nextOpcode == 0x59) {
-                            stack.add(VerificationType.object("java/lang/Object"));
-                        } else if (opcode == 0xB7) {
-                            // void return for invokespecial
-                        } else {
-                            stack.add(VerificationType.object("java/lang/Object"));
-                        }
+                        stack.add(VerificationType.object("java/lang/Object"));
                     }
                 }
-                break;
+            }
+            break;
             case 0xB9: // invokeinterface
                 // invokeinterface: pop receiver and args, push result
-                {
-                    // Get method reference index from bytecode
-                    int methodIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
+            {
+                // Get method reference index from bytecode
+                int methodIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
 
-                    // Look up method descriptor from constant pool
-                    String methodDescriptor = (constantPool != null) ? constantPool.getMethodDescriptor(methodIndex) : null;
+                // Look up method descriptor from constant pool
+                String methodDescriptor = (constantPool != null) ? constantPool.getMethodDescriptor(methodIndex) : null;
 
-                    if (methodDescriptor != null) {
-                        // Parse descriptor to get argument count and return type
-                        int argCount = countMethodArgSlots(methodDescriptor);
-                        String returnType = getReturnType(methodDescriptor);
+                if (methodDescriptor != null) {
+                    // Parse descriptor to get argument count and return type
+                    int argCount = countMethodArgSlots(methodDescriptor);
+                    String returnType = getReturnType(methodDescriptor);
 
-                        // Pop arguments + receiver (interface methods are never static)
-                        int totalPops = argCount + 1;
-                        for (int i = 0; i < totalPops && !stack.isEmpty(); i++) {
-                            stack.remove(stack.size() - 1);
-                        }
+                    // Pop arguments + receiver (interface methods are never static)
+                    int totalPops = argCount + 1;
+                    for (int i = 0; i < totalPops && !stack.isEmpty(); i++) {
+                        stack.remove(stack.size() - 1);
+                    }
 
-                        // Push return type
-                        pushReturnType(stack, returnType);
+                    // Push return type
+                    pushReturnType(stack, returnType);
+                } else {
+                    // Fallback: use count byte to determine pops
+                    int count = (pc + 3 < bytecode.length) ? (bytecode[pc + 3] & 0xFF) : 1;
+                    for (int i = 0; i < count && !stack.isEmpty(); i++) {
+                        stack.remove(stack.size() - 1);
+                    }
+                    // Determine return type from next instruction
+                    int nextPc = pc + 5;
+                    int nextOpcode = (nextPc < bytecode.length) ? (bytecode[nextPc] & 0xFF) : 0;
+                    if (nextOpcode == 0x99 || nextOpcode == 0x9A) {
+                        stack.add(VerificationType.integer());
                     } else {
-                        // Fallback: use count byte to determine pops
-                        int count = (pc + 3 < bytecode.length) ? (bytecode[pc + 3] & 0xFF) : 1;
-                        for (int i = 0; i < count && !stack.isEmpty(); i++) {
-                            stack.remove(stack.size() - 1);
-                        }
-                        // Determine return type from next instruction
-                        int nextPc = pc + 5;
-                        int nextOpcode = (nextPc < bytecode.length) ? (bytecode[nextPc] & 0xFF) : 0;
-                        if (nextOpcode == 0x99 || nextOpcode == 0x9A) {
-                            stack.add(VerificationType.integer());
-                        } else {
-                            stack.add(VerificationType.object("java/lang/Object"));
-                        }
+                        stack.add(VerificationType.object("java/lang/Object"));
                     }
                 }
-                break;
+            }
+            break;
 
             // Object creation
             case 0xBB: // new
@@ -1016,6 +1099,30 @@ public class StackMapGenerator {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.integer());
+                }
+                break;
+
+            // Type checking
+            case 0xC0: // checkcast - pops objectref, pushes objectref of the specified type
+                if (!stack.isEmpty()) {
+                    // Get class index from bytecode
+                    int classIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
+                    String className = (constantPool != null) ? constantPool.getClassName(classIndex) : "java/lang/Object";
+                    stack.remove(stack.size() - 1);
+                    stack.add(VerificationType.object(className));
+                }
+                break;
+            case 0xC1: // instanceof - pops objectref, pushes int (0 or 1)
+                if (!stack.isEmpty()) {
+                    stack.remove(stack.size() - 1);
+                    stack.add(VerificationType.integer());
+                }
+                break;
+
+            // athrow - pops exception objectref, terminates normal flow
+            case 0xBF:
+                if (!stack.isEmpty()) {
+                    stack.remove(stack.size() - 1);
                 }
                 break;
         }
@@ -1113,87 +1220,6 @@ public class StackMapGenerator {
                 case UNINITIALIZED_THIS -> "UninitializedThis";
                 default -> "Unknown(" + tag + ")";
             };
-        }
-    }
-
-    /**
-     * Count the number of stack slots consumed by method arguments.
-     * Long and double take 2 slots, everything else takes 1.
-     */
-    private int countMethodArgSlots(String descriptor) {
-        int count = 0;
-        int i = 1; // Skip opening '('
-        while (i < descriptor.length() && descriptor.charAt(i) != ')') {
-            char c = descriptor.charAt(i);
-            if (c == 'J' || c == 'D') {
-                count += 2; // Long and double take 2 slots
-                i++;
-            } else if (c == 'L') {
-                count++;
-                // Skip to ';'
-                while (i < descriptor.length() && descriptor.charAt(i) != ';') {
-                    i++;
-                }
-                i++; // Skip ';'
-            } else if (c == '[') {
-                count++;
-                i++;
-                // Skip array element type
-                while (i < descriptor.length() && descriptor.charAt(i) == '[') {
-                    i++;
-                }
-                if (i < descriptor.length() && descriptor.charAt(i) == 'L') {
-                    while (i < descriptor.length() && descriptor.charAt(i) != ';') {
-                        i++;
-                    }
-                    i++; // Skip ';'
-                } else {
-                    i++; // Skip primitive type
-                }
-            } else {
-                count++; // Other primitives take 1 slot
-                i++;
-            }
-        }
-        return count;
-    }
-
-    /**
-     * Extract the return type from a method descriptor.
-     * Returns everything after ')'.
-     */
-    private String getReturnType(String descriptor) {
-        int parenIndex = descriptor.indexOf(')');
-        if (parenIndex >= 0 && parenIndex + 1 < descriptor.length()) {
-            return descriptor.substring(parenIndex + 1);
-        }
-        return "V"; // Default to void
-    }
-
-    /**
-     * Push the appropriate verification type onto the stack based on return type.
-     */
-    private void pushReturnType(List<VerificationType> stack, String returnType) {
-        if (returnType == null || returnType.isEmpty() || returnType.equals("V")) {
-            // Void return - don't push anything
-            return;
-        }
-        char c = returnType.charAt(0);
-        switch (c) {
-            case 'Z', 'B', 'C', 'S', 'I' -> stack.add(VerificationType.integer());
-            case 'J' -> stack.add(VerificationType.long_());
-            case 'F' -> stack.add(VerificationType.float_());
-            case 'D' -> stack.add(VerificationType.double_());
-            case 'L' -> {
-                // Object type - extract class name (remove L and ;)
-                String className = returnType.substring(1, returnType.length() - 1);
-                stack.add(VerificationType.object(className));
-            }
-            case '[' -> {
-                // Array type
-                stack.add(VerificationType.object(returnType));
-            }
-            default -> stack.add(VerificationType.object("java/lang/Object"));
         }
     }
 

@@ -79,17 +79,25 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
                     return;
                 }
             }
-        } else if ("Ljava/util/ArrayList;".equals(objType)) {
-            // ArrayList operations
+        } else if ("Ljava/util/ArrayList;".equals(objType) || "Ljava/util/List;".equals(objType)) {
+            // ArrayList/List operations
             // Check if it's a computed property (arr[index]) or named property (arr.length)
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                 // arr[index] -> arr.get(index)
-                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
-                compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [ArrayList, index]
+                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList/List]
+                compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [ArrayList/List, index]
 
-                // Call ArrayList.get(int)
-                int getMethod = cp.addMethodRef("java/util/ArrayList", "get", "(I)Ljava/lang/Object;");
-                code.invokevirtual(getMethod); // Stack: [Object]
+                // Convert index to int if it's a String (for-in returns string indices in JS semantics)
+                String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
+                if ("Ljava/lang/String;".equals(indexType)) {
+                    // String index -> Integer.parseInt(index)
+                    int parseIntMethod = cp.addMethodRef("java/lang/Integer", "parseInt", "(Ljava/lang/String;)I");
+                    code.invokestatic(parseIntMethod); // Stack: [ArrayList/List, int]
+                }
+
+                // Call List.get(int) via interface method
+                int getMethod = cp.addInterfaceMethodRef("java/util/List", "get", "(I)Ljava/lang/Object;");
+                code.invokeinterface(getMethod, 2); // Stack: [Object]
                 return;
             }
 
@@ -98,9 +106,9 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
                 String propName = propIdent.getSym();
                 if ("length".equals(propName)) {
                     // arr.length -> arr.size()
-                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
-                    int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
-                    code.invokevirtual(sizeMethod); // Stack: [int]
+                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList/List]
+                    int sizeMethod = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
+                    code.invokeinterface(sizeMethod, 1); // Stack: [int]
                     return;
                 }
             }

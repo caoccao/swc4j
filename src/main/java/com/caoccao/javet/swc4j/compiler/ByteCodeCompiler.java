@@ -18,11 +18,7 @@ package com.caoccao.javet.swc4j.compiler;
 
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
-import com.caoccao.javet.swc4j.compiler.jdk17.ClassCollector;
-import com.caoccao.javet.swc4j.compiler.jdk17.EnumCollector;
-import com.caoccao.javet.swc4j.compiler.jdk17.TypeAliasCollector;
-import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
-import com.caoccao.javet.swc4j.compiler.jdk17.VariableAnalyzer;
+import com.caoccao.javet.swc4j.compiler.jdk17.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.AstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.MethodGenerator;

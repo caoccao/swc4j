@@ -106,13 +106,22 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         throw new Swc4jByteCodeCompilerException("Cannot set length on Java array - array size is fixed");
                     }
                 }
-            } else if ("Ljava/util/ArrayList;".equals(objType)) {
+            } else if ("Ljava/util/ArrayList;".equals(objType) || "Ljava/util/List;".equals(objType)) {
                 // Check if it's arr[index] = value
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                     // arr[index] = value -> arr.set(index, value)
-                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
-                    compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [ArrayList, index]
-                    compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null); // Stack: [ArrayList, index, value]
+                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList/List]
+                    compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [ArrayList/List, index]
+
+                    // Convert index to int if it's a String (for-in returns string indices in JS semantics)
+                    String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
+                    if ("Ljava/lang/String;".equals(indexType)) {
+                        // String index -> Integer.parseInt(index)
+                        int parseIntMethod = cp.addMethodRef("java/lang/Integer", "parseInt", "(Ljava/lang/String;)I");
+                        code.invokestatic(parseIntMethod); // Stack: [ArrayList/List, int]
+                    }
+
+                    compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null); // Stack: [ArrayList/List, index, value]
 
                     // Box value if needed
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
@@ -121,12 +130,12 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         // wrapperType is already in the form "Ljava/lang/Integer;" so use it directly
                         String className = wrapperType.substring(1, wrapperType.length() - 1); // Remove L and ;
                         int valueOfRef = cp.addMethodRef(className, "valueOf", "(" + valueType + ")" + wrapperType);
-                        code.invokestatic(valueOfRef); // Stack: [ArrayList, index, boxedValue]
+                        code.invokestatic(valueOfRef); // Stack: [ArrayList/List, index, boxedValue]
                     }
 
-                    // Call ArrayList.set(int, Object)
-                    int setMethod = cp.addMethodRef("java/util/ArrayList", "set", "(ILjava/lang/Object;)Ljava/lang/Object;");
-                    code.invokevirtual(setMethod); // Stack: [oldValue] - the return value of set() is the previous value
+                    // Call List.set(int, Object) via interface method
+                    int setMethod = cp.addInterfaceMethodRef("java/util/List", "set", "(ILjava/lang/Object;)Ljava/lang/Object;");
+                    code.invokeinterface(setMethod, 3); // Stack: [oldValue] - the return value of set() is the previous value
                     // Leave the value on stack for expression statements to pop
                     return;
                 }
@@ -138,39 +147,39 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         // arr.length = newLength
                         // Special case: arr.length = 0 -> arr.clear()
                         if (assignExpr.getRight() instanceof Swc4jAstNumber number && number.getValue() == 0.0) {
-                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
-                            int clearMethod = cp.addMethodRef("java/util/ArrayList", "clear", "()V");
-                            code.invokevirtual(clearMethod); // Stack: []
+                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [List]
+                            int clearMethod = cp.addInterfaceMethodRef("java/util/List", "clear", "()V");
+                            code.invokeinterface(clearMethod, 1); // Stack: []
                             // Assignment expression should return the assigned value (0 in this case)
                             code.iconst(0); // Stack: [0]
                             return;
                         }
 
                         // General case for constant new length (like arr.length = 2)
-                        // Use ArrayList.subList(newLength, size()).clear() to remove excess elements
+                        // Use List.subList(newLength, size()).clear() to remove excess elements
                         if (assignExpr.getRight() instanceof Swc4jAstNumber number) {
                             int newLength = (int) number.getValue();
 
                             // Call arr.subList(newLength, arr.size()).clear()
-                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
-                            code.dup(); // Stack: [ArrayList, ArrayList] - keep one for potential use
-                            code.iconst(newLength); // Stack: [ArrayList, ArrayList, newLength]
+                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [List]
+                            code.dup(); // Stack: [List, List] - keep one for potential use
+                            code.iconst(newLength); // Stack: [List, List, newLength]
 
-                            // Get arr.size() - need to load ArrayList again
-                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList, ArrayList, newLength, ArrayList]
-                            int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
-                            code.invokevirtual(sizeMethod); // Stack: [ArrayList, ArrayList, newLength, size]
+                            // Get arr.size() - need to load List again
+                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [List, List, newLength, List]
+                            int sizeMethod = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
+                            code.invokeinterface(sizeMethod, 1); // Stack: [List, List, newLength, size]
 
-                            // Call subList(newLength, size) on the second ArrayList
-                            int subListMethod = cp.addMethodRef("java/util/ArrayList", "subList", "(II)Ljava/util/List;");
-                            code.invokevirtual(subListMethod); // Stack: [ArrayList, List]
+                            // Call subList(newLength, size) on the second List
+                            int subListMethod = cp.addInterfaceMethodRef("java/util/List", "subList", "(II)Ljava/util/List;");
+                            code.invokeinterface(subListMethod, 3); // Stack: [List, List]
 
-                            // Call clear() on the List
+                            // Call clear() on the returned subList
                             int clearMethod2 = cp.addInterfaceMethodRef("java/util/List", "clear", "()V");
-                            code.invokeinterface(clearMethod2, 1); // Stack: [ArrayList]
+                            code.invokeinterface(clearMethod2, 1); // Stack: [List]
 
-                            // Assignment expression returns the assigned value (newLength), not the ArrayList
-                            code.pop(); // Pop the ArrayList we kept, Stack: []
+                            // Assignment expression returns the assigned value (newLength), not the List
+                            code.pop(); // Pop the List we kept, Stack: []
                             code.iconst(newLength); // Stack: [newLength]
                             return;
                         }

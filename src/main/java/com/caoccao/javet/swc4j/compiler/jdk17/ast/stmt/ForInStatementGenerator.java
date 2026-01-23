@@ -35,10 +35,24 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 /**
  * Generator for for-in loops.
  * <p>
- * For-in loops iterate over the keys of an object (LinkedHashMap), indices of an array (ArrayList),
- * or indices of a string (String).
+ * For-in loops iterate over the keys of an object (Map), indices of an array (List),
+ * or indices of a string (String). Type checking is performed at runtime using instanceof.
  * <p>
- * Bytecode pattern for objects (LinkedHashMap):
+ * Runtime type dispatch:
+ * <pre>
+ *   aload obj                              // Load object
+ *   instanceof java/util/List              // Check if List
+ *   ifne LIST_LABEL                        // Jump to list iteration
+ *   aload obj
+ *   instanceof java/util/Map               // Check if Map
+ *   ifne MAP_LABEL                         // Jump to map iteration
+ *   aload obj
+ *   instanceof java/lang/String            // Check if String
+ *   ifne STRING_LABEL                      // Jump to string iteration
+ *   // throw IllegalArgumentException
+ * </pre>
+ * <p>
+ * Bytecode pattern for objects (Map):
  * <pre>
  *   aload obj                              // Load object
  *   invokeinterface Map.keySet()           // Get key set
@@ -57,7 +71,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  *   END_LABEL:                             // Break target
  * </pre>
  * <p>
- * Bytecode pattern for arrays (ArrayList):
+ * Bytecode pattern for arrays (List):
  * <pre>
  *   aload arr                              // Load array
  *   invokeinterface List.size()            // Get size
@@ -102,6 +116,11 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
 
     /**
      * Generate bytecode for a for-in statement (potentially labeled).
+     * <p>
+     * Uses runtime instanceof checks to determine iteration strategy:
+     * - List: iterate over indices (0, 1, 2, ...)
+     * - Map: iterate over keys
+     * - String: iterate over character indices (0, 1, 2, ...)
      *
      * @param code           the code builder
      * @param cp             the constant pool
@@ -118,25 +137,273 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
-        // Enter scope for for-in loop variables
+        // Generate right expression and store in temp variable BEFORE entering loop scope
+        // This ensures the temp variable persists across nested loops
+        compiler.getExpressionGenerator().generate(code, cp, forInStmt.getRight(), null);
+        int tempSlot = context.getLocalVariableTable().allocateVariable("$forInTarget", "Ljava/lang/Object;");
+        code.astore(tempSlot);
+
+        // Runtime type checking using instanceof
+        // Check if it's a List
+        code.aload(tempSlot);
+        int listClassRef = cp.addClass("java/util/List");
+        code.instanceof_(listClassRef);
+        code.ifne(0); // Jump to LIST_ITERATION if instanceof List
+        int listJumpPos = code.getCurrentOffset() - 2;
+
+        // Check if it's a Map
+        code.aload(tempSlot);
+        int mapClassRef = cp.addClass("java/util/Map");
+        code.instanceof_(mapClassRef);
+        code.ifne(0); // Jump to MAP_ITERATION if instanceof Map
+        int mapJumpPos = code.getCurrentOffset() - 2;
+
+        // Check if it's a String
+        code.aload(tempSlot);
+        int stringClassRef = cp.addClass("java/lang/String");
+        code.instanceof_(stringClassRef);
+        code.ifne(0); // Jump to STRING_ITERATION if instanceof String
+        int stringJumpPos = code.getCurrentOffset() - 2;
+
+        // None matched - throw IllegalArgumentException
+        int illegalArgExRef = cp.addClass("java/lang/IllegalArgumentException");
+        code.newInstance(illegalArgExRef);
+        code.dup();
+        int messageRef = cp.addString("For-in loops require List, Map, or String");
+        code.ldc(messageRef);
+        int constructorRef = cp.addMethodRef("java/lang/IllegalArgumentException", "<init>", "(Ljava/lang/String;)V");
+        code.invokespecial(constructorRef);
+        code.athrow();
+
+        // LIST_ITERATION:
+        int listIterationLabel = code.getCurrentOffset();
         context.getLocalVariableTable().enterScope();
+        generateArrayIterationFromTemp(code, cp, forInStmt, tempSlot, labelName, returnTypeInfo);
+        context.getLocalVariableTable().exitScope();
+        code.gotoLabel(0); // Jump to END
+        int listEndJumpPos = code.getCurrentOffset() - 2;
 
-        // Infer type of right expression
-        String rightType = compiler.getTypeResolver().inferTypeFromExpr(forInStmt.getRight());
+        // MAP_ITERATION:
+        int mapIterationLabel = code.getCurrentOffset();
+        context.getLocalVariableTable().enterScope();
+        generateObjectIterationFromTemp(code, cp, forInStmt, tempSlot, labelName, returnTypeInfo);
+        context.getLocalVariableTable().exitScope();
+        code.gotoLabel(0); // Jump to END
+        int mapEndJumpPos = code.getCurrentOffset() - 2;
 
-        if ("Ljava/util/LinkedHashMap;".equals(rightType)) {
-            generateObjectIteration(code, cp, forInStmt, labelName, returnTypeInfo);
-        } else if ("Ljava/util/ArrayList;".equals(rightType)) {
-            generateArrayIteration(code, cp, forInStmt, labelName, returnTypeInfo);
-        } else if ("Ljava/lang/String;".equals(rightType)) {
-            generateStringIteration(code, cp, forInStmt, labelName, returnTypeInfo);
-        } else {
-            throw new Swc4jByteCodeCompilerException(
-                "For-in loops require LinkedHashMap, ArrayList, or String, got: " + rightType);
+        // STRING_ITERATION:
+        int stringIterationLabel = code.getCurrentOffset();
+        context.getLocalVariableTable().enterScope();
+        generateStringIterationFromTemp(code, cp, forInStmt, tempSlot, labelName, returnTypeInfo);
+        context.getLocalVariableTable().exitScope();
+
+        // END:
+        int endLabel = code.getCurrentOffset();
+
+        // Patch all jumps
+        code.patchShort(listJumpPos, listIterationLabel - (listJumpPos - 1));
+        code.patchShort(mapJumpPos, mapIterationLabel - (mapJumpPos - 1));
+        code.patchShort(stringJumpPos, stringIterationLabel - (stringJumpPos - 1));
+        code.patchShort(listEndJumpPos, endLabel - (listEndJumpPos - 1));
+        code.patchShort(mapEndJumpPos, endLabel - (mapEndJumpPos - 1));
+    }
+
+    /**
+     * Generate bytecode for iterating over an array (ArrayList).
+     */
+    private void generateArrayIteration(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstForInStmt forInStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        // Initialize index variable with type int for arrays
+        int indexSlot = initializeArrayIndexVariable(code, forInStmt.getLeft());
+
+        // 1. Generate right expression (array)
+        compiler.getExpressionGenerator().generate(code, cp, forInStmt.getRight(), null);
+
+        // 2. Get size: List.size() -> int
+        int sizeRef = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
+        code.invokeinterface(sizeRef, 1);
+
+        // 3. Store size in temporary variable
+        int sizeSlot = context.getLocalVariableTable().allocateVariable("$size", "I");
+        code.istore(sizeSlot);
+
+        // 4. Initialize counter: i = 0
+        code.iconst(0);
+        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", "I");
+        code.istore(counterSlot);
+
+        // 5. Mark test label (loop entry point)
+        int testLabel = code.getCurrentOffset();
+
+        // 6. Test counter < size
+        code.iload(counterSlot);
+        code.iload(sizeSlot);
+
+        // 7. Jump to end if i >= size
+        code.if_icmpge(0); // Placeholder
+        int exitJumpPos = code.getCurrentOffset() - 2;
+
+        // 8. Store counter directly as int in loop variable (no conversion to String)
+        code.iload(counterSlot);
+
+        // 9. Store in loop variable (indexSlot already initialized at method start)
+        code.istore(indexSlot);
+
+        // 10. Setup break/continue labels
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
+        LoopLabelInfo continueLabel = new LoopLabelInfo(labelName);
+
+        context.pushBreakLabel(breakLabel);
+        context.pushContinueLabel(continueLabel);
+
+        // 11. Generate body
+        compiler.getStatementGenerator().generate(code, cp, forInStmt.getBody(), returnTypeInfo);
+
+        // 12. Pop labels
+        context.popContinueLabel();
+        context.popBreakLabel();
+
+        // 13. Mark update label (continue target)
+        int updateLabel = code.getCurrentOffset();
+        continueLabel.setTargetOffset(updateLabel);
+
+        // 14. Increment counter: i++
+        code.iinc(counterSlot, 1);
+
+        // 15. Jump back to test
+        code.gotoLabel(0); // Placeholder
+        int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
+        int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
+        int backwardGotoOffset = testLabel - backwardGotoOpcodePos;
+        code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
+
+        // 16. Mark end label
+        int endLabel = code.getCurrentOffset();
+        breakLabel.setTargetOffset(endLabel);
+
+        // 17. Patch exit jump
+        int exitOffset = endLabel - (exitJumpPos - 1);
+        code.patchShort(exitJumpPos, (short) exitOffset);
+
+        // 18. Patch all break statements
+        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchShort(patchInfo.offsetPos(), offset);
         }
 
-        // Exit scope
-        context.getLocalVariableTable().exitScope();
+        // 19. Patch all continue statements
+        for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
+            int offset = updateLabel - patchInfo.opcodePos();
+            code.patchShort(patchInfo.offsetPos(), offset);
+        }
+    }
+
+    /**
+     * Generate bytecode for iterating over an array (List) loaded from temp slot.
+     * Indices are converted to String to match JavaScript for-in semantics.
+     */
+    private void generateArrayIterationFromTemp(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstForInStmt forInStmt,
+            int tempSlot,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        // Initialize loop variable with String type (for-in keys are always strings in JS)
+        int keySlot = initializeLoopVariable(code, forInStmt.getLeft());
+
+        // 1. Load array from temp slot and cast to List
+        code.aload(tempSlot);
+        int listClassRef = cp.addClass("java/util/List");
+        code.checkcast(listClassRef);
+
+        // 2. Get size: List.size() -> int
+        int sizeRef = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
+        code.invokeinterface(sizeRef, 1);
+
+        // 3. Store size in temporary variable
+        int sizeSlot = context.getLocalVariableTable().allocateVariable("$size", "I");
+        code.istore(sizeSlot);
+
+        // 4. Initialize counter: i = 0
+        code.iconst(0);
+        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", "I");
+        code.istore(counterSlot);
+
+        // 5. Mark test label (loop entry point)
+        int testLabel = code.getCurrentOffset();
+
+        // 6. Test counter < size
+        code.iload(counterSlot);
+        code.iload(sizeSlot);
+
+        // 7. Jump to end if i >= size
+        code.if_icmpge(0); // Placeholder
+        int exitJumpPos = code.getCurrentOffset() - 2;
+
+        // 8. Convert counter to String: String.valueOf(int)
+        code.iload(counterSlot);
+        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", "(I)Ljava/lang/String;");
+        code.invokestatic(valueOfRef);
+
+        // 9. Store in loop variable (as String)
+        code.astore(keySlot);
+
+        // 10. Setup break/continue labels
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
+        LoopLabelInfo continueLabel = new LoopLabelInfo(labelName);
+
+        context.pushBreakLabel(breakLabel);
+        context.pushContinueLabel(continueLabel);
+
+        // 11. Generate body
+        compiler.getStatementGenerator().generate(code, cp, forInStmt.getBody(), returnTypeInfo);
+
+        // 12. Pop labels
+        context.popContinueLabel();
+        context.popBreakLabel();
+
+        // 13. Mark update label (continue target)
+        int updateLabel = code.getCurrentOffset();
+        continueLabel.setTargetOffset(updateLabel);
+
+        // 14. Increment counter: i++
+        code.iinc(counterSlot, 1);
+
+        // 15. Jump back to test
+        code.gotoLabel(0); // Placeholder
+        int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
+        int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
+        int backwardGotoOffset = testLabel - backwardGotoOpcodePos;
+        code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
+
+        // 16. Mark end label
+        int endLabel = code.getCurrentOffset();
+        breakLabel.setTargetOffset(endLabel);
+
+        // 17. Patch exit jump
+        int exitOffset = endLabel - (exitJumpPos - 1);
+        code.patchShort(exitJumpPos, (short) exitOffset);
+
+        // 18. Patch all break statements
+        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchShort(patchInfo.offsetPos(), offset);
+        }
+
+        // 19. Patch all continue statements
+        for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
+            int offset = updateLabel - patchInfo.opcodePos();
+            code.patchShort(patchInfo.offsetPos(), offset);
+        }
     }
 
     /**
@@ -236,97 +503,98 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
     }
 
     /**
-     * Generate bytecode for iterating over an array (ArrayList).
+     * Generate bytecode for iterating over an object (Map) loaded from temp slot.
      */
-    private void generateArrayIteration(
+    private void generateObjectIterationFromTemp(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstForInStmt forInStmt,
+            int tempSlot,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
-        // Initialize index variable with type int for arrays
-        int indexSlot = initializeArrayIndexVariable(code, forInStmt.getLeft());
+        // Initialize loop variable
+        int keySlot = initializeLoopVariable(code, forInStmt.getLeft());
 
-        // 1. Generate right expression (array)
-        compiler.getExpressionGenerator().generate(code, cp, forInStmt.getRight(), null);
+        // 1. Load object from temp slot
+        code.aload(tempSlot);
 
-        // 2. Get size: List.size() -> int
-        int sizeRef = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
-        code.invokeinterface(sizeRef, 1);
+        // 2. Get keySet: Map.keySet() -> Set
+        int keySetRef = cp.addInterfaceMethodRef("java/util/Map", "keySet", "()Ljava/util/Set;");
+        code.invokeinterface(keySetRef, 1);
 
-        // 3. Store size in temporary variable
-        int sizeSlot = context.getLocalVariableTable().allocateVariable("$size", "I");
-        code.istore(sizeSlot);
+        // 3. Get iterator: Set.iterator() -> Iterator
+        int iteratorRef = cp.addInterfaceMethodRef("java/util/Set", "iterator", "()Ljava/util/Iterator;");
+        code.invokeinterface(iteratorRef, 1);
 
-        // 4. Initialize counter: i = 0
-        code.iconst(0);
-        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", "I");
-        code.istore(counterSlot);
+        // 4. Store iterator in temporary variable
+        int iteratorSlot = context.getLocalVariableTable().allocateVariable("$iterator", "Ljava/util/Iterator;");
+        code.astore(iteratorSlot);
 
         // 5. Mark test label (loop entry point)
         int testLabel = code.getCurrentOffset();
 
-        // 6. Test counter < size
-        code.iload(counterSlot);
-        code.iload(sizeSlot);
+        // 6. Test hasNext: Iterator.hasNext() -> boolean
+        code.aload(iteratorSlot);
+        int hasNextRef = cp.addInterfaceMethodRef("java/util/Iterator", "hasNext", "()Z");
+        code.invokeinterface(hasNextRef, 1);
 
-        // 7. Jump to end if i >= size
-        code.if_icmpge(0); // Placeholder
+        // 7. Jump to end if no more elements
+        code.ifeq(0); // Placeholder
         int exitJumpPos = code.getCurrentOffset() - 2;
 
-        // 8. Store counter directly as int in loop variable (no conversion to String)
-        code.iload(counterSlot);
+        // 8. Get next element: Iterator.next() -> Object
+        code.aload(iteratorSlot);
+        int nextRef = cp.addInterfaceMethodRef("java/util/Iterator", "next", "()Ljava/lang/Object;");
+        code.invokeinterface(nextRef, 1);
 
-        // 9. Store in loop variable (indexSlot already initialized at method start)
-        code.istore(indexSlot);
+        // 9. Convert to String: String.valueOf(Object) -> String
+        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
+        code.invokestatic(valueOfRef);
 
-        // 10. Setup break/continue labels
+        // 10. Store in loop variable
+        code.astore(keySlot);
+
+        // 11. Setup break/continue labels
         LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
         LoopLabelInfo continueLabel = new LoopLabelInfo(labelName);
+        continueLabel.setTargetOffset(testLabel);
 
         context.pushBreakLabel(breakLabel);
         context.pushContinueLabel(continueLabel);
 
-        // 11. Generate body
+        // 12. Generate body
         compiler.getStatementGenerator().generate(code, cp, forInStmt.getBody(), returnTypeInfo);
 
-        // 12. Pop labels
+        // 13. Pop labels
         context.popContinueLabel();
         context.popBreakLabel();
 
-        // 13. Mark update label (continue target)
-        int updateLabel = code.getCurrentOffset();
-        continueLabel.setTargetOffset(updateLabel);
-
-        // 14. Increment counter: i++
-        code.iinc(counterSlot, 1);
-
-        // 15. Jump back to test
+        // 14. Jump back to test
         code.gotoLabel(0); // Placeholder
         int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
         int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
         int backwardGotoOffset = testLabel - backwardGotoOpcodePos;
         code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
 
-        // 16. Mark end label
+        // 15. Mark end label
         int endLabel = code.getCurrentOffset();
         breakLabel.setTargetOffset(endLabel);
 
-        // 17. Patch exit jump
+        // 16. Patch exit jump
         int exitOffset = endLabel - (exitJumpPos - 1);
         code.patchShort(exitJumpPos, (short) exitOffset);
 
-        // 18. Patch all break statements
+        // 17. Patch all break statements
         for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
             int offset = endLabel - patchInfo.opcodePos();
             code.patchShort(patchInfo.offsetPos(), offset);
         }
 
-        // 19. Patch all continue statements
+        // 18. Patch all continue statements
         for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
-            int offset = updateLabel - patchInfo.opcodePos();
+            int offset = testLabel - patchInfo.opcodePos();
             code.patchShort(patchInfo.offsetPos(), offset);
         }
     }
@@ -429,44 +697,104 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
     }
 
     /**
-     * Initialize loop variable for object iteration and return its slot index.
-     * Object keys are always strings.
+     * Generate bytecode for iterating over a string (String) loaded from temp slot.
+     * Indices are converted to String to match JavaScript for-in semantics.
      */
-    private int initializeLoopVariable(CodeBuilder code, ISwc4jAstForHead left) throws Swc4jByteCodeCompilerException {
+    private void generateStringIterationFromTemp(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstForInStmt forInStmt,
+            int tempSlot,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
-        if (left instanceof Swc4jAstVarDecl varDecl) {
-            // Variable declaration: let key or const key
-            if (varDecl.getDecls().isEmpty()) {
-                throw new Swc4jByteCodeCompilerException("For-in variable declaration is empty");
-            }
-            Swc4jAstVarDeclarator decl = varDecl.getDecls().get(0);
-            ISwc4jAstPat name = decl.getName();
-            if (name instanceof Swc4jAstBindingIdent bindingIdent) {
-                String varName = bindingIdent.getId().getSym();
-                // Allocate variable in current scope (object keys are strings)
-                int slot = context.getLocalVariableTable().allocateVariable(varName, "Ljava/lang/String;");
-                // Also register in inferredTypes so TypeResolver can find it
-                context.getInferredTypes().put(varName, "Ljava/lang/String;");
-                // Initialize to null in case loop doesn't execute
-                code.aconst_null();
-                code.astore(slot);
-                return slot;
-            } else {
-                throw new Swc4jByteCodeCompilerException("For-in variable must be a simple identifier");
-            }
-        } else if (left instanceof Swc4jAstBindingIdent bindingIdent) {
-            // Existing variable - look it up (do NOT reinitialize - keep existing value)
-            String varName = bindingIdent.getId().getSym();
-            var variable = context.getLocalVariableTable().getVariable(varName);
-            if (variable == null) {
-                throw new Swc4jByteCodeCompilerException("Variable not found: " + varName);
-            }
-            // Update inferredTypes to String for object keys
-            context.getInferredTypes().put(varName, "Ljava/lang/String;");
-            return variable.index();
-        } else {
-            throw new Swc4jByteCodeCompilerException("Unsupported for-in left type: " + left.getClass().getName());
+        // Initialize loop variable with String type (for-in keys are always strings in JS)
+        int keySlot = initializeLoopVariable(code, forInStmt.getLeft());
+
+        // 1. Load string from temp slot and cast to String
+        code.aload(tempSlot);
+        int stringClassRef = cp.addClass("java/lang/String");
+        code.checkcast(stringClassRef);
+
+        // 2. Get length: String.length() -> int
+        int lengthRef = cp.addMethodRef("java/lang/String", "length", "()I");
+        code.invokevirtual(lengthRef);
+
+        // 3. Store length in temporary variable
+        int lengthSlot = context.getLocalVariableTable().allocateVariable("$length", "I");
+        code.istore(lengthSlot);
+
+        // 4. Initialize counter: i = 0
+        code.iconst(0);
+        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", "I");
+        code.istore(counterSlot);
+
+        // 5. Mark test label (loop entry point)
+        int testLabel = code.getCurrentOffset();
+
+        // 6. Test counter < length
+        code.iload(counterSlot);
+        code.iload(lengthSlot);
+
+        // 7. Jump to end if i >= length
+        code.if_icmpge(0); // Placeholder
+        int exitJumpPos = code.getCurrentOffset() - 2;
+
+        // 8. Convert counter to String: String.valueOf(int)
+        code.iload(counterSlot);
+        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", "(I)Ljava/lang/String;");
+        code.invokestatic(valueOfRef);
+
+        // 9. Store in loop variable (as String)
+        code.astore(keySlot);
+
+        // 10. Setup break/continue labels
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
+        LoopLabelInfo continueLabel = new LoopLabelInfo(labelName);
+
+        context.pushBreakLabel(breakLabel);
+        context.pushContinueLabel(continueLabel);
+
+        // 11. Generate body
+        compiler.getStatementGenerator().generate(code, cp, forInStmt.getBody(), returnTypeInfo);
+
+        // 12. Pop labels
+        context.popContinueLabel();
+        context.popBreakLabel();
+
+        // 13. Mark update label (continue target)
+        int updateLabel = code.getCurrentOffset();
+        continueLabel.setTargetOffset(updateLabel);
+
+        // 14. Increment counter: i++
+        code.iinc(counterSlot, 1);
+
+        // 15. Jump back to test
+        code.gotoLabel(0); // Placeholder
+        int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
+        int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
+        int backwardGotoOffset = testLabel - backwardGotoOpcodePos;
+        code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
+
+        // 16. Mark end label
+        int endLabel = code.getCurrentOffset();
+        breakLabel.setTargetOffset(endLabel);
+
+        // 17. Patch exit jump
+        int exitOffset = endLabel - (exitJumpPos - 1);
+        code.patchShort(exitJumpPos, (short) exitOffset);
+
+        // 18. Patch all break statements
+        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchShort(patchInfo.offsetPos(), offset);
+        }
+
+        // 19. Patch all continue statements
+        for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
+            int offset = updateLabel - patchInfo.opcodePos();
+            code.patchShort(patchInfo.offsetPos(), offset);
         }
     }
 
@@ -506,6 +834,48 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
             }
             // Update inferredTypes to int for array indices
             context.getInferredTypes().put(varName, "I");
+            return variable.index();
+        } else {
+            throw new Swc4jByteCodeCompilerException("Unsupported for-in left type: " + left.getClass().getName());
+        }
+    }
+
+    /**
+     * Initialize loop variable for object iteration and return its slot index.
+     * Object keys are always strings.
+     */
+    private int initializeLoopVariable(CodeBuilder code, ISwc4jAstForHead left) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        if (left instanceof Swc4jAstVarDecl varDecl) {
+            // Variable declaration: let key or const key
+            if (varDecl.getDecls().isEmpty()) {
+                throw new Swc4jByteCodeCompilerException("For-in variable declaration is empty");
+            }
+            Swc4jAstVarDeclarator decl = varDecl.getDecls().get(0);
+            ISwc4jAstPat name = decl.getName();
+            if (name instanceof Swc4jAstBindingIdent bindingIdent) {
+                String varName = bindingIdent.getId().getSym();
+                // Allocate variable in current scope (object keys are strings)
+                int slot = context.getLocalVariableTable().allocateVariable(varName, "Ljava/lang/String;");
+                // Also register in inferredTypes so TypeResolver can find it
+                context.getInferredTypes().put(varName, "Ljava/lang/String;");
+                // Initialize to null in case loop doesn't execute
+                code.aconst_null();
+                code.astore(slot);
+                return slot;
+            } else {
+                throw new Swc4jByteCodeCompilerException("For-in variable must be a simple identifier");
+            }
+        } else if (left instanceof Swc4jAstBindingIdent bindingIdent) {
+            // Existing variable - look it up (do NOT reinitialize - keep existing value)
+            String varName = bindingIdent.getId().getSym();
+            var variable = context.getLocalVariableTable().getVariable(varName);
+            if (variable == null) {
+                throw new Swc4jByteCodeCompilerException("Variable not found: " + varName);
+            }
+            // Update inferredTypes to String for object keys
+            context.getInferredTypes().put(varName, "Ljava/lang/String;");
             return variable.index();
         } else {
             throw new Swc4jByteCodeCompilerException("Unsupported for-in left type: " + left.getClass().getName());

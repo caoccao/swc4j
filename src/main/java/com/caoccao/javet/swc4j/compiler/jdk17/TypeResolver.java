@@ -248,6 +248,18 @@ public final class TypeResolver {
                     fromType.equals("Ljava/lang/Double;");
         }
 
+        // List interface hierarchy: ArrayList/LinkedList → List
+        if (toType.equals("Ljava/util/List;")) {
+            return fromType.equals("Ljava/util/ArrayList;") ||
+                    fromType.equals("Ljava/util/LinkedList;");
+        }
+
+        // Map interface hierarchy: LinkedHashMap/HashMap → Map
+        if (toType.equals("Ljava/util/Map;")) {
+            return fromType.equals("Ljava/util/LinkedHashMap;") ||
+                    fromType.equals("Ljava/util/HashMap;");
+        }
+
         // For other object types, we'd need full class hierarchy information
         // For now, we only support the common cases above
         return false;
@@ -874,7 +886,7 @@ public final class TypeResolver {
                             for (var arg : callExpr.getArgs()) {
                                 if (arg.getSpread().isPresent()) {
                                     throw new Swc4jByteCodeCompilerException(
-                                        "Spread arguments not supported in TypeScript class method calls");
+                                            "Spread arguments not supported in TypeScript class method calls");
                                 }
                                 String argType = inferTypeFromExpr(arg.getExpr());
                                 if (argType == null) {
@@ -884,14 +896,14 @@ public final class TypeResolver {
                             }
                             String paramDescriptor = "(" + paramDescriptors + ")";
                             String returnType = compiler.getMemory().getScopedJavaClassRegistry()
-                                .resolveTSClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
+                                    .resolveTSClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
                             if (returnType != null) {
                                 return returnType;
                             }
                             // Cannot infer return type - require explicit annotation
                             throw new Swc4jByteCodeCompilerException(
-                                "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
-                                ". Please add explicit return type annotation to the method.");
+                                    "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
+                                            ". Please add explicit return type annotation to the method.");
                         }
                     }
                 }

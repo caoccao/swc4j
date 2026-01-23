@@ -203,10 +203,7 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
     public boolean isTypeSupported(String objType) {
         // A TS class type is an object type (starts with L and ends with ;)
         // that is not a known Java built-in type
-        if (objType == null || !objType.startsWith("L") || !objType.endsWith(";")) {
-            return false;
-        }
-        return true;
+        return objType != null && objType.startsWith("L") && objType.endsWith(";");
     }
 
     /**
