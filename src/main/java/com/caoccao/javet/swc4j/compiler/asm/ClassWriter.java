@@ -553,6 +553,43 @@ public class ClassWriter {
         private record IntegerInfo(int value) {
         }
 
+        /**
+         * Get the method descriptor for a method reference at the given constant pool index.
+         * This looks up the method/interface method ref, then the name and type, then the UTF8 descriptor.
+         *
+         * @param index the constant pool index of the method ref
+         * @return the method descriptor string, or null if not found or not a method ref
+         */
+        public String getMethodDescriptor(int index) {
+            if (index <= 0 || index >= constants.size()) {
+                return null;
+            }
+            Object constant = constants.get(index);
+            int nameAndTypeIndex;
+            if (constant instanceof MethodRefInfo methodRef) {
+                nameAndTypeIndex = methodRef.nameAndTypeIndex;
+            } else if (constant instanceof InterfaceMethodRefInfo interfaceMethodRef) {
+                nameAndTypeIndex = interfaceMethodRef.nameAndTypeIndex;
+            } else {
+                return null;
+            }
+            if (nameAndTypeIndex <= 0 || nameAndTypeIndex >= constants.size()) {
+                return null;
+            }
+            Object nameAndType = constants.get(nameAndTypeIndex);
+            if (nameAndType instanceof NameAndTypeInfo natInfo) {
+                int descriptorIndex = natInfo.descriptorIndex;
+                if (descriptorIndex <= 0 || descriptorIndex >= constants.size()) {
+                    return null;
+                }
+                Object descriptor = constants.get(descriptorIndex);
+                if (descriptor instanceof Utf8Info utf8) {
+                    return utf8.value;
+                }
+            }
+            return null;
+        }
+
         private record InterfaceMethodRefInfo(int classIndex, int nameAndTypeIndex) {
         }
 

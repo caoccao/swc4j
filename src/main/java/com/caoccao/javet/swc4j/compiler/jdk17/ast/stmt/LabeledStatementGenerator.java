@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstDoWhileStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstForInStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstForStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstLabeledStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstWhileStmt;
@@ -70,6 +71,9 @@ public final class LabeledStatementGenerator extends BaseAstProcessor<Swc4jAstLa
         if (body instanceof Swc4jAstForStmt forStmt) {
             // Generate labeled for loop
             compiler.getForStatementGenerator().generate(code, cp, forStmt, labelName, returnTypeInfo);
+        } else if (body instanceof Swc4jAstForInStmt forInStmt) {
+            // Generate labeled for-in loop
+            compiler.getForInStatementGenerator().generate(code, cp, forInStmt, labelName, returnTypeInfo);
         } else if (body instanceof Swc4jAstWhileStmt whileStmt) {
             // Generate labeled while loop
             compiler.getWhileStatementGenerator().generate(code, cp, whileStmt, labelName, returnTypeInfo);

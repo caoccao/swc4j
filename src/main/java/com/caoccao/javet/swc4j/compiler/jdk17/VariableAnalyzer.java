@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
@@ -85,6 +86,22 @@ public final class VariableAnalyzer {
             analyzeStatement(forStmt.getBody());
 
             // Exit the for loop scope - restores shadowed variables
+            context.getLocalVariableTable().exitScope();
+        } else if (stmt instanceof Swc4jAstForInStmt forInStmt) {
+            // For-in loops create a new scope for their loop variable
+            context.getLocalVariableTable().enterScope();
+
+            // Analyze for-in loop variable - use shadowing-aware allocation
+            ISwc4jAstForHead left = forInStmt.getLeft();
+            if (left instanceof Swc4jAstVarDecl varDecl) {
+                analyzeVarDecl(varDecl);
+            }
+            // If left is a BindingIdent, it's an existing variable - no allocation needed
+
+            // Recursively analyze for-in loop body
+            analyzeStatement(forInStmt.getBody());
+
+            // Exit the for-in loop scope - restores shadowed variables
             context.getLocalVariableTable().exitScope();
         } else if (stmt instanceof Swc4jAstIfStmt ifStmt) {
             // Recursively analyze if statement branches

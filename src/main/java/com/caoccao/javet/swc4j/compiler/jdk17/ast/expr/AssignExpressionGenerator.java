@@ -291,6 +291,12 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                             case "J" -> code.ladd();
                             case "F" -> code.fadd();
                             case "D" -> code.dadd();
+                            case "Ljava/lang/String;" -> {
+                                // String concatenation: result = result.concat(value)
+                                // Stack is: [result, value] where value is already a String
+                                int concatMethod = cp.addMethodRef("java/lang/String", "concat", "(Ljava/lang/String;)Ljava/lang/String;");
+                                code.invokevirtual(concatMethod); // Stack: [concatenated]
+                            }
                         }
                     }
                     case SubAssign -> {
