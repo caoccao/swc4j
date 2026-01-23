@@ -91,10 +91,12 @@ public final class VariableAnalyzer {
             // For-in loops create a new scope for their loop variable
             context.getLocalVariableTable().enterScope();
 
-            // Analyze for-in loop variable - use shadowing-aware allocation
+            // For-in loop variables are allocated during code generation (not analysis)
+            // because their type depends on the runtime collection type
+            // Just skip variable declaration analysis here
             ISwc4jAstForHead left = forInStmt.getLeft();
-            if (left instanceof Swc4jAstVarDecl varDecl) {
-                analyzeVarDecl(varDecl);
+            if (left instanceof Swc4jAstVarDecl) {
+                // Skip allocation - will be done during generation
             }
             // If left is a BindingIdent, it's an existing variable - no allocation needed
 

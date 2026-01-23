@@ -31,27 +31,6 @@ public class TestCompileAstForInStmtBasic extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testBasicObjectIteration(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): string {
-                      const obj = { a: 1, b: 2, c: 3 }
-                      let result: string = ""
-                      for (let key in obj) {
-                        result += key
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("abc", classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testBasicArrayIteration(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -73,44 +52,43 @@ public class TestCompileAstForInStmtBasic extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testEmptyObject(JdkVersion jdkVersion) throws Exception {
+    public void testBasicObjectIteration(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): int {
-                      const obj = {}
-                      let count: int = 0
+                    test(): string {
+                      const obj = { a: 1, b: 2, c: 3 }
+                      let result: string = ""
                       for (let key in obj) {
-                        count++
+                        result += key
                       }
-                      return count
+                      return result
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance));
+        assertEquals("abc", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testEmptyArray(JdkVersion jdkVersion) throws Exception {
+    public void testBasicStringIteration(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): int {
-                      const arr = []
-                      let count: int = 0
-                      for (let i in arr) {
-                        count++
+                    test(): string {
+                      let result: string = ""
+                      for (let index in 'abc') {
+                        result += index
                       }
-                      return count
+                      return result
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance));
+        assertEquals("012", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -163,26 +141,44 @@ public class TestCompileAstForInStmtBasic extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNestedForInLoops(JdkVersion jdkVersion) throws Exception {
+    public void testEmptyArray(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(): string {
-                      const obj1 = { a: 1, b: 2 }
-                      const obj2 = { x: 10, y: 20 }
-                      let result: string = ""
-                      for (let k1 in obj1) {
-                        for (let k2 in obj2) {
-                          result += k1 + k2 + ","
-                        }
+                    test(): int {
+                      const arr = []
+                      let count: int = 0
+                      for (let i in arr) {
+                        count++
                       }
-                      return result
+                      return count
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("ax,ay,bx,by,", classA.getMethod("test").invoke(instance));
+        assertEquals(0, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEmptyObject(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const obj = {}
+                      let count: int = 0
+                      for (let key in obj) {
+                        count++
+                      }
+                      return count
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(0, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -210,5 +206,29 @@ public class TestCompileAstForInStmtBasic extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals("ax,ay,", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedForInLoops(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): string {
+                      const obj1 = { a: 1, b: 2 }
+                      const obj2 = { x: 10, y: 20 }
+                      let result: string = ""
+                      for (let k1 in obj1) {
+                        for (let k2 in obj2) {
+                          result += k1 + k2 + ","
+                        }
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("ax,ay,bx,by,", classA.getMethod("test").invoke(instance));
     }
 }

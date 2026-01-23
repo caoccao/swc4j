@@ -35,7 +35,8 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 /**
  * Generator for for-in loops.
  * <p>
- * For-in loops iterate over the keys of an object (LinkedHashMap) or indices of an array (ArrayList).
+ * For-in loops iterate over the keys of an object (LinkedHashMap), indices of an array (ArrayList),
+ * or indices of a string (String).
  * <p>
  * Bytecode pattern for objects (LinkedHashMap):
  * <pre>
@@ -127,9 +128,11 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
             generateObjectIteration(code, cp, forInStmt, labelName, returnTypeInfo);
         } else if ("Ljava/util/ArrayList;".equals(rightType)) {
             generateArrayIteration(code, cp, forInStmt, labelName, returnTypeInfo);
+        } else if ("Ljava/lang/String;".equals(rightType)) {
+            generateStringIteration(code, cp, forInStmt, labelName, returnTypeInfo);
         } else {
             throw new Swc4jByteCodeCompilerException(
-                "For-in loops require LinkedHashMap or ArrayList, got: " + rightType);
+                "For-in loops require LinkedHashMap, ArrayList, or String, got: " + rightType);
         }
 
         // Exit scope
@@ -146,6 +149,9 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        // Initialize existing variable to null if needed (in case loop doesn't execute)
+        int keySlot = initializeLoopVariable(code, forInStmt.getLeft());
 
         // 1. Generate right expression (object)
         compiler.getExpressionGenerator().generate(code, cp, forInStmt.getRight(), null);
@@ -183,8 +189,7 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
         int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
         code.invokestatic(valueOfRef);
 
-        // 10. Store in loop variable
-        int keySlot = allocateLoopVariable(forInStmt.getLeft());
+        // 10. Store in loop variable (keySlot already initialized at method start)
         code.astore(keySlot);
 
         // 11. Setup break/continue labels
@@ -241,6 +246,9 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
+        // Initialize index variable with type int for arrays
+        int indexSlot = initializeArrayIndexVariable(code, forInStmt.getLeft());
+
         // 1. Generate right expression (array)
         compiler.getExpressionGenerator().generate(code, cp, forInStmt.getRight(), null);
 
@@ -268,14 +276,11 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
         code.if_icmpge(0); // Placeholder
         int exitJumpPos = code.getCurrentOffset() - 2;
 
-        // 8. Convert counter to String: String.valueOf(int) -> String
+        // 8. Store counter directly as int in loop variable (no conversion to String)
         code.iload(counterSlot);
-        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", "(I)Ljava/lang/String;");
-        code.invokestatic(valueOfRef);
 
-        // 9. Store in loop variable
-        int keySlot = allocateLoopVariable(forInStmt.getLeft());
-        code.astore(keySlot);
+        // 9. Store in loop variable (indexSlot already initialized at method start)
+        code.istore(indexSlot);
 
         // 10. Setup break/continue labels
         LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
@@ -327,10 +332,107 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
     }
 
     /**
-     * Allocate local variable slot for the loop variable.
-     * Handles both variable declarations and existing variables.
+     * Generate bytecode for iterating over a string (String).
+     * Iterates over character indices as integers.
      */
-    private int allocateLoopVariable(ISwc4jAstForHead left) throws Swc4jByteCodeCompilerException {
+    private void generateStringIteration(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstForInStmt forInStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        // Initialize index variable with type int for strings
+        int indexSlot = initializeArrayIndexVariable(code, forInStmt.getLeft());
+
+        // 1. Generate right expression (string)
+        compiler.getExpressionGenerator().generate(code, cp, forInStmt.getRight(), null);
+
+        // 2. Get length: String.length() -> int
+        int lengthRef = cp.addMethodRef("java/lang/String", "length", "()I");
+        code.invokevirtual(lengthRef);
+
+        // 3. Store length in temporary variable
+        int lengthSlot = context.getLocalVariableTable().allocateVariable("$length", "I");
+        code.istore(lengthSlot);
+
+        // 4. Initialize counter: i = 0
+        code.iconst(0);
+        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", "I");
+        code.istore(counterSlot);
+
+        // 5. Mark test label (loop entry point)
+        int testLabel = code.getCurrentOffset();
+
+        // 6. Test counter < length
+        code.iload(counterSlot);
+        code.iload(lengthSlot);
+
+        // 7. Jump to end if i >= length
+        code.if_icmpge(0); // Placeholder
+        int exitJumpPos = code.getCurrentOffset() - 2;
+
+        // 8. Store counter directly as int in loop variable
+        code.iload(counterSlot);
+
+        // 9. Store in loop variable (indexSlot already initialized at method start)
+        code.istore(indexSlot);
+
+        // 10. Setup break/continue labels
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
+        LoopLabelInfo continueLabel = new LoopLabelInfo(labelName);
+
+        context.pushBreakLabel(breakLabel);
+        context.pushContinueLabel(continueLabel);
+
+        // 11. Generate body
+        compiler.getStatementGenerator().generate(code, cp, forInStmt.getBody(), returnTypeInfo);
+
+        // 12. Pop labels
+        context.popContinueLabel();
+        context.popBreakLabel();
+
+        // 13. Mark update label (continue target)
+        int updateLabel = code.getCurrentOffset();
+        continueLabel.setTargetOffset(updateLabel);
+
+        // 14. Increment counter: i++
+        code.iinc(counterSlot, 1);
+
+        // 15. Jump back to test
+        code.gotoLabel(0); // Placeholder
+        int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
+        int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
+        int backwardGotoOffset = testLabel - backwardGotoOpcodePos;
+        code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
+
+        // 16. Mark end label
+        int endLabel = code.getCurrentOffset();
+        breakLabel.setTargetOffset(endLabel);
+
+        // 17. Patch exit jump
+        int exitOffset = endLabel - (exitJumpPos - 1);
+        code.patchShort(exitJumpPos, (short) exitOffset);
+
+        // 18. Patch all break statements
+        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchShort(patchInfo.offsetPos(), offset);
+        }
+
+        // 19. Patch all continue statements
+        for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
+            int offset = updateLabel - patchInfo.opcodePos();
+            code.patchShort(patchInfo.offsetPos(), offset);
+        }
+    }
+
+    /**
+     * Initialize loop variable for object iteration and return its slot index.
+     * Object keys are always strings.
+     */
+    private int initializeLoopVariable(CodeBuilder code, ISwc4jAstForHead left) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         if (left instanceof Swc4jAstVarDecl varDecl) {
@@ -342,21 +444,68 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
             ISwc4jAstPat name = decl.getName();
             if (name instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
-                // Allocate variable in current scope (keys/indices are always strings)
+                // Allocate variable in current scope (object keys are strings)
                 int slot = context.getLocalVariableTable().allocateVariable(varName, "Ljava/lang/String;");
                 // Also register in inferredTypes so TypeResolver can find it
                 context.getInferredTypes().put(varName, "Ljava/lang/String;");
+                // Initialize to null in case loop doesn't execute
+                code.aconst_null();
+                code.astore(slot);
                 return slot;
             } else {
                 throw new Swc4jByteCodeCompilerException("For-in variable must be a simple identifier");
             }
         } else if (left instanceof Swc4jAstBindingIdent bindingIdent) {
-            // Existing variable - look it up
+            // Existing variable - look it up (do NOT reinitialize - keep existing value)
             String varName = bindingIdent.getId().getSym();
             var variable = context.getLocalVariableTable().getVariable(varName);
             if (variable == null) {
                 throw new Swc4jByteCodeCompilerException("Variable not found: " + varName);
             }
+            // Update inferredTypes to String for object keys
+            context.getInferredTypes().put(varName, "Ljava/lang/String;");
+            return variable.index();
+        } else {
+            throw new Swc4jByteCodeCompilerException("Unsupported for-in left type: " + left.getClass().getName());
+        }
+    }
+
+    /**
+     * Initialize loop variable for array iteration and return its slot index.
+     * Array indices are integers.
+     */
+    private int initializeArrayIndexVariable(CodeBuilder code, ISwc4jAstForHead left) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        if (left instanceof Swc4jAstVarDecl varDecl) {
+            // Variable declaration: let index or const index
+            if (varDecl.getDecls().isEmpty()) {
+                throw new Swc4jByteCodeCompilerException("For-in variable declaration is empty");
+            }
+            Swc4jAstVarDeclarator decl = varDecl.getDecls().get(0);
+            ISwc4jAstPat name = decl.getName();
+            if (name instanceof Swc4jAstBindingIdent bindingIdent) {
+                String varName = bindingIdent.getId().getSym();
+                // Allocate variable in current scope (array indices are ints)
+                int slot = context.getLocalVariableTable().allocateVariable(varName, "I");
+                // Also register in inferredTypes so TypeResolver can find it
+                context.getInferredTypes().put(varName, "I");
+                // Initialize to 0 in case loop doesn't execute
+                code.iconst(0);
+                code.istore(slot);
+                return slot;
+            } else {
+                throw new Swc4jByteCodeCompilerException("For-in variable must be a simple identifier");
+            }
+        } else if (left instanceof Swc4jAstBindingIdent bindingIdent) {
+            // Existing variable - look it up (do NOT reinitialize - keep existing value)
+            String varName = bindingIdent.getId().getSym();
+            var variable = context.getLocalVariableTable().getVariable(varName);
+            if (variable == null) {
+                throw new Swc4jByteCodeCompilerException("Variable not found: " + varName);
+            }
+            // Update inferredTypes to int for array indices
+            context.getInferredTypes().put(varName, "I");
             return variable.index();
         } else {
             throw new Swc4jByteCodeCompilerException("Unsupported for-in left type: " + left.getClass().getName());

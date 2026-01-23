@@ -71,6 +71,31 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                         case "D" -> code.dstore(localVar.index());
                         default -> code.astore(localVar.index());
                     }
+                } else {
+                    // Generate default initialization for variables without initializers
+                    // This is required by the JVM verifier to track variable initialization
+                    switch (localVar.type()) {
+                        case "I", "S", "C", "Z", "B" -> {
+                            code.iconst(0);
+                            code.istore(localVar.index());
+                        }
+                        case "J" -> {
+                            code.lconst(0);
+                            code.lstore(localVar.index());
+                        }
+                        case "F" -> {
+                            code.fconst(0);
+                            code.fstore(localVar.index());
+                        }
+                        case "D" -> {
+                            code.dconst(0);
+                            code.dstore(localVar.index());
+                        }
+                        default -> {
+                            code.aconst_null();
+                            code.astore(localVar.index());
+                        }
+                    }
                 }
             }
         }

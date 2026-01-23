@@ -228,6 +228,10 @@ public class StackMapGenerator {
                     short offset = (short) (((bytecode[i + 1] & 0xFF) << 8) | (bytecode[i + 2] & 0xFF));
                     targets.add(i + offset);
                 }
+                // Add instruction after goto (if exists) - it needs a frame since it follows unconditional branch
+                if (nextInstructionOffset < bytecode.length) {
+                    targets.add(nextInstructionOffset);
+                }
             } else if (opcode == 0xC6 || opcode == 0xC7) { // ifnull, ifnonnull
                 if (i + 2 < bytecode.length) {
                     short offset = (short) (((bytecode[i + 1] & 0xFF) << 8) | (bytecode[i + 2] & 0xFF));
@@ -268,6 +272,11 @@ public class StackMapGenerator {
                     }
                     // lookupswitch has no fall-through (all paths jump)
                 }
+            } else if (isUnconditionalExit(opcode)) {
+                // Return instructions and athrow - add instruction after them (if exists)
+                if (nextInstructionOffset < bytecode.length) {
+                    targets.add(nextInstructionOffset);
+                }
             }
             // Properly skip to the next instruction
             i = nextInstructionOffset;
@@ -298,9 +307,23 @@ public class StackMapGenerator {
         Collections.sort(sortedTargets);
 
         int previousOffset = -1;
+        Frame lastFrame = null;
         for (int offset : sortedTargets) {
             Frame frame = frames.get(offset);
-            if (frame == null) continue;
+
+            // For unreachable code (e.g., after return/throw), use the last known frame
+            // This is needed because the JVM verifier still processes unreachable code
+            if (frame == null) {
+                if (lastFrame != null) {
+                    frame = lastFrame.copy();
+                    // Clear stack for unreachable code
+                    frame.stack.clear();
+                } else {
+                    continue; // No frame available, skip
+                }
+            }
+
+            lastFrame = frame;
 
             int offsetDelta = previousOffset == -1 ? offset : offset - previousOffset - 1;
 
@@ -553,6 +576,19 @@ public class StackMapGenerator {
                 ((bytecode[offset + 1] & 0xFF) << 16) |
                 ((bytecode[offset + 2] & 0xFF) << 8) |
                 (bytecode[offset + 3] & 0xFF);
+    }
+
+    /**
+     * Check if opcode is an unconditional exit (return or throw).
+     */
+    private boolean isUnconditionalExit(int opcode) {
+        return opcode == 0xAC // ireturn
+                || opcode == 0xAD // lreturn
+                || opcode == 0xAE // freturn
+                || opcode == 0xAF // dreturn
+                || opcode == 0xB0 // areturn
+                || opcode == 0xB1 // return (void)
+                || opcode == 0xBF; // athrow
     }
 
     private Frame simulateInstruction(Frame frame, int pc) {

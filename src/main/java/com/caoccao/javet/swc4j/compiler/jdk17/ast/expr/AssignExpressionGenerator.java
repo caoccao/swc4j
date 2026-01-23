@@ -275,7 +275,24 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
                 // Convert to the variable's type if needed
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                if (valueType != null && !valueType.equals(varType)) {
+
+                // Special handling for String += (need to convert value to String)
+                if ("Ljava/lang/String;".equals(varType) && op == Swc4jAstAssignOp.AddAssign) {
+                    // Convert value to String using String.valueOf() if it's not already a String
+                    if (!"Ljava/lang/String;".equals(valueType)) {
+                        String valueOfDescriptor = switch (valueType) {
+                            case "I" -> "(I)Ljava/lang/String;";
+                            case "J" -> "(J)Ljava/lang/String;";
+                            case "F" -> "(F)Ljava/lang/String;";
+                            case "D" -> "(D)Ljava/lang/String;";
+                            case "Z" -> "(Z)Ljava/lang/String;";
+                            case "C" -> "(C)Ljava/lang/String;";
+                            default -> "(Ljava/lang/Object;)Ljava/lang/String;";
+                        };
+                        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", valueOfDescriptor);
+                        code.invokestatic(valueOfRef);
+                    }
+                } else if (valueType != null && !valueType.equals(varType)) {
                     TypeConversionUtils.unboxWrapperType(code, cp, valueType);
                     String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
                     if (valuePrimitive != null && !valuePrimitive.equals(varType)) {
@@ -293,7 +310,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                             case "D" -> code.dadd();
                             case "Ljava/lang/String;" -> {
                                 // String concatenation: result = result.concat(value)
-                                // Stack is: [result, value] where value is already a String
+                                // Stack is: [result, value] where value is now a String
                                 int concatMethod = cp.addMethodRef("java/lang/String", "concat", "(Ljava/lang/String;)Ljava/lang/String;");
                                 code.invokevirtual(concatMethod); // Stack: [concatenated]
                             }
