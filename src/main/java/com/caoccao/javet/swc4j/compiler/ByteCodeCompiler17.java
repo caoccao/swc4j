@@ -21,18 +21,13 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public final class ByteCodeCompiler17 extends ByteCodeCompiler {
     ByteCodeCompiler17(ByteCodeCompilerOptions options) {
         super(options);
     }
 
     @Override
-    Map<String, byte[]> compileProgram(ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException {
-        Map<String, byte[]> byteCodeMap = new HashMap<>();
-
+    void compileProgram(ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException {
         // Enter a new scope for this file
         memory.getScopedJavaClassRegistry().enterScope();
 
@@ -44,7 +39,7 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 typeAliasCollector.collectFromModuleItems(module.getBody());
                 memory.getTypeRegistry().collectFromModuleItems(module.getBody(), options.packagePrefix());
                 // Third pass: generate bytecode
-                astProcessor.processModuleItems(module.getBody(), options.packagePrefix(), byteCodeMap);
+                astProcessor.processModuleItems(module.getBody(), options.packagePrefix());
             } else if (program instanceof Swc4jAstScript script) {
                 // First pass: process imports (scripts typically don't have imports, but support it anyway)
                 importDeclProcessor.processImports(script.getBody());
@@ -52,10 +47,8 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 typeAliasCollector.collectFromStmts(script.getBody());
                 memory.getTypeRegistry().collectFromStmts(script.getBody(), options.packagePrefix());
                 // Third pass: generate bytecode
-                astProcessor.processStmts(script.getBody(), options.packagePrefix(), byteCodeMap);
+                astProcessor.processStmts(script.getBody(), options.packagePrefix());
             }
-
-            return byteCodeMap;
         } finally {
             // Always exit the scope, even if an exception occurs
             memory.getScopedJavaClassRegistry().exitScope();

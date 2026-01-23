@@ -139,11 +139,13 @@ public sealed abstract class ByteCodeCompiler permits
     }
 
     public Map<String, byte[]> compile(String code) throws Swc4jCoreException, Swc4jByteCodeCompilerException {
+        memory.getByteCodeMap().clear();
         Swc4jParseOutput output = swc4j.parse(code, parseOptions);
-        return compileProgram(output.getProgram());
+        compileProgram(output.getProgram());
+        return memory.getByteCodeMap();
     }
 
-    abstract Map<String, byte[]> compileProgram(ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException;
+    abstract void compileProgram(ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException;
 
     public ArrayLiteralGenerator getArrayLiteralGenerator() {
         return arrayLiteralGenerator;
