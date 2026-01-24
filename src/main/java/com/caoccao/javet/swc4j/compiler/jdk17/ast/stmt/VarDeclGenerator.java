@@ -59,7 +59,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
 
                     // Phase 2: Get GenericTypeInfo from context if available (for Record types)
                     GenericTypeInfo genericTypeInfo = context.getGenericTypeInfoMap().get(varName);
-                    ReturnTypeInfo varTypeInfo = ReturnTypeInfo.of(localVar.type(), genericTypeInfo);
+                    ReturnTypeInfo varTypeInfo = ReturnTypeInfo.of(declarator, localVar.type(), genericTypeInfo);
 
                     compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
 

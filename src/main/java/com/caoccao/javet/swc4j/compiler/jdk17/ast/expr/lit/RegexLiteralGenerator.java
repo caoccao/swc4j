@@ -39,11 +39,12 @@ public final class RegexLiteralGenerator extends BaseAstProcessor<Swc4jAstRegex>
     /**
      * Converts JavaScript flags to Java Pattern flags.
      *
+     * @param regex   the regex AST node (for error reporting)
      * @param jsFlags JavaScript flag string (e.g., "gim")
      * @return Combined Java Pattern flags as int
      * @throws Swc4jByteCodeCompilerException if unsupported flags are present
      */
-    private int convertFlags(String jsFlags) throws Swc4jByteCodeCompilerException {
+    private int convertFlags(Swc4jAstRegex regex, String jsFlags) throws Swc4jByteCodeCompilerException {
         int javaFlags = 0;
         boolean hasUnicodeFlag = jsFlags.contains("u");
 
@@ -71,14 +72,16 @@ public final class RegexLiteralGenerator extends BaseAstProcessor<Swc4jAstRegex>
                     break;
                 case 'y':
                     throw new Swc4jByteCodeCompilerException(
+                            regex,
                             "Sticky flag 'y' is not supported in Java regex. " +
                                     "Java Pattern does not have an equivalent to JavaScript's sticky matching.");
                 case 'd':
                     throw new Swc4jByteCodeCompilerException(
+                            regex,
                             "Indices flag 'd' is not supported in Java regex. " +
                                     "Java Pattern does not generate match indices in the same way.");
                 default:
-                    throw new Swc4jByteCodeCompilerException("Unknown regex flag: " + flag);
+                    throw new Swc4jByteCodeCompilerException(regex, "Unknown regex flag: " + flag);
             }
         }
 
@@ -121,7 +124,7 @@ public final class RegexLiteralGenerator extends BaseAstProcessor<Swc4jAstRegex>
         String convertedPattern = convertPattern(pattern);
 
         // Convert flags
-        int javaFlags = convertFlags(flags);
+        int javaFlags = convertFlags(regex, flags);
 
         // Generate bytecode: Pattern.compile(String, int)
         // Stack: [] → [Pattern]

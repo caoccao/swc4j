@@ -113,7 +113,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                 ReturnTypeInfo valueReturnType = null;
                 if (genericTypeInfo != null && genericTypeInfo.isNested() && valueExpr instanceof Swc4jAstObjectLit) {
                     // Create ReturnTypeInfo with nested GenericTypeInfo for recursive validation
-                    valueReturnType = ReturnTypeInfo.of("Ljava/util/LinkedHashMap;", genericTypeInfo.getNestedTypeInfo());
+                    valueReturnType = ReturnTypeInfo.of(valueExpr, "Ljava/util/LinkedHashMap;", genericTypeInfo.getNestedTypeInfo());
                 }
 
                 compiler.getExpressionGenerator().generate(code, cp, valueExpr, valueReturnType);
@@ -272,6 +272,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
             }
         } else {
             throw new Swc4jByteCodeCompilerException(
+                    key,
                     "Unsupported property key type: " + key.getClass().getSimpleName() +
                             ". Supported types: Identifier, String literal, Number, and Computed property names.");
         }
@@ -449,6 +450,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
             } else {
                 String keyName = getPropertyName(key);
                 throw Swc4jByteCodeCompilerException.typeMismatch(
+                        key,
                         keyName,
                         expectedKeyType,
                         actualKeyType,
@@ -485,6 +487,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
         if (!TypeResolver.isAssignable(actualValueType, expectedValueType)) {
             String keyName = getPropertyName(key);
             throw Swc4jByteCodeCompilerException.typeMismatch(
+                    valueExpr,
                     keyName,
                     expectedValueType,
                     actualValueType,
@@ -504,6 +507,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
 
         if (!TypeResolver.isAssignable(actualKeyType, expectedKeyType)) {
             throw Swc4jByteCodeCompilerException.typeMismatch(
+                    ident,
                     propertyName,
                     expectedKeyType,
                     actualKeyType,
@@ -521,6 +525,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
 
         if (!TypeResolver.isAssignable(actualValueType, expectedValueType)) {
             throw Swc4jByteCodeCompilerException.typeMismatch(
+                    ident,
                     propertyName,
                     expectedValueType,
                     actualValueType,
@@ -549,6 +554,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                 !"Ljava/util/Map;".equals(spreadType) &&
                 !"Ljava/lang/Object;".equals(spreadType)) {
             throw new Swc4jByteCodeCompilerException(
+                    spread,
                     "Spread source must be a Map type, got: " + spreadType);
         }
 
@@ -568,6 +574,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
             // Validate key types match
             if (!TypeResolver.isAssignable(actualKeyType, expectedKeyType)) {
                 throw new Swc4jByteCodeCompilerException(
+                        spread,
                         "Spread source has incompatible key type: expected " +
                                 expectedKeyType + ", got " + actualKeyType);
             }
@@ -586,6 +593,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
 
                 if (!TypeResolver.isAssignable(actualNestedKeyType, expectedNestedKeyType)) {
                     throw new Swc4jByteCodeCompilerException(
+                            spread,
                             "Spread source has incompatible nested key type: expected " +
                                     expectedNestedKeyType + ", got " + actualNestedKeyType);
                 }
@@ -595,18 +603,21 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
 
                 if (!TypeResolver.isAssignable(actualNestedValueType, expectedNestedValueType)) {
                     throw new Swc4jByteCodeCompilerException(
+                            spread,
                             "Spread source has incompatible value type: expected " +
                                     expectedNestedValueType + ", got " + actualNestedValueType);
                 }
             } else if (genericTypeInfo.isNested() != spreadGenericInfo.isNested()) {
                 // One is nested, the other is not - incompatible
                 throw new Swc4jByteCodeCompilerException(
+                        spread,
                         "Spread source has incompatible nesting: expected nested=" +
                                 genericTypeInfo.isNested() + ", got nested=" + spreadGenericInfo.isNested());
             } else {
                 // Neither is nested - validate value types match
                 if (!TypeResolver.isAssignable(actualValueType, expectedValueType)) {
                     throw new Swc4jByteCodeCompilerException(
+                            spread,
                             "Spread source has incompatible value type: expected " +
                                     expectedValueType + ", got " + actualValueType);
                 }

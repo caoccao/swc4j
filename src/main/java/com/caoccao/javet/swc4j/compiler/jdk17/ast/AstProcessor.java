@@ -57,7 +57,7 @@ public final class AstProcessor {
             byte[] bytecode = compiler.getClassGenerator().generateBytecode(internalClassName, classDecl.getClazz());
             compiler.getMemory().getByteCodeMap().put(fullClassName, bytecode);
         } catch (IOException e) {
-            throw new Swc4jByteCodeCompilerException("Failed to generate bytecode for class: " + fullClassName, e);
+            throw new Swc4jByteCodeCompilerException(classDecl, "Failed to generate bytecode for class: " + fullClassName, e);
         }
     }
 
@@ -74,7 +74,7 @@ public final class AstProcessor {
                 compiler.getMemory().getByteCodeMap().put(fullClassName, bytecode);
             }
         } catch (IOException e) {
-            throw new Swc4jByteCodeCompilerException("Failed to generate bytecode for enum: " + fullClassName, e);
+            throw new Swc4jByteCodeCompilerException(enumDecl, "Failed to generate bytecode for enum: " + fullClassName, e);
         }
     }
 

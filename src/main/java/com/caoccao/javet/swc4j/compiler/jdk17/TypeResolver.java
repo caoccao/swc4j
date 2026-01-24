@@ -318,7 +318,7 @@ public final class TypeResolver {
             var returnTypeAnn = returnTypeOpt.get();
             var tsType = returnTypeAnn.getTypeAnn();
             String descriptor = mapTsTypeToDescriptor(tsType);
-            return ReturnTypeInfo.of(descriptor);
+            return ReturnTypeInfo.of(tsType, descriptor);
         }
 
         // Fall back to type inference from return statement
@@ -333,7 +333,7 @@ public final class TypeResolver {
                     if (type == null) {
                         type = "Ljava/lang/Object;";
                     }
-                    return ReturnTypeInfo.of(type);
+                    return ReturnTypeInfo.of(arg, type);
                 }
                 return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
             }
@@ -885,7 +885,7 @@ public final class TypeResolver {
                             StringBuilder paramDescriptors = new StringBuilder();
                             for (var arg : callExpr.getArgs()) {
                                 if (arg.getSpread().isPresent()) {
-                                    throw new Swc4jByteCodeCompilerException(
+                                    throw new Swc4jByteCodeCompilerException(arg.getExpr(),
                                             "Spread arguments not supported in TypeScript class method calls");
                                 }
                                 String argType = inferTypeFromExpr(arg.getExpr());
@@ -901,7 +901,7 @@ public final class TypeResolver {
                                 return returnType;
                             }
                             // Cannot infer return type - require explicit annotation
-                            throw new Swc4jByteCodeCompilerException(
+                            throw new Swc4jByteCodeCompilerException(callExpr,
                                     "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
                                             ". Please add explicit return type annotation to the method.");
                         }

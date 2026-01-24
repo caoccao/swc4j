@@ -175,6 +175,6 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
             }
         }
         // For unsupported member expressions, throw an error for now
-        throw new Swc4jByteCodeCompilerException("Member expression not yet supported: " + memberExpr.getProp());
+        throw new Swc4jByteCodeCompilerException(memberExpr, "Member expression not yet supported: " + memberExpr.getProp());
     }
 }

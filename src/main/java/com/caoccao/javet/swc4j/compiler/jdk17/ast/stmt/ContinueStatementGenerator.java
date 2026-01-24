@@ -68,7 +68,7 @@ public final class ContinueStatementGenerator extends BaseAstProcessor<Swc4jAstC
             continueLabel = context.getLabeledContinueLabel(labelName);
 
             if (continueLabel == null) {
-                throw new Swc4jByteCodeCompilerException(
+                throw new Swc4jByteCodeCompilerException(continueStmt,
                         "Label '" + labelName + "' not found for continue statement");
             }
         } else {
@@ -76,7 +76,7 @@ public final class ContinueStatementGenerator extends BaseAstProcessor<Swc4jAstC
             continueLabel = context.getCurrentContinueLabel();
 
             if (continueLabel == null) {
-                throw new Swc4jByteCodeCompilerException(
+                throw new Swc4jByteCodeCompilerException(continueStmt,
                         "Continue statement outside of loop");
             }
         }

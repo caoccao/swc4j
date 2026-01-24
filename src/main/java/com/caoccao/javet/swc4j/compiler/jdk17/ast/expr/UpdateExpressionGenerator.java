@@ -68,7 +68,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             // Phase 2: Member access (obj.prop++ or arr[i]++)
             handleMemberAccess(code, cp, updateExpr, memberExpr, returnTypeInfo);
         } else {
-            throw new Swc4jByteCodeCompilerException(
+            throw new Swc4jByteCodeCompilerException(updateExpr,
                     "Update expressions only support identifiers and member expressions, got: " + updateExpr.getArg().getClass().getSimpleName());
         }
     }
@@ -333,7 +333,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             // obj[key] - computed property
             isComputedKey = true;
         } else {
-            throw new Swc4jByteCodeCompilerException(
+            throw new Swc4jByteCodeCompilerException(memberExpr,
                     "Unsupported property type for update expression: " + memberExpr.getProp().getClass().getSimpleName());
         }
 
@@ -470,7 +470,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
 
         if (localVar == null) {
-            throw new Swc4jByteCodeCompilerException("Variable '" + varName + "' not found in local scope");
+            throw new Swc4jByteCodeCompilerException(ident, "Variable '" + varName + "' not found in local scope");
         }
 
         String varType = localVar.type();
@@ -485,11 +485,11 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
                  "Ljava/lang/Double;", "Ljava/lang/Byte;", "Ljava/lang/Short;" -> {
                 // Valid numeric type
             }
-            case "Z", "Ljava/lang/Boolean;" -> throw new Swc4jByteCodeCompilerException(
+            case "Z", "Ljava/lang/Boolean;" -> throw new Swc4jByteCodeCompilerException(updateExpr,
                     "Cannot apply " + updateExpr.getOp().getName() + " operator to boolean type");
-            case "Ljava/lang/String;" -> throw new Swc4jByteCodeCompilerException(
+            case "Ljava/lang/String;" -> throw new Swc4jByteCodeCompilerException(updateExpr,
                     "Cannot apply " + updateExpr.getOp().getName() + " operator to string type");
-            default -> throw new Swc4jByteCodeCompilerException(
+            default -> throw new Swc4jByteCodeCompilerException(updateExpr,
                     "Cannot apply " + updateExpr.getOp().getName() + " operator to type: " + varType);
         }
 
@@ -546,7 +546,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             return;
         }
 
-        throw new Swc4jByteCodeCompilerException(
+        throw new Swc4jByteCodeCompilerException(updateExpr,
                 "Update expressions on member access not yet supported for type: " + objType);
     }
 
@@ -569,7 +569,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
 
         // Only support primitive element types for now
         if (!TypeConversionUtils.isPrimitiveType(elementType)) {
-            throw new Swc4jByteCodeCompilerException(
+            throw new Swc4jByteCodeCompilerException(memberExpr,
                     "Update expressions on arrays currently only support primitive element types, got: " + elementType);
         }
 
@@ -620,7 +620,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             // We'll use a pattern: load, increment, then juggle stack
             if ("J".equals(elementType) || "D".equals(elementType)) {
                 // Category 2 - defer for now
-                throw new Swc4jByteCodeCompilerException(
+                throw new Swc4jByteCodeCompilerException(memberExpr,
                         "Postfix update on long/double arrays not yet supported");
             } else {
                 // Category 1: [array, index, old]

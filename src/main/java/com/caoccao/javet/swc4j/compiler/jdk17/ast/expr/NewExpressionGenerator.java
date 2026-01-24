@@ -45,7 +45,7 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
 
         // Only support simple class name constructors for now
         if (!(callee instanceof Swc4jAstIdent ident)) {
-            throw new Swc4jByteCodeCompilerException("Only simple class names supported in new expressions");
+            throw new Swc4jByteCodeCompilerException(newExpr, "Only simple class names supported in new expressions");
         }
 
         String className = ident.getSym();
@@ -72,7 +72,7 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
         // For now, assume parameterless constructor
         // TODO: Handle constructors with parameters
         if (newExpr.getArgs().isPresent() && !newExpr.getArgs().get().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException("Constructors with parameters not yet supported");
+            throw new Swc4jByteCodeCompilerException(newExpr, "Constructors with parameters not yet supported");
         }
 
         // Generate: invokespecial <class>.<init>()V

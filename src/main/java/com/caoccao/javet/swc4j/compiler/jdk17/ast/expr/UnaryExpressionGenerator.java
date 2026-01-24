@@ -87,7 +87,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                     int gotoOffset = endLabel - gotoOpcodePos;
                     code.patchShort(gotoOffsetPos, gotoOffset);
                 } else {
-                    throw new Swc4jByteCodeCompilerException(
+                    throw new Swc4jByteCodeCompilerException(unaryExpr,
                             "Logical NOT (!) requires boolean operand, got: " + argType);
                 }
             }
@@ -99,7 +99,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
 
                     if (objType != null && objType.startsWith("[")) {
                         // Java array - delete not supported
-                        throw new Swc4jByteCodeCompilerException("Delete operator not supported on Java arrays - arrays have fixed size");
+                        throw new Swc4jByteCodeCompilerException(unaryExpr, "Delete operator not supported on Java arrays - arrays have fixed size");
                     } else if ("Ljava/util/ArrayList;".equals(objType)) {
                         if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                             // delete arr[index] -> arr.remove(index)
@@ -117,7 +117,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                         }
                     }
                 }
-                throw new Swc4jByteCodeCompilerException("Delete operator not yet supported for: " + arg);
+                throw new Swc4jByteCodeCompilerException(unaryExpr, "Delete operator not yet supported for: " + arg);
             }
             case Minus -> {
                 // Handle numeric negation
@@ -326,16 +326,16 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                 if (!isNumericPrimitive) {
                     // Reject boolean
                     if (primitiveType.equals("Z")) {
-                        throw new Swc4jByteCodeCompilerException(
+                        throw new Swc4jByteCodeCompilerException(unaryExpr,
                                 "Unary plus (+) not supported on boolean types");
                     }
                     // Reject string
                     if ("Ljava/lang/String;".equals(argType)) {
-                        throw new Swc4jByteCodeCompilerException(
+                        throw new Swc4jByteCodeCompilerException(unaryExpr,
                                 "Unary plus (+) string-to-number conversion not supported. " +
                                         "Use explicit parsing: Integer.parseInt() or Double.parseDouble()");
                     }
-                    throw new Swc4jByteCodeCompilerException(
+                    throw new Swc4jByteCodeCompilerException(unaryExpr,
                             "Unary plus (+) not supported for type: " + argType);
                 }
 

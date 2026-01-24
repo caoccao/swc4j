@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
@@ -84,18 +85,10 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
         super(compiler);
     }
 
-    /**
-     * Determines the iteration type based on compile-time type analysis.
-     * Uses {@link JavaTypeInfo#isAssignableTo(String)} for unified type checking,
-     * which leverages Java reflection for JDK types and parent type hierarchy for user-defined types.
-     *
-     * @param typeDescriptor the JVM type descriptor of the right expression
-     * @return the iteration type to use
-     * @throws Swc4jByteCodeCompilerException if the type is not iterable
-     */
-    private IterationType determineIterationType(String typeDescriptor) throws Swc4jByteCodeCompilerException {
+    private IterationType determineIterationType(ISwc4jAstExpr astExpr) throws Swc4jByteCodeCompilerException {
+        String typeDescriptor = compiler.getTypeResolver().inferTypeFromExpr(astExpr);
         if (typeDescriptor == null) {
-            throw new Swc4jByteCodeCompilerException(
+            throw new Swc4jByteCodeCompilerException(astExpr,
                     "Cannot determine type of for-in expression. Please add explicit type annotation.");
         }
 
@@ -137,7 +130,7 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
             }
         }
 
-        throw new Swc4jByteCodeCompilerException(
+        throw new Swc4jByteCodeCompilerException(astExpr,
                 "For-in loops require List, Map, or String type, but got: " + typeDescriptor);
     }
 
@@ -162,11 +155,8 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
             Swc4jAstForInStmt forInStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        // Infer the type of the right expression at compile time
-        String rightType = compiler.getTypeResolver().inferTypeFromExpr(forInStmt.getRight());
-
         // Determine iteration strategy based on compile-time type
-        IterationType iterationType = determineIterationType(rightType);
+        IterationType iterationType = determineIterationType(forInStmt.getRight());
 
         // Generate the appropriate iteration code
         switch (iterationType) {
@@ -498,7 +488,7 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
         if (left instanceof Swc4jAstVarDecl varDecl) {
             // Variable declaration: let key or const key
             if (varDecl.getDecls().isEmpty()) {
-                throw new Swc4jByteCodeCompilerException("For-in variable declaration is empty");
+                throw new Swc4jByteCodeCompilerException(varDecl, "For-in variable declaration is empty");
             }
             Swc4jAstVarDeclarator decl = varDecl.getDecls().get(0);
             ISwc4jAstPat name = decl.getName();
@@ -513,20 +503,20 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
                 code.astore(slot);
                 return slot;
             } else {
-                throw new Swc4jByteCodeCompilerException("For-in variable must be a simple identifier");
+                throw new Swc4jByteCodeCompilerException(name, "For-in variable must be a simple identifier");
             }
         } else if (left instanceof Swc4jAstBindingIdent bindingIdent) {
             // Existing variable - look it up (do NOT reinitialize - keep existing value)
             String varName = bindingIdent.getId().getSym();
             var variable = context.getLocalVariableTable().getVariable(varName);
             if (variable == null) {
-                throw new Swc4jByteCodeCompilerException("Variable not found: " + varName);
+                throw new Swc4jByteCodeCompilerException(bindingIdent, "Variable not found: " + varName);
             }
             // Update inferredTypes to String for object keys
             context.getInferredTypes().put(varName, "Ljava/lang/String;");
             return variable.index();
         } else {
-            throw new Swc4jByteCodeCompilerException("Unsupported for-in left type: " + left.getClass().getName());
+            throw new Swc4jByteCodeCompilerException(left, "Unsupported for-in left type: " + left.getClass().getName());
         }
     }
 

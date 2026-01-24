@@ -64,7 +64,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             if (switchCase.getTest().isEmpty()) {
                 // Default case
                 if (hasDefault) {
-                    throw new Swc4jByteCodeCompilerException("Duplicate default case in switch statement");
+                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate default case in switch statement");
                 }
                 hasDefault = true;
                 cases.add(new CaseInfo(null, switchCase.getCons(), true));
@@ -73,12 +73,12 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                 ISwc4jAstExpr testExpr = switchCase.getTest().get();
                 Integer caseValue = extractConstantIntValue(testExpr);
                 if (caseValue == null) {
-                    throw new Swc4jByteCodeCompilerException(
+                    throw new Swc4jByteCodeCompilerException(testExpr,
                             "Switch case value must be a constant integer: " + testExpr.getClass().getSimpleName());
                 }
 
                 if (seenValues.contains(caseValue)) {
-                    throw new Swc4jByteCodeCompilerException("Duplicate case value: " + caseValue);
+                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate case value: " + caseValue);
                 }
                 seenValues.add(caseValue);
 

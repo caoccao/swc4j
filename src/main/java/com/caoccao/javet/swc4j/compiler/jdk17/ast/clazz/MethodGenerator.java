@@ -43,7 +43,7 @@ public final class MethodGenerator extends BaseAstProcessor {
 
     @Override
     public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, ISwc4jAst ast, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        throw new Swc4jByteCodeCompilerException("MethodGenerator does not support generic generate method.");
+        throw new Swc4jByteCodeCompilerException(ast, "MethodGenerator does not support generic generate method.");
     }
 
     public void generate(
@@ -121,7 +121,7 @@ public final class MethodGenerator extends BaseAstProcessor {
                             null, null, stackMapTable);
                 }
             } catch (Exception e) {
-                throw new Swc4jByteCodeCompilerException("Failed to generate method: " + methodName, e);
+                throw new Swc4jByteCodeCompilerException(method, "Failed to generate method: " + methodName, e);
             }
         }
     }

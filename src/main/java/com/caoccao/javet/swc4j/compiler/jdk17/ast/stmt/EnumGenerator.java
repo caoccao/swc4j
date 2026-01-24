@@ -60,13 +60,12 @@ public final class EnumGenerator {
                 if (initExpr instanceof Swc4jAstNumber numLit) {
                     // Numeric value
                     if (isStringEnum != null && isStringEnum) {
-                        throw new Swc4jByteCodeCompilerException(
+                        throw new Swc4jByteCodeCompilerException(numLit,
                                 "Heterogeneous enums (mixed numeric and string values) are not supported");
                     }
                     isStringEnum = false;
 
-                    String rawValue = numLit.getRaw().orElse("0");
-                    int intValue = parseIntValue(rawValue);
+                    int intValue = parseIntValue(numLit);
                     autoIncrementValue = intValue + 1;
 
                     memberInfo = new EnumMemberInfo(tsName, javaName, intValue, null);
@@ -74,25 +73,24 @@ public final class EnumGenerator {
                     // Handle negative numbers (e.g., -10)
                     if (unaryExpr.getOp().name().equals("Minus") && unaryExpr.getArg() instanceof Swc4jAstNumber numLit) {
                         if (isStringEnum != null && isStringEnum) {
-                            throw new Swc4jByteCodeCompilerException(
+                            throw new Swc4jByteCodeCompilerException(unaryExpr,
                                     "Heterogeneous enums (mixed numeric and string values) are not supported");
                         }
                         isStringEnum = false;
 
-                        String rawValue = numLit.getRaw().orElse("0");
-                        int intValue = -parseIntValue(rawValue); // Negate the value
+                        int intValue = -parseIntValue(numLit); // Negate the value
                         autoIncrementValue = intValue + 1;
 
                         memberInfo = new EnumMemberInfo(tsName, javaName, intValue, null);
                     } else {
-                        throw new Swc4jByteCodeCompilerException(
+                        throw new Swc4jByteCodeCompilerException(unaryExpr,
                                 "Computed enum values (expressions referencing other members) are not supported. " +
                                         "Use explicit constant values instead.");
                     }
                 } else if (initExpr instanceof Swc4jAstStr strLit) {
                     // String value
                     if (isStringEnum != null && !isStringEnum) {
-                        throw new Swc4jByteCodeCompilerException(
+                        throw new Swc4jByteCodeCompilerException(strLit,
                                 "Heterogeneous enums (mixed numeric and string values) are not supported");
                     }
                     isStringEnum = true;
@@ -101,14 +99,14 @@ public final class EnumGenerator {
                     memberInfo = new EnumMemberInfo(tsName, javaName, 0, stringValue);
                 } else {
                     // Computed or other unsupported expression
-                    throw new Swc4jByteCodeCompilerException(
+                    throw new Swc4jByteCodeCompilerException(initExpr,
                             "Computed enum values (expressions referencing other members) are not supported. " +
                                     "Use explicit constant values instead.");
                 }
             } else {
                 // No explicit value - use auto-increment (only valid for numeric enums)
                 if (isStringEnum != null && isStringEnum) {
-                    throw new Swc4jByteCodeCompilerException(
+                    throw new Swc4jByteCodeCompilerException(member,
                             "String enum members must have explicit values");
                 }
                 isStringEnum = false;
@@ -139,7 +137,7 @@ public final class EnumGenerator {
 
         List<Swc4jAstTsEnumMember> members = enumDecl.getMembers();
         if (members.isEmpty()) {
-            throw new Swc4jByteCodeCompilerException("Empty enums are not supported");
+            throw new Swc4jByteCodeCompilerException(enumDecl, "Empty enums are not supported");
         }
 
         // Analyze enum members to determine type
@@ -635,7 +633,8 @@ public final class EnumGenerator {
         );
     }
 
-    private int parseIntValue(String raw) throws Swc4jByteCodeCompilerException {
+    private int parseIntValue(Swc4jAstNumber numLit) throws Swc4jByteCodeCompilerException {
+        String raw = numLit.getRaw().orElse("0");
         try {
             // Handle different number formats
             if (raw.startsWith("0x") || raw.startsWith("0X")) {
@@ -647,13 +646,13 @@ public final class EnumGenerator {
             } else {
                 // Check for floating point
                 if (raw.contains(".") || raw.contains("e") || raw.contains("E")) {
-                    throw new Swc4jByteCodeCompilerException(
+                    throw new Swc4jByteCodeCompilerException(numLit,
                             "Floating-point enum values are not supported. Enum values must be integers or strings.");
                 }
                 return Integer.parseInt(raw);
             }
         } catch (NumberFormatException e) {
-            throw new Swc4jByteCodeCompilerException("Invalid enum numeric value: " + raw, e);
+            throw new Swc4jByteCodeCompilerException(numLit, "Invalid enum numeric value: " + raw, e);
         }
     }
 

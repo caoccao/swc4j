@@ -48,6 +48,7 @@ public final class StringApiUtils {
     public static void appendOperandToStringBuilder(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
+            ISwc4jAstExpr operand,
             String operandType,
             int appendString,
             int appendInt,
@@ -89,13 +90,13 @@ public final class StringApiUtils {
                     case "Ljava/lang/Byte;" -> "byteValue";
                     case "Ljava/lang/Short;" -> "shortValue";
                     case "Ljava/lang/Integer;" -> "intValue";
-                    default -> throw new Swc4jByteCodeCompilerException("Unexpected type: " + operandType);
+                    default -> throw new Swc4jByteCodeCompilerException(operand, "Unexpected type: " + operandType);
                 };
                 String returnType = switch (operandType) {
                     case "Ljava/lang/Byte;" -> "B";
                     case "Ljava/lang/Short;" -> "S";
                     case "Ljava/lang/Integer;" -> "I";
-                    default -> throw new Swc4jByteCodeCompilerException("Unexpected type: " + operandType);
+                    default -> throw new Swc4jByteCodeCompilerException(operand, "Unexpected type: " + operandType);
                 };
                 int unboxRef = cp.addMethodRef(wrapperClass, methodName, "()" + returnType);
                 code.invokevirtual(unboxRef);
@@ -223,8 +224,9 @@ public final class StringApiUtils {
 
         // Append all operands
         for (int i = 0; i < operands.size(); i++) {
-            compiler.getExpressionGenerator().generate(code, cp, operands.get(i), null);
-            appendOperandToStringBuilder(code, cp, operandTypes.get(i), appendString, appendInt, appendChar);
+            ISwc4jAstExpr operand = operands.get(i);
+            compiler.getExpressionGenerator().generate(code, cp, operand, null);
+            appendOperandToStringBuilder(code, cp, operand, operandTypes.get(i), appendString, appendInt, appendChar);
         }
 
         // Call toString()

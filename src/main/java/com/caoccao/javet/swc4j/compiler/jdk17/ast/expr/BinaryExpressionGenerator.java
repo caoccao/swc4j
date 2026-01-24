@@ -728,7 +728,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
 
                     if (isPrimitiveComparison) {
                         // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
-                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(comparisonType);
+                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(binExpr, comparisonType);
 
                         // Generate left operand with type hint
                         compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), compTypeInfo);
@@ -845,7 +845,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
 
                     if (isPrimitiveComparison) {
                         // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
-                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(comparisonType);
+                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(binExpr, comparisonType);
 
                         // Generate left operand with type hint
                         compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), compTypeInfo);
@@ -979,7 +979,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
 
                     if (isPrimitiveComparison) {
                         // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
-                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(comparisonType);
+                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(binExpr, comparisonType);
 
                         // Generate left operand with type hint
                         compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), compTypeInfo);
@@ -1051,7 +1051,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         }
                     } else {
                         // Object comparison: not supported for < or <=
-                        throw new Swc4jByteCodeCompilerException(
+                        throw new Swc4jByteCodeCompilerException(binExpr,
                                 "Less than comparison not supported for non-primitive types. " +
                                         "Use comparable types or implement Comparable interface.");
                     }
@@ -1118,7 +1118,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
 
                     if (isPrimitiveComparison) {
                         // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
-                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(comparisonType);
+                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(binExpr, comparisonType);
 
                         // Generate left operand with type hint
                         compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), compTypeInfo);
@@ -1190,7 +1190,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         }
                     } else {
                         // Object comparison: not supported for > or >=
-                        throw new Swc4jByteCodeCompilerException(
+                        throw new Swc4jByteCodeCompilerException(binExpr,
                                 "Greater than comparison not supported for non-primitive types. " +
                                         "Use comparable types or implement Comparable interface.");
                     }

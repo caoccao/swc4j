@@ -55,7 +55,7 @@ public final class ClassGenerator extends BaseAstProcessor {
 
     @Override
     public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, ISwc4jAst ast, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        throw new Swc4jByteCodeCompilerException("ClassGenerator does not support generic generate method.");
+        throw new Swc4jByteCodeCompilerException(ast, "ClassGenerator does not support generic generate method.");
     }
 
     public byte[] generateBytecode(

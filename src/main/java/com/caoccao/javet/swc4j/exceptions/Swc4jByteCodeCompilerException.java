@@ -16,17 +16,33 @@
 
 package com.caoccao.javet.swc4j.exceptions;
 
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+
 public final class Swc4jByteCodeCompilerException extends Swc4jException {
-    public Swc4jByteCodeCompilerException(String message) {
+    private final ISwc4jAst ast;
+
+    public Swc4jByteCodeCompilerException(ISwc4jAst ast, String message) {
         super(message);
+        this.ast = ast;
     }
 
-    public Swc4jByteCodeCompilerException(String message, Throwable cause) {
+    public Swc4jByteCodeCompilerException(ISwc4jAst ast, String message, Throwable cause) {
         super(message, cause);
+        this.ast = ast;
     }
 
-    public Swc4jByteCodeCompilerException(Throwable cause) {
+    public Swc4jByteCodeCompilerException(ISwc4jAst ast, Throwable cause) {
         super(cause);
+        this.ast = ast;
+    }
+
+    /**
+     * Gets the AST node that caused the exception.
+     *
+     * @return the AST node, or null if not available
+     */
+    public ISwc4jAst getAst() {
+        return ast;
     }
 
     /**
@@ -37,6 +53,7 @@ public final class Swc4jByteCodeCompilerException extends Swc4jException {
      * - "Key 'count' has type String, but Record requires Integer"
      * - "Nested property 'outer.inner' has type String, but Record requires double"
      *
+     * @param ast          the AST node that caused the exception
      * @param propertyName Property name (or nested path like "outer.inner")
      * @param expectedType JVM type descriptor of expected type (e.g., "D", "Ljava/lang/Integer;")
      * @param actualType   JVM type descriptor of actual type (e.g., "Ljava/lang/String;")
@@ -44,6 +61,7 @@ public final class Swc4jByteCodeCompilerException extends Swc4jException {
      * @return Swc4jByteCodeCompilerException with formatted error message
      */
     public static Swc4jByteCodeCompilerException typeMismatch(
+            ISwc4jAst ast,
             String propertyName,
             String expectedType,
             String actualType,
@@ -73,7 +91,7 @@ public final class Swc4jByteCodeCompilerException extends Swc4jException {
             );
         }
 
-        return new Swc4jByteCodeCompilerException(message);
+        return new Swc4jByteCodeCompilerException(ast, message);
     }
 
     /**
@@ -83,6 +101,7 @@ public final class Swc4jByteCodeCompilerException extends Swc4jException {
      * - "Property 'age' has type String, but {@code Record<string, number>} requires double"
      * - "Key 'id' has type String, but {@code Record<number, string>} requires Integer"
      *
+     * @param ast                 the AST node that caused the exception
      * @param propertyName        Property name
      * @param expectedType        JVM type descriptor of expected type
      * @param actualType          JVM type descriptor of actual type
@@ -92,6 +111,7 @@ public final class Swc4jByteCodeCompilerException extends Swc4jException {
      * @return Swc4jByteCodeCompilerException with formatted error message including Record type
      */
     public static Swc4jByteCodeCompilerException typeMismatchWithRecordType(
+            ISwc4jAst ast,
             String propertyName,
             String expectedType,
             String actualType,
@@ -127,7 +147,7 @@ public final class Swc4jByteCodeCompilerException extends Swc4jException {
             );
         }
 
-        return new Swc4jByteCodeCompilerException(message);
+        return new Swc4jByteCodeCompilerException(ast, message);
     }
 
     /**

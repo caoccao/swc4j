@@ -71,7 +71,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
                 case "unshift" -> generateUnshift(code, cp, callExpr);
                 case "with" -> generateWith(code, cp, callExpr);
                 default ->
-                        throw new Swc4jByteCodeCompilerException("Method '" + methodName + "()' not supported on ArrayList");
+                        throw new Swc4jByteCodeCompilerException(callExpr, "Method '" + methodName + "()' not supported on ArrayList");
             }
         }
     }
@@ -107,7 +107,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
         if (argCount < 2) {
             // Need at least target and start
-            throw new Swc4jByteCodeCompilerException("copyWithin() requires at least two arguments (target, start)");
+            throw new Swc4jByteCodeCompilerException(callExpr, "copyWithin() requires at least two arguments (target, start)");
         }
 
         // Generate the target argument
@@ -164,7 +164,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
         if (argCount == 0) {
             // No value provided - throw error
-            throw new Swc4jByteCodeCompilerException("fill() requires at least one argument (value)");
+            throw new Swc4jByteCodeCompilerException(callExpr, "fill() requires at least one argument (value)");
         }
 
         // Generate the value argument
@@ -701,7 +701,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         // arr.with(index, value) -> ArrayListApiUtils.with(arr, index, value)
         // Returns new array with one element changed (ES2023)
         if (callExpr.getArgs().size() < 2) {
-            throw new Swc4jByteCodeCompilerException("with() requires two arguments (index, value)");
+            throw new Swc4jByteCodeCompilerException(callExpr, "with() requires two arguments (index, value)");
         }
 
         // Generate index argument

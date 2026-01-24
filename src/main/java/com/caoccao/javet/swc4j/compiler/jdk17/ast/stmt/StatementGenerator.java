@@ -83,7 +83,7 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
         } else if (stmt instanceof Swc4jAstSwitchStmt switchStmt) {
             compiler.getSwitchStatementGenerator().generate(code, cp, switchStmt, returnTypeInfo);
         } else {
-            throw new Swc4jByteCodeCompilerException(
+            throw new Swc4jByteCodeCompilerException(stmt,
                     "Unsupported statement type: " + stmt.getClass().getSimpleName());
         }
     }

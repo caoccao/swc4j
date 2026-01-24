@@ -103,7 +103,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
                     if ("length".equals(propName)) {
-                        throw new Swc4jByteCodeCompilerException("Cannot set length on Java array - array size is fixed");
+                        throw new Swc4jByteCodeCompilerException(assignExpr, "Cannot set length on Java array - array size is fixed");
                     }
                 }
             } else if ("Ljava/util/ArrayList;".equals(objType) || "Ljava/util/List;".equals(objType)) {
@@ -185,7 +185,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         }
 
                         // For non-constant expressions, we need more complex handling
-                        throw new Swc4jByteCodeCompilerException("Setting array length to non-constant values not yet supported");
+                        throw new Swc4jByteCodeCompilerException(assignExpr, "Setting array length to non-constant values not yet supported");
                     }
                 }
             } else if ("Ljava/util/LinkedHashMap;".equals(objType)) {
@@ -249,7 +249,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
             LocalVariable var = context.getLocalVariableTable().getVariable(varName);
 
             if (var == null) {
-                throw new Swc4jByteCodeCompilerException("Undefined variable: " + varName);
+                throw new Swc4jByteCodeCompilerException(assignExpr, "Undefined variable: " + varName);
             }
 
             String varType = var.type();
@@ -394,7 +394,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         }
                     }
                     default ->
-                            throw new Swc4jByteCodeCompilerException("Compound assignment not yet supported: " + op.getName());
+                            throw new Swc4jByteCodeCompilerException(assignExpr, "Compound assignment not yet supported: " + op.getName());
                 }
             }
 
@@ -416,6 +416,6 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
             // The duplicated value is now on the stack as the assignment result
             return;
         }
-        throw new Swc4jByteCodeCompilerException("Assignment expression not yet supported: " + left);
+        throw new Swc4jByteCodeCompilerException(assignExpr, "Assignment expression not yet supported: " + left);
     }
 }
