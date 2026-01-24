@@ -127,7 +127,10 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Check if this is string concatenation
-                if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
+                // Treat Object + anything or anything + Object as string concatenation
+                // (JavaScript semantics: + operator with non-numeric types converts to string)
+                if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)
+                        || "Ljava/lang/Object;".equals(leftType) || "Ljava/lang/Object;".equals(rightType)) {
                     StringApiUtils.generateConcat(
                             compiler,
                             code,

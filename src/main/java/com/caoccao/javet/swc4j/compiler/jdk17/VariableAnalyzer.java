@@ -105,6 +105,24 @@ public final class VariableAnalyzer {
 
             // Exit the for-in loop scope - restores shadowed variables
             context.getLocalVariableTable().exitScope();
+        } else if (stmt instanceof Swc4jAstForOfStmt forOfStmt) {
+            // For-of loops create a new scope for their loop variable
+            context.getLocalVariableTable().enterScope();
+
+            // For-of loop variables are allocated during code generation (not analysis)
+            // because their type depends on the runtime collection type
+            // Just skip variable declaration analysis here
+            ISwc4jAstForHead left = forOfStmt.getLeft();
+            if (left instanceof Swc4jAstVarDecl) {
+                // Skip allocation - will be done during generation
+            }
+            // If left is a BindingIdent, it's an existing variable - no allocation needed
+
+            // Recursively analyze for-of loop body
+            analyzeStatement(forOfStmt.getBody());
+
+            // Exit the for-of loop scope - restores shadowed variables
+            context.getLocalVariableTable().exitScope();
         } else if (stmt instanceof Swc4jAstIfStmt ifStmt) {
             // Recursively analyze if statement branches
             analyzeStatement(ifStmt.getCons());

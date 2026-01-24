@@ -68,6 +68,8 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
             compiler.getForStatementGenerator().generate(code, cp, forStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstForInStmt forInStmt) {
             compiler.getForInStatementGenerator().generate(code, cp, forInStmt, returnTypeInfo);
+        } else if (stmt instanceof Swc4jAstForOfStmt forOfStmt) {
+            compiler.getForOfStatementGenerator().generate(code, cp, forOfStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstWhileStmt whileStmt) {
             compiler.getWhileStatementGenerator().generate(code, cp, whileStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstDoWhileStmt doWhileStmt) {

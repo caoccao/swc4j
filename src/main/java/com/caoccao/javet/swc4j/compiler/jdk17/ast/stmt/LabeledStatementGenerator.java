@@ -70,6 +70,9 @@ public final class LabeledStatementGenerator extends BaseAstProcessor<Swc4jAstLa
         } else if (body instanceof Swc4jAstForInStmt forInStmt) {
             // Generate labeled for-in loop
             compiler.getForInStatementGenerator().generate(code, cp, forInStmt, labelName, returnTypeInfo);
+        } else if (body instanceof Swc4jAstForOfStmt forOfStmt) {
+            // Generate labeled for-of loop
+            compiler.getForOfStatementGenerator().generate(code, cp, forOfStmt, labelName, returnTypeInfo);
         } else if (body instanceof Swc4jAstWhileStmt whileStmt) {
             // Generate labeled while loop
             compiler.getWhileStatementGenerator().generate(code, cp, whileStmt, labelName, returnTypeInfo);

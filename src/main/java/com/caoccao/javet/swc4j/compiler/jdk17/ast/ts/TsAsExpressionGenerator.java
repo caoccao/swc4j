@@ -46,6 +46,74 @@ public final class TsAsExpressionGenerator extends BaseAstProcessor<Swc4jAstTsAs
         // Generate code for the inner expression
         compiler.getExpressionGenerator().generate(code, cp, asExpr.getExpr(), null);
 
+        // Handle Object to primitive conversion
+        // When the source is Object and target is a primitive, we need to cast first
+        if ("Ljava/lang/Object;".equals(innerType) && TypeConversionUtils.isPrimitiveType(targetType)) {
+            // Cast Object to Number (works for Integer, Long, Double, etc.)
+            // Then call the appropriate value method
+            String wrapperType = TypeConversionUtils.getWrapperType(targetType);
+            switch (targetType) {
+                case "I" -> {
+                    int integerClass = cp.addClass("java/lang/Integer");
+                    code.checkcast(integerClass);
+                    int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                    code.invokevirtual(intValueRef);
+                }
+                case "J" -> {
+                    int longClass = cp.addClass("java/lang/Long");
+                    code.checkcast(longClass);
+                    int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
+                    code.invokevirtual(longValueRef);
+                }
+                case "D" -> {
+                    int doubleClass = cp.addClass("java/lang/Double");
+                    code.checkcast(doubleClass);
+                    int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
+                    code.invokevirtual(doubleValueRef);
+                }
+                case "F" -> {
+                    int floatClass = cp.addClass("java/lang/Float");
+                    code.checkcast(floatClass);
+                    int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
+                    code.invokevirtual(floatValueRef);
+                }
+                case "B" -> {
+                    int byteClass = cp.addClass("java/lang/Byte");
+                    code.checkcast(byteClass);
+                    int byteValueRef = cp.addMethodRef("java/lang/Byte", "byteValue", "()B");
+                    code.invokevirtual(byteValueRef);
+                }
+                case "S" -> {
+                    int shortClass = cp.addClass("java/lang/Short");
+                    code.checkcast(shortClass);
+                    int shortValueRef = cp.addMethodRef("java/lang/Short", "shortValue", "()S");
+                    code.invokevirtual(shortValueRef);
+                }
+                case "C" -> {
+                    int characterClass = cp.addClass("java/lang/Character");
+                    code.checkcast(characterClass);
+                    int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
+                    code.invokevirtual(charValueRef);
+                }
+                case "Z" -> {
+                    int booleanClass = cp.addClass("java/lang/Boolean");
+                    code.checkcast(booleanClass);
+                    int booleanValueRef = cp.addMethodRef("java/lang/Boolean", "booleanValue", "()Z");
+                    code.invokevirtual(booleanValueRef);
+                }
+            }
+            return;
+        }
+
+        // Handle Object to reference type cast (e.g., Object as string)
+        if ("Ljava/lang/Object;".equals(innerType) && targetType.startsWith("L") && !targetType.equals(innerType)) {
+            // Cast Object to target reference type
+            String targetClass = targetType.substring(1, targetType.length() - 1);
+            int classRef = cp.addClass(targetClass);
+            code.checkcast(classRef);
+            return;
+        }
+
         // Unbox if the inner expression is a wrapper type
         TypeConversionUtils.unboxWrapperType(code, cp, innerType);
 

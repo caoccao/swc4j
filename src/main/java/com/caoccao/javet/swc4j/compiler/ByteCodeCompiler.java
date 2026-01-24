@@ -54,6 +54,7 @@ public sealed abstract class ByteCodeCompiler permits
     protected final EnumGenerator enumGenerator;
     protected final ExpressionGenerator expressionGenerator;
     protected final ForInStatementGenerator forInStatementGenerator;
+    protected final ForOfStatementGenerator forOfStatementGenerator;
     protected final ForStatementGenerator forStatementGenerator;
     protected final IdentifierGenerator identifierGenerator;
     protected final IfStatementGenerator ifStatementGenerator;
@@ -111,6 +112,7 @@ public sealed abstract class ByteCodeCompiler permits
         enumGenerator = new EnumGenerator(this);
         expressionGenerator = new ExpressionGenerator(this);
         forInStatementGenerator = new ForInStatementGenerator(this);
+        forOfStatementGenerator = new ForOfStatementGenerator(this);
         forStatementGenerator = new ForStatementGenerator(this);
         identifierGenerator = new IdentifierGenerator(this);
         ifStatementGenerator = new IfStatementGenerator(this);
@@ -220,6 +222,10 @@ public sealed abstract class ByteCodeCompiler permits
 
     public ForInStatementGenerator getForInStatementGenerator() {
         return forInStatementGenerator;
+    }
+
+    public ForOfStatementGenerator getForOfStatementGenerator() {
+        return forOfStatementGenerator;
     }
 
     public ForStatementGenerator getForStatementGenerator() {
