@@ -1168,24 +1168,48 @@ public class Swc4jAstForInStmt {
 
 ## Implementation Strategy
 
-### Type Detection Algorithm
+### Type Detection Algorithm (Compile-Time)
+
+Type checking is performed at compile-time using the `JavaTypeInfo.isAssignableTo()` method to check type hierarchy:
 
 ```java
 String rightType = compiler.getTypeResolver().inferTypeFromExpr(right);
+IterationType iterationType = determineIterationType(rightType);
 
-if ("Ljava/util/LinkedHashMap;".equals(rightType)) {
-    // Object iteration - use iterator
-    generateObjectIteration();
-} else if ("Ljava/util/ArrayList;".equals(rightType)) {
-    // Array iteration - use index counter
-    generateArrayIteration();
-} else if (rightType == null || "Ljava/lang/Object;".equals(rightType)) {
-    // Unknown type - runtime check or assume object
-    generateRuntimeTypeCheck();
-} else {
-    // Primitive or null - skip iteration or error
+switch (iterationType) {
+    case LIST -> generateArrayIteration(code, cp, forInStmt, labelName, returnTypeInfo);
+    case MAP -> generateObjectIteration(code, cp, forInStmt, labelName, returnTypeInfo);
+    case STRING -> generateStringIteration(code, cp, forInStmt, labelName, returnTypeInfo);
+}
+
+// Type determination uses compile-time type hierarchy checking
+private IterationType determineIterationType(String typeDescriptor) {
+    // Check for String type
+    if ("Ljava/lang/String;".equals(typeDescriptor)) {
+        return IterationType.STRING;
+    }
+
+    // Check for List types
+    if ("Ljava/util/ArrayList;".equals(typeDescriptor) || "Ljava/util/List;".equals(typeDescriptor)) {
+        return IterationType.LIST;
+    }
+
+    // Check for Map types
+    if ("Ljava/util/LinkedHashMap;".equals(typeDescriptor) || "Ljava/util/Map;".equals(typeDescriptor)) {
+        return IterationType.MAP;
+    }
+
+    // Check user-defined types using JavaTypeInfo.isAssignableTo()
+    if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {
+        JavaTypeInfo typeInfo = registry.resolve(typeName);
+        if (typeInfo != null) {
+            if (typeInfo.isAssignableTo("Ljava/util/List;")) return IterationType.LIST;
+            if (typeInfo.isAssignableTo("Ljava/util/Map;")) return IterationType.MAP;
+        }
+    }
+
     throw new Swc4jByteCodeCompilerException(
-        "Cannot iterate over non-object type: " + rightType);
+        "For-in loops require List, Map, or String type, but got: " + typeDescriptor);
 }
 ```
 
@@ -1467,8 +1491,10 @@ CompilationContext must track:
 - [x] Javadoc builds successfully
 
 **Implementation Notes:**
-- Array indices are **int** type (not String as in JavaScript) for Java type safety
-- Object keys remain String type
+- Array/String indices are converted to **String** type to match JavaScript for-in semantics
+- Object keys are String type
+- **Compile-time type checking** using `JavaTypeInfo.isAssignableTo()` replaces runtime instanceof checks
+- Type hierarchy is built from `extends` and `implements` clauses during class collection
 - VarDeclGenerator now properly initializes variables without initializers (required for JVM verifier)
 - StackMapGenerator handles unreachable code after return/throw statements
 - AssignExpressionGenerator handles String += int concatenation using String.valueOf()

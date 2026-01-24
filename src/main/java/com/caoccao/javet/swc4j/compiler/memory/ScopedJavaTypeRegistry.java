@@ -16,11 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.memory;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Manages Java type registrations (classes, interfaces, enums) in a scoped manner.
@@ -28,10 +24,10 @@ import java.util.Stack;
  * Also tracks class method signatures for type inference.
  */
 public final class ScopedJavaTypeRegistry {
-    private final Stack<Map<String, JavaTypeInfo>> scopeStack;
     // Scoped map from "qualifiedClassName.methodName(paramDescriptors)" to return type descriptor
     // Example: "com.example.MyClass.test()" -> "I"
     private final Stack<Map<String, String>> classMethodToReturnTypeMap;
+    private final Stack<Map<String, JavaTypeInfo>> scopeStack;
 
     public ScopedJavaTypeRegistry() {
         scopeStack = new Stack<>();

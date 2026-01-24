@@ -77,39 +77,6 @@ public final class JavaTypeInfo {
     }
 
     /**
-     * Gets the list of parent type infos (from extends and implements).
-     *
-     * @return the list of parent type infos
-     */
-    public List<JavaTypeInfo> getParentTypeInfos() {
-        return parentTypeInfos;
-    }
-
-    /**
-     * Checks if this type is assignable to the given type.
-     * This checks if any of the parent types (including transitive parents) match the given type.
-     *
-     * @param typeDescriptor the type descriptor to check (e.g., "Ljava/util/List;")
-     * @return true if this type is assignable to the given type
-     */
-    public boolean isAssignableTo(String typeDescriptor) {
-        // Check direct match
-        String thisDescriptor = "L" + internalName + ";";
-        if (thisDescriptor.equals(typeDescriptor)) {
-            return true;
-        }
-
-        // Check parent types recursively
-        for (JavaTypeInfo parent : parentTypeInfos) {
-            if (parent.isAssignableTo(typeDescriptor)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Counts the number of parameters in a method descriptor.
      */
     private int countParameters(String descriptor) {
@@ -232,6 +199,15 @@ public final class JavaTypeInfo {
     }
 
     /**
+     * Gets the list of parent type infos (from extends and implements).
+     *
+     * @return the list of parent type infos
+     */
+    public List<JavaTypeInfo> getParentTypeInfos() {
+        return parentTypeInfos;
+    }
+
+    /**
      * Gets the primitive type for a wrapper type.
      */
     private String getPrimitiveType(String wrapperType) {
@@ -272,6 +248,54 @@ public final class JavaTypeInfo {
             case "D" -> "Ljava/lang/Double;";
             default -> null;
         };
+    }
+
+    /**
+     * Checks if this type is assignable to the given type.
+     * This checks if any of the parent types (including transitive parents) match the given type.
+     *
+     * @param typeDescriptor the type descriptor to check (e.g., "Ljava/util/List;")
+     * @return true if this type is assignable to the given type
+     */
+    public boolean isAssignableTo(String typeDescriptor) {
+        try {
+            return isAssignableTo(Class.forName(typeDescriptor.substring(1, typeDescriptor.length() - 1).replace('/', '.')));
+        } catch (ClassNotFoundException e) {
+            return isAssignableTo(typeDescriptor, true);
+        }
+    }
+
+    public boolean isAssignableTo(Class<?> clazz) {
+        try {
+            return clazz.isAssignableFrom(Class.forName(internalName.replace('/', '.')));
+        } catch (ClassNotFoundException e) {
+            // Check direct match
+            if (internalName.equals(clazz.getName().replace(".", "/"))) {
+                return true;
+            }
+            // Check parent types recursively
+            for (JavaTypeInfo parent : parentTypeInfos) {
+                if (parent.isAssignableTo(clazz)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    public boolean isAssignableTo(String typeDescriptor, boolean ignoreClassForName) {
+        // Check direct match
+        String thisDescriptor = "L" + internalName + ";";
+        if (thisDescriptor.equals(typeDescriptor)) {
+            return true;
+        }
+        // Check parent types recursively
+        for (JavaTypeInfo parent : parentTypeInfos) {
+            if (parent.isAssignableTo(typeDescriptor, true)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -330,16 +354,6 @@ public final class JavaTypeInfo {
         }
 
         return types;
-    }
-
-    /**
-     * Sets enum values for this type.
-     *
-     * @param memberOrdinals map of member name to ordinal value
-     */
-    public void setEnumValues(Map<String, Integer> memberOrdinals) {
-        enumValues.clear();
-        enumValues.putAll(memberOrdinals);
     }
 
     /**
@@ -510,5 +524,15 @@ public final class JavaTypeInfo {
                     toType.equals("D") ? 0.99 : 0.0; // float -> double
             default -> 0.0;
         };
+    }
+
+    /**
+     * Sets enum values for this type.
+     *
+     * @param memberOrdinals map of member name to ordinal value
+     */
+    public void setEnumValues(Map<String, Integer> memberOrdinals) {
+        enumValues.clear();
+        enumValues.putAll(memberOrdinals);
     }
 }
