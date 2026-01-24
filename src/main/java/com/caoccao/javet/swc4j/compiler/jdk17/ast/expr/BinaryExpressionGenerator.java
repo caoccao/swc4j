@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
@@ -1255,6 +1256,33 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 int gotoOffset = endLabel - gotoOpcodePos;
                 code.patchShort(gotoOffsetPos, gotoOffset);
             }
+            case InstanceOf -> {
+                // InstanceOf checks if the left operand is an instance of the type specified by the right operand
+                // The right operand must be an identifier (class name)
+
+                // Result type is always boolean
+                resultType = "Z";
+
+                // Get the class name from the right operand
+                ISwc4jAstExpr rightExpr = binExpr.getRight();
+                String className;
+                if (rightExpr instanceof Swc4jAstIdent ident) {
+                    className = ident.getSym();
+                } else {
+                    throw new Swc4jByteCodeCompilerException(binExpr.getRight(),
+                            "Right operand of instanceof must be a type identifier, got: " + rightExpr.getClass().getSimpleName());
+                }
+
+                // Resolve the class name to its JVM internal name
+                String internalName = compiler.getMemory().resolveType(className, rightExpr).getInternalName();
+
+                // Generate the left operand (object to check)
+                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+
+                // Add the class to constant pool and emit instanceof instruction
+                int classRef = cp.addClass(internalName);
+                code.instanceof_(classRef);
+            }
             case LogicalOr -> {
                 // LogicalOr (||) with short-circuit evaluation
                 // If left is true, skip evaluating right and return true
@@ -1341,4 +1369,5 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 (targetType.equals("I") || targetType.equals("J") ||
                         targetType.equals("F") || targetType.equals("D"));
     }
+
 }

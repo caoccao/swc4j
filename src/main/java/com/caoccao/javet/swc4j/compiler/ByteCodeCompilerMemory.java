@@ -16,9 +16,12 @@
 
 package com.caoccao.javet.swc4j.compiler;
 
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.ScopedJavaTypeRegistry;
 import com.caoccao.javet.swc4j.compiler.memory.ScopedTypeAliasRegistry;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,5 +82,34 @@ public final class ByteCodeCompilerMemory {
 
     public void resetCompilationContext() {
         compilationContext.reset();
+    }
+
+    /**
+     * Resolves a simple class name to its JavaTypeInfo.
+     * First checks the type alias registry, then the java type registry.
+     *
+     * @param className the class name to resolve
+     * @param ast       the AST node for error reporting
+     * @return the JavaTypeInfo
+     * @throws Swc4jByteCodeCompilerException if the type is not found
+     */
+    public JavaTypeInfo resolveType(String className, ISwc4jAst ast) throws Swc4jByteCodeCompilerException {
+        // First try to resolve from the type alias registry
+        String resolvedType = scopedTypeAliasRegistry.resolve(className);
+        if (resolvedType != null) {
+            String internalName = resolvedType.replace('.', '/');
+            int lastSlash = internalName.lastIndexOf('/');
+            String packageName = lastSlash >= 0 ? resolvedType.substring(0, lastSlash).replace('/', '.') : "";
+            return new JavaTypeInfo(className, packageName, internalName);
+        }
+
+        // Then try to resolve from the java type registry
+        var javaTypeInfo = scopedJavaTypeRegistry.resolve(className);
+        if (javaTypeInfo != null) {
+            return javaTypeInfo;
+        }
+
+        throw new Swc4jByteCodeCompilerException(ast,
+                "Type '" + className + "' not found. Did you forget to import it?");
     }
 }

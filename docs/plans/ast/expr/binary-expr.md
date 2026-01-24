@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting all 25 binary operations defined in `Swc4jAstBinaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 22 of 25 operations implemented for primitives and BigInt (88% complete)
+**Current Status:** 23 of 25 operations implemented for primitives and BigInt (92% complete)
 
 **Primitive Support (Implemented):**
 - ✅ **Add (`+`)** - Fully implemented with numeric addition and string concatenation
@@ -32,7 +32,7 @@ This document outlines the implementation plan for supporting all 25 binary oper
 
 **BigInt Support (Implemented):**
 - ✅ All 22 operations above have BigInt support using BigInteger methods
-- ❌ **3 special operations remaining** (NullishCoalescing, InstanceOf, In)
+- ❌ **2 special operations remaining** (NullishCoalescing, In)
 
 **Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
@@ -67,7 +67,7 @@ This document outlines the implementation plan for supporting all 25 binary oper
 | 12 | LogicalAnd | `&&` | Logical | ✅ Implemented | High |
 | 13 | LogicalOr | `\|\|` | Logical | ✅ Implemented | High |
 | 21 | NullishCoalescing | `??` | Special | ❌ Not Implemented | High |
-| 11 | InstanceOf | `instanceof` | Special | ❌ Not Implemented | Very High |
+| 11 | InstanceOf | `instanceof` | Special | ✅ Implemented | Very High |
 | 10 | In | `in` | Special | ❌ Not Implemented | Very High |
 
 ---

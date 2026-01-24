@@ -771,8 +771,8 @@ public final class TypeResolver {
                     // Use type widening rules (int ^ long → long, etc.)
                     return getWidenedType(leftType, rightType);
                 }
-                case EqEq, EqEqEq, NotEq, NotEqEq, Lt, LtEq, Gt, GtEq, LogicalAnd, LogicalOr -> {
-                    // Equality, inequality, relational comparisons, and logical operations return boolean
+                case EqEq, EqEqEq, NotEq, NotEqEq, Lt, LtEq, Gt, GtEq, LogicalAnd, LogicalOr, InstanceOf -> {
+                    // Equality, inequality, relational comparisons, logical operations, and instanceof return boolean
                     return "Z";
                 }
             }
