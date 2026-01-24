@@ -35,21 +35,24 @@ public class StackMapGenerator {
     private final String className;
     private final ClassWriter.ConstantPool constantPool;
     private final String descriptor;
+    private final List<ClassWriter.ExceptionTableEntry> exceptionTable;
     private final boolean isStatic;
     private final int maxLocals;
 
-    public StackMapGenerator(byte[] bytecode, int maxLocals, boolean isStatic, String className, String descriptor, ClassWriter.ConstantPool constantPool) {
+    public StackMapGenerator(byte[] bytecode, int maxLocals, boolean isStatic, String className, String descriptor, ClassWriter.ConstantPool constantPool, List<ClassWriter.ExceptionTableEntry> exceptionTable) {
         this.bytecode = bytecode;
         this.maxLocals = maxLocals;
         this.isStatic = isStatic;
         this.className = className;
         this.descriptor = descriptor;
         this.constantPool = constantPool;
+        this.exceptionTable = exceptionTable != null ? exceptionTable : List.of();
     }
 
     private Map<Integer, Frame> computeFramesDataFlow() {
         Map<Integer, Frame> frames = new HashMap<>();
         Queue<WorkItem> workQueue = new LinkedList<>();
+        Set<Integer> visitedHandlers = new HashSet<>();
 
         // Start with initial frame at offset 0
         Frame initialFrame = createInitialFrame();
@@ -77,6 +80,31 @@ public class StackMapGenerator {
 
             // Get the current frame at this offset for simulation
             Frame currentFrame = frames.get(pc);
+
+            // Check if this pc is within any try block, and propagate to handler if so
+            for (ClassWriter.ExceptionTableEntry entry : exceptionTable) {
+                if (pc >= entry.startPc() && pc < entry.endPc()) {
+                    // This instruction is in a try block - propagate to handler
+                    int handlerPc = entry.handlerPc();
+                    if (!visitedHandlers.contains(handlerPc) || !frames.containsKey(handlerPc)) {
+                        visitedHandlers.add(handlerPc);
+                        Frame handlerFrame = currentFrame.copy();
+                        handlerFrame.stack.clear();
+                        // Determine exception type from catch_type
+                        String exceptionClass;
+                        if (entry.catchType() != 0) {
+                            exceptionClass = constantPool.getClassName(entry.catchType());
+                            if (exceptionClass == null) {
+                                exceptionClass = "java/lang/Throwable";
+                            }
+                        } else {
+                            exceptionClass = "java/lang/Throwable"; // catch-all
+                        }
+                        handlerFrame.stack.add(VerificationType.object(exceptionClass));
+                        workQueue.add(new WorkItem(handlerPc, handlerFrame));
+                    }
+                }
+            }
 
             // Execute instruction and get next offsets
             List<Integer> nextOffsets = getNextOffsets(pc);
@@ -323,6 +351,12 @@ public class StackMapGenerator {
             // Properly skip to the next instruction
             i = nextInstructionOffset;
         }
+
+        // Add exception handler targets
+        for (ClassWriter.ExceptionTableEntry entry : exceptionTable) {
+            targets.add(entry.handlerPc());
+        }
+
         return targets;
     }
 
@@ -713,14 +747,40 @@ public class StackMapGenerator {
                 break;
             case 0x12: // ldc (String, int, float, Class, etc.)
             case 0x13: // ldc_w (wide index version)
-                // ldc can load various constant types - we need to inspect the constant pool
-                // For now, conservatively assume String (most common case)
-                stack.add(VerificationType.object("java/lang/String"));
-                break;
+            {
+                // Get constant pool index from bytecode
+                int cpIndex;
+                if (opcode == 0x12) {
+                    cpIndex = bytecode[pc + 1] & 0xFF;
+                } else {
+                    cpIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
+                }
+
+                // Look up constant type from constant pool
+                char constType = (constantPool != null) ? constantPool.getConstantType(cpIndex) : 'O';
+                switch (constType) {
+                    case 'I' -> stack.add(VerificationType.integer());
+                    case 'F' -> stack.add(VerificationType.float_());
+                    case 'S' -> stack.add(VerificationType.object("java/lang/String"));
+                    case 'C' -> stack.add(VerificationType.object("java/lang/Class"));
+                    default -> stack.add(VerificationType.object("java/lang/Object"));
+                }
+            }
+            break;
             case 0x14: // ldc2_w (long or double)
-                // Assume double (most common in our tests)
-                stack.add(VerificationType.double_());
-                break;
+            {
+                // Get constant pool index from bytecode
+                int cpIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
+
+                // Look up constant type from constant pool
+                char constType = (constantPool != null) ? constantPool.getConstantType(cpIndex) : 'D';
+                if (constType == 'J') {
+                    stack.add(VerificationType.long_());
+                } else {
+                    stack.add(VerificationType.double_());
+                }
+            }
+            break;
 
             // Loads
             case 0x15:

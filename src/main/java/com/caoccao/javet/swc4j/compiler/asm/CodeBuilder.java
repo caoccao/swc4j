@@ -25,6 +25,7 @@ import java.util.List;
  */
 public class CodeBuilder {
     private final List<Byte> code = new ArrayList<>(4096);
+    private final List<ClassWriter.ExceptionTableEntry> exceptionTable = new ArrayList<>();
     private final List<ClassWriter.LineNumberEntry> lineNumbers = new ArrayList<>(1024);
     private int currentLine = -1;
 
@@ -41,6 +42,18 @@ public class CodeBuilder {
     public CodeBuilder aconst_null() {
         code.add((byte) (0x01)); // aconst_null
         return this;
+    }
+
+    /**
+     * Add an exception handler entry.
+     *
+     * @param startPc   start of the try block (inclusive)
+     * @param endPc     end of the try block (exclusive)
+     * @param handlerPc start of the exception handler
+     * @param catchType constant pool index of the exception class, or 0 for any exception
+     */
+    public void addExceptionHandler(int startPc, int endPc, int handlerPc, int catchType) {
+        exceptionTable.add(new ClassWriter.ExceptionTableEntry(startPc, endPc, handlerPc, catchType));
     }
 
     public CodeBuilder aload(int index) {
@@ -410,7 +423,7 @@ public class CodeBuilder {
      */
     public java.util.List<ClassWriter.StackMapEntry> generateStackMapTable(int maxLocals, boolean isStatic, String className, String descriptor, ClassWriter.ConstantPool constantPool) {
         byte[] bytecode = toByteArray();
-        StackMapGenerator generator = new StackMapGenerator(bytecode, maxLocals, isStatic, className, descriptor, constantPool);
+        StackMapGenerator generator = new StackMapGenerator(bytecode, maxLocals, isStatic, className, descriptor, constantPool, exceptionTable);
         return generator.generate();
     }
 
@@ -434,6 +447,15 @@ public class CodeBuilder {
 
     public int getCurrentOffset() {
         return code.size();
+    }
+
+    /**
+     * Get the exception table entries for this code builder.
+     *
+     * @return the list of exception table entries
+     */
+    public List<ClassWriter.ExceptionTableEntry> getExceptionTable() {
+        return exceptionTable;
     }
 
     public List<ClassWriter.LineNumberEntry> getLineNumbers() {

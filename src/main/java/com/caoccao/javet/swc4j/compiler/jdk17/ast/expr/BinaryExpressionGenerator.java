@@ -29,6 +29,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringApiUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBinExpr> {
@@ -52,6 +53,62 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
         // Call BigInteger.valueOf(long)
         int valueOfRef = cp.addMethodRef("java/math/BigInteger", "valueOf", "(J)Ljava/math/BigInteger;");
         code.invokestatic(valueOfRef);
+    }
+
+    /**
+     * Determines the container type for the 'in' operator.
+     *
+     * @param astExpr        the right operand expression
+     * @param typeDescriptor the type descriptor of the right operand
+     * @return the container type (LIST, MAP, or STRING)
+     * @throws Swc4jByteCodeCompilerException if the type is not a valid container
+     */
+    private InContainerType determineInContainerType(ISwc4jAstExpr astExpr, String typeDescriptor)
+            throws Swc4jByteCodeCompilerException {
+        if (typeDescriptor == null) {
+            throw new Swc4jByteCodeCompilerException(astExpr,
+                    "Cannot determine type of 'in' right operand. Please add explicit type annotation.");
+        }
+
+        // Check for String type
+        if ("Ljava/lang/String;".equals(typeDescriptor)) {
+            return InContainerType.STRING;
+        }
+
+        // For object types, use isAssignableTo() for unified checking
+        if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {
+            String internalName = typeDescriptor.substring(1, typeDescriptor.length() - 1);
+            String qualifiedName = internalName.replace('/', '.');
+
+            // Try to resolve from the registry first
+            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+            if (typeInfo == null) {
+                // Try simple name
+                int lastSlash = internalName.lastIndexOf('/');
+                String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
+                typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+            }
+
+            if (typeInfo == null) {
+                // Create a temporary JavaTypeInfo for JDK types not in registry
+                int lastSlash = internalName.lastIndexOf('/');
+                String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
+                int lastDot = qualifiedName.lastIndexOf('.');
+                String packageName = lastDot >= 0 ? qualifiedName.substring(0, lastDot) : "";
+                typeInfo = new JavaTypeInfo(simpleName, packageName, internalName);
+            }
+
+            // Check assignability using the unified type hierarchy
+            if (typeInfo.isAssignableTo("Ljava/util/List;")) {
+                return InContainerType.LIST;
+            }
+            if (typeInfo.isAssignableTo("Ljava/util/Map;")) {
+                return InContainerType.MAP;
+            }
+        }
+
+        throw new Swc4jByteCodeCompilerException(astExpr,
+                "The 'in' operator requires List, Map, or String type, but got: " + typeDescriptor);
     }
 
     @Override
@@ -1283,6 +1340,87 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 int classRef = cp.addClass(internalName);
                 code.instanceof_(classRef);
             }
+            case In -> {
+                // In operator checks if a key exists in a container (Map, List, or String)
+                // Result type is always boolean
+                resultType = "Z";
+
+                // Determine the container type from the right operand
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
+                InContainerType containerType = determineInContainerType(binExpr.getRight(), rightType);
+
+                switch (containerType) {
+                    case MAP -> {
+                        // For Maps: call map.containsKey(key)
+                        // Generate left operand (key) - convert to String for JS semantics
+                        String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+
+                        // Convert to String if not already a String
+                        if (!"Ljava/lang/String;".equals(leftType)) {
+                            int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf",
+                                    "(Ljava/lang/Object;)Ljava/lang/String;");
+                            code.invokestatic(valueOfRef);
+                        }
+
+                        // Generate right operand (map)
+                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+
+                        // Swap to get: map, key on stack
+                        code.swap();
+
+                        // Call Map.containsKey(Object) -> boolean
+                        int containsKeyRef = cp.addInterfaceMethodRef("java/util/Map", "containsKey",
+                                "(Ljava/lang/Object;)Z");
+                        code.invokeinterface(containsKeyRef, 2);
+                    }
+                    case LIST -> {
+                        // For Lists: check if index is valid (0 <= index < size)
+                        // Left operand is converted to int index
+                        // For float/double, must be a whole number (1.0 is valid, 1.1 is not)
+                        // Non-whole floats are converted to -1, which fails the bounds check
+                        String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+
+                        // Convert left operand to int, with whole number check for float/double
+                        generateConvertToIntForIndex(code, cp, leftType);
+
+                        // Generate right operand (list)
+                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+
+                        // Get list size: List.size() -> int
+                        int sizeRef = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
+                        code.invokeinterface(sizeRef, 1);
+
+                        // Now stack has: [index, size]
+                        // Check: index >= 0 && index < size
+                        // Pattern: if index < 0 or index >= size -> false, else true
+                        generateInBoundsCheck(code);
+                    }
+                    case STRING -> {
+                        // For Strings: check if index is valid (0 <= index < length)
+                        // Left operand is converted to int index
+                        // For float/double, must be a whole number (1.0 is valid, 1.1 is not)
+                        // Non-whole floats are converted to -1, which fails the bounds check
+                        String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+
+                        // Convert left operand to int, with whole number check for float/double
+                        generateConvertToIntForIndex(code, cp, leftType);
+
+                        // Generate right operand (string)
+                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+
+                        // Get string length: String.length() -> int
+                        int lengthRef = cp.addMethodRef("java/lang/String", "length", "()I");
+                        code.invokevirtual(lengthRef);
+
+                        // Now stack has: [index, length]
+                        // Check: index >= 0 && index < length
+                        generateInBoundsCheck(code);
+                    }
+                }
+            }
             case LogicalOr -> {
                 // LogicalOr (||) with short-circuit evaluation
                 // If left is true, skip evaluating right and return true
@@ -1352,6 +1490,306 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
     }
 
     /**
+     * Generates bytecode to convert a value on the stack to int for use as an index.
+     * For float/double types, this also generates a whole number check - if the value
+     * has a fractional part, the index is set to -1 (which will fail bounds check).
+     * <p>
+     * Handles primitive types (int, long, float, double, byte, short, char),
+     * boxed types (Integer, Long, etc.), and String (via Integer.parseInt).
+     * <p>
+     * For floating point (where whole number check is needed):
+     * <pre>
+     *   [float on stack]
+     *   dup           ; [float, float]
+     *   f2i           ; [float, int]
+     *   dup_x1        ; [int, float, int]
+     *   i2f           ; [int, float, float_from_int]
+     *   fcmpl         ; [int, cmp_result]
+     *   ifeq KEEP     ; if equal (whole number), keep the int
+     *   pop           ; not whole: pop the int
+     *   iconst_m1     ; push -1 (invalid index)
+     *   KEEP:         ; stack: [int] (valid index or -1)
+     * </pre>
+     *
+     * @param code     the code builder
+     * @param cp       the constant pool
+     * @param leftType the type descriptor of the value on the stack
+     */
+    private void generateConvertToIntForIndex(CodeBuilder code, ClassWriter.ConstantPool cp, String leftType) {
+        switch (leftType) {
+            case "I" -> {
+                // Already int, no conversion needed
+            }
+            case "J" -> {
+                // long to int
+                code.l2i();
+            }
+            case "F" -> {
+                // float to int with whole number check
+                generateFloatToIntWithWholeCheck(code, cp);
+            }
+            case "D" -> {
+                // double to int with whole number check
+                generateDoubleToIntWithWholeCheck(code, cp);
+            }
+            case "B", "S", "C" -> {
+                // byte, short, char are already int-compatible on stack
+            }
+            case "Ljava/lang/String;" -> {
+                // Safely parse string to int, returning MIN_VALUE for invalid formats
+                generateSafeStringToInt(code, cp);
+            }
+            case "Ljava/lang/Integer;" -> {
+                // Unbox Integer to int
+                int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                code.invokevirtual(intValueRef);
+            }
+            case "Ljava/lang/Long;" -> {
+                // Unbox Long to long, then convert to int
+                int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
+                code.invokevirtual(longValueRef);
+                code.l2i();
+            }
+            case "Ljava/lang/Float;" -> {
+                // Unbox Float to float, then check for whole number and convert to int
+                int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
+                code.invokevirtual(floatValueRef);
+                generateFloatToIntWithWholeCheck(code, cp);
+            }
+            case "Ljava/lang/Double;" -> {
+                // Unbox Double to double, then check for whole number and convert to int
+                int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
+                code.invokevirtual(doubleValueRef);
+                generateDoubleToIntWithWholeCheck(code, cp);
+            }
+            default -> {
+                // For other object types, convert to String first, then safely parse
+                int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf",
+                        "(Ljava/lang/Object;)Ljava/lang/String;");
+                code.invokestatic(valueOfRef);
+                generateSafeStringToInt(code, cp);
+            }
+        }
+    }
+
+    /**
+     * Generates bytecode to convert double to int with whole number check.
+     * If not a whole number, sets index to Integer.MIN_VALUE (which will fail bounds check).
+     * Uses branch-free logic to avoid stackmap frame issues.
+     * <p>
+     * Stack: [double] -> [int] (valid index if whole, Integer.MIN_VALUE if not whole)
+     */
+    private void generateDoubleToIntWithWholeCheck(CodeBuilder code, ClassWriter.ConstantPool cp) {
+        // Stack: [double] (2 slots)
+        code.dup2();     // [double, double]
+        code.d2i();      // [double, int]
+        code.dup_x2();   // [int, double, int]
+        code.i2d();      // [int, double, double_from_int]
+        code.dcmpl();    // [int, cmp] (0 if equal, -1 or 1 otherwise)
+
+        // Compute signBit = (cmp | -cmp) >>> 31 ; 0 if cmp==0, 1 otherwise
+        code.dup();      // [int, cmp, cmp]
+        code.ineg();     // [int, cmp, -cmp]
+        code.ior();      // [int, cmp|-cmp]
+        code.bipush(31); // [int, cmp|-cmp, 31]
+        code.iushr();    // [int, signBit] (0 or 1)
+
+        // Compute mask = -signBit ; 0 if valid, -1 if invalid
+        code.ineg();     // [int, mask] (0 or -1)
+
+        // result = (index & ~mask) | (MIN_VALUE & mask)
+        code.dup_x1();   // [mask, int, mask]
+        code.iconst(-1); // [mask, int, mask, -1]
+        code.ixor();     // [mask, int, ~mask]
+        code.iand();     // [mask, int & ~mask]
+        code.swap();     // [int & ~mask, mask]
+        code.ldc(cp.addInteger(Integer.MIN_VALUE)); // [int & ~mask, mask, MIN_VALUE]
+        code.iand();     // [int & ~mask, MIN_VALUE & mask]
+        code.ior();      // [result]
+    }
+
+    /**
+     * Generates bytecode to convert float to int with whole number check.
+     * If not a whole number, sets index to Integer.MIN_VALUE (which will fail bounds check).
+     * Uses branch-free logic to avoid stackmap frame issues.
+     * <p>
+     * Stack: [float] -> [int] (valid index if whole, Integer.MIN_VALUE if not whole)
+     * <p>
+     * Algorithm:
+     * <pre>
+     *   int index = (int) floatValue;
+     *   float reconstructed = (float) index;
+     *   int cmp = Float.compare(floatValue, reconstructed);
+     *   // cmp is 0 if equal, non-zero otherwise
+     *   // We want: if cmp != 0, return Integer.MIN_VALUE
+     *   // Using: Integer.MIN_VALUE | (((cmp | -cmp) >> 31) & (index ^ Integer.MIN_VALUE))
+     *   // When cmp == 0: (0 | 0) >> 31 = 0, result = MIN_VALUE | (0 & x) = MIN_VALUE | 0... wait that's wrong
+     *   // Let me use a different approach: just convert and let bounds check handle it
+     * </pre>
+     * <p>
+     * Actually, for simplicity, we use f2i directly. Non-whole floats will truncate,
+     * but we do a separate check: we convert back to float and compare.
+     * If not equal, we know it wasn't a whole number.
+     * We set index = index - (cmp != 0 ? index + 1 : 0) which gives -1 for non-whole.
+     */
+    private void generateFloatToIntWithWholeCheck(CodeBuilder code, ClassWriter.ConstantPool cp) {
+        // Stack: [float]
+        // Strategy: convert to int, check if valid, use arithmetic to get -1 for invalid
+        // f2i truncates, so 1.9 -> 1. We need to detect this.
+        // Compare original float with (float)(int)float
+        // If different, set index to a negative value
+
+        // Simple approach: just convert and check bounds will reject negative
+        // But 1.9 in [0,1,2] would give true (index 1 is valid), which is wrong.
+
+        // Better approach: use Integer.MIN_VALUE for invalid
+        // We can compute: isWhole = (float == (float)(int)float) ? 1 : 0
+        // Then: result = isWhole == 1 ? index : Integer.MIN_VALUE
+
+        // Using branches is problematic due to stackmap, so let's use arithmetic:
+        // signBit = ((cmp | -cmp) >>> 31)  ; 0 if cmp==0, 1 if cmp!=0
+        // result = (index & ~(-signBit)) | (MIN_VALUE & (-signBit))
+        // When cmp==0: signBit=0, -signBit=0, ~0=-1, result = index & -1 | MIN_VALUE & 0 = index
+        // When cmp!=0: signBit=1, -signBit=-1, ~(-1)=0, result = index & 0 | MIN_VALUE & -1 = MIN_VALUE
+
+        code.dup();      // [float, float]
+        code.f2i();      // [float, int]
+        code.dup_x1();   // [int, float, int]
+        code.i2f();      // [int, float, float_from_int]
+        code.fcmpl();    // [int, cmp] (0 if equal, -1 or 1 otherwise)
+
+        // Compute signBit = (cmp | -cmp) >>> 31 ; 0 if cmp==0, 1 otherwise
+        code.dup();      // [int, cmp, cmp]
+        code.ineg();     // [int, cmp, -cmp]
+        code.ior();      // [int, cmp|-cmp]
+        code.bipush(31); // [int, cmp|-cmp, 31]
+        code.iushr();    // [int, signBit] (0 or 1)
+
+        // Compute mask = -signBit ; 0 if valid, -1 if invalid
+        code.ineg();     // [int, mask] (0 or -1)
+
+        // result = (index & ~mask) | (MIN_VALUE & mask)
+        code.dup_x1();   // [mask, int, mask]
+        code.iconst(-1); // [mask, int, mask, -1]
+        code.ixor();     // [mask, int, ~mask]
+        code.iand();     // [mask, int & ~mask]
+        code.swap();     // [int & ~mask, mask]
+        code.ldc(cp.addInteger(Integer.MIN_VALUE)); // [int & ~mask, mask, MIN_VALUE]
+        code.iand();     // [int & ~mask, MIN_VALUE & mask]
+        code.ior();      // [result]
+    }
+
+    /**
+     * Generates bytecode to check if an index is within bounds.
+     * Expects stack: [index, size]
+     * Leaves on stack: 1 (true) if 0 <= index < size, 0 (false) otherwise
+     * <p>
+     * Pattern:
+     * <pre>
+     *   [index, size on stack]
+     *   swap               ; [size, index]
+     *   dup                ; [size, index, index]
+     *   iflt FALSE_LT      ; if index < 0, jump to false_lt
+     *   swap               ; [index, size]
+     *   if_icmpge FALSE_GE ; if index >= size, jump to false_ge
+     *   iconst_1
+     *   goto END
+     *   FALSE_LT:          ; stack: [size, index]
+     *   pop2               ; clear both values
+     *   FALSE_GE:          ; stack: []
+     *   iconst_0
+     *   END:
+     * </pre>
+     *
+     * @param code the code builder
+     */
+    private void generateInBoundsCheck(CodeBuilder code) {
+        // Stack: [index, size]
+        code.swap();     // [size, index]
+        code.dup();      // [size, index, index]
+
+        // Check: if index < 0, jump to false
+        code.iflt(0);
+        int ltJumpOffsetPos = code.getCurrentOffset() - 2;
+        int ltJumpOpcodePos = code.getCurrentOffset() - 3;
+
+        // Stack: [size, index]
+        code.swap();     // [index, size]
+
+        // Check: if index >= size, jump to false
+        code.if_icmpge(0);
+        int geJumpOffsetPos = code.getCurrentOffset() - 2;
+        int geJumpOpcodePos = code.getCurrentOffset() - 3;
+
+        // Stack: []
+        // Both checks passed, push true
+        code.iconst(1);
+        code.gotoLabel(0);
+        int gotoEndOffsetPos = code.getCurrentOffset() - 2;
+        int gotoEndOpcodePos = code.getCurrentOffset() - 3;
+
+        // FALSE label for index < 0 path
+        // Stack at this point: [size, index] (2 int values)
+        int falseLtLabel = code.getCurrentOffset();
+        code.pop2();     // pop both size and index
+
+        // FALSE label for index >= size path - stack is already empty
+        int falseGeLabel = code.getCurrentOffset();
+        code.iconst(0);
+
+        // END label
+        int endLabel = code.getCurrentOffset();
+
+        // Patch jumps
+        code.patchShort(ltJumpOffsetPos, falseLtLabel - ltJumpOpcodePos);
+        code.patchShort(geJumpOffsetPos, falseGeLabel - geJumpOpcodePos);
+        code.patchShort(gotoEndOffsetPos, endLabel - gotoEndOpcodePos);
+    }
+
+    /**
+     * Generates bytecode to safely convert a String to int for array/string index.
+     * If the string is not a valid integer format (e.g., "abc", "1.0") or overflows,
+     * returns Integer.MIN_VALUE which will fail the bounds check.
+     * <p>
+     * Stack: [String] -> [int]
+     * <p>
+     * Uses try-catch to handle NumberFormatException from Integer.parseInt().
+     *
+     * @param code the code builder
+     * @param cp   the constant pool
+     */
+    private void generateSafeStringToInt(CodeBuilder code, ClassWriter.ConstantPool cp) {
+        // Stack: [String]
+
+        // Try block: call Integer.parseInt
+        int tryStart = code.getCurrentOffset();
+        int parseIntRef = cp.addMethodRef("java/lang/Integer", "parseInt", "(Ljava/lang/String;)I");
+        code.invokestatic(parseIntRef);                  // [int]
+        int tryEnd = code.getCurrentOffset();
+
+        // Jump to end (skip handler)
+        code.gotoLabel(0); // placeholder
+        int gotoOpcodePos = code.getCurrentOffset() - 3;
+        int gotoOffsetPos = code.getCurrentOffset() - 2;
+
+        // Exception handler: pop exception, push MIN_VALUE
+        int handlerStart = code.getCurrentOffset();
+        code.pop();                                      // [] - discard exception
+        code.ldc(cp.addInteger(Integer.MIN_VALUE));      // [int]
+
+        int endLabel = code.getCurrentOffset();
+
+        // Patch goto to jump to end
+        code.patchShort(gotoOffsetPos, endLabel - gotoOpcodePos);
+
+        // Add exception table entry for NumberFormatException
+        int catchTypeRef = cp.addClass("java/lang/NumberFormatException");
+        code.addExceptionHandler(tryStart, tryEnd, handlerStart, catchTypeRef);
+
+        // Stack: [int]
+    }
+
+    /**
      * Check if a type is BigInteger.
      */
     private boolean isBigInteger(String type) {
@@ -1370,4 +1808,12 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         targetType.equals("F") || targetType.equals("D"));
     }
 
+    /**
+     * Enum representing the container type for the 'in' operator.
+     */
+    private enum InContainerType {
+        LIST,
+        MAP,
+        STRING
+    }
 }

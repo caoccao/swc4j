@@ -59,13 +59,19 @@ public class ClassWriter {
 
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals,
                           List<LineNumberEntry> lineNumberTable, List<LocalVariableEntry> localVariableTable) {
-        addMethod(accessFlags, name, descriptor, code, maxStack, maxLocals, lineNumberTable, localVariableTable, null);
+        addMethod(accessFlags, name, descriptor, code, maxStack, maxLocals, lineNumberTable, localVariableTable, null, null);
     }
 
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals,
                           List<LineNumberEntry> lineNumberTable, List<LocalVariableEntry> localVariableTable,
                           List<StackMapEntry> stackMapTable) {
-        methods.add(new MethodInfo(accessFlags, name, descriptor, code, maxStack, maxLocals, lineNumberTable, localVariableTable, stackMapTable));
+        addMethod(accessFlags, name, descriptor, code, maxStack, maxLocals, lineNumberTable, localVariableTable, stackMapTable, null);
+    }
+
+    public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals,
+                          List<LineNumberEntry> lineNumberTable, List<LocalVariableEntry> localVariableTable,
+                          List<StackMapEntry> stackMapTable, List<ExceptionTableEntry> exceptionTable) {
+        methods.add(new MethodInfo(accessFlags, name, descriptor, code, maxStack, maxLocals, lineNumberTable, localVariableTable, stackMapTable, exceptionTable));
     }
 
     public String getClassName() {
@@ -215,7 +221,8 @@ public class ClassWriter {
             out.writeShort(constantPool.getUtf8Index("Code"));
 
             // Calculate attribute length including sub-attributes
-            int attributeLength = 12 + method.code.length; // Base: max_stack + max_locals + code_length + code + exception_table_length + attributes_count
+            int exceptionTableSize = (method.exceptionTable != null) ? method.exceptionTable.size() * 8 : 0;
+            int attributeLength = 12 + method.code.length + exceptionTableSize; // Base: max_stack + max_locals + code_length + code + exception_table_length + exception_table + attributes_count
 
             // Add StackMapTable size if present
             if (method.stackMapTable != null && !method.stackMapTable.isEmpty()) {
@@ -265,8 +272,18 @@ public class ClassWriter {
             // Code
             out.write(method.code);
 
-            // Exception table length
-            out.writeShort(0);
+            // Exception table
+            if (method.exceptionTable != null && !method.exceptionTable.isEmpty()) {
+                out.writeShort(method.exceptionTable.size());
+                for (ExceptionTableEntry entry : method.exceptionTable) {
+                    out.writeShort(entry.startPc);
+                    out.writeShort(entry.endPc);
+                    out.writeShort(entry.handlerPc);
+                    out.writeShort(entry.catchType);
+                }
+            } else {
+                out.writeShort(0);
+            }
 
             // Code attributes count (StackMapTable + LineNumberTable + LocalVariableTable if present)
             int codeAttributeCount = 0;
@@ -509,6 +526,35 @@ public class ClassWriter {
         }
 
         /**
+         * Get the type of constant at the given index for stack map verification.
+         * Returns: 'I' for Integer, 'F' for Float, 'J' for Long, 'D' for Double,
+         * 'S' for String, 'C' for Class, 'O' for other/unknown.
+         *
+         * @param index the constant pool index
+         * @return a character indicating the constant type
+         */
+        public char getConstantType(int index) {
+            if (index <= 0 || index >= constants.size()) {
+                return 'O'; // Unknown
+            }
+            Object constant = constants.get(index);
+            if (constant instanceof IntegerInfo) {
+                return 'I';
+            } else if (constant instanceof FloatInfo) {
+                return 'F';
+            } else if (constant instanceof LongInfo) {
+                return 'J';
+            } else if (constant instanceof DoubleInfo) {
+                return 'D';
+            } else if (constant instanceof StringInfo) {
+                return 'S';
+            } else if (constant instanceof ClassInfo) {
+                return 'C';
+            }
+            return 'O'; // Other/unknown
+        }
+
+        /**
          * Get the method descriptor for a method reference at the given constant pool index.
          * This looks up the method/interface method ref, then the name and type, then the UTF8 descriptor.
          *
@@ -634,6 +680,17 @@ public class ClassWriter {
         }
     }
 
+    /**
+     * Represents an entry in the exception table of a method's Code attribute.
+     *
+     * @param startPc   start of the try block (inclusive)
+     * @param endPc     end of the try block (exclusive)
+     * @param handlerPc start of the exception handler
+     * @param catchType constant pool index of the exception class, or 0 for any exception
+     */
+    public record ExceptionTableEntry(int startPc, int endPc, int handlerPc, int catchType) {
+    }
+
     private record FieldInfo(int accessFlags, String name, String descriptor) {
     }
 
@@ -645,7 +702,8 @@ public class ClassWriter {
 
     private record MethodInfo(int accessFlags, String name, String descriptor, byte[] code, int maxStack,
                               int maxLocals, List<LineNumberEntry> lineNumberTable,
-                              List<LocalVariableEntry> localVariableTable, List<StackMapEntry> stackMapTable) {
+                              List<LocalVariableEntry> localVariableTable, List<StackMapEntry> stackMapTable,
+                              List<ExceptionTableEntry> exceptionTable) {
     }
 
     public record StackMapEntry(int offset, int frameType, List<Integer> locals, List<Integer> stack,

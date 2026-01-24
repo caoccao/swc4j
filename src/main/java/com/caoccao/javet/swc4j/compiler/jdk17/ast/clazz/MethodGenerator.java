@@ -112,13 +112,15 @@ public final class MethodGenerator extends BaseAstProcessor {
                     // Generate stack map table for methods with branches (required for Java 7+)
                     boolean isStatic = (accessFlags & 0x0008) != 0;
                     var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName(), descriptor, classWriter.getConstantPool());
+                    var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
                     classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
-                            lineNumbers, localVariableTable, stackMapTable);
+                            lineNumbers, localVariableTable, stackMapTable, exceptionTable);
                 } else {
                     boolean isStatic = (accessFlags & 0x0008) != 0;
                     var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName(), descriptor, classWriter.getConstantPool());
+                    var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
                     classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
-                            null, null, stackMapTable);
+                            null, null, stackMapTable, exceptionTable);
                 }
             } catch (Exception e) {
                 throw new Swc4jByteCodeCompilerException(method, "Failed to generate method: " + methodName, e);
