@@ -113,8 +113,8 @@ public final class EnumCollector {
             ordinal++;
         }
 
-        // Register in the scoped enum registry
-        compiler.getMemory().getScopedEnumRegistry().registerEnum(qualifiedName, memberOrdinals);
+        // Register in the scoped Java class registry as an enum type
+        compiler.getMemory().getScopedJavaTypeRegistry().registerEnum(qualifiedName, memberOrdinals);
 
         // Register the simple name as an alias in the scoped type registry
         // This allows the enum to be referenced by its simple name within its declaration scope

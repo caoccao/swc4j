@@ -17,8 +17,7 @@
 package com.caoccao.javet.swc4j.compiler;
 
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
-import com.caoccao.javet.swc4j.compiler.memory.ScopedEnumRegistry;
-import com.caoccao.javet.swc4j.compiler.memory.ScopedJavaClassRegistry;
+import com.caoccao.javet.swc4j.compiler.memory.ScopedJavaTypeRegistry;
 import com.caoccao.javet.swc4j.compiler.memory.ScopedTypeAliasRegistry;
 
 import java.util.HashMap;
@@ -27,27 +26,21 @@ import java.util.Map;
 public final class ByteCodeCompilerMemory {
     private final Map<String, byte[]> byteCodeMap;
     private final CompilationContext compilationContext;
-    private final ScopedEnumRegistry scopedEnumRegistry;
-    private final ScopedJavaClassRegistry scopedJavaClassRegistry;
+    private final ScopedJavaTypeRegistry scopedJavaTypeRegistry;
     private final ScopedTypeAliasRegistry scopedTypeAliasRegistry;
 
     public ByteCodeCompilerMemory() {
         byteCodeMap = new HashMap<>();
         compilationContext = new CompilationContext();
-        scopedEnumRegistry = new ScopedEnumRegistry();
-        scopedJavaClassRegistry = new ScopedJavaClassRegistry();
+        scopedJavaTypeRegistry = new ScopedJavaTypeRegistry();
         scopedTypeAliasRegistry = new ScopedTypeAliasRegistry();
     }
 
     public void enterScope() {
-        scopedEnumRegistry.enterScope();
-//        scopedJavaClassRegistry.enterScope();
         scopedTypeAliasRegistry.enterScope();
     }
 
     public void exitScope() {
-        scopedEnumRegistry.exitScope();
-//        scopedJavaClassRegistry.exitScope();
         scopedTypeAliasRegistry.exitScope();
     }
 
@@ -69,12 +62,8 @@ public final class ByteCodeCompilerMemory {
         return compilationContext;
     }
 
-    public ScopedEnumRegistry getScopedEnumRegistry() {
-        return scopedEnumRegistry;
-    }
-
-    public ScopedJavaClassRegistry getScopedJavaClassRegistry() {
-        return scopedJavaClassRegistry;
+    public ScopedJavaTypeRegistry getScopedJavaTypeRegistry() {
+        return scopedJavaTypeRegistry;
     }
 
     public ScopedTypeAliasRegistry getScopedTypeAliasRegistry() {
@@ -84,8 +73,7 @@ public final class ByteCodeCompilerMemory {
     public void reset() {
         byteCodeMap.clear();
         compilationContext.reset();
-        scopedEnumRegistry.clear();
-        scopedJavaClassRegistry.clear();
+        scopedJavaTypeRegistry.clear();
         scopedTypeAliasRegistry.clear();
     }
 

@@ -790,7 +790,7 @@ public final class TypeResolver {
                 // Check if the object is a Java class identifier
                 if (memberExpr.getObj() instanceof Swc4jAstIdent objIdent) {
                     String className = objIdent.getSym();
-                    var javaClassInfo = compiler.getMemory().getScopedJavaClassRegistry().resolve(className);
+                    var javaClassInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
                     if (javaClassInfo != null && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                         String methodName = propIdent.getSym();
                         var methodInfo = javaClassInfo.getMethod(methodName);
@@ -895,8 +895,8 @@ public final class TypeResolver {
                                 paramDescriptors.append(argType);
                             }
                             String paramDescriptor = "(" + paramDescriptors + ")";
-                            String returnType = compiler.getMemory().getScopedJavaClassRegistry()
-                                    .resolveTSClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
+                            String returnType = compiler.getMemory().getScopedJavaTypeRegistry()
+                                    .resolveClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
                             if (returnType != null) {
                                 return returnType;
                             }
@@ -1059,7 +1059,7 @@ public final class TypeResolver {
 
         // Try to find the enum in the registry by checking if any member exists
         // We use a dummy member name since we just want to know if the enum exists
-        for (String qualifiedName : compiler.getMemory().getScopedEnumRegistry().getAllEnumNames()) {
+        for (String qualifiedName : compiler.getMemory().getScopedJavaTypeRegistry().getAllEnumNames()) {
             if (qualifiedName.endsWith("." + typeName)) {
                 return qualifiedName;
             }

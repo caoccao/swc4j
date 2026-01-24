@@ -336,8 +336,8 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             qualifiedEnumName = enumName; // Use as-is if not found
         }
 
-        // Look up in scoped enum registry using qualified name
-        Integer ordinal = compiler.getMemory().getScopedEnumRegistry().getEnumMemberOrdinal(qualifiedEnumName, memberName);
+        // Look up in scoped Java class registry using qualified name
+        Integer ordinal = compiler.getMemory().getScopedJavaTypeRegistry().getEnumMemberOrdinal(qualifiedEnumName, memberName);
         return ordinal;
     }
 

@@ -27,7 +27,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
-import com.caoccao.javet.swc4j.compiler.memory.JavaClassInfo;
+import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -82,13 +82,13 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
         }
 
         // Determine if it's a Java class static method call or TS class instance method call
-        JavaClassInfo javaClassInfo = null;
+        JavaTypeInfo javaTypeInfo = null;
         if (memberExpr.getObj() instanceof Swc4jAstIdent objIdent) {
             String className = objIdent.getSym();
-            javaClassInfo = compiler.getMemory().getScopedJavaClassRegistry().resolve(className);
+            javaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
         }
 
-        boolean isJavaStaticCall = javaClassInfo != null;
+        boolean isJavaStaticCall = javaTypeInfo != null;
 
         // Infer argument types
         var args = callExpr.getArgs();
@@ -110,16 +110,16 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
 
         if (isJavaStaticCall) {
             // Java class static method call
-            MethodInfo methodInfo = javaClassInfo.getMethod(methodName, argTypes);
+            MethodInfo methodInfo = javaTypeInfo.getMethod(methodName, argTypes);
             if (methodInfo == null) {
                 throw new Swc4jByteCodeCompilerException(
-                        "Method not found: " + javaClassInfo.getAlias() + "." + methodName +
+                        "Method not found: " + javaTypeInfo.getAlias() + "." + methodName +
                                 " with argument types " + argTypes);
             }
 
             if (!methodInfo.isStatic()) {
                 throw new Swc4jByteCodeCompilerException(
-                        "Method is not static: " + javaClassInfo.getAlias() + "." + methodName);
+                        "Method is not static: " + javaTypeInfo.getAlias() + "." + methodName);
             }
 
             // Parse expected parameter types for type conversion
@@ -136,7 +136,7 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
                 }
             }
 
-            internalClassName = javaClassInfo.getInternalName();
+            internalClassName = javaTypeInfo.getInternalName();
             methodDescriptor = methodInfo.descriptor();
             returnType = methodInfo.returnType();
 
@@ -167,8 +167,8 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
 
             // Look up method return type
             String paramDescriptor = "(" + paramDescriptors + ")";
-            returnType = compiler.getMemory().getScopedJavaClassRegistry()
-                    .resolveTSClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
+            returnType = compiler.getMemory().getScopedJavaTypeRegistry()
+                    .resolveClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
             if (returnType == null) {
                 throw new Swc4jByteCodeCompilerException(
                         "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +

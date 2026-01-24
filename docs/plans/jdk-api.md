@@ -88,8 +88,8 @@ Create a **scope-based registry** similar to `ScopedTypeRegistry` that manages J
 
 ```java
 public final class ScopedJavaClassRegistry {
-    // Stack of scopes: each scope maps class alias -> JavaClassInfo
-    private final Stack<Map<String, JavaClassInfo>> scopeStack;
+    // Stack of scopes: each scope maps class alias -> JavaTypeInfo
+    private final Stack<Map<String, JavaTypeInfo>> scopeStack;
 
     public ScopedJavaClassRegistry() {
         scopeStack = new Stack<>();
@@ -131,22 +131,22 @@ public final class ScopedJavaClassRegistry {
      * @param alias              the class alias (e.g., "Math")
      * @param javaClassInfo      the Java class metadata
      */
-    public void registerClass(String alias, JavaClassInfo javaClassInfo) {
+    public void registerClass(String alias, JavaTypeInfo javaClassInfo) {
         scopeStack.peek().put(alias, javaClassInfo);
     }
 
     /**
-     * Resolve a class name to its JavaClassInfo.
+     * Resolve a class name to its JavaTypeInfo.
      * Searches from the innermost scope to the outermost scope.
      *
      * @param className the class name (alias)
-     * @return the JavaClassInfo, or null if not found
+     * @return the JavaTypeInfo, or null if not found
      */
-    public JavaClassInfo resolve(String className) {
+    public JavaTypeInfo resolve(String className) {
         // Search from innermost to outermost scope
         for (int i = scopeStack.size() - 1; i >= 0; i--) {
-            Map<String, JavaClassInfo> scope = scopeStack.get(i);
-            JavaClassInfo info = scope.get(className);
+            Map<String, JavaTypeInfo> scope = scopeStack.get(i);
+            JavaTypeInfo info = scope.get(className);
             if (info != null) {
                 return info;
             }
@@ -162,9 +162,9 @@ public final class ScopedJavaClassRegistry {
     }
 
     /**
-     * Get JavaClassInfo for a registered class.
+     * Get JavaTypeInfo for a registered class.
      */
-    public JavaClassInfo getClassInfo(String className) {
+    public JavaTypeInfo getClassInfo(String className) {
         return resolve(className);
     }
 
@@ -179,10 +179,10 @@ public final class ScopedJavaClassRegistry {
 }
 ```
 
-#### JavaClassInfo Structure
+#### JavaTypeInfo Structure
 
 ```java
-public static class JavaClassInfo {
+public static class JavaTypeInfo {
     String simpleName;           // e.g., "Math"
     String fullyQualifiedName;   // e.g., "java.lang.Math"
     String internalName;         // e.g., "java/lang/Math"
@@ -191,7 +191,7 @@ public static class JavaClassInfo {
     // Cache of known static methods (populated on demand)
     Map<String, MethodInfo> staticMethods;
 
-    public JavaClassInfo(String simpleName, String fullyQualifiedName) {
+    public JavaTypeInfo(String simpleName, String fullyQualifiedName) {
         this.simpleName = simpleName;
         this.fullyQualifiedName = fullyQualifiedName;
         this.internalName = fullyQualifiedName.replace('.', '/');
@@ -380,7 +380,7 @@ public void testImportIsolationBetweenFiles() throws Exception {
 - Implement stack-based scope management (like `ScopedTypeRegistry`)
 - Add `enterScope()` method to push new scope
 - Add `exitScope()` method to pop current scope
-- Add `registerClass(String alias, JavaClassInfo info)` in current scope
+- Add `registerClass(String alias, JavaTypeInfo info)` in current scope
 - Add `resolve(String className)` to search scopes (innermost to outermost)
 - Add `isImportedJavaClass(String className)` convenience method
 - Add `getClassInfo(String className)` convenience method
@@ -389,23 +389,23 @@ public void testImportIsolationBetweenFiles() throws Exception {
 - Add comprehensive javadoc explaining scope semantics
 
 **Implementation Notes**:
-- Use `Stack<Map<String, JavaClassInfo>>` for scope storage
+- Use `Stack<Map<String, JavaTypeInfo>>` for scope storage
 - Global scope (index 0) is always present and never popped
 - File scope is typically depth 2 (global + file)
 - Future: Could support nested scopes for modules within files
 
-#### 0.2 Create JavaClassInfo and MethodInfo Classes
+#### 0.2 Create JavaTypeInfo and MethodInfo Classes
 **Location**: Same file as `ScopedJavaClassRegistry` (nested static classes)
 
 ```java
-public static class JavaClassInfo {
+public static class JavaTypeInfo {
     String simpleName;
     String fullyQualifiedName;
     String internalName;
     boolean isInterface;
     Map<String, MethodInfo> staticMethods;
 
-    public JavaClassInfo(String simpleName, String fullyQualifiedName) { ... }
+    public JavaTypeInfo(String simpleName, String fullyQualifiedName) { ... }
 }
 
 public static class MethodInfo {
@@ -537,7 +537,7 @@ registry during compilation. Never directly access globalJavaClassRegistry for i
 **No new file needed** - `ScopedJavaClassRegistry` was created in Phase 0.
 
 The registry is already integrated into `ByteCodeCompilerMemory` and provides:
-- `registerClass(String alias, JavaClassInfo info)` - Register in current scope
+- `registerClass(String alias, JavaTypeInfo info)` - Register in current scope
 - `resolve(String className)` - Find class info by searching scopes
 - `isImportedJavaClass(String name)` - Check if class is imported
 - `getClassInfo(String className)` - Get class metadata
@@ -545,7 +545,7 @@ The registry is already integrated into `ByteCodeCompilerMemory` and provides:
 **Usage in ImportDeclProcessor**:
 ```java
 // Register a Java class import
-JavaClassInfo classInfo = new JavaClassInfo(className, fullyQualifiedName);
+JavaTypeInfo classInfo = new JavaTypeInfo(className, fullyQualifiedName);
 compiler.getMemory()
     .getScopedJavaClassRegistry()
     .registerClass(className, classInfo);
@@ -624,7 +624,7 @@ public String inferTypeFromExpr(ISwc4jAstExpr expr) throws Swc4jByteCodeCompiler
 
         // Check if this is an imported Java class
         if (compiler.getMemory().getJavaClassRegistry().isImportedJavaClass(name)) {
-            JavaClassInfo classInfo = compiler.getMemory()
+            JavaTypeInfo classInfo = compiler.getMemory()
                 .getJavaClassRegistry().getClassInfo(name);
             // Return the class type (not instance type)
             return "Ljava/lang/Class;";  // Or a custom marker type
@@ -648,7 +648,7 @@ if (expr instanceof Swc4jAstMemberExpr memberExpr) {
         String objName = objIdent.getSym();
 
         if (compiler.getMemory().getJavaClassRegistry().isImportedJavaClass(objName)) {
-            JavaClassInfo classInfo = compiler.getMemory()
+            JavaTypeInfo classInfo = compiler.getMemory()
                 .getJavaClassRegistry().getClassInfo(objName);
 
             // Get method name from member expression
@@ -666,7 +666,7 @@ if (expr instanceof Swc4jAstMemberExpr memberExpr) {
 
 **Helper**: Use Java Reflection to get method signatures:
 ```java
-private MethodInfo getMethodInfo(JavaClassInfo classInfo, String methodName) {
+private MethodInfo getMethodInfo(JavaTypeInfo classInfo, String methodName) {
     try {
         Class<?> clazz = Class.forName(classInfo.fullyQualifiedName);
 
@@ -726,7 +726,7 @@ public boolean tryGenerateJavaStaticCall(
                     .isImportedJavaClass(className)) {
 
                 // This is a Java static method call!
-                JavaClassInfo classInfo = compiler.getMemory()
+                JavaTypeInfo classInfo = compiler.getMemory()
                     .getJavaClassRegistry().getClassInfo(className);
                 String methodName = getMemberName(memberExpr.getProp());
 

@@ -19,7 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.module;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstImportDecl;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstImportNamedSpecifier;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
-import com.caoccao.javet.swc4j.compiler.memory.JavaClassInfo;
+import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
 
 import java.lang.reflect.Method;
@@ -112,7 +112,7 @@ public final class ImportDeclProcessor {
                     Class<?> javaClass = Class.forName(fullyQualifiedName);
                     String internalName = getInternalName(fullyQualifiedName);
 
-                    JavaClassInfo classInfo = new JavaClassInfo(importedName, packageName, internalName);
+                    JavaTypeInfo typeInfo = new JavaTypeInfo(importedName, packageName, internalName);
 
                     // Scan all public methods and register them
                     for (Method method : javaClass.getMethods()) {
@@ -124,12 +124,12 @@ public final class ImportDeclProcessor {
                             boolean isVarArgs = method.isVarArgs();
 
                             MethodInfo methodInfo = new MethodInfo(methodName, descriptor, returnType, isStatic, isVarArgs);
-                            classInfo.addMethod(methodName, methodInfo);
+                            typeInfo.addMethod(methodName, methodInfo);
                         }
                     }
 
                     // Register in the scoped registry
-                    compiler.getMemory().getScopedJavaClassRegistry().registerClass(importedName, classInfo);
+                    compiler.getMemory().getScopedJavaTypeRegistry().registerClass(importedName, typeInfo);
 
                 } catch (ClassNotFoundException e) {
                     // Class not found - could be a user error or unsupported class

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Stores metadata about an imported Java class.
+ * Stores metadata about an imported Java type (class, interface, or enum).
  * <p>
  * This class handles method overload resolution using a scoring-based system:
  * - All candidate methods are evaluated and scored (0.0 to 1.0)
@@ -37,22 +37,76 @@ import java.util.Map;
  * - Varargs methods (variable number of arguments)
  * - Primitive type widening following Java rules
  * - Boxing and unboxing conversions
+ * <p>
+ * For enums, this class stores the enum member ordinals in the enumValues map.
  */
-public final class JavaClassInfo {
+public final class JavaTypeInfo {
     private final String alias;
+    private final Map<String, Integer> enumValues;
     private final String internalName;
     private final Map<String, List<MethodInfo>> methods;
     private final String packageName;
+    private final List<JavaTypeInfo> parentTypeInfos;
+    private final JavaType type;
 
-    public JavaClassInfo(String alias, String packageName, String internalName) {
+    public JavaTypeInfo(String alias, String packageName, String internalName) {
+        this(alias, packageName, internalName, JavaType.CLASS);
+    }
+
+    public JavaTypeInfo(String alias, String packageName, String internalName, JavaType type) {
         this.alias = alias;
         this.packageName = packageName;
         this.internalName = internalName;
+        this.type = type;
         this.methods = new HashMap<>();
+        this.parentTypeInfos = new ArrayList<>();
+        this.enumValues = new HashMap<>();
     }
 
     public void addMethod(String methodName, MethodInfo methodInfo) {
         methods.computeIfAbsent(methodName, k -> new ArrayList<>()).add(methodInfo);
+    }
+
+    /**
+     * Adds a parent type info (from extends or implements).
+     *
+     * @param parentTypeInfo the parent type info
+     */
+    public void addParentTypeInfo(JavaTypeInfo parentTypeInfo) {
+        parentTypeInfos.add(parentTypeInfo);
+    }
+
+    /**
+     * Gets the list of parent type infos (from extends and implements).
+     *
+     * @return the list of parent type infos
+     */
+    public List<JavaTypeInfo> getParentTypeInfos() {
+        return parentTypeInfos;
+    }
+
+    /**
+     * Checks if this type is assignable to the given type.
+     * This checks if any of the parent types (including transitive parents) match the given type.
+     *
+     * @param typeDescriptor the type descriptor to check (e.g., "Ljava/util/List;")
+     * @return true if this type is assignable to the given type
+     */
+    public boolean isAssignableTo(String typeDescriptor) {
+        // Check direct match
+        String thisDescriptor = "L" + internalName + ";";
+        if (thisDescriptor.equals(typeDescriptor)) {
+            return true;
+        }
+
+        // Check parent types recursively
+        for (JavaTypeInfo parent : parentTypeInfos) {
+            if (parent.isAssignableTo(typeDescriptor)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -97,6 +151,25 @@ public final class JavaClassInfo {
 
     public String getAlias() {
         return alias;
+    }
+
+    /**
+     * Gets the enum member ordinal value.
+     *
+     * @param memberName the enum member name
+     * @return the ordinal value, or null if not found
+     */
+    public Integer getEnumMemberOrdinal(String memberName) {
+        return enumValues.get(memberName);
+    }
+
+    /**
+     * Gets all enum values.
+     *
+     * @return map of member name to ordinal value
+     */
+    public Map<String, Integer> getEnumValues() {
+        return enumValues;
     }
 
     public String getInternalName() {
@@ -176,6 +249,15 @@ public final class JavaClassInfo {
     }
 
     /**
+     * Gets the Java type (Class, Interface, or Enum).
+     *
+     * @return the Java type
+     */
+    public JavaType getType() {
+        return type;
+    }
+
+    /**
      * Gets the wrapper type for a primitive type.
      */
     private String getWrapperType(String primitiveType) {
@@ -190,6 +272,15 @@ public final class JavaClassInfo {
             case "D" -> "Ljava/lang/Double;";
             default -> null;
         };
+    }
+
+    /**
+     * Checks if this type is an enum.
+     *
+     * @return true if this is an enum type
+     */
+    public boolean isEnum() {
+        return type == JavaType.ENUM;
     }
 
     /**
@@ -239,6 +330,16 @@ public final class JavaClassInfo {
         }
 
         return types;
+    }
+
+    /**
+     * Sets enum values for this type.
+     *
+     * @param memberOrdinals map of member name to ordinal value
+     */
+    public void setEnumValues(Map<String, Integer> memberOrdinals) {
+        enumValues.clear();
+        enumValues.putAll(memberOrdinals);
     }
 
     /**
