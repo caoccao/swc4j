@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
@@ -108,6 +109,52 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                                 code.dup2_x1(); // For wide types (double, long)
                             } else {
                                 code.dup_x1(); // For single-slot types
+                            }
+
+                            int fieldRef = cp.addFieldRef(currentClassName, fieldName, fieldInfo.descriptor());
+                            code.putfield(fieldRef);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // Handle this.#field = value assignment (ES2022 private fields)
+            if (memberExpr.getObj() instanceof Swc4jAstThisExpr && memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
+                String fieldName = privateName.getName(); // Name without # prefix
+                String currentClassName = context.getCurrentClassInternalName();
+
+                if (currentClassName != null) {
+                    String qualifiedName = currentClassName.replace('/', '.');
+                    JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+                    if (typeInfo == null) {
+                        int lastSlash = currentClassName.lastIndexOf('/');
+                        String simpleName = lastSlash >= 0 ? currentClassName.substring(lastSlash + 1) : currentClassName;
+                        typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+                    }
+
+                    if (typeInfo != null) {
+                        FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                        if (fieldInfo != null) {
+                            code.aload(0); // load this
+                            compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+
+                            // Convert value type if needed
+                            String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
+                            if (valueType != null && !valueType.equals(fieldInfo.descriptor())) {
+                                TypeConversionUtils.unboxWrapperType(code, cp, valueType);
+                                String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
+                                if (valuePrimitive != null && !valuePrimitive.equals(fieldInfo.descriptor())) {
+                                    TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, fieldInfo.descriptor());
+                                }
+                            }
+
+                            // Duplicate value for assignment expression result
+                            String fieldDesc = fieldInfo.descriptor();
+                            if ("D".equals(fieldDesc) || "J".equals(fieldDesc)) {
+                                code.dup2_x1();
+                            } else {
+                                code.dup_x1();
                             }
 
                             int fieldRef = cp.addFieldRef(currentClassName, fieldName, fieldInfo.descriptor());

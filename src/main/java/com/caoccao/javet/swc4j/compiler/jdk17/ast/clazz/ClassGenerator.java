@@ -127,6 +127,27 @@ public final class ClassGenerator extends BaseAstProcessor {
                             instanceFields.add(fieldInfo);
                         }
                     }
+                } else if (member instanceof Swc4jAstPrivateProp privateProp) {
+                    // ES2022 private fields (#field)
+                    String fieldName = privateProp.getKey().getName(); // Without the # prefix
+                    FieldInfo fieldInfo = typeInfo != null ? typeInfo.getField(fieldName) : null;
+
+                    if (fieldInfo != null) {
+                        // Private fields are always ACC_PRIVATE
+                        int accessFlags = 0x0002; // ACC_PRIVATE
+                        if (fieldInfo.isStatic()) {
+                            accessFlags |= 0x0008; // ACC_STATIC
+                            if (fieldInfo.initializer().isPresent()) {
+                                staticFields.add(fieldInfo);
+                            }
+                        }
+                        classWriter.addField(accessFlags, fieldInfo.name(), fieldInfo.descriptor());
+
+                        // Collect instance fields for constructor initialization
+                        if (!fieldInfo.isStatic() && fieldInfo.initializer().isPresent()) {
+                            instanceFields.add(fieldInfo);
+                        }
+                    }
                 }
             }
 

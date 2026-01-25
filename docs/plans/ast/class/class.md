@@ -275,12 +275,12 @@ Existing tests in `TestCompileAstClass.java`:
 
 ### Phase 8: Access Modifiers - Priority: MEDIUM
 
-**Status:** IMPLEMENTED (except ES2022 private fields)
+**Status:** IMPLEMENTED
 
 - Public (default) - IMPLEMENTED
 - Private methods/fields - IMPLEMENTED
 - Protected methods/fields - IMPLEMENTED
-- Private class fields (#field) - NOT IMPLEMENTED (ES2022 syntax)
+- Private class fields (#field) - IMPLEMENTED (ES2022 syntax)
 
 ### Phase 9: Decorators - Priority: LOW
 
@@ -990,7 +990,7 @@ Field:
 - [x] Phase 5: Constructors fully working
 - [x] Phase 6: Instance fields working
 - [x] Phase 7: Static methods working (static fields pending)
-- [x] Phase 8: Access modifiers working (except ES2022 #field)
+- [x] Phase 8: Access modifiers working (including ES2022 #field)
 - [x] Phase 9: Decorators - NOT SUPPORTED (intentionally excluded)
 - [ ] Phase 10: Generics working (future)
 - [x] All current tests passing
@@ -1087,8 +1087,18 @@ Field:
   - Added same `getAccessFlags()` helper method
   - Updated field generation to use `getAccessFlags(prop.getAccessibility())` instead of hardcoded ACC_PUBLIC
 - Default behavior unchanged: when `accessibility` is empty (not specified), defaults to ACC_PUBLIC
-- ES2022 private class fields (`#field`) are NOT implemented - would require additional AST handling (`Swc4jAstPrivateProp`, `Swc4jAstPrivateMethod`)
 - Test coverage in `TestCompileAstClassAccessibility.java`: 6 tests covering private/protected fields and methods
+
+**ES2022 Private Fields Support (2026-01-25):**
+- Added support for ES2022 private fields (`#field` syntax) in instance classes
+- Updated `ClassCollector` to register private field metadata via `Swc4jAstPrivateProp`
+- Updated `ClassGenerator` to generate private fields with ACC_PRIVATE flag
+- Updated `MemberExpressionGenerator` to handle `this.#field` access
+- Updated `AssignExpressionGenerator` to handle `this.#field = value` assignment
+- Updated `TypeResolver.inferTypeFromExpr` to properly infer types for private field access
+- Private fields are stored without the `#` prefix in JVM bytecode
+- Static private fields (`ClassName.#field`) not yet supported
+- Test coverage in `TestCompileAstClassPrivateFields.java`: 7 tests covering private field read/write, types, multiple fields, and binary operations
 
 ---
 
@@ -1098,7 +1108,7 @@ Field:
 2. **Anonymous Classes**: Class expressions may not be fully supported
 3. **Decorators**: Decorator evaluation at compile time is limited
 4. **Generics**: Type erasure follows Java conventions
-5. **Private Fields (#)**: ES2022 private fields may require special handling
+5. **Private Fields (#)**: ES2022 private fields are supported for instance fields; static private fields (`ClassName.#field`) not yet supported
 6. **Multiple Inheritance**: Only single class inheritance (Java limitation)
 7. **Dynamic Class Loading**: Not supported at compile time
 

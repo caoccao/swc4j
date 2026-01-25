@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassProp;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateProp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
@@ -125,6 +126,8 @@ public final class ClassCollector {
         for (ISwc4jAstClassMember member : clazz.getBody()) {
             if (member instanceof Swc4jAstClassProp prop) {
                 processFieldProp(prop, typeInfo);
+            } else if (member instanceof Swc4jAstPrivateProp privateProp) {
+                processPrivateFieldProp(privateProp, typeInfo);
             }
         }
 
@@ -198,6 +201,34 @@ public final class ClassCollector {
 
         // Create FieldInfo and register it
         FieldInfo fieldInfo = new FieldInfo(fieldName, fieldDescriptor, isStatic, prop.getValue());
+        typeInfo.addField(fieldName, fieldInfo);
+    }
+
+    private void processPrivateFieldProp(Swc4jAstPrivateProp privateProp, JavaTypeInfo typeInfo) {
+        // ES2022 private fields (#field) - field name without # prefix
+        String fieldName = privateProp.getKey().getName();
+        boolean isStatic = privateProp.isStatic();
+
+        // Determine field type from type annotation or initializer
+        String fieldDescriptor = "Ljava/lang/Object;"; // default
+
+        // Check type annotation first
+        if (privateProp.getTypeAnn().isPresent()) {
+            fieldDescriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(privateProp.getTypeAnn().get().getTypeAnn());
+        } else if (privateProp.getValue().isPresent()) {
+            // Infer type from initializer
+            try {
+                String inferredType = compiler.getTypeResolver().inferTypeFromExpr(privateProp.getValue().get());
+                if (inferredType != null) {
+                    fieldDescriptor = inferredType;
+                }
+            } catch (Swc4jByteCodeCompilerException e) {
+                // Ignore - use default type
+            }
+        }
+
+        // Create FieldInfo and register it
+        FieldInfo fieldInfo = new FieldInfo(fieldName, fieldDescriptor, isStatic, privateProp.getValue());
         typeInfo.addField(fieldName, fieldInfo);
     }
 

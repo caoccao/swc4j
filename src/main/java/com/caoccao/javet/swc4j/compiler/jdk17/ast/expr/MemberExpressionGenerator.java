@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
@@ -65,6 +66,32 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
                         // Generate getfield instruction using the owner class
                         code.aload(0); // load this
                         int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, lookupResult.fieldInfo.descriptor());
+                        code.getfield(fieldRef);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Handle this.#field access for ES2022 private fields
+        if (memberExpr.getObj() instanceof Swc4jAstThisExpr && memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
+            String fieldName = privateName.getName(); // Name without # prefix
+            String currentClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+
+            if (currentClassName != null) {
+                String qualifiedName = currentClassName.replace('/', '.');
+                JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+                if (typeInfo == null) {
+                    int lastSlash = currentClassName.lastIndexOf('/');
+                    String simpleName = lastSlash >= 0 ? currentClassName.substring(lastSlash + 1) : currentClassName;
+                    typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+                }
+
+                if (typeInfo != null) {
+                    FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                    if (fieldInfo != null) {
+                        code.aload(0); // load this
+                        int fieldRef = cp.addFieldRef(currentClassName, fieldName, fieldInfo.descriptor());
                         code.getfield(fieldRef);
                         return;
                     }

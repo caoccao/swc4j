@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
@@ -619,6 +620,29 @@ public final class TypeResolver {
                     if (typeInfo != null) {
                         // Look up field in current class or parent classes
                         FieldInfo fieldInfo = lookupFieldInHierarchy(typeInfo, fieldName);
+                        if (fieldInfo != null) {
+                            return fieldInfo.descriptor();
+                        }
+                    }
+                }
+            }
+
+            // Handle this.#field access for ES2022 private fields
+            if (memberExpr.getObj() instanceof Swc4jAstThisExpr && memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
+                String fieldName = privateName.getName(); // Name without # prefix
+                String currentClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+
+                if (currentClassName != null) {
+                    String qualifiedName = currentClassName.replace('/', '.');
+                    JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+                    if (typeInfo == null) {
+                        int lastSlash = currentClassName.lastIndexOf('/');
+                        String simpleName = lastSlash >= 0 ? currentClassName.substring(lastSlash + 1) : currentClassName;
+                        typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+                    }
+
+                    if (typeInfo != null) {
+                        FieldInfo fieldInfo = typeInfo.getField(fieldName);
                         if (fieldInfo != null) {
                             return fieldInfo.descriptor();
                         }
