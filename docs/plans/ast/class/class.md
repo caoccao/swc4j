@@ -227,12 +227,12 @@ Existing tests in `TestCompileAstClass.java`:
 
 ### Phase 3: Abstract Classes - Priority: MEDIUM
 
-**Status:** TO BE IMPLEMENTED
+**Status:** IMPLEMENTED
 
-- ACC_ABSTRACT flag on class
-- Abstract method declaration (no body)
-- Validation: concrete subclass implements all abstract methods
-- Cannot instantiate abstract class
+- ACC_ABSTRACT flag on class - IMPLEMENTED
+- Abstract method declaration (no body) - IMPLEMENTED
+- Validation: concrete subclass implements all abstract methods - (runtime JVM validation)
+- Cannot instantiate abstract class - (runtime JVM validation)
 
 ### Phase 4: Interface Implementation - Priority: MEDIUM
 
@@ -245,13 +245,13 @@ Existing tests in `TestCompileAstClass.java`:
 
 ### Phase 5: Constructors - Priority: HIGH
 
-**Status:** PARTIAL
+**Status:** IMPLEMENTED
 
 - Constructor parameter handling - IMPLEMENTED
 - Field initialization in constructor - IMPLEMENTED
 - super() calls with arguments - IMPLEMENTED
-- Constructor overloading - TO BE IMPLEMENTED
-- this() calls (constructor chaining) - TO BE IMPLEMENTED
+- Constructor overloading - IMPLEMENTED
+- this() calls (constructor chaining) - IMPLEMENTED
 
 ### Phase 6: Instance Fields - Priority: HIGH
 
@@ -988,9 +988,9 @@ Field:
 
 - [x] Phase 1: Basic class declaration working
 - [x] Phase 2: Class inheritance (extends) working
-- [ ] Phase 3: Abstract classes working
+- [x] Phase 3: Abstract classes working
 - [ ] Phase 4: Interface implementation working
-- [ ] Phase 5: Constructors fully working
+- [x] Phase 5: Constructors fully working
 - [x] Phase 6: Instance fields working
 - [x] Phase 7: Static methods working (static fields pending)
 - [ ] Phase 8: Access modifiers working
@@ -1047,6 +1047,21 @@ Field:
 - Added static field write support in `AssignExpressionGenerator` using `putstatic`
 - Added static field type inference in `TypeResolver` for `ClassName.staticField` access
 - Static fields are collected and initialized in `<clinit>` method
+
+**Constructor Overloading and this() Calls (2026-01-25):**
+- Updated `ClassGenerator.generateBytecode()` to collect ALL explicit constructors (not just first)
+- Each constructor is generated via `generateExplicitConstructor()` with its own descriptor
+- Added `generateThisConstructorCall()` in `CallExpressionGenerator` for `this()` calls
+- Updated `ClassGenerator` to detect both `super()` and `this()` calls before injecting implicit `super()`
+- Constructor chaining uses `invokespecial` to call another constructor in the same class
+- Method descriptor built from argument types for overload resolution
+
+**Abstract Classes Support (2026-01-25):**
+- Updated `ClassGenerator.generateBytecode()` to set ACC_ABSTRACT (0x0400) flag when `clazz.isAbstract()` is true
+- Added `generateAbstractMethod()` in `MethodGenerator` for abstract method declarations
+- Abstract methods have ACC_ABSTRACT flag and no Code attribute (code = null)
+- Updated `TypeResolver.analyzeReturnType()` to handle null body for abstract methods
+- JVM validates at runtime that abstract classes cannot be instantiated and concrete subclasses implement all abstract methods
 
 ---
 

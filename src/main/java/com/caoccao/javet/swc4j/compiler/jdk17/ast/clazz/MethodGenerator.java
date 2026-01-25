@@ -55,7 +55,13 @@ public final class MethodGenerator extends BaseAstProcessor {
         String methodName = CodeGeneratorUtils.getMethodName(key);
         Swc4jAstFunction function = method.getFunction();
 
-        // Only handle methods with bodies
+        // Handle abstract methods (no body)
+        if (method.isAbstract()) {
+            generateAbstractMethod(classWriter, cp, method, methodName, function);
+            return;
+        }
+
+        // Handle methods with bodies
         var bodyOpt = function.getBody();
         if (bodyOpt.isPresent()) {
             try {
@@ -128,6 +134,32 @@ public final class MethodGenerator extends BaseAstProcessor {
                 throw new Swc4jByteCodeCompilerException(method, "Failed to generate method: " + methodName, e);
             }
         }
+    }
+
+    private void generateAbstractMethod(
+            ClassWriter classWriter,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstClassMethod method,
+            String methodName,
+            Swc4jAstFunction function) throws Swc4jByteCodeCompilerException {
+        // Reset compilation context to analyze parameters and return type
+        compiler.getMemory().resetCompilationContext(method.isStatic());
+
+        // Analyze function parameters
+        compiler.getVariableAnalyzer().analyzeParameters(function);
+
+        // Determine return type from explicit annotation
+        ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, null);
+        String descriptor = generateDescriptor(function, returnTypeInfo);
+
+        // ACC_PUBLIC | ACC_ABSTRACT (no ACC_STATIC for abstract methods, but they can be static in interfaces)
+        int accessFlags = 0x0401; // ACC_PUBLIC | ACC_ABSTRACT
+        if (method.isStatic()) {
+            accessFlags |= 0x0008; // ACC_STATIC
+        }
+
+        // Abstract methods have no code (null)
+        classWriter.addMethod(accessFlags, methodName, descriptor, null, 0, 0);
     }
 
     public CodeBuilder generateCode(

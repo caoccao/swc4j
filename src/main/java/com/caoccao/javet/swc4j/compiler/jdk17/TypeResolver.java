@@ -323,6 +323,11 @@ public final class TypeResolver {
             return ReturnTypeInfo.of(tsType, descriptor);
         }
 
+        // If no body (e.g., abstract method), default to void
+        if (body == null) {
+            return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
+        }
+
         // Fall back to type inference from return statement
         for (ISwc4jAstStmt stmt : body.getStmts()) {
             if (stmt instanceof Swc4jAstReturnStmt returnStmt) {

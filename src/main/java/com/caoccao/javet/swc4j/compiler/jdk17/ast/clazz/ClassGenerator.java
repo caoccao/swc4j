@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
@@ -75,6 +76,11 @@ public final class ClassGenerator extends BaseAstProcessor {
         ClassWriter classWriter = new ClassWriter(internalClassName, superClassInternalName);
         ClassWriter.ConstantPool cp = classWriter.getConstantPool();
 
+        // Set ACC_ABSTRACT flag if class is abstract
+        if (clazz.isAbstract()) {
+            classWriter.setAccessFlags(0x0421); // ACC_PUBLIC | ACC_SUPER | ACC_ABSTRACT
+        }
+
         // Push the current class onto the stack for 'this' resolution (supports nested classes)
         compiler.getMemory().getCompilationContext().pushClass(internalClassName);
 
@@ -124,18 +130,19 @@ public final class ClassGenerator extends BaseAstProcessor {
                 generateClinitMethod(classWriter, cp, internalClassName, staticFields);
             }
 
-            // Check for explicit constructor
-            Swc4jAstConstructor explicitConstructor = null;
+            // Collect all explicit constructors
+            List<Swc4jAstConstructor> constructors = new ArrayList<>();
             for (ISwc4jAstClassMember member : clazz.getBody()) {
                 if (member instanceof Swc4jAstConstructor ctor) {
-                    explicitConstructor = ctor;
-                    break;
+                    constructors.add(ctor);
                 }
             }
 
-            // Generate constructor
-            if (explicitConstructor != null) {
-                generateExplicitConstructor(classWriter, cp, internalClassName, superClassInternalName, explicitConstructor);
+            // Generate constructors
+            if (!constructors.isEmpty()) {
+                for (Swc4jAstConstructor ctor : constructors) {
+                    generateExplicitConstructor(classWriter, cp, internalClassName, superClassInternalName, ctor);
+                }
             } else if (!instanceFields.isEmpty()) {
                 generateConstructorWithFieldInit(classWriter, cp, internalClassName, superClassInternalName, instanceFields);
             } else {
@@ -271,22 +278,22 @@ public final class ClassGenerator extends BaseAstProcessor {
             Swc4jAstBlockStmt body = constructor.getBody().get();
             List<ISwc4jAstStmt> stmts = body.getStmts();
 
-            // Check if first statement is a super() call
-            boolean firstIsSuperCall = false;
-            int firstStmtIndex = 0;
+            // Check if first statement is a super() or this() call
+            boolean firstIsSuperOrThisCall = false;
             if (!stmts.isEmpty()) {
                 ISwc4jAstStmt firstStmt = stmts.get(0);
                 if (firstStmt instanceof Swc4jAstExprStmt exprStmt) {
                     if (exprStmt.getExpr() instanceof Swc4jAstCallExpr callExpr) {
-                        if (callExpr.getCallee() instanceof Swc4jAstSuper) {
-                            firstIsSuperCall = true;
+                        if (callExpr.getCallee() instanceof Swc4jAstSuper
+                                || callExpr.getCallee() instanceof Swc4jAstThisExpr) {
+                            firstIsSuperOrThisCall = true;
                         }
                     }
                 }
             }
 
-            // If first statement is not super(), inject an implicit super() call
-            if (!firstIsSuperCall) {
+            // If first statement is not super() or this(), inject an implicit super() call
+            if (!firstIsSuperOrThisCall) {
                 int superCtorRef = cp.addMethodRef(superClassInternalName, "<init>", "()V");
                 code.aload(0).invokespecial(superCtorRef);
             }

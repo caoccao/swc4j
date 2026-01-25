@@ -71,6 +71,114 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testConstructorChaining(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class Point {
+                    x: int
+                    y: int
+                    constructor(x: int, y: int) {
+                      this.x = x
+                      this.y = y
+                    }
+                    constructor(v: int) {
+                      this(v, v)
+                    }
+                    constructor() {
+                      this(0, 0)
+                    }
+                    getX(): int { return this.x }
+                    getY(): int { return this.y }
+                  }
+                }""");
+        Class<?> classPoint = loadClass(map.get("com.Point"));
+
+        // Test two-parameter constructor
+        var point1 = classPoint.getConstructor(int.class, int.class).newInstance(10, 20);
+        assertEquals(
+                List.of(10, 20),
+                List.of(
+                        classPoint.getMethod("getX").invoke(point1),
+                        classPoint.getMethod("getY").invoke(point1)
+                )
+        );
+
+        // Test single-parameter constructor which calls this(v, v)
+        var point2 = classPoint.getConstructor(int.class).newInstance(5);
+        assertEquals(
+                List.of(5, 5),
+                List.of(
+                        classPoint.getMethod("getX").invoke(point2),
+                        classPoint.getMethod("getY").invoke(point2)
+                )
+        );
+
+        // Test no-parameter constructor which calls this(0, 0)
+        var point3 = classPoint.getConstructor().newInstance();
+        assertEquals(
+                List.of(0, 0),
+                List.of(
+                        classPoint.getMethod("getX").invoke(point3),
+                        classPoint.getMethod("getY").invoke(point3)
+                )
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testConstructorChainingWithInheritance(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class Point {
+                    x: int
+                    y: int
+                    constructor(x: int, y: int) {
+                      this.x = x
+                      this.y = y
+                    }
+                    getX(): int { return this.x }
+                    getY(): int { return this.y }
+                  }
+                  export class Point3D extends Point {
+                    z: int
+                    constructor(x: int, y: int, z: int) {
+                      super(x, y)
+                      this.z = z
+                    }
+                    constructor(v: int) {
+                      this(v, v, v)
+                    }
+                    getZ(): int { return this.z }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classPoint3D = classes.get("com.Point3D");
+
+        // Test three-parameter constructor
+        var p1 = classPoint3D.getConstructor(int.class, int.class, int.class).newInstance(1, 2, 3);
+        assertEquals(
+                List.of(1, 2, 3),
+                List.of(
+                        classPoint3D.getMethod("getX").invoke(p1),
+                        classPoint3D.getMethod("getY").invoke(p1),
+                        classPoint3D.getMethod("getZ").invoke(p1)
+                )
+        );
+
+        // Test single-parameter constructor which calls this(v, v, v)
+        var p2 = classPoint3D.getConstructor(int.class).newInstance(5);
+        assertEquals(
+                List.of(5, 5, 5),
+                List.of(
+                        classPoint3D.getMethod("getX").invoke(p2),
+                        classPoint3D.getMethod("getY").invoke(p2),
+                        classPoint3D.getMethod("getZ").invoke(p2)
+                )
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testConstructorInitializingFields(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -129,6 +237,52 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                         classC.getMethod("getB").invoke(instance),
                         classC.getMethod("getC").invoke(instance),
                         classC.getMethod("getSum").invoke(instance)
+                )
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testConstructorOverloading(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class Rectangle {
+                    width: int
+                    height: int
+                    constructor(w: int, h: int) {
+                      this.width = w
+                      this.height = h
+                    }
+                    constructor(side: int) {
+                      this.width = side
+                      this.height = side
+                    }
+                    getArea(): int { return this.width * this.height }
+                    getWidth(): int { return this.width }
+                    getHeight(): int { return this.height }
+                  }
+                }""");
+        Class<?> classRectangle = loadClass(map.get("com.Rectangle"));
+
+        // Test two-parameter constructor
+        var rect1 = classRectangle.getConstructor(int.class, int.class).newInstance(10, 5);
+        assertEquals(
+                List.of(10, 5, 50),
+                List.of(
+                        classRectangle.getMethod("getWidth").invoke(rect1),
+                        classRectangle.getMethod("getHeight").invoke(rect1),
+                        classRectangle.getMethod("getArea").invoke(rect1)
+                )
+        );
+
+        // Test single-parameter constructor (square)
+        var rect2 = classRectangle.getConstructor(int.class).newInstance(7);
+        assertEquals(
+                List.of(7, 7, 49),
+                List.of(
+                        classRectangle.getMethod("getWidth").invoke(rect2),
+                        classRectangle.getMethod("getHeight").invoke(rect2),
+                        classRectangle.getMethod("getArea").invoke(rect2)
                 )
         );
     }
