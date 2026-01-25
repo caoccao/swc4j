@@ -270,11 +270,11 @@ Existing tests in `TestCompileAstFunction.java`:
 
 ### Phase 6: Default Parameters - Priority: MEDIUM
 
-**Status:** TO BE IMPLEMENTED
+**Status:** IMPLEMENTED
 
-- Default value evaluation
-- Bytecode for checking undefined/null
-- Default parameter initialization
+- Default value evaluation - IMPLEMENTED
+- Bytecode for checking undefined/null - N/A (uses method overloading)
+- Default parameter initialization - IMPLEMENTED via method overloads
 
 ### Phase 7: Function Overloading - Priority: MEDIUM
 
@@ -1101,7 +1101,7 @@ return   // void
 - [x] Phase 3: All return types working
 - [x] Phase 4: Varargs fully working (including iteration over primitive arrays)
 - [x] Phase 5: Type inference partial (basic + 'this' method calls)
-- [ ] Phase 6: Default parameters working
+- [x] Phase 6: Default parameters working
 - [ ] Phase 7: Overloading working (future)
 - [ ] Phase 8: Async functions working (future)
 - [ ] Phase 9: Generator functions working (future)
@@ -1116,6 +1116,20 @@ return   // void
 - The `StackMapGenerator` was missing array operation handlers (`iaload`, `arraylength`, etc.), causing compilation to hang
 - This enables varargs iteration tests like `testVarargsIteration` and return-in-loop tests like `testReturnInLoop` to pass
 - See `docs/plans/ast/stmt/for-stmt.md` for detailed fix description
+
+**Default Parameters (Phase 6) Implementation:**
+- Default parameters use **method overloading** strategy instead of null/undefined checking at runtime
+- For `test(a: int, b: int = 10): int`, generates two methods:
+  - `test(int, int)` - full method with implementation body
+  - `test(int)` - overload that calls `test(a, 10)` with default value
+- Multiple default parameters generate multiple overloads (e.g., 3 params with 2 defaults → 3 methods)
+- Key implementation files:
+  - `TypeResolver.java`: Added `extractDefaultValue()` and `hasDefaultValue()` methods for `Swc4jAstAssignPat`
+  - `VariableAnalyzer.java`: Updated `analyzeParameters()` to handle `Swc4jAstAssignPat` for slot allocation
+  - `MethodGenerator.java`: Added `generateDefaultParameterOverloads()` to create overload methods
+- Proper type handling: Each overload generates correct bytecode for its default value type (e.g., double literals generate dconst/ldc2_w, not integer constants)
+- Works for both instance methods and static methods
+- Test coverage in `TestCompileAstFunctionDefaultParams.java`: 6 tests covering int, double, String, boolean, multiple defaults, and static methods
 
 ---
 

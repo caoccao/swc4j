@@ -236,12 +236,12 @@ Existing tests in `TestCompileAstClass.java`:
 
 ### Phase 4: Interface Implementation - Priority: MEDIUM
 
-**Status:** TO BE IMPLEMENTED
+**Status:** IMPLEMENTED
 
-- `implements` clause processing
-- Interface method implementation
-- Multiple interface implementation
-- Interface resolution
+- `implements` clause processing - IMPLEMENTED
+- Interface method implementation - IMPLEMENTED
+- Multiple interface implementation - IMPLEMENTED
+- Interface resolution - IMPLEMENTED (via type alias registry)
 
 ### Phase 5: Constructors - Priority: HIGH
 
@@ -989,7 +989,7 @@ Field:
 - [x] Phase 1: Basic class declaration working
 - [x] Phase 2: Class inheritance (extends) working
 - [x] Phase 3: Abstract classes working
-- [ ] Phase 4: Interface implementation working
+- [x] Phase 4: Interface implementation working
 - [x] Phase 5: Constructors fully working
 - [x] Phase 6: Instance fields working
 - [x] Phase 7: Static methods working (static fields pending)
@@ -1062,6 +1062,20 @@ Field:
 - Abstract methods have ACC_ABSTRACT flag and no Code attribute (code = null)
 - Updated `TypeResolver.analyzeReturnType()` to handle null body for abstract methods
 - JVM validates at runtime that abstract classes cannot be instantiated and concrete subclasses implement all abstract methods
+
+**Interface Implementation (Phase 4) Support (2026-01-25):**
+- Updated `ClassWriter` to support interfaces:
+  - Added `List<String> interfaces` field to store interface names
+  - Added `addInterface(String interfaceInternalName)` method
+  - Updated `toByteArray()` to pre-add interfaces to constant pool and write interface indexes
+- Added `resolveInterfaces()` method in `ClassGenerator`:
+  - Iterates over `clazz.getImplements()` list of `Swc4jAstTsExprWithTypeArgs`
+  - Extracts interface name from `expr` (Swc4jAstIdent)
+  - Resolves via type alias registry, Java type registry, or uses simple name as fallback
+  - Calls `classWriter.addInterface()` with the resolved internal name
+- Interface resolution requires interfaces to be registered in the type alias map (e.g., `"Runnable" -> "java.lang.Runnable"`)
+- Supports single interface, multiple interfaces, and class extends + implements
+- Test coverage in `TestCompileAstClassImplements.java`: 4 tests covering single/multiple interfaces, extends+implements, and method implementation
 
 ---
 

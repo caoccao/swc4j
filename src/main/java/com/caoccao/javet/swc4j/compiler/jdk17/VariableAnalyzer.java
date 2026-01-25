@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstSwitchCase;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.*;
@@ -52,6 +53,14 @@ public final class VariableAnalyzer {
                 if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
                     String paramName = bindingIdent.getId().getSym();
                     String paramType = compiler.getTypeResolver().extractParameterType(restPat);
+                    context.getLocalVariableTable().allocateVariable(paramName, paramType);
+                    context.getInferredTypes().put(paramName, paramType);
+                }
+            } else if (pat instanceof Swc4jAstAssignPat assignPat) {
+                // Handle default parameter - extract name and type from left side
+                String paramName = compiler.getTypeResolver().extractParameterName(assignPat);
+                String paramType = compiler.getTypeResolver().extractParameterType(assignPat);
+                if (paramName != null) {
                     context.getLocalVariableTable().allocateVariable(paramName, paramType);
                     context.getInferredTypes().put(paramName, paramType);
                 }

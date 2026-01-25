@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
@@ -40,6 +41,21 @@ import java.util.List;
 public final class MethodGenerator extends BaseAstProcessor {
     public MethodGenerator(ByteCodeCompiler compiler) {
         super(compiler);
+    }
+
+    private ReturnTypeInfo createReturnTypeInfoFromDescriptor(String descriptor) {
+        return switch (descriptor) {
+            case "I" -> new ReturnTypeInfo(ReturnType.INT, 1, null, null);
+            case "Z" -> new ReturnTypeInfo(ReturnType.BOOLEAN, 1, null, null);
+            case "B" -> new ReturnTypeInfo(ReturnType.BYTE, 1, null, null);
+            case "C" -> new ReturnTypeInfo(ReturnType.CHAR, 1, null, null);
+            case "S" -> new ReturnTypeInfo(ReturnType.SHORT, 1, null, null);
+            case "J" -> new ReturnTypeInfo(ReturnType.LONG, 2, null, null);
+            case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null, null);
+            case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null, null);
+            case "Ljava/lang/String;" -> new ReturnTypeInfo(ReturnType.STRING, 1, null, null);
+            default -> new ReturnTypeInfo(ReturnType.OBJECT, 1, descriptor, null);
+        };
     }
 
     @Override
@@ -130,6 +146,9 @@ public final class MethodGenerator extends BaseAstProcessor {
                     classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
                             null, null, stackMapTable, exceptionTable);
                 }
+
+                // Generate overloaded methods for default parameters
+                generateDefaultParameterOverloads(classWriter, cp, method, methodName, function, returnTypeInfo, accessFlags);
             } catch (Exception e) {
                 throw new Swc4jByteCodeCompilerException(method, "Failed to generate method: " + methodName, e);
             }
@@ -185,6 +204,48 @@ public final class MethodGenerator extends BaseAstProcessor {
         return code;
     }
 
+    /**
+     * Generates overloaded methods for parameters with default values.
+     * For each default parameter, generates a method that calls the full method with the default value.
+     */
+    private void generateDefaultParameterOverloads(
+            ClassWriter classWriter,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstClassMethod method,
+            String methodName,
+            Swc4jAstFunction function,
+            ReturnTypeInfo returnTypeInfo,
+            int baseAccessFlags) throws Swc4jByteCodeCompilerException {
+        List<Swc4jAstParam> params = function.getParams();
+
+        // Find the index of the first default parameter
+        int firstDefaultIndex = -1;
+        for (int i = 0; i < params.size(); i++) {
+            if (compiler.getTypeResolver().hasDefaultValue(params.get(i).getPat())) {
+                firstDefaultIndex = i;
+                break;
+            }
+        }
+
+        // No default parameters, nothing to generate
+        if (firstDefaultIndex == -1) {
+            return;
+        }
+
+        // Get full method descriptor for calling
+        String fullDescriptor = generateDescriptor(function, returnTypeInfo);
+        String internalClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+
+        // Generate overloads for each valid parameter count
+        // e.g., for add(a: int, b: int = 10, c: int = 20):
+        // - add(int a) calls add(a, 10, 20)
+        // - add(int a, int b) calls add(a, b, 20)
+        for (int paramCount = firstDefaultIndex; paramCount < params.size(); paramCount++) {
+            generateOverloadMethod(classWriter, cp, method, methodName, function, returnTypeInfo,
+                    baseAccessFlags, paramCount, fullDescriptor, internalClassName);
+        }
+    }
+
     public String generateDescriptor(
             Swc4jAstFunction function,
             ReturnTypeInfo returnTypeInfo) {
@@ -210,5 +271,130 @@ public final class MethodGenerator extends BaseAstProcessor {
         };
 
         return "(" + paramDescriptors + ")" + returnDescriptor;
+    }
+
+    /**
+     * Generates a single overload method that calls the full method with default values.
+     */
+    private void generateOverloadMethod(
+            ClassWriter classWriter,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstClassMethod method,
+            String methodName,
+            Swc4jAstFunction function,
+            ReturnTypeInfo returnTypeInfo,
+            int baseAccessFlags,
+            int paramCount,
+            String fullDescriptor,
+            String internalClassName) throws Swc4jByteCodeCompilerException {
+        List<Swc4jAstParam> params = function.getParams();
+        boolean isStatic = method.isStatic();
+
+        // Reset compilation context for this overload
+        compiler.getMemory().resetCompilationContext(isStatic);
+
+        // Build the overload descriptor (with fewer parameters)
+        StringBuilder overloadParamDescriptors = new StringBuilder();
+        for (int i = 0; i < paramCount; i++) {
+            String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
+            overloadParamDescriptors.append(paramType);
+        }
+        String returnDescriptor = getReturnDescriptor(returnTypeInfo);
+        String overloadDescriptor = "(" + overloadParamDescriptors + ")" + returnDescriptor;
+
+        // Generate bytecode for the overload
+        CodeBuilder code = new CodeBuilder();
+
+        // Load 'this' for instance methods
+        int slot = 0;
+        if (!isStatic) {
+            code.aload(0);
+            slot = 1;
+        }
+
+        // Load parameters that are provided
+        for (int i = 0; i < paramCount; i++) {
+            String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
+            loadParameter(code, slot, paramType);
+            slot += getSlotSize(paramType);
+        }
+
+        // Generate default values for remaining parameters
+        for (int i = paramCount; i < params.size(); i++) {
+            ISwc4jAstExpr defaultValue = compiler.getTypeResolver().extractDefaultValue(params.get(i).getPat());
+            if (defaultValue != null) {
+                // Create ReturnTypeInfo for the expected parameter type
+                String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
+                ReturnTypeInfo expectedType = createReturnTypeInfoFromDescriptor(paramType);
+                compiler.getExpressionGenerator().generate(code, cp, defaultValue, expectedType);
+            } else {
+                // This shouldn't happen if firstDefaultIndex is correct
+                throw new Swc4jByteCodeCompilerException(params.get(i),
+                        "Expected default value for parameter at index " + i);
+            }
+        }
+
+        // Call the full method
+        int methodRef = cp.addMethodRef(internalClassName, methodName, fullDescriptor);
+        if (isStatic) {
+            code.invokestatic(methodRef);
+        } else {
+            code.invokevirtual(methodRef);
+        }
+
+        // Return the result
+        generateReturn(code, returnTypeInfo);
+
+        // Calculate max locals for the overload
+        int maxLocals = isStatic ? 0 : 1;
+        for (int i = 0; i < paramCount; i++) {
+            String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
+            maxLocals += getSlotSize(paramType);
+        }
+
+        classWriter.addMethod(baseAccessFlags, methodName, overloadDescriptor, code.toByteArray(),
+                10, // max stack
+                maxLocals);
+    }
+
+    private void generateReturn(CodeBuilder code, ReturnTypeInfo returnTypeInfo) {
+        switch (returnTypeInfo.type()) {
+            case VOID -> code.returnVoid();
+            case INT, BOOLEAN, BYTE, CHAR, SHORT -> code.ireturn();
+            case LONG -> code.lreturn();
+            case FLOAT -> code.freturn();
+            case DOUBLE -> code.dreturn();
+            case STRING, OBJECT -> code.areturn();
+        }
+    }
+
+    private String getReturnDescriptor(ReturnTypeInfo returnTypeInfo) {
+        return switch (returnTypeInfo.type()) {
+            case VOID -> "V";
+            case INT -> "I";
+            case BOOLEAN -> "Z";
+            case BYTE -> "B";
+            case CHAR -> "C";
+            case SHORT -> "S";
+            case LONG -> "J";
+            case FLOAT -> "F";
+            case DOUBLE -> "D";
+            case STRING -> "Ljava/lang/String;";
+            case OBJECT -> returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : "Ljava/lang/Object;";
+        };
+    }
+
+    private int getSlotSize(String type) {
+        return ("J".equals(type) || "D".equals(type)) ? 2 : 1;
+    }
+
+    private void loadParameter(CodeBuilder code, int slot, String paramType) {
+        switch (paramType) {
+            case "I", "Z", "B", "C", "S" -> code.iload(slot);
+            case "J" -> code.lload(slot);
+            case "F" -> code.fload(slot);
+            case "D" -> code.dload(slot);
+            default -> code.aload(slot);
+        }
     }
 }

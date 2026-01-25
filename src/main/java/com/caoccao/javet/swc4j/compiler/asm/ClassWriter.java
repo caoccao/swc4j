@@ -35,6 +35,7 @@ public class ClassWriter {
     private final String className;
     private final ConstantPool constantPool;
     private final List<FieldInfo> fields = new ArrayList<>();
+    private final List<String> interfaces = new ArrayList<>();
     private final List<MethodInfo> methods = new ArrayList<>();
     private final String superClassName;
     private int accessFlags = 0x0021; // ACC_PUBLIC | ACC_SUPER (default)
@@ -51,6 +52,10 @@ public class ClassWriter {
 
     public void addField(int accessFlags, String name, String descriptor) {
         fields.add(new FieldInfo(accessFlags, name, descriptor));
+    }
+
+    public void addInterface(String interfaceInternalName) {
+        interfaces.add(interfaceInternalName);
     }
 
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals) {
@@ -100,6 +105,12 @@ public class ClassWriter {
         // Build constant pool
         int thisClassIndex = constantPool.addClass(className);
         int superClassIndex = constantPool.addClass(superClassName);
+
+        // Pre-add interface classes to constant pool
+        int[] interfaceIndexes = new int[interfaces.size()];
+        for (int i = 0; i < interfaces.size(); i++) {
+            interfaceIndexes[i] = constantPool.addClass(interfaces.get(i));
+        }
 
         // Add method references to constant pool
         for (MethodInfo method : methods) {
@@ -162,8 +173,11 @@ public class ClassWriter {
         // Super class
         out.writeShort(superClassIndex);
 
-        // Interfaces count
-        out.writeShort(0);
+        // Interfaces count and interfaces
+        out.writeShort(interfaces.size());
+        for (int interfaceIndex : interfaceIndexes) {
+            out.writeShort(interfaceIndex);
+        }
 
         // Fields count
         out.writeShort(fields.size());

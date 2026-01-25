@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
@@ -349,6 +350,19 @@ public final class TypeResolver {
     }
 
     /**
+     * Extract default value expression from a parameter pattern.
+     *
+     * @param pat the parameter pattern
+     * @return the default value expression, or null if not a default parameter
+     */
+    public ISwc4jAstExpr extractDefaultValue(ISwc4jAstPat pat) {
+        if (pat instanceof Swc4jAstAssignPat assignPat) {
+            return assignPat.getRight();
+        }
+        return null;
+    }
+
+    /**
      * Extract GenericTypeInfo from a BindingIdent's type annotation if it's a Record type.
      * Phase 2: Support for {@code Record<K, V>} type validation
      *
@@ -383,6 +397,9 @@ public final class TypeResolver {
             }
         } else if (pat instanceof Swc4jAstBindingIdent bindingIdent) {
             return bindingIdent.getId().getSym();
+        } else if (pat instanceof Swc4jAstAssignPat assignPat) {
+            // Default parameter - extract name from left side
+            return extractParameterName(assignPat.getLeft());
         }
         return null;
     }
@@ -412,6 +429,9 @@ public final class TypeResolver {
             }
             // Default to Object for untyped parameters
             return "Ljava/lang/Object;";
+        } else if (pat instanceof Swc4jAstAssignPat assignPat) {
+            // Default parameter - extract type from left side
+            return extractParameterType(assignPat.getLeft());
         }
         return "Ljava/lang/Object;";
     }
@@ -434,6 +454,16 @@ public final class TypeResolver {
         }
 
         return "Ljava/lang/Object;"; // Default
+    }
+
+    /**
+     * Check if a parameter has a default value.
+     *
+     * @param pat the parameter pattern
+     * @return true if the parameter has a default value
+     */
+    public boolean hasDefaultValue(ISwc4jAstPat pat) {
+        return pat instanceof Swc4jAstAssignPat;
     }
 
     /**

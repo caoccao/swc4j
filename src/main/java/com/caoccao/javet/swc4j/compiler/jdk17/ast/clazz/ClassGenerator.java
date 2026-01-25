@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -75,6 +76,9 @@ public final class ClassGenerator extends BaseAstProcessor {
 
         ClassWriter classWriter = new ClassWriter(internalClassName, superClassInternalName);
         ClassWriter.ConstantPool cp = classWriter.getConstantPool();
+
+        // Resolve and add implemented interfaces
+        resolveInterfaces(clazz, classWriter);
 
         // Set ACC_ABSTRACT flag if class is abstract
         if (clazz.isAbstract()) {
@@ -327,6 +331,38 @@ public final class ClassGenerator extends BaseAstProcessor {
                 10, // max stack
                 maxLocals
         );
+    }
+
+    /**
+     * Resolves implemented interfaces from the class AST and adds them to the ClassWriter.
+     *
+     * @param clazz       the class AST
+     * @param classWriter the class writer to add interfaces to
+     */
+    private void resolveInterfaces(Swc4jAstClass clazz, ClassWriter classWriter) {
+        for (Swc4jAstTsExprWithTypeArgs exprWithTypeArgs : clazz.getImplements()) {
+            ISwc4jAstExpr expr = exprWithTypeArgs.getExpr();
+            if (expr instanceof Swc4jAstIdent ident) {
+                String interfaceName = ident.getSym();
+
+                // Try to resolve from type alias registry
+                String resolvedName = compiler.getMemory().getScopedTypeAliasRegistry().resolve(interfaceName);
+                if (resolvedName != null) {
+                    classWriter.addInterface(resolvedName.replace('.', '/'));
+                    continue;
+                }
+
+                // Try to resolve from Java type registry
+                JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(interfaceName);
+                if (typeInfo != null) {
+                    classWriter.addInterface(typeInfo.getInternalName());
+                    continue;
+                }
+
+                // Default to simple name (might be in same package)
+                classWriter.addInterface(interfaceName);
+            }
+        }
     }
 
     /**
