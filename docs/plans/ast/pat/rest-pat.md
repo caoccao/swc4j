@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting rest patterns (`...rest`) in TypeScript to JVM bytecode compilation. Rest patterns collect remaining elements/properties into a new array or object.
 
-**Current Status:** PARTIAL - Function parameter varargs implemented; object and array destructuring rest in for-of loops, variable declarations, and assignment expressions implemented (2026-01-25)
+**Current Status:** PARTIAL - Function parameter varargs implemented; object and array destructuring rest in for-of loops, variable declarations, assignment expressions, and nested destructuring implemented (2026-01-25)
 
 **Syntax:**
 ```typescript
@@ -28,6 +28,9 @@ const { a, b, ...rest } = { a: 1, b: 2, c: 3, d: 4 };  // rest = { c: 3, d: 4 }
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/pat/restpat/TestCompileAstRestPatFunctionParam.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/pat/restpat/TestCompileAstRestPatArrayDestructuring.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/pat/restpat/TestCompileAstRestPatObjectDestructuring.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/pat/restpat/TestCompileAstRestPatVarDecl.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/pat/restpat/TestCompileAstRestPatAssignment.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/pat/restpat/TestCompileAstRestPatNestedDestructuring.java`
 
 **AST Definition:** [Swc4jAstRestPat.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/pat/Swc4jAstRestPat.java)
 
@@ -411,7 +414,7 @@ for (const { a, ...rest } of objects) {
 
 ### Phase 6: Nested Rest Patterns - Priority: LOW
 
-**Status:** Not implemented
+**Status:** IMPLEMENTED (2026-01-25) - Nested array and object destructuring rest in variable declarations (17 tests)
 
 Support rest patterns in nested destructuring contexts.
 
@@ -1164,9 +1167,9 @@ private void generateArrayRestExtraction(
 - [x] Phase 3: Object destructuring rest implemented (for-of loops, 19 tests)
 - [x] Phase 4: Variable declaration with rest working (20 tests)
 - [x] Phase 5: For-of loop with rest working (array and object destructuring)
-- [ ] Phase 6: Nested rest patterns working
+- [x] Phase 6: Nested rest patterns working (17 tests)
 - [x] Phase 7: Assignment pattern rest working (17 tests)
-- [x] Comprehensive test coverage for all edge cases (74 tests total)
+- [x] Comprehensive test coverage for all edge cases (89 tests total)
 - [x] Proper stack map frame generation
 - [x] Correct type inference for rest variables (ArrayList for arrays, LinkedHashMap for objects)
 - [x] All tests passing

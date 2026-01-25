@@ -33,6 +33,7 @@ public class CompilationContext {
     private final Map<String, GenericTypeInfo> genericTypeInfoMap;
     private final Map<String, String> inferredTypes;
     private final LocalVariableTable localVariableTable;
+    private int tempIdCounter;
 
     public CompilationContext() {
         breakLabels = new Stack<>();
@@ -40,6 +41,7 @@ public class CompilationContext {
         genericTypeInfoMap = new HashMap<>();
         inferredTypes = new HashMap<>();
         localVariableTable = new LocalVariableTable();
+        tempIdCounter = 0;
     }
 
     public LoopLabelInfo getCurrentBreakLabel() {
@@ -100,6 +102,16 @@ public class CompilationContext {
         return localVariableTable;
     }
 
+    /**
+     * Get the next unique temp variable ID.
+     * Used for generating unique temp variable names in nested patterns.
+     *
+     * @return the next unique ID
+     */
+    public int getNextTempId() {
+        return tempIdCounter++;
+    }
+
     public void popBreakLabel() {
         if (!breakLabels.isEmpty()) {
             breakLabels.pop();
@@ -126,5 +138,6 @@ public class CompilationContext {
         genericTypeInfoMap.clear();
         inferredTypes.clear();
         localVariableTable.reset();
+        tempIdCounter = 0;
     }
 }
