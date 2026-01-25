@@ -102,6 +102,26 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testReturnInLoop(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    findFirst(arr: int[], target: int): int {
+                      for (let i: int = 0; i < arr.length; i++) {
+                        if (arr[i] == target) return i
+                      }
+                      return -1
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(2, classA.getMethod("findFirst", int[].class, int.class).invoke(instance, new int[]{1, 2, 3, 4, 5}, 3));
+        assertEquals(-1, classA.getMethod("findFirst", int[].class, int.class).invoke(instance, new int[]{1, 2, 3, 4, 5}, 10));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testReturnInt(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -163,25 +183,4 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         assertNull(classA.getMethod("test").invoke(instance));
     }
-
-    // TODO: This test requires proper for-loop iteration support on native int[] which is hanging
-    // @ParameterizedTest
-    // @EnumSource(JdkVersion.class)
-    // public void testReturnInLoop(JdkVersion jdkVersion) throws Exception {
-    //     var map = getCompiler(jdkVersion).compile("""
-    //             namespace com {
-    //               export class A {
-    //                 findFirst(arr: int[], target: int): int {
-    //                   for (let i: int = 0; i < arr.length; i++) {
-    //                     if (arr[i] == target) return i
-    //                   }
-    //                   return -1
-    //                 }
-    //               }
-    //             }""");
-    //     Class<?> classA = loadClass(map.get("com.A"));
-    //     var instance = classA.getConstructor().newInstance();
-    //     assertEquals(2, classA.getMethod("findFirst", int[].class, int.class).invoke(instance, new int[]{1, 2, 3, 4, 5}, 3));
-    //     assertEquals(-1, classA.getMethod("findFirst", int[].class, int.class).invoke(instance, new int[]{1, 2, 3, 4, 5}, 10));
-    // }
 }

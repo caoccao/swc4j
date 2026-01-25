@@ -112,6 +112,26 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testVarargsIteration(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    sum(...values: int[]): int {
+                      let total: int = 0
+                      for (let i: int = 0; i < values.length; i++) {
+                        total = total + values[i]
+                      }
+                      return total
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(15, classA.getMethod("sum", int[].class).invoke(instance, new int[]{1, 2, 3, 4, 5}));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testVarargsLengthAccess(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -141,27 +161,6 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         assertEquals(10, classA.getMethod("test", int[].class).invoke(instance, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}));
     }
-
-    // TODO: This test requires proper for-loop iteration support on native int[] which is hanging
-    // @ParameterizedTest
-    // @EnumSource(JdkVersion.class)
-    // public void testVarargsIteration(JdkVersion jdkVersion) throws Exception {
-    //     var map = getCompiler(jdkVersion).compile("""
-    //             namespace com {
-    //               export class A {
-    //                 sum(...values: int[]): int {
-    //                   let total: int = 0
-    //                   for (let i: int = 0; i < values.length; i++) {
-    //                     total = total + values[i]
-    //                   }
-    //                   return total
-    //                 }
-    //               }
-    //             }""");
-    //     Class<?> classA = loadClass(map.get("com.A"));
-    //     var instance = classA.getConstructor().newInstance();
-    //     assertEquals(15, classA.getMethod("sum", int[].class).invoke(instance, new int[]{1, 2, 3, 4, 5}));
-    // }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

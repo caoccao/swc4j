@@ -422,64 +422,16 @@ public class StackMapGenerator {
     }
 
     private int getInstructionSize(int pc, int opcode) {
-        switch (opcode) {
-            case 0x10:
-            case 0x12: // ldc (1 byte index)
-            case 0x15:
-            case 0x16:
-            case 0x17:
-            case 0x18:
-            case 0x19: // bipush, *load
-            case 0x36:
-            case 0x37:
-            case 0x38:
-            case 0x39:
-            case 0x3A: // *store
-            case 0xBC: // newarray (1 byte type)
-                return 2;
-            case 0x11: // sipush
-            case 0x13: // ldc_w (2 byte index)
-            case 0x14: // ldc2_w (2 byte index)
-            case 0x84: // iinc (1 byte index + 1 byte const)
-            case 0x99:
-            case 0x9A:
-            case 0x9B:
-            case 0x9C:
-            case 0x9D:
-            case 0x9E: // if<cond>
-            case 0x9F:
-            case 0xA0:
-            case 0xA1:
-            case 0xA2:
-            case 0xA3:
-            case 0xA4: // if_icmp<cond>
-            case 0xA5:
-            case 0xA6: // if_acmp<cond>
-            case 0xA7: // goto
-            case 0xB2: // getstatic
-            case 0xB3: // putstatic
-            case 0xB4: // getfield
-            case 0xB5: // putfield
-            case 0xB6:
-            case 0xB7:
-            case 0xB8: // invoke*
-            case 0xBB: // new (2 byte class index)
-                return 3;
-            case 0xB9: // invokeinterface (4 bytes after opcode: 2-byte index + count + reserved)
-                return 5;
-            case 0xBD: // anewarray
-            case 0xC0: // checkcast
-            case 0xC1: // instanceof
-            case 0xC6:
-            case 0xC7: // ifnull, ifnonnull
-                return 3;
-            case 0xAA: // tableswitch
-                return getTableSwitchSize(pc);
-            case 0xAB: // lookupswitch
-                return getLookupSwitchSize(pc);
-            default:
-                return 1;
-        }
+        return switch (opcode) {
+            case 0x10, 0x12, 0x15, 0x16, 0x17, 0x18, 0x19, 0x36, 0x37, 0x38, 0x39, 0x3A,
+                 0xBC -> 2;
+            case 0x11, 0x13, 0x14, 0x84, 0x99, 0x9A, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F, 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5,
+                 0xA6, 0xA7, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, 0xBB, 0xBD, 0xC0, 0xC1, 0xC6, 0xC7 -> 3;
+            case 0xB9 -> 5;
+            case 0xAA -> getTableSwitchSize(pc);
+            case 0xAB -> getLookupSwitchSize(pc);
+            default -> 1;
+        };
     }
 
     private int getLookupSwitchSize(int pc) {
@@ -715,39 +667,12 @@ public class StackMapGenerator {
 
         // Simulate stack effects
         switch (opcode) {
-            // Push constants
-            case 0x01:
-                stack.add(VerificationType.null_());
-                break; // aconst_null
-            case 0x02:
-            case 0x03:
-            case 0x04:
-            case 0x05:
-            case 0x06:
-            case 0x07:
-            case 0x08: // iconst_m1 to iconst_5
-                stack.add(VerificationType.integer());
-                break;
-            case 0x09:
-            case 0x0a: // lconst_0, lconst_1
-                stack.add(VerificationType.long_());
-                break;
-            case 0x0b:
-            case 0x0c:
-            case 0x0d: // fconst_0, fconst_1, fconst_2
-                stack.add(VerificationType.float_());
-                break;
-            case 0x0e:
-            case 0x0f: // dconst_0, dconst_1
-                stack.add(VerificationType.double_());
-                break;
-            case 0x10:
-            case 0x11: // bipush, sipush
-                stack.add(VerificationType.integer());
-                break;
-            case 0x12: // ldc (String, int, float, Class, etc.)
-            case 0x13: // ldc_w (wide index version)
-            {
+            case 0x01 -> stack.add(VerificationType.null_());
+            case 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x10, 0x11 -> stack.add(VerificationType.integer());
+            case 0x09, 0x0a -> stack.add(VerificationType.long_());
+            case 0x0b, 0x0c, 0x0d -> stack.add(VerificationType.float_());
+            case 0x0e, 0x0f -> stack.add(VerificationType.double_());
+            case 0x12, 0x13 -> {
                 // Get constant pool index from bytecode
                 int cpIndex;
                 if (opcode == 0x12) {
@@ -755,7 +680,6 @@ public class StackMapGenerator {
                 } else {
                     cpIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
                 }
-
                 // Look up constant type from constant pool
                 char constType = (constantPool != null) ? constantPool.getConstantType(cpIndex) : 'O';
                 switch (constType) {
@@ -766,12 +690,10 @@ public class StackMapGenerator {
                     default -> stack.add(VerificationType.object("java/lang/Object"));
                 }
             }
-            break;
-            case 0x14: // ldc2_w (long or double)
+            case 0x14 -> // ldc2_w (long or double)
             {
                 // Get constant pool index from bytecode
                 int cpIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
-
                 // Look up constant type from constant pool
                 char constType = (constantPool != null) ? constantPool.getConstantType(cpIndex) : 'D';
                 if (constType == 'J') {
@@ -780,194 +702,114 @@ public class StackMapGenerator {
                     stack.add(VerificationType.double_());
                 }
             }
-            break;
-
             // Loads
-            case 0x15:
-            case 0x1A:
-            case 0x1B:
-            case 0x1C:
-            case 0x1D: // iload*
-                stack.add(VerificationType.integer());
-                break;
-            case 0x16:
-            case 0x1E:
-            case 0x1F:
-            case 0x20:
-            case 0x21: // lload*
-                stack.add(VerificationType.long_());
-                break;
-            case 0x17:
-            case 0x22:
-            case 0x23:
-            case 0x24:
-            case 0x25: // fload*
-                stack.add(VerificationType.float_());
-                break;
-            case 0x18:
-            case 0x26:
-            case 0x27:
-            case 0x28:
-            case 0x29: // dload*
-                stack.add(VerificationType.double_());
-                break;
-            case 0x19:
-            case 0x2A:
-            case 0x2B:
-            case 0x2C:
-            case 0x2D: // aload* - load actual type from locals
+            case 0x15, 0x1A, 0x1B, 0x1C, 0x1D -> stack.add(VerificationType.integer()); // iload*
+            case 0x16, 0x1E, 0x1F, 0x20, 0x21 -> stack.add(VerificationType.long_()); // lload*
+            case 0x17, 0x22, 0x23, 0x24, 0x25 -> stack.add(VerificationType.float_()); // fload*
+            case 0x18, 0x26, 0x27, 0x28, 0x29 -> stack.add(VerificationType.double_()); // dload*
+            case 0x19, 0x2A, 0x2B, 0x2C, 0x2D -> {
                 int aloadIndex = (opcode == 0x19) ? (bytecode[pc + 1] & 0xFF) : (opcode - 0x2A);
                 if (aloadIndex < newFrame.locals.size()) {
                     stack.add(newFrame.locals.get(aloadIndex));
                 } else {
                     stack.add(VerificationType.object("java/lang/Object"));
                 }
-                break;
-
+            }
             // Stores - pop from stack and update locals
-            case 0x36: // istore
+            case 0x36 -> {
                 if (!stack.isEmpty()) {
                     int index = bytecode[pc + 1] & 0xFF;
                     ensureLocalSlot(newFrame.locals, index, VerificationType.integer());
                     stack.remove(stack.size() - 1);
                 }
-                break;
-            case 0x3B:
-            case 0x3C:
-            case 0x3D:
-            case 0x3E: // istore_0 to istore_3
+            }
+            case 0x3B, 0x3C, 0x3D, 0x3E -> {
                 if (!stack.isEmpty()) {
                     int index = opcode - 0x3B;
                     ensureLocalSlot(newFrame.locals, index, VerificationType.integer());
                     stack.remove(stack.size() - 1);
                 }
-                break;
-            case 0x37:
-            case 0x3F:
-            case 0x40:
-            case 0x41:
-            case 0x42: // lstore*
+            }
+            case 0x37, 0x3F, 0x40, 0x41, 0x42 -> {
                 if (!stack.isEmpty()) {
                     int index = (opcode == 0x37) ? (bytecode[pc + 1] & 0xFF) : (opcode - 0x3F);
                     ensureLocalSlot(newFrame.locals, index, VerificationType.long_());
                     stack.remove(stack.size() - 1);
                 }
-                break;
-            case 0x38:
-            case 0x43:
-            case 0x44:
-            case 0x45:
-            case 0x46: // fstore*
+            }
+            case 0x38, 0x43, 0x44, 0x45, 0x46 -> {
                 if (!stack.isEmpty()) {
                     int index = (opcode == 0x38) ? (bytecode[pc + 1] & 0xFF) : (opcode - 0x43);
                     ensureLocalSlot(newFrame.locals, index, VerificationType.float_());
                     stack.remove(stack.size() - 1);
                 }
-                break;
-            case 0x39:
-            case 0x47:
-            case 0x48:
-            case 0x49:
-            case 0x4A: // dstore*
+            }
+            case 0x39, 0x47, 0x48, 0x49, 0x4A -> {
                 if (!stack.isEmpty()) {
                     int index = (opcode == 0x39) ? (bytecode[pc + 1] & 0xFF) : (opcode - 0x47);
                     ensureLocalSlot(newFrame.locals, index, VerificationType.double_());
                     stack.remove(stack.size() - 1);
                 }
-                break;
-            case 0x3A:
-            case 0x4B:
-            case 0x4C:
-            case 0x4D:
-            case 0x4E: // astore* - store actual type from stack
+            }
+            case 0x3A, 0x4B, 0x4C, 0x4D, 0x4E -> {
                 if (!stack.isEmpty()) {
                     int index = (opcode == 0x3A) ? (bytecode[pc + 1] & 0xFF) : (opcode - 0x4B);
                     VerificationType valueType = stack.get(stack.size() - 1);
                     ensureLocalSlot(newFrame.locals, index, valueType);
                     stack.remove(stack.size() - 1);
                 }
-                break;
-
+            }
             // Arithmetic - pop 2, push 1
             // Int operations: iadd(0x60), isub(0x64), imul(0x68), idiv(0x6C), irem(0x70), iand(0x7E), ior(0x80), ixor(0x82)
-            case 0x60:
-            case 0x64:
-            case 0x68:
-            case 0x6C:
-            case 0x70:
-            case 0x7E:
-            case 0x80:
-            case 0x82:
+            case 0x60, 0x64, 0x68, 0x6C, 0x70, 0x7E, 0x80, 0x82 -> {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.integer());
                 }
-                break;
+            }
             // Long operations: ladd(0x61), lsub(0x65), lmul(0x69), ldiv(0x6D), lrem(0x71), land(0x7F), lor(0x81), lxor(0x83)
-            case 0x61:
-            case 0x65:
-            case 0x69:
-            case 0x6D:
-            case 0x71:
-            case 0x7F:
-            case 0x81:
-            case 0x83:
+            case 0x61, 0x65, 0x69, 0x6D, 0x71, 0x7F, 0x81, 0x83 -> {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.long_());
                 }
-                break;
+            }
             // Float operations: fadd(0x62), fsub(0x66), fmul(0x6A), fdiv(0x6E), frem(0x72)
-            case 0x62:
-            case 0x66:
-            case 0x6A:
-            case 0x6E:
-            case 0x72:
+            case 0x62, 0x66, 0x6A, 0x6E, 0x72 -> {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.float_());
                 }
-                break;
+            }
             // Double operations: dadd(0x63), dsub(0x67), dmul(0x6B), ddiv(0x6F), drem(0x73)
-            case 0x63:
-            case 0x67:
-            case 0x6B:
-            case 0x6F:
-            case 0x73:
+            case 0x63, 0x67, 0x6B, 0x6F, 0x73 -> {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.double_());
                 }
-                break;
-
-            // Comparisons - pop 2, push int
-            case 0x94: // lcmp
-            case 0x95:
-            case 0x96: // fcmpl, fcmpg
-            case 0x97:
-            case 0x98: // dcmpl, dcmpg
+            }
+            // Comparisons - pop 2, push int, lcmp, fcmpl, fcmpg
+            case 0x94, 0x95, 0x96, 0x97, 0x98 -> {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.integer());
                 }
-                break;
-
+            }
             // iinc - increment local variable (doesn't affect stack)
-            case 0x84:
+            case 0x84 -> {
                 // iinc <index> <const> - just increments a local variable
                 // Stack is unchanged, local stays INTEGER type
-                break;
-
+            }
             // Stack manipulation
-            case 0x57: // pop
+            case 0x57 -> {
                 if (!stack.isEmpty()) stack.remove(stack.size() - 1);
-                break;
-            case 0x58: // pop2
+            }
+            case 0x58 -> {
                 // pop2 removes either one category-2 value or two category-1 values
                 if (!stack.isEmpty()) {
                     VerificationType topType = stack.remove(stack.size() - 1);
@@ -976,13 +818,13 @@ public class StackMapGenerator {
                         stack.remove(stack.size() - 1);
                     }
                 }
-                break;
-            case 0x59: // dup
+            }
+            case 0x59 -> {
                 if (!stack.isEmpty()) {
                     stack.add(stack.get(stack.size() - 1));
                 }
-                break;
-            case 0x5C: // dup2
+            }
+            case 0x5C -> {
                 if (!stack.isEmpty()) {
                     VerificationType topType = stack.get(stack.size() - 1);
                     if (topType.tag == LONG || topType.tag == DOUBLE) {
@@ -995,64 +837,46 @@ public class StackMapGenerator {
                         stack.add(topType);
                     }
                 }
-                break;
-            case 0x5F: // swap
+            }
+            case 0x5F -> {
                 if (stack.size() >= 2) {
                     VerificationType top = stack.remove(stack.size() - 1);
                     VerificationType second = stack.remove(stack.size() - 1);
                     stack.add(top);
                     stack.add(second);
                 }
-                break;
-
+            }
             // Conditional branches - pop operands
-            case 0x99:
-            case 0x9A:
-            case 0x9B:
-            case 0x9C:
-            case 0x9D:
-            case 0x9E: // if<cond>
-            case 0xC6:
-            case 0xC7: // ifnull, ifnonnull
+            // if<cond>
+            case 0x99, 0x9A, 0x9B, 0x9C, 0x9D, 0x9E, 0xC6, 0xC7 -> {
                 if (!stack.isEmpty()) stack.remove(stack.size() - 1);
-                break;
-            case 0x9F:
-            case 0xA0:
-            case 0xA1:
-            case 0xA2:
-            case 0xA3:
-            case 0xA4: // if_icmp<cond>
-            case 0xA5:
-            case 0xA6: // if_acmp<cond>
+            }
+            // if_icmp<cond>
+            case 0x9F, 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6 -> {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
                 }
-                break;
-
+            }
             // Switch instructions - pop int
-            case 0xAA: // tableswitch
-            case 0xAB: // lookupswitch
+            // tableswitch
+            case 0xAA, 0xAB -> {
                 if (!stack.isEmpty()) stack.remove(stack.size() - 1);
-                break;
-
+            }
             // Method calls - use constant pool to determine argument count and return type
-            case 0xB6: // invokevirtual
-            case 0xB7: // invokespecial
-            case 0xB8: // invokestatic
+            // invokevirtual
+            // invokespecial
+            case 0xB6, 0xB7, 0xB8 -> // invokestatic
             {
                 // Get method reference index from bytecode
                 int methodIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
-
                 // Look up method descriptor from constant pool
                 String methodDescriptor = (constantPool != null) ? constantPool.getMethodDescriptor(methodIndex) : null;
-
                 if (methodDescriptor != null) {
                     // Parse descriptor to get argument count and return type
                     // Format: (args)return e.g., "(Ljava/lang/String;)Ljava/lang/String;"
                     int argCount = countMethodArgSlots(methodDescriptor);
                     String returnType = getReturnType(methodDescriptor);
-
                     // Pop arguments (and receiver for non-static)
                     int totalPops = argCount;
                     if (opcode != 0xB8) { // Non-static methods also pop receiver
@@ -1061,7 +885,6 @@ public class StackMapGenerator {
                     for (int i = 0; i < totalPops && !stack.isEmpty(); i++) {
                         stack.remove(stack.size() - 1);
                     }
-
                     // Push return type
                     pushReturnType(stack, returnType);
                 } else {
@@ -1080,27 +903,22 @@ public class StackMapGenerator {
                     }
                 }
             }
-            break;
-            case 0xB9: // invokeinterface
-                // invokeinterface: pop receiver and args, push result
+            case 0xB9 -> // invokeinterface
+            // invokeinterface: pop receiver and args, push result
             {
                 // Get method reference index from bytecode
                 int methodIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
-
                 // Look up method descriptor from constant pool
                 String methodDescriptor = (constantPool != null) ? constantPool.getMethodDescriptor(methodIndex) : null;
-
                 if (methodDescriptor != null) {
                     // Parse descriptor to get argument count and return type
                     int argCount = countMethodArgSlots(methodDescriptor);
                     String returnType = getReturnType(methodDescriptor);
-
                     // Pop arguments + receiver (interface methods are never static)
                     int totalPops = argCount + 1;
                     for (int i = 0; i < totalPops && !stack.isEmpty(); i++) {
                         stack.remove(stack.size() - 1);
                     }
-
                     // Push return type
                     pushReturnType(stack, returnType);
                 } else {
@@ -1119,51 +937,117 @@ public class StackMapGenerator {
                     }
                 }
             }
-            break;
-
             // Object creation
-            case 0xBB: // new
+            case 0xBB -> // new
                 // new pushes an uninitialized object reference onto the stack
                 // For simplicity, we treat it as a regular object
-                stack.add(VerificationType.object("java/lang/Object"));
-                break;
-
-            // Type conversions
-            case 0x85: // i2l
-            case 0x8C: // f2l
-            case 0x8F: // d2l
+                    stack.add(VerificationType.object("java/lang/Object"));
+            // Type conversions, i2l, f2l
+            case 0x85, 0x8C, 0x8F -> {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.long_());
                 }
-                break;
-            case 0x86: // i2f
-            case 0x89: // l2f
-            case 0x90: // d2f
+            }
+            // i2f, l2f
+            case 0x86, 0x89, 0x90 -> {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.float_());
                 }
-                break;
-            case 0x87: // i2d
-            case 0x8A: // l2d
-            case 0x8D: // f2d
+            }
+            // i2d, l2d
+            case 0x87, 0x8A, 0x8D -> {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.double_());
                 }
-                break;
-            case 0x88: // l2i
-            case 0x8B: // f2i
-            case 0x8E: // d2i
+            }
+            // l2i, f2i
+            case 0x88, 0x8B, 0x8E -> {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.integer());
                 }
-                break;
-
+            }
+            // Array loads - pop arrayref and index, push element
+            // iaload - pop int[], pop index, push int
+            // baload - pop byte[]/boolean[], pop index, push int (byte/boolean widened to int)
+            // caload - pop char[], pop index, push int (char widened to int)
+            case 0x2E, 0x33, 0x34, 0x35 -> {
+                if (stack.size() >= 2) {
+                    stack.remove(stack.size() - 1); // index
+                    stack.remove(stack.size() - 1); // arrayref
+                    stack.add(VerificationType.integer());
+                }
+            }
+            case 0x2F -> {
+                if (stack.size() >= 2) {
+                    stack.remove(stack.size() - 1); // index
+                    stack.remove(stack.size() - 1); // arrayref
+                    stack.add(VerificationType.long_());
+                }
+            }
+            case 0x30 -> {
+                if (stack.size() >= 2) {
+                    stack.remove(stack.size() - 1); // index
+                    stack.remove(stack.size() - 1); // arrayref
+                    stack.add(VerificationType.float_());
+                }
+            }
+            case 0x31 -> {
+                if (stack.size() >= 2) {
+                    stack.remove(stack.size() - 1); // index
+                    stack.remove(stack.size() - 1); // arrayref
+                    stack.add(VerificationType.double_());
+                }
+            }
+            case 0x32 -> {
+                if (stack.size() >= 2) {
+                    stack.remove(stack.size() - 1); // index
+                    stack.remove(stack.size() - 1); // arrayref
+                    stack.add(VerificationType.object("java/lang/Object"));
+                }
+            }
+            // Array stores - pop arrayref, index, and value
+            // iastore - pop int[], pop index, pop int
+            // bastore - pop byte[]/boolean[], pop index, pop int
+            // castore - pop char[], pop index, pop int
+            // sastore - pop short[], pop index, pop int
+            // lastore - pop long[], pop index, pop long
+            // fastore - pop float[], pop index, pop float
+            // dastore - pop double[], pop index, pop double
+            case 0x4F, 0x54, 0x55, 0x56, 0x50, 0x51, 0x52, 0x53 -> {
+                if (stack.size() >= 3) {
+                    stack.remove(stack.size() - 1); // value
+                    stack.remove(stack.size() - 1); // index
+                    stack.remove(stack.size() - 1); // arrayref
+                }
+            }
+            // arraylength - pop arrayref, push int
+            case 0xBE -> {
+                if (!stack.isEmpty()) {
+                    stack.remove(stack.size() - 1); // arrayref
+                    stack.add(VerificationType.integer());
+                }
+            }
+            // newarray - pop count, push array reference
+            case 0xBC -> {
+                if (!stack.isEmpty()) {
+                    stack.remove(stack.size() - 1); // count
+                    // atype byte determines the primitive type, but result is always an array
+                    stack.add(VerificationType.object("[I")); // Generic - actual type depends on atype
+                }
+            }
+            // anewarray - pop count, push array reference
+            case 0xBD -> {
+                if (!stack.isEmpty()) {
+                    stack.remove(stack.size() - 1); // count
+                    stack.add(VerificationType.object("[Ljava/lang/Object;"));
+                }
+            }
             // Type checking
-            case 0xC0: // checkcast - pops objectref, pushes objectref of the specified type
+            case 0xC0 -> {
                 if (!stack.isEmpty()) {
                     // Get class index from bytecode
                     int classIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
@@ -1171,22 +1055,20 @@ public class StackMapGenerator {
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.object(className));
                 }
-                break;
-            case 0xC1: // instanceof - pops objectref, pushes int (0 or 1)
+            }
+            case 0xC1 -> {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.integer());
                 }
-                break;
-
+            }
             // athrow - pops exception objectref, terminates normal flow
-            case 0xBF:
+            case 0xBF -> {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
                 }
-                break;
+            }
         }
-
         return newFrame;
     }
 

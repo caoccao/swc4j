@@ -1486,6 +1486,29 @@ All previously reported issues have been resolved:
 3. **Dead Code Elimination:** Properly detects unreachable code after break/continue/return
 4. **Bytecode Scanning:** Fixed instruction size calculation for accurate branch target detection
 
+### Bug Fix (2026-01-25): Primitive Array Iteration Support
+
+**Issue:** Compilation hung when iterating over primitive arrays (e.g., `int[]`) inside for loops:
+```typescript
+for (let i: int = 0; i < arr.length; i++) {
+    total = total + arr[i]  // This caused compilation to hang
+}
+```
+
+**Root Cause:** The `StackMapGenerator.simulateInstruction` method was missing handlers for array operations:
+- Array load instructions: `iaload`, `laload`, `faload`, `daload`, `aaload`, `baload`, `caload`, `saload`
+- Array store instructions: `iastore`, `lastore`, `fastore`, `dastore`, `aastore`, `bastore`, `castore`, `sastore`
+- Array length instruction: `arraylength`
+- Array creation instructions: `newarray`, `anewarray`
+
+Without these handlers, the data flow analysis in stack map frame generation could not correctly track the stack state, causing the work queue to never converge.
+
+**Fix:** Added proper stack effect simulation for all array operations in `StackMapGenerator.java`:
+- Array loads: pop arrayref and index, push element type
+- Array stores: pop arrayref, index, and value
+- arraylength: pop arrayref, push int
+- newarray/anewarray: pop count, push array reference
+
 ---
 
 ## Future Work

@@ -998,6 +998,18 @@ Field:
 - [x] All current tests passing
 - [x] Javadoc builds successfully
 
+### Implementation Notes (2026-01-25)
+
+**'this' Expression Support (Stack-based):**
+- `CompilationContext` uses a `Stack<String> classStack` for tracking the current class internal name
+- Supports nested classes via `pushClass()`/`popClass()` methods
+- `ClassGenerator` uses try/finally to ensure proper stack cleanup
+
+**Primitive Array Iteration Fix:**
+- The `StackMapGenerator` was missing array operation handlers, causing compilation to hang when iterating primitive arrays inside for loops
+- Fixed by adding handlers for `iaload`, `laload`, `faload`, `daload`, `aaload`, `baload`, `caload`, `saload`, `arraylength`, `newarray`, and `anewarray` instructions
+- This fix enables methods that iterate over primitive arrays (e.g., `int[]`, `double[]`) to compile correctly
+
 ---
 
 ## Known Limitations

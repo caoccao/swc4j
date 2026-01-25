@@ -1099,7 +1099,7 @@ return   // void
 - [x] Phase 1: Basic function declaration working
 - [x] Phase 2: All parameter types working
 - [x] Phase 3: All return types working
-- [x] Phase 4: Varargs fully working
+- [x] Phase 4: Varargs fully working (including iteration over primitive arrays)
 - [x] Phase 5: Type inference partial (basic + 'this' method calls)
 - [ ] Phase 6: Default parameters working
 - [ ] Phase 7: Overloading working (future)
@@ -1108,6 +1108,14 @@ return   // void
 - [ ] Phase 10: Decorators working (future)
 - [x] All current tests passing
 - [x] Javadoc builds successfully
+
+### Implementation Notes (2026-01-25)
+
+**Primitive Array Iteration Fix:**
+- Functions that iterate over primitive arrays (e.g., `int[]`, `double[]`) in for loops now compile correctly
+- The `StackMapGenerator` was missing array operation handlers (`iaload`, `arraylength`, etc.), causing compilation to hang
+- This enables varargs iteration tests like `testVarargsIteration` and return-in-loop tests like `testReturnInLoop` to pass
+- See `docs/plans/ast/stmt/for-stmt.md` for detailed fix description
 
 ---
 
