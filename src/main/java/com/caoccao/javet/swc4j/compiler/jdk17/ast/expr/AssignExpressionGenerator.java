@@ -203,6 +203,44 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 }
             }
 
+            // Handle ClassName.#staticField = value assignment for ES2022 static private fields
+            if (memberExpr.getObj() instanceof Swc4jAstIdent classIdent && memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
+                String className = classIdent.getSym();
+                String fieldName = privateName.getName(); // Name without # prefix
+
+                // Try to resolve the class
+                JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
+                if (typeInfo != null) {
+                    FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                    if (fieldInfo != null && fieldInfo.isStatic()) {
+                        // Generate: <value>; dup; putstatic
+                        compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+
+                        // Convert value type if needed
+                        String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
+                        if (valueType != null && !valueType.equals(fieldInfo.descriptor())) {
+                            TypeConversionUtils.unboxWrapperType(code, cp, valueType);
+                            String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
+                            if (valuePrimitive != null && !valuePrimitive.equals(fieldInfo.descriptor())) {
+                                TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, fieldInfo.descriptor());
+                            }
+                        }
+
+                        // Duplicate value for assignment expression result
+                        String fieldDesc = fieldInfo.descriptor();
+                        if ("D".equals(fieldDesc) || "J".equals(fieldDesc)) {
+                            code.dup2(); // For wide types (double, long)
+                        } else {
+                            code.dup(); // For single-slot types
+                        }
+
+                        int fieldRef = cp.addFieldRef(typeInfo.getInternalName(), fieldName, fieldInfo.descriptor());
+                        code.putstatic(fieldRef);
+                        return;
+                    }
+                }
+            }
+
             String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
 
             if (objType != null && objType.startsWith("[")) {

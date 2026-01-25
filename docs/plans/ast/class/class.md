@@ -1090,15 +1090,17 @@ Field:
 - Test coverage in `TestCompileAstClassAccessibility.java`: 6 tests covering private/protected fields and methods
 
 **ES2022 Private Fields Support (2026-01-25):**
-- Added support for ES2022 private fields (`#field` syntax) in instance classes
+- Added support for ES2022 private fields (`#field` syntax) - both instance and static
 - Updated `ClassCollector` to register private field metadata via `Swc4jAstPrivateProp`
 - Updated `ClassGenerator` to generate private fields with ACC_PRIVATE flag
-- Updated `MemberExpressionGenerator` to handle `this.#field` access
-- Updated `AssignExpressionGenerator` to handle `this.#field = value` assignment
-- Updated `TypeResolver.inferTypeFromExpr` to properly infer types for private field access
+- Updated `MemberExpressionGenerator` to handle `this.#field` and `ClassName.#field` access
+- Updated `AssignExpressionGenerator` to handle `this.#field = value` and `ClassName.#field = value` assignment
+- Updated `TypeResolver.inferTypeFromExpr` to properly infer types for private field access (instance and static)
 - Private fields are stored without the `#` prefix in JVM bytecode
-- Static private fields (`ClassName.#field`) not yet supported
-- Test coverage in `TestCompileAstClassPrivateFields.java`: 7 tests covering private field read/write, types, multiple fields, and binary operations
+- Test coverage in `TestCompileAstClassPrivateFields.java`: 12 tests covering:
+  - Instance private fields: basic read/write, types, multiple fields, binary operations
+  - Static private fields: basic read/write, types, counter pattern
+  - Mixed instance and static private fields
 
 ---
 
@@ -1108,7 +1110,7 @@ Field:
 2. **Anonymous Classes**: Class expressions may not be fully supported
 3. **Decorators**: Decorator evaluation at compile time is limited
 4. **Generics**: Type erasure follows Java conventions
-5. **Private Fields (#)**: ES2022 private fields are supported for instance fields; static private fields (`ClassName.#field`) not yet supported
+5. **Private Fields (#)**: ES2022 private fields fully supported (both instance and static)
 6. **Multiple Inheritance**: Only single class inheritance (Java limitation)
 7. **Dynamic Class Loading**: Not supported at compile time
 

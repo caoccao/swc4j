@@ -25,8 +25,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for ES2022 private fields (#field syntax).
@@ -39,6 +38,40 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     private static <T> T invokeAfter(ThrowingRunnable action, ThrowingSupplier<T> result) throws Exception {
         action.run();
         return result.get();
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMixedStaticAndInstancePrivateFields(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    static #staticValue: int = 100
+                    #instanceValue: int = 50
+                    static getStaticValue(): int { return A.#staticValue }
+                    getInstanceValue(): int { return this.#instanceValue }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+
+        // Verify static field
+        var staticField = classA.getDeclaredField("staticValue");
+        assertTrue(Modifier.isPrivate(staticField.getModifiers()), "#staticValue should be private");
+        assertTrue(Modifier.isStatic(staticField.getModifiers()), "#staticValue should be static");
+
+        // Verify instance field
+        var instanceField = classA.getDeclaredField("instanceValue");
+        assertTrue(Modifier.isPrivate(instanceField.getModifiers()), "#instanceValue should be private");
+        assertFalse(Modifier.isStatic(instanceField.getModifiers()), "#instanceValue should not be static");
+
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(
+                List.of(100, 50),
+                List.of(
+                        classA.getMethod("getStaticValue").invoke(null),
+                        classA.getMethod("getInstanceValue").invoke(instance)
+                )
+        );
     }
 
     @ParameterizedTest
@@ -220,6 +253,124 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals(50, classA.getMethod("getValue").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testStaticPrivateFieldAssignment(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    static #counter: int = 0
+                    static increment(): void { A.#counter = A.#counter + 1 }
+                    static getCounter(): int { return A.#counter }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var increment = classA.getMethod("increment");
+        var getCounter = classA.getMethod("getCounter");
+
+        assertEquals(
+                List.of(0, 1, 2),
+                List.of(
+                        getCounter.invoke(null),
+                        invokeAfter(() -> increment.invoke(null), () -> getCounter.invoke(null)),
+                        invokeAfter(() -> increment.invoke(null), () -> getCounter.invoke(null))
+                )
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testStaticPrivateFieldBasic(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    static #count: int = 100
+                    static getCount(): int { return A.#count }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+
+        // Verify field is private and static
+        var countField = classA.getDeclaredField("count");
+        assertTrue(Modifier.isPrivate(countField.getModifiers()), "#count should be private");
+        assertTrue(Modifier.isStatic(countField.getModifiers()), "#count should be static");
+
+        assertEquals(100, classA.getMethod("getCount").invoke(null));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testStaticPrivateFieldCounter(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class Counter {
+                    static #count: int = 0
+                    static increment(): void { Counter.#count = Counter.#count + 1 }
+                    static decrement(): void { Counter.#count = Counter.#count - 1 }
+                    static getCount(): int { return Counter.#count }
+                    static reset(): void { Counter.#count = 0 }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.Counter"));
+        var getCount = classA.getMethod("getCount");
+        var increment = classA.getMethod("increment");
+        var decrement = classA.getMethod("decrement");
+        var reset = classA.getMethod("reset");
+
+        assertEquals(
+                List.of(0, 1, 2, 1, 0),
+                List.of(
+                        getCount.invoke(null),
+                        invokeAfter(() -> increment.invoke(null), () -> getCount.invoke(null)),
+                        invokeAfter(() -> increment.invoke(null), () -> getCount.invoke(null)),
+                        invokeAfter(() -> decrement.invoke(null), () -> getCount.invoke(null)),
+                        invokeAfter(() -> reset.invoke(null), () -> getCount.invoke(null))
+                )
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testStaticPrivateFieldTypes(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    static #intValue: int = 42
+                    static #doubleValue: double = 3.14
+                    static #boolValue: boolean = true
+                    static #stringValue: String = "Hello"
+                
+                    static getInt(): int { return A.#intValue }
+                    static getDouble(): double { return A.#doubleValue }
+                    static getBool(): boolean { return A.#boolValue }
+                    static getString(): String { return A.#stringValue }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+
+        // Verify all fields are private and static
+        for (String fieldName : List.of("intValue", "doubleValue", "boolValue", "stringValue")) {
+            var field = classA.getDeclaredField(fieldName);
+            assertTrue(Modifier.isPrivate(field.getModifiers()), "#" + fieldName + " should be private");
+            assertTrue(Modifier.isStatic(field.getModifiers()), "#" + fieldName + " should be static");
+        }
+
+        assertEquals(
+                Map.of(
+                        "int", 42,
+                        "double", 3.14,
+                        "bool", true,
+                        "string", "Hello"
+                ),
+                Map.of(
+                        "int", classA.getMethod("getInt").invoke(null),
+                        "double", classA.getMethod("getDouble").invoke(null),
+                        "bool", classA.getMethod("getBool").invoke(null),
+                        "string", classA.getMethod("getString").invoke(null)
+                )
+        );
     }
 
     @FunctionalInterface

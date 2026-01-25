@@ -117,6 +117,24 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
             }
         }
 
+        // Handle ClassName.#staticField access for ES2022 static private fields
+        if (memberExpr.getObj() instanceof Swc4jAstIdent classIdent && memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
+            String className = classIdent.getSym();
+            String fieldName = privateName.getName(); // Name without # prefix
+
+            // Try to resolve the class
+            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
+            if (typeInfo != null) {
+                FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                if (fieldInfo != null && fieldInfo.isStatic()) {
+                    // Generate getstatic instruction
+                    int fieldRef = cp.addFieldRef(typeInfo.getInternalName(), fieldName, fieldInfo.descriptor());
+                    code.getstatic(fieldRef);
+                    return;
+                }
+            }
+        }
+
         // Handle member access on arrays (e.g., arr.length or arr[index])
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
 

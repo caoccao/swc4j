@@ -665,6 +665,21 @@ public final class TypeResolver {
                 }
             }
 
+            // Handle ClassName.#staticField access for ES2022 static private fields
+            if (memberExpr.getObj() instanceof Swc4jAstIdent classIdent && memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
+                String className = classIdent.getSym();
+                String fieldName = privateName.getName(); // Name without # prefix
+
+                // Try to resolve the class
+                JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
+                if (typeInfo != null) {
+                    FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                    if (fieldInfo != null && fieldInfo.isStatic()) {
+                        return fieldInfo.descriptor();
+                    }
+                }
+            }
+
             // Member expression - handle array-like properties
             String objType = inferTypeFromExpr(memberExpr.getObj());
 
