@@ -43,6 +43,7 @@ import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -240,6 +241,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         boolean hasObjectDestructuring = false;
         Swc4jAstObjectPat objectPat = null;
         int tempElementSlot = -1;
+        List<String> extractedKeys = new ArrayList<>();
 
         if (left instanceof Swc4jAstVarDecl varDecl && !varDecl.getDecls().isEmpty()) {
             Swc4jAstVarDeclarator decl = varDecl.getDecls().get(0);
@@ -248,7 +250,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                 hasObjectDestructuring = true;
                 objectPat = op;
                 // Allocate variables for each property in the object pattern
-                initializeObjectPatternVariables(code, context, objectPat);
+                extractedKeys = initializeObjectPatternVariables(code, context, objectPat);
             }
         }
 
@@ -295,7 +297,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
             code.astore(tempElementSlot);
 
             // Extract each property from the map
-            generateObjectDestructuringExtraction(code, cp, context, objectPat, tempElementSlot);
+            generateObjectDestructuringExtraction(code, cp, context, objectPat, tempElementSlot, extractedKeys);
         } else {
             // 8b. Store in loop variable (NO conversion - keep actual value)
             code.astore(valueSlot);
@@ -366,13 +368,14 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
      * Generate bytecode to extract properties from a Map for object destructuring.
      * For pattern { name, age }, generates: name = map.get("name"), age = map.get("age")
      * Supports shorthand properties ({ name }), renamed properties ({ name: n }),
-     * and default values ({ name = "default" }).
+     * default values ({ name = "default" }), and rest patterns ({ ...rest }).
      *
-     * @param code         the code builder
-     * @param cp           the constant pool
-     * @param context      the compilation context
-     * @param objectPat    the object pattern
-     * @param mapSlot      the local variable slot containing the map
+     * @param code          the code builder
+     * @param cp            the constant pool
+     * @param context       the compilation context
+     * @param objectPat     the object pattern
+     * @param mapSlot       the local variable slot containing the map
+     * @param extractedKeys list of keys that have been explicitly extracted (for rest pattern)
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     private void generateObjectDestructuringExtraction(
@@ -380,7 +383,8 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
             ClassWriter.ConstantPool cp,
             CompilationContext context,
             Swc4jAstObjectPat objectPat,
-            int mapSlot) throws Swc4jByteCodeCompilerException {
+            int mapSlot,
+            List<String> extractedKeys) throws Swc4jByteCodeCompilerException {
         int mapGetRef = cp.addInterfaceMethodRef("java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
 
         for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
@@ -446,9 +450,41 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                 }
 
             } else if (prop instanceof Swc4jAstRestPat restPat) {
-                // Rest property: { ...rest } - not yet supported
-                throw new Swc4jByteCodeCompilerException(restPat,
-                        "Rest patterns in object destructuring are not yet supported");
+                // Rest property: { ...rest }
+                // Creates a new LinkedHashMap with remaining properties
+                ISwc4jAstPat arg = restPat.getArg();
+                if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
+                    String varName = bindingIdent.getId().getSym();
+                    var variable = context.getLocalVariableTable().getVariable(varName);
+                    if (variable == null) {
+                        throw new Swc4jByteCodeCompilerException(restPat, "Variable not found: " + varName);
+                    }
+
+                    // Create new LinkedHashMap as copy of source map
+                    // new LinkedHashMap(sourceMap)
+                    int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
+                    code.newInstance(linkedHashMapClass);
+                    code.dup();
+                    code.aload(mapSlot);
+                    int linkedHashMapInitRef = cp.addMethodRef("java/util/LinkedHashMap", "<init>", "(Ljava/util/Map;)V");
+                    code.invokespecial(linkedHashMapInitRef);
+
+                    // Store the copy
+                    code.astore(variable.index());
+
+                    // Remove all extracted keys from the rest map
+                    int mapRemoveRef = cp.addInterfaceMethodRef("java/util/Map", "remove", "(Ljava/lang/Object;)Ljava/lang/Object;");
+                    for (String key : extractedKeys) {
+                        code.aload(variable.index());
+                        int keyStringIndex = cp.addString(key);
+                        code.ldc(keyStringIndex);
+                        code.invokeinterface(mapRemoveRef, 2);
+                        code.pop(); // Discard removed value
+                    }
+                } else {
+                    throw new Swc4jByteCodeCompilerException(restPat,
+                            "Rest pattern argument must be a binding identifier");
+                }
             } else {
                 throw new Swc4jByteCodeCompilerException(prop,
                         "Unsupported property type in object destructuring: " + prop.getClass().getName());
@@ -462,16 +498,20 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
      * @param code      the code builder
      * @param context   the compilation context
      * @param objectPat the object pattern
+     * @return list of extracted key names (for rest pattern processing)
      * @throws Swc4jByteCodeCompilerException if initialization fails
      */
-    private void initializeObjectPatternVariables(
+    private List<String> initializeObjectPatternVariables(
             CodeBuilder code,
             CompilationContext context,
             Swc4jAstObjectPat objectPat) throws Swc4jByteCodeCompilerException {
+        List<String> extractedKeys = new ArrayList<>();
+
         for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
             if (prop instanceof Swc4jAstAssignPatProp assignProp) {
                 // Shorthand property: { name }
                 String varName = assignProp.getKey().getId().getSym();
+                extractedKeys.add(varName);
                 int slot = context.getLocalVariableTable().allocateVariable(varName, "Ljava/lang/Object;");
                 context.getInferredTypes().put(varName, "Ljava/lang/Object;");
                 code.aconst_null();
@@ -479,6 +519,9 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
 
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
                 // Renamed property: { name: n }
+                String keyName = extractPropertyName(keyValueProp.getKey());
+                extractedKeys.add(keyName);
+
                 ISwc4jAstPat valuePat = keyValueProp.getValue();
                 if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
                     String varName = bindingIdent.getId().getSym();
@@ -491,10 +534,23 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                             "Unsupported value pattern type in object destructuring: " + valuePat.getClass().getName());
                 }
 
-            } else if (prop instanceof Swc4jAstRestPat) {
-                // Rest property - not yet supported, skip initialization
+            } else if (prop instanceof Swc4jAstRestPat restPat) {
+                // Rest property: { ...rest }
+                ISwc4jAstPat arg = restPat.getArg();
+                if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
+                    String varName = bindingIdent.getId().getSym();
+                    // Rest creates a new LinkedHashMap
+                    int slot = context.getLocalVariableTable().allocateVariable(varName, "Ljava/util/LinkedHashMap;");
+                    context.getInferredTypes().put(varName, "Ljava/util/LinkedHashMap;");
+                    code.aconst_null();
+                    code.astore(slot);
+                } else {
+                    throw new Swc4jByteCodeCompilerException(restPat,
+                            "Rest pattern argument must be a binding identifier");
+                }
             }
         }
+        return extractedKeys;
     }
 
     /**
