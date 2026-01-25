@@ -186,6 +186,7 @@ public final class ScopedJavaTypeRegistry {
 
     /**
      * Resolves a class method return type, searching from innermost to outermost scope.
+     * Also searches in parent classes if not found in the current class.
      *
      * @param qualifiedClassName fully qualified class name
      * @param methodName         method name
@@ -200,6 +201,44 @@ public final class ScopedJavaTypeRegistry {
             String returnType = scope.get(key);
             if (returnType != null) {
                 return returnType;
+            }
+        }
+
+        // Not found in current class, search in parent classes
+        JavaTypeInfo typeInfo = resolve(qualifiedClassName);
+        if (typeInfo == null) {
+            // Try simple name
+            int lastDot = qualifiedClassName.lastIndexOf('.');
+            String simpleName = lastDot >= 0 ? qualifiedClassName.substring(lastDot + 1) : qualifiedClassName;
+            typeInfo = resolve(simpleName);
+        }
+
+        if (typeInfo != null) {
+            for (JavaTypeInfo parentInfo : typeInfo.getParentTypeInfos()) {
+                String parentQualifiedName = parentInfo.getInternalName().replace('/', '.');
+                String returnType = resolveClassMethodReturnType(parentQualifiedName, methodName, paramDescriptor);
+                if (returnType != null) {
+                    return returnType;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolves the superclass internal name for a given class.
+     *
+     * @param className the class name (qualified or simple)
+     * @return the superclass internal name, or null if not found
+     */
+    public String resolveSuperClass(String className) {
+        JavaTypeInfo typeInfo = resolve(className);
+        if (typeInfo != null) {
+            List<JavaTypeInfo> parents = typeInfo.getParentTypeInfos();
+            if (!parents.isEmpty()) {
+                // Return the first parent (extends clause comes first)
+                return parents.get(0).getInternalName();
             }
         }
         return null;

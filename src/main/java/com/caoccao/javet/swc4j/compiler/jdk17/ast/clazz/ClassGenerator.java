@@ -19,8 +19,10 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassProp;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -39,9 +41,9 @@ public final class ClassGenerator extends BaseAstProcessor {
         super(compiler);
     }
 
-    public static void generateDefaultConstructor(ClassWriter classWriter, ClassWriter.ConstantPool cp) {
+    public static void generateDefaultConstructor(ClassWriter classWriter, ClassWriter.ConstantPool cp, String superClassInternalName) {
         // Generate: public <init>() { super(); }
-        int superCtorRef = cp.addMethodRef("java/lang/Object", "<init>", "()V");
+        int superCtorRef = cp.addMethodRef(superClassInternalName, "<init>", "()V");
 
         CodeBuilder code = new CodeBuilder();
         code.aload(0)                    // load this
@@ -67,7 +69,11 @@ public final class ClassGenerator extends BaseAstProcessor {
             String internalClassName,
             Swc4jAstClass clazz) throws IOException, Swc4jByteCodeCompilerException {
         String qualifiedName = internalClassName.replace('/', '.');
-        ClassWriter classWriter = new ClassWriter(internalClassName);
+
+        // Resolve superclass
+        String superClassInternalName = resolveSuperClass(clazz);
+
+        ClassWriter classWriter = new ClassWriter(internalClassName, superClassInternalName);
         ClassWriter.ConstantPool cp = classWriter.getConstantPool();
 
         // Push the current class onto the stack for 'this' resolution (supports nested classes)
@@ -109,9 +115,9 @@ public final class ClassGenerator extends BaseAstProcessor {
 
             // Generate constructor with field initialization if there are fields to initialize
             if (!instanceFields.isEmpty()) {
-                generateConstructorWithFieldInit(classWriter, cp, internalClassName, instanceFields);
+                generateConstructorWithFieldInit(classWriter, cp, internalClassName, superClassInternalName, instanceFields);
             } else {
-                generateDefaultConstructor(classWriter, cp);
+                generateDefaultConstructor(classWriter, cp, superClassInternalName);
             }
 
             // Generate methods
@@ -132,9 +138,10 @@ public final class ClassGenerator extends BaseAstProcessor {
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
             String internalClassName,
+            String superClassInternalName,
             List<FieldInfo> fieldsToInit) throws Swc4jByteCodeCompilerException {
         // Generate: public <init>() { super(); this.field1 = value1; ... }
-        int superCtorRef = cp.addMethodRef("java/lang/Object", "<init>", "()V");
+        int superCtorRef = cp.addMethodRef(superClassInternalName, "<init>", "()V");
 
         // Reset compilation context for constructor code generation
         compiler.getMemory().resetCompilationContext(false); // not static
@@ -165,5 +172,39 @@ public final class ClassGenerator extends BaseAstProcessor {
                 10, // max stack (increased for field initialization)
                 1   // max locals (this)
         );
+    }
+
+    /**
+     * Resolves the superclass internal name from the class AST.
+     *
+     * @param clazz the class AST
+     * @return the superclass internal name, or "java/lang/Object" if no superclass
+     */
+    private String resolveSuperClass(Swc4jAstClass clazz) {
+        if (clazz.getSuperClass().isEmpty()) {
+            return "java/lang/Object";
+        }
+
+        ISwc4jAstExpr superClassExpr = clazz.getSuperClass().get();
+        if (superClassExpr instanceof Swc4jAstIdent ident) {
+            String superClassName = ident.getSym();
+
+            // Try to resolve from type alias registry
+            String resolvedName = compiler.getMemory().getScopedTypeAliasRegistry().resolve(superClassName);
+            if (resolvedName != null) {
+                return resolvedName.replace('.', '/');
+            }
+
+            // Try to resolve from Java type registry
+            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(superClassName);
+            if (typeInfo != null) {
+                return typeInfo.getInternalName();
+            }
+
+            // Default to simple name (might be in same package)
+            return superClassName;
+        }
+
+        return "java/lang/Object";
     }
 }

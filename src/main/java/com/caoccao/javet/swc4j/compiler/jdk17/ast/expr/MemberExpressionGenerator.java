@@ -58,11 +58,12 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
                 }
 
                 if (typeInfo != null) {
-                    FieldInfo fieldInfo = typeInfo.getField(fieldName);
-                    if (fieldInfo != null) {
-                        // Generate getfield instruction
+                    // Look up field in current class or parent classes
+                    FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                    if (lookupResult != null) {
+                        // Generate getfield instruction using the owner class
                         code.aload(0); // load this
-                        int fieldRef = cp.addFieldRef(currentClassName, fieldName, fieldInfo.descriptor());
+                        int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, lookupResult.fieldInfo.descriptor());
                         code.getfield(fieldRef);
                         return;
                     }
@@ -208,5 +209,36 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
         }
         // For unsupported member expressions, throw an error for now
         throw new Swc4jByteCodeCompilerException(memberExpr, "Member expression not yet supported: " + memberExpr.getProp());
+    }
+
+    /**
+     * Looks up a field in the class hierarchy, starting from the given class and traversing up to parent classes.
+     *
+     * @param typeInfo  the starting class type info
+     * @param fieldName the field name to look up
+     * @return the lookup result containing the field info and owner class, or null if not found
+     */
+    private FieldLookupResult lookupFieldInHierarchy(JavaTypeInfo typeInfo, String fieldName) {
+        // First check in current class
+        FieldInfo fieldInfo = typeInfo.getField(fieldName);
+        if (fieldInfo != null) {
+            return new FieldLookupResult(fieldInfo, typeInfo.getInternalName());
+        }
+
+        // Check in parent classes
+        for (JavaTypeInfo parentInfo : typeInfo.getParentTypeInfos()) {
+            FieldLookupResult result = lookupFieldInHierarchy(parentInfo, fieldName);
+            if (result != null) {
+                return result;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Result of a field lookup in the class hierarchy.
+     */
+    private record FieldLookupResult(FieldInfo fieldInfo, String ownerInternalName) {
     }
 }

@@ -564,7 +564,8 @@ public final class TypeResolver {
                     }
 
                     if (typeInfo != null) {
-                        FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                        // Look up field in current class or parent classes
+                        FieldInfo fieldInfo = lookupFieldInHierarchy(typeInfo, fieldName);
                         if (fieldInfo != null) {
                             return fieldInfo.descriptor();
                         }
@@ -819,6 +820,44 @@ public final class TypeResolver {
             return inferTypeFromExpr(parenExpr.getExpr());
         } else if (expr instanceof Swc4jAstCallExpr callExpr) {
             // For call expressions, try to infer the return type
+
+            // Handle super.method() calls
+            if (callExpr.getCallee() instanceof Swc4jAstSuperPropExpr superPropExpr) {
+                if (superPropExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String methodName = propIdent.getSym();
+
+                    // Get the current class and resolve its superclass
+                    String currentClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+                    if (currentClassName != null) {
+                        String superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry()
+                                .resolveSuperClass(currentClassName.replace('/', '.'));
+                        if (superClassInternalName == null) {
+                            // Try simple name
+                            int lastSlash = currentClassName.lastIndexOf('/');
+                            String simpleName = lastSlash >= 0 ? currentClassName.substring(lastSlash + 1) : currentClassName;
+                            superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
+                        }
+
+                        if (superClassInternalName != null) {
+                            // Look up method return type from the superclass
+                            String superQualifiedName = superClassInternalName.replace('/', '.');
+                            String returnType = compiler.getMemory().getScopedJavaTypeRegistry()
+                                    .resolveClassMethodReturnType(superQualifiedName, methodName, "()");
+                            if (returnType == null) {
+                                // Try simple name
+                                int lastSlash = superClassInternalName.lastIndexOf('/');
+                                String simpleName = lastSlash >= 0 ? superClassInternalName.substring(lastSlash + 1) : superClassInternalName;
+                                returnType = compiler.getMemory().getScopedJavaTypeRegistry()
+                                        .resolveClassMethodReturnType(simpleName, methodName, "()");
+                            }
+                            if (returnType != null) {
+                                return returnType;
+                            }
+                        }
+                    }
+                }
+            }
+
             if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
                 String objType = inferTypeFromExpr(memberExpr.getObj());
 
@@ -953,6 +992,31 @@ public final class TypeResolver {
             return "V"; // Empty sequence - void
         }
         return "Ljava/lang/Object;";
+    }
+
+    /**
+     * Looks up a field in the class hierarchy, starting from the given class and traversing up to parent classes.
+     *
+     * @param typeInfo  the starting class type info
+     * @param fieldName the field name to look up
+     * @return the field info, or null if not found
+     */
+    private FieldInfo lookupFieldInHierarchy(JavaTypeInfo typeInfo, String fieldName) {
+        // First check in current class
+        FieldInfo fieldInfo = typeInfo.getField(fieldName);
+        if (fieldInfo != null) {
+            return fieldInfo;
+        }
+
+        // Check in parent classes
+        for (JavaTypeInfo parentInfo : typeInfo.getParentTypeInfos()) {
+            fieldInfo = lookupFieldInHierarchy(parentInfo, fieldName);
+            if (fieldInfo != null) {
+                return fieldInfo;
+            }
+        }
+
+        return null;
     }
 
     public String mapTsTypeToDescriptor(

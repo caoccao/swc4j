@@ -217,7 +217,7 @@ Existing tests in `TestCompileAstClass.java`:
 
 ### Phase 2: Inheritance (extends) - Priority: HIGH
 
-**Status:** TO BE IMPLEMENTED
+**Status:** IMPLEMENTED
 
 - Superclass resolution
 - Setting superclass in bytecode
@@ -987,7 +987,7 @@ Field:
 ## Success Criteria
 
 - [x] Phase 1: Basic class declaration working
-- [ ] Phase 2: Class inheritance (extends) working
+- [x] Phase 2: Class inheritance (extends) working
 - [ ] Phase 3: Abstract classes working
 - [ ] Phase 4: Interface implementation working
 - [ ] Phase 5: Constructors fully working
@@ -1021,6 +1021,17 @@ Field:
 - Updated `TypeResolver` to infer types for `this.field` expressions
 - Added `getfield`/`putfield`/`getstatic`/`putstatic` handlers to `StackMapGenerator`
 - Class registry lookup uses fallback pattern: try qualified name first, then simple name
+
+**Inheritance (extends) Support (2026-01-25):**
+- Updated `ClassGenerator.resolveSuperClass()` to resolve parent class from AST
+- Updated `ClassWriter` constructor call to pass superclass internal name
+- Updated constructor generation to call parent class `<init>` instead of Object.<init>
+- Added `super.method()` call support in `CallExpressionGenerator` using `invokespecial`
+- Added `resolveSuperClass()` method to `ScopedJavaTypeRegistry`
+- Added inherited field lookup in `MemberExpressionGenerator.lookupFieldInHierarchy()`
+- Added inherited field lookup in `TypeResolver.lookupFieldInHierarchy()`
+- Updated `ScopedJavaTypeRegistry.resolveClassMethodReturnType()` to search parent classes
+- Type inference for `super.method()` expressions in `TypeResolver`
 
 ---
 
