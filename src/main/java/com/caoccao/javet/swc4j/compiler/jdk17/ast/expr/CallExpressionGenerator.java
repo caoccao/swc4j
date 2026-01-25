@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstSuper;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
@@ -52,6 +53,12 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
             ClassWriter.ConstantPool cp,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        // Handle super() constructor calls
+        if (callExpr.getCallee() instanceof Swc4jAstSuper) {
+            generateSuperConstructorCall(code, cp, callExpr);
+            return;
+        }
+
         // Handle super.method() calls
         if (callExpr.getCallee() instanceof Swc4jAstSuperPropExpr superPropExpr) {
             generateSuperMethodCall(code, cp, callExpr, superPropExpr, returnTypeInfo);
@@ -79,6 +86,59 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
         }
         // For unsupported call expressions, throw an error for now
         throw new Swc4jByteCodeCompilerException(callExpr, "Call expression not yet supported");
+    }
+
+    /**
+     * Generates bytecode for super() constructor calls.
+     * Uses invokespecial to call the parent class constructor.
+     */
+    private void generateSuperConstructorCall(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        // Get the current class and resolve its superclass
+        String currentClassInternalName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+        if (currentClassInternalName == null) {
+            throw new Swc4jByteCodeCompilerException(callExpr, "super() call outside of class context");
+        }
+
+        // Resolve the superclass
+        String qualifiedClassName = currentClassInternalName.replace('/', '.');
+        String superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry()
+                .resolveSuperClass(qualifiedClassName);
+        if (superClassInternalName == null) {
+            // Try simple name
+            int lastSlash = currentClassInternalName.lastIndexOf('/');
+            String simpleName = lastSlash >= 0 ? currentClassInternalName.substring(lastSlash + 1) : currentClassInternalName;
+            superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
+        }
+        if (superClassInternalName == null) {
+            superClassInternalName = "java/lang/Object";
+        }
+
+        // Load 'this' reference
+        code.aload(0);
+
+        // Infer argument types and generate argument bytecode
+        var args = callExpr.getArgs();
+        StringBuilder paramDescriptors = new StringBuilder();
+        for (var arg : args) {
+            if (arg.getSpread().isPresent()) {
+                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not yet supported in super constructor calls");
+            }
+            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
+            if (argType == null) {
+                argType = "Ljava/lang/Object;";
+            }
+            paramDescriptors.append(argType);
+        }
+
+        String methodDescriptor = "(" + paramDescriptors + ")V";
+
+        // Generate invokespecial to call the superclass constructor
+        int ctorRef = cp.addMethodRef(superClassInternalName, "<init>", methodDescriptor);
+        code.invokespecial(ctorRef);
     }
 
     /**

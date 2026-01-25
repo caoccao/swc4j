@@ -18,10 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
@@ -117,6 +114,44 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                             code.putfield(fieldRef);
                             return;
                         }
+                    }
+                }
+            }
+
+            // Handle ClassName.staticField = value assignment
+            if (memberExpr.getObj() instanceof Swc4jAstIdent classIdent && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                String className = classIdent.getSym();
+                String fieldName = propIdent.getSym();
+
+                // Try to resolve the class
+                JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
+                if (typeInfo != null) {
+                    FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                    if (fieldInfo != null && fieldInfo.isStatic()) {
+                        // Generate: <value>; dup; putstatic
+                        compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+
+                        // Convert value type if needed
+                        String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
+                        if (valueType != null && !valueType.equals(fieldInfo.descriptor())) {
+                            TypeConversionUtils.unboxWrapperType(code, cp, valueType);
+                            String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
+                            if (valuePrimitive != null && !valuePrimitive.equals(fieldInfo.descriptor())) {
+                                TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, fieldInfo.descriptor());
+                            }
+                        }
+
+                        // Duplicate value for assignment expression result
+                        String fieldDesc = fieldInfo.descriptor();
+                        if ("D".equals(fieldDesc) || "J".equals(fieldDesc)) {
+                            code.dup2(); // For wide types (double, long)
+                        } else {
+                            code.dup(); // For single-slot types
+                        }
+
+                        int fieldRef = cp.addFieldRef(typeInfo.getInternalName(), fieldName, fieldInfo.descriptor());
+                        code.putstatic(fieldRef);
+                        return;
                     }
                 }
             }

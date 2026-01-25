@@ -365,6 +365,24 @@ public final class TypeResolver {
     }
 
     /**
+     * Extracts the parameter name from a pattern.
+     *
+     * @param pat the pattern
+     * @return the parameter name, or null if not found
+     */
+    public String extractParameterName(ISwc4jAstPat pat) {
+        if (pat instanceof Swc4jAstRestPat restPat) {
+            ISwc4jAstPat arg = restPat.getArg();
+            if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
+                return bindingIdent.getId().getSym();
+            }
+        } else if (pat instanceof Swc4jAstBindingIdent bindingIdent) {
+            return bindingIdent.getId().getSym();
+        }
+        return null;
+    }
+
+    /**
      * Extract type from parameter pattern (regular param or varargs).
      */
     public String extractParameterType(
@@ -569,6 +587,21 @@ public final class TypeResolver {
                         if (fieldInfo != null) {
                             return fieldInfo.descriptor();
                         }
+                    }
+                }
+            }
+
+            // Handle ClassName.staticField access
+            if (memberExpr.getObj() instanceof Swc4jAstIdent classIdent && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                String className = classIdent.getSym();
+                String fieldName = propIdent.getSym();
+
+                // Try to resolve the class
+                JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
+                if (typeInfo != null) {
+                    FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                    if (fieldInfo != null && fieldInfo.isStatic()) {
+                        return fieldInfo.descriptor();
                     }
                 }
             }

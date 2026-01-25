@@ -16,13 +16,12 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassProp;
+import com.caoccao.javet.swc4j.ast.clazz.*;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -92,6 +91,9 @@ public final class ClassGenerator extends BaseAstProcessor {
                 typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
             }
 
+            // Collect static fields for <clinit> initialization
+            List<FieldInfo> staticFields = new ArrayList<>();
+
             // Generate field declarations
             for (ISwc4jAstClassMember member : clazz.getBody()) {
                 if (member instanceof Swc4jAstClassProp prop) {
@@ -102,6 +104,10 @@ public final class ClassGenerator extends BaseAstProcessor {
                         int accessFlags = 0x0001; // ACC_PUBLIC
                         if (fieldInfo.isStatic()) {
                             accessFlags |= 0x0008; // ACC_STATIC
+                            // Collect static fields for <clinit> initialization
+                            if (fieldInfo.initializer().isPresent()) {
+                                staticFields.add(fieldInfo);
+                            }
                         }
                         classWriter.addField(accessFlags, fieldInfo.name(), fieldInfo.descriptor());
 
@@ -113,8 +119,24 @@ public final class ClassGenerator extends BaseAstProcessor {
                 }
             }
 
-            // Generate constructor with field initialization if there are fields to initialize
-            if (!instanceFields.isEmpty()) {
+            // Generate <clinit> for static field initialization if needed
+            if (!staticFields.isEmpty()) {
+                generateClinitMethod(classWriter, cp, internalClassName, staticFields);
+            }
+
+            // Check for explicit constructor
+            Swc4jAstConstructor explicitConstructor = null;
+            for (ISwc4jAstClassMember member : clazz.getBody()) {
+                if (member instanceof Swc4jAstConstructor ctor) {
+                    explicitConstructor = ctor;
+                    break;
+                }
+            }
+
+            // Generate constructor
+            if (explicitConstructor != null) {
+                generateExplicitConstructor(classWriter, cp, internalClassName, superClassInternalName, explicitConstructor);
+            } else if (!instanceFields.isEmpty()) {
                 generateConstructorWithFieldInit(classWriter, cp, internalClassName, superClassInternalName, instanceFields);
             } else {
                 generateDefaultConstructor(classWriter, cp, superClassInternalName);
@@ -132,6 +154,42 @@ public final class ClassGenerator extends BaseAstProcessor {
             // Pop the class from the stack when done
             compiler.getMemory().getCompilationContext().popClass();
         }
+    }
+
+    /**
+     * Generates the &lt;clinit&gt; method for static field initialization.
+     */
+    private void generateClinitMethod(
+            ClassWriter classWriter,
+            ClassWriter.ConstantPool cp,
+            String internalClassName,
+            List<FieldInfo> staticFields) throws Swc4jByteCodeCompilerException {
+        // Reset compilation context for static initialization
+        compiler.getMemory().resetCompilationContext(true); // is static
+
+        CodeBuilder code = new CodeBuilder();
+
+        // Initialize static fields with their initializers
+        for (FieldInfo field : staticFields) {
+            if (field.initializer().isPresent()) {
+                // Generate code for the initializer expression
+                compiler.getExpressionGenerator().generate(code, cp, field.initializer().get(), null);
+                // Store to static field
+                int fieldRef = cp.addFieldRef(internalClassName, field.name(), field.descriptor());
+                code.putstatic(fieldRef);
+            }
+        }
+
+        code.returnVoid(); // return
+
+        classWriter.addMethod(
+                0x0008, // ACC_STATIC
+                "<clinit>",
+                "()V",
+                code.toByteArray(),
+                10, // max stack
+                0   // max locals
+        );
     }
 
     public void generateConstructorWithFieldInit(
@@ -171,6 +229,96 @@ public final class ClassGenerator extends BaseAstProcessor {
                 code.toByteArray(),
                 10, // max stack (increased for field initialization)
                 1   // max locals (this)
+        );
+    }
+
+    /**
+     * Generates an explicit constructor from the AST.
+     */
+    public void generateExplicitConstructor(
+            ClassWriter classWriter,
+            ClassWriter.ConstantPool cp,
+            String internalClassName,
+            String superClassInternalName,
+            Swc4jAstConstructor constructor) throws Swc4jByteCodeCompilerException {
+        // Reset compilation context for constructor code generation (not static)
+        compiler.getMemory().resetCompilationContext(false);
+
+        // Build parameter descriptor and allocate parameter slots
+        StringBuilder paramDescriptors = new StringBuilder();
+        for (ISwc4jAstParamOrTsParamProp paramOrProp : constructor.getParams()) {
+            if (paramOrProp instanceof Swc4jAstParam param) {
+                String paramType = compiler.getTypeResolver().extractParameterType(param.getPat());
+                paramDescriptors.append(paramType);
+                // Allocate slot for parameter - use VariableAnalyzer-like logic
+                String paramName = compiler.getTypeResolver().extractParameterName(param.getPat());
+                if (paramName != null) {
+                    compiler.getMemory().getCompilationContext()
+                            .getLocalVariableTable().allocateVariable(paramName, paramType);
+                    compiler.getMemory().getCompilationContext()
+                            .getInferredTypes().put(paramName, paramType);
+                }
+            }
+            // TODO: Handle TsParamProp (parameter properties) later
+        }
+
+        String descriptor = "(" + paramDescriptors + ")V";
+
+        // Generate constructor body
+        CodeBuilder code = new CodeBuilder();
+
+        if (constructor.getBody().isPresent()) {
+            Swc4jAstBlockStmt body = constructor.getBody().get();
+            List<ISwc4jAstStmt> stmts = body.getStmts();
+
+            // Check if first statement is a super() call
+            boolean firstIsSuperCall = false;
+            int firstStmtIndex = 0;
+            if (!stmts.isEmpty()) {
+                ISwc4jAstStmt firstStmt = stmts.get(0);
+                if (firstStmt instanceof Swc4jAstExprStmt exprStmt) {
+                    if (exprStmt.getExpr() instanceof Swc4jAstCallExpr callExpr) {
+                        if (callExpr.getCallee() instanceof Swc4jAstSuper) {
+                            firstIsSuperCall = true;
+                        }
+                    }
+                }
+            }
+
+            // If first statement is not super(), inject an implicit super() call
+            if (!firstIsSuperCall) {
+                int superCtorRef = cp.addMethodRef(superClassInternalName, "<init>", "()V");
+                code.aload(0).invokespecial(superCtorRef);
+            }
+
+            // Analyze variable declarations in the body
+            compiler.getVariableAnalyzer().analyzeVariableDeclarations(body);
+
+            // Process statements in the constructor body
+            for (ISwc4jAstStmt stmt : stmts) {
+                compiler.getStatementGenerator().generate(code, cp, stmt, null);
+            }
+        } else {
+            // No body - generate default super() call
+            int superCtorRef = cp.addMethodRef(superClassInternalName, "<init>", "()V");
+            code.aload(0).invokespecial(superCtorRef);
+        }
+
+        // Add return if not already present
+        byte[] bytecode = code.toByteArray();
+        if (bytecode.length == 0 || bytecode[bytecode.length - 1] != (byte) 0xB1) {
+            code.returnVoid();
+        }
+
+        int maxLocals = compiler.getMemory().getCompilationContext().getLocalVariableTable().getMaxLocals();
+
+        classWriter.addMethod(
+                0x0001, // ACC_PUBLIC
+                "<init>",
+                descriptor,
+                code.toByteArray(),
+                10, // max stack
+                maxLocals
         );
     }
 

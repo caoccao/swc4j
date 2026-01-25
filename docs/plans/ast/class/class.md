@@ -247,11 +247,11 @@ Existing tests in `TestCompileAstClass.java`:
 
 **Status:** PARTIAL
 
-- Constructor parameter handling
-- Field initialization in constructor
-- Constructor overloading
-- super() calls
-- this() calls (constructor chaining)
+- Constructor parameter handling - IMPLEMENTED
+- Field initialization in constructor - IMPLEMENTED
+- super() calls with arguments - IMPLEMENTED
+- Constructor overloading - TO BE IMPLEMENTED
+- this() calls (constructor chaining) - TO BE IMPLEMENTED
 
 ### Phase 6: Instance Fields - Priority: HIGH
 
@@ -265,13 +265,13 @@ Existing tests in `TestCompileAstClass.java`:
 
 ### Phase 7: Static Members - Priority: MEDIUM
 
-**Status:** PARTIAL
+**Status:** IMPLEMENTED
 
-- Static field declaration - TO BE IMPLEMENTED
+- Static field declaration - IMPLEMENTED
 - Static method declaration - IMPLEMENTED
-- Static field initializers - TO BE IMPLEMENTED
-- Static block (clinit) - TO BE IMPLEMENTED
-- Static member access - TO BE IMPLEMENTED (calling static methods from instance methods)
+- Static field initializers - IMPLEMENTED (via <clinit>)
+- Static block (clinit) - IMPLEMENTED
+- Static member access (getstatic/putstatic) - IMPLEMENTED
 
 ### Phase 8: Access Modifiers - Priority: MEDIUM
 
@@ -1032,6 +1032,21 @@ Field:
 - Added inherited field lookup in `TypeResolver.lookupFieldInHierarchy()`
 - Updated `ScopedJavaTypeRegistry.resolveClassMethodReturnType()` to search parent classes
 - Type inference for `super.method()` expressions in `TypeResolver`
+
+**Explicit Constructor Support (2026-01-25):**
+- Added `generateExplicitConstructor()` method in `ClassGenerator` to handle `Swc4jAstConstructor`
+- Added `extractParameterName()` method in `TypeResolver` for constructor parameter name extraction
+- Added `generateSuperConstructorCall()` method in `CallExpressionGenerator` for `super()` calls
+- Constructor parameter allocation uses the same slot allocation system as method parameters
+- Implicit `super()` injection when constructor body doesn't start with explicit `super()` call
+- Multi-level inheritance with `super(args)` chaining is fully supported
+
+**Static Fields Support (2026-01-25):**
+- Added `generateClinitMethod()` in `ClassGenerator` for static field initialization
+- Added static field read support in `MemberExpressionGenerator` using `getstatic`
+- Added static field write support in `AssignExpressionGenerator` using `putstatic`
+- Added static field type inference in `TypeResolver` for `ClassName.staticField` access
+- Static fields are collected and initialized in `<clinit>` method
 
 ---
 

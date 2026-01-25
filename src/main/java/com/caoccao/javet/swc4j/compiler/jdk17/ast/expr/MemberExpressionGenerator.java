@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
@@ -67,6 +68,24 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
                         code.getfield(fieldRef);
                         return;
                     }
+                }
+            }
+        }
+
+        // Handle ClassName.staticField access
+        if (memberExpr.getObj() instanceof Swc4jAstIdent classIdent && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+            String className = classIdent.getSym();
+            String fieldName = propIdent.getSym();
+
+            // Try to resolve the class
+            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
+            if (typeInfo != null) {
+                FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                if (fieldInfo != null && fieldInfo.isStatic()) {
+                    // Generate getstatic instruction
+                    int fieldRef = cp.addFieldRef(typeInfo.getInternalName(), fieldName, fieldInfo.descriptor());
+                    code.getstatic(fieldRef);
+                    return;
                 }
             }
         }
