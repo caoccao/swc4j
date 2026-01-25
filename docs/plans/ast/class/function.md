@@ -302,11 +302,9 @@ Existing tests in `TestCompileAstFunction.java`:
 
 ### Phase 10: Decorators - Priority: LOW
 
-**Status:** NOT IMPLEMENTED
+**Status:** NOT SUPPORTED
 
-- Method decorator invocation
-- Parameter decorator invocation
-- Decorator metadata generation
+Decorators are intentionally not supported. The JVM bytecode compilation targets a simpler subset of TypeScript without decorator metaprogramming.
 
 ---
 
@@ -1105,7 +1103,7 @@ return   // void
 - [ ] Phase 7: Overloading working (future)
 - [ ] Phase 8: Async functions working (future)
 - [ ] Phase 9: Generator functions working (future)
-- [ ] Phase 10: Decorators working (future)
+- [x] Phase 10: Decorators - NOT SUPPORTED (intentionally excluded)
 - [x] All current tests passing
 - [x] Javadoc builds successfully
 
@@ -1139,7 +1137,7 @@ return   // void
 2. **Generators**: Requires iterator protocol implementation
 3. **Closures**: Capturing outer scope variables requires synthetic classes
 4. **Overloading**: TypeScript overloads are type-level only, not JVM overloading
-5. **Parameter Decorators**: Limited compile-time support
+5. **Decorators**: Not supported (method, parameter, and class decorators are intentionally excluded)
 6. **Optional Parameters**: Handled via default values, not true optionality
 7. **Union Types**: Cannot have multiple return types in JVM
 8. **Rest Parameters in Middle**: TypeScript allows only at end (same as JVM)

@@ -275,21 +275,18 @@ Existing tests in `TestCompileAstClass.java`:
 
 ### Phase 8: Access Modifiers - Priority: MEDIUM
 
-**Status:** PARTIAL
+**Status:** IMPLEMENTED (except ES2022 private fields)
 
 - Public (default) - IMPLEMENTED
-- Private methods/fields
-- Protected methods/fields
-- Private class fields (#field)
+- Private methods/fields - IMPLEMENTED
+- Protected methods/fields - IMPLEMENTED
+- Private class fields (#field) - NOT IMPLEMENTED (ES2022 syntax)
 
 ### Phase 9: Decorators - Priority: LOW
 
-**Status:** NOT IMPLEMENTED
+**Status:** NOT SUPPORTED
 
-- Class decorators
-- Method decorators
-- Field decorators
-- Decorator evaluation order
+Decorators are intentionally not supported. The JVM bytecode compilation targets a simpler subset of TypeScript without decorator metaprogramming.
 
 ### Phase 10: Generics - Priority: LOW
 
@@ -993,8 +990,8 @@ Field:
 - [x] Phase 5: Constructors fully working
 - [x] Phase 6: Instance fields working
 - [x] Phase 7: Static methods working (static fields pending)
-- [ ] Phase 8: Access modifiers working
-- [ ] Phase 9: Decorators working (future)
+- [x] Phase 8: Access modifiers working (except ES2022 #field)
+- [x] Phase 9: Decorators - NOT SUPPORTED (intentionally excluded)
 - [ ] Phase 10: Generics working (future)
 - [x] All current tests passing
 - [x] Javadoc builds successfully
@@ -1076,6 +1073,22 @@ Field:
 - Interface resolution requires interfaces to be registered in the type alias map (e.g., `"Runnable" -> "java.lang.Runnable"`)
 - Supports single interface, multiple interfaces, and class extends + implements
 - Test coverage in `TestCompileAstClassImplements.java`: 4 tests covering single/multiple interfaces, extends+implements, and method implementation
+
+**Access Modifiers (Phase 8) Support (2026-01-25):**
+- Updated `MethodGenerator`:
+  - Added import for `Swc4jAstAccessibility`
+  - Added `getAccessFlags()` helper method to convert `Swc4jAstAccessibility` enum to JVM access flags:
+    - `Public` → `ACC_PUBLIC` (0x0001)
+    - `Protected` → `ACC_PROTECTED` (0x0004)
+    - `Private` → `ACC_PRIVATE` (0x0002)
+  - Updated regular method generation to use `getAccessFlags(method.getAccessibility())` instead of hardcoded ACC_PUBLIC
+  - Updated abstract method generation similarly
+- Updated `ClassGenerator`:
+  - Added same `getAccessFlags()` helper method
+  - Updated field generation to use `getAccessFlags(prop.getAccessibility())` instead of hardcoded ACC_PUBLIC
+- Default behavior unchanged: when `accessibility` is empty (not specified), defaults to ACC_PUBLIC
+- ES2022 private class fields (`#field`) are NOT implemented - would require additional AST handling (`Swc4jAstPrivateProp`, `Swc4jAstPrivateMethod`)
+- Test coverage in `TestCompileAstClassAccessibility.java`: 6 tests covering private/protected fields and methods
 
 ---
 

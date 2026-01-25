@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
@@ -99,7 +100,7 @@ public final class MethodGenerator extends BaseAstProcessor {
                 String descriptor = generateDescriptor(function, returnTypeInfo);
                 CodeBuilder code = generateCode(cp, body, returnTypeInfo);
 
-                int accessFlags = 0x0001; // ACC_PUBLIC
+                int accessFlags = getAccessFlags(method.getAccessibility());
                 if (method.isStatic()) {
                     accessFlags |= 0x0008; // ACC_STATIC
                 }
@@ -171,8 +172,8 @@ public final class MethodGenerator extends BaseAstProcessor {
         ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, null);
         String descriptor = generateDescriptor(function, returnTypeInfo);
 
-        // ACC_PUBLIC | ACC_ABSTRACT (no ACC_STATIC for abstract methods, but they can be static in interfaces)
-        int accessFlags = 0x0401; // ACC_PUBLIC | ACC_ABSTRACT
+        // ACC_ABSTRACT + access modifier (no ACC_STATIC for abstract methods, but they can be static in interfaces)
+        int accessFlags = getAccessFlags(method.getAccessibility()) | 0x0400; // ACC_ABSTRACT
         if (method.isStatic()) {
             accessFlags |= 0x0008; // ACC_STATIC
         }
@@ -366,6 +367,23 @@ public final class MethodGenerator extends BaseAstProcessor {
             case DOUBLE -> code.dreturn();
             case STRING, OBJECT -> code.areturn();
         }
+    }
+
+    /**
+     * Converts TypeScript/ES accessibility to JVM access flags.
+     *
+     * @param accessibility the accessibility modifier (Public, Protected, Private)
+     * @return JVM access flags (ACC_PUBLIC=0x0001, ACC_PROTECTED=0x0004, ACC_PRIVATE=0x0002)
+     */
+    private int getAccessFlags(java.util.Optional<Swc4jAstAccessibility> accessibility) {
+        if (accessibility.isEmpty()) {
+            return 0x0001; // Default to ACC_PUBLIC
+        }
+        return switch (accessibility.get()) {
+            case Public -> 0x0001;    // ACC_PUBLIC
+            case Protected -> 0x0004; // ACC_PROTECTED
+            case Private -> 0x0002;   // ACC_PRIVATE
+        };
     }
 
     private String getReturnDescriptor(ReturnTypeInfo returnTypeInfo) {

@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 
 import com.caoccao.javet.swc4j.ast.clazz.*;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
@@ -111,7 +112,7 @@ public final class ClassGenerator extends BaseAstProcessor {
                     FieldInfo fieldInfo = typeInfo != null ? typeInfo.getField(fieldName) : null;
 
                     if (fieldInfo != null) {
-                        int accessFlags = 0x0001; // ACC_PUBLIC
+                        int accessFlags = getAccessFlags(prop.getAccessibility());
                         if (fieldInfo.isStatic()) {
                             accessFlags |= 0x0008; // ACC_STATIC
                             // Collect static fields for <clinit> initialization
@@ -331,6 +332,23 @@ public final class ClassGenerator extends BaseAstProcessor {
                 10, // max stack
                 maxLocals
         );
+    }
+
+    /**
+     * Converts TypeScript/ES accessibility to JVM access flags.
+     *
+     * @param accessibility the accessibility modifier (Public, Protected, Private)
+     * @return JVM access flags (ACC_PUBLIC=0x0001, ACC_PROTECTED=0x0004, ACC_PRIVATE=0x0002)
+     */
+    private int getAccessFlags(java.util.Optional<Swc4jAstAccessibility> accessibility) {
+        if (accessibility.isEmpty()) {
+            return 0x0001; // Default to ACC_PUBLIC
+        }
+        return switch (accessibility.get()) {
+            case Public -> 0x0001;    // ACC_PUBLIC
+            case Protected -> 0x0004; // ACC_PROTECTED
+            case Private -> 0x0002;   // ACC_PRIVATE
+        };
     }
 
     /**
