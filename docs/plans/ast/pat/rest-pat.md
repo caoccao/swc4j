@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting rest patterns (`...rest`) in TypeScript to JVM bytecode compilation. Rest patterns collect remaining elements/properties into a new array or object.
 
-**Current Status:** PARTIAL - Function parameter varargs implemented; object and array destructuring rest in for-of loops implemented (2026-01-25)
+**Current Status:** PARTIAL - Function parameter varargs implemented; object and array destructuring rest in for-of loops and variable declarations implemented (2026-01-25)
 
 **Syntax:**
 ```typescript
@@ -334,7 +334,7 @@ pop
 
 ### Phase 4: Variable Declaration with Rest - Priority: MEDIUM
 
-**Status:** Not implemented
+**Status:** IMPLEMENTED (2026-01-25) - Array and object destructuring rest in variable declarations
 
 Support rest patterns in standalone variable declarations.
 
@@ -1162,11 +1162,11 @@ private void generateArrayRestExtraction(
 - [ ] Phase 1: Function parameter rest (varargs) fully working
 - [x] Phase 2: Array destructuring rest implemented (for-of loops, 18 tests)
 - [x] Phase 3: Object destructuring rest implemented (for-of loops, 19 tests)
-- [ ] Phase 4: Variable declaration with rest working
+- [x] Phase 4: Variable declaration with rest working (20 tests)
 - [x] Phase 5: For-of loop with rest working (array and object destructuring)
 - [ ] Phase 6: Nested rest patterns working
 - [ ] Phase 7: Assignment pattern rest working
-- [x] Comprehensive test coverage for all edge cases (37 tests total)
+- [x] Comprehensive test coverage for all edge cases (57 tests total)
 - [x] Proper stack map frame generation
 - [x] Correct type inference for rest variables (ArrayList for arrays, LinkedHashMap for objects)
 - [x] All tests passing
@@ -1230,7 +1230,7 @@ private void generateArrayRestExtraction(
 ### Integration
 - [ ] Update VariableAnalyzer for rest pattern variables
 - [x] Update ForOfStatementGenerator for rest in loop variables (array and object destructuring)
-- [ ] Update VarDeclGenerator for rest in declarations
+- [x] Update VarDeclGenerator for rest in declarations (array and object destructuring)
 - [ ] Handle nested rest patterns
 - [x] Track extracted keys for object rest
 - [x] Track rest start index for array rest
@@ -1240,7 +1240,7 @@ private void generateArrayRestExtraction(
 - [ ] Create `TestCompileAstRestPatFunctionParam.java`
 - [x] Create `TestCompileAstRestPatArrayDestructuring.java` (18 tests)
 - [x] Create `TestCompileAstRestPatObjectDestructuring.java` (19 tests)
-- [ ] Add all phase tests
+- [x] Create `TestCompileAstRestPatVarDecl.java` (20 tests)
 - [x] Verify all tests pass
 - [x] Verify javadoc builds
 

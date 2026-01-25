@@ -84,107 +84,73 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRestWithEmptyRemaining(JdkVersion jdkVersion) throws Exception {
-        // Rest when all properties are extracted: rest = {}
+    public void testRestCollectingKeys(JdkVersion jdkVersion) throws Exception {
+        // Collect keys from rest
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): string {
+                      const items = [{ extracted: "X", keyA: "A", keyB: "B" }]
+                      let result: string = ""
+                      for (const { extracted, ...rest } of items) {
+                        for (const [key, value] of rest) {
+                          result += key
+                          result += ","
+                        }
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("keyA,keyB,", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRestConstDeclaration(JdkVersion jdkVersion) throws Exception {
+        // Rest with const declaration
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      const items = [{ a: 1, b: 2 }]
-                      let restSize: int = 0
-                      for (const { a, b, ...rest } of items) {
-                        for (const [k, v] of rest) {
-                          restSize++
+                      const items = [{ id: 1, x: 10, y: 20 }]
+                      let sum: int = 0
+                      for (const { id, ...data } of items) {
+                        for (const [k, v] of data) {
+                          sum++
                         }
                       }
-                      return restSize
+                      return sum
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(2, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRestEmptyArray(JdkVersion jdkVersion) throws Exception {
+        // For-of over empty array with rest pattern
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const items = []
+                      let count: int = 0
+                      for (const { id, ...rest } of items) {
+                        count++
+                      }
+                      return count
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testRestWithRenamedProperty(JdkVersion jdkVersion) throws Exception {
-        // Rest with renamed property: { a: x, ...rest }
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): string {
-                      const items = [{ a: "X", b: "B", c: "C" }]
-                      let result: string = ""
-                      for (const { a: x, ...rest } of items) {
-                        result += x
-                        result += ":"
-                        let count: int = 0
-                        for (const [k, v] of rest) {
-                          count++
-                        }
-                        result += count
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("X:2", classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testRestWithDefaultValue(JdkVersion jdkVersion) throws Exception {
-        // Rest with default value property: { a = "default", ...rest }
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): string {
-                      const items = [{ b: "B", c: "C" }]
-                      let result: string = ""
-                      for (const { a = "default", ...rest } of items) {
-                        result += a
-                        result += ":"
-                        let count: int = 0
-                        for (const [k, v] of rest) {
-                          count++
-                        }
-                        result += count
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("default:2", classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testRestPreservesOrder(JdkVersion jdkVersion) throws Exception {
-        // Rest preserves insertion order (LinkedHashMap)
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): string {
-                      const items = [{ c: 3, a: 1, b: 2, d: 4 }]
-                      let result: string = ""
-                      for (const { b, ...rest } of items) {
-                        for (const [key, value] of rest) {
-                          result += key
-                        }
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // Should preserve order: c, a, d (b was extracted)
-        assertEquals("cad", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -209,6 +175,54 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRestIteratingValues(JdkVersion jdkVersion) throws Exception {
+        // Iterate over rest values
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): string {
+                      const items = [{ extracted: "X", a: "A", b: "B", c: "C" }]
+                      let result: string = ""
+                      for (const { extracted, ...rest } of items) {
+                        for (const [key, value] of rest) {
+                          result += value
+                        }
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("ABC", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRestLetDeclaration(JdkVersion jdkVersion) throws Exception {
+        // Rest with let declaration
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const items = [{ id: 1, x: 10, y: 20 }]
+                      let sum: int = 0
+                      for (let { id, ...data } of items) {
+                        for (const [k, v] of data) {
+                          sum++
+                        }
+                      }
+                      return sum
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(2, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -242,6 +256,31 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals("1:2,2:1,3:0,", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRestPreservesOrder(JdkVersion jdkVersion) throws Exception {
+        // Rest preserves insertion order (LinkedHashMap)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): string {
+                      const items = [{ c: 3, a: 1, b: 2, d: 4 }]
+                      let result: string = ""
+                      for (const { b, ...rest } of items) {
+                        for (const [key, value] of rest) {
+                          result += key
+                        }
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // Should preserve order: c, a, d (b was extracted)
+        assertEquals("cad", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -299,69 +338,16 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRestWithReturn(JdkVersion jdkVersion) throws Exception {
-        // Rest with return statement - iterate to find value
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): Object {
-                      const items = [{ id: 1, data: "first" }, { id: 2, data: "second" }]
-                      for (const { id, ...rest } of items) {
-                        if ((id as int) === 1) {
-                          for (const [key, value] of rest) {
-                            if (key === "data") {
-                              return value
-                            }
-                          }
-                        }
-                      }
-                      return "not found"
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("first", classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testRestIteratingValues(JdkVersion jdkVersion) throws Exception {
-        // Iterate over rest values
+    public void testRestWithDefaultValue(JdkVersion jdkVersion) throws Exception {
+        // Rest with default value property: { a = "default", ...rest }
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
-                      const items = [{ extracted: "X", a: "A", b: "B", c: "C" }]
+                      const items = [{ b: "B", c: "C" }]
                       let result: string = ""
-                      for (const { extracted, ...rest } of items) {
-                        for (const [key, value] of rest) {
-                          result += value
-                        }
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("ABC", classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testRestWithMultipleExtracted(JdkVersion jdkVersion) throws Exception {
-        // Multiple extracted properties before rest
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): string {
-                      const items = [{ a: "A", b: "B", c: "C", d: "D", e: "E" }]
-                      let result: string = ""
-                      for (const { a, b, c, ...rest } of items) {
+                      for (const { a = "default", ...rest } of items) {
                         result += a
-                        result += b
-                        result += c
                         result += ":"
                         let count: int = 0
                         for (const [k, v] of rest) {
@@ -375,96 +361,25 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("ABC:2", classA.getMethod("test").invoke(instance));
+        assertEquals("default:2", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRestWithMixedTypes(JdkVersion jdkVersion) throws Exception {
-        // Rest with mixed value types - collect values
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): string {
-                      const items = [{ str: "hello", num: 42, flag: true }]
-                      let result: string = ""
-                      for (const { str, ...rest } of items) {
-                        for (const [key, value] of rest) {
-                          result += value
-                          result += ","
-                        }
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("42,true,", classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testRestConstDeclaration(JdkVersion jdkVersion) throws Exception {
-        // Rest with const declaration
+    public void testRestWithEmptyRemaining(JdkVersion jdkVersion) throws Exception {
+        // Rest when all properties are extracted: rest = {}
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      const items = [{ id: 1, x: 10, y: 20 }]
-                      let sum: int = 0
-                      for (const { id, ...data } of items) {
-                        for (const [k, v] of data) {
-                          sum++
+                      const items = [{ a: 1, b: 2 }]
+                      let restSize: int = 0
+                      for (const { a, b, ...rest } of items) {
+                        for (const [k, v] of rest) {
+                          restSize++
                         }
                       }
-                      return sum
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(2, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testRestLetDeclaration(JdkVersion jdkVersion) throws Exception {
-        // Rest with let declaration
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      const items = [{ id: 1, x: 10, y: 20 }]
-                      let sum: int = 0
-                      for (let { id, ...data } of items) {
-                        for (const [k, v] of data) {
-                          sum++
-                        }
-                      }
-                      return sum
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(2, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testRestEmptyArray(JdkVersion jdkVersion) throws Exception {
-        // For-of over empty array with rest pattern
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      const items = []
-                      let count: int = 0
-                      for (const { id, ...rest } of items) {
-                        count++
-                      }
-                      return count
+                      return restSize
                     }
                   }
                 }""");
@@ -503,17 +418,17 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRestCollectingKeys(JdkVersion jdkVersion) throws Exception {
-        // Collect keys from rest
+    public void testRestWithMixedTypes(JdkVersion jdkVersion) throws Exception {
+        // Rest with mixed value types - collect values
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
-                      const items = [{ extracted: "X", keyA: "A", keyB: "B" }]
+                      const items = [{ str: "hello", num: 42, flag: true }]
                       let result: string = ""
-                      for (const { extracted, ...rest } of items) {
+                      for (const { str, ...rest } of items) {
                         for (const [key, value] of rest) {
-                          result += key
+                          result += value
                           result += ","
                         }
                       }
@@ -523,6 +438,91 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals("keyA,keyB,", classA.getMethod("test").invoke(instance));
+        assertEquals("42,true,", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRestWithMultipleExtracted(JdkVersion jdkVersion) throws Exception {
+        // Multiple extracted properties before rest
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): string {
+                      const items = [{ a: "A", b: "B", c: "C", d: "D", e: "E" }]
+                      let result: string = ""
+                      for (const { a, b, c, ...rest } of items) {
+                        result += a
+                        result += b
+                        result += c
+                        result += ":"
+                        let count: int = 0
+                        for (const [k, v] of rest) {
+                          count++
+                        }
+                        result += count
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("ABC:2", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRestWithRenamedProperty(JdkVersion jdkVersion) throws Exception {
+        // Rest with renamed property: { a: x, ...rest }
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): string {
+                      const items = [{ a: "X", b: "B", c: "C" }]
+                      let result: string = ""
+                      for (const { a: x, ...rest } of items) {
+                        result += x
+                        result += ":"
+                        let count: int = 0
+                        for (const [k, v] of rest) {
+                          count++
+                        }
+                        result += count
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("X:2", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRestWithReturn(JdkVersion jdkVersion) throws Exception {
+        // Rest with return statement - iterate to find value
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Object {
+                      const items = [{ id: 1, data: "first" }, { id: 2, data: "second" }]
+                      for (const { id, ...rest } of items) {
+                        if ((id as int) === 1) {
+                          for (const [key, value] of rest) {
+                            if (key === "data") {
+                              return value
+                            }
+                          }
+                        }
+                      }
+                      return "not found"
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("first", classA.getMethod("test").invoke(instance));
     }
 }
