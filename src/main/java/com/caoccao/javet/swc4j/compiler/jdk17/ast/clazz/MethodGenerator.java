@@ -28,6 +28,7 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
@@ -61,7 +62,8 @@ public final class MethodGenerator extends BaseAstProcessor {
                 Swc4jAstBlockStmt body = bodyOpt.get();
 
                 // Reset compilation context for this method
-                compiler.getMemory().resetCompilationContext();
+                // Pass isStatic so that static methods use slot 0 for first parameter (no 'this')
+                compiler.getMemory().resetCompilationContext(method.isStatic());
                 CompilationContext context = compiler.getMemory().getCompilationContext();
 
                 // Analyze function parameters and allocate local variable slots
@@ -137,6 +139,15 @@ public final class MethodGenerator extends BaseAstProcessor {
         // Process statements in the method body
         for (ISwc4jAstStmt stmt : body.getStmts()) {
             compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+        }
+
+        // Add implicit return for void methods if not already present
+        if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.VOID) {
+            // Check if the last bytecode is not already a return
+            byte[] bytecode = code.toByteArray();
+            if (bytecode.length == 0 || bytecode[bytecode.length - 1] != (byte) 0xB1) { // 0xB1 is return void
+                code.returnVoid();
+            }
         }
 
         return code;

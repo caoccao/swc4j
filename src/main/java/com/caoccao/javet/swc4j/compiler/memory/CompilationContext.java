@@ -29,6 +29,7 @@ import java.util.Stack;
  */
 public class CompilationContext {
     private final Stack<LoopLabelInfo> breakLabels;
+    private final Stack<String> classStack;
     private final Stack<LoopLabelInfo> continueLabels;
     private final Map<String, GenericTypeInfo> genericTypeInfoMap;
     private final Map<String, String> inferredTypes;
@@ -37,6 +38,7 @@ public class CompilationContext {
 
     public CompilationContext() {
         breakLabels = new Stack<>();
+        classStack = new Stack<>();
         continueLabels = new Stack<>();
         genericTypeInfoMap = new HashMap<>();
         inferredTypes = new HashMap<>();
@@ -49,6 +51,16 @@ public class CompilationContext {
             return null;
         }
         return breakLabels.peek();
+    }
+
+    /**
+     * Get the internal name of the current class being compiled.
+     * Used for resolving 'this' expressions.
+     *
+     * @return the internal class name (e.g., "com/example/MyClass"), or null if not in a class
+     */
+    public String getCurrentClassInternalName() {
+        return classStack.isEmpty() ? null : classStack.peek();
     }
 
     public LoopLabelInfo getCurrentContinueLabel() {
@@ -118,6 +130,16 @@ public class CompilationContext {
         }
     }
 
+    /**
+     * Pop the current class from the class stack.
+     * Call this when exiting a class scope.
+     */
+    public void popClass() {
+        if (!classStack.isEmpty()) {
+            classStack.pop();
+        }
+    }
+
     public void popContinueLabel() {
         if (!continueLabels.isEmpty()) {
             continueLabels.pop();
@@ -128,16 +150,46 @@ public class CompilationContext {
         breakLabels.push(labelInfo);
     }
 
+    /**
+     * Push a class onto the class stack.
+     * Call this when entering a class scope.
+     *
+     * @param internalName the internal class name (e.g., "com/example/MyClass")
+     */
+    public void pushClass(String internalName) {
+        classStack.push(internalName);
+    }
+
     public void pushContinueLabel(LoopLabelInfo labelInfo) {
         continueLabels.push(labelInfo);
     }
 
     public void reset() {
+        reset(false);
+    }
+
+    /**
+     * Reset the compilation context for a new method.
+     * Does NOT clear the class stack - class context is preserved across methods.
+     *
+     * @param isStatic true if this is for a static method (no 'this' parameter)
+     */
+    public void reset(boolean isStatic) {
         breakLabels.clear();
         continueLabels.clear();
         genericTypeInfoMap.clear();
         inferredTypes.clear();
-        localVariableTable.reset();
+        localVariableTable.reset(isStatic);
         tempIdCounter = 0;
+        // Note: classStack is NOT cleared - class context persists across method resets
+    }
+
+    /**
+     * Fully reset the compilation context including the class stack.
+     * Call this when starting a completely new compilation.
+     */
+    public void resetAll() {
+        reset(false);
+        classStack.clear();
     }
 }

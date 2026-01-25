@@ -89,9 +89,19 @@ public class LocalVariableTable {
     }
 
     public void reset() {
+        reset(false);
+    }
+
+    /**
+     * Reset the local variable table.
+     *
+     * @param isStatic true if this is for a static method (slot 0 is first parameter),
+     *                 false for instance methods (slot 0 is 'this')
+     */
+    public void reset(boolean isStatic) {
         allVariables.clear();
         scopes.clear();
         scopes.add(new HashMap<>());
-        nextIndex = 1;
+        nextIndex = isStatic ? 0 : 1;
     }
 }

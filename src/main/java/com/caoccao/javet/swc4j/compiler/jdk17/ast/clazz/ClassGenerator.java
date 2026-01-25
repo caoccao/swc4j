@@ -64,16 +64,24 @@ public final class ClassGenerator extends BaseAstProcessor {
         ClassWriter classWriter = new ClassWriter(internalClassName);
         ClassWriter.ConstantPool cp = classWriter.getConstantPool();
 
-        // Generate default constructor
-        generateDefaultConstructor(classWriter, cp);
+        // Push the current class onto the stack for 'this' resolution (supports nested classes)
+        compiler.getMemory().getCompilationContext().pushClass(internalClassName);
 
-        // Generate methods
-        for (ISwc4jAstClassMember member : clazz.getBody()) {
-            if (member instanceof Swc4jAstClassMethod method) {
-                compiler.getMethodGenerator().generate(classWriter, cp, method);
+        try {
+            // Generate default constructor
+            generateDefaultConstructor(classWriter, cp);
+
+            // Generate methods
+            for (ISwc4jAstClassMember member : clazz.getBody()) {
+                if (member instanceof Swc4jAstClassMethod method) {
+                    compiler.getMethodGenerator().generate(classWriter, cp, method);
+                }
             }
-        }
 
-        return classWriter.toByteArray();
+            return classWriter.toByteArray();
+        } finally {
+            // Pop the class from the stack when done
+            compiler.getMemory().getCompilationContext().popClass();
+        }
     }
 }

@@ -530,6 +530,14 @@ public final class TypeResolver {
             // null has no specific type - it's compatible with any reference type
             // Return null to indicate that the type should be determined by context
             return null;
+        } else if (expr instanceof Swc4jAstThisExpr) {
+            // 'this' refers to the current class instance
+            String currentClass = context.getCurrentClassInternalName();
+            if (currentClass != null) {
+                return "L" + currentClass + ";";
+            }
+            // Fallback to Object if no current class is set
+            return "Ljava/lang/Object;";
         } else if (expr instanceof Swc4jAstArrayLit) {
             // Array literal - maps to ArrayList
             return "Ljava/util/ArrayList;";

@@ -212,6 +212,8 @@ Existing tests in `TestCompileAstClass.java`:
 - Public class access modifier
 - Default constructor generation
 - Basic method generation
+- 'this' expression support (stack-based for nested classes)
+- Instance method calling other instance methods via 'this'
 
 ### Phase 2: Inheritance (extends) - Priority: HIGH
 
@@ -262,13 +264,13 @@ Existing tests in `TestCompileAstClass.java`:
 
 ### Phase 7: Static Members - Priority: MEDIUM
 
-**Status:** TO BE IMPLEMENTED
+**Status:** PARTIAL
 
-- Static field declaration
-- Static method declaration
-- Static field initializers
-- Static block (clinit)
-- Static member access
+- Static field declaration - TO BE IMPLEMENTED
+- Static method declaration - IMPLEMENTED
+- Static field initializers - TO BE IMPLEMENTED
+- Static block (clinit) - TO BE IMPLEMENTED
+- Static member access - TO BE IMPLEMENTED (calling static methods from instance methods)
 
 ### Phase 8: Access Modifiers - Priority: MEDIUM
 
@@ -983,18 +985,18 @@ Field:
 
 ## Success Criteria
 
-- [ ] Phase 1: Basic class declaration working
+- [x] Phase 1: Basic class declaration working
 - [ ] Phase 2: Class inheritance (extends) working
 - [ ] Phase 3: Abstract classes working
 - [ ] Phase 4: Interface implementation working
 - [ ] Phase 5: Constructors fully working
 - [ ] Phase 6: Instance fields working
-- [ ] Phase 7: Static members working
+- [x] Phase 7: Static methods working (static fields pending)
 - [ ] Phase 8: Access modifiers working
 - [ ] Phase 9: Decorators working (future)
 - [ ] Phase 10: Generics working (future)
-- [ ] All tests passing
-- [ ] Javadoc builds successfully
+- [x] All current tests passing
+- [x] Javadoc builds successfully
 
 ---
 

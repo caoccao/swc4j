@@ -227,6 +227,9 @@ Existing tests in `TestCompileAstFunction.java`:
 - Method name and descriptor
 - Basic body generation
 - Local variable allocation for parameters
+- 'this' expression support for instance method calls
+- Recursive function support (via 'this')
+- Mutually recursive function support (via 'this')
 
 ### Phase 2: Parameter Handling - Priority: HIGH
 
@@ -259,10 +262,11 @@ Existing tests in `TestCompileAstFunction.java`:
 
 **Status:** PARTIAL
 
-- Return type inference from simple expressions
-- Return type inference from variable types
-- Return type inference from literals
-- Complex expression type inference
+- Return type inference from simple expressions - IMPLEMENTED
+- Return type inference from variable types - IMPLEMENTED
+- Return type inference from literals - IMPLEMENTED
+- Return type inference from 'this' method calls - IMPLEMENTED
+- Complex expression type inference - PARTIAL
 
 ### Phase 6: Default Parameters - Priority: MEDIUM
 
@@ -1092,18 +1096,18 @@ return   // void
 
 ## Success Criteria
 
-- [ ] Phase 1: Basic function declaration working
-- [ ] Phase 2: All parameter types working
-- [ ] Phase 3: All return types working
-- [ ] Phase 4: Varargs fully working
-- [ ] Phase 5: Type inference complete
+- [x] Phase 1: Basic function declaration working
+- [x] Phase 2: All parameter types working
+- [x] Phase 3: All return types working
+- [x] Phase 4: Varargs fully working
+- [x] Phase 5: Type inference partial (basic + 'this' method calls)
 - [ ] Phase 6: Default parameters working
 - [ ] Phase 7: Overloading working (future)
 - [ ] Phase 8: Async functions working (future)
 - [ ] Phase 9: Generator functions working (future)
 - [ ] Phase 10: Decorators working (future)
-- [ ] All tests passing
-- [ ] Javadoc builds successfully
+- [x] All current tests passing
+- [x] Javadoc builds successfully
 
 ---
 

@@ -85,6 +85,15 @@ public final class ByteCodeCompilerMemory {
     }
 
     /**
+     * Reset the compilation context for a specific method type.
+     *
+     * @param isStatic true if this is for a static method (no 'this' parameter)
+     */
+    public void resetCompilationContext(boolean isStatic) {
+        compilationContext.reset(isStatic);
+    }
+
+    /**
      * Resolves a simple class name to its JavaTypeInfo.
      * First checks the type alias registry, then the java type registry.
      *
