@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting rest patterns (`...rest`) in TypeScript to JVM bytecode compilation. Rest patterns collect remaining elements/properties into a new array or object.
 
-**Current Status:** PARTIAL - Function parameter varargs implemented; object destructuring rest in for-of loops implemented (2026-01-25); array destructuring rest not implemented
+**Current Status:** PARTIAL - Function parameter varargs implemented; object and array destructuring rest in for-of loops implemented (2026-01-25)
 
 **Syntax:**
 ```typescript
@@ -137,7 +137,7 @@ istore_3
 
 ### Phase 2: Array Destructuring Rest - Priority: HIGH
 
-**Status:** Not implemented
+**Status:** IMPLEMENTED (2026-01-25) - For-of loops with array destructuring rest patterns
 
 Support rest pattern in array destructuring to collect remaining elements.
 
@@ -371,7 +371,7 @@ console.log(others);  // { y: 2, z: 3 }
 
 ### Phase 5: For-Of Loop with Rest - Priority: MEDIUM
 
-**Status:** PARTIAL (2026-01-25) - Object destructuring rest in for-of loops implemented; array destructuring rest not yet implemented
+**Status:** IMPLEMENTED (2026-01-25) - Both array and object destructuring rest in for-of loops implemented
 
 Support rest patterns in for-of loop variable declarations.
 
@@ -1160,17 +1160,17 @@ private void generateArrayRestExtraction(
 ## Success Criteria
 
 - [ ] Phase 1: Function parameter rest (varargs) fully working
-- [ ] Phase 2: Array destructuring rest implemented
-- [x] Phase 3: Object destructuring rest implemented (for-of loops)
+- [x] Phase 2: Array destructuring rest implemented (for-of loops, 18 tests)
+- [x] Phase 3: Object destructuring rest implemented (for-of loops, 19 tests)
 - [ ] Phase 4: Variable declaration with rest working
-- [x] Phase 5: For-of loop with rest working (object destructuring)
+- [x] Phase 5: For-of loop with rest working (array and object destructuring)
 - [ ] Phase 6: Nested rest patterns working
 - [ ] Phase 7: Assignment pattern rest working
-- [x] Comprehensive test coverage for all edge cases (19 tests for object destructuring)
+- [x] Comprehensive test coverage for all edge cases (37 tests total)
 - [x] Proper stack map frame generation
-- [x] Correct type inference for rest variables (LinkedHashMap)
+- [x] Correct type inference for rest variables (ArrayList for arrays, LinkedHashMap for objects)
 - [x] All tests passing
-- [ ] Javadoc builds successfully
+- [x] Javadoc builds successfully
 
 ---
 
@@ -1221,27 +1221,28 @@ private void generateArrayRestExtraction(
 
 ### Code Generation
 - [ ] Create `RestPatternGenerator.java`
-- [ ] Implement array rest extraction
+- [x] Implement array rest extraction (in ForOfStatementGenerator)
 - [x] Implement object rest extraction (in ForOfStatementGenerator)
 - [ ] Handle varargs type resolution
-- [ ] Generate proper backward jumps for rest loops
+- [x] Generate proper backward jumps for rest loops
 - [x] Implement stack map frame generation for rest loops
 
 ### Integration
 - [ ] Update VariableAnalyzer for rest pattern variables
-- [x] Update ForOfStatementGenerator for rest in loop variables (object destructuring)
+- [x] Update ForOfStatementGenerator for rest in loop variables (array and object destructuring)
 - [ ] Update VarDeclGenerator for rest in declarations
 - [ ] Handle nested rest patterns
 - [x] Track extracted keys for object rest
+- [x] Track rest start index for array rest
 
 ### Testing
 - [x] Create test directory `restpat/`
 - [ ] Create `TestCompileAstRestPatFunctionParam.java`
-- [ ] Create `TestCompileAstRestPatArrayDestructuring.java`
+- [x] Create `TestCompileAstRestPatArrayDestructuring.java` (18 tests)
 - [x] Create `TestCompileAstRestPatObjectDestructuring.java` (19 tests)
 - [ ] Add all phase tests
 - [x] Verify all tests pass
-- [ ] Verify javadoc builds
+- [x] Verify javadoc builds
 
 ---
 
