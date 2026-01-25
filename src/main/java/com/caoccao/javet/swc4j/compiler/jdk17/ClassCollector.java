@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassProp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
@@ -27,6 +28,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -119,6 +121,13 @@ public final class ClassCollector {
         // Register the class info
         compiler.getMemory().getScopedJavaTypeRegistry().registerClass(className, typeInfo);
 
+        // Analyze fields and register their types
+        for (ISwc4jAstClassMember member : clazz.getBody()) {
+            if (member instanceof Swc4jAstClassProp prop) {
+                processFieldProp(prop, typeInfo);
+            }
+        }
+
         // Analyze methods and register their return types
         for (ISwc4jAstClassMember member : clazz.getBody()) {
             if (member instanceof Swc4jAstClassMethod method) {
@@ -163,6 +172,33 @@ public final class ClassCollector {
                 }
             }
         }
+    }
+
+    private void processFieldProp(Swc4jAstClassProp prop, JavaTypeInfo typeInfo) {
+        String fieldName = prop.getKey().toString();
+        boolean isStatic = prop.isStatic();
+
+        // Determine field type from type annotation or initializer
+        String fieldDescriptor = "Ljava/lang/Object;"; // default
+
+        // Check type annotation first
+        if (prop.getTypeAnn().isPresent()) {
+            fieldDescriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(prop.getTypeAnn().get().getTypeAnn());
+        } else if (prop.getValue().isPresent()) {
+            // Infer type from initializer
+            try {
+                String inferredType = compiler.getTypeResolver().inferTypeFromExpr(prop.getValue().get());
+                if (inferredType != null) {
+                    fieldDescriptor = inferredType;
+                }
+            } catch (Swc4jByteCodeCompilerException e) {
+                // Ignore - use default type
+            }
+        }
+
+        // Create FieldInfo and register it
+        FieldInfo fieldInfo = new FieldInfo(fieldName, fieldDescriptor, isStatic, prop.getValue());
+        typeInfo.addField(fieldName, fieldInfo);
     }
 
     /**

@@ -272,6 +272,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder dup2_x1() {
+        code.add((byte) (0x5D)); // dup2_x1
+        return this;
+    }
+
     public CodeBuilder dup2_x2() {
         code.add((byte) (0x5E)); // dup2_x2
         return this;

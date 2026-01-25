@@ -255,12 +255,13 @@ Existing tests in `TestCompileAstClass.java`:
 
 ### Phase 6: Instance Fields - Priority: HIGH
 
-**Status:** TO BE IMPLEMENTED
+**Status:** IMPLEMENTED
 
 - Field declaration bytecode
 - Field initializers
 - Field access (getfield/putfield)
 - Field type annotations
+- Type inference for `this.field` expressions
 
 ### Phase 7: Static Members - Priority: MEDIUM
 
@@ -990,7 +991,7 @@ Field:
 - [ ] Phase 3: Abstract classes working
 - [ ] Phase 4: Interface implementation working
 - [ ] Phase 5: Constructors fully working
-- [ ] Phase 6: Instance fields working
+- [x] Phase 6: Instance fields working
 - [x] Phase 7: Static methods working (static fields pending)
 - [ ] Phase 8: Access modifiers working
 - [ ] Phase 9: Decorators working (future)
@@ -1009,6 +1010,17 @@ Field:
 - The `StackMapGenerator` was missing array operation handlers, causing compilation to hang when iterating primitive arrays inside for loops
 - Fixed by adding handlers for `iaload`, `laload`, `faload`, `daload`, `aaload`, `baload`, `caload`, `saload`, `arraylength`, `newarray`, and `anewarray` instructions
 - This fix enables methods that iterate over primitive arrays (e.g., `int[]`, `double[]`) to compile correctly
+
+**Instance Fields Support (2026-01-25):**
+- Added `FieldInfo` record class to store field metadata (name, descriptor, isStatic, initializer)
+- Updated `JavaTypeInfo` to store fields and provide field lookup
+- Updated `ClassCollector` to collect field information during class pre-processing
+- Updated `ClassGenerator` to generate field declarations and initialize fields in constructor
+- Updated `MemberExpressionGenerator` for `this.field` access (getfield instruction)
+- Updated `AssignExpressionGenerator` for `this.field = value` assignment (putfield instruction)
+- Updated `TypeResolver` to infer types for `this.field` expressions
+- Added `getfield`/`putfield`/`getstatic`/`putstatic` handlers to `StackMapGenerator`
+- Class registry lookup uses fallback pattern: try qualified name first, then simple name
 
 ---
 

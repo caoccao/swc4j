@@ -43,6 +43,7 @@ import java.util.Map;
 public final class JavaTypeInfo {
     private final String alias;
     private final Map<String, Integer> enumValues;
+    private final Map<String, FieldInfo> fields;
     private final String internalName;
     private final Map<String, List<MethodInfo>> methods;
     private final String packageName;
@@ -59,8 +60,13 @@ public final class JavaTypeInfo {
         this.internalName = internalName;
         this.type = type;
         this.methods = new HashMap<>();
+        this.fields = new HashMap<>();
         this.parentTypeInfos = new ArrayList<>();
         this.enumValues = new HashMap<>();
+    }
+
+    public void addField(String fieldName, FieldInfo fieldInfo) {
+        fields.put(fieldName, fieldInfo);
     }
 
     public void addMethod(String methodName, MethodInfo methodInfo) {
@@ -137,6 +143,14 @@ public final class JavaTypeInfo {
      */
     public Map<String, Integer> getEnumValues() {
         return enumValues;
+    }
+
+    public FieldInfo getField(String fieldName) {
+        return fields.get(fieldName);
+    }
+
+    public Map<String, FieldInfo> getFields() {
+        return fields;
     }
 
     public String getInternalName() {

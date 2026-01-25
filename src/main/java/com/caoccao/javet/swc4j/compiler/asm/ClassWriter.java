@@ -555,6 +555,41 @@ public class ClassWriter {
         }
 
         /**
+         * Get the field descriptor for a field reference at the given constant pool index.
+         * This looks up the field ref, then the name and type, then the UTF8 descriptor.
+         *
+         * @param index the constant pool index of the field ref
+         * @return the field descriptor string, or null if not found or not a field ref
+         */
+        public String getFieldDescriptor(int index) {
+            if (index <= 0 || index >= constants.size()) {
+                return null;
+            }
+            Object constant = constants.get(index);
+            int nameAndTypeIndex;
+            if (constant instanceof FieldRefInfo fieldRef) {
+                nameAndTypeIndex = fieldRef.nameAndTypeIndex;
+            } else {
+                return null;
+            }
+            if (nameAndTypeIndex <= 0 || nameAndTypeIndex >= constants.size()) {
+                return null;
+            }
+            Object nameAndType = constants.get(nameAndTypeIndex);
+            if (nameAndType instanceof NameAndTypeInfo natInfo) {
+                int descriptorIndex = natInfo.descriptorIndex;
+                if (descriptorIndex <= 0 || descriptorIndex >= constants.size()) {
+                    return null;
+                }
+                Object descriptor = constants.get(descriptorIndex);
+                if (descriptor instanceof Utf8Info utf8) {
+                    return utf8.value;
+                }
+            }
+            return null;
+        }
+
+        /**
          * Get the method descriptor for a method reference at the given constant pool index.
          * This looks up the method/interface method ref, then the name and type, then the UTF8 descriptor.
          *

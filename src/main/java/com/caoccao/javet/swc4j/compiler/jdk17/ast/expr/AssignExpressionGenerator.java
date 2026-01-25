@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
@@ -35,6 +36,8 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
+import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.ArrayList;
@@ -69,6 +72,55 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
         // Handle assignments like arr[1] = value or arr.length = 0
         var left = assignExpr.getLeft();
         if (left instanceof Swc4jAstMemberExpr memberExpr) {
+            // Handle this.field = value assignment
+            if (memberExpr.getObj() instanceof Swc4jAstThisExpr && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                String fieldName = propIdent.getSym();
+                String currentClassName = context.getCurrentClassInternalName();
+
+                if (currentClassName != null) {
+                    // Look up the field in the class registry - try qualified name first, then simple name
+                    String qualifiedName = currentClassName.replace('/', '.');
+                    JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+                    if (typeInfo == null) {
+                        // Try simple name
+                        int lastSlash = currentClassName.lastIndexOf('/');
+                        String simpleName = lastSlash >= 0 ? currentClassName.substring(lastSlash + 1) : currentClassName;
+                        typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+                    }
+
+                    if (typeInfo != null) {
+                        FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                        if (fieldInfo != null) {
+                            // Generate: aload 0; <value>; dup_x1; putfield
+                            code.aload(0); // load this
+                            compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+
+                            // Convert value type if needed
+                            String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
+                            if (valueType != null && !valueType.equals(fieldInfo.descriptor())) {
+                                TypeConversionUtils.unboxWrapperType(code, cp, valueType);
+                                String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
+                                if (valuePrimitive != null && !valuePrimitive.equals(fieldInfo.descriptor())) {
+                                    TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, fieldInfo.descriptor());
+                                }
+                            }
+
+                            // Duplicate value for assignment expression result (assignment returns the assigned value)
+                            String fieldDesc = fieldInfo.descriptor();
+                            if ("D".equals(fieldDesc) || "J".equals(fieldDesc)) {
+                                code.dup2_x1(); // For wide types (double, long)
+                            } else {
+                                code.dup_x1(); // For single-slot types
+                            }
+
+                            int fieldRef = cp.addFieldRef(currentClassName, fieldName, fieldInfo.descriptor());
+                            code.putfield(fieldRef);
+                            return;
+                        }
+                    }
+                }
+            }
+
             String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
 
             if (objType != null && objType.startsWith("[")) {

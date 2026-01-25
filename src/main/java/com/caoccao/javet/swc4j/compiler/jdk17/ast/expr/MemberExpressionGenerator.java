@@ -19,12 +19,15 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
+import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMemberExpr> {
@@ -38,6 +41,35 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
             ClassWriter.ConstantPool cp,
             Swc4jAstMemberExpr memberExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        // Handle this.field access for instance fields
+        if (memberExpr.getObj() instanceof Swc4jAstThisExpr && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+            String fieldName = propIdent.getSym();
+            String currentClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+
+            if (currentClassName != null) {
+                // Look up the field in the class registry - try qualified name first, then simple name
+                String qualifiedName = currentClassName.replace('/', '.');
+                JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+                if (typeInfo == null) {
+                    // Try simple name
+                    int lastSlash = currentClassName.lastIndexOf('/');
+                    String simpleName = lastSlash >= 0 ? currentClassName.substring(lastSlash + 1) : currentClassName;
+                    typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+                }
+
+                if (typeInfo != null) {
+                    FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                    if (fieldInfo != null) {
+                        // Generate getfield instruction
+                        code.aload(0); // load this
+                        int fieldRef = cp.addFieldRef(currentClassName, fieldName, fieldInfo.descriptor());
+                        code.getfield(fieldRef);
+                        return;
+                    }
+                }
+            }
+        }
+
         // Handle member access on arrays (e.g., arr.length or arr[index])
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
 

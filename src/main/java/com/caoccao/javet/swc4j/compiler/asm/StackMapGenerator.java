@@ -626,6 +626,14 @@ public class StackMapGenerator {
     }
 
     /**
+     * Push the appropriate verification type onto the stack based on field descriptor.
+     * Field descriptors have the same format as return types, so we reuse the same logic.
+     */
+    private void pushFieldType(List<VerificationType> stack, String fieldDescriptor) {
+        pushReturnType(stack, fieldDescriptor);
+    }
+
+    /**
      * Push the appropriate verification type onto the stack based on return type.
      */
     private void pushReturnType(List<VerificationType> stack, String returnType) {
@@ -935,6 +943,53 @@ public class StackMapGenerator {
                     } else {
                         stack.add(VerificationType.object("java/lang/Object"));
                     }
+                }
+            }
+            // Field access
+            case 0xB2 -> // getstatic - pop nothing, push field value
+            {
+                int fieldIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
+                String fieldDescriptor = (constantPool != null) ? constantPool.getFieldDescriptor(fieldIndex) : null;
+                if (fieldDescriptor != null) {
+                    pushFieldType(stack, fieldDescriptor);
+                } else {
+                    stack.add(VerificationType.object("java/lang/Object"));
+                }
+            }
+            case 0xB3 -> // putstatic - pop value, push nothing
+            {
+                int fieldIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
+                String fieldDescriptor = (constantPool != null) ? constantPool.getFieldDescriptor(fieldIndex) : null;
+                if (fieldDescriptor != null) {
+                    // Pop based on field type (double/long take 2 slots conceptually but are single stack items)
+                    if (!stack.isEmpty()) {
+                        stack.remove(stack.size() - 1);
+                    }
+                } else if (!stack.isEmpty()) {
+                    stack.remove(stack.size() - 1);
+                }
+            }
+            case 0xB4 -> // getfield - pop objectref, push field value
+            {
+                int fieldIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
+                String fieldDescriptor = (constantPool != null) ? constantPool.getFieldDescriptor(fieldIndex) : null;
+                if (!stack.isEmpty()) {
+                    stack.remove(stack.size() - 1); // pop objectref
+                }
+                if (fieldDescriptor != null) {
+                    pushFieldType(stack, fieldDescriptor);
+                } else {
+                    stack.add(VerificationType.object("java/lang/Object"));
+                }
+            }
+            case 0xB5 -> // putfield - pop objectref and value, push nothing
+            {
+                // Pop value first, then objectref
+                if (!stack.isEmpty()) {
+                    stack.remove(stack.size() - 1); // pop value
+                }
+                if (!stack.isEmpty()) {
+                    stack.remove(stack.size() - 1); // pop objectref
                 }
             }
             // Object creation

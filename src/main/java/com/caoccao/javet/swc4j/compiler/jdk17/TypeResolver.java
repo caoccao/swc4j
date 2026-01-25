@@ -33,6 +33,8 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
+import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
@@ -545,6 +547,31 @@ public final class TypeResolver {
             // Object literal - maps to LinkedHashMap
             return "Ljava/util/LinkedHashMap;";
         } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
+            // Handle this.field access for instance fields
+            if (memberExpr.getObj() instanceof Swc4jAstThisExpr && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                String fieldName = propIdent.getSym();
+                String currentClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+
+                if (currentClassName != null) {
+                    // Look up the field in the class registry - try qualified name first, then simple name
+                    String qualifiedName = currentClassName.replace('/', '.');
+                    JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+                    if (typeInfo == null) {
+                        // Try simple name
+                        int lastSlash = currentClassName.lastIndexOf('/');
+                        String simpleName = lastSlash >= 0 ? currentClassName.substring(lastSlash + 1) : currentClassName;
+                        typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+                    }
+
+                    if (typeInfo != null) {
+                        FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                        if (fieldInfo != null) {
+                            return fieldInfo.descriptor();
+                        }
+                    }
+                }
+            }
+
             // Member expression - handle array-like properties
             String objType = inferTypeFromExpr(memberExpr.getObj());
 
