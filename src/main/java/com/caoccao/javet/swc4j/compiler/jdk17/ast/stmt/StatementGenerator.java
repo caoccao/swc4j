@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstParenExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUpdateExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
@@ -124,11 +125,14 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
         ISwc4jAstExpr expr = exprStmt.getExpr();
         compiler.getExpressionGenerator().generate(code, cp, expr, null);
 
+        // Unwrap paren expressions to check the inner expression type
+        ISwc4jAstExpr unwrappedExpr = expr.unParenExpr();
+
         // Assignment and update expressions leave values on the stack that need to be popped
         // Call expressions handle their own return values (already popped if needed)
-        if (expr instanceof Swc4jAstAssignExpr || expr instanceof Swc4jAstUpdateExpr) {
+        if (unwrappedExpr instanceof Swc4jAstAssignExpr || unwrappedExpr instanceof Swc4jAstUpdateExpr) {
             // Assignment and update expressions leave the value on the stack
-            String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
+            String exprType = compiler.getTypeResolver().inferTypeFromExpr(unwrappedExpr);
             if (exprType != null && !("V".equals(exprType))) {
                 // Expression leaves a value, pop it
                 // Use pop2 for wide types (double, long)
@@ -137,6 +141,9 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
                 } else {
                     code.pop();
                 }
+            } else if (exprType == null) {
+                // If type inference fails, still pop since assignment leaves a value
+                code.pop();
             }
         }
         // Note: CallExpr already pops its return value in generateCallExpr

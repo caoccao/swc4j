@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting rest patterns (`...rest`) in TypeScript to JVM bytecode compilation. Rest patterns collect remaining elements/properties into a new array or object.
 
-**Current Status:** PARTIAL - Function parameter varargs implemented; object and array destructuring rest in for-of loops and variable declarations implemented (2026-01-25)
+**Current Status:** PARTIAL - Function parameter varargs implemented; object and array destructuring rest in for-of loops, variable declarations, and assignment expressions implemented (2026-01-25)
 
 **Syntax:**
 ```typescript
@@ -451,7 +451,7 @@ const { x, nested: { y, ...innerRest }, ...outerRest } = obj;
 
 ### Phase 7: Assignment Pattern Rest - Priority: LOW
 
-**Status:** Not implemented
+**Status:** IMPLEMENTED (2026-01-25) - Array and object destructuring rest in assignment expressions
 
 Support rest patterns in assignment expressions (not just declarations).
 
@@ -1165,8 +1165,8 @@ private void generateArrayRestExtraction(
 - [x] Phase 4: Variable declaration with rest working (20 tests)
 - [x] Phase 5: For-of loop with rest working (array and object destructuring)
 - [ ] Phase 6: Nested rest patterns working
-- [ ] Phase 7: Assignment pattern rest working
-- [x] Comprehensive test coverage for all edge cases (57 tests total)
+- [x] Phase 7: Assignment pattern rest working (17 tests)
+- [x] Comprehensive test coverage for all edge cases (74 tests total)
 - [x] Proper stack map frame generation
 - [x] Correct type inference for rest variables (ArrayList for arrays, LinkedHashMap for objects)
 - [x] All tests passing
