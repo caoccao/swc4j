@@ -4,12 +4,15 @@
 
 This document outlines the implementation plan for supporting for-of loops in TypeScript to JVM bytecode compilation. For-of loops iterate over the **values** of an iterable object, unlike for-in which iterates over keys/indices.
 
-**Current Status:** COMPLETED (2026-01-24)
+**Current Status:** COMPLETED (2026-01-25)
 
 **Implementation Summary:**
-- 72 tests passing
+- 90 tests passing (72 original + 18 object destructuring tests)
 - Supports ArrayList, String, LinkedHashMap, and Set iteration
 - Supports [key, value] destructuring for Map iteration
+- Supports { name, age } object destructuring for iterating over array of objects
+- Supports renamed properties ({ name: n }) in object destructuring
+- Supports default values ({ name = "default" }) with string defaults
 - Break/continue with labels supported
 - Nested for-of loops working
 - Object type concatenation requires separate statements (e.g., `result += v1; result += v2;` instead of `result += v1 + v2`)
@@ -34,6 +37,7 @@ for (const [key, value] of map) { console.log(key, value); }
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/forofstmt/TestCompileAstForOfStmtBreakContinue.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/forofstmt/TestCompileAstForOfStmtNested.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/forofstmt/TestCompileAstForOfStmtEdgeCases.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/forofstmt/TestCompileAstForOfStmtObjectDestructuring.java`
 
 **AST Definition:** [Swc4jAstForOfStmt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstForOfStmt.java)
 
@@ -1587,14 +1591,14 @@ private void storeLoopVariable(CodeBuilder code, ClassWriter.ConstantPool cp, IS
 ## Success Criteria
 
 - [x] All 13 phases implemented (core phases completed, async not applicable)
-- [x] Comprehensive test coverage for all edge cases (72 tests)
+- [x] Comprehensive test coverage for all edge cases (90 tests)
 - [x] Proper stack map frame generation
 - [x] Support for arrays, strings, sets, maps
 - [x] Correct value iteration (not keys like for-in)
 - [x] Support for break and continue statements
 - [x] Support for labeled break and continue
 - [x] Array destructuring support (Map [key, value])
-- [ ] Object destructuring support (not implemented - use for-in for objects)
+- [x] Object destructuring support ({ name, age } for array of objects)
 - [x] Proper variable scoping (note: true shadowing limited - inferredTypes not scope-aware)
 - [x] Type detection for right-hand expression
 - [x] Integration with expression generator
@@ -1618,6 +1622,8 @@ private void storeLoopVariable(CodeBuilder code, ClassWriter.ConstantPool cp, IS
 10. **Variable Shadowing:** True variable shadowing is limited because `inferredTypes` map is not scope-aware. Loop variables with same name as outer variables will override the type.
 11. **Nested For-Of with Casted String:** Iterating over a casted string (e.g., `for (let char of (word as string))`) requires storing in intermediate variable first.
 12. **ArrayList.push():** Method calls on ArrayList (like `push()`) are not fully supported. Use primitive returns and string concatenation patterns instead.
+13. **Primitive Default Values in Object Destructuring:** Default values with primitive types (e.g., `{ x = 0 }`) are not supported. Use string defaults (e.g., `{ x = "0" }`) instead.
+14. **Rest Patterns in Object Destructuring:** Rest patterns like `{ ...rest }` are not yet supported.
 
 ---
 

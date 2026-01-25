@@ -16,11 +16,19 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstArrayPat;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPatProp;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstKeyValuePatProp;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstObjectPat;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstForOfStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
@@ -217,6 +225,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
     /**
      * Generate bytecode for iterating over an iterable (ArrayList, Set) using iterator.
      * Values are obtained directly via iterator.next() - no conversion needed.
+     * Supports object destructuring patterns like { name, age } for iterating over array of maps.
      */
     private void generateIteratorIteration(
             CodeBuilder code,
@@ -226,8 +235,28 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
-        // Initialize loop variable with Object type (for-of values are objects)
-        int valueSlot = initializeLoopVariable(code, forOfStmt.getLeft(), "Ljava/lang/Object;");
+        // Check for object destructuring pattern { name, age }
+        ISwc4jAstForHead left = forOfStmt.getLeft();
+        boolean hasObjectDestructuring = false;
+        Swc4jAstObjectPat objectPat = null;
+        int tempElementSlot = -1;
+
+        if (left instanceof Swc4jAstVarDecl varDecl && !varDecl.getDecls().isEmpty()) {
+            Swc4jAstVarDeclarator decl = varDecl.getDecls().get(0);
+            ISwc4jAstPat name = decl.getName();
+            if (name instanceof Swc4jAstObjectPat op) {
+                hasObjectDestructuring = true;
+                objectPat = op;
+                // Allocate variables for each property in the object pattern
+                initializeObjectPatternVariables(code, context, objectPat);
+            }
+        }
+
+        int valueSlot = -1;
+        if (!hasObjectDestructuring) {
+            // Initialize loop variable with Object type (for-of values are objects)
+            valueSlot = initializeLoopVariable(code, forOfStmt.getLeft(), "Ljava/lang/Object;");
+        }
 
         // 1. Generate right expression (iterable)
         compiler.getExpressionGenerator().generate(code, cp, forOfStmt.getRight(), null);
@@ -257,8 +286,20 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         int nextRef = cp.addInterfaceMethodRef("java/util/Iterator", "next", "()Ljava/lang/Object;");
         code.invokeinterface(nextRef, 1);
 
-        // 8. Store in loop variable (NO conversion - keep actual value)
-        code.astore(valueSlot);
+        if (hasObjectDestructuring) {
+            // 8a. Handle object destructuring - element is a Map
+            // Cast to Map and store temporarily
+            int mapClass = cp.addClass("java/util/Map");
+            code.checkcast(mapClass);
+            tempElementSlot = context.getLocalVariableTable().allocateVariable("$element", "Ljava/util/Map;");
+            code.astore(tempElementSlot);
+
+            // Extract each property from the map
+            generateObjectDestructuringExtraction(code, cp, context, objectPat, tempElementSlot);
+        } else {
+            // 8b. Store in loop variable (NO conversion - keep actual value)
+            code.astore(valueSlot);
+        }
 
         // 9. Setup break/continue labels
         LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
@@ -300,6 +341,159 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
             int offset = testLabel - patchInfo.opcodePos();
             code.patchShort(patchInfo.offsetPos(), offset);
+        }
+    }
+
+    /**
+     * Extract property name from ISwc4jAstPropName.
+     *
+     * @param propName the property name AST node
+     * @return the string representation of the property name
+     * @throws Swc4jByteCodeCompilerException if the property name type is not supported
+     */
+    private String extractPropertyName(ISwc4jAstPropName propName) throws Swc4jByteCodeCompilerException {
+        if (propName instanceof Swc4jAstIdentName identName) {
+            return identName.getSym();
+        } else if (propName instanceof Swc4jAstStr str) {
+            return str.getValue();
+        } else {
+            throw new Swc4jByteCodeCompilerException(propName,
+                    "Unsupported property name type in object destructuring: " + propName.getClass().getName());
+        }
+    }
+
+    /**
+     * Generate bytecode to extract properties from a Map for object destructuring.
+     * For pattern { name, age }, generates: name = map.get("name"), age = map.get("age")
+     * Supports shorthand properties ({ name }), renamed properties ({ name: n }),
+     * and default values ({ name = "default" }).
+     *
+     * @param code         the code builder
+     * @param cp           the constant pool
+     * @param context      the compilation context
+     * @param objectPat    the object pattern
+     * @param mapSlot      the local variable slot containing the map
+     * @throws Swc4jByteCodeCompilerException if code generation fails
+     */
+    private void generateObjectDestructuringExtraction(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            CompilationContext context,
+            Swc4jAstObjectPat objectPat,
+            int mapSlot) throws Swc4jByteCodeCompilerException {
+        int mapGetRef = cp.addInterfaceMethodRef("java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
+
+        for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
+            if (prop instanceof Swc4jAstAssignPatProp assignProp) {
+                // Shorthand property: { name } or { name = defaultValue }
+                String varName = assignProp.getKey().getId().getSym();
+                var variable = context.getLocalVariableTable().getVariable(varName);
+                if (variable == null) {
+                    throw new Swc4jByteCodeCompilerException(assignProp, "Variable not found: " + varName);
+                }
+
+                // Load map and call get(key)
+                code.aload(mapSlot);
+                int stringIndex = cp.addString(varName);
+                code.ldc(stringIndex);
+                code.invokeinterface(mapGetRef, 2);
+
+                // Handle default value if present
+                if (assignProp.getValue().isPresent()) {
+                    // Stack: [value] (may be null)
+                    // Store value first, then check null
+                    code.astore(variable.index()); // Stack: []
+                    code.aload(variable.index());  // Stack: [value]
+                    code.ifnonnull(0); // Placeholder - jump if not null. Stack: []
+                    int skipDefaultPos = code.getCurrentOffset() - 2;
+
+                    // Value is null, generate default value and store
+                    compiler.getExpressionGenerator().generate(code, cp, assignProp.getValue().get(), null);
+                    code.astore(variable.index()); // Stack: []
+
+                    // Patch the skip jump
+                    int afterDefaultLabel = code.getCurrentOffset();
+                    int skipOffset = afterDefaultLabel - (skipDefaultPos - 1);
+                    code.patchShort(skipDefaultPos, (short) skipOffset);
+                } else {
+                    // Store the value
+                    code.astore(variable.index());
+                }
+
+            } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
+                // Renamed property: { name: n }
+                String keyName = extractPropertyName(keyValueProp.getKey());
+                ISwc4jAstPat valuePat = keyValueProp.getValue();
+
+                if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
+                    String varName = bindingIdent.getId().getSym();
+                    var variable = context.getLocalVariableTable().getVariable(varName);
+                    if (variable == null) {
+                        throw new Swc4jByteCodeCompilerException(keyValueProp, "Variable not found: " + varName);
+                    }
+
+                    // Load map and call get(key)
+                    code.aload(mapSlot);
+                    int stringIndex = cp.addString(keyName);
+                    code.ldc(stringIndex);
+                    code.invokeinterface(mapGetRef, 2);
+
+                    // Store the value
+                    code.astore(variable.index());
+                } else {
+                    throw new Swc4jByteCodeCompilerException(keyValueProp,
+                            "Unsupported value pattern type in object destructuring: " + valuePat.getClass().getName());
+                }
+
+            } else if (prop instanceof Swc4jAstRestPat restPat) {
+                // Rest property: { ...rest } - not yet supported
+                throw new Swc4jByteCodeCompilerException(restPat,
+                        "Rest patterns in object destructuring are not yet supported");
+            } else {
+                throw new Swc4jByteCodeCompilerException(prop,
+                        "Unsupported property type in object destructuring: " + prop.getClass().getName());
+            }
+        }
+    }
+
+    /**
+     * Initialize variables for all properties in an object pattern.
+     *
+     * @param code      the code builder
+     * @param context   the compilation context
+     * @param objectPat the object pattern
+     * @throws Swc4jByteCodeCompilerException if initialization fails
+     */
+    private void initializeObjectPatternVariables(
+            CodeBuilder code,
+            CompilationContext context,
+            Swc4jAstObjectPat objectPat) throws Swc4jByteCodeCompilerException {
+        for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
+            if (prop instanceof Swc4jAstAssignPatProp assignProp) {
+                // Shorthand property: { name }
+                String varName = assignProp.getKey().getId().getSym();
+                int slot = context.getLocalVariableTable().allocateVariable(varName, "Ljava/lang/Object;");
+                context.getInferredTypes().put(varName, "Ljava/lang/Object;");
+                code.aconst_null();
+                code.astore(slot);
+
+            } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
+                // Renamed property: { name: n }
+                ISwc4jAstPat valuePat = keyValueProp.getValue();
+                if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
+                    String varName = bindingIdent.getId().getSym();
+                    int slot = context.getLocalVariableTable().allocateVariable(varName, "Ljava/lang/Object;");
+                    context.getInferredTypes().put(varName, "Ljava/lang/Object;");
+                    code.aconst_null();
+                    code.astore(slot);
+                } else {
+                    throw new Swc4jByteCodeCompilerException(keyValueProp,
+                            "Unsupported value pattern type in object destructuring: " + valuePat.getClass().getName());
+                }
+
+            } else if (prop instanceof Swc4jAstRestPat) {
+                // Rest property - not yet supported, skip initialization
+            }
         }
     }
 
