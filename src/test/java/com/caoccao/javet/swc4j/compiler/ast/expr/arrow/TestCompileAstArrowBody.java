@@ -21,9 +21,8 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.IntPredicate;
-import java.util.function.IntUnaryOperator;
+import java.util.List;
+import java.util.function.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -88,6 +87,34 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testBlockBodyConditionalReturns(JdkVersion jdkVersion) throws Exception {
+        // Edge case 26: Block body - conditional returns
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    getClamp(): IntUnaryOperator {
+                      return (x: int) => {
+                        if (x < 0) return 0
+                        if (x > 100) return 100
+                        return x
+                      }
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntUnaryOperator) classA.getMethod("getClamp").invoke(instance);
+
+        assertEquals(
+                List.of(0, 0, 50, 100, 100),
+                List.of(fn.applyAsInt(-10), fn.applyAsInt(0), fn.applyAsInt(50),
+                        fn.applyAsInt(100), fn.applyAsInt(150)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testBlockBodyEmpty(JdkVersion jdkVersion) throws Exception {
         // Edge case 22: Block body empty (void return)
         var map = getCompiler(jdkVersion).compile("""
@@ -106,6 +133,60 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
         assertNotNull(fn);
         // Just verify it doesn't throw
         ((Runnable) fn).run();
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testBlockBodyForLoop(JdkVersion jdkVersion) throws Exception {
+        // Edge case 27 (extended): Block body with for loop
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    getSum(): IntUnaryOperator {
+                      return (n: int) => {
+                        let sum: int = 0
+                        for (let i: int = 1; i <= n; i = i + 1) {
+                          sum = sum + i
+                        }
+                        return sum
+                      }
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntUnaryOperator) classA.getMethod("getSum").invoke(instance);
+
+        assertEquals(
+                List.of(0, 1, 3, 6, 10, 55),
+                List.of(fn.applyAsInt(0), fn.applyAsInt(1), fn.applyAsInt(2),
+                        fn.applyAsInt(3), fn.applyAsInt(4), fn.applyAsInt(10)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testBlockBodyNoReturnVoid(JdkVersion jdkVersion) throws Exception {
+        // Edge case 25: Block body - no return (void)
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntConsumer } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    getConsumer(): IntConsumer {
+                      return (x: int) => {
+                        let temp: int = x * 2
+                        temp = temp + 1
+                      }
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntConsumer) classA.getMethod("getConsumer").invoke(instance);
+        // Just verify it doesn't throw - no observable side effect in this simple version
+        fn.accept(5);
     }
 
     @ParameterizedTest
@@ -163,6 +244,51 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testExpressionBodyBinaryOperation(JdkVersion jdkVersion) throws Exception {
+        // Edge case 19: Expression body - binary operation
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    getCompute(): IntUnaryOperator {
+                      return (x: int) => x + x * 2
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntUnaryOperator) classA.getMethod("getCompute").invoke(instance);
+
+        assertEquals(
+                List.of(3, 15, 30),
+                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testExpressionBodyMethodCall(JdkVersion jdkVersion) throws Exception {
+        // Edge case 20: Expression body - method call on captured String
+        var map = getCompiler(jdkVersion).compile("""
+                import { Supplier } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    getValue(): Supplier {
+                      const s: String = "hello"
+                      return () => s
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (Supplier<?>) classA.getMethod("getValue").invoke(instance);
+
+        assertEquals("hello", fn.get());
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testExpressionBodyPrimitiveReturn(JdkVersion jdkVersion) throws Exception {
         // Edge case 15: Expression body with primitive return
         var map = getCompiler(jdkVersion).compile("""
@@ -180,5 +306,36 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);
         assertEquals(10, ((IntUnaryOperator) fn).applyAsInt(5));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testExpressionBodyTernary(JdkVersion jdkVersion) throws Exception {
+        // Edge case 18: Expression body - ternary
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    getAbs(): IntUnaryOperator {
+                      return (x: int) => x > 0 ? x : -x
+                    }
+                    getMax(): IntUnaryOperator {
+                      return (x: int) => x > 100 ? 100 : x
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+
+        var absFn = (IntUnaryOperator) classA.getMethod("getAbs").invoke(instance);
+        var maxFn = (IntUnaryOperator) classA.getMethod("getMax").invoke(instance);
+
+        assertEquals(
+                List.of(5, 5, 0),
+                List.of(absFn.applyAsInt(5), absFn.applyAsInt(-5), absFn.applyAsInt(0)));
+        assertEquals(
+                List.of(50, 100, 100),
+                List.of(maxFn.applyAsInt(50), maxFn.applyAsInt(100), maxFn.applyAsInt(150)));
     }
 }

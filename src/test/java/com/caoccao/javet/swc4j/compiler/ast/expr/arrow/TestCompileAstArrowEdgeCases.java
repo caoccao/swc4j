@@ -21,6 +21,8 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.util.List;
+import java.util.function.IntPredicate;
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
@@ -100,6 +102,26 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testArrowCaptureStaticField(JdkVersion jdkVersion) throws Exception {
+        // Edge case 39: Capture static field
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntSupplier } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    static multiplier: int = 10
+                    static getMultiplied(x: int): IntSupplier {
+                      return () => x * A.multiplier
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var fn = (IntSupplier) classA.getMethod("getMultiplied", int.class).invoke(null, 5);
+        assertEquals(50, fn.getAsInt());
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testArrowCaptureThisAndLocalVars(JdkVersion jdkVersion) throws Exception {
         // Edge case 33: Capture both this and local variables
         var map = getCompiler(jdkVersion).compile("""
@@ -122,6 +144,72 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testArrowInFieldInitializer(JdkVersion jdkVersion) throws Exception {
+        // Edge case 49: As field initializer (simplified - stores as field)
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    processor: IntUnaryOperator = (x: int) => x * 2
+                    getProcessor(): IntUnaryOperator {
+                      return this.processor
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntUnaryOperator) classA.getMethod("getProcessor").invoke(instance);
+        assertEquals(10, fn.applyAsInt(5));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrowInStaticMethod(JdkVersion jdkVersion) throws Exception {
+        // Edge case 57: Arrow inside static method
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    static getDoubler(): IntUnaryOperator {
+                      return (x: int) => x * 2
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var fn = (IntUnaryOperator) classA.getMethod("getDoubler").invoke(null);
+
+        assertEquals(
+                List.of(2, 10, 20),
+                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrowWithMultiParamCapture(JdkVersion jdkVersion) throws Exception {
+        // Arrow capturing multiple parameters
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    createAdder(a: int, b: int): IntUnaryOperator {
+                      return (x: int) => x + a + b
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntUnaryOperator) classA.getMethod("createAdder", int.class, int.class).invoke(instance, 10, 5);
+
+        assertEquals(
+                List.of(15, 16, 25, 115),
+                List.of(fn.applyAsInt(0), fn.applyAsInt(1), fn.applyAsInt(10), fn.applyAsInt(100)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testArrowWithNestedTernary(JdkVersion jdkVersion) throws Exception {
         // Test arrow with nested ternary
         var map = getCompiler(jdkVersion).compile("""
@@ -140,5 +228,40 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
         assertEquals(1, fn.applyAsInt(5));
         assertEquals(-1, fn.applyAsInt(-5));
         assertEquals(0, fn.applyAsInt(0));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMultipleArrowsDifferentTypes(JdkVersion jdkVersion) throws Exception {
+        // Multiple arrows with different functional interfaces
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                import { IntSupplier } from 'java.util.function'
+                import { IntPredicate } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    getDoubler(): IntUnaryOperator {
+                      return (x: int) => x * 2
+                    }
+                    getConstant(): IntSupplier {
+                      return () => 42
+                    }
+                    getPositive(): IntPredicate {
+                      return (x: int) => x > 0
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+
+        var doubler = (IntUnaryOperator) classA.getMethod("getDoubler").invoke(instance);
+        var constant = (IntSupplier) classA.getMethod("getConstant").invoke(instance);
+        var positive = (IntPredicate) classA.getMethod("getPositive").invoke(instance);
+
+        assertEquals(
+                List.of(10, 42, true, false),
+                List.of(doubler.applyAsInt(5), constant.getAsInt(),
+                        positive.test(5), positive.test(-5)));
     }
 }

@@ -22,7 +22,9 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstBlockStmtOrExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -311,6 +313,12 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
     private String extractParamName(ISwc4jAstPat param) {
         if (param instanceof Swc4jAstBindingIdent bindingIdent) {
             return bindingIdent.getId().getSym();
+        } else if (param instanceof Swc4jAstRestPat restPat) {
+            // Rest parameter: ...args -> extract "args"
+            return extractParamName(restPat.getArg());
+        } else if (param instanceof Swc4jAstAssignPat assignPat) {
+            // Default parameter: x = 10 -> extract "x"
+            return extractParamName(assignPat.getLeft());
         }
         return null;
     }

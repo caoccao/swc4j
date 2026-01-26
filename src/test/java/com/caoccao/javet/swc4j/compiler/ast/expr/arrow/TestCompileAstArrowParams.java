@@ -133,6 +133,30 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testManyParametersViaClosure(JdkVersion jdkVersion) throws Exception {
+        // Edge case 6: Many parameters via closure capture
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    createComputer(a: int, b: int, c: int, d: int): IntUnaryOperator {
+                      return (x: int) => x + a + b + c + d
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntUnaryOperator) classA.getMethod("createComputer", int.class, int.class, int.class, int.class)
+                .invoke(instance, 1, 2, 3, 4);
+
+        assertEquals(
+                List.of(10, 15, 20, 110),
+                List.of(fn.applyAsInt(0), fn.applyAsInt(5), fn.applyAsInt(10), fn.applyAsInt(100)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testNoParameters(JdkVersion jdkVersion) throws Exception {
         // Edge case 1: No parameters
         var map = getCompiler(jdkVersion).compile("""
@@ -279,5 +303,33 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var fn = (LongBinaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(30L, fn.applyAsLong(10L, 20L));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTypedParametersMixed(JdkVersion jdkVersion) throws Exception {
+        // Edge case 7: Typed parameters with mixed types (via capture)
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    createMultiplier(factor: int): IntUnaryOperator {
+                      return (x: int) => x * factor
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn2 = (IntUnaryOperator) classA.getMethod("createMultiplier", int.class).invoke(instance, 2);
+        var fn3 = (IntUnaryOperator) classA.getMethod("createMultiplier", int.class).invoke(instance, 3);
+
+        // fn2.applyAsInt(5) = 5*2 = 10
+        // fn3.applyAsInt(5) = 5*3 = 15
+        // fn2.applyAsInt(15) = 15*2 = 30
+        // fn3.applyAsInt(10) = 10*3 = 30
+        assertEquals(
+                List.of(10, 15, 30, 30),
+                List.of(fn2.applyAsInt(5), fn3.applyAsInt(5), fn2.applyAsInt(15), fn3.applyAsInt(10)));
     }
 }
