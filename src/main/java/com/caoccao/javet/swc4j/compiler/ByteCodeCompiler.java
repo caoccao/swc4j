@@ -82,6 +82,8 @@ public sealed abstract class ByteCodeCompiler permits
     protected final SwitchStatementGenerator switchStatementGenerator;
     protected final ThisExpressionGenerator thisExpressionGenerator;
     protected final TsAsExpressionGenerator tsAsExpressionGenerator;
+    protected final TsInterfaceCollector tsInterfaceCollector;
+    protected final TsInterfaceGenerator tsInterfaceGenerator;
     protected final TypeAliasCollector typeAliasCollector;
     protected final TypeResolver typeResolver;
     protected final UnaryExpressionGenerator unaryExpressionGenerator;
@@ -138,6 +140,8 @@ public sealed abstract class ByteCodeCompiler permits
         statementGenerator = new StatementGenerator(this);
         stringLiteralGenerator = new StringLiteralGenerator(this);
         switchStatementGenerator = new SwitchStatementGenerator(this);
+        tsInterfaceCollector = new TsInterfaceCollector(this);
+        tsInterfaceGenerator = new TsInterfaceGenerator(this);
         thisExpressionGenerator = new ThisExpressionGenerator(this);
         tsAsExpressionGenerator = new TsAsExpressionGenerator(this);
         typeAliasCollector = new TypeAliasCollector(this);
@@ -331,6 +335,14 @@ public sealed abstract class ByteCodeCompiler permits
 
     public TsAsExpressionGenerator getTsAsExpressionGenerator() {
         return tsAsExpressionGenerator;
+    }
+
+    public TsInterfaceCollector getTsInterfaceCollector() {
+        return tsInterfaceCollector;
+    }
+
+    public TsInterfaceGenerator getTsInterfaceGenerator() {
+        return tsInterfaceGenerator;
     }
 
     public TypeAliasCollector getTypeAliasCollector() {

@@ -167,6 +167,16 @@ public final class ScopedJavaTypeRegistry {
     }
 
     /**
+     * Registers an interface in the current scope.
+     *
+     * @param interfaceName the qualified interface name
+     * @param typeInfo      the JavaTypeInfo for the interface
+     */
+    public void registerInterface(String interfaceName, JavaTypeInfo typeInfo) {
+        scopeStack.peek().put(interfaceName, typeInfo);
+    }
+
+    /**
      * Resolves a Java type by alias, searching from innermost to outermost scope.
      *
      * @param className the class alias to resolve

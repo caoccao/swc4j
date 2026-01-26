@@ -25,6 +25,7 @@ import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsEnumDecl;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsInterfaceDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -78,6 +79,19 @@ public final class AstProcessor {
         }
     }
 
+    public void processInterfaceDecl(
+            Swc4jAstTsInterfaceDecl interfaceDecl,
+            String currentPackage) throws Swc4jByteCodeCompilerException {
+        String interfaceName = interfaceDecl.getId().getSym();
+        String fullClassName = currentPackage.isEmpty() ? interfaceName : currentPackage + "." + interfaceName;
+        String internalClassName = fullClassName.replace('.', '/');
+
+        byte[] bytecode = compiler.getTsInterfaceGenerator().generateBytecode(internalClassName, interfaceDecl);
+        if (bytecode != null) {  // null means ambient declaration
+            compiler.getMemory().getByteCodeMap().put(fullClassName, bytecode);
+        }
+    }
+
     public void processModuleItems(
             List<ISwc4jAstModuleItem> items,
             String currentPackage) throws Swc4jByteCodeCompilerException {
@@ -92,6 +106,8 @@ public final class AstProcessor {
                     processTsModuleDecl(tsModuleDecl, currentPackage);
                 } else if (decl instanceof Swc4jAstTsEnumDecl enumDecl) {
                     processEnumDecl(enumDecl, currentPackage);
+                } else if (decl instanceof Swc4jAstTsInterfaceDecl interfaceDecl) {
+                    processInterfaceDecl(interfaceDecl, currentPackage);
                 }
             } else if (item instanceof ISwc4jAstStmt stmt) {
                 processStmt(stmt, currentPackage);
@@ -108,6 +124,8 @@ public final class AstProcessor {
             processClassDecl(classDecl, currentPackage);
         } else if (stmt instanceof Swc4jAstTsEnumDecl enumDecl) {
             processEnumDecl(enumDecl, currentPackage);
+        } else if (stmt instanceof Swc4jAstTsInterfaceDecl interfaceDecl) {
+            processInterfaceDecl(interfaceDecl, currentPackage);
         }
     }
 

@@ -1,0 +1,285 @@
+/*
+ * Copyright (c) 2026. caoccao.com Sam Cao
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.caoccao.javet.swc4j.compiler.jdk17;
+
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsInterfaceDecl;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsMethodSignature;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsPropertySignature;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.JavaType;
+import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
+import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
+
+import java.util.List;
+
+/**
+ * Collects interface declarations and registers them in the scoped type registries.
+ * This allows interfaces to reference each other within the same compilation unit.
+ */
+public final class TsInterfaceCollector {
+    private final ByteCodeCompiler compiler;
+
+    public TsInterfaceCollector(ByteCodeCompiler compiler) {
+        this.compiler = compiler;
+    }
+
+    private String capitalize(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
+
+    /**
+     * Collects interface declarations from module items.
+     *
+     * @param items          the module items to process
+     * @param currentPackage the current package name
+     */
+    public void collectFromModuleItems(List<ISwc4jAstModuleItem> items, String currentPackage) {
+        for (ISwc4jAstModuleItem item : items) {
+            if (item instanceof Swc4jAstTsModuleDecl moduleDecl) {
+                String moduleName = getModuleName(moduleDecl);
+                String newPackage = currentPackage.isEmpty() ? moduleName : currentPackage + "." + moduleName;
+
+                if (moduleDecl.getBody().isPresent() && moduleDecl.getBody().get() instanceof Swc4jAstTsModuleBlock block) {
+                    collectFromModuleItems(block.getBody(), newPackage);
+                }
+            } else if (item instanceof Swc4jAstExportDecl exportDecl) {
+                ISwc4jAstDecl decl = exportDecl.getDecl();
+                if (decl instanceof Swc4jAstTsInterfaceDecl interfaceDecl) {
+                    processInterfaceDecl(interfaceDecl, currentPackage);
+                } else if (decl instanceof Swc4jAstTsModuleDecl tsModuleDecl) {
+                    String moduleName = getModuleName(tsModuleDecl);
+                    String newPackage = currentPackage.isEmpty() ? moduleName : currentPackage + "." + moduleName;
+
+                    if (tsModuleDecl.getBody().isPresent() && tsModuleDecl.getBody().get() instanceof Swc4jAstTsModuleBlock block) {
+                        collectFromModuleItems(block.getBody(), newPackage);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Collects interface declarations from statements.
+     *
+     * @param stmts          the statements to process
+     * @param currentPackage the current package name
+     */
+    public void collectFromStmts(List<ISwc4jAstStmt> stmts, String currentPackage) {
+        for (ISwc4jAstStmt stmt : stmts) {
+            if (stmt instanceof Swc4jAstTsInterfaceDecl interfaceDecl) {
+                processInterfaceDecl(interfaceDecl, currentPackage);
+            } else if (stmt instanceof Swc4jAstTsModuleDecl moduleDecl) {
+                String moduleName = getModuleName(moduleDecl);
+                String newPackage = currentPackage.isEmpty() ? moduleName : currentPackage + "." + moduleName;
+
+                if (moduleDecl.getBody().isPresent() && moduleDecl.getBody().get() instanceof Swc4jAstTsModuleBlock block) {
+                    collectFromModuleItems(block.getBody(), newPackage);
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets the getter method name following Java naming conventions.
+     *
+     * @param propName   the property name
+     * @param descriptor the type descriptor
+     * @return the getter method name
+     */
+    private String getGetterName(String propName, String descriptor) {
+        if ("Z".equals(descriptor)) {
+            // Boolean: use 'is' prefix unless already prefixed
+            if (propName.startsWith("is") || propName.startsWith("has") || propName.startsWith("can")) {
+                return propName;
+            }
+            return "is" + capitalize(propName);
+        }
+        return "get" + capitalize(propName);
+    }
+
+    private String getModuleName(Swc4jAstTsModuleDecl moduleDecl) {
+        return moduleDecl.getId().toString();
+    }
+
+    /**
+     * Extracts property name from a key expression.
+     *
+     * @param key the key expression
+     * @return the property name
+     */
+    private String getPropertyName(ISwc4jAstExpr key) {
+        if (key instanceof Swc4jAstIdent ident) {
+            return ident.getSym();
+        }
+        return key.toString();
+    }
+
+    /**
+     * Processes an interface declaration and registers it in both registries.
+     *
+     * @param interfaceDecl  the interface declaration to process
+     * @param currentPackage the current package name
+     */
+    private void processInterfaceDecl(Swc4jAstTsInterfaceDecl interfaceDecl, String currentPackage) {
+        if (interfaceDecl.isDeclare()) {
+            return; // Skip ambient declarations
+        }
+
+        String interfaceName = interfaceDecl.getId().getSym();
+        String qualifiedName = currentPackage.isEmpty() ? interfaceName : currentPackage + "." + interfaceName;
+        String internalName = qualifiedName.replace('.', '/');
+
+        // Create JavaTypeInfo for this interface
+        JavaTypeInfo typeInfo = new JavaTypeInfo(interfaceName, currentPackage, internalName, JavaType.INTERFACE);
+
+        // Process extends clause
+        for (Swc4jAstTsExprWithTypeArgs extendsExpr : interfaceDecl.getExtends()) {
+            JavaTypeInfo parentInfo = resolveParentTypeInfo(extendsExpr.getExpr());
+            if (parentInfo != null) {
+                typeInfo.addParentTypeInfo(parentInfo);
+            }
+        }
+
+        // Process body members and register methods
+        for (ISwc4jAstTsTypeElement element : interfaceDecl.getBody().getBody()) {
+            if (element instanceof Swc4jAstTsPropertySignature prop) {
+                processPropertySignature(prop, typeInfo);
+            } else if (element instanceof Swc4jAstTsMethodSignature method) {
+                processMethodSignature(method, typeInfo);
+            }
+        }
+
+        // Register the interface in the scoped type registry
+        compiler.getMemory().getScopedJavaTypeRegistry().registerInterface(qualifiedName, typeInfo);
+
+        // Register the simple name as an alias in the scoped type alias registry
+        compiler.getMemory().getScopedTypeAliasRegistry().registerAlias(interfaceName, qualifiedName);
+    }
+
+    /**
+     * Processes a method signature and registers it in the JavaTypeInfo.
+     *
+     * @param method   the method signature
+     * @param typeInfo the JavaTypeInfo to register the method in
+     */
+    private void processMethodSignature(Swc4jAstTsMethodSignature method, JavaTypeInfo typeInfo) {
+        String methodName = getPropertyName(method.getKey());
+
+        // Build method descriptor
+        StringBuilder paramDescriptors = new StringBuilder("(");
+        for (ISwc4jAstTsFnParam param : method.getParams()) {
+            String paramType = "Ljava/lang/Object;"; // Default
+            if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+                if (bindingIdent.getTypeAnn().isPresent()) {
+                    paramType = compiler.getTypeResolver().mapTsTypeToDescriptor(
+                            bindingIdent.getTypeAnn().get().getTypeAnn());
+                }
+            }
+            paramDescriptors.append(paramType);
+        }
+        paramDescriptors.append(")");
+
+        // Get return type
+        String returnType = "V"; // Default to void
+        if (method.getTypeAnn().isPresent()) {
+            returnType = compiler.getTypeResolver().mapTsTypeToDescriptor(
+                    method.getTypeAnn().get().getTypeAnn());
+        }
+
+        String fullDescriptor = paramDescriptors + returnType;
+        MethodInfo methodInfo = new MethodInfo(methodName, fullDescriptor, returnType, false, false);
+        typeInfo.addMethod(methodName, methodInfo);
+    }
+
+    /**
+     * Processes a property signature and registers getter/setter methods in the JavaTypeInfo.
+     *
+     * @param prop     the property signature
+     * @param typeInfo the JavaTypeInfo to register methods in
+     */
+    private void processPropertySignature(Swc4jAstTsPropertySignature prop, JavaTypeInfo typeInfo) {
+        String propName = getPropertyName(prop.getKey());
+
+        // Get type descriptor
+        String descriptor = "Ljava/lang/Object;"; // Default
+        if (prop.getTypeAnn().isPresent()) {
+            descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(prop.getTypeAnn().get().getTypeAnn());
+        }
+
+        // Register getter method
+        String getterName = getGetterName(propName, descriptor);
+        String getterDescriptor = "()" + descriptor;
+        MethodInfo getterInfo = new MethodInfo(getterName, getterDescriptor, descriptor, false, false);
+        typeInfo.addMethod(getterName, getterInfo);
+
+        // Register setter method (if not readonly)
+        if (!prop.isReadonly()) {
+            String setterName = "set" + capitalize(propName);
+            String setterDescriptor = "(" + descriptor + ")V";
+            MethodInfo setterInfo = new MethodInfo(setterName, setterDescriptor, "V", false, false);
+            typeInfo.addMethod(setterName, setterInfo);
+        }
+    }
+
+    /**
+     * Resolves a parent interface info from an expression.
+     *
+     * @param expr the expression representing the parent interface
+     * @return the JavaTypeInfo for the parent, or null if cannot be resolved
+     */
+    private JavaTypeInfo resolveParentTypeInfo(ISwc4jAstExpr expr) {
+        String qualifiedName = AstUtils.extractQualifiedName(expr);
+        if (qualifiedName == null) {
+            return null;
+        }
+
+        int lastDot = qualifiedName.lastIndexOf('.');
+        String simpleName = lastDot >= 0 ? qualifiedName.substring(lastDot + 1) : qualifiedName;
+
+        // First, try to resolve from the registry
+        JavaTypeInfo existingInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+        if (existingInfo != null) {
+            return existingInfo;
+        }
+
+        // For simple names, try to resolve from type alias registry
+        if (lastDot < 0) {
+            String resolvedName = compiler.getMemory().getScopedTypeAliasRegistry().resolve(simpleName);
+            if (resolvedName != null) {
+                qualifiedName = resolvedName;
+                lastDot = qualifiedName.lastIndexOf('.');
+            }
+        }
+
+        // Create a placeholder JavaTypeInfo for the parent
+        String internalName = qualifiedName.replace('.', '/');
+        String packageName = lastDot > 0 ? qualifiedName.substring(0, lastDot) : "";
+
+        return new JavaTypeInfo(simpleName, packageName, internalName, JavaType.INTERFACE);
+    }
+}

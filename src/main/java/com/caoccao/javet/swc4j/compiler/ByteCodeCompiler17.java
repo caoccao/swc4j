@@ -42,6 +42,7 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 typeAliasCollector.collectFromModuleItems(module.getBody());
                 classCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
                 enumCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
+                tsInterfaceCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
                 // Collect standalone functions
                 standaloneFunctionCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
                 // Determine dummy class names after all class names are known
@@ -57,6 +58,7 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 typeAliasCollector.collectFromStmts(script.getBody());
                 classCollector.collectFromStmts(script.getBody(), options.packagePrefix());
                 enumCollector.collectFromStmts(script.getBody(), options.packagePrefix());
+                tsInterfaceCollector.collectFromStmts(script.getBody(), options.packagePrefix());
                 // Collect standalone functions
                 standaloneFunctionCollector.collectFromStmts(script.getBody(), options.packagePrefix());
                 // Determine dummy class names after all class names are known

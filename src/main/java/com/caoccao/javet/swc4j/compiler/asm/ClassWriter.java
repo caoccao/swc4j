@@ -19,10 +19,7 @@ package com.caoccao.javet.swc4j.compiler.asm;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Simple bytecode class writer for generating JVM class files.
@@ -48,6 +45,15 @@ public class ClassWriter {
         this.className = className;
         this.superClassName = superClassName;
         this.constantPool = new ConstantPool();
+    }
+
+    public ClassWriter(String className, String superClassName, String[] interfaces) {
+        this.className = className;
+        this.superClassName = superClassName;
+        this.constantPool = new ConstantPool();
+        if (interfaces != null) {
+            Collections.addAll(this.interfaces, interfaces);
+        }
     }
 
     public void addField(int accessFlags, String name, String descriptor) {

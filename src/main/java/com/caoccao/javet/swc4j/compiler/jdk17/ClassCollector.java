@@ -20,10 +20,8 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassProp;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateProp;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
@@ -86,26 +84,6 @@ public final class ClassCollector {
                 }
             }
         }
-    }
-
-    /**
-     * Extracts a fully qualified name from an expression.
-     * Handles both simple identifiers (e.g., "Animal") and member expressions (e.g., "java.util.ArrayList").
-     *
-     * @param expr the expression to extract the qualified name from
-     * @return the fully qualified name, or null if cannot be extracted
-     */
-    private String extractQualifiedName(ISwc4jAstExpr expr) {
-        if (expr instanceof Swc4jAstIdent ident) {
-            return ident.getSym();
-        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
-            // Handle fully qualified names like java.util.ArrayList
-            String objPart = extractQualifiedName(memberExpr.getObj());
-            if (objPart != null && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-                return objPart + "." + propIdent.getSym();
-            }
-        }
-        return null;
     }
 
     private String getModuleName(Swc4jAstTsModuleDecl moduleDecl) {
@@ -290,7 +268,7 @@ public final class ClassCollector {
      */
     private JavaTypeInfo resolveParentTypeInfo(ISwc4jAstExpr expr) {
         // Extract fully qualified name from identifier or member expression
-        String qualifiedName = extractQualifiedName(expr);
+        String qualifiedName = AstUtils.extractQualifiedName(expr);
         if (qualifiedName == null) {
             return null;
         }
