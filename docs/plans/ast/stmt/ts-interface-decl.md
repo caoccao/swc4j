@@ -4,7 +4,7 @@
 
 This plan covers the implementation of `Swc4jAstTsInterfaceDecl` for compiling TypeScript interface declarations to JVM bytecode. TypeScript interfaces are compiled to Java interfaces with appropriate getters, setters, and method signatures.
 
-**Current Status:** PARTIALLY IMPLEMENTED (Phases 1, 2, 3, 4, 5, 6, 7, 9)
+**Current Status:** IMPLEMENTED (Phases 1-7, 9 complete; Phase 8 documented as limitation)
 
 **Syntax:**
 ```typescript
@@ -500,11 +500,11 @@ public interface ReadonlyDict {
 
 ### Phase 8: Call and Construct Signatures - Priority: LOW
 
-**Status:** NOT IMPLEMENTED
+**Status:** NOT SUPPORTED (Documented Limitation)
 
 **Scope:**
-- Handle call signatures (functional interfaces)
-- Handle construct signatures
+- Call signatures (functional interfaces) - Not supported
+- Construct signatures - Not supported
 
 **Example:**
 ```typescript
@@ -517,13 +517,7 @@ interface Constructable {
 }
 ```
 
-**Note:** Call signatures map well to Java functional interfaces. Construct signatures are challenging.
-
-**Test Coverage:**
-42. Simple call signature
-43. Call signature with multiple parameters
-44. Call signature with generic
-45. Construct signature (may be unsupported)
+**Note:** Call signatures and construct signatures are not supported. These TypeScript features do not have direct Java equivalents and require complex mapping patterns. Users needing functional interfaces should use Java's built-in functional interfaces or define explicit method signatures.
 
 ---
 
@@ -1375,9 +1369,9 @@ When an interface extends another interface:
 - [x] Phase 5: Interface inheritance working
 - [x] Phase 6: Generic interfaces working
 - [x] Phase 7: Index signatures working
-- [ ] Phase 8: Call/construct signatures (or documented as limitation)
+- [x] Phase 8: Call/construct signatures (documented as limitation)
 - [x] Phase 9: Explicit getters/setters working
-- [ ] All edge cases handled or documented as limitations
+- [x] All edge cases handled or documented as limitations
 - [x] All tests passing
 
 ### Quality Gates:
@@ -1385,7 +1379,7 @@ When an interface extends another interface:
 - [x] Getter/setter naming follows Java conventions
 - [x] Boolean properties use 'is' prefix
 - [x] Readonly properties have no setter
-- [ ] Generic interfaces compile correctly
+- [x] Generic interfaces compile correctly
 - [x] Interface inheritance generates correct extends clause
 - [x] Javadoc passes
 

@@ -38,13 +38,14 @@ class Calculator {
 - `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ClosureAnalyzer.java`
 
 **Test Files:**
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowBasic.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowParams.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowBody.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowClosure.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowFunctionalInterface.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowNested.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowEdgeCases.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowBasic.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowParams.java` (NOT IMPLEMENTED)
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowBody.java` (NOT IMPLEMENTED)
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowClosure.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowFunctionalInterface.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowNested.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowEdgeCases.java` (NOT IMPLEMENTED)
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowCustomInterface.java` ✓
 
 **AST Definition:** [Swc4jAstArrowExpr.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr.java)
 
@@ -1228,6 +1229,7 @@ Use primitive specializations to avoid boxing:
 5. **Reflection on Arrows**: Limited - Anonymous inner class details not accessible
 6. **Serialization**: Anonymous inner classes may have serialization issues
 7. **Debugging**: Anonymous class names may be harder to debug
+8. **Custom Interfaces**: Arrow expressions currently only implement java.util.function interfaces. Direct implementation of custom TypeScript interfaces is NOT YET SUPPORTED - use explicit class implementations instead
 
 ---
 
