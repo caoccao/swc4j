@@ -32,6 +32,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
@@ -81,6 +82,14 @@ public final class MethodGenerator extends BaseAstProcessor {
         // Handle methods with bodies
         var bodyOpt = function.getBody();
         if (bodyOpt.isPresent()) {
+            // Push type parameters scope for generic methods (type erasure)
+            TypeParameterScope methodTypeParamScope = function.getTypeParams()
+                    .map(TypeParameterScope::fromDecl)
+                    .orElse(null);
+            if (methodTypeParamScope != null) {
+                compiler.getMemory().getCompilationContext().pushTypeParameterScope(methodTypeParamScope);
+            }
+
             try {
                 Swc4jAstBlockStmt body = bodyOpt.get();
 
@@ -152,6 +161,11 @@ public final class MethodGenerator extends BaseAstProcessor {
                 generateDefaultParameterOverloads(classWriter, cp, method, methodName, function, returnTypeInfo, accessFlags);
             } catch (Exception e) {
                 throw new Swc4jByteCodeCompilerException(method, "Failed to generate method: " + methodName, e);
+            } finally {
+                // Pop the method type parameter scope when done
+                if (methodTypeParamScope != null) {
+                    compiler.getMemory().getCompilationContext().popTypeParameterScope();
+                }
             }
         }
     }
@@ -162,24 +176,39 @@ public final class MethodGenerator extends BaseAstProcessor {
             Swc4jAstClassMethod method,
             String methodName,
             Swc4jAstFunction function) throws Swc4jByteCodeCompilerException {
-        // Reset compilation context to analyze parameters and return type
-        compiler.getMemory().resetCompilationContext(method.isStatic());
-
-        // Analyze function parameters
-        compiler.getVariableAnalyzer().analyzeParameters(function);
-
-        // Determine return type from explicit annotation
-        ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, null);
-        String descriptor = generateDescriptor(function, returnTypeInfo);
-
-        // ACC_ABSTRACT + access modifier (no ACC_STATIC for abstract methods, but they can be static in interfaces)
-        int accessFlags = getAccessFlags(method.getAccessibility()) | 0x0400; // ACC_ABSTRACT
-        if (method.isStatic()) {
-            accessFlags |= 0x0008; // ACC_STATIC
+        // Push type parameters scope for generic methods (type erasure)
+        TypeParameterScope methodTypeParamScope = function.getTypeParams()
+                .map(TypeParameterScope::fromDecl)
+                .orElse(null);
+        if (methodTypeParamScope != null) {
+            compiler.getMemory().getCompilationContext().pushTypeParameterScope(methodTypeParamScope);
         }
 
-        // Abstract methods have no code (null)
-        classWriter.addMethod(accessFlags, methodName, descriptor, null, 0, 0);
+        try {
+            // Reset compilation context to analyze parameters and return type
+            compiler.getMemory().resetCompilationContext(method.isStatic());
+
+            // Analyze function parameters
+            compiler.getVariableAnalyzer().analyzeParameters(function);
+
+            // Determine return type from explicit annotation
+            ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, null);
+            String descriptor = generateDescriptor(function, returnTypeInfo);
+
+            // ACC_ABSTRACT + access modifier (no ACC_STATIC for abstract methods, but they can be static in interfaces)
+            int accessFlags = getAccessFlags(method.getAccessibility()) | 0x0400; // ACC_ABSTRACT
+            if (method.isStatic()) {
+                accessFlags |= 0x0008; // ACC_STATIC
+            }
+
+            // Abstract methods have no code (null)
+            classWriter.addMethod(accessFlags, methodName, descriptor, null, 0, 0);
+        } finally {
+            // Pop the method type parameter scope when done
+            if (methodTypeParamScope != null) {
+                compiler.getMemory().getCompilationContext().popTypeParameterScope();
+            }
+        }
     }
 
     public CodeBuilder generateCode(

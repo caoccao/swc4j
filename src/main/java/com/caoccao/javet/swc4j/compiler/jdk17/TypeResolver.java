@@ -1165,6 +1165,20 @@ public final class TypeResolver {
 
     public String mapTypeNameToDescriptor(
             String typeName) {
+        // First check if this is a type parameter (for generics support)
+        var context = compiler.getMemory().getCompilationContext();
+        if (context.isTypeParameter(typeName)) {
+            // Type parameter - resolve to its constraint type (type erasure)
+            var constraintOpt = context.resolveTypeParameter(typeName);
+            if (constraintOpt.isPresent()) {
+                // Has constraint (e.g., T extends Number) - erase to constraint type
+                return mapTsTypeToDescriptor(constraintOpt.get());
+            } else {
+                // No constraint - erase to Object
+                return "Ljava/lang/Object;";
+            }
+        }
+
         // Resolve type alias first
         String resolvedType = compiler.getMemory().getScopedTypeAliasRegistry().resolve(typeName);
         if (resolvedType == null) {

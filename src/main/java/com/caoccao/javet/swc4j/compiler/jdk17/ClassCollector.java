@@ -104,6 +104,33 @@ public final class ClassCollector {
 
         // Process extends (superClass)
         Swc4jAstClass clazz = classDecl.getClazz();
+
+        // Push type parameter scope for generics support (type erasure)
+        // This allows field/method type resolution to correctly erase type parameters to Object
+        TypeParameterScope typeParamScope = clazz.getTypeParams()
+                .map(TypeParameterScope::fromDecl)
+                .orElse(null);
+        if (typeParamScope != null) {
+            compiler.getMemory().getCompilationContext().pushTypeParameterScope(typeParamScope);
+        }
+
+        try {
+            processClassDeclInternal(classDecl, clazz, typeInfo, qualifiedName);
+        } finally {
+            // Pop the type parameter scope when done
+            if (typeParamScope != null) {
+                compiler.getMemory().getCompilationContext().popTypeParameterScope();
+            }
+        }
+    }
+
+    private void processClassDeclInternal(
+            Swc4jAstClassDecl classDecl,
+            Swc4jAstClass clazz,
+            JavaTypeInfo typeInfo,
+            String qualifiedName) {
+        String className = classDecl.getIdent().getSym();
+
         clazz.getSuperClass().ifPresent(superClassExpr -> {
             JavaTypeInfo parentInfo = resolveParentTypeInfo(superClassExpr);
             if (parentInfo != null) {

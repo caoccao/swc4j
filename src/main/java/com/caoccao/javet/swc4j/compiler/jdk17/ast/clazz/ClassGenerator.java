@@ -29,6 +29,7 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
@@ -88,6 +89,14 @@ public final class ClassGenerator extends BaseAstProcessor {
 
         // Push the current class onto the stack for 'this' resolution (supports nested classes)
         compiler.getMemory().getCompilationContext().pushClass(internalClassName);
+
+        // Push type parameters scope for generics support (type erasure)
+        TypeParameterScope typeParamScope = clazz.getTypeParams()
+                .map(TypeParameterScope::fromDecl)
+                .orElse(null);
+        if (typeParamScope != null) {
+            compiler.getMemory().getCompilationContext().pushTypeParameterScope(typeParamScope);
+        }
 
         try {
             // Collect fields from the class body and from the registry
@@ -184,6 +193,10 @@ public final class ClassGenerator extends BaseAstProcessor {
 
             return classWriter.toByteArray();
         } finally {
+            // Pop the type parameter scope when done
+            if (typeParamScope != null) {
+                compiler.getMemory().getCompilationContext().popTypeParameterScope();
+            }
             // Pop the class from the stack when done
             compiler.getMemory().getCompilationContext().popClass();
         }

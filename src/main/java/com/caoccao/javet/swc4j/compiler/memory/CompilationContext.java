@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.memory;
 
 import com.caoccao.javet.swc4j.compiler.jdk17.GenericTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariableTable;
+import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class CompilationContext {
     private final Map<String, GenericTypeInfo> genericTypeInfoMap;
     private final Map<String, String> inferredTypes;
     private final LocalVariableTable localVariableTable;
+    private final Stack<TypeParameterScope> typeParameterScopes;
     private int tempIdCounter;
 
     public CompilationContext() {
@@ -43,6 +45,7 @@ public class CompilationContext {
         genericTypeInfoMap = new HashMap<>();
         inferredTypes = new HashMap<>();
         localVariableTable = new LocalVariableTable();
+        typeParameterScopes = new Stack<>();
         tempIdCounter = 0;
     }
 
@@ -124,6 +127,21 @@ public class CompilationContext {
         return tempIdCounter++;
     }
 
+    /**
+     * Check if a type name is a type parameter in any active scope.
+     *
+     * @param typeName the type name to check
+     * @return true if it's a type parameter
+     */
+    public boolean isTypeParameter(String typeName) {
+        for (int i = typeParameterScopes.size() - 1; i >= 0; i--) {
+            if (typeParameterScopes.get(i).isTypeParameter(typeName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void popBreakLabel() {
         if (!breakLabels.isEmpty()) {
             breakLabels.pop();
@@ -146,6 +164,16 @@ public class CompilationContext {
         }
     }
 
+    /**
+     * Pop the current type parameter scope from the stack.
+     * Call this when exiting a generic class or method.
+     */
+    public void popTypeParameterScope() {
+        if (!typeParameterScopes.isEmpty()) {
+            typeParameterScopes.pop();
+        }
+    }
+
     public void pushBreakLabel(LoopLabelInfo labelInfo) {
         breakLabels.push(labelInfo);
     }
@@ -164,13 +192,25 @@ public class CompilationContext {
         continueLabels.push(labelInfo);
     }
 
+    /**
+     * Push a new type parameter scope onto the stack.
+     * Call this when entering a generic class or method.
+     *
+     * @param scope the type parameter scope
+     */
+    public void pushTypeParameterScope(TypeParameterScope scope) {
+        if (scope != null && !scope.isEmpty()) {
+            typeParameterScopes.push(scope);
+        }
+    }
+
     public void reset() {
         reset(false);
     }
 
     /**
      * Reset the compilation context for a new method.
-     * Does NOT clear the class stack - class context is preserved across methods.
+     * Does NOT clear the class stack or type parameter scopes - class context is preserved across methods.
      *
      * @param isStatic true if this is for a static method (no 'this' parameter)
      */
@@ -181,15 +221,35 @@ public class CompilationContext {
         inferredTypes.clear();
         localVariableTable.reset(isStatic);
         tempIdCounter = 0;
-        // Note: classStack is NOT cleared - class context persists across method resets
+        // Note: classStack and typeParameterScopes are NOT cleared - class context persists across method resets
     }
 
     /**
-     * Fully reset the compilation context including the class stack.
+     * Fully reset the compilation context including the class stack and type parameter scopes.
      * Call this when starting a completely new compilation.
      */
     public void resetAll() {
         reset(false);
         classStack.clear();
+        typeParameterScopes.clear();
+    }
+
+    /**
+     * Resolve a type parameter to its constraint type (for type erasure).
+     * Searches from innermost to outermost scope.
+     *
+     * @param typeName the type parameter name
+     * @return the constraint type, or null if it's a type parameter with no constraint (erases to Object),
+     * or empty if not a type parameter at all
+     */
+    public java.util.Optional<com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType> resolveTypeParameter(String typeName) {
+        for (int i = typeParameterScopes.size() - 1; i >= 0; i--) {
+            TypeParameterScope scope = typeParameterScopes.get(i);
+            if (scope.isTypeParameter(typeName)) {
+                return scope.getConstraint(typeName);
+            }
+        }
+        // Not found - return a special marker (we use Optional<Optional> pattern via empty)
+        return java.util.Optional.empty();
     }
 }
