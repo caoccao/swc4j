@@ -18,16 +18,14 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsInterfaceDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsMethodSignature;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsPropertySignature;
+import com.caoccao.javet.swc4j.ast.ts.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaType;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
@@ -140,6 +138,28 @@ public final class TsInterfaceCollector {
     }
 
     /**
+     * Processes an explicit getter signature and registers it in the JavaTypeInfo.
+     *
+     * @param getter   the getter signature
+     * @param typeInfo the JavaTypeInfo to register the method in
+     */
+    private void processGetterSignature(Swc4jAstTsGetterSignature getter, JavaTypeInfo typeInfo) {
+        String propName = getPropertyName(getter.getKey());
+
+        // Get type descriptor
+        String descriptor = "Ljava/lang/Object;"; // Default
+        if (getter.getTypeAnn().isPresent()) {
+            descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(getter.getTypeAnn().get().getTypeAnn());
+        }
+
+        // Register getter method
+        String getterName = getGetterName(propName, descriptor);
+        String getterDescriptor = "()" + descriptor;
+        MethodInfo getterInfo = new MethodInfo(getterName, getterDescriptor, descriptor, false, false);
+        typeInfo.addMethod(getterName, getterInfo);
+    }
+
+    /**
      * Processes an interface declaration and registers it in both registries.
      *
      * @param interfaceDecl  the interface declaration to process
@@ -171,6 +191,10 @@ public final class TsInterfaceCollector {
                 processPropertySignature(prop, typeInfo);
             } else if (element instanceof Swc4jAstTsMethodSignature method) {
                 processMethodSignature(method, typeInfo);
+            } else if (element instanceof Swc4jAstTsGetterSignature getter) {
+                processGetterSignature(getter, typeInfo);
+            } else if (element instanceof Swc4jAstTsSetterSignature setter) {
+                processSetterSignature(setter, typeInfo);
             }
         }
 
@@ -244,6 +268,32 @@ public final class TsInterfaceCollector {
             MethodInfo setterInfo = new MethodInfo(setterName, setterDescriptor, "V", false, false);
             typeInfo.addMethod(setterName, setterInfo);
         }
+    }
+
+    /**
+     * Processes an explicit setter signature and registers it in the JavaTypeInfo.
+     *
+     * @param setter   the setter signature
+     * @param typeInfo the JavaTypeInfo to register the method in
+     */
+    private void processSetterSignature(Swc4jAstTsSetterSignature setter, JavaTypeInfo typeInfo) {
+        String propName = getPropertyName(setter.getKey());
+
+        // Get type descriptor from parameter
+        String descriptor = "Ljava/lang/Object;"; // Default
+        ISwc4jAstTsFnParam param = setter.getParam();
+        if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+            if (bindingIdent.getTypeAnn().isPresent()) {
+                descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(
+                        bindingIdent.getTypeAnn().get().getTypeAnn());
+            }
+        }
+
+        // Register setter method
+        String setterName = "set" + capitalize(propName);
+        String setterDescriptor = "(" + descriptor + ")V";
+        MethodInfo setterInfo = new MethodInfo(setterName, setterDescriptor, "V", false, false);
+        typeInfo.addMethod(setterName, setterInfo);
     }
 
     /**

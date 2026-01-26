@@ -4,7 +4,7 @@
 
 This plan covers the implementation of `Swc4jAstTsInterfaceDecl` for compiling TypeScript interface declarations to JVM bytecode. TypeScript interfaces are compiled to Java interfaces with appropriate getters, setters, and method signatures.
 
-**Current Status:** PARTIALLY IMPLEMENTED (Phases 1, 2, 4, 5)
+**Current Status:** PARTIALLY IMPLEMENTED (Phases 1, 2, 3, 4, 5, 9)
 
 **Syntax:**
 ```typescript
@@ -33,6 +33,8 @@ interface Container<T> {
 **Test Files:**
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclBasic.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclExtends.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclOptional.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclAccessors.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclGenerics.java` (NOT IMPLEMENTED)
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclMethods.java` (NOT IMPLEMENTED)
 
@@ -269,7 +271,7 @@ public interface Entity {
 
 ### Phase 3: Optional Properties - Priority: MEDIUM
 
-**Status:** NOT IMPLEMENTED
+**Status:** IMPLEMENTED ✓
 
 **Scope:**
 - Handle optional properties (`?`)
@@ -507,7 +509,7 @@ interface Constructable {
 
 ### Phase 9: Explicit Getter/Setter Signatures - Priority: MEDIUM
 
-**Status:** NOT IMPLEMENTED
+**Status:** IMPLEMENTED ✓
 
 **Scope:**
 - Handle explicit `get` and `set` accessors in interfaces
@@ -1348,13 +1350,13 @@ When an interface extends another interface:
 ### Implementation Complete When:
 - [x] Phase 1: Basic interface with properties working
 - [x] Phase 2: Readonly properties working
-- [ ] Phase 3: Optional properties working
+- [x] Phase 3: Optional properties working
 - [x] Phase 4: Method signatures working
 - [x] Phase 5: Interface inheritance working
 - [ ] Phase 6: Generic interfaces working
 - [ ] Phase 7: Index signatures (or documented as limitation)
 - [ ] Phase 8: Call/construct signatures (or documented as limitation)
-- [ ] Phase 9: Explicit getters/setters working
+- [x] Phase 9: Explicit getters/setters working
 - [ ] All edge cases handled or documented as limitations
 - [x] All tests passing
 

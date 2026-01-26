@@ -18,16 +18,14 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsTypeElement;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsInterfaceDecl;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsMethodSignature;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsPropertySignature;
+import com.caoccao.javet.swc4j.ast.ts.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
@@ -92,6 +90,10 @@ public final class TsInterfaceGenerator {
                 generatePropertyMethods(classWriter, prop);
             } else if (element instanceof Swc4jAstTsMethodSignature method) {
                 generateMethod(classWriter, method);
+            } else if (element instanceof Swc4jAstTsGetterSignature getter) {
+                generateGetterSignature(classWriter, getter);
+            } else if (element instanceof Swc4jAstTsSetterSignature setter) {
+                generateSetterSignature(classWriter, setter);
             }
         }
 
@@ -100,6 +102,34 @@ public final class TsInterfaceGenerator {
         } catch (IOException e) {
             throw new Swc4jByteCodeCompilerException(interfaceDecl, "Failed to generate bytecode for interface", e);
         }
+    }
+
+    /**
+     * Generates an abstract getter method for an explicit getter signature.
+     *
+     * @param classWriter the class writer
+     * @param getter      the getter signature
+     */
+    private void generateGetterSignature(ClassWriter classWriter, Swc4jAstTsGetterSignature getter) {
+        String propName = getPropertyName(getter.getKey());
+
+        // Get type descriptor
+        String descriptor = "Ljava/lang/Object;"; // Default
+        if (getter.getTypeAnn().isPresent()) {
+            descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(getter.getTypeAnn().get().getTypeAnn());
+        }
+
+        // Generate getter method with proper name
+        String getterName = getGetterName(propName, descriptor);
+        String getterDescriptor = "()" + descriptor;
+        classWriter.addMethod(
+                METHOD_ACCESS_FLAGS,
+                getterName,
+                getterDescriptor,
+                null, // No code for abstract methods
+                0,    // max stack
+                0     // max locals
+        );
     }
 
     /**
@@ -185,6 +215,38 @@ public final class TsInterfaceGenerator {
                     0     // max locals
             );
         }
+    }
+
+    /**
+     * Generates an abstract setter method for an explicit setter signature.
+     *
+     * @param classWriter the class writer
+     * @param setter      the setter signature
+     */
+    private void generateSetterSignature(ClassWriter classWriter, Swc4jAstTsSetterSignature setter) {
+        String propName = getPropertyName(setter.getKey());
+
+        // Get type descriptor from parameter
+        String descriptor = "Ljava/lang/Object;"; // Default
+        ISwc4jAstTsFnParam param = setter.getParam();
+        if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+            if (bindingIdent.getTypeAnn().isPresent()) {
+                descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(
+                        bindingIdent.getTypeAnn().get().getTypeAnn());
+            }
+        }
+
+        // Generate setter method
+        String setterName = "set" + capitalize(propName);
+        String setterDescriptor = "(" + descriptor + ")V";
+        classWriter.addMethod(
+                METHOD_ACCESS_FLAGS,
+                setterName,
+                setterDescriptor,
+                null, // No code for abstract methods
+                0,    // max stack
+                0     // max locals
+        );
     }
 
     /**
