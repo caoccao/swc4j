@@ -60,6 +60,17 @@ public record ByteCodeCompilerOptions(
                 "unknown", "java.lang.Object",
                 "any", "java.lang.Object"
         ));
+        // JavaScript built-in error types
+        DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
+                "Error", "com.caoccao.javet.swc4j.exceptions.JsError",
+                "TypeError", "com.caoccao.javet.swc4j.exceptions.JsTypeError",
+                "RangeError", "com.caoccao.javet.swc4j.exceptions.JsRangeError",
+                "ReferenceError", "com.caoccao.javet.swc4j.exceptions.JsReferenceError",
+                "SyntaxError", "com.caoccao.javet.swc4j.exceptions.JsSyntaxError",
+                "URIError", "com.caoccao.javet.swc4j.exceptions.JsURIError",
+                "EvalError", "com.caoccao.javet.swc4j.exceptions.JsEvalError",
+                "AggregateError", "com.caoccao.javet.swc4j.exceptions.JsAggregateError"
+        ));
     }
 
     public ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap) {
