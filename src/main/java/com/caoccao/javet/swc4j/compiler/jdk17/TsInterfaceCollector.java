@@ -160,6 +160,48 @@ public final class TsInterfaceCollector {
     }
 
     /**
+     * Processes an index signature and registers get/set methods in the JavaTypeInfo.
+     * Index signatures like {@code [key: string]: number} are translated to:
+     * - {@code Object get(String key)} - getter method
+     * - {@code void set(String key, double value)} - setter method (if not readonly)
+     *
+     * @param indexSig the index signature
+     * @param typeInfo the JavaTypeInfo to register the methods in
+     */
+    private void processIndexSignature(Swc4jAstTsIndexSignature indexSig, JavaTypeInfo typeInfo) {
+        // Get key type from params (first parameter)
+        String keyDescriptor = "Ljava/lang/Object;"; // Default
+        if (!indexSig.getParams().isEmpty()) {
+            ISwc4jAstTsFnParam param = indexSig.getParams().get(0);
+            if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+                if (bindingIdent.getTypeAnn().isPresent()) {
+                    keyDescriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(
+                            bindingIdent.getTypeAnn().get().getTypeAnn());
+                }
+            }
+        }
+
+        // Get value type from typeAnn
+        String valueDescriptor = "Ljava/lang/Object;"; // Default
+        if (indexSig.getTypeAnn().isPresent()) {
+            valueDescriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(
+                    indexSig.getTypeAnn().get().getTypeAnn());
+        }
+
+        // Register getter method: get(KeyType key): ValueType
+        String getterDescriptor = "(" + keyDescriptor + ")" + valueDescriptor;
+        MethodInfo getterInfo = new MethodInfo("get", getterDescriptor, valueDescriptor, false, false);
+        typeInfo.addMethod("get", getterInfo);
+
+        // Register setter method (if not readonly): set(KeyType key, ValueType value): void
+        if (!indexSig.isReadonly()) {
+            String setterDescriptor = "(" + keyDescriptor + valueDescriptor + ")V";
+            MethodInfo setterInfo = new MethodInfo("set", setterDescriptor, "V", false, false);
+            typeInfo.addMethod("set", setterInfo);
+        }
+    }
+
+    /**
      * Processes an interface declaration and registers it in both registries.
      *
      * @param interfaceDecl  the interface declaration to process
@@ -195,6 +237,8 @@ public final class TsInterfaceCollector {
                 processGetterSignature(getter, typeInfo);
             } else if (element instanceof Swc4jAstTsSetterSignature setter) {
                 processSetterSignature(setter, typeInfo);
+            } else if (element instanceof Swc4jAstTsIndexSignature indexSig) {
+                processIndexSignature(indexSig, typeInfo);
             }
         }
 

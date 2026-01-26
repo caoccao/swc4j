@@ -165,6 +165,8 @@ public final class TsInterfaceGenerator {
                 generateGetterSignature(classWriter, getter, typeParamNames);
             } else if (element instanceof Swc4jAstTsSetterSignature setter) {
                 generateSetterSignature(classWriter, setter, typeParamNames);
+            } else if (element instanceof Swc4jAstTsIndexSignature indexSig) {
+                generateIndexSignature(classWriter, indexSig, typeParamNames);
             }
         }
 
@@ -210,6 +212,72 @@ public final class TsInterfaceGenerator {
                 0,    // max stack
                 0     // max locals
         );
+    }
+
+    /**
+     * Generates abstract get/set methods for an index signature.
+     * Index signatures like {@code [key: string]: number} are translated to:
+     * - {@code Object get(String key)} - getter method
+     * - {@code void set(String key, double value)} - setter method (if not readonly)
+     *
+     * @param classWriter    the class writer
+     * @param indexSig       the index signature
+     * @param typeParamNames the set of type parameter names in scope
+     */
+    private void generateIndexSignature(
+            ClassWriter classWriter,
+            Swc4jAstTsIndexSignature indexSig,
+            Set<String> typeParamNames) {
+        // Get key type from params (first parameter)
+        String keyDescriptor = "Ljava/lang/Object;"; // Default
+        if (!indexSig.getParams().isEmpty()) {
+            ISwc4jAstTsFnParam param = indexSig.getParams().get(0);
+            if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+                if (bindingIdent.getTypeAnn().isPresent()) {
+                    ISwc4jAstTsType keyType = bindingIdent.getTypeAnn().get().getTypeAnn();
+                    if (isTypeParameter(keyType, typeParamNames)) {
+                        keyDescriptor = "Ljava/lang/Object;";
+                    } else {
+                        keyDescriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(keyType);
+                    }
+                }
+            }
+        }
+
+        // Get value type from typeAnn
+        String valueDescriptor = "Ljava/lang/Object;"; // Default
+        if (indexSig.getTypeAnn().isPresent()) {
+            ISwc4jAstTsType valueType = indexSig.getTypeAnn().get().getTypeAnn();
+            if (isTypeParameter(valueType, typeParamNames)) {
+                valueDescriptor = "Ljava/lang/Object;";
+            } else {
+                valueDescriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(valueType);
+            }
+        }
+
+        // Generate getter: Object get(KeyType key)
+        String getterDescriptor = "(" + keyDescriptor + ")" + valueDescriptor;
+        classWriter.addMethod(
+                METHOD_ACCESS_FLAGS,
+                "get",
+                getterDescriptor,
+                null, // No code for abstract methods
+                0,    // max stack
+                0     // max locals
+        );
+
+        // Generate setter (if not readonly): void set(KeyType key, ValueType value)
+        if (!indexSig.isReadonly()) {
+            String setterDescriptor = "(" + keyDescriptor + valueDescriptor + ")V";
+            classWriter.addMethod(
+                    METHOD_ACCESS_FLAGS,
+                    "set",
+                    setterDescriptor,
+                    null, // No code for abstract methods
+                    0,    // max stack
+                    0     // max locals
+            );
+        }
     }
 
     /**

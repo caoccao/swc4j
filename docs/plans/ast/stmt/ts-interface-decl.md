@@ -4,7 +4,7 @@
 
 This plan covers the implementation of `Swc4jAstTsInterfaceDecl` for compiling TypeScript interface declarations to JVM bytecode. TypeScript interfaces are compiled to Java interfaces with appropriate getters, setters, and method signatures.
 
-**Current Status:** PARTIALLY IMPLEMENTED (Phases 1, 2, 3, 4, 5, 6, 9)
+**Current Status:** PARTIALLY IMPLEMENTED (Phases 1, 2, 3, 4, 5, 6, 7, 9)
 
 **Syntax:**
 ```typescript
@@ -36,6 +36,7 @@ interface Container<T> {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclOptional.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclAccessors.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclGenerics.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclIndexSignature.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclMethods.java` (NOT IMPLEMENTED)
 
 **Additional Implementation Files:**
@@ -448,11 +449,12 @@ public interface Comparable<T extends Number> {
 
 ### Phase 7: Index Signatures - Priority: LOW
 
-**Status:** NOT IMPLEMENTED
+**Status:** IMPLEMENTED ✓
 
 **Scope:**
 - Handle index signatures
-- Map to appropriate Java patterns (Map-like interface)
+- Map to `get(key)` and `set(key, value)` methods
+- Readonly index signatures only have `get(key)` (no setter)
 
 **Example:**
 ```typescript
@@ -463,18 +465,36 @@ interface Dictionary {
 interface NumberMap {
   [index: number]: string
 }
+
+interface ReadonlyDict {
+  readonly [key: string]: string  // No setter
+}
 ```
 
-**Note:** Index signatures are challenging to map directly to Java interfaces. Options:
-1. Generate `get(key)` and `put(key, value)` methods
-2. Extend `Map<K, V>` interface
-3. Skip index signatures (document as limitation)
+**Generated Java Interface:**
+```java
+public interface Dictionary {
+    String get(String key);
+    void set(String key, String value);
+}
+
+public interface NumberMap {
+    String get(int index);
+    void set(int index, String value);
+}
+
+public interface ReadonlyDict {
+    String get(String key);  // No setter
+}
+```
 
 **Test Coverage:**
 38. String index signature
 39. Number index signature
 40. Readonly index signature
 41. Index signature with other properties
+42. Index signature with primitive value types
+43. Index signature with methods
 
 ---
 
@@ -1354,7 +1374,7 @@ When an interface extends another interface:
 - [x] Phase 4: Method signatures working
 - [x] Phase 5: Interface inheritance working
 - [x] Phase 6: Generic interfaces working
-- [ ] Phase 7: Index signatures (or documented as limitation)
+- [x] Phase 7: Index signatures working
 - [ ] Phase 8: Call/construct signatures (or documented as limitation)
 - [x] Phase 9: Explicit getters/setters working
 - [ ] All edge cases handled or documented as limitations
@@ -1379,10 +1399,9 @@ The following TypeScript interface features are NOT supported:
 2. **Computed property names** (unless string literal) - Cannot evaluate at compile time
 3. **Call signatures** - May be partially supported via functional interface pattern
 4. **Construct signatures** - No direct Java equivalent
-5. **Index signatures** - May be mapped to Map-like pattern or skipped
-6. **Declaration merging** - Interfaces with same name are not merged
-7. **Conditional types in properties** - Complex to evaluate
-8. **Mapped types** - Not applicable to interface declarations
+5. **Declaration merging** - Interfaces with same name are not merged
+6. **Conditional types in properties** - Complex to evaluate
+7. **Mapped types** - Not applicable to interface declarations
 
 ---
 
