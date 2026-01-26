@@ -21,6 +21,8 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassProp;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateProp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
@@ -260,6 +262,26 @@ public final class ClassCollector {
     }
 
     /**
+     * Extracts a fully qualified name from an expression.
+     * Handles both simple identifiers (e.g., "Animal") and member expressions (e.g., "java.util.ArrayList").
+     *
+     * @param expr the expression to extract the qualified name from
+     * @return the fully qualified name, or null if cannot be extracted
+     */
+    private String extractQualifiedName(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstIdent ident) {
+            return ident.getSym();
+        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
+            // Handle fully qualified names like java.util.ArrayList
+            String objPart = extractQualifiedName(memberExpr.getObj());
+            if (objPart != null && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                return objPart + "." + propIdent.getSym();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Resolves a parent class info from an expression (typically an identifier).
      * Looks up in the ScopedJavaClassRegistry first, then creates a placeholder if not found.
      *
@@ -267,29 +289,36 @@ public final class ClassCollector {
      * @return the JavaTypeInfo for the parent, or null if cannot be resolved
      */
     private JavaTypeInfo resolveParentTypeInfo(ISwc4jAstExpr expr) {
-        if (expr instanceof Swc4jAstIdent ident) {
-            String parentName = ident.getSym();
-
-            // First, try to resolve from the registry (might be an already-processed class or imported Java class)
-            JavaTypeInfo existingInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(parentName);
-            if (existingInfo != null) {
-                return existingInfo;
-            }
-
-            // Try to resolve from type alias registry to get the qualified name
-            String qualifiedName = compiler.getMemory().getScopedTypeAliasRegistry().resolve(parentName);
-            if (qualifiedName == null) {
-                qualifiedName = parentName; // Use as-is if no alias found
-            }
-
-            // Create a placeholder JavaTypeInfo for the parent
-            // This will be properly linked when the parent class is processed
-            String internalName = qualifiedName.replace('.', '/');
-            int lastDot = qualifiedName.lastIndexOf('.');
-            String packageName = lastDot > 0 ? qualifiedName.substring(0, lastDot) : "";
-
-            return new JavaTypeInfo(parentName, packageName, internalName);
+        // Extract fully qualified name from identifier or member expression
+        String qualifiedName = extractQualifiedName(expr);
+        if (qualifiedName == null) {
+            return null;
         }
-        return null;
+
+        // Get simple name (last part of qualified name)
+        int lastDot = qualifiedName.lastIndexOf('.');
+        String simpleName = lastDot >= 0 ? qualifiedName.substring(lastDot + 1) : qualifiedName;
+
+        // First, try to resolve from the registry (might be an already-processed class or imported Java class)
+        JavaTypeInfo existingInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+        if (existingInfo != null) {
+            return existingInfo;
+        }
+
+        // For simple names, try to resolve from type alias registry to get the qualified name
+        if (lastDot < 0) {
+            String resolvedName = compiler.getMemory().getScopedTypeAliasRegistry().resolve(simpleName);
+            if (resolvedName != null) {
+                qualifiedName = resolvedName;
+                lastDot = qualifiedName.lastIndexOf('.');
+            }
+        }
+
+        // Create a placeholder JavaTypeInfo for the parent
+        // This will be properly linked when the parent class is processed
+        String internalName = qualifiedName.replace('.', '/');
+        String packageName = lastDot > 0 ? qualifiedName.substring(0, lastDot) : "";
+
+        return new JavaTypeInfo(simpleName, packageName, internalName);
     }
 }

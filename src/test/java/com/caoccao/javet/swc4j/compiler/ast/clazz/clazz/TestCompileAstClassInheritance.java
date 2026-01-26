@@ -21,11 +21,9 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
 
@@ -62,6 +60,226 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                 )
         );
     }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testExtendArrayList(JdkVersion jdkVersion) throws Exception {
+        // Test that we can extend ArrayList and the class hierarchy is correct
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class MyList extends java.util.ArrayList<Object> {
+                    customField: int = 42
+                    getCustomField(): int {
+                      return this.customField
+                    }
+                  }
+                }""");
+        Class<?> myListClass = loadClass(map.get("com.MyList"));
+        assertNotNull(myListClass);
+
+        // Verify it extends ArrayList
+        assertTrue(ArrayList.class.isAssignableFrom(myListClass));
+
+        // Test custom field and method work
+        var instance = myListClass.getConstructor().newInstance();
+        assertEquals(42, myListClass.getMethod("getCustomField").invoke(instance));
+
+        // Inherited methods from ArrayList should be available via reflection
+        // Using ArrayList's add method directly (which is inherited)
+        @SuppressWarnings("unchecked")
+        ArrayList<Object> list = (ArrayList<Object>) instance;
+        list.add("Hello");
+        assertEquals(1, list.size());
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testExtendException(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class MyException extends java.lang.Exception {
+                    errorCode: int = 0
+                    constructor(message: String, code: int) {
+                      super(message)
+                      this.errorCode = code
+                    }
+                    getErrorCode(): int {
+                      return this.errorCode
+                    }
+                  }
+                }""");
+        Class<?> myExceptionClass = loadClass(map.get("com.MyException"));
+        assertNotNull(myExceptionClass);
+
+        // Verify it extends Exception
+        assertTrue(Exception.class.isAssignableFrom(myExceptionClass));
+
+        // Test functionality
+        var instance = myExceptionClass.getConstructor(String.class, int.class).newInstance("Test error", 500);
+        assertInstanceOf(Exception.class, instance);
+        assertEquals(500, myExceptionClass.getMethod("getErrorCode").invoke(instance));
+        assertEquals("Test error", myExceptionClass.getMethod("getMessage").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testExtendHashMap(JdkVersion jdkVersion) throws Exception {
+        // Test that we can extend HashMap and the class hierarchy is correct
+        var map = getCompiler(jdkVersion).compile("""
+                import { HashMap } from "java.util"
+                namespace com {
+                  export class MyMap extends HashMap<Object, Object> {
+                    customField: String = "custom"
+                    getCustomField(): String {
+                      return this.customField
+                    }
+                  }
+                }""");
+        Class<?> myMapClass = loadClass(map.get("com.MyMap"));
+        assertNotNull(myMapClass);
+
+        // Verify it extends HashMap
+        assertTrue(HashMap.class.isAssignableFrom(myMapClass));
+
+        // Test custom field and method work
+        var instance = myMapClass.getConstructor().newInstance();
+        assertEquals("custom", myMapClass.getMethod("getCustomField").invoke(instance));
+
+        // Inherited methods from HashMap should be available via casting
+        @SuppressWarnings("unchecked")
+        HashMap<Object, Object> hashMap = (HashMap<Object, Object>) instance;
+        hashMap.put("key", "value");
+        assertEquals("value", hashMap.get("key"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testExtendLinkedHashMap(JdkVersion jdkVersion) throws Exception {
+        // Test that we can extend LinkedHashMap and the class hierarchy is correct
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class MyLinkedHashMap extends java.util.LinkedHashMap<Object, Object> {
+                    customField: int = 100
+                    getCustomField(): int {
+                      return this.customField
+                    }
+                  }
+                }""");
+        Class<?> myLinkedHashMapClass = loadClass(map.get("com.MyLinkedHashMap"));
+        assertNotNull(myLinkedHashMapClass);
+
+        // Verify it extends LinkedHashMap
+        assertTrue(LinkedHashMap.class.isAssignableFrom(myLinkedHashMapClass));
+
+        // Test custom field and method work
+        var instance = myLinkedHashMapClass.getConstructor().newInstance();
+        assertEquals(100, myLinkedHashMapClass.getMethod("getCustomField").invoke(instance));
+
+        // Inherited methods from LinkedHashMap should be available via casting
+        @SuppressWarnings("unchecked")
+        LinkedHashMap<Object, Object> linkedHashMap = (LinkedHashMap<Object, Object>) instance;
+        linkedHashMap.put("a", 1);
+        linkedHashMap.put("b", 2);
+        assertEquals(1, linkedHashMap.get("a"));
+        assertEquals(2, linkedHashMap.size());
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testExtendNumber(JdkVersion jdkVersion) throws Exception {
+        // Test that we can extend Number and the class hierarchy is correct
+        // Note: Number is abstract, so we need to implement its abstract methods
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class MyNumber extends java.lang.Number {
+                    value: int = 0
+                    constructor(v: int) {
+                      super()
+                      this.value = v
+                    }
+                    intValue(): int { return this.value }
+                    longValue(): long { return (this.value as long) }
+                    floatValue(): float { return (this.value as float) }
+                    doubleValue(): double { return (this.value as double) }
+                  }
+                }""");
+        Class<?> myNumberClass = loadClass(map.get("com.MyNumber"));
+        assertNotNull(myNumberClass);
+
+        // Verify it extends Number
+        assertTrue(Number.class.isAssignableFrom(myNumberClass));
+
+        // Test functionality
+        var instance = myNumberClass.getConstructor(int.class).newInstance(42);
+        Number number = (Number) instance;
+
+        assertEquals(42, number.intValue());
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testExtendRuntimeException(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class ValidationException extends java.lang.RuntimeException {
+                    fieldName: String = ""
+                    constructor(field: String, message: String) {
+                      super(message)
+                      this.fieldName = field
+                    }
+                    getFieldName(): String {
+                      return this.fieldName
+                    }
+                  }
+                }""");
+        Class<?> validationExceptionClass = loadClass(map.get("com.ValidationException"));
+        assertNotNull(validationExceptionClass);
+
+        // Verify it extends RuntimeException
+        assertTrue(RuntimeException.class.isAssignableFrom(validationExceptionClass));
+
+        var instance = validationExceptionClass.getConstructor(String.class, String.class)
+                .newInstance("email", "Invalid email format");
+        assertEquals(
+                List.of("email", "Invalid email format"),
+                List.of(
+                        validationExceptionClass.getMethod("getFieldName").invoke(instance),
+                        validationExceptionClass.getMethod("getMessage").invoke(instance)
+                )
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testExtendThread(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class MyThread extends java.lang.Thread {
+                    result: int = 0
+                    run(): void {
+                      this.result = 42
+                    }
+                    getResult(): int {
+                      return this.result
+                    }
+                  }
+                }""");
+        Class<?> myThreadClass = loadClass(map.get("com.MyThread"));
+        assertNotNull(myThreadClass);
+
+        // Verify it extends Thread
+        assertTrue(Thread.class.isAssignableFrom(myThreadClass));
+
+        // Test functionality
+        var instance = myThreadClass.getConstructor().newInstance();
+        Thread thread = (Thread) instance;
+        thread.start();
+        thread.join(); // Wait for thread to complete
+
+        assertEquals(42, myThreadClass.getMethod("getResult").invoke(instance));
+    }
+
+    // ==================== JDK Built-in Class Extension Tests ====================
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

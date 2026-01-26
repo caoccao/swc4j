@@ -20,6 +20,8 @@ import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
@@ -418,6 +420,26 @@ public final class ClassGenerator extends BaseAstProcessor {
     }
 
     /**
+     * Extracts a fully qualified name from an expression.
+     * Handles both simple identifiers (e.g., "Animal") and member expressions (e.g., "java.util.ArrayList").
+     *
+     * @param expr the expression to extract the qualified name from
+     * @return the fully qualified name, or null if cannot be extracted
+     */
+    private String extractQualifiedName(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstIdent ident) {
+            return ident.getSym();
+        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
+            // Handle fully qualified names like java.util.ArrayList
+            String objPart = extractQualifiedName(memberExpr.getObj());
+            if (objPart != null && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                return objPart + "." + propIdent.getSym();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Resolves the superclass internal name from the class AST.
      *
      * @param clazz the class AST
@@ -429,25 +451,32 @@ public final class ClassGenerator extends BaseAstProcessor {
         }
 
         ISwc4jAstExpr superClassExpr = clazz.getSuperClass().get();
-        if (superClassExpr instanceof Swc4jAstIdent ident) {
-            String superClassName = ident.getSym();
 
-            // Try to resolve from type alias registry
-            String resolvedName = compiler.getMemory().getScopedTypeAliasRegistry().resolve(superClassName);
+        // Extract fully qualified name from identifier or member expression
+        String qualifiedName = extractQualifiedName(superClassExpr);
+        if (qualifiedName == null) {
+            return "java/lang/Object";
+        }
+
+        // Get simple name (last part of qualified name)
+        int lastDot = qualifiedName.lastIndexOf('.');
+        String simpleName = lastDot >= 0 ? qualifiedName.substring(lastDot + 1) : qualifiedName;
+
+        // For simple names, try to resolve from type alias registry
+        if (lastDot < 0) {
+            String resolvedName = compiler.getMemory().getScopedTypeAliasRegistry().resolve(simpleName);
             if (resolvedName != null) {
                 return resolvedName.replace('.', '/');
             }
 
             // Try to resolve from Java type registry
-            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(superClassName);
+            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
             if (typeInfo != null) {
                 return typeInfo.getInternalName();
             }
-
-            // Default to simple name (might be in same package)
-            return superClassName;
         }
 
-        return "java/lang/Object";
+        // For fully qualified names or unresolved simple names, convert to internal name
+        return qualifiedName.replace('.', '/');
     }
 }
