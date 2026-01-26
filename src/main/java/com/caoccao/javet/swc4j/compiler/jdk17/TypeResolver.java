@@ -317,12 +317,11 @@ public final class TypeResolver {
             Swc4jAstFunction function,
             Swc4jAstBlockStmt body) throws Swc4jByteCodeCompilerException {
         // Check for explicit return type annotation first
-        var returnTypeOpt = function.getReturnType();
-        if (returnTypeOpt.isPresent()) {
-            var returnTypeAnn = returnTypeOpt.get();
-            var tsType = returnTypeAnn.getTypeAnn();
-            String descriptor = mapTsTypeToDescriptor(tsType);
-            return ReturnTypeInfo.of(tsType, descriptor);
+        if (function != null) {
+            var returnTypeOpt = function.getReturnType();
+            if (returnTypeOpt.isPresent()) {
+                return analyzeReturnTypeFromAnnotation(returnTypeOpt.get());
+            }
         }
 
         // If no body (e.g., abstract method), default to void
@@ -348,6 +347,45 @@ public final class TypeResolver {
             }
         }
         return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
+    }
+
+    /**
+     * Analyzes a type annotation and returns the corresponding ReturnTypeInfo.
+     *
+     * @param typeAnn the TypeScript type annotation
+     * @return ReturnTypeInfo based on the type annotation
+     * @throws Swc4jByteCodeCompilerException if type analysis fails
+     */
+    public ReturnTypeInfo analyzeReturnTypeFromAnnotation(com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn typeAnn)
+            throws Swc4jByteCodeCompilerException {
+        var tsType = typeAnn.getTypeAnn();
+        String descriptor = mapTsTypeToDescriptor(tsType);
+        return ReturnTypeInfo.of(tsType, descriptor);
+    }
+
+    /**
+     * Creates a ReturnTypeInfo from a JVM type descriptor.
+     *
+     * @param descriptor the JVM type descriptor (e.g., "I", "Ljava/lang/String;")
+     * @return ReturnTypeInfo based on the descriptor
+     */
+    public ReturnTypeInfo createReturnTypeInfoFromDescriptor(String descriptor) {
+        if (descriptor == null) {
+            return new ReturnTypeInfo(ReturnType.OBJECT, 0, "Ljava/lang/Object;", null);
+        }
+        return switch (descriptor) {
+            case "V" -> new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
+            case "Z" -> new ReturnTypeInfo(ReturnType.BOOLEAN, 0, null, null);
+            case "B" -> new ReturnTypeInfo(ReturnType.BYTE, 0, null, null);
+            case "C" -> new ReturnTypeInfo(ReturnType.CHAR, 0, null, null);
+            case "S" -> new ReturnTypeInfo(ReturnType.SHORT, 0, null, null);
+            case "I" -> new ReturnTypeInfo(ReturnType.INT, 0, null, null);
+            case "J" -> new ReturnTypeInfo(ReturnType.LONG, 0, null, null);
+            case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 0, null, null);
+            case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 0, null, null);
+            case "Ljava/lang/String;" -> new ReturnTypeInfo(ReturnType.STRING, 0, descriptor, null);
+            default -> new ReturnTypeInfo(ReturnType.OBJECT, 0, descriptor, null);
+        };
     }
 
     /**

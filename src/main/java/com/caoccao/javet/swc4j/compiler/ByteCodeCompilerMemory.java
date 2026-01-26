@@ -22,17 +22,19 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 public final class ByteCodeCompilerMemory {
     private final Map<String, byte[]> byteCodeMap;
-    private final CompilationContext compilationContext;
+    private final Stack<CompilationContext> contextStack;
     private final ScopedJavaTypeRegistry scopedJavaTypeRegistry;
     private final ScopedStandaloneFunctionRegistry scopedStandaloneFunctionRegistry;
     private final ScopedTypeAliasRegistry scopedTypeAliasRegistry;
 
     public ByteCodeCompilerMemory() {
         byteCodeMap = new HashMap<>();
-        compilationContext = new CompilationContext();
+        contextStack = new Stack<>();
+        contextStack.push(new CompilationContext());
         scopedJavaTypeRegistry = new ScopedJavaTypeRegistry();
         scopedStandaloneFunctionRegistry = new ScopedStandaloneFunctionRegistry();
         scopedTypeAliasRegistry = new ScopedTypeAliasRegistry();
@@ -63,7 +65,7 @@ public final class ByteCodeCompilerMemory {
      * @return the current compilation context
      */
     public CompilationContext getCompilationContext() {
-        return compilationContext;
+        return contextStack.peek();
     }
 
     public ScopedJavaTypeRegistry getScopedJavaTypeRegistry() {
@@ -78,16 +80,44 @@ public final class ByteCodeCompilerMemory {
         return scopedTypeAliasRegistry;
     }
 
+    /**
+     * Pop the current compilation context from the stack.
+     * Used when exiting a nested scope (like a lambda).
+     *
+     * @return the popped context
+     */
+    public CompilationContext popCompilationContext() {
+        if (contextStack.size() > 1) {
+            return contextStack.pop();
+        }
+        return contextStack.peek();
+    }
+
+    /**
+     * Push a new compilation context onto the stack.
+     * Used when entering a nested scope (like a lambda).
+     *
+     * @param isStatic true if the new context is for a static method
+     * @return the new context
+     */
+    public CompilationContext pushCompilationContext(boolean isStatic) {
+        CompilationContext newContext = new CompilationContext();
+        newContext.reset(isStatic);
+        contextStack.push(newContext);
+        return newContext;
+    }
+
     public void reset() {
         byteCodeMap.clear();
-        compilationContext.reset();
+        contextStack.clear();
+        contextStack.push(new CompilationContext());
         scopedJavaTypeRegistry.clear();
         scopedStandaloneFunctionRegistry.clear();
         scopedTypeAliasRegistry.clear();
     }
 
     public void resetCompilationContext() {
-        compilationContext.reset();
+        contextStack.peek().reset();
     }
 
     /**
@@ -96,7 +126,7 @@ public final class ByteCodeCompilerMemory {
      * @param isStatic true if this is for a static method (no 'this' parameter)
      */
     public void resetCompilationContext(boolean isStatic) {
-        compilationContext.reset(isStatic);
+        contextStack.peek().reset(isStatic);
     }
 
     /**

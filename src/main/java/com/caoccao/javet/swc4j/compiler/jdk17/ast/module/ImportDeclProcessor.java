@@ -131,6 +131,9 @@ public final class ImportDeclProcessor {
                     // Register in the scoped registry
                     compiler.getMemory().getScopedJavaTypeRegistry().registerClass(importedName, typeInfo);
 
+                    // Also register as a type alias so TypeResolver can resolve the type name
+                    compiler.getMemory().getScopedTypeAliasRegistry().registerAlias(importedName, fullyQualifiedName);
+
                 } catch (ClassNotFoundException e) {
                     // Class not found - could be a user error or unsupported class
                     // For now, silently skip (could add logging later)

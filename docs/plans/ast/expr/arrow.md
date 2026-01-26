@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstArrowExpr` in TypeScript to JVM bytecode compilation. Arrow expressions (arrow functions/lambdas) are first-class function values that capture variables from their enclosing scope.
 
-**Current Status:** NOT IMPLEMENTED
+**Current Status:** PARTIALLY IMPLEMENTED
 
 **Strategy:** Arrow expressions will be implemented as **Anonymous Inner Classes** that implement a functional interface. This approach is compatible with JDK 17 and provides full closure semantics.
 
@@ -156,7 +156,7 @@ Anonymous inner classes will be named:
 
 ### Phase 1: Basic Arrow Expression - Priority: HIGH
 
-**Status:** NOT IMPLEMENTED
+**Status:** IMPLEMENTED
 
 **Scope:**
 - Arrow with no parameters, empty body: `() => {}`
@@ -173,7 +173,7 @@ Anonymous inner classes will be named:
 
 ### Phase 2: Variable Capture (Closures) - Priority: HIGH
 
-**Status:** NOT IMPLEMENTED
+**Status:** PARTIALLY IMPLEMENTED (basic capture works, `this` capture and mutable capture not yet implemented)
 
 **Scope:**
 - Capture local variables from enclosing scope
@@ -196,7 +196,7 @@ Anonymous inner classes will be named:
 
 ### Phase 3: Functional Interface Resolution - Priority: HIGH
 
-**Status:** NOT IMPLEMENTED
+**Status:** IMPLEMENTED
 
 **Scope:**
 - Determine target functional interface from context
@@ -1103,9 +1103,9 @@ Use primitive specializations to avoid boxing:
 ## Success Criteria
 
 ### Implementation Complete When:
-- [ ] Phase 1: Basic arrow expressions with no capture working
-- [ ] Phase 2: Variable capture (closures) working
-- [ ] Phase 3: Functional interface resolution working
+- [x] Phase 1: Basic arrow expressions with no capture working
+- [x] Phase 2: Variable capture (closures) working (basic capture)
+- [x] Phase 3: Functional interface resolution working
 - [ ] Phase 4: All parameter types working
 - [ ] Phase 5: Type inference working
 - [ ] Phase 6: Nested arrows working
@@ -1115,10 +1115,10 @@ Use primitive specializations to avoid boxing:
 - [ ] All tests passing
 
 ### Quality Gates:
-- [ ] Anonymous inner classes generate valid bytecode
-- [ ] Captured variables correctly accessible in lambda body
-- [ ] Functional interfaces correctly implemented
-- [ ] Stack map frames generated correctly
+- [x] Anonymous inner classes generate valid bytecode
+- [x] Captured variables correctly accessible in lambda body
+- [x] Functional interfaces correctly implemented
+- [x] Stack map frames generated correctly
 - [ ] No memory leaks from captures
 
 ---
@@ -1147,5 +1147,5 @@ Use primitive specializations to avoid boxing:
 ---
 
 *Last Updated: January 26, 2026*
-*Status: NOT IMPLEMENTED*
-*Next Step: Implement Phase 1 - Basic Arrow Expressions*
+*Status: PARTIALLY IMPLEMENTED*
+*Next Step: Implement Phase 4 - Parameter Handling*

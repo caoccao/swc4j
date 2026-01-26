@@ -39,6 +39,7 @@ import java.util.Map;
 public sealed abstract class ByteCodeCompiler permits
         ByteCodeCompiler17 {
     protected final ArrayLiteralGenerator arrayLiteralGenerator;
+    protected final ArrowExpressionGenerator arrowExpressionGenerator;
     protected final AssignExpressionGenerator assignExpressionGenerator;
     protected final AstProcessor astProcessor;
     protected final BigIntLiteralGenerator bigIntLiteralGenerator;
@@ -100,6 +101,7 @@ public sealed abstract class ByteCodeCompiler permits
         swc4j = new Swc4j();
 
         arrayLiteralGenerator = new ArrayLiteralGenerator(this);
+        arrowExpressionGenerator = new ArrowExpressionGenerator(this);
         assignExpressionGenerator = new AssignExpressionGenerator(this);
         astProcessor = new AstProcessor(this);
         binaryExpressionGenerator = new BinaryExpressionGenerator(this);
@@ -165,6 +167,10 @@ public sealed abstract class ByteCodeCompiler permits
 
     public ArrayLiteralGenerator getArrayLiteralGenerator() {
         return arrayLiteralGenerator;
+    }
+
+    public ArrowExpressionGenerator getArrowExpressionGenerator() {
+        return arrowExpressionGenerator;
     }
 
     public AssignExpressionGenerator getAssignExpressionGenerator() {
