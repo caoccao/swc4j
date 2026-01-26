@@ -88,13 +88,13 @@ public final class StandaloneFunctionGenerator extends BaseAstProcessor {
 
         // Generate each function as a static method
         for (Swc4jAstFnDecl fnDecl : functions) {
-            generateStaticMethod(classWriter, cp, fnDecl);
+            generateStaticMethod(classWriter, cp, fnDecl, internalClassName);
         }
 
         return classWriter.toByteArray();
     }
 
-    private void generateStaticMethod(ClassWriter classWriter, ClassWriter.ConstantPool cp, Swc4jAstFnDecl fnDecl) throws Swc4jByteCodeCompilerException {
+    private void generateStaticMethod(ClassWriter classWriter, ClassWriter.ConstantPool cp, Swc4jAstFnDecl fnDecl, String internalClassName) throws Swc4jByteCodeCompilerException {
         String methodName = fnDecl.getIdent().getSym();
         Swc4jAstFunction function = fnDecl.getFunction();
 
@@ -154,7 +154,15 @@ public final class StandaloneFunctionGenerator extends BaseAstProcessor {
             int maxLocals = context.getLocalVariableTable().getMaxLocals();
 
             // ACC_PUBLIC | ACC_STATIC = 0x0009
-            classWriter.addMethod(0x0009, methodName, descriptor, code.toByteArray(), 10, maxLocals);
+            int accessFlags = 0x0009;
+            boolean isStatic = true;
+
+            // Generate stack map table for methods with branches (required for Java 7+)
+            var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, internalClassName, descriptor, cp);
+            var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
+
+            classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), 10, maxLocals,
+                    null, null, stackMapTable, exceptionTable);
         } finally {
             if (methodTypeParamScope != null) {
                 compiler.getMemory().getCompilationContext().popTypeParameterScope();

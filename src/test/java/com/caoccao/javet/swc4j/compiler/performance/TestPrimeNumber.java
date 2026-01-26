@@ -29,20 +29,16 @@ public class TestPrimeNumber extends BaseTestCompileSuite {
     public void test(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 import { Math } from 'java.lang'
-                namespace com {
-                  export class A {
-                    public isPrime(number: int): boolean {
-                      const limit = Math.floor(number / 2)
-                      for (let i = 2; i <= limit; i++) {
-                        if (number % i === 0) {
-                          return false
-                        }
-                      }
-                      return true
+                export function isPrime(number: int): boolean {
+                  const limit = Math.floor(number / 2)
+                  for (let i = 2; i <= limit; i++) {
+                    if (number % i === 0) {
+                      return false
                     }
                   }
+                  return true
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = loadClass(map.get("$"));
         var instance = classA.getConstructor().newInstance();
         var method = classA.getMethod("isPrime", int.class);
         assertEquals(true, method.invoke(instance, 7));  // 7 is prime
