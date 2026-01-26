@@ -36,7 +36,7 @@ public class CompilationContext {
     private final Stack<String> classStack;
     private final Stack<LoopLabelInfo> continueLabels;
     private final Map<String, GenericTypeInfo> genericTypeInfoMap;
-    private final Map<String, String> inferredTypes;
+    private final Stack<Map<String, String>> inferredTypesScopes;
     private final LocalVariableTable localVariableTable;
     private final Stack<TypeParameterScope> typeParameterScopes;
     private int tempIdCounter;
@@ -47,7 +47,8 @@ public class CompilationContext {
         classStack = new Stack<>();
         continueLabels = new Stack<>();
         genericTypeInfoMap = new HashMap<>();
-        inferredTypes = new HashMap<>();
+        inferredTypesScopes = new Stack<>();
+        inferredTypesScopes.push(new HashMap<>()); // Base scope
         localVariableTable = new LocalVariableTable();
         typeParameterScopes = new Stack<>();
         tempIdCounter = 0;
@@ -100,8 +101,31 @@ public class CompilationContext {
         return genericTypeInfoMap;
     }
 
+    /**
+     * Get an inferred type by name, searching from innermost to outermost scope.
+     *
+     * @param name         the variable name
+     * @param defaultValue the default value if not found
+     * @return the inferred type, or defaultValue if not found in any scope
+     */
+    public String getInferredType(String name, String defaultValue) {
+        for (int i = inferredTypesScopes.size() - 1; i >= 0; i--) {
+            String type = inferredTypesScopes.get(i).get(name);
+            if (type != null) {
+                return type;
+            }
+        }
+        return defaultValue;
+    }
+
+    /**
+     * Get the current (innermost) inferred types scope.
+     * Use this for putting new types into the current scope.
+     *
+     * @return the current inferred types map
+     */
     public Map<String, String> getInferredTypes() {
-        return inferredTypes;
+        return inferredTypesScopes.peek();
     }
 
     /**
@@ -188,6 +212,17 @@ public class CompilationContext {
     }
 
     /**
+     * Pop the current inferred types scope from the stack.
+     * Call this when exiting a scope (e.g., arrow function body analysis).
+     * Note: The base scope is never popped.
+     */
+    public void popInferredTypesScope() {
+        if (inferredTypesScopes.size() > 1) {
+            inferredTypesScopes.pop();
+        }
+    }
+
+    /**
      * Pop the current type parameter scope from the stack.
      * Call this when exiting a generic class or method.
      */
@@ -213,6 +248,19 @@ public class CompilationContext {
 
     public void pushContinueLabel(LoopLabelInfo labelInfo) {
         continueLabels.push(labelInfo);
+    }
+
+    /**
+     * Push a new inferred types scope onto the stack.
+     * Call this when entering a new scope that may have its own type bindings
+     * (e.g., arrow function parameter types for return type inference).
+     *
+     * @return the new scope map, which can be populated with type bindings
+     */
+    public Map<String, String> pushInferredTypesScope() {
+        Map<String, String> newScope = new HashMap<>();
+        inferredTypesScopes.push(newScope);
+        return newScope;
     }
 
     /**
@@ -242,7 +290,9 @@ public class CompilationContext {
         capturedVariables.clear();
         continueLabels.clear();
         genericTypeInfoMap.clear();
-        inferredTypes.clear();
+        // Clear all inferred types scopes and reset to a single base scope
+        inferredTypesScopes.clear();
+        inferredTypesScopes.push(new HashMap<>());
         localVariableTable.reset(isStatic);
         tempIdCounter = 0;
         // Note: classStack and typeParameterScopes are NOT cleared - class context persists across method resets

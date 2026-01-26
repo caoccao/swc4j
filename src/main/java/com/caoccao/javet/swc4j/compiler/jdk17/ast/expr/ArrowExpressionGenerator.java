@@ -86,20 +86,19 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             paramNames.add(paramName != null ? paramName : "arg" + paramTypes.size());
         }
 
-        // Temporarily register parameter types in the context for return type analysis
+        // Push a new scope for parameter types to enable return type inference
         // This allows inferTypeFromExpr to correctly infer types like x * 2 when x is a long
         CompilationContext context = compiler.getMemory().getCompilationContext();
-        Map<String, String> originalInferredTypes = new HashMap<>(context.getInferredTypes());
+        Map<String, String> paramScope = context.pushInferredTypesScope();
         for (int i = 0; i < paramNames.size(); i++) {
-            context.getInferredTypes().put(paramNames.get(i), paramTypes.get(i));
+            paramScope.put(paramNames.get(i), paramTypes.get(i));
         }
 
         // Determine return type
         ReturnTypeInfo returnInfo = analyzeReturnType(arrowExpr, body);
 
-        // Restore original inferred types
-        context.getInferredTypes().clear();
-        context.getInferredTypes().putAll(originalInferredTypes);
+        // Pop the parameter types scope
+        context.popInferredTypesScope();
 
         // Determine which functional interface to use
         String interfaceName;

@@ -765,14 +765,14 @@ public final class TypeResolver {
                 var left = assignExpr.getLeft();
                 if (left instanceof Swc4jAstBindingIdent bindingIdent) {
                     String varName = bindingIdent.getId().getSym();
-                    return context.getInferredTypes().getOrDefault(varName, "Ljava/lang/Object;");
+                    return context.getInferredType(varName, "Ljava/lang/Object;");
                 }
                 return inferTypeFromExpr(assignExpr.getRight());
             }
             // Simple assignment - result type is the right operand type
             return inferTypeFromExpr(assignExpr.getRight());
         } else if (expr instanceof Swc4jAstIdent ident) {
-            return context.getInferredTypes().getOrDefault(ident.getSym(), "Ljava/lang/Object;");
+            return context.getInferredType(ident.getSym(), "Ljava/lang/Object;");
         } else if (expr instanceof Swc4jAstUpdateExpr updateExpr) {
             // Update expression (++/--) returns the type of the operand
             return inferTypeFromExpr(updateExpr.getArg());
