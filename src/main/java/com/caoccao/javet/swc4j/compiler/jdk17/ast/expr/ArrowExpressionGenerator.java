@@ -490,10 +490,19 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             lambdaContext.getInferredTypes().put(paramName, paramType);
         }
 
-        // Map captured variables to field access - store mapping for identifier resolution
+        // Map captured variables to field access - register them in the compilation context
         for (CapturedVariable captured : capturedVariables) {
             // Store in inferred types so the identifier generator knows the type
             lambdaContext.getInferredTypes().put(captured.name(), captured.type());
+            // Register as captured variable for field access resolution
+            lambdaContext.getCapturedVariables().put(
+                    captured.name(),
+                    new com.caoccao.javet.swc4j.compiler.memory.CapturedVariable(
+                            captured.name(),
+                            "captured$" + captured.name(),
+                            captured.type()
+                    )
+            );
         }
 
         // Generate method body

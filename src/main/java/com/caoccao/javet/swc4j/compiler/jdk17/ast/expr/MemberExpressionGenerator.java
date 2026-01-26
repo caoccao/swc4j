@@ -49,6 +49,38 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
             String currentClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
 
             if (currentClassName != null) {
+                // Check if we have a captured 'this' (we're inside a lambda)
+                var capturedThis = compiler.getMemory().getCompilationContext().getCapturedVariable("this");
+                if (capturedThis != null) {
+                    // We're in a lambda - need to access field via captured$this
+                    // Extract the outer class name from the captured type (e.g., "Lcom/A;" -> "com/A")
+                    String outerClassName = capturedThis.type().substring(1, capturedThis.type().length() - 1);
+
+                    // Load captured$this
+                    code.aload(0); // load lambda's this
+                    int capturedThisRef = cp.addFieldRef(currentClassName, capturedThis.fieldName(), capturedThis.type());
+                    code.getfield(capturedThisRef); // Stack: [outer this]
+
+                    // Look up the field in the outer class
+                    String outerQualifiedName = outerClassName.replace('/', '.');
+                    JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(outerQualifiedName);
+                    if (typeInfo == null) {
+                        int lastSlash = outerClassName.lastIndexOf('/');
+                        String simpleName = lastSlash >= 0 ? outerClassName.substring(lastSlash + 1) : outerClassName;
+                        typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+                    }
+
+                    if (typeInfo != null) {
+                        FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                        if (lookupResult != null) {
+                            int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, lookupResult.fieldInfo.descriptor());
+                            code.getfield(fieldRef);
+                            return;
+                        }
+                    }
+                }
+
+                // Regular this.field access (not in lambda)
                 // Look up the field in the class registry - try qualified name first, then simple name
                 String qualifiedName = currentClassName.replace('/', '.');
                 JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);

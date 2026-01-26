@@ -16,12 +16,14 @@
 
 package com.caoccao.javet.swc4j.compiler.memory;
 
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.compiler.jdk17.GenericTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariableTable;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Stack;
 
 /**
@@ -30,6 +32,7 @@ import java.util.Stack;
  */
 public class CompilationContext {
     private final Stack<LoopLabelInfo> breakLabels;
+    private final Map<String, CapturedVariable> capturedVariables;
     private final Stack<String> classStack;
     private final Stack<LoopLabelInfo> continueLabels;
     private final Map<String, GenericTypeInfo> genericTypeInfoMap;
@@ -40,6 +43,7 @@ public class CompilationContext {
 
     public CompilationContext() {
         breakLabels = new Stack<>();
+        capturedVariables = new HashMap<>();
         classStack = new Stack<>();
         continueLabels = new Stack<>();
         genericTypeInfoMap = new HashMap<>();
@@ -47,6 +51,25 @@ public class CompilationContext {
         localVariableTable = new LocalVariableTable();
         typeParameterScopes = new Stack<>();
         tempIdCounter = 0;
+    }
+
+    /**
+     * Get a captured variable by name.
+     *
+     * @param name the variable name
+     * @return the captured variable info, or null if not captured
+     */
+    public CapturedVariable getCapturedVariable(String name) {
+        return capturedVariables.get(name);
+    }
+
+    /**
+     * Get the captured variables map.
+     *
+     * @return the captured variables map
+     */
+    public Map<String, CapturedVariable> getCapturedVariables() {
+        return capturedVariables;
     }
 
     public LoopLabelInfo getCurrentBreakLabel() {
@@ -216,6 +239,7 @@ public class CompilationContext {
      */
     public void reset(boolean isStatic) {
         breakLabels.clear();
+        capturedVariables.clear();
         continueLabels.clear();
         genericTypeInfoMap.clear();
         inferredTypes.clear();
@@ -242,7 +266,7 @@ public class CompilationContext {
      * @return the constraint type, or null if it's a type parameter with no constraint (erases to Object),
      * or empty if not a type parameter at all
      */
-    public java.util.Optional<com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType> resolveTypeParameter(String typeName) {
+    public Optional<ISwc4jAstTsType> resolveTypeParameter(String typeName) {
         for (int i = typeParameterScopes.size() - 1; i >= 0; i--) {
             TypeParameterScope scope = typeParameterScopes.get(i);
             if (scope.isTypeParameter(typeName)) {
@@ -250,6 +274,6 @@ public class CompilationContext {
             }
         }
         // Not found - return a special marker (we use Optional<Optional> pattern via empty)
-        return java.util.Optional.empty();
+        return Optional.empty();
     }
 }

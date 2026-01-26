@@ -40,6 +40,18 @@ public final class IdentifierGenerator extends BaseAstProcessor<Swc4jAstIdent> {
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
         String varName = ident.getSym();
+
+        // Check if this is a captured variable (from enclosing scope)
+        var capturedVar = context.getCapturedVariable(varName);
+        if (capturedVar != null) {
+            // Access captured variable via field: this.captured$varName
+            String currentClass = context.getCurrentClassInternalName();
+            code.aload(0);  // Load 'this' (the lambda instance)
+            int fieldRef = cp.addFieldRef(currentClass, capturedVar.fieldName(), capturedVar.type());
+            code.getfield(fieldRef);
+            return;
+        }
+
         LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
         if (localVar != null) {
             switch (localVar.type()) {
