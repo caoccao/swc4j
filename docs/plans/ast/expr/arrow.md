@@ -46,6 +46,7 @@ class Calculator {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowNested.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowEdgeCases.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowCustomInterface.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowTypeInference.java` ✓
 
 **AST Definition:** [Swc4jAstArrowExpr.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr.java)
 
@@ -360,12 +361,46 @@ When arrow expressions are assigned to standard functional interfaces (e.g., `In
 
 ### Phase 5: Type Inference - Priority: MEDIUM
 
-**Status:** NOT IMPLEMENTED
+**Status:** PARTIALLY IMPLEMENTED
 
 **Scope:**
-- Infer parameter types from context (target interface)
-- Infer return type from expression or return statements
-- Handle generic type parameters
+- Infer parameter types from context (target interface) - LIMITED (requires explicit type annotations)
+- Infer return type from expression or return statements ✓
+- Handle generic type parameters - LIMITED (type erasure to Object)
+
+**Implementation Notes:**
+
+1. **Return Type Inference from Expressions**: Fully working. The system correctly infers return types from:
+   - Binary operations (arithmetic, bitwise, logical)
+   - Unary operations (negation)
+   - Ternary expressions (including nested)
+   - Captured variables
+   - Local variable types
+   - Comparison expressions (boolean inference)
+
+2. **Return Type Inference from Return Statements**: Fully working. The system analyzes block bodies and:
+   - Finds return statements recursively (including in if blocks)
+   - Infers type from the returned expression
+   - Supports multiple return paths
+
+3. **Type Widening**: Working. When mixing types in operations:
+   - int + long → long
+   - int + double → double
+   - Follows JVM numeric promotion rules
+
+4. **Parameter Type Inference from Context**: Limited. Parameters require explicit type annotations:
+   ```typescript
+   // Works: explicit parameter type
+   const fn: IntUnaryOperator = (x: int) => x * 2
+
+   // NOT supported: inferring x:int from IntUnaryOperator
+   // const fn: IntUnaryOperator = x => x * 2
+   ```
+
+5. **Generic Type Parameters**: Limited. Generic arrows like `<T>(x: T): T => x` are parsed but use type erasure to Object. Full generic support would require:
+   - Type parameter propagation
+   - Constraint resolution
+   - Specialized interface generation
 
 ### Phase 6: Nested Arrows - Priority: MEDIUM
 
@@ -1241,7 +1276,9 @@ Use primitive specializations to avoid boxing:
 - [x] Phase 3: Functional interface resolution working
 - [x] Phase 4: Basic parameter types working (typed params, multiple params, param capture)
 - [ ] Phase 4: Advanced parameter features (destructuring) - NOT IMPLEMENTED
-- [ ] Phase 5: Type inference working
+- [x] Phase 5: Return type inference working (expressions, statements, operators)
+- [ ] Phase 5: Parameter type inference from context - LIMITED
+- [ ] Phase 5: Generic type parameters - LIMITED (type erasure)
 - [x] Phase 6: Nested arrows working (basic support)
 - [x] Phase 7: Async arrows - NOT SUPPORTED (intentionally excluded)
 - [x] Phase 8: Generator arrows - NOT SUPPORTED (intentionally excluded, also invalid syntax)
@@ -1322,8 +1359,23 @@ The following edge cases are now covered by tests:
 - Edge case 32: Capture method parameter ✓
 - Multiple arrows in same scope ✓
 
+**Type Inference (TestCompileAstArrowTypeInference.java):**
+- Edge case 60: Inferred return type from expression ✓
+- Edge case 61: Inferred return type from return statement ✓
+- Return type inference from binary operations (add, multiply, modulo) ✓
+- Return type inference from unary operations (negation) ✓
+- Return type inference from ternary expressions (including nested) ✓
+- Return type inference from captured variables ✓
+- Return type inference from local/const variables ✓
+- Return type inference from boolean comparisons ✓
+- Return type inference from bitwise operations (and, or, xor) ✓
+- Type widening (int + long → long) ✓
+- Conditional returns in block body ✓
+- Multiple suppliers (IntSupplier, LongSupplier, DoubleSupplier, BooleanSupplier) ✓
+- Binary operators (IntBinaryOperator, LongBinaryOperator, DoubleBinaryOperator) ✓
+
 ---
 
 *Last Updated: January 26, 2026*
 *Status: PARTIALLY IMPLEMENTED*
-*Next Step: Implement Phase 5 - Type Inference (infer param types from context, generic type parameters)*
+*Next Step: Implement Phase 6 - Nested Arrows (arrows returning arrows)*
