@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstClass` in TypeScript to JVM bytecode compilation. Classes are fundamental constructs that contain methods, properties, constructors, and support inheritance.
 
-**Current Status:** COMPLETE - All class features implemented (basic, inheritance, abstract, interfaces, constructors, fields, static members, access modifiers, generics)
+**Current Status:** COMPLETE - All class features implemented (basic, inheritance, abstract, interfaces, constructors, fields, static members, access modifiers, generics, direct access for classes without namespace)
 
 **Syntax:**
 ```typescript
@@ -940,6 +940,50 @@ Test coverage in `TestCompileAstClassGenerics.java`: 8 tests
     ```typescript
     const a = condition ? new A() : new B()
     ```
+
+---
+
+## Class Name Mapping
+
+### Classes Without Namespace
+
+Classes defined without a namespace are directly accessible in the bytecode map using their simple name:
+
+```typescript
+// No namespace
+class A {
+  test(): int { return 123 }
+}
+
+// Access via: byteCodeMap.get("A")
+```
+
+### Classes With Namespace
+
+Classes defined within a namespace use the fully qualified name:
+
+```typescript
+namespace com.example {
+  export class A {
+    test(): int { return 123 }
+  }
+}
+
+// Access via: byteCodeMap.get("com.example.A")
+```
+
+### Classes With Package Prefix Option
+
+When a package prefix is configured via `ByteCodeCompilerOptions.packagePrefix()`:
+
+```typescript
+// With packagePrefix = "org.app"
+class A {
+  test(): int { return 123 }
+}
+
+// Access via: byteCodeMap.get("org.app.A")
+```
 
 ---
 

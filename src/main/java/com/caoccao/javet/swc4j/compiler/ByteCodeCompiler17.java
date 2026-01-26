@@ -19,7 +19,11 @@ package com.caoccao.javet.swc4j.compiler;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstFnDecl;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
+import java.io.IOException;
+import java.util.List;
 
 public final class ByteCodeCompiler17 extends ByteCodeCompiler {
     ByteCodeCompiler17(ByteCodeCompilerOptions options) {
@@ -38,8 +42,14 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 typeAliasCollector.collectFromModuleItems(module.getBody());
                 classCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
                 enumCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
-                // Third pass: generate bytecode
+                // Collect standalone functions
+                standaloneFunctionCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
+                // Determine dummy class names after all class names are known
+                standaloneFunctionCollector.determineDummyClassNames();
+                // Third pass: generate bytecode for classes/enums
                 astProcessor.processModuleItems(module.getBody(), options.packagePrefix());
+                // Generate bytecode for standalone functions
+                generateStandaloneFunctions();
             } else if (program instanceof Swc4jAstScript script) {
                 // First pass: process imports (scripts typically don't have imports, but support it anyway)
                 importDeclProcessor.processImports(script.getBody());
@@ -47,12 +57,45 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 typeAliasCollector.collectFromStmts(script.getBody());
                 classCollector.collectFromStmts(script.getBody(), options.packagePrefix());
                 enumCollector.collectFromStmts(script.getBody(), options.packagePrefix());
-                // Third pass: generate bytecode
+                // Collect standalone functions
+                standaloneFunctionCollector.collectFromStmts(script.getBody(), options.packagePrefix());
+                // Determine dummy class names after all class names are known
+                standaloneFunctionCollector.determineDummyClassNames();
+                // Third pass: generate bytecode for classes/enums
                 astProcessor.processStmts(script.getBody(), options.packagePrefix());
+                // Generate bytecode for standalone functions
+                generateStandaloneFunctions();
             }
         } finally {
             // Always exit the scope, even if an exception occurs
             memory.exitScope();
+        }
+    }
+
+    private void generateStandaloneFunctions() throws Swc4jByteCodeCompilerException {
+        var registry = memory.getScopedStandaloneFunctionRegistry();
+        if (!registry.hasFunctions()) {
+            return;
+        }
+
+        for (String packageName : registry.getPackagesWithFunctions()) {
+            String dummyClassName = registry.getDummyClassName(packageName);
+            List<Swc4jAstFnDecl> functions = registry.getFunctions(packageName);
+
+            if (functions.isEmpty() || dummyClassName == null) {
+                continue;
+            }
+
+            String fullClassName = packageName.isEmpty() ? dummyClassName : packageName + "." + dummyClassName;
+            String internalClassName = fullClassName.replace('.', '/');
+
+            try {
+                byte[] bytecode = standaloneFunctionGenerator.generateBytecode(internalClassName, functions);
+                memory.getByteCodeMap().put(fullClassName, bytecode);
+            } catch (IOException e) {
+                throw new Swc4jByteCodeCompilerException(functions.get(0),
+                        "Failed to generate bytecode for standalone functions in: " + fullClassName, e);
+            }
         }
     }
 }

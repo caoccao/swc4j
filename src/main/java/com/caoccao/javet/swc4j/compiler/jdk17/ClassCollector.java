@@ -88,6 +88,26 @@ public final class ClassCollector {
         }
     }
 
+    /**
+     * Extracts a fully qualified name from an expression.
+     * Handles both simple identifiers (e.g., "Animal") and member expressions (e.g., "java.util.ArrayList").
+     *
+     * @param expr the expression to extract the qualified name from
+     * @return the fully qualified name, or null if cannot be extracted
+     */
+    private String extractQualifiedName(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstIdent ident) {
+            return ident.getSym();
+        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
+            // Handle fully qualified names like java.util.ArrayList
+            String objPart = extractQualifiedName(memberExpr.getObj());
+            if (objPart != null && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                return objPart + "." + propIdent.getSym();
+            }
+        }
+        return null;
+    }
+
     private String getModuleName(Swc4jAstTsModuleDecl moduleDecl) {
         return moduleDecl.getId().toString();
     }
@@ -259,26 +279,6 @@ public final class ClassCollector {
         // Create FieldInfo and register it
         FieldInfo fieldInfo = new FieldInfo(fieldName, fieldDescriptor, isStatic, privateProp.getValue());
         typeInfo.addField(fieldName, fieldInfo);
-    }
-
-    /**
-     * Extracts a fully qualified name from an expression.
-     * Handles both simple identifiers (e.g., "Animal") and member expressions (e.g., "java.util.ArrayList").
-     *
-     * @param expr the expression to extract the qualified name from
-     * @return the fully qualified name, or null if cannot be extracted
-     */
-    private String extractQualifiedName(ISwc4jAstExpr expr) {
-        if (expr instanceof Swc4jAstIdent ident) {
-            return ident.getSym();
-        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
-            // Handle fully qualified names like java.util.ArrayList
-            String objPart = extractQualifiedName(memberExpr.getObj());
-            if (objPart != null && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-                return objPart + "." + propIdent.getSym();
-            }
-        }
-        return null;
     }
 
     /**

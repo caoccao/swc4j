@@ -17,10 +17,7 @@
 package com.caoccao.javet.swc4j.compiler;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
-import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
-import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
-import com.caoccao.javet.swc4j.compiler.memory.ScopedJavaTypeRegistry;
-import com.caoccao.javet.swc4j.compiler.memory.ScopedTypeAliasRegistry;
+import com.caoccao.javet.swc4j.compiler.memory.*;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.HashMap;
@@ -30,20 +27,24 @@ public final class ByteCodeCompilerMemory {
     private final Map<String, byte[]> byteCodeMap;
     private final CompilationContext compilationContext;
     private final ScopedJavaTypeRegistry scopedJavaTypeRegistry;
+    private final ScopedStandaloneFunctionRegistry scopedStandaloneFunctionRegistry;
     private final ScopedTypeAliasRegistry scopedTypeAliasRegistry;
 
     public ByteCodeCompilerMemory() {
         byteCodeMap = new HashMap<>();
         compilationContext = new CompilationContext();
         scopedJavaTypeRegistry = new ScopedJavaTypeRegistry();
+        scopedStandaloneFunctionRegistry = new ScopedStandaloneFunctionRegistry();
         scopedTypeAliasRegistry = new ScopedTypeAliasRegistry();
     }
 
     public void enterScope() {
+        scopedStandaloneFunctionRegistry.enterScope();
         scopedTypeAliasRegistry.enterScope();
     }
 
     public void exitScope() {
+        scopedStandaloneFunctionRegistry.exitScope();
         scopedTypeAliasRegistry.exitScope();
     }
 
@@ -69,6 +70,10 @@ public final class ByteCodeCompilerMemory {
         return scopedJavaTypeRegistry;
     }
 
+    public ScopedStandaloneFunctionRegistry getScopedStandaloneFunctionRegistry() {
+        return scopedStandaloneFunctionRegistry;
+    }
+
     public ScopedTypeAliasRegistry getScopedTypeAliasRegistry() {
         return scopedTypeAliasRegistry;
     }
@@ -77,6 +82,7 @@ public final class ByteCodeCompilerMemory {
         byteCodeMap.clear();
         compilationContext.reset();
         scopedJavaTypeRegistry.clear();
+        scopedStandaloneFunctionRegistry.clear();
         scopedTypeAliasRegistry.clear();
     }
 

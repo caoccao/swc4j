@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.AstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.MethodGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.StandaloneFunctionGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ImportDeclProcessor;
@@ -72,6 +73,8 @@ public sealed abstract class ByteCodeCompiler permits
     protected final Swc4jParseOptions parseOptions;
     protected final RegexLiteralGenerator regexLiteralGenerator;
     protected final SeqExpressionGenerator seqExpressionGenerator;
+    protected final StandaloneFunctionCollector standaloneFunctionCollector;
+    protected final StandaloneFunctionGenerator standaloneFunctionGenerator;
     protected final StatementGenerator statementGenerator;
     protected final StringLiteralGenerator stringLiteralGenerator;
     protected final Swc4j swc4j;
@@ -128,6 +131,8 @@ public sealed abstract class ByteCodeCompiler permits
         parenExpressionGenerator = new ParenExpressionGenerator(this);
         regexLiteralGenerator = new RegexLiteralGenerator(this);
         seqExpressionGenerator = new SeqExpressionGenerator(this);
+        standaloneFunctionCollector = new StandaloneFunctionCollector(this);
+        standaloneFunctionGenerator = new StandaloneFunctionGenerator(this);
         statementGenerator = new StatementGenerator(this);
         stringLiteralGenerator = new StringLiteralGenerator(this);
         switchStatementGenerator = new SwitchStatementGenerator(this);
@@ -292,6 +297,14 @@ public sealed abstract class ByteCodeCompiler permits
 
     public SeqExpressionGenerator getSeqExpressionGenerator() {
         return seqExpressionGenerator;
+    }
+
+    public StandaloneFunctionCollector getStandaloneFunctionCollector() {
+        return standaloneFunctionCollector;
+    }
+
+    public StandaloneFunctionGenerator getStandaloneFunctionGenerator() {
+        return standaloneFunctionGenerator;
     }
 
     public StatementGenerator getStatementGenerator() {

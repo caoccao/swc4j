@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstFunction` in TypeScript to JVM bytecode compilation. Functions are the core executable units containing parameters, body statements, and return types.
 
-**Current Status:** PARTIAL - Basic function with parameters, return types, and overloading working
+**Current Status:** PARTIAL - Basic function with parameters, return types, overloading, and standalone functions working
 
 **Syntax:**
 ```typescript
@@ -310,6 +310,68 @@ Async/await is intentionally not supported. The JVM bytecode compilation targets
 **Status:** NOT SUPPORTED
 
 Decorators are intentionally not supported. The JVM bytecode compilation targets a simpler subset of TypeScript without decorator metaprogramming.
+
+### Phase 11: Standalone Functions - Priority: HIGH
+
+**Status:** IMPLEMENTED
+
+Standalone functions (functions not inside a class) are compiled into a dummy class as static methods.
+
+**Dummy Class Naming:**
+- Default dummy class name is `$`
+- If `$` is already taken by a class, tries `$1`, `$2`, etc. until an available name is found
+- Each namespace gets its own dummy class
+
+**Examples:**
+
+```typescript
+// Standalone function (no namespace)
+function add(a: int, b: int): int {
+  return a + b
+}
+
+// Compiled to: class $ with static method add(int, int): int
+// Access via: byteCodeMap.get("$")
+```
+
+```typescript
+// Standalone function in namespace
+namespace math {
+  export function multiply(a: int, b: int): int {
+    return a * b
+  }
+}
+
+// Compiled to: class math.$ with static method multiply(int, int): int
+// Access via: byteCodeMap.get("math.$")
+```
+
+```typescript
+// When $ class already exists
+class $ { }
+
+function helper(): int {
+  return 1
+}
+
+// $ is taken, so function goes into $1
+// Access class $ via: byteCodeMap.get("$")
+// Access helper via: byteCodeMap.get("$1")
+```
+
+**Implementation Details:**
+- `StandaloneFunctionCollector`: Stateless collector that identifies standalone functions in AST
+- `ScopedStandaloneFunctionRegistry`: Stores function declarations and dummy class names per scope (file)
+- `StandaloneFunctionGenerator`: Generates dummy class bytecode with functions as static methods
+- Scoping ensures functions from different files don't leak into each other
+
+**Implementation Files:**
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/StandaloneFunctionCollector.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/StandaloneFunctionGenerator.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/memory/ScopedStandaloneFunctionRegistry.java`
+
+**Test Files:**
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionBasic.java`
 
 ---
 
@@ -1014,9 +1076,71 @@ Decorators are intentionally not supported. The JVM bytecode compilation targets
     }
     ```
 
+### Standalone Function Edge Cases
+
+81. **Standalone Function Without Namespace**
+    ```typescript
+    function add(a: int, b: int): int {
+      return a + b
+    }
+    // Compiled to class $ with static method add
+    ```
+
+82. **Standalone Function In Namespace**
+    ```typescript
+    namespace math {
+      export function multiply(a: int, b: int): int {
+        return a * b
+      }
+    }
+    // Compiled to class math.$ with static method multiply
+    ```
+
+83. **Standalone Function When $ Class Exists**
+    ```typescript
+    class $ { }
+    function helper(): int { return 1 }
+    // helper goes into $1 since $ is taken
+    ```
+
+84. **Multiple Standalone Functions In Same Namespace**
+    ```typescript
+    function add(a: int, b: int): int { return a + b }
+    function sub(a: int, b: int): int { return a - b }
+    // Both compiled as static methods in class $
+    ```
+
+85. **Standalone Function With Multiple $ Classes Taken**
+    ```typescript
+    class $ { }
+    class $1 { }
+    function helper(): int { return 1 }
+    // helper goes into $2 since $ and $1 are taken
+    ```
+
+86. **Standalone Function Coexisting With Class**
+    ```typescript
+    class Calculator {
+      add(a: int, b: int): int { return a + b }
+    }
+    function multiply(a: int, b: int): int { return a * b }
+    // Calculator class: byteCodeMap.get("Calculator")
+    // multiply in dummy class: byteCodeMap.get("$")
+    ```
+
+87. **Exported Standalone Function In Namespace**
+    ```typescript
+    namespace utils {
+      export function format(s: String): String {
+        return s
+      }
+    }
+    // Compiled to class utils.$ with static method format
+    ```
+
 ### JVM Limit Edge Cases
 
-81. **Max Parameter Count (255)**
+88. **Max Parameter Count (255)**
     ```typescript
     // JVM limit: 255 parameters (254 for instance methods + 'this')
     class A {
@@ -1109,6 +1233,7 @@ return   // void
 - [x] Phase 8: Async functions - NOT SUPPORTED (intentionally excluded)
 - [ ] Phase 9: Generator functions working (future)
 - [x] Phase 10: Decorators - NOT SUPPORTED (intentionally excluded)
+- [x] Phase 11: Standalone functions working (compiled into dummy class `$`, `$1`, etc.)
 - [x] All current tests passing
 - [x] Javadoc builds successfully
 
@@ -1133,6 +1258,20 @@ return   // void
 - Proper type handling: Each overload generates correct bytecode for its default value type (e.g., double literals generate dconst/ldc2_w, not integer constants)
 - Works for both instance methods and static methods
 - Test coverage in `TestCompileAstFunctionDefaultParams.java`: 6 tests covering int, double, String, boolean, multiple defaults, and static methods
+
+**Standalone Functions (Phase 11) Implementation (2026-01-26):**
+- Standalone functions are compiled into a dummy class as public static methods
+- **Architecture** (Stateless Collector Pattern):
+  - `StandaloneFunctionCollector`: Stateless - traverses AST and collects functions into registry
+  - `ScopedStandaloneFunctionRegistry`: Scoped storage in `ByteCodeCompilerMemory` - stores function declarations and dummy class names per file scope
+  - `StandaloneFunctionGenerator`: Generates bytecode for dummy class containing all functions as static methods
+- **Scoping**: Each file gets its own scope via `memory.enterScope()` / `memory.exitScope()` - prevents functions from different files leaking into each other
+- **Dummy Class Naming**:
+  - Default name is `$`
+  - If `$` conflicts with an existing class, tries `$1`, `$2`, etc.
+  - Naming is determined after all classes are collected to avoid conflicts
+- **Bytecode Generation**: Dummy class extends `java/lang/Object`, has default constructor, and all functions are `ACC_PUBLIC | ACC_STATIC`
+- Test coverage in `TestCompileAstFunctionBasic.java`: 7 tests covering basic functions, namespaces, class conflicts, and coexistence with classes
 
 ---
 

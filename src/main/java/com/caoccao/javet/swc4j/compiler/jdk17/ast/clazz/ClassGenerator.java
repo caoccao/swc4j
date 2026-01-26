@@ -18,11 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 
 import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
@@ -63,6 +59,26 @@ public final class ClassGenerator extends BaseAstProcessor {
                 1, // max stack
                 1  // max locals (this)
         );
+    }
+
+    /**
+     * Extracts a fully qualified name from an expression.
+     * Handles both simple identifiers (e.g., "Animal") and member expressions (e.g., "java.util.ArrayList").
+     *
+     * @param expr the expression to extract the qualified name from
+     * @return the fully qualified name, or null if cannot be extracted
+     */
+    private String extractQualifiedName(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstIdent ident) {
+            return ident.getSym();
+        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
+            // Handle fully qualified names like java.util.ArrayList
+            String objPart = extractQualifiedName(memberExpr.getObj());
+            if (objPart != null && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                return objPart + "." + propIdent.getSym();
+            }
+        }
+        return null;
     }
 
     @Override
@@ -417,26 +433,6 @@ public final class ClassGenerator extends BaseAstProcessor {
                 classWriter.addInterface(interfaceName);
             }
         }
-    }
-
-    /**
-     * Extracts a fully qualified name from an expression.
-     * Handles both simple identifiers (e.g., "Animal") and member expressions (e.g., "java.util.ArrayList").
-     *
-     * @param expr the expression to extract the qualified name from
-     * @return the fully qualified name, or null if cannot be extracted
-     */
-    private String extractQualifiedName(ISwc4jAstExpr expr) {
-        if (expr instanceof Swc4jAstIdent ident) {
-            return ident.getSym();
-        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
-            // Handle fully qualified names like java.util.ArrayList
-            String objPart = extractQualifiedName(memberExpr.getObj());
-            if (objPart != null && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-                return objPart + "." + propIdent.getSym();
-            }
-        }
-        return null;
     }
 
     /**
