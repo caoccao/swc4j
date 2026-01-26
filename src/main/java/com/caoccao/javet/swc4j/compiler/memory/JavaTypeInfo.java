@@ -16,6 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.memory;
 
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -322,13 +324,6 @@ public final class JavaTypeInfo {
     }
 
     /**
-     * Checks if a type descriptor represents a primitive type.
-     */
-    private boolean isPrimitive(String type) {
-        return type.length() == 1 && "ZBCSIJFD".contains(type);
-    }
-
-    /**
      * Parses parameter types from a method descriptor.
      * Example: "(IDLjava/lang/String;)V" -> ["I", "D", "Ljava/lang/String;"]
      */
@@ -445,12 +440,12 @@ public final class JavaTypeInfo {
         }
 
         // Both primitive types - check widening
-        if (isPrimitive(argType) && isPrimitive(paramType)) {
+        if (TypeConversionUtils.isPrimitiveType(argType) && TypeConversionUtils.isPrimitiveType(paramType)) {
             return scoreWideningConversion(argType, paramType);
         }
 
         // Boxing: primitive -> wrapper
-        if (isPrimitive(argType) && !isPrimitive(paramType)) {
+        if (TypeConversionUtils.isPrimitiveType(argType) && !TypeConversionUtils.isPrimitiveType(paramType)) {
             String wrapperType = getWrapperType(argType);
             if (wrapperType.equals(paramType)) {
                 return 0.7; // Boxing with exact match
@@ -460,7 +455,7 @@ public final class JavaTypeInfo {
         }
 
         // Unboxing: wrapper -> primitive
-        if (!isPrimitive(argType) && isPrimitive(paramType)) {
+        if (!TypeConversionUtils.isPrimitiveType(argType) && TypeConversionUtils.isPrimitiveType(paramType)) {
             String primitiveType = getPrimitiveType(argType);
             if (primitiveType != null) {
                 if (primitiveType.equals(paramType)) {
@@ -476,7 +471,7 @@ public final class JavaTypeInfo {
         }
 
         // Both reference types
-        if (!isPrimitive(argType) && !isPrimitive(paramType)) {
+        if (!TypeConversionUtils.isPrimitiveType(argType) && !TypeConversionUtils.isPrimitiveType(paramType)) {
             // Any reference type can be assigned to Object
             if (paramType.equals("Ljava/lang/Object;")) {
                 return 0.5;
