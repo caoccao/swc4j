@@ -989,7 +989,7 @@ Field:
 - [x] Phase 4: Interface implementation working
 - [x] Phase 5: Constructors fully working
 - [x] Phase 6: Instance fields working
-- [x] Phase 7: Static methods working (static fields pending)
+- [x] Phase 7: Static members working (methods and fields)
 - [x] Phase 8: Access modifiers working (including ES2022 #field)
 - [x] Phase 9: Decorators - NOT SUPPORTED (intentionally excluded)
 - [ ] Phase 10: Generics working (future)

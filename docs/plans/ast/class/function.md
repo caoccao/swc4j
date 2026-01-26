@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstFunction` in TypeScript to JVM bytecode compilation. Functions are the core executable units containing parameters, body statements, and return types.
 
-**Current Status:** PARTIAL - Basic function with parameters and return types working
+**Current Status:** PARTIAL - Basic function with parameters, return types, and overloading working
 
 **Syntax:**
 ```typescript
@@ -278,19 +278,24 @@ Existing tests in `TestCompileAstFunction.java`:
 
 ### Phase 7: Function Overloading - Priority: MEDIUM
 
-**Status:** TO BE IMPLEMENTED
+**Status:** IMPLEMENTED
 
-- Multiple signature declarations
-- Single implementation body
-- Overload resolution at call site
+JVM method overloading is naturally supported because JVM method signatures are based on name + parameter types. TypeScript methods with the same name but different parameter types or counts are compiled to separate JVM methods with different descriptors.
+
+Supported:
+- Method overloading by parameter count (arity)
+- Method overloading by parameter types
+- Constructor overloading
+- Static method overloading
+- Mixed arity and type overloading
+
+Test coverage in `TestCompileAstFunctionOverloading.java`: 8 tests
 
 ### Phase 8: Async Functions - Priority: LOW
 
-**Status:** NOT IMPLEMENTED
+**Status:** NOT SUPPORTED
 
-- Promise return type handling
-- State machine generation for async/await
-- Continuation passing style transformation
+Async/await is intentionally not supported. The JVM bytecode compilation targets a simpler subset of TypeScript without async/await syntax. State machine generation for coroutines would require significant complexity.
 
 ### Phase 9: Generator Functions - Priority: LOW
 
@@ -1100,8 +1105,8 @@ return   // void
 - [x] Phase 4: Varargs fully working (including iteration over primitive arrays)
 - [x] Phase 5: Type inference partial (basic + 'this' method calls)
 - [x] Phase 6: Default parameters working
-- [ ] Phase 7: Overloading working (future)
-- [ ] Phase 8: Async functions working (future)
+- [x] Phase 7: Overloading working
+- [x] Phase 8: Async functions - NOT SUPPORTED (intentionally excluded)
 - [ ] Phase 9: Generator functions working (future)
 - [x] Phase 10: Decorators - NOT SUPPORTED (intentionally excluded)
 - [x] All current tests passing
@@ -1133,10 +1138,10 @@ return   // void
 
 ## Known Limitations
 
-1. **Async/Await**: Requires state machine transformation, complex to implement
+1. **Async/Await**: NOT SUPPORTED - State machine transformation too complex for bytecode compilation
 2. **Generators**: Requires iterator protocol implementation
 3. **Closures**: Capturing outer scope variables requires synthetic classes
-4. **Overloading**: TypeScript overloads are type-level only, not JVM overloading
+4. **Overloading**: Fully supported - TypeScript methods with different signatures compile to separate JVM methods
 5. **Decorators**: Not supported (method, parameter, and class decorators are intentionally excluded)
 6. **Optional Parameters**: Handled via default values, not true optionality
 7. **Union Types**: Cannot have multiple return types in JVM
