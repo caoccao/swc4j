@@ -299,11 +299,9 @@ Async/await is intentionally not supported. The JVM bytecode compilation targets
 
 ### Phase 9: Generator Functions - Priority: LOW
 
-**Status:** NOT IMPLEMENTED
+**Status:** NOT SUPPORTED
 
-- Iterator/Iterable interface implementation
-- Yield expression handling
-- State machine for resumable execution
+Generator functions are intentionally not supported. The JVM bytecode compilation targets a simpler subset of TypeScript without generator functions. State machine generation for resumable execution would require significant complexity.
 
 ### Phase 10: Decorators - Priority: LOW
 
@@ -892,7 +890,9 @@ function helper(): int {
 
 ### Generator Function Edge Cases
 
-64. **Basic Generator**
+> **NOTE:** Generator functions are NOT SUPPORTED. The following examples are for reference only.
+
+64. **Basic Generator** - NOT SUPPORTED
     ```typescript
     class A {
       *numbers(): Generator<int> {
@@ -903,7 +903,7 @@ function helper(): int {
     }
     ```
 
-65. **Generator with Loop**
+65. **Generator with Loop** - NOT SUPPORTED
     ```typescript
     class A {
       *range(start: int, end: int): Generator<int> {
@@ -914,7 +914,7 @@ function helper(): int {
     }
     ```
 
-66. **Generator with yield***
+66. **Generator with yield*** - NOT SUPPORTED
     ```typescript
     class A {
       *combined(): Generator<int> {
@@ -924,7 +924,7 @@ function helper(): int {
     }
     ```
 
-67. **Async Generator**
+67. **Async Generator** - NOT SUPPORTED
     ```typescript
     class A {
       async *stream(): AsyncGenerator<int> {
@@ -1231,7 +1231,7 @@ return   // void
 - [x] Phase 6: Default parameters working
 - [x] Phase 7: Overloading working
 - [x] Phase 8: Async functions - NOT SUPPORTED (intentionally excluded)
-- [ ] Phase 9: Generator functions working (future)
+- [x] Phase 9: Generator functions - NOT SUPPORTED (intentionally excluded)
 - [x] Phase 10: Decorators - NOT SUPPORTED (intentionally excluded)
 - [x] Phase 11: Standalone functions working (compiled into dummy class `$`, `$1`, etc.)
 - [x] All current tests passing
@@ -1278,7 +1278,7 @@ return   // void
 ## Known Limitations
 
 1. **Async/Await**: NOT SUPPORTED - State machine transformation too complex for bytecode compilation
-2. **Generators**: Requires iterator protocol implementation
+2. **Generators**: NOT SUPPORTED - State machine for resumable execution too complex for bytecode compilation
 3. **Closures**: Capturing outer scope variables requires synthetic classes
 4. **Overloading**: Fully supported - TypeScript methods with different signatures compile to separate JVM methods
 5. **Decorators**: Not supported (method, parameter, and class decorators are intentionally excluded)
