@@ -39,12 +39,12 @@ class Calculator {
 
 **Test Files:**
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowBasic.java` ✓
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowParams.java` (NOT IMPLEMENTED)
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowBody.java` (NOT IMPLEMENTED)
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowParams.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowBody.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowClosure.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowFunctionalInterface.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowNested.java` ✓
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowEdgeCases.java` (NOT IMPLEMENTED)
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowEdgeCases.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowCustomInterface.java` ✓
 
 **AST Definition:** [Swc4jAstArrowExpr.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr.java)
@@ -1184,16 +1184,22 @@ class Lambda$1 {
 
 Use primitive specializations to avoid boxing:
 
-| Arrow Type | Preferred Interface |
-|------------|---------------------|
-| `() => int` | `IntSupplier` |
-| `() => long` | `LongSupplier` |
-| `() => double` | `DoubleSupplier` |
-| `() => boolean` | `BooleanSupplier` |
-| `(int) => void` | `IntConsumer` |
-| `(int) => int` | `IntUnaryOperator` |
-| `(int) => boolean` | `IntPredicate` |
-| `(int, int) => int` | `IntBinaryOperator` |
+| Arrow Type | Preferred Interface | Status |
+|------------|---------------------|--------|
+| `() => int` | `IntSupplier` | ✓ IMPLEMENTED |
+| `() => long` | `LongSupplier` | ✓ IMPLEMENTED |
+| `() => double` | `DoubleSupplier` | ✓ IMPLEMENTED |
+| `() => boolean` | `BooleanSupplier` | ✓ IMPLEMENTED |
+| `(int) => void` | `IntConsumer` | ✓ IMPLEMENTED |
+| `(long) => void` | `LongConsumer` | ✓ IMPLEMENTED |
+| `(double) => void` | `DoubleConsumer` | ✓ IMPLEMENTED |
+| `(int) => int` | `IntUnaryOperator` | ✓ IMPLEMENTED |
+| `(long) => long` | `LongUnaryOperator` | ✓ IMPLEMENTED |
+| `(double) => double` | `DoubleUnaryOperator` | ✓ IMPLEMENTED |
+| `(int) => boolean` | `IntPredicate` | ✓ IMPLEMENTED |
+| `(int, int) => int` | `IntBinaryOperator` | ✓ IMPLEMENTED |
+| `(long, long) => long` | `LongBinaryOperator` | ✓ IMPLEMENTED |
+| `(double, double) => double` | `DoubleBinaryOperator` | ✓ IMPLEMENTED |
 
 ---
 
@@ -1208,7 +1214,7 @@ Use primitive specializations to avoid boxing:
 - [x] Phase 6: Nested arrows working (basic support)
 - [x] Phase 7: Async arrows - NOT SUPPORTED (intentionally excluded)
 - [x] Phase 8: Generator arrows - NOT SUPPORTED (intentionally excluded, also invalid syntax)
-- [ ] All edge cases documented and tested
+- [x] Core edge cases documented and tested (params, body types, closures, custom interfaces)
 - [x] All tests passing
 
 ### Quality Gates:
@@ -1246,4 +1252,4 @@ Use primitive specializations to avoid boxing:
 
 *Last Updated: January 26, 2026*
 *Status: PARTIALLY IMPLEMENTED*
-*Next Step: Implement Phase 4 - Parameter Handling*
+*Next Step: Implement Phase 4 - Parameter Handling (default params, rest params, destructuring)*

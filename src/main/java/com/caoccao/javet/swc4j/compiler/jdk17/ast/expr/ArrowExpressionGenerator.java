@@ -86,8 +86,20 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             paramNames.add(paramName != null ? paramName : "arg" + paramTypes.size());
         }
 
+        // Temporarily register parameter types in the context for return type analysis
+        // This allows inferTypeFromExpr to correctly infer types like x * 2 when x is a long
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+        Map<String, String> originalInferredTypes = new HashMap<>(context.getInferredTypes());
+        for (int i = 0; i < paramNames.size(); i++) {
+            context.getInferredTypes().put(paramNames.get(i), paramTypes.get(i));
+        }
+
         // Determine return type
         ReturnTypeInfo returnInfo = analyzeReturnType(arrowExpr, body);
+
+        // Restore original inferred types
+        context.getInferredTypes().clear();
+        context.getInferredTypes().putAll(originalInferredTypes);
 
         // Determine which functional interface to use
         String interfaceName;
@@ -116,15 +128,24 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             methodName = getFunctionMethodName(paramTypes.get(0), returnInfo);
             methodDescriptor = "(" + paramTypes.get(0) + ")" + getReturnDescriptor(returnInfo);
         } else if (params.size() == 2) {
-            // (T, U) => R -> BiFunction<T, U, R>
-            interfaceName = "java/util/function/BiFunction";
-            methodName = "apply";
-            StringBuilder desc = new StringBuilder("(");
-            for (String pt : paramTypes) {
-                desc.append(boxedDescriptor(pt));
+            // Check for primitive binary operators first
+            String binaryOperatorInfo = getBinaryOperatorInfo(paramTypes.get(0), paramTypes.get(1), returnInfo);
+            if (binaryOperatorInfo != null) {
+                String[] parts = binaryOperatorInfo.split("\\|");
+                interfaceName = parts[0];
+                methodName = parts[1];
+                methodDescriptor = parts[2];
+            } else {
+                // (T, U) => R -> BiFunction<T, U, R>
+                interfaceName = "java/util/function/BiFunction";
+                methodName = "apply";
+                StringBuilder desc = new StringBuilder("(");
+                for (String pt : paramTypes) {
+                    desc.append(boxedDescriptor(pt));
+                }
+                desc.append(")").append(boxedDescriptor(getReturnDescriptor(returnInfo)));
+                methodDescriptor = desc.toString();
             }
-            desc.append(")").append(boxedDescriptor(getReturnDescriptor(returnInfo)));
-            methodDescriptor = desc.toString();
         } else {
             // For more than 2 parameters, we'll generate a custom interface or use Object varargs
             throw new Swc4jByteCodeCompilerException(arrowExpr,
@@ -551,6 +572,26 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             case DOUBLE -> code.dreturn();
             case STRING, OBJECT -> code.areturn();
         }
+    }
+
+    /**
+     * Gets binary operator interface info if both params and return are same primitive type.
+     * Returns "interfaceName|methodName|methodDescriptor" or null if not a binary operator.
+     */
+    private String getBinaryOperatorInfo(String param1Type, String param2Type, ReturnTypeInfo returnInfo) {
+        // IntBinaryOperator: (int, int) => int
+        if (param1Type.equals("I") && param2Type.equals("I") && returnInfo.type() == ReturnType.INT) {
+            return "java/util/function/IntBinaryOperator|applyAsInt|(II)I";
+        }
+        // LongBinaryOperator: (long, long) => long
+        if (param1Type.equals("J") && param2Type.equals("J") && returnInfo.type() == ReturnType.LONG) {
+            return "java/util/function/LongBinaryOperator|applyAsLong|(JJ)J";
+        }
+        // DoubleBinaryOperator: (double, double) => double
+        if (param1Type.equals("D") && param2Type.equals("D") && returnInfo.type() == ReturnType.DOUBLE) {
+            return "java/util/function/DoubleBinaryOperator|applyAsDouble|(DD)D";
+        }
+        return null;
     }
 
     private String getConsumerInterface(String paramType) {
