@@ -20,6 +20,8 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEntityName;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsQualifiedName;
 
 /**
  * Utility class for AST-related operations.
@@ -43,6 +45,25 @@ public final class AstUtils {
             String objPart = extractQualifiedName(memberExpr.getObj());
             if (objPart != null && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                 return objPart + "." + propIdent.getSym();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Extracts a fully qualified name from a TypeScript entity name.
+     * Handles both simple identifiers and qualified names (e.g., com.example.MyClass).
+     *
+     * @param entityName the entity name to extract the qualified name from
+     * @return the fully qualified name, or null if cannot be extracted
+     */
+    public static String extractQualifiedName(ISwc4jAstTsEntityName entityName) {
+        if (entityName instanceof Swc4jAstIdent ident) {
+            return ident.getSym();
+        } else if (entityName instanceof Swc4jAstTsQualifiedName qualifiedName) {
+            String leftPart = extractQualifiedName(qualifiedName.getLeft());
+            if (leftPart != null) {
+                return leftPart + "." + qualifiedName.getRight().getSym();
             }
         }
         return null;

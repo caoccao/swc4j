@@ -52,7 +52,13 @@ public record ByteCodeCompilerOptions(
                 "Pattern", "java.util.regex.Pattern",
                 "String", "java.lang.String",
                 "Object", "java.lang.Object",
+                "number", "java.lang.Number",
+                "Number", "java.lang.Number",
                 "void", "void"
+        ));
+        DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
+                "unknown", "java.lang.Object",
+                "any", "java.lang.Object"
         ));
     }
 

@@ -36,6 +36,7 @@ public class ClassWriter {
     private final List<MethodInfo> methods = new ArrayList<>();
     private final String superClassName;
     private int accessFlags = 0x0021; // ACC_PUBLIC | ACC_SUPER (default)
+    private String classSignature; // Generic signature for the class
 
     public ClassWriter(String className) {
         this(className, "java/lang/Object");
@@ -97,6 +98,16 @@ public class ClassWriter {
         this.accessFlags = accessFlags;
     }
 
+    /**
+     * Sets the generic signature for the class.
+     * For generic interfaces, this would be something like: {@code <T:Ljava/lang/Object;>Ljava/lang/Object;}
+     *
+     * @param signature the generic signature
+     */
+    public void setClassSignature(String signature) {
+        this.classSignature = signature;
+    }
+
     public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(baos);
@@ -116,6 +127,12 @@ public class ClassWriter {
         int[] interfaceIndexes = new int[interfaces.size()];
         for (int i = 0; i < interfaces.size(); i++) {
             interfaceIndexes[i] = constantPool.addClass(interfaces.get(i));
+        }
+
+        // Add class signature to constant pool if present
+        if (classSignature != null) {
+            constantPool.addUtf8("Signature");
+            constantPool.addUtf8(classSignature);
         }
 
         // Add method references to constant pool
@@ -201,8 +218,16 @@ public class ClassWriter {
             writeMethod(out, method);
         }
 
-        // Attributes count
-        out.writeShort(0);
+        // Class attributes count and attributes
+        int classAttributeCount = (classSignature != null) ? 1 : 0;
+        out.writeShort(classAttributeCount);
+
+        // Write Signature attribute if present
+        if (classSignature != null) {
+            out.writeShort(constantPool.getUtf8Index("Signature"));
+            out.writeInt(2); // Signature attribute length is always 2 (1 u2 for signature_index)
+            out.writeShort(constantPool.getUtf8Index(classSignature));
+        }
 
         return baos.toByteArray();
     }

@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsTypeElement;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsInterfaceDecl;
@@ -30,7 +31,9 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Generates JVM bytecode for TypeScript interface declarations.
@@ -53,11 +56,68 @@ public final class TsInterfaceGenerator {
         this.compiler = compiler;
     }
 
+    /**
+     * Builds a generic class signature for Java bytecode.
+     * For example: {@code <T:Ljava/lang/Object;>Ljava/lang/Object;} or
+     * {@code <T:Ljava/lang/Number;>Ljava/lang/Object;}
+     *
+     * @param typeParams         the type parameter declaration
+     * @param extendedInterfaces the extended interfaces
+     * @return the generic class signature, or null if no type parameters
+     */
+    private String buildClassSignature(Swc4jAstTsTypeParamDecl typeParams, String[] extendedInterfaces) {
+        if (typeParams == null || typeParams.getParams().isEmpty()) {
+            return null;
+        }
+
+        StringBuilder signature = new StringBuilder("<");
+        for (Swc4jAstTsTypeParam param : typeParams.getParams()) {
+            String paramName = param.getName().getSym();
+            signature.append(paramName);
+            signature.append(":");
+
+            // Handle constraint (extends)
+            if (param.getConstraint().isPresent()) {
+                String constraintSignature = mapTsTypeToSignature(param.getConstraint().get());
+                signature.append(constraintSignature);
+            } else {
+                signature.append("Ljava/lang/Object;");
+            }
+        }
+        signature.append(">");
+
+        // Add superclass (always Object for interfaces)
+        signature.append("Ljava/lang/Object;");
+
+        // Add extended interfaces with their signatures
+        for (String iface : extendedInterfaces) {
+            signature.append("L").append(iface).append(";");
+        }
+
+        return signature.toString();
+    }
+
     private String capitalize(String str) {
         if (str == null || str.isEmpty()) {
             return str;
         }
         return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
+
+    /**
+     * Collects the set of type parameter names from the interface declaration.
+     *
+     * @param interfaceDecl the interface declaration
+     * @return set of type parameter names
+     */
+    private Set<String> collectTypeParameterNames(Swc4jAstTsInterfaceDecl interfaceDecl) {
+        Set<String> names = new HashSet<>();
+        if (interfaceDecl.getTypeParams().isPresent()) {
+            for (Swc4jAstTsTypeParam param : interfaceDecl.getTypeParams().get().getParams()) {
+                names.add(param.getName().getSym());
+            }
+        }
+        return names;
     }
 
     /**
@@ -84,16 +144,27 @@ public final class TsInterfaceGenerator {
         // Set interface flags: ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT
         classWriter.setAccessFlags(INTERFACE_ACCESS_FLAGS);
 
+        // Collect type parameter names for this interface
+        Set<String> typeParamNames = collectTypeParameterNames(interfaceDecl);
+
+        // Build and set class signature for generic interfaces
+        if (interfaceDecl.getTypeParams().isPresent()) {
+            String classSignature = buildClassSignature(interfaceDecl.getTypeParams().get(), extendedInterfaces);
+            if (classSignature != null) {
+                classWriter.setClassSignature(classSignature);
+            }
+        }
+
         // Process body members
         for (ISwc4jAstTsTypeElement element : interfaceDecl.getBody().getBody()) {
             if (element instanceof Swc4jAstTsPropertySignature prop) {
-                generatePropertyMethods(classWriter, prop);
+                generatePropertyMethods(classWriter, prop, typeParamNames);
             } else if (element instanceof Swc4jAstTsMethodSignature method) {
-                generateMethod(classWriter, method);
+                generateMethod(classWriter, method, typeParamNames);
             } else if (element instanceof Swc4jAstTsGetterSignature getter) {
-                generateGetterSignature(classWriter, getter);
+                generateGetterSignature(classWriter, getter, typeParamNames);
             } else if (element instanceof Swc4jAstTsSetterSignature setter) {
-                generateSetterSignature(classWriter, setter);
+                generateSetterSignature(classWriter, setter, typeParamNames);
             }
         }
 
@@ -107,16 +178,25 @@ public final class TsInterfaceGenerator {
     /**
      * Generates an abstract getter method for an explicit getter signature.
      *
-     * @param classWriter the class writer
-     * @param getter      the getter signature
+     * @param classWriter    the class writer
+     * @param getter         the getter signature
+     * @param typeParamNames the set of type parameter names in scope
      */
-    private void generateGetterSignature(ClassWriter classWriter, Swc4jAstTsGetterSignature getter) {
+    private void generateGetterSignature(
+            ClassWriter classWriter,
+            Swc4jAstTsGetterSignature getter,
+            Set<String> typeParamNames) {
         String propName = getPropertyName(getter.getKey());
 
-        // Get type descriptor
+        // Get type descriptor (use Object for type parameters)
         String descriptor = "Ljava/lang/Object;"; // Default
         if (getter.getTypeAnn().isPresent()) {
-            descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(getter.getTypeAnn().get().getTypeAnn());
+            ISwc4jAstTsType type = getter.getTypeAnn().get().getTypeAnn();
+            if (isTypeParameter(type, typeParamNames)) {
+                descriptor = "Ljava/lang/Object;";
+            } else {
+                descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+            }
         }
 
         // Generate getter method with proper name
@@ -135,10 +215,14 @@ public final class TsInterfaceGenerator {
     /**
      * Generates an abstract method for a method signature.
      *
-     * @param classWriter the class writer
-     * @param method      the method signature
+     * @param classWriter    the class writer
+     * @param method         the method signature
+     * @param typeParamNames the set of type parameter names in scope
      */
-    private void generateMethod(ClassWriter classWriter, Swc4jAstTsMethodSignature method) {
+    private void generateMethod(
+            ClassWriter classWriter,
+            Swc4jAstTsMethodSignature method,
+            Set<String> typeParamNames) {
         String methodName = getPropertyName(method.getKey());
 
         // Build method descriptor
@@ -147,8 +231,12 @@ public final class TsInterfaceGenerator {
             String paramType = "Ljava/lang/Object;"; // Default
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
                 if (bindingIdent.getTypeAnn().isPresent()) {
-                    paramType = compiler.getTypeResolver().mapTsTypeToDescriptor(
-                            bindingIdent.getTypeAnn().get().getTypeAnn());
+                    ISwc4jAstTsType type = bindingIdent.getTypeAnn().get().getTypeAnn();
+                    if (isTypeParameter(type, typeParamNames)) {
+                        paramType = "Ljava/lang/Object;";
+                    } else {
+                        paramType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+                    }
                 }
             }
             paramDescriptors.append(paramType);
@@ -158,8 +246,12 @@ public final class TsInterfaceGenerator {
         // Get return type
         String returnType = "V"; // Default to void
         if (method.getTypeAnn().isPresent()) {
-            returnType = compiler.getTypeResolver().mapTsTypeToDescriptor(
-                    method.getTypeAnn().get().getTypeAnn());
+            ISwc4jAstTsType type = method.getTypeAnn().get().getTypeAnn();
+            if (isTypeParameter(type, typeParamNames)) {
+                returnType = "Ljava/lang/Object;";
+            } else {
+                returnType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+            }
         }
 
         String descriptor = paramDescriptors + returnType;
@@ -178,16 +270,25 @@ public final class TsInterfaceGenerator {
     /**
      * Generates getter and optional setter methods for a property signature.
      *
-     * @param classWriter the class writer
-     * @param prop        the property signature
+     * @param classWriter    the class writer
+     * @param prop           the property signature
+     * @param typeParamNames the set of type parameter names in scope
      */
-    private void generatePropertyMethods(ClassWriter classWriter, Swc4jAstTsPropertySignature prop) {
+    private void generatePropertyMethods(
+            ClassWriter classWriter,
+            Swc4jAstTsPropertySignature prop,
+            Set<String> typeParamNames) {
         String propName = getPropertyName(prop.getKey());
 
-        // Get type descriptor
+        // Get type descriptor (use Object for type parameters)
         String descriptor = "Ljava/lang/Object;"; // Default
         if (prop.getTypeAnn().isPresent()) {
-            descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(prop.getTypeAnn().get().getTypeAnn());
+            ISwc4jAstTsType type = prop.getTypeAnn().get().getTypeAnn();
+            if (isTypeParameter(type, typeParamNames)) {
+                descriptor = "Ljava/lang/Object;";
+            } else {
+                descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+            }
         }
 
         // Generate getter
@@ -220,19 +321,27 @@ public final class TsInterfaceGenerator {
     /**
      * Generates an abstract setter method for an explicit setter signature.
      *
-     * @param classWriter the class writer
-     * @param setter      the setter signature
+     * @param classWriter    the class writer
+     * @param setter         the setter signature
+     * @param typeParamNames the set of type parameter names in scope
      */
-    private void generateSetterSignature(ClassWriter classWriter, Swc4jAstTsSetterSignature setter) {
+    private void generateSetterSignature(
+            ClassWriter classWriter,
+            Swc4jAstTsSetterSignature setter,
+            Set<String> typeParamNames) {
         String propName = getPropertyName(setter.getKey());
 
-        // Get type descriptor from parameter
+        // Get type descriptor from parameter (use Object for type parameters)
         String descriptor = "Ljava/lang/Object;"; // Default
         ISwc4jAstTsFnParam param = setter.getParam();
         if (param instanceof Swc4jAstBindingIdent bindingIdent) {
             if (bindingIdent.getTypeAnn().isPresent()) {
-                descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(
-                        bindingIdent.getTypeAnn().get().getTypeAnn());
+                ISwc4jAstTsType type = bindingIdent.getTypeAnn().get().getTypeAnn();
+                if (isTypeParameter(type, typeParamNames)) {
+                    descriptor = "Ljava/lang/Object;";
+                } else {
+                    descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+                }
             }
         }
 
@@ -278,6 +387,77 @@ public final class TsInterfaceGenerator {
             return ident.getSym();
         }
         return key.toString();
+    }
+
+    /**
+     * Checks if a TypeScript type is a type parameter reference.
+     *
+     * @param type           the TypeScript type
+     * @param typeParamNames the set of type parameter names in scope
+     * @return true if the type is a type parameter reference
+     */
+    private boolean isTypeParameter(ISwc4jAstTsType type, Set<String> typeParamNames) {
+        if (type instanceof Swc4jAstTsTypeRef typeRef) {
+            var typeName = typeRef.getTypeName();
+            if (typeName instanceof Swc4jAstIdent ident) {
+                return typeParamNames.contains(ident.getSym());
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Maps a TypeScript type to a Java generic signature for use in class signature bounds.
+     * For example, maps 'number' to 'Ljava/lang/Number;' or a type parameter 'T' to 'TT;'.
+     * <p>
+     * Uses the type alias registry and java type registry for name resolution instead of
+     * hardcoded mappings.
+     *
+     * @param type the TypeScript type
+     * @return the Java generic signature (always a reference type for bounds)
+     */
+    private String mapTsTypeToSignature(ISwc4jAstTsType type) {
+        if (type instanceof Swc4jAstTsTypeRef typeRef) {
+            var typeName = typeRef.getTypeName();
+            if (typeName instanceof Swc4jAstIdent ident) {
+                String name = ident.getSym();
+                return mapTypeNameToSignature(name);
+            } else if (typeName instanceof Swc4jAstTsQualifiedName) {
+                // Handle qualified names like com.example.MyClass
+                String qualifiedName = AstUtils.extractQualifiedName(typeRef.getTypeName());
+                if (qualifiedName != null) {
+                    return "L" + qualifiedName.replace('.', '/') + ";";
+                }
+            }
+        } else if (type instanceof Swc4jAstTsKeywordType keywordType) {
+            // For generic bounds, keyword types must be mapped to their boxed/wrapper types
+            // since type bounds in Java must be reference types
+            return mapTypeNameToSignature(keywordType.getKind().getName());
+        }
+        return "Ljava/lang/Object;";
+    }
+
+    /**
+     * Maps a type name to a Java generic signature using the registries.
+     *
+     * @param typeName the type name to map
+     * @return the Java generic signature (always a reference type)
+     */
+    private String mapTypeNameToSignature(String typeName) {
+        // First, try to resolve using the type alias registry
+        String resolvedType = compiler.getMemory().getScopedTypeAliasRegistry().resolve(typeName);
+        if (resolvedType == null) {
+            resolvedType = typeName;
+        }
+
+        // Try to look up in the java type registry
+        var javaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(resolvedType);
+        if (javaTypeInfo != null) {
+            return "L" + javaTypeInfo.getInternalName() + ";";
+        }
+
+        // Fall back to treating as a class name - use resolved name with package handling
+        return "L" + resolvedType.replace('.', '/') + ";";
     }
 
     /**

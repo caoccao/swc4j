@@ -4,7 +4,7 @@
 
 This plan covers the implementation of `Swc4jAstTsInterfaceDecl` for compiling TypeScript interface declarations to JVM bytecode. TypeScript interfaces are compiled to Java interfaces with appropriate getters, setters, and method signatures.
 
-**Current Status:** PARTIALLY IMPLEMENTED (Phases 1, 2, 3, 4, 5, 9)
+**Current Status:** PARTIALLY IMPLEMENTED (Phases 1, 2, 3, 4, 5, 6, 9)
 
 **Syntax:**
 ```typescript
@@ -35,7 +35,7 @@ interface Container<T> {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclExtends.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclOptional.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclAccessors.java` ✓
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclGenerics.java` (NOT IMPLEMENTED)
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclGenerics.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclMethods.java` (NOT IMPLEMENTED)
 
 **Additional Implementation Files:**
@@ -403,7 +403,7 @@ public interface Person extends Named, Aged {
 
 ### Phase 6: Generic Interfaces - Priority: MEDIUM
 
-**Status:** NOT IMPLEMENTED
+**Status:** IMPLEMENTED ✓
 
 **Scope:**
 - Handle generic type parameters
@@ -1353,7 +1353,7 @@ When an interface extends another interface:
 - [x] Phase 3: Optional properties working
 - [x] Phase 4: Method signatures working
 - [x] Phase 5: Interface inheritance working
-- [ ] Phase 6: Generic interfaces working
+- [x] Phase 6: Generic interfaces working
 - [ ] Phase 7: Index signatures (or documented as limitation)
 - [ ] Phase 8: Call/construct signatures (or documented as limitation)
 - [x] Phase 9: Explicit getters/setters working
