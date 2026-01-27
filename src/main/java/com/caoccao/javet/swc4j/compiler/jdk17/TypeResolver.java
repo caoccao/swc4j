@@ -30,12 +30,15 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstIfStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.ast.ts.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -538,6 +541,67 @@ public final class TypeResolver {
             }
         }
         return null;
+    }
+
+    /**
+     * Generate a custom functional interface for a TsFnType.
+     * The interface has a single abstract method named "call".
+     *
+     * @param fnType the function type AST node
+     * @return the descriptor for the generated interface (e.g., "Lcom/A/$Fn$1;")
+     */
+    private String generateFunctionalInterface(Swc4jAstTsFnType fnType) {
+        // Generate interface name
+        String currentClass = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+        int counter = compiler.getMemory().getNextFnInterfaceCounter();
+        String interfaceName;
+        if (currentClass != null) {
+            interfaceName = currentClass + "/$Fn$" + counter;
+        } else {
+            interfaceName = "$Fn$" + counter;
+        }
+
+        // Build parameter types
+        List<String> paramTypes = new ArrayList<>();
+        for (ISwc4jAstTsFnParam param : fnType.getParams()) {
+            // ISwc4jAstTsFnParam implementations (BindingIdent, ArrayPat, etc.) also implement ISwc4jAstPat
+            if (param instanceof ISwc4jAstPat pat) {
+                paramTypes.add(extractParameterType(pat));
+            } else {
+                paramTypes.add("Ljava/lang/Object;");
+            }
+        }
+
+        // Get return type
+        String returnType = mapTsTypeToDescriptor(fnType.getTypeAnn().getTypeAnn());
+
+        // Build method descriptor
+        StringBuilder descriptor = new StringBuilder("(");
+        for (String paramType : paramTypes) {
+            descriptor.append(paramType);
+        }
+        descriptor.append(")").append(returnType);
+
+        // Generate interface bytecode
+        try {
+            ClassWriter classWriter = new ClassWriter(interfaceName, "java/lang/Object");
+            classWriter.setAccessFlags(0x0601);  // ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT
+            classWriter.addAbstractMethod("call", descriptor.toString());
+            byte[] bytecode = classWriter.toByteArray();
+            compiler.getMemory().getByteCodeMap().put(interfaceName.replace('/', '.'), bytecode);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to generate functional interface", e);
+        }
+
+        // Register the interface so ArrowExpressionGenerator can look up parameter types
+        compiler.getMemory().getScopedFunctionalInterfaceRegistry().register(
+                interfaceName,
+                "call",
+                paramTypes,
+                returnType
+        );
+
+        return "L" + interfaceName + ";";
     }
 
     /**
@@ -1304,6 +1368,10 @@ public final class TypeResolver {
                 }
                 return mapTypeNameToDescriptor(typeName);
             }
+        } else if (tsType instanceof Swc4jAstTsFnType fnType) {
+            // Function type syntax: (a: int, b: int) => int
+            // Generate a custom functional interface at compile time
+            return generateFunctionalInterface(fnType);
         }
         // Default to Object for unknown types
         return "Ljava/lang/Object;";

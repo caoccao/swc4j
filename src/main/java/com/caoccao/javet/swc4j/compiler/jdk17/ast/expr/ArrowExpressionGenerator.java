@@ -1384,6 +1384,16 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
      * @return FunctionalInterfaceInfo or null if not a known interface
      */
     private FunctionalInterfaceInfo getFunctionalInterfaceInfo(String interfaceName, List<String> paramTypes, ReturnTypeInfo returnInfo) {
+        // Custom functional interface (generated from function type syntax)
+        if (interfaceName.contains("/$Fn$")) {
+            // Look up the method info from the registry
+            var samInfo = compiler.getMemory().getScopedFunctionalInterfaceRegistry()
+                    .getSamMethodInfo(interfaceName);
+            if (samInfo != null) {
+                return new FunctionalInterfaceInfo(interfaceName, samInfo.methodName(), samInfo.methodDescriptor());
+            }
+        }
+
         // UnaryOperator<T> - single param, same return type
         if (interfaceName.equals("java/util/function/UnaryOperator")) {
             // UnaryOperator.apply(Object): Object

@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstArrowExpr` in TypeScript to JVM bytecode compilation. Arrow expressions (arrow functions/lambdas) are first-class function values that capture variables from their enclosing scope.
 
-**Current Status:** COMPLETE (Phases 1-6 implemented with documented limitations, recursive arrows, mutable captures, and generic type parameters supported)
+**Current Status:** COMPLETE (Phases 1-6 implemented with documented limitations, recursive arrows, mutable captures, generic type parameters, and arbitrary functional interfaces via function type syntax supported)
 
 **Strategy:** Arrow expressions will be implemented as **Anonymous Inner Classes** that implement a functional interface. This approach is compatible with JDK 17 and provides full closure semantics.
 
@@ -50,6 +50,7 @@ class Calculator {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowRecursive.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowMutableCapture.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowGeneric.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowFnType.java` ✓
 
 **AST Definition:** [Swc4jAstArrowExpr.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr.java)
 

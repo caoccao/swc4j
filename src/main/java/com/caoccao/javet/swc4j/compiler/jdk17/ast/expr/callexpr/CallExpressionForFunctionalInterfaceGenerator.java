@@ -113,8 +113,13 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
 
         // Call the SAM method using invokeinterface
         int methodRef = cp.addInterfaceMethodRef(interfaceName, samInfo.methodName(), samInfo.methodDescriptor());
-        int argCount = args.size() + 1; // +1 for 'this'
-        code.invokeinterface(methodRef, argCount);
+        // Calculate slot count: 1 for 'this' + slots for all parameters
+        // long and double take 2 slots, others take 1 slot
+        int slotCount = 1; // 'this'
+        for (String paramType : samInfo.paramTypes()) {
+            slotCount += ("J".equals(paramType) || "D".equals(paramType)) ? 2 : 1;
+        }
+        code.invokeinterface(methodRef, slotCount);
     }
 
     /**

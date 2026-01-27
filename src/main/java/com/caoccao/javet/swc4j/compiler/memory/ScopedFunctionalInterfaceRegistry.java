@@ -217,6 +217,27 @@ public final class ScopedFunctionalInterfaceRegistry {
         return "toString".equals(name) && params.length == 0;
     }
 
+    /**
+     * Manually register SAM method information for a generated functional interface.
+     * This is used for custom interfaces generated from function type syntax.
+     *
+     * @param interfaceInternalName internal name (e.g., "com/A/$Fn$1")
+     * @param methodName            SAM method name (e.g., "call")
+     * @param paramTypes            list of parameter type descriptors
+     * @param returnType            return type descriptor
+     */
+    public void register(String interfaceInternalName, String methodName,
+                         List<String> paramTypes, String returnType) {
+        StringBuilder descriptor = new StringBuilder("(");
+        for (String paramType : paramTypes) {
+            descriptor.append(paramType);
+        }
+        descriptor.append(")").append(returnType);
+
+        SamMethodInfo info = new SamMethodInfo(methodName, paramTypes, returnType, descriptor.toString());
+        scopeStack.peek().put(interfaceInternalName, info);
+    }
+
     private SamMethodInfo resolveSamMethodInfo(String interfaceInternalName) {
         try {
             String className = interfaceInternalName.replace('/', '.');

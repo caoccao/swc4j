@@ -30,6 +30,7 @@ public final class ByteCodeCompilerMemory {
     private final ScopedJavaTypeRegistry scopedJavaTypeRegistry;
     private final ScopedStandaloneFunctionRegistry scopedStandaloneFunctionRegistry;
     private final ScopedTypeAliasRegistry scopedTypeAliasRegistry;
+    private int fnInterfaceCounter;
 
     public ByteCodeCompilerMemory() {
         byteCodeMap = new HashMap<>();
@@ -38,6 +39,7 @@ public final class ByteCodeCompilerMemory {
         scopedJavaTypeRegistry = new ScopedJavaTypeRegistry();
         scopedStandaloneFunctionRegistry = new ScopedStandaloneFunctionRegistry();
         scopedTypeAliasRegistry = new ScopedTypeAliasRegistry();
+        fnInterfaceCounter = 0;
     }
 
     public void enterScope() {
@@ -68,6 +70,15 @@ public final class ByteCodeCompilerMemory {
      */
     public CompilationContext getCompilationContext() {
         return scopedCompilationContext.current();
+    }
+
+    /**
+     * Get the next functional interface counter value and increment.
+     *
+     * @return the next counter value
+     */
+    public int getNextFnInterfaceCounter() {
+        return ++fnInterfaceCounter;
     }
 
     public ScopedCompilationContext getScopedCompilationContext() {
@@ -113,6 +124,7 @@ public final class ByteCodeCompilerMemory {
 
     public void reset() {
         byteCodeMap.clear();
+        fnInterfaceCounter = 0;
         scopedCompilationContext.clear();
         scopedFunctionalInterfaceRegistry.clear();
         scopedJavaTypeRegistry.clear();
