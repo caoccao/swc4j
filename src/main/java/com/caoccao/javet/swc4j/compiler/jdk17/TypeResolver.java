@@ -27,11 +27,9 @@ import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstIfStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsArrayType;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsKeywordType;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
+import com.caoccao.javet.swc4j.ast.ts.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
@@ -356,7 +354,7 @@ public final class TypeResolver {
      * @return ReturnTypeInfo based on the type annotation
      * @throws Swc4jByteCodeCompilerException if type analysis fails
      */
-    public ReturnTypeInfo analyzeReturnTypeFromAnnotation(com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn typeAnn)
+    public ReturnTypeInfo analyzeReturnTypeFromAnnotation(Swc4jAstTsTypeAnn typeAnn)
             throws Swc4jByteCodeCompilerException {
         var tsType = typeAnn.getTypeAnn();
         String descriptor = mapTsTypeToDescriptor(tsType);
@@ -386,6 +384,22 @@ public final class TypeResolver {
             case "Ljava/lang/String;" -> new ReturnTypeInfo(ReturnType.STRING, 0, descriptor, null);
             default -> new ReturnTypeInfo(ReturnType.OBJECT, 0, descriptor, null);
         };
+    }
+
+    /**
+     * Extracts an arrow expression from a potentially parenthesized expression (IIFE pattern).
+     *
+     * @param expr the expression to check
+     * @return the arrow expression if found, null otherwise
+     */
+    private Swc4jAstArrowExpr extractArrowFromIIFE(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstArrowExpr arrow) {
+            return arrow;
+        }
+        if (expr instanceof Swc4jAstParenExpr parenExpr) {
+            return extractArrowFromIIFE(parenExpr.getExpr());
+        }
+        return null;
     }
 
     /**
@@ -496,6 +510,38 @@ public final class TypeResolver {
     }
 
     /**
+     * Recursively finds return type in a statement.
+     *
+     * @param stmt the statement to analyze
+     * @return the return type descriptor, or null if no return found
+     */
+    private String findReturnTypeInStmt(ISwc4jAstStmt stmt)
+            throws Swc4jByteCodeCompilerException {
+        if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
+            if (returnStmt.getArg().isPresent()) {
+                return inferTypeFromExpr(returnStmt.getArg().get());
+            }
+            return "V"; // void return
+        } else if (stmt instanceof Swc4jAstBlockStmt innerBlock) {
+            return inferReturnTypeFromBlock(innerBlock);
+        } else if (stmt instanceof Swc4jAstIfStmt ifStmt) {
+            // Check consequent
+            if (ifStmt.getCons() instanceof Swc4jAstBlockStmt consBlock) {
+                String consType = inferReturnTypeFromBlock(consBlock);
+                if (consType != null) {
+                    return consType;
+                }
+            }
+            // Check alternate
+            if (ifStmt.getAlt().isPresent() && ifStmt.getAlt().get() instanceof Swc4jAstBlockStmt altBlock) {
+                String altType = inferReturnTypeFromBlock(altBlock);
+                return altType;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Check if a parameter has a default value.
      *
      * @param pat the parameter pattern
@@ -572,6 +618,23 @@ public final class TypeResolver {
 
         // Default to String for any unknown key type
         return "Ljava/lang/String;";
+    }
+
+    /**
+     * Infers the return type from a block statement by analyzing return statements.
+     *
+     * @param blockStmt the block statement to analyze
+     * @return the inferred return type descriptor, or null if no return found
+     */
+    private String inferReturnTypeFromBlock(Swc4jAstBlockStmt blockStmt)
+            throws Swc4jByteCodeCompilerException {
+        for (var stmt : blockStmt.getStmts()) {
+            String returnType = findReturnTypeInStmt(stmt);
+            if (returnType != null) {
+                return returnType;
+            }
+        }
+        return null;
     }
 
     public String inferTypeFromExpr(
@@ -1127,6 +1190,35 @@ public final class TypeResolver {
                     }
                 }
             }
+
+            // Handle IIFE (Immediately Invoked Function Expression)
+            // Pattern: ((x: int): int => x * 2)(5)
+            var callee = callExpr.getCallee();
+            if (callee instanceof ISwc4jAstExpr calleeExpr) {
+                var arrowExpr = extractArrowFromIIFE(calleeExpr);
+                if (arrowExpr != null) {
+                    // Check for explicit return type annotation
+                    if (arrowExpr.getReturnType().isPresent()) {
+                        return mapTsTypeToDescriptor(arrowExpr.getReturnType().get().getTypeAnn());
+                    }
+
+                    // Infer from arrow body
+                    var body = arrowExpr.getBody();
+                    if (body instanceof ISwc4jAstExpr bodyExpr) {
+                        // Expression body - infer from expression
+                        return inferTypeFromExpr(bodyExpr);
+                    } else if (body instanceof Swc4jAstBlockStmt blockStmt) {
+                        // Block body - analyze return statements
+                        String returnType = inferReturnTypeFromBlock(blockStmt);
+                        if (returnType != null) {
+                            return returnType;
+                        }
+                    }
+                    // Default to Object if we can't infer
+                    return "Ljava/lang/Object;";
+                }
+            }
+
             return "Ljava/lang/Object;";
         } else if (expr instanceof Swc4jAstSeqExpr seqExpr) {
             // Sequence expression returns the type of the last expression

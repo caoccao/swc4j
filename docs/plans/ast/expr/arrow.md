@@ -1438,10 +1438,12 @@ The following edge cases are now covered by tests:
 - IIFE with boolean type ✓
 - Multiple IIFE in same method ✓
 - IIFE as return value ✓
+- IIFE nested in binary expressions (addition, subtraction, etc.) ✓
 - IIFE with complex argument expression ✓
 - IIFE with multiple captures ✓
 - IIFE with type inference ✓
 - IIFE generates unique interfaces ✓
+- Type inference works correctly for IIFE in expressions ✓
 
 ---
 

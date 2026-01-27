@@ -16,14 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstParenExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstBlockStmtOrExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.expr.*;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
@@ -34,6 +28,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.memory.CapturedVariable;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -95,8 +90,8 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
         return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
     }
 
-    private List<CapturedVariable> analyzeCapturedVariables(Swc4jAstArrowExpr arrowExpr) {
-        List<CapturedVariable> captured = new ArrayList<>();
+    private List<IIFECapturedVariable> analyzeCapturedVariables(Swc4jAstArrowExpr arrowExpr) {
+        List<IIFECapturedVariable> captured = new ArrayList<>();
 
         // Get the parameter names (these are NOT captured)
         Set<String> paramNames = new HashSet<>();
@@ -121,14 +116,14 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
             // Check if it's a local variable in the outer scope
             var localVar = context.getLocalVariableTable().getVariable(varName);
             if (localVar != null) {
-                captured.add(new CapturedVariable(varName, localVar.type(), localVar.index()));
+                captured.add(new IIFECapturedVariable(varName, localVar.type(), localVar.index()));
             }
         }
 
         // Check if 'this' is captured
         String currentClass = context.getCurrentClassInternalName();
         if (currentClass != null && referencesThis(arrowExpr.getBody())) {
-            captured.add(0, new CapturedVariable("this", "L" + currentClass + ";", 0));
+            captured.add(0, new IIFECapturedVariable("this", "L" + currentClass + ";", 0));
         }
 
         return captured;
@@ -203,7 +198,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
 
         if (node instanceof Swc4jAstIdent ident) {
             identifiers.add(ident.getSym());
-        } else if (node instanceof com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst ast) {
+        } else if (node instanceof ISwc4jAst ast) {
             for (var child : ast.getChildNodes()) {
                 collectIdentifiersRecursive(child, identifiers);
             }
@@ -242,12 +237,12 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
         }
     }
 
-    private boolean containsThis(com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst ast) {
-        if (ast instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr) {
+    private boolean containsThis(ISwc4jAst ast) {
+        if (ast instanceof Swc4jAstThisExpr) {
             return true;
         }
         for (var child : ast.getChildNodes()) {
-            if (child instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr) {
+            if (child instanceof Swc4jAstThisExpr) {
                 return true;
             }
             if (containsThis(child)) {
@@ -346,7 +341,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
 
         try {
             // Analyze captured variables
-            List<CapturedVariable> capturedVariables = analyzeCapturedVariables(arrowExpr);
+            List<IIFECapturedVariable> capturedVariables = analyzeCapturedVariables(arrowExpr);
 
             // Determine the interface and method signature
             IIFETypeInfo typeInfo = analyzeIIFEType(arrowExpr);
@@ -371,7 +366,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
             String implClassName,
             Swc4jAstArrowExpr arrowExpr,
             IIFETypeInfo typeInfo,
-            List<CapturedVariable> capturedVariables) throws IOException, Swc4jByteCodeCompilerException {
+            List<IIFECapturedVariable> capturedVariables) throws IOException, Swc4jByteCodeCompilerException {
         ClassWriter classWriter = new ClassWriter(implClassName, "java/lang/Object");
         ClassWriter.ConstantPool cp = classWriter.getConstantPool();
 
@@ -379,7 +374,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
         classWriter.addInterface(typeInfo.interfaceName());
 
         // Add fields for captured variables
-        for (CapturedVariable captured : capturedVariables) {
+        for (IIFECapturedVariable captured : capturedVariables) {
             classWriter.addField(0x0012, // ACC_PRIVATE | ACC_FINAL
                     "captured$" + captured.name(), captured.type());
         }
@@ -406,7 +401,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
             String implClassName,
-            List<CapturedVariable> capturedVariables) {
+            List<IIFECapturedVariable> capturedVariables) {
         CodeBuilder code = new CodeBuilder();
 
         // Call super()
@@ -416,7 +411,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
 
         // Initialize captured variable fields
         int slot = 1;
-        for (CapturedVariable captured : capturedVariables) {
+        for (IIFECapturedVariable captured : capturedVariables) {
             code.aload(0); // this
             loadVariable(code, slot, captured.type());
             int fieldRef = cp.addFieldRef(implClassName, "captured$" + captured.name(), captured.type());
@@ -428,7 +423,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
 
         // Build constructor descriptor
         StringBuilder descriptor = new StringBuilder("(");
-        for (CapturedVariable captured : capturedVariables) {
+        for (IIFECapturedVariable captured : capturedVariables) {
             descriptor.append(captured.type());
         }
         descriptor.append(")V");
@@ -443,7 +438,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
             String implClassName,
             Swc4jAstArrowExpr arrowExpr,
             IIFETypeInfo typeInfo,
-            List<CapturedVariable> capturedVariables) throws Swc4jByteCodeCompilerException {
+            List<IIFECapturedVariable> capturedVariables) throws Swc4jByteCodeCompilerException {
         // Push a new compilation context for the method (instance method, so slot 0 is 'this')
         CompilationContext methodContext = compiler.getMemory().pushCompilationContext(false);
 
@@ -459,11 +454,11 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
         }
 
         // Map captured variables to field access
-        for (CapturedVariable captured : capturedVariables) {
+        for (IIFECapturedVariable captured : capturedVariables) {
             methodContext.getInferredTypes().put(captured.name(), captured.type());
             methodContext.getCapturedVariables().put(
                     captured.name(),
-                    new com.caoccao.javet.swc4j.compiler.memory.CapturedVariable(
+                    new CapturedVariable(
                             captured.name(),
                             "captured$" + captured.name(),
                             captured.type()
@@ -531,22 +526,22 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             String implClassName,
-            List<CapturedVariable> capturedVariables,
+            List<IIFECapturedVariable> capturedVariables,
             IIFETypeInfo typeInfo,
-            List<com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread> callArgs) throws Swc4jByteCodeCompilerException {
+            List<Swc4jAstExprOrSpread> callArgs) throws Swc4jByteCodeCompilerException {
         // new ImplClass
         int classRef = cp.addClass(implClassName);
         code.newInstance(classRef);
         code.dup();
 
         // Load captured variables onto stack
-        for (CapturedVariable captured : capturedVariables) {
+        for (IIFECapturedVariable captured : capturedVariables) {
             loadVariable(code, captured.outerSlot(), captured.type());
         }
 
         // Build constructor descriptor
         StringBuilder constructorDesc = new StringBuilder("(");
-        for (CapturedVariable captured : capturedVariables) {
+        for (IIFECapturedVariable captured : capturedVariables) {
             constructorDesc.append(captured.type());
         }
         constructorDesc.append(")V");
@@ -613,7 +608,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
     /**
      * Check if the callee is an IIFE pattern (parenthesized arrow expression).
      */
-    public boolean isCalleeSupported(com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee callee) {
+    public boolean isCalleeSupported(ISwc4jAstCallee callee) {
         if (callee instanceof ISwc4jAstExpr expr) {
             return extractArrowExpr(expr) != null;
         }
@@ -631,11 +626,11 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
     }
 
     private boolean referencesThis(ISwc4jAstBlockStmtOrExpr body) {
-        if (body instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr) {
+        if (body instanceof Swc4jAstThisExpr) {
             return true;
         }
         for (var child : body.getChildNodes()) {
-            if (child instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr) {
+            if (child instanceof Swc4jAstThisExpr) {
                 return true;
             }
             if (child instanceof ISwc4jAstBlockStmtOrExpr childBody) {
@@ -661,7 +656,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
     /**
      * Record for captured variable information.
      */
-    private record CapturedVariable(String name, String type, int outerSlot) {
+    private record IIFECapturedVariable(String name, String type, int outerSlot) {
     }
 
     /**

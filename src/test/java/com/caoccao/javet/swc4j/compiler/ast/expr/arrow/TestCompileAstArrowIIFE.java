@@ -235,6 +235,25 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testIIFENestedInExpression(JdkVersion jdkVersion) throws Exception {
+        // IIFE result used in arithmetic expression
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const result: int = ((x: int): int => x * 2)(5) + 10
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var result = classA.getMethod("test").invoke(instance);
+        assertEquals(20, result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testIIFENoParams(JdkVersion jdkVersion) throws Exception {
         // IIFE with no parameters
         var runner = getCompiler(jdkVersion).compile("""
@@ -270,29 +289,6 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
         var result = classA.getMethod("test").invoke(instance);
         assertEquals("Hello World", result);
     }
-
-    // TODO: This test reveals a bug in binary expression handling when IIFE is one operand
-    // The compiler incorrectly generates StringBuilder code instead of integer addition
-    // This is not a bug in IIFE itself, but in how the expression generator handles
-    // binary operations with IIFE as one operand.
-    //@ParameterizedTest
-    //@EnumSource(JdkVersion.class)
-    //public void testIIFENestedInExpression(JdkVersion jdkVersion) throws Exception {
-    //    // IIFE result used in arithmetic expression
-    //    var runner = getCompiler(jdkVersion).compile("""
-    //            namespace com {
-    //              export class A {
-    //                test(): int {
-    //                  const result: int = ((x: int): int => x * 2)(5) + 10
-    //                  return result
-    //                }
-    //              }
-    //            }""");
-    //    Class<?> classA = runner.getClass("com.A");
-    //    var instance = classA.getConstructor().newInstance();
-    //    var result = classA.getMethod("test").invoke(instance);
-    //    assertEquals(20, result);
-    //}
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
