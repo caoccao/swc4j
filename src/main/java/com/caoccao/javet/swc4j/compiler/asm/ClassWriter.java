@@ -57,6 +57,11 @@ public class ClassWriter {
         }
     }
 
+    public void addAbstractMethod(String name, String descriptor) {
+        // Abstract methods in interfaces: ACC_PUBLIC | ACC_ABSTRACT
+        addMethod(0x0401, name, descriptor, null, 0, 0, null, null, null, null);
+    }
+
     public void addField(int accessFlags, String name, String descriptor) {
         fields.add(new FieldInfo(accessFlags, name, descriptor));
     }

@@ -1319,7 +1319,7 @@ Use primitive specializations to avoid boxing:
 2. **Generator Arrows**: NOT SUPPORTED - Generator arrow functions are not valid TypeScript/JavaScript syntax; the AST flag exists but should never be true for valid code
 3. **Union Return Types**: NOT SUPPORTED - JVM requires single return type
 4. **Mutable Captures**: Require holder object pattern (performance overhead) - not yet fully implemented
-5. **IIFE (Immediately Invoked Function Expression)**: NOT YET SUPPORTED - Call expression on arrow immediately requires additional implementation
+5. **IIFE (Immediately Invoked Function Expression)**: IMPLEMENTED - Generates custom interface with naming convention $interfaceN and anonymous implementation class
 6. **Destructuring Parameters**: NOT SUPPORTED - Object/array destructuring in parameters not implemented
 7. **Default/Rest/Optional Parameters**: LIMITED - Only work with custom interfaces, not standard functional interfaces
 8. **Recursive Arrows**: LIMITED - Requires complex self-reference pattern not yet fully implemented
@@ -1425,9 +1425,27 @@ The following edge cases are now covered by tests:
 - Arrow capturing double values ✓
 - Arrow capturing mixed types (int + long + double) ✓
 
+**IIFE (TestCompileAstArrowIIFE.java):**
+- Edge case 51: Basic IIFE with int parameter ✓
+- IIFE with block body ✓
+- IIFE with multiple parameters ✓
+- IIFE with no parameters ✓
+- IIFE returning string ✓
+- IIFE with capture of outer variable ✓
+- IIFE with 'this' capture ✓
+- IIFE with long type ✓
+- IIFE with double type ✓
+- IIFE with boolean type ✓
+- Multiple IIFE in same method ✓
+- IIFE as return value ✓
+- IIFE with complex argument expression ✓
+- IIFE with multiple captures ✓
+- IIFE with type inference ✓
+- IIFE generates unique interfaces ✓
+
 ---
 
 *Last Updated: January 27, 2026*
-*Status: MOSTLY COMPLETE (Phase 1-6 implemented with documented limitations)*
-*Remaining Work: IIFE support, mutable captures with holder objects, recursive arrows, custom interface type inference*
+*Status: MOSTLY COMPLETE (Phase 1-6 implemented with IIFE support)*
+*Remaining Work: Mutable captures with holder objects, recursive arrows, custom interface type inference*
 *Note: Some features (destructuring, async, generator) are intentionally not supported due to complexity*

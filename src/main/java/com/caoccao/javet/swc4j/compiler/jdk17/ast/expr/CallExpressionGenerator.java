@@ -30,6 +30,7 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
     private final CallExpressionForArrayGenerator arrayGenerator;
     private final CallExpressionForArrayListGenerator arrayListGenerator;
     private final CallExpressionForClassGenerator classGenerator;
+    private final CallExpressionForIIFEGenerator iifeGenerator;
     private final CallExpressionForStringGenerator stringGenerator;
     private final CallExpressionForSuperConstructorGenerator superConstructorGenerator;
     private final CallExpressionForSuperMethodGenerator superMethodGenerator;
@@ -40,6 +41,7 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
         arrayGenerator = new CallExpressionForArrayGenerator(compiler);
         arrayListGenerator = new CallExpressionForArrayListGenerator(compiler);
         classGenerator = new CallExpressionForClassGenerator(compiler);
+        iifeGenerator = new CallExpressionForIIFEGenerator(compiler);
         stringGenerator = new CallExpressionForStringGenerator(compiler);
         superConstructorGenerator = new CallExpressionForSuperConstructorGenerator(compiler);
         superMethodGenerator = new CallExpressionForSuperMethodGenerator(compiler);
@@ -69,6 +71,12 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
         // Handle super.method() calls
         if (superMethodGenerator.isCalleeSupported(callee)) {
             superMethodGenerator.generate(code, cp, callExpr, returnTypeInfo);
+            return;
+        }
+
+        // Handle IIFE (Immediately Invoked Function Expression)
+        if (iifeGenerator.isCalleeSupported(callee)) {
+            iifeGenerator.generate(code, cp, callExpr, returnTypeInfo);
             return;
         }
 
