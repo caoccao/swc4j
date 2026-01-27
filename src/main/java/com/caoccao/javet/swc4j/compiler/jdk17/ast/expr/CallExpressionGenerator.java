@@ -30,6 +30,7 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
     private final CallExpressionForArrayGenerator arrayGenerator;
     private final CallExpressionForArrayListGenerator arrayListGenerator;
     private final CallExpressionForClassGenerator classGenerator;
+    private final CallExpressionForFunctionalInterfaceGenerator functionalInterfaceGenerator;
     private final CallExpressionForIIFEGenerator iifeGenerator;
     private final CallExpressionForStringGenerator stringGenerator;
     private final CallExpressionForSuperConstructorGenerator superConstructorGenerator;
@@ -41,6 +42,7 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
         arrayGenerator = new CallExpressionForArrayGenerator(compiler);
         arrayListGenerator = new CallExpressionForArrayListGenerator(compiler);
         classGenerator = new CallExpressionForClassGenerator(compiler);
+        functionalInterfaceGenerator = new CallExpressionForFunctionalInterfaceGenerator(compiler);
         iifeGenerator = new CallExpressionForIIFEGenerator(compiler);
         stringGenerator = new CallExpressionForStringGenerator(compiler);
         superConstructorGenerator = new CallExpressionForSuperConstructorGenerator(compiler);
@@ -77,6 +79,12 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
         // Handle IIFE (Immediately Invoked Function Expression)
         if (iifeGenerator.isCalleeSupported(callee)) {
             iifeGenerator.generate(code, cp, callExpr, returnTypeInfo);
+            return;
+        }
+
+        // Handle direct calls to functional interface variables (e.g., factorial(n - 1))
+        if (functionalInterfaceGenerator.isCalleeSupported(callee)) {
+            functionalInterfaceGenerator.generate(code, cp, callExpr, returnTypeInfo);
             return;
         }
 

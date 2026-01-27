@@ -253,7 +253,14 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
     }
 
-    private List<CapturedVariable> analyzeCapturedVariables(Swc4jAstArrowExpr arrowExpr) {
+    /**
+     * Analyze captured variables for an arrow expression.
+     *
+     * @param arrowExpr         the arrow expression
+     * @param selfReferenceName the name of the variable being assigned (for recursive arrows), or null
+     * @return list of captured variables with self-reference information
+     */
+    private List<CapturedVariable> analyzeCapturedVariables(Swc4jAstArrowExpr arrowExpr, String selfReferenceName) {
         List<CapturedVariable> captured = new ArrayList<>();
 
         // Get the parameter names (these are NOT captured)
@@ -279,14 +286,16 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             // Check if it's a local variable in the outer scope
             var localVar = context.getLocalVariableTable().getVariable(varName);
             if (localVar != null) {
-                captured.add(new CapturedVariable(varName, localVar.type(), localVar.index()));
+                // Check if this is a self-reference (recursive arrow)
+                boolean isSelfRef = varName.equals(selfReferenceName);
+                captured.add(new CapturedVariable(varName, localVar.type(), localVar.index(), isSelfRef));
             }
         }
 
         // Check if 'this' is captured
         String currentClass = context.getCurrentClassInternalName();
         if (currentClass != null && referencesThis(arrowExpr.getBody())) {
-            captured.add(0, new CapturedVariable("this", "L" + currentClass + ";", 0));
+            captured.add(0, new CapturedVariable("this", "L" + currentClass + ";", 0, false));
         }
 
         return captured;
@@ -516,6 +525,25 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             ClassWriter.ConstantPool cp,
             Swc4jAstArrowExpr arrowExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        generate(code, cp, arrowExpr, returnTypeInfo, null);
+    }
+
+    /**
+     * Generate bytecode for an arrow expression with optional self-reference support.
+     *
+     * @param code              the code builder
+     * @param cp                the constant pool
+     * @param arrowExpr         the arrow expression
+     * @param returnTypeInfo    return type info for type inference
+     * @param selfReferenceName the variable name for recursive arrows (or null)
+     * @return information about self-references that need post-processing (or null)
+     */
+    public SelfReferenceInfo generate(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstArrowExpr arrowExpr,
+            ReturnTypeInfo returnTypeInfo,
+            String selfReferenceName) throws Swc4jByteCodeCompilerException {
         // Check for unsupported features
         if (arrowExpr.isAsync()) {
             throw new Swc4jByteCodeCompilerException(arrowExpr, "Async arrow functions are not supported");
@@ -528,8 +556,8 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             // Generate a unique class name for this lambda
             String lambdaClassName = generateLambdaClassName();
 
-            // Analyze captured variables
-            List<CapturedVariable> capturedVariables = analyzeCapturedVariables(arrowExpr);
+            // Analyze captured variables, marking self-references
+            List<CapturedVariable> capturedVariables = analyzeCapturedVariables(arrowExpr, selfReferenceName);
 
             // Determine the functional interface and method signature
             // Pass returnTypeInfo to enable parameter type inference from target type context
@@ -543,6 +571,14 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
 
             // Generate code to instantiate the lambda
             generateInstantiation(code, cp, lambdaClassName, capturedVariables);
+
+            // Check if there are self-references that need post-processing
+            for (CapturedVariable captured : capturedVariables) {
+                if (captured.isSelfReference()) {
+                    return new SelfReferenceInfo(lambdaClassName, captured.name(), captured.type());
+                }
+            }
+            return null;
         } catch (IOException e) {
             throw new Swc4jByteCodeCompilerException(arrowExpr, "Failed to generate lambda class", e);
         }
@@ -647,9 +683,14 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         code.newInstance(classRef);
         code.dup();
 
-        // Load captured variables onto stack
+        // Load captured variables onto stack (skip self-references for now)
         for (CapturedVariable captured : capturedVariables) {
-            loadVariable(code, captured.outerSlot(), captured.type());
+            if (!captured.isSelfReference()) {
+                loadVariable(code, captured.outerSlot(), captured.type());
+            } else {
+                // For self-references, load null initially
+                code.aconst_null();
+            }
         }
 
         // Build constructor descriptor
@@ -662,6 +703,13 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         // invokespecial <init>
         int constructorRef = cp.addMethodRef(lambdaClassName, "<init>", descriptor.toString());
         code.invokespecial(constructorRef);
+
+        // For self-referencing captures, we need to update the field AFTER the lambda is stored
+        // This is handled by the caller (VarDeclGenerator) which will:
+        // 1. Store the lambda in the local variable
+        // 2. Load the lambda back
+        // 3. Dup it
+        // 4. Store into the captured field
     }
 
     private byte[] generateLambdaClass(
@@ -677,7 +725,11 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
 
         // Add fields for captured variables
         for (CapturedVariable captured : capturedVariables) {
-            classWriter.addField(0x0012, // ACC_PRIVATE | ACC_FINAL
+            // Self-referencing fields cannot be final (they are set after construction)
+            // and must be accessible from the outer class (package-private or public)
+            // 0x0000 = package-private, 0x0010 = ACC_FINAL, 0x0012 = ACC_PRIVATE | ACC_FINAL
+            int fieldAccess = captured.isSelfReference() ? 0x0000 : 0x0012;
+            classWriter.addField(fieldAccess,
                     "captured$" + captured.name(), captured.type());
         }
 
@@ -1294,79 +1346,6 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         return ("J".equals(type) || "D".equals(type)) ? 2 : 1;
     }
 
-    /**
-     * Get parameter types from a target functional interface descriptor.
-     * This enables parameter type inference from context.
-     *
-     * @param interfaceDescriptor the interface type descriptor (e.g., "Ljava/util/function/IntUnaryOperator;")
-     * @return list of parameter type descriptors, or null if unknown interface
-     */
-    private List<String> getTargetInterfaceParamTypes(String interfaceDescriptor) {
-        if (interfaceDescriptor == null || !interfaceDescriptor.startsWith("L") || !interfaceDescriptor.endsWith(";")) {
-            return null;
-        }
-
-        String interfaceName = interfaceDescriptor.substring(1, interfaceDescriptor.length() - 1);
-
-        // Map well-known functional interfaces to their parameter types
-        return switch (interfaceName) {
-            // Suppliers - no parameters
-            case "java/util/function/Supplier",
-                 "java/util/function/IntSupplier",
-                 "java/util/function/LongSupplier",
-                 "java/util/function/DoubleSupplier",
-                 "java/util/function/BooleanSupplier" -> List.of();
-
-            // Consumers - single parameter
-            case "java/util/function/Consumer" -> List.of("Ljava/lang/Object;");
-            case "java/util/function/IntConsumer" -> List.of("I");
-            case "java/util/function/LongConsumer" -> List.of("J");
-            case "java/util/function/DoubleConsumer" -> List.of("D");
-
-            // Predicates - single parameter, return boolean
-            case "java/util/function/Predicate" -> List.of("Ljava/lang/Object;");
-            case "java/util/function/IntPredicate" -> List.of("I");
-            case "java/util/function/LongPredicate" -> List.of("J");
-            case "java/util/function/DoublePredicate" -> List.of("D");
-
-            // Functions - single parameter, return type varies
-            case "java/util/function/Function" -> List.of("Ljava/lang/Object;");
-            case "java/util/function/IntFunction" -> List.of("I");
-            case "java/util/function/LongFunction" -> List.of("J");
-            case "java/util/function/DoubleFunction" -> List.of("D");
-            case "java/util/function/ToIntFunction" -> List.of("Ljava/lang/Object;");
-            case "java/util/function/ToLongFunction" -> List.of("Ljava/lang/Object;");
-            case "java/util/function/ToDoubleFunction" -> List.of("Ljava/lang/Object;");
-
-            // Unary operators - single parameter, same return type
-            case "java/util/function/UnaryOperator" -> List.of("Ljava/lang/Object;");
-            case "java/util/function/IntUnaryOperator" -> List.of("I");
-            case "java/util/function/LongUnaryOperator" -> List.of("J");
-            case "java/util/function/DoubleUnaryOperator" -> List.of("D");
-
-            // Binary operators - two parameters
-            case "java/util/function/BiFunction" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
-            case "java/util/function/BiConsumer" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
-            case "java/util/function/BiPredicate" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
-            case "java/util/function/BinaryOperator" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
-            case "java/util/function/IntBinaryOperator" -> List.of("I", "I");
-            case "java/util/function/LongBinaryOperator" -> List.of("J", "J");
-            case "java/util/function/DoubleBinaryOperator" -> List.of("D", "D");
-
-            // ToInt/Long/Double binary functions
-            case "java/util/function/ToIntBiFunction" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
-            case "java/util/function/ToLongBiFunction" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
-            case "java/util/function/ToDoubleBiFunction" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
-
-            // Other common functional interfaces
-            case "java/lang/Runnable" -> List.of();
-            case "java/util/concurrent/Callable" -> List.of();
-            case "java/util/Comparator" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
-
-            default -> null;
-        };
-    }
-
     private String getSupplierInterface(ReturnTypeInfo returnInfo) {
         return switch (returnInfo.type()) {
             case INT -> "java/util/function/IntSupplier";
@@ -1385,6 +1364,18 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             case BOOLEAN -> "getAsBoolean";
             default -> "get";
         };
+    }
+
+    /**
+     * Get parameter types from a target functional interface descriptor.
+     * This enables parameter type inference from context.
+     * Uses reflection to dynamically resolve the SAM method parameters.
+     *
+     * @param interfaceDescriptor the interface type descriptor (e.g., "Ljava/util/function/IntUnaryOperator;")
+     * @return list of parameter type descriptors, or null if unknown interface
+     */
+    private List<String> getTargetInterfaceParamTypes(String interfaceDescriptor) {
+        return compiler.getMemory().getScopedFunctionalInterfaceRegistry().getParamTypes(interfaceDescriptor);
     }
 
     private void loadVariable(CodeBuilder code, int slot, String type) {
@@ -1453,8 +1444,22 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
     }
 
     /**
-     * Record for captured variable information.
+     * Represents a captured variable with information about whether it's a self-reference.
+     *
+     * @param name            variable name
+     * @param type            JVM type descriptor
+     * @param outerSlot       slot index in outer scope
+     * @param isSelfReference true if this is a self-referencing capture (recursive arrow)
      */
-    private record CapturedVariable(String name, String type, int outerSlot) {
+    private record CapturedVariable(String name, String type, int outerSlot, boolean isSelfReference) {
+        CapturedVariable(String name, String type, int outerSlot) {
+            this(name, type, outerSlot, false);
+        }
+    }
+
+    /**
+     * Information about a self-referencing capture that needs post-processing.
+     */
+    public record SelfReferenceInfo(String lambdaClassName, String fieldName, String fieldType) {
     }
 }

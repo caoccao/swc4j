@@ -177,9 +177,20 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
 
             methodDescriptor = paramDescriptor + returnType;
 
-            // Generate invokevirtual
-            int methodRef = cp.addMethodRef(internalClassName, methodName, methodDescriptor);
-            code.invokevirtual(methodRef);
+            // Determine if the target is an interface (use invokeinterface) or class (use invokevirtual)
+            boolean isInterface = isInterface(qualifiedClassName);
+
+            if (isInterface) {
+                // Interface method call - use invokeinterface
+                int methodRef = cp.addInterfaceMethodRef(internalClassName, methodName, methodDescriptor);
+                // invokeinterface needs the argument count (including 'this')
+                int argCount = args.size() + 1;
+                code.invokeinterface(methodRef, argCount);
+            } else {
+                // Class method call - use invokevirtual
+                int methodRef = cp.addMethodRef(internalClassName, methodName, methodDescriptor);
+                code.invokevirtual(methodRef);
+            }
         }
 
         // Type conversion for return value (Java static calls only)
@@ -195,6 +206,23 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             return identName.getSym();
         }
         return null;
+    }
+
+    /**
+     * Checks if a given class name is an interface.
+     * Uses Java reflection to determine if the type is an interface.
+     *
+     * @param qualifiedClassName fully qualified class name (e.g., "java.util.function.IntUnaryOperator")
+     * @return true if the class is an interface, false otherwise
+     */
+    private boolean isInterface(String qualifiedClassName) {
+        try {
+            Class<?> clazz = Class.forName(qualifiedClassName);
+            return clazz.isInterface();
+        } catch (ClassNotFoundException e) {
+            // If class not found, assume it's not an interface (could be a TS class)
+            return false;
+        }
     }
 
     /**

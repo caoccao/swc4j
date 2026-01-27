@@ -16,8 +16,11 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
@@ -31,11 +34,14 @@ import com.caoccao.javet.swc4j.compiler.jdk17.GenericTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ArrowExpressionGenerator;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
     public VarDeclGenerator(ByteCodeCompiler compiler) {
@@ -95,6 +101,36 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
         if (localVar == null) {
             context.getLocalVariableTable().allocateVariable(varName, varType);
             context.getInferredTypes().put(varName, varType);
+        }
+    }
+
+    /**
+     * Checks if an arrow expression references a specific variable name.
+     * Used to detect self-referencing (recursive) arrows.
+     *
+     * @param arrowExpr the arrow expression to check
+     * @param varName   the variable name to look for
+     * @return true if the arrow body references the variable
+     */
+    private boolean arrowReferencesSelf(Swc4jAstArrowExpr arrowExpr, String varName) {
+        Set<String> identifiers = new HashSet<>();
+        collectIdentifiersRecursive(arrowExpr.getBody(), identifiers);
+        return identifiers.contains(varName);
+    }
+
+    /**
+     * Recursively collects all identifier names from an AST node.
+     */
+    private void collectIdentifiersRecursive(Object node, Set<String> identifiers) {
+        if (node == null) {
+            return;
+        }
+        if (node instanceof Swc4jAstIdent ident) {
+            identifiers.add(ident.getSym());
+        } else if (node instanceof ISwc4jAst ast) {
+            for (var child : ast.getChildNodes()) {
+                collectIdentifiersRecursive(child, identifiers);
+            }
         }
     }
 
@@ -261,19 +297,82 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
         if (declarator.getInit().isPresent()) {
             var init = declarator.getInit().get();
 
+            // Pre-register the variable type before generating the initializer.
+            // This is essential for recursive arrows that need to reference themselves.
+            // For example: const factorial: IntUnaryOperator = (n: int) => n <= 1 ? 1 : n * factorial.applyAsInt(n - 1)
+            // Without this, the arrow body wouldn't know the type of 'factorial'.
+            context.getInferredTypes().put(varName, localVar.type());
+
+            // Check if this is a self-referencing (recursive) arrow expression.
+            // If so, we need to pre-initialize the variable to null before creating the lambda.
+            // This is because the lambda will capture this variable, and the JVM verifier
+            // requires that captured variables be initialized before use.
+            boolean isSelfReferencingArrow = init instanceof Swc4jAstArrowExpr arrowExpr
+                    && arrowReferencesSelf(arrowExpr, varName);
+
             // Phase 2: Get GenericTypeInfo from context if available (for Record types)
             GenericTypeInfo genericTypeInfo = context.getGenericTypeInfoMap().get(varName);
             ReturnTypeInfo varTypeInfo = ReturnTypeInfo.of(declarator, localVar.type(), genericTypeInfo);
 
-            compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+            if (isSelfReferencingArrow) {
+                // Pre-initialize to null (for reference types) or default value (for primitives)
+                // This ensures the variable slot is initialized when captured by the lambda
+                switch (localVar.type()) {
+                    case "I", "S", "C", "Z", "B" -> {
+                        code.iconst(0);
+                        code.istore(localVar.index());
+                    }
+                    case "J" -> {
+                        code.lconst(0);
+                        code.lstore(localVar.index());
+                    }
+                    case "F" -> {
+                        code.fconst(0);
+                        code.fstore(localVar.index());
+                    }
+                    case "D" -> {
+                        code.dconst(0);
+                        code.dstore(localVar.index());
+                    }
+                    default -> {
+                        code.aconst_null();
+                        code.astore(localVar.index());
+                    }
+                }
 
-            // Store the value in the local variable
-            switch (localVar.type()) {
-                case "I", "S", "C", "Z", "B" -> code.istore(localVar.index());
-                case "J" -> code.lstore(localVar.index());
-                case "F" -> code.fstore(localVar.index());
-                case "D" -> code.dstore(localVar.index());
-                default -> code.astore(localVar.index());
+                // Call arrow generator directly with self-reference name
+                Swc4jAstArrowExpr arrowExpr = (Swc4jAstArrowExpr) init;
+                ArrowExpressionGenerator.SelfReferenceInfo selfRefInfo =
+                        compiler.getArrowExpressionGenerator().generate(code, cp, arrowExpr, varTypeInfo, varName);
+
+                // Store the lambda in the local variable
+                code.astore(localVar.index());
+
+                // If there's a self-reference, update the captured field after storing
+                // The captured field was initialized to null during construction, now we update it
+                // with the actual lambda reference so recursive calls work
+                if (selfRefInfo != null) {
+                    // Load the lambda reference
+                    code.aload(localVar.index());
+                    // Dup for both objectref and value (putfield pops both)
+                    code.dup();
+                    // Store into captured field: putfield captured$<varName>
+                    int fieldRef = cp.addFieldRef(selfRefInfo.lambdaClassName(),
+                            "captured$" + selfRefInfo.fieldName(), selfRefInfo.fieldType());
+                    code.putfield(fieldRef);
+                }
+            } else {
+                // Normal case: generate expression and store
+                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+
+                // Store the value in the local variable
+                switch (localVar.type()) {
+                    case "I", "S", "C", "Z", "B" -> code.istore(localVar.index());
+                    case "J" -> code.lstore(localVar.index());
+                    case "F" -> code.fstore(localVar.index());
+                    case "D" -> code.dstore(localVar.index());
+                    default -> code.astore(localVar.index());
+                }
             }
         } else {
             // Generate default initialization for variables without initializers

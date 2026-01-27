@@ -1029,6 +1029,28 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstCallExpr callExpr) {
             // For call expressions, try to infer the return type
 
+            // Handle direct calls to functional interface variables (e.g., factorial(n - 1))
+            if (callExpr.getCallee() instanceof Swc4jAstIdent ident) {
+                String varName = ident.getSym();
+
+                // Get the type of the variable (context is already available at method scope)
+                String varType = context.getInferredTypes().get(varName);
+                if (varType == null) {
+                    var localVar = context.getLocalVariableTable().getVariable(varName);
+                    if (localVar != null) {
+                        varType = localVar.type();
+                    }
+                }
+
+                if (varType != null && varType.startsWith("L") && varType.endsWith(";")) {
+                    // Get return type from functional interface using reflection
+                    String returnType = compiler.getMemory().getScopedFunctionalInterfaceRegistry().getReturnType(varType);
+                    if (returnType != null) {
+                        return returnType;
+                    }
+                }
+            }
+
             // Handle super.method() calls
             if (callExpr.getCallee() instanceof Swc4jAstSuperPropExpr superPropExpr) {
                 if (superPropExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
@@ -1155,34 +1177,33 @@ public final class TypeResolver {
                     }
                 }
 
-                // Check if it's a TypeScript class method call (after checking known Java APIs)
+                // Check if it's an object method call (Java or TypeScript class)
                 if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
-                    // Exclude known Java types
-                    if (!objType.startsWith("Ljava/") && !objType.startsWith("Ljavax/")) {
-                        // Get the qualified class name from the object type
-                        String qualifiedClassName = objType.substring(1, objType.length() - 1).replace('/', '.');
-                        if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-                            String methodName = propIdent.getSym();
-                            // Build parameter descriptor from call arguments
-                            StringBuilder paramDescriptors = new StringBuilder();
-                            for (var arg : callExpr.getArgs()) {
-                                if (arg.getSpread().isPresent()) {
-                                    throw new Swc4jByteCodeCompilerException(arg.getExpr(),
-                                            "Spread arguments not supported in TypeScript class method calls");
-                                }
-                                String argType = inferTypeFromExpr(arg.getExpr());
-                                if (argType == null) {
-                                    argType = "Ljava/lang/Object;";
-                                }
-                                paramDescriptors.append(argType);
+                    String qualifiedClassName = objType.substring(1, objType.length() - 1).replace('/', '.');
+                    if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                        String methodName = propIdent.getSym();
+                        // Build parameter descriptor from call arguments
+                        StringBuilder paramDescriptors = new StringBuilder();
+                        for (var arg : callExpr.getArgs()) {
+                            if (arg.getSpread().isPresent()) {
+                                throw new Swc4jByteCodeCompilerException(arg.getExpr(),
+                                        "Spread arguments not supported in class method calls");
                             }
-                            String paramDescriptor = "(" + paramDescriptors + ")";
-                            String returnType = compiler.getMemory().getScopedJavaTypeRegistry()
-                                    .resolveClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
-                            if (returnType != null) {
-                                return returnType;
+                            String argType = inferTypeFromExpr(arg.getExpr());
+                            if (argType == null) {
+                                argType = "Ljava/lang/Object;";
                             }
-                            // Cannot infer return type - require explicit annotation
+                            paramDescriptors.append(argType);
+                        }
+                        String paramDescriptor = "(" + paramDescriptors + ")";
+                        // Use the registry which falls back to reflection for Java types
+                        String returnType = compiler.getMemory().getScopedJavaTypeRegistry()
+                                .resolveClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
+                        if (returnType != null) {
+                            return returnType;
+                        }
+                        // For non-Java types, require explicit annotation
+                        if (!objType.startsWith("Ljava/") && !objType.startsWith("Ljavax/")) {
                             throw new Swc4jByteCodeCompilerException(callExpr,
                                     "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
                                             ". Please add explicit return type annotation to the method.");

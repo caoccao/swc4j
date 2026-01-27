@@ -90,6 +90,28 @@ public final class ScopedJavaTypeRegistry {
     }
 
     /**
+     * Get the JVM type descriptor for a class.
+     *
+     * @param clazz the class
+     * @return the type descriptor
+     */
+    private String getDescriptor(Class<?> clazz) {
+        if (clazz == void.class) return "V";
+        if (clazz == boolean.class) return "Z";
+        if (clazz == byte.class) return "B";
+        if (clazz == char.class) return "C";
+        if (clazz == short.class) return "S";
+        if (clazz == int.class) return "I";
+        if (clazz == long.class) return "J";
+        if (clazz == float.class) return "F";
+        if (clazz == double.class) return "D";
+        if (clazz.isArray()) {
+            return "[" + getDescriptor(clazz.getComponentType());
+        }
+        return "L" + clazz.getName().replace('.', '/') + ";";
+    }
+
+    /**
      * Gets the ordinal value for an enum member.
      * Searches from innermost to outermost scope.
      *
@@ -119,6 +141,99 @@ public final class ScopedJavaTypeRegistry {
      */
     public int getScopeDepth() {
         return scopeStack.size();
+    }
+
+    /**
+     * Parse parameter types from a descriptor string.
+     *
+     * @param paramDescriptor parameter descriptor only (e.g., "()", "(I)", "(ILjava/lang/String;)")
+     * @return array of parameter types
+     */
+    private Class<?>[] parseParameterTypes(String paramDescriptor) {
+        List<Class<?>> params = new ArrayList<>();
+
+        // Remove parentheses
+        String inner = paramDescriptor;
+        if (inner.startsWith("(")) {
+            inner = inner.substring(1);
+        }
+        if (inner.endsWith(")")) {
+            inner = inner.substring(0, inner.length() - 1);
+        }
+
+        int i = 0;
+        while (i < inner.length()) {
+            char c = inner.charAt(i);
+            switch (c) {
+                case 'Z' -> {
+                    params.add(boolean.class);
+                    i++;
+                }
+                case 'B' -> {
+                    params.add(byte.class);
+                    i++;
+                }
+                case 'C' -> {
+                    params.add(char.class);
+                    i++;
+                }
+                case 'S' -> {
+                    params.add(short.class);
+                    i++;
+                }
+                case 'I' -> {
+                    params.add(int.class);
+                    i++;
+                }
+                case 'J' -> {
+                    params.add(long.class);
+                    i++;
+                }
+                case 'F' -> {
+                    params.add(float.class);
+                    i++;
+                }
+                case 'D' -> {
+                    params.add(double.class);
+                    i++;
+                }
+                case 'L' -> {
+                    // Object type
+                    int semicolon = inner.indexOf(';', i);
+                    if (semicolon == -1) break;
+                    String className = inner.substring(i + 1, semicolon).replace('/', '.');
+                    try {
+                        params.add(Class.forName(className));
+                    } catch (ClassNotFoundException e) {
+                        // Skip unknown class
+                    }
+                    i = semicolon + 1;
+                }
+                case '[' -> {
+                    // Array type - find the element type
+                    int start = i;
+                    while (i < inner.length() && inner.charAt(i) == '[') i++;
+                    if (i < inner.length()) {
+                        char elemType = inner.charAt(i);
+                        if (elemType == 'L') {
+                            int semicolon = inner.indexOf(';', i);
+                            if (semicolon != -1) i = semicolon + 1;
+                        } else {
+                            i++;
+                        }
+                    }
+                    String arrayDesc = inner.substring(start, i);
+                    try {
+                        params.add(Class.forName(arrayDesc.replace('/', '.')));
+                    } catch (ClassNotFoundException e) {
+                        // Skip unknown class
+                    }
+                }
+                default -> i++;
+            }
+        }
+
+        return params.toArray(new Class<?>[0]);
     }
 
     /**
@@ -197,6 +312,7 @@ public final class ScopedJavaTypeRegistry {
     /**
      * Resolves a class method return type, searching from innermost to outermost scope.
      * Also searches in parent classes if not found in the current class.
+     * Falls back to Java reflection for standard Java classes.
      *
      * @param qualifiedClassName fully qualified class name
      * @param methodName         method name
@@ -233,7 +349,32 @@ public final class ScopedJavaTypeRegistry {
             }
         }
 
-        return null;
+        // Fallback: Use reflection to look up method return type for Java classes
+        // This enables calling methods on standard Java interfaces like IntUnaryOperator
+        return resolveMethodReturnTypeViaReflection(qualifiedClassName, methodName, paramDescriptor);
+    }
+
+    /**
+     * Resolves a method return type using Java reflection.
+     * Used for standard Java library classes that aren't registered in the type registry.
+     *
+     * @param qualifiedClassName fully qualified class name
+     * @param methodName         method name
+     * @param paramDescriptor    parameter descriptor only (e.g., "()", "(I)")
+     * @return return type descriptor, or null if not found
+     */
+    private String resolveMethodReturnTypeViaReflection(String qualifiedClassName, String methodName, String paramDescriptor) {
+        try {
+            Class<?> clazz = Class.forName(qualifiedClassName);
+            Class<?>[] paramTypes = parseParameterTypes(paramDescriptor);
+
+            // Find the method
+            java.lang.reflect.Method method = clazz.getMethod(methodName, paramTypes);
+            return getDescriptor(method.getReturnType());
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            // Class or method not found - return null
+            return null;
+        }
     }
 
     /**

@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstArrowExpr` in TypeScript to JVM bytecode compilation. Arrow expressions (arrow functions/lambdas) are first-class function values that capture variables from their enclosing scope.
 
-**Current Status:** MOSTLY COMPLETE (Phases 1-6 implemented with documented limitations)
+**Current Status:** MOSTLY COMPLETE (Phases 1-6 implemented with documented limitations, recursive arrows supported)
 
 **Strategy:** Arrow expressions will be implemented as **Anonymous Inner Classes** that implement a functional interface. This approach is compatible with JDK 17 and provides full closure semantics.
 
@@ -47,6 +47,7 @@ class Calculator {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowEdgeCases.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowCustomInterface.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowTypeInference.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowRecursive.java` ✓
 
 **AST Definition:** [Swc4jAstArrowExpr.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr.java)
 
@@ -1347,7 +1348,7 @@ Use primitive specializations to avoid boxing:
 5. **IIFE (Immediately Invoked Function Expression)**: IMPLEMENTED - Generates custom interface with naming convention $interfaceN and anonymous implementation class
 6. **Destructuring Parameters**: NOT SUPPORTED - Object/array destructuring in parameters not implemented
 7. **Default/Rest/Optional Parameters**: LIMITED - Only work with custom interfaces, not standard functional interfaces
-8. **Recursive Arrows**: LIMITED - Requires complex self-reference pattern not yet fully implemented
+8. **Recursive Arrows**: ✓ IMPLEMENTED - Self-referencing arrows (e.g., factorial, fibonacci) work via non-final captured field updated after instantiation
 9. **Reflection on Arrows**: Limited - Anonymous inner class details not accessible
 10. **Serialization**: Anonymous inner classes may have serialization issues
 11. **Debugging**: Anonymous class names may be harder to debug
@@ -1481,9 +1482,18 @@ The following edge cases are now covered by tests:
 - IIFE generates unique interfaces ✓
 - Type inference works correctly for IIFE in expressions ✓
 
+**Recursive Arrows (TestCompileAstArrowRecursive.java):**
+- Edge case 85: Recursive arrow - factorial (ternary expression) ✓
+- Recursive arrow - factorial returned from method ✓
+- Recursive arrow - fibonacci (block body) ✓
+- Recursive arrow - fibonacci returned from method ✓
+- Recursive arrow - sum 1 to n ✓
+- Recursive arrow - with additional captured variable ✓
+- Recursive arrow - with 'this' capture ✓
+
 ---
 
 *Last Updated: January 27, 2026*
-*Status: MOSTLY COMPLETE (Phase 1-6 implemented with IIFE support, Phase 5 parameter type inference added)*
-*Remaining Work: Mutable captures with holder objects, recursive arrows, generic type parameters*
+*Status: MOSTLY COMPLETE (Phase 1-6 implemented with IIFE support, recursive arrows, Phase 5 parameter type inference)*
+*Remaining Work: Mutable captures with holder objects, generic type parameters*
 *Note: Async and generator arrows are intentionally not supported due to complexity*

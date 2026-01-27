@@ -22,30 +22,32 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 
 public final class ByteCodeCompilerMemory {
     private final Map<String, byte[]> byteCodeMap;
-    private final Stack<CompilationContext> contextStack;
+    private final ScopedCompilationContext scopedCompilationContext;
+    private final ScopedFunctionalInterfaceRegistry scopedFunctionalInterfaceRegistry;
     private final ScopedJavaTypeRegistry scopedJavaTypeRegistry;
     private final ScopedStandaloneFunctionRegistry scopedStandaloneFunctionRegistry;
     private final ScopedTypeAliasRegistry scopedTypeAliasRegistry;
 
     public ByteCodeCompilerMemory() {
         byteCodeMap = new HashMap<>();
-        contextStack = new Stack<>();
-        contextStack.push(new CompilationContext());
+        scopedCompilationContext = new ScopedCompilationContext();
+        scopedFunctionalInterfaceRegistry = new ScopedFunctionalInterfaceRegistry();
         scopedJavaTypeRegistry = new ScopedJavaTypeRegistry();
         scopedStandaloneFunctionRegistry = new ScopedStandaloneFunctionRegistry();
         scopedTypeAliasRegistry = new ScopedTypeAliasRegistry();
     }
 
     public void enterScope() {
+        scopedFunctionalInterfaceRegistry.enterScope();
         scopedStandaloneFunctionRegistry.enterScope();
         scopedTypeAliasRegistry.enterScope();
     }
 
     public void exitScope() {
+        scopedFunctionalInterfaceRegistry.exitScope();
         scopedStandaloneFunctionRegistry.exitScope();
         scopedTypeAliasRegistry.exitScope();
     }
@@ -65,7 +67,15 @@ public final class ByteCodeCompilerMemory {
      * @return the current compilation context
      */
     public CompilationContext getCompilationContext() {
-        return contextStack.peek();
+        return scopedCompilationContext.current();
+    }
+
+    public ScopedCompilationContext getScopedCompilationContext() {
+        return scopedCompilationContext;
+    }
+
+    public ScopedFunctionalInterfaceRegistry getScopedFunctionalInterfaceRegistry() {
+        return scopedFunctionalInterfaceRegistry;
     }
 
     public ScopedJavaTypeRegistry getScopedJavaTypeRegistry() {
@@ -87,10 +97,7 @@ public final class ByteCodeCompilerMemory {
      * @return the popped context
      */
     public CompilationContext popCompilationContext() {
-        if (contextStack.size() > 1) {
-            return contextStack.pop();
-        }
-        return contextStack.peek();
+        return scopedCompilationContext.exitScope();
     }
 
     /**
@@ -101,23 +108,20 @@ public final class ByteCodeCompilerMemory {
      * @return the new context
      */
     public CompilationContext pushCompilationContext(boolean isStatic) {
-        CompilationContext newContext = new CompilationContext();
-        newContext.reset(isStatic);
-        contextStack.push(newContext);
-        return newContext;
+        return scopedCompilationContext.enterScope(isStatic);
     }
 
     public void reset() {
         byteCodeMap.clear();
-        contextStack.clear();
-        contextStack.push(new CompilationContext());
+        scopedCompilationContext.clear();
+        scopedFunctionalInterfaceRegistry.clear();
         scopedJavaTypeRegistry.clear();
         scopedStandaloneFunctionRegistry.clear();
         scopedTypeAliasRegistry.clear();
     }
 
     public void resetCompilationContext() {
-        contextStack.peek().reset();
+        scopedCompilationContext.resetCurrent();
     }
 
     /**
@@ -126,7 +130,7 @@ public final class ByteCodeCompilerMemory {
      * @param isStatic true if this is for a static method (no 'this' parameter)
      */
     public void resetCompilationContext(boolean isStatic) {
-        contextStack.peek().reset(isStatic);
+        scopedCompilationContext.resetCurrent(isStatic);
     }
 
     /**
