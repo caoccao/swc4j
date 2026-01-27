@@ -34,7 +34,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testNumericEnumAllExplicit(JdkVersion jdkVersion) throws Exception {
         // Test: All values explicit
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Priority {
                     Low = 10,
@@ -42,7 +42,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
                     High = 30
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Priority"));
+        Class<?> enumClass = runner.getClass("com.Priority");
 
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
@@ -56,7 +56,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testNumericEnumBasic(JdkVersion jdkVersion) throws Exception {
         // Test: Simple auto-increment from 0
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Direction {
                     Up,    // 0
@@ -65,7 +65,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
                     Right  // 3
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Direction"));
+        Class<?> enumClass = runner.getClass("com.Direction");
         assertTrue(Enum.class.isAssignableFrom(enumClass));
 
         Object[] constants = enumClass.getEnumConstants();
@@ -89,7 +89,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testNumericEnumExplicitStart(JdkVersion jdkVersion) throws Exception {
         // Test: Explicit starting value
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Status {
                     Pending = 1,
@@ -97,7 +97,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
                     Done       // 3
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Status"));
+        Class<?> enumClass = runner.getClass("com.Status");
 
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
@@ -111,13 +111,13 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testNumericEnumFromValue(JdkVersion jdkVersion) throws Exception {
         // Test: Reverse lookup with fromValue()
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Direction {
                     Up, Down, Left, Right
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Direction"));
+        Class<?> enumClass = runner.getClass("com.Direction");
 
         var fromValueMethod = enumClass.getMethod("fromValue", int.class);
         Object left = fromValueMethod.invoke(null, 2);
@@ -130,7 +130,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testNumericEnumNegativeValues(JdkVersion jdkVersion) throws Exception {
         // Test: Negative values
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Temperature {
                     Cold = -10,
@@ -138,7 +138,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
                     Hot = 10
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Temperature"));
+        Class<?> enumClass = runner.getClass("com.Temperature");
 
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
@@ -152,7 +152,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testNumericEnumNonContiguous(JdkVersion jdkVersion) throws Exception {
         // Test: Non-sequential values
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Priority {
                     Low = 1,
@@ -160,7 +160,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
                     High = 100
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Priority"));
+        Class<?> enumClass = runner.getClass("com.Priority");
 
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
@@ -174,14 +174,14 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testNumericEnumOrdinal(JdkVersion jdkVersion) throws Exception {
         // Test: Ordinal vs value
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Status {
                     A = 10,
                     B = 20
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Status"));
+        Class<?> enumClass = runner.getClass("com.Status");
 
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
@@ -198,13 +198,13 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testNumericEnumSingleMember(JdkVersion jdkVersion) throws Exception {
         // Test: Enum with one member
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Single {
                     Only
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Single"));
+        Class<?> enumClass = runner.getClass("com.Single");
 
         Object[] constants = enumClass.getEnumConstants();
         assertEquals(1, constants.length);
@@ -218,13 +218,13 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testNumericEnumValueOf(JdkVersion jdkVersion) throws Exception {
         // Test: valueOf(String) method
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Direction {
                     Up, Down
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Direction"));
+        Class<?> enumClass = runner.getClass("com.Direction");
 
         var valueOfMethod = enumClass.getMethod("valueOf", String.class);
         Object down = valueOfMethod.invoke(null, "DOWN");
@@ -237,13 +237,13 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testNumericEnumValues(JdkVersion jdkVersion) throws Exception {
         // Test: values() method
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Direction {
                     Up, Down
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Direction"));
+        Class<?> enumClass = runner.getClass("com.Direction");
 
         var valuesMethod = enumClass.getMethod("values");
         Object[] values = (Object[]) valuesMethod.invoke(null);

@@ -29,7 +29,7 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testMultipleStandaloneFunctions(JdkVersion jdkVersion) throws Exception {
         // Multiple standalone functions should all be in the same dummy class $
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 export function add(a: int, b: int): int {
                   return a + b
                 }
@@ -39,7 +39,7 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                 export function mul(a: int, b: int): int {
                   return a * b
                 }""");
-        Class<?> dummyClass = loadClass(map.get("$"));
+        Class<?> dummyClass = runner.getClass("$");
         assertEquals(15, dummyClass.getMethod("add", int.class, int.class).invoke(null, 10, 5));
         assertEquals(5, dummyClass.getMethod("sub", int.class, int.class).invoke(null, 10, 5));
         assertEquals(50, dummyClass.getMethod("mul", int.class, int.class).invoke(null, 10, 5));
@@ -49,11 +49,11 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testStandaloneFunctionInDummyClass(JdkVersion jdkVersion) throws Exception {
         // Standalone function without a class is compiled into dummy class $
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 export function add(a: int, b: int): int {
                   return a + b
                 }""");
-        Class<?> dummyClass = loadClass(map.get("$"));
+        Class<?> dummyClass = runner.getClass("$");
         assertEquals(30, dummyClass.getMethod("add", int.class, int.class).invoke(null, 10, 20));
     }
 
@@ -61,13 +61,13 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testStandaloneFunctionInNamespace(JdkVersion jdkVersion) throws Exception {
         // Standalone function in namespace is compiled into namespace.$
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export function multiply(a: int, b: int): int {
                     return a * b
                   }
                 }""");
-        Class<?> dummyClass = loadClass(map.get("com.$"));
+        Class<?> dummyClass = runner.getClass("com.$");
         assertEquals(50, dummyClass.getMethod("multiply", int.class, int.class).invoke(null, 5, 10));
     }
 
@@ -75,20 +75,19 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testStandaloneFunctionWhenDollarClassExists(JdkVersion jdkVersion) throws Exception {
         // When class $ already exists, use $1 for standalone functions
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 export class $ {
                   getValue(): int { return 100 }
                 }
                 export function helper(): int {
                   return 42
                 }""");
-        var classes = loadClasses(map);
         // Class $ should exist with its own method
-        Class<?> dollarClass = classes.get("$");
+        Class<?> dollarClass = runner.getClass("$");
         var instance = dollarClass.getConstructor().newInstance();
         assertEquals(100, dollarClass.getMethod("getValue").invoke(instance));
         // Function should be in $1
-        Class<?> dollar1Class = classes.get("$1");
+        Class<?> dollar1Class = runner.getClass("$1");
         assertEquals(42, dollar1Class.getMethod("helper").invoke(null));
     }
 
@@ -96,7 +95,7 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testStandaloneFunctionWhenDollarClassExistsInNamespace(JdkVersion jdkVersion) throws Exception {
         // When class $ already exists in namespace, use $1 for standalone functions
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class $ {
                     getValue(): int { return 200 }
@@ -105,13 +104,12 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                     return 84
                   }
                 }""");
-        var classes = loadClasses(map);
         // Class com.$ should exist
-        Class<?> dollarClass = classes.get("com.$");
+        Class<?> dollarClass = runner.getClass("com.$");
         var instance = dollarClass.getConstructor().newInstance();
         assertEquals(200, dollarClass.getMethod("getValue").invoke(instance));
         // Function should be in com.$1
-        Class<?> dollar1Class = classes.get("com.$1");
+        Class<?> dollar1Class = runner.getClass("com.$1");
         assertEquals(84, dollar1Class.getMethod("helper").invoke(null));
     }
 
@@ -119,7 +117,7 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testStandaloneFunctionWhenMultipleDollarClassesExist(JdkVersion jdkVersion) throws Exception {
         // When classes $ and $1 exist, use $2 for standalone functions
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 export class $ {
                   getValue(): int { return 1 }
                 }
@@ -129,17 +127,16 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                 export function helper(): int {
                   return 3
                 }""");
-        var classes = loadClasses(map);
-        assertEquals(1, classes.get("$").getMethod("getValue").invoke(classes.get("$").getConstructor().newInstance()));
-        assertEquals(2, classes.get("$1").getMethod("getValue").invoke(classes.get("$1").getConstructor().newInstance()));
-        assertEquals(3, classes.get("$2").getMethod("helper").invoke(null));
+        assertEquals(1, runner.getClass("$").getMethod("getValue").invoke(runner.getClass("$").getConstructor().newInstance()));
+        assertEquals(2, runner.getClass("$1").getMethod("getValue").invoke(runner.getClass("$1").getConstructor().newInstance()));
+        assertEquals(3, runner.getClass("$2").getMethod("helper").invoke(null));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStandaloneFunctionWithClass(JdkVersion jdkVersion) throws Exception {
         // Standalone function alongside a regular class
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 export class Calculator {
                   add(a: int, b: int): int {
                     return a + b
@@ -148,13 +145,12 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                 export function helper(x: int): int {
                   return x * 2
                 }""");
-        var classes = loadClasses(map);
         // Regular class
-        Class<?> calcClass = classes.get("Calculator");
+        Class<?> calcClass = runner.getClass("Calculator");
         var instance = calcClass.getConstructor().newInstance();
         assertEquals(30, calcClass.getMethod("add", int.class, int.class).invoke(instance, 10, 20));
         // Standalone function in $
-        Class<?> dummyClass = classes.get("$");
+        Class<?> dummyClass = runner.getClass("$");
         assertEquals(20, dummyClass.getMethod("helper", int.class).invoke(null, 10));
     }
 }

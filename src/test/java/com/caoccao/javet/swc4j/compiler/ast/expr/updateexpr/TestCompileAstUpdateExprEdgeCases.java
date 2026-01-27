@@ -35,7 +35,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testByteMaxValue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -45,7 +45,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Overflow wraps around in Java
         assertEquals((byte) -128, classA.getMethod("test").invoke(instance));
@@ -54,7 +54,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testByteMinValue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -64,7 +64,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Underflow wraps around in Java
         assertEquals((byte) 127, classA.getMethod("test").invoke(instance));
@@ -124,7 +124,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoubleIncrementSeparateStatements(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -135,7 +135,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(7, classA.getMethod("test").invoke(instance));
     }
@@ -143,7 +143,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoubleSequentialIncrements(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -154,7 +154,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(2.1, (double) classA.getMethod("test").invoke(instance), 0.0001);
     }
@@ -162,7 +162,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIntegerMaxValueOverflow(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -172,7 +172,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(Integer.MIN_VALUE, classA.getMethod("test").invoke(instance));
     }
@@ -180,7 +180,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLongMaxValueOverflow(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -190,7 +190,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(Long.MIN_VALUE, classA.getMethod("test").invoke(instance));
     }
@@ -198,7 +198,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMixedIncrementDecrement(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -210,7 +210,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(11, classA.getMethod("test").invoke(instance));
     }
@@ -218,7 +218,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleUpdatesInExpression(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -229,7 +229,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(16, classA.getMethod("test").invoke(instance));
     }
@@ -237,7 +237,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNegativeNumberIncrement(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -247,15 +247,15 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(-4, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullWrapperThrowsNPE(JdkVersion jdkVersion) {
-        var map = assertDoesNotThrow(() -> getCompiler(jdkVersion).compile("""
+    public void testNullWrapperThrowsNPE(JdkVersion jdkVersion) throws ClassNotFoundException {
+        var runner = assertDoesNotThrow(() -> getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -265,7 +265,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }"""));
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = assertDoesNotThrow(() -> classA.getConstructor().newInstance());
         assertThrows(InvocationTargetException.class, () -> {
             classA.getMethod("test").invoke(instance);

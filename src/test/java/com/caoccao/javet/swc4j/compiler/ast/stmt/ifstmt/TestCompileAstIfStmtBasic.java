@@ -32,7 +32,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBasicIfFalse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -44,7 +44,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test").invoke(instance));
     }
@@ -52,7 +52,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBasicIfTrue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -64,7 +64,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(10, classA.getMethod("test").invoke(instance));
     }
@@ -72,7 +72,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIfWithBooleanVariable(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -85,7 +85,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(42, classA.getMethod("test").invoke(instance));
     }
@@ -93,7 +93,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIfWithComparison(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -106,7 +106,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(1, classA.getMethod("test").invoke(instance));
     }
@@ -114,7 +114,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIfWithLogicalAnd(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -128,7 +128,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(100, classA.getMethod("test").invoke(instance));
     }
@@ -136,7 +136,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIfWithLogicalOr(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -150,7 +150,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(100, classA.getMethod("test").invoke(instance));
     }
@@ -158,7 +158,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIfWithMultipleStatements(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -172,7 +172,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(30, classA.getMethod("test").invoke(instance));
     }
@@ -180,7 +180,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIfWithNegation(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -193,7 +193,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(1, classA.getMethod("test").invoke(instance));
     }
@@ -201,7 +201,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIfWithReturn(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -213,7 +213,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(100, classA.getMethod("test").invoke(instance));
     }
@@ -221,7 +221,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSequentialIfs(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -236,7 +236,7 @@ public class TestCompileAstIfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(15, classA.getMethod("test").invoke(instance));
     }

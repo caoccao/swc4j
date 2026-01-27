@@ -20,34 +20,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ByteArrayClassLoader extends ClassLoader {
-    private final Map<String, byte[]> classBytes = new HashMap<>();
+    protected final Map<String, byte[]> byteCodeMap;
+    protected final Map<String, Class<?>> classMap;
 
-    public ByteArrayClassLoader(String name, ClassLoader parent) {
-        super(name, parent);
-    }
-
-    public ByteArrayClassLoader(ClassLoader parent) {
+    public ByteArrayClassLoader(Map<String, byte[]> byteCodeMap, ClassLoader parent) {
         super(parent);
-    }
-
-    public ByteArrayClassLoader() {
-        super();
-    }
-
-    public void addClass(String name, byte[] bytes) {
-        classBytes.put(name, bytes);
+        this.byteCodeMap = new HashMap<>(byteCodeMap);
+        classMap = new HashMap<>();
     }
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
-        byte[] bytes = classBytes.get(name);
-        if (bytes != null) {
-            return defineClass(name, bytes, 0, bytes.length);
+        if (classMap.containsKey(name)) {
+            return classMap.get(name);
         }
-        return super.findClass(name);
+        byte[] bytes = byteCodeMap.get(name);
+        Class<?> clazz;
+        if (bytes != null) {
+            clazz = defineClass(name, bytes, 0, bytes.length);
+        } else {
+            clazz = super.findClass(name);
+        }
+        classMap.put(name, clazz);
+        return clazz;
     }
 
-    public Class<?> loadClassFromBytes(byte[] bytes) {
-        return defineClass(null, bytes, 0, bytes.length);
+    public synchronized Class<?> getClass(String name) throws ClassNotFoundException {
+        return findClass(name);
     }
 }

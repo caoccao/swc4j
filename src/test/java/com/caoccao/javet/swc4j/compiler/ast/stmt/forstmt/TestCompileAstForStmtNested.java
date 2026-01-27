@@ -32,7 +32,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBreakInInnerLoop(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -49,7 +49,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(45, classA.getMethod("test").invoke(instance));
     }
@@ -57,7 +57,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBreakInOuterLoop(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -74,7 +74,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(18, classA.getMethod("test").invoke(instance));
     }
@@ -82,7 +82,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testContinueInInnerLoop(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -99,7 +99,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(18, classA.getMethod("test").invoke(instance));
     }
@@ -107,7 +107,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testContinueInOuterLoop(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -124,7 +124,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(10, classA.getMethod("test").invoke(instance));
     }
@@ -132,7 +132,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEmptyInnerLoop(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -146,7 +146,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(5, classA.getMethod("test").invoke(instance));
     }
@@ -154,7 +154,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFiveLevelDeepNesting(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -174,7 +174,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(32, classA.getMethod("test").invoke(instance));
     }
@@ -182,7 +182,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFourLevelNested(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -200,7 +200,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(16, classA.getMethod("test").invoke(instance));
     }
@@ -208,7 +208,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testInnerModifiesOuter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -223,7 +223,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(9, classA.getMethod("test").invoke(instance));
     }
@@ -231,7 +231,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNestedBreakAndContinue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -251,7 +251,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(28, classA.getMethod("test").invoke(instance));
     }
@@ -259,7 +259,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNestedWithComplexConditions(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -279,7 +279,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(63, classA.getMethod("test").invoke(instance));
     }
@@ -287,7 +287,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNestedWithDifferentIterations(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -301,7 +301,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(25, classA.getMethod("test").invoke(instance));
     }
@@ -309,7 +309,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNestedWithReturn(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -324,7 +324,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(23, classA.getMethod("test").invoke(instance));
     }
@@ -332,7 +332,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSharedVariables(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -346,7 +346,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(4, classA.getMethod("test").invoke(instance));
     }
@@ -354,7 +354,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testThreeLevelNested(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -370,7 +370,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(12, classA.getMethod("test").invoke(instance));
     }
@@ -378,7 +378,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testTwoLevelNested(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -392,7 +392,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Sum of i*j for i,j in 0..2 = 0+0+0 + 0+1+2 + 0+2+4 = 9
         assertEquals(9, classA.getMethod("test").invoke(instance));

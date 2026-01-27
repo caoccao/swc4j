@@ -32,7 +32,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoubleNegative(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): double {
@@ -40,7 +40,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(-123.456, (double) classA.getMethod("test").invoke(instance), 0.001);
     }
@@ -48,7 +48,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoubleOne(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): double {
@@ -56,7 +56,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(1.0, (double) classA.getMethod("test").invoke(instance), 0.0);
     }
@@ -64,7 +64,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoublePositive(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): double {
@@ -72,7 +72,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(123.456, (double) classA.getMethod("test").invoke(instance), 0.001);
     }
@@ -80,7 +80,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoubleSmallDecimal(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): double {
@@ -88,7 +88,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0.000001, (double) classA.getMethod("test").invoke(instance), 0.0000001);
     }
@@ -96,7 +96,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoubleZero(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): double {
@@ -104,7 +104,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0.0, (double) classA.getMethod("test").invoke(instance), 0.0);
     }
@@ -112,7 +112,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testReturnDoubleWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -121,7 +121,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(123.456D, (double) classA.getMethod("test").invoke(instance), 0.00001D);
     }
@@ -129,7 +129,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testReturnDoubleWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): double {
@@ -137,7 +137,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(123.456D, (double) classA.getMethod("test").invoke(instance), 0.00001D);
     }

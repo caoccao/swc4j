@@ -36,7 +36,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntConst(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -45,7 +45,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("123"), classA.getMethod("test").invoke(instance));
     }
@@ -53,7 +53,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntExceedingLong(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -61,7 +61,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Long.MAX_VALUE + 1
         assertEquals(new BigInteger("9223372036854775808"), classA.getMethod("test").invoke(instance));
@@ -70,7 +70,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntLet(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -79,7 +79,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("456"), classA.getMethod("test").invoke(instance));
     }
@@ -87,7 +87,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntMinusSign(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -95,7 +95,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("-123"), classA.getMethod("test").invoke(instance));
     }
@@ -103,7 +103,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntMultipleVariables(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -114,7 +114,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("300"), classA.getMethod("test").invoke(instance));
     }
@@ -122,7 +122,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntNegativeLarge(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -130,7 +130,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("-123456789"), classA.getMethod("test").invoke(instance));
     }
@@ -138,7 +138,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntNegativeSmall(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -146,7 +146,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("-42"), classA.getMethod("test").invoke(instance));
     }
@@ -154,7 +154,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntNoSign(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -162,7 +162,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("123"), classA.getMethod("test").invoke(instance));
     }
@@ -170,7 +170,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntOne(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -178,7 +178,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(BigInteger.ONE, classA.getMethod("test").invoke(instance));
     }
@@ -186,7 +186,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntPositiveLarge(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -194,7 +194,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("123456789"), classA.getMethod("test").invoke(instance));
     }
@@ -202,7 +202,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntPositiveSign(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -210,7 +210,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("123"), classA.getMethod("test").invoke(instance));
     }
@@ -218,7 +218,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntPositiveSmall(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -226,7 +226,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("42"), classA.getMethod("test").invoke(instance));
     }
@@ -234,7 +234,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntVariable(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -243,7 +243,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("999"), classA.getMethod("test").invoke(instance));
     }
@@ -251,7 +251,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntVeryLarge(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -259,7 +259,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"),
                 classA.getMethod("test").invoke(instance));
@@ -268,7 +268,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntZero(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): BigInteger {
@@ -276,7 +276,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(BigInteger.ZERO, classA.getMethod("test").invoke(instance));
     }

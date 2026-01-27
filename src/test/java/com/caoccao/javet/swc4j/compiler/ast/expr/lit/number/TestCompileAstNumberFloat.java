@@ -32,7 +32,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFloatNegative(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): float {
@@ -40,7 +40,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(-123.456f, (float) classA.getMethod("test").invoke(instance), 0.001f);
     }
@@ -48,7 +48,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFloatOne(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): float {
@@ -56,7 +56,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(1.0f, (float) classA.getMethod("test").invoke(instance), 0.0f);
     }
@@ -64,7 +64,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFloatPositive(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): float {
@@ -72,7 +72,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(123.456f, (float) classA.getMethod("test").invoke(instance), 0.001f);
     }
@@ -80,7 +80,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFloatSmallDecimal(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): float {
@@ -88,7 +88,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0.001f, (float) classA.getMethod("test").invoke(instance), 0.00001f);
     }
@@ -96,7 +96,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFloatTwo(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): float {
@@ -104,7 +104,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(2.0f, (float) classA.getMethod("test").invoke(instance), 0.0f);
     }
@@ -112,7 +112,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFloatZero(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): float {
@@ -120,7 +120,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0.0f, (float) classA.getMethod("test").invoke(instance), 0.0f);
     }
@@ -128,7 +128,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testReturnFloatWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -137,7 +137,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(123.456F, (float) classA.getMethod("test").invoke(instance), 0.00001F);
     }
@@ -145,7 +145,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testReturnFloatWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): float {
@@ -153,7 +153,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(123.456F, (float) classA.getMethod("test").invoke(instance), 0.00001F);
     }

@@ -32,7 +32,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoWhileAndCondition(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -46,7 +46,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Stops when j reaches 3 (i=3, j=3)
         assertEquals(33, classA.getMethod("test").invoke(instance));
@@ -55,7 +55,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoWhileComplexExpression(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -69,7 +69,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // (i < 5 && j > 5) || i < 3
         // Stops when i=5, j=5
@@ -79,7 +79,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoWhileEqualityCheck(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -92,7 +92,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(7, classA.getMethod("test").invoke(instance));
     }
@@ -100,7 +100,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoWhileGreaterThanOrEqual(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -112,7 +112,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Stops when i < 5, so i = 4
         assertEquals(4, classA.getMethod("test").invoke(instance));
@@ -121,7 +121,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoWhileMultipleComparisons(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -136,7 +136,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Stops when a=5, b=5 (both equal to c)
         assertEquals(505, classA.getMethod("test").invoke(instance));
@@ -145,7 +145,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoWhileNotCondition(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -157,7 +157,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Stops when i <= 5, so i = 5
         assertEquals(5, classA.getMethod("test").invoke(instance));
@@ -166,7 +166,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoWhileOrCondition(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -180,7 +180,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Continues until both conditions false: i>=3 AND j>=10
         // Stops when i=5, j=10

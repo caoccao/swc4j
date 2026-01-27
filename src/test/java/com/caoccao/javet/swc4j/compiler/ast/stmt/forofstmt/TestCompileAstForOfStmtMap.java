@@ -32,7 +32,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEmptyMap(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -45,7 +45,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test").invoke(instance));
     }
@@ -53,7 +53,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMapCollectKeys(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -67,7 +67,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("apple,banana,cherry,", classA.getMethod("test").invoke(instance));
     }
@@ -75,7 +75,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMapCollectValues(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -88,7 +88,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(600, classA.getMethod("test").invoke(instance));
     }
@@ -96,7 +96,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMapConstDeclaration(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -110,7 +110,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("a1b2", classA.getMethod("test").invoke(instance));
     }
@@ -118,7 +118,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMapDestructuringKeyValue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -131,7 +131,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("a=1,b=2,c=3,", classA.getMethod("test").invoke(instance));
     }
@@ -139,7 +139,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMapMixedValueTypes(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -153,7 +153,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("42,hello,true,", classA.getMethod("test").invoke(instance));
     }
@@ -161,7 +161,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMapOnlyKey(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -174,7 +174,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("xy", classA.getMethod("test").invoke(instance));
     }
@@ -182,7 +182,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMapPreservesOrder(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -195,7 +195,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // LinkedHashMap maintains insertion order: c, a, b
         assertEquals("cab", classA.getMethod("test").invoke(instance));
@@ -204,7 +204,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMapSingleEntry(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -217,7 +217,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("only:42", classA.getMethod("test").invoke(instance));
     }
@@ -225,7 +225,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMapValueSum(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -238,7 +238,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(60, classA.getMethod("test").invoke(instance));
     }

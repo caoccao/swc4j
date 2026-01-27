@@ -32,7 +32,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchDefaultAtBeginning(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -52,7 +52,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -64,7 +64,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchDefaultAtEnd(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -84,7 +84,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -96,7 +96,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchDefaultInMiddle(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -116,7 +116,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -128,7 +128,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchDefaultNoBreak(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -147,7 +147,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -159,7 +159,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchDefaultOnly(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -173,7 +173,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -185,7 +185,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchDefaultWithMultipleStatements(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -203,7 +203,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -215,7 +215,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchDefaultWithReturn(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -228,7 +228,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -240,7 +240,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchEmptyDefault(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -255,7 +255,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 

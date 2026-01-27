@@ -32,7 +32,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLabeledDoWhileBreak(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -53,7 +53,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(5, classA.getMethod("test").invoke(instance));
     }
@@ -61,7 +61,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLabeledDoWhileContinue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -83,7 +83,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Each outer iteration: j=1 increments sum, j=2 continues outer (skipping rest)
         // 3 iterations, each adds 1 = 3
@@ -93,7 +93,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLabeledDoWhileWithContinueOuter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -114,7 +114,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // i=1: sum = 1+1 = 2
         // i=2: continue (skip inner)
@@ -126,7 +126,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLabeledDoWhileWithMultipleBreaks(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -150,7 +150,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // i=0: j=0,1,2 (break), result=3, i=1
         // i=1: j=0,1 (break outer), result=5
@@ -160,7 +160,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNestedLabeledDoWhile(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -184,7 +184,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // First outer: sum=1,2,3 (break inner), i=1
         // Second outer: sum=4,5,6 (j=0,1,2), i=2

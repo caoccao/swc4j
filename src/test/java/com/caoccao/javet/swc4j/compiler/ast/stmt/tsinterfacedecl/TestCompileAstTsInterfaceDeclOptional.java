@@ -36,7 +36,7 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
     @EnumSource(JdkVersion.class)
     public void testInterfaceAllOptionalProperties(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with all optional properties
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Options {
                     timeout?: int
@@ -44,7 +44,7 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
                     verbose?: boolean
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Options"));
+        Class<?> interfaceClass = runner.getClass("com.Options");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -63,7 +63,7 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
     @EnumSource(JdkVersion.class)
     public void testInterfaceMixedOptionalAndRequired(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with mix of optional and required properties
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface User {
                     id: int
@@ -72,7 +72,7 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
                     phone?: String
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.User"));
+        Class<?> interfaceClass = runner.getClass("com.User");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -93,7 +93,7 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
     @EnumSource(JdkVersion.class)
     public void testInterfaceOptionalPropertyWithImplementation(JdkVersion jdkVersion) throws Exception {
         // Test: Optional property with implementing class that can return null
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Contact {
                     name: String
@@ -108,9 +108,8 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
                     setEmail(email: String): void { this.email = email }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.Contact");
-        Class<?> implClass = classes.get("com.ContactImpl");
+        Class<?> interfaceClass = runner.getClass("com.Contact");
+        Class<?> implClass = runner.getClass("com.ContactImpl");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -136,14 +135,14 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
     @EnumSource(JdkVersion.class)
     public void testInterfaceOptionalReadonlyProperty(JdkVersion jdkVersion) throws Exception {
         // Test: Optional readonly property (getter only)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Entity {
                     readonly id?: int
                     name: String
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Entity"));
+        Class<?> interfaceClass = runner.getClass("com.Entity");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -164,13 +163,13 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
     @EnumSource(JdkVersion.class)
     public void testInterfaceSingleOptionalProperty(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with single optional property
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Named {
                     name?: String
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Named"));
+        Class<?> interfaceClass = runner.getClass("com.Named");
 
         assertTrue(interfaceClass.isInterface());
 

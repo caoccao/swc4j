@@ -29,7 +29,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBasicClassDefinition(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -37,7 +37,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(42, classA.getMethod("test").invoke(instance));
     }
@@ -45,7 +45,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testClassCallingAnotherClass(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Calculator {
                     add(a: int, b: int): int {
@@ -59,8 +59,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> userClass = classes.get("com.User");
+        Class<?> userClass = runner.getClass("com.User");
         var instance = userClass.getConstructor().newInstance();
         assertEquals(30, userClass.getMethod("compute").invoke(instance));
     }
@@ -68,7 +67,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testClassWithMethodCallingOwnMethod(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     helper(): int {
@@ -79,7 +78,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(15, classA.getMethod("test").invoke(instance));
     }
@@ -87,7 +86,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testClassWithMultipleMethods(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     first(): int {
@@ -101,7 +100,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(1, classA.getMethod("first").invoke(instance));
         assertEquals(2, classA.getMethod("second").invoke(instance));
@@ -111,12 +110,12 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testClassWithNoMethods(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Empty {
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.Empty"));
+        Class<?> classA = runner.getClass("com.Empty");
         var instance = classA.getConstructor().newInstance();
         assertNotNull(instance);
     }
@@ -124,7 +123,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleClassesInNamespace(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     value(): int { return 1 }
@@ -136,16 +135,18 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     value(): int { return 3 }
                   }
                 }""");
-        var classes = loadClasses(map);
-        assertEquals(1, classes.get("com.A").getMethod("value").invoke(classes.get("com.A").getConstructor().newInstance()));
-        assertEquals(2, classes.get("com.B").getMethod("value").invoke(classes.get("com.B").getConstructor().newInstance()));
-        assertEquals(3, classes.get("com.C").getMethod("value").invoke(classes.get("com.C").getConstructor().newInstance()));
+        Class<?> classA = runner.getClass("com.A");
+        Class<?> classB = runner.getClass("com.B");
+        Class<?> classC = runner.getClass("com.C");
+        assertEquals(1, classA.getMethod("value").invoke(classA.getConstructor().newInstance()));
+        assertEquals(2, classB.getMethod("value").invoke(classB.getConstructor().newInstance()));
+        assertEquals(3, classC.getMethod("value").invoke(classC.getConstructor().newInstance()));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleClassesWithTypeInfer(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -158,8 +159,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(123, classA.getMethod("test").invoke(instance));
     }
@@ -167,7 +167,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleClassesWithoutTypeInfer(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -180,8 +180,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(123, classA.getMethod("test").invoke(instance));
     }

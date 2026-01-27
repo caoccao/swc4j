@@ -31,7 +31,7 @@ public class TestImport extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMathAbs(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Math } from 'java.lang'
                 namespace com {
                   export class A {
@@ -40,7 +40,7 @@ public class TestImport extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var method = classA.getMethod("test", double.class);
         assertEquals(5.0, (double) method.invoke(instance, -5.0), 0.001);
@@ -50,7 +50,7 @@ public class TestImport extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMathFloor(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Math } from 'java.lang'
                 namespace com {
                   export class A {
@@ -59,7 +59,7 @@ public class TestImport extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var method = classA.getMethod("test", double.class);
         assertEquals(3.0, (double) method.invoke(instance, 3.7), 0.001);
@@ -69,7 +69,7 @@ public class TestImport extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMathMax(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Math } from 'java.lang'
                 namespace com {
                   export class A {
@@ -78,7 +78,7 @@ public class TestImport extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var method = classA.getMethod("test", double.class, double.class);
         assertEquals(5.0, (double) method.invoke(instance, 3.0, 5.0), 0.001);
@@ -88,7 +88,7 @@ public class TestImport extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMathMaxWithIntegerWidening(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Math } from 'java.lang'
                 namespace com {
                   export class A {
@@ -97,7 +97,7 @@ public class TestImport extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var method = classA.getMethod("test", int.class, int.class);
         assertEquals(5, (int) method.invoke(instance, 3, 5));
@@ -107,7 +107,7 @@ public class TestImport extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMathMinWithExactTypes(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Math } from 'java.lang'
                 namespace com {
                   export class A {
@@ -120,7 +120,7 @@ public class TestImport extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         // Test that int args select min(int, int)

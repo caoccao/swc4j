@@ -32,7 +32,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLabelOnSingleLoop(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -49,7 +49,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // i=1: sum=1
         // i=2: sum=3
@@ -62,7 +62,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLabeledBreakInConditional(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -83,7 +83,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // i=0: j=0..9 => 10
         // i=1: j=0..9 => 10
@@ -95,7 +95,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLabeledBreakToOuter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -116,7 +116,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // i=0: j=0,1,...,9 => sum=10 (0*j never >20)
         // i=1: j=0,1,...,9 => sum=20 (1*j never >20)
@@ -129,7 +129,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLabeledContinueSkipsRest(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -151,7 +151,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // i=1 (odd): j=1,2,3,4,5 => sum=5, then sum+=100 => 105
         // i=2 (even): j=1, then j=2 continue outer (skip +100) => sum=106
@@ -164,7 +164,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLabeledContinueToOuter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -185,7 +185,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Each outer iteration: j=1,2 increment sum, then j=3 continues outer
         // 5 outer iterations * 2 inner increments = 10
@@ -195,7 +195,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLabeledWhileWithFor(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -214,7 +214,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // i=0: j=0,1,2,3,4 => 5 (0*j never >6)
         // i=1: j=0,1,2,3,4 => 5 (1*j never >6)
@@ -226,7 +226,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMixedLabeledAndUnlabeled(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -250,7 +250,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // i=0: j=1 (sum=1), j=2 continue, j=3 (sum=2), j=4 (sum=3), j=5 (sum=4) => 4
         // i=1: j=1 (sum=5), j=2 continue, j=3 (sum=6), j=4 (sum=7), j=5 (sum=8) => 4
@@ -262,7 +262,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleLabeledLoops(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -290,7 +290,7 @@ public class TestCompileAstWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // i=0: j=0: k=0,1,2 (3) | j=1: k=0,1 break middle (2) => 5
         // i=1: j=0: k=0,1,2 (3) | j=1: k=0,1 break middle (2) => 5

@@ -37,14 +37,14 @@ public class TestCompileAstTsInterfaceDeclGenerics extends BaseTestCompileSuite 
     @EnumSource(JdkVersion.class)
     public void testInterfaceMultipleTypeParameters(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with multiple type parameters
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Pair<K, V> {
                     key: K
                     value: V
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Pair"));
+        Class<?> interfaceClass = runner.getClass("com.Pair");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -63,13 +63,13 @@ public class TestCompileAstTsInterfaceDeclGenerics extends BaseTestCompileSuite 
     @EnumSource(JdkVersion.class)
     public void testInterfaceSingleTypeParameter(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with single type parameter
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Container<T> {
                     content: T
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Container"));
+        Class<?> interfaceClass = runner.getClass("com.Container");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -93,14 +93,14 @@ public class TestCompileAstTsInterfaceDeclGenerics extends BaseTestCompileSuite 
     @EnumSource(JdkVersion.class)
     public void testInterfaceTypeParameterInMethod(JdkVersion jdkVersion) throws Exception {
         // Test: Type parameter used in method signature
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Processor<T> {
                     process(input: T): T
                     transform(input: T, fn: String): T
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Processor"));
+        Class<?> interfaceClass = runner.getClass("com.Processor");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -123,13 +123,13 @@ public class TestCompileAstTsInterfaceDeclGenerics extends BaseTestCompileSuite 
     @EnumSource(JdkVersion.class)
     public void testInterfaceTypeParameterInProperty(JdkVersion jdkVersion) throws Exception {
         // Test: Type parameter used in property
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Box<T> {
                     content: T
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Box"));
+        Class<?> interfaceClass = runner.getClass("com.Box");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -151,13 +151,13 @@ public class TestCompileAstTsInterfaceDeclGenerics extends BaseTestCompileSuite 
     @EnumSource(JdkVersion.class)
     public void testInterfaceTypeParameterWithBound(JdkVersion jdkVersion) throws Exception {
         // Test: Type parameter with extends constraint
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface NumericContainer<T extends Number> {
                     content: T
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.NumericContainer"));
+        Class<?> interfaceClass = runner.getClass("com.NumericContainer");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -179,14 +179,14 @@ public class TestCompileAstTsInterfaceDeclGenerics extends BaseTestCompileSuite 
     @EnumSource(JdkVersion.class)
     public void testInterfaceWithMixedGenericAndConcreteTypes(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with mix of generic and concrete types
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Repository<T> {
                     id: int
                     data: T
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Repository"));
+        Class<?> interfaceClass = runner.getClass("com.Repository");
 
         assertTrue(interfaceClass.isInterface());
 

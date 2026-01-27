@@ -36,7 +36,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordEmptyValid(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -45,7 +45,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertTrue(result.isEmpty());
@@ -54,7 +54,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordIntegerNumberValid(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -67,7 +67,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(3, result.size());
@@ -81,7 +81,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordIntegerStringValid(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -94,7 +94,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(3, result.size());
@@ -106,7 +106,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordLongNumberValid(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -118,7 +118,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(2, result.size());
@@ -129,7 +129,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordLongStringValid(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -142,7 +142,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(3, result.size());
@@ -154,7 +154,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordNumberEmptyValid(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -163,7 +163,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertTrue(result.isEmpty());
@@ -174,7 +174,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordNumberNumberValid(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -187,7 +187,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of(1, 100, 2, 200, 3, 300), result);
@@ -197,7 +197,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordNumberStringEmpty(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<number, string> test 1: Empty object
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -206,7 +206,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of(), result);
@@ -216,7 +216,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordNumberStringLargeObject(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<number, string> test 10: Larger object (20+ numeric keys)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -230,7 +230,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(SimpleMap.of(
@@ -245,7 +245,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordNumberStringNegativeKeys(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<number, string> test 7: Negative numeric keys
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -259,7 +259,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of(-1, "negative one", -10, "negative ten", 0, "zero", 10, "positive ten"), result);
@@ -269,7 +269,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordNumberStringNumericLiteralKeys(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<number, string> test 2: Numeric literal keys
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -283,7 +283,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Numeric literal keys stored as Integer
@@ -294,7 +294,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordNumberStringOverwrite(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<number, string> test 8: Key overwriting (duplicate numeric keys)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -309,7 +309,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Last value wins for duplicate keys
@@ -320,7 +320,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordNumberStringReturnTypeContext(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<number, string> test 9: In return type context
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Record<number, string> {
@@ -328,7 +328,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Return type context: numeric keys become strings (type info not propagated)
@@ -339,7 +339,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordNumberStringTypedNumericKeys(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<number, string> test 4: Keys from typed number variables
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -355,7 +355,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Variables typed as 'number' are Double, so keys are 1.0, 2.0, 3.0
@@ -367,7 +367,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordNumberStringValid(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -380,7 +380,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(3, result.size());
@@ -393,7 +393,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordStringNumberEmpty(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<string, number> test 1: Empty object
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -402,7 +402,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of(), result);
@@ -412,7 +412,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordStringNumberExpressionValues(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<string, number> test 7: Expression values (arithmetic, etc.)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -429,7 +429,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of(
@@ -446,7 +446,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordStringNumberLargeObject(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<string, number> test 10: Larger object (20+ properties)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -460,7 +460,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(SimpleMap.of(
@@ -475,7 +475,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordStringNumberOverwrite(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<string, number> test 8: Key overwriting (duplicate keys)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -490,7 +490,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Last value wins for duplicate keys
@@ -501,7 +501,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordStringNumberReturnTypeContext(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<string, number> test 9: In return type context
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Record<string, number> {
@@ -509,7 +509,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("x", 1, "y", 2, "z", 3), result);
@@ -519,7 +519,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testRecordStringNumberSimpleProperties(JdkVersion jdkVersion) throws Exception {
         // Comprehensive Record<string, number> test 2: Simple properties with different numeric literals
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -534,7 +534,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // All numeric literals stored as Integer for whole numbers, Double for decimals
@@ -550,7 +550,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordStringNumberValid(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -563,7 +563,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
@@ -572,7 +572,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordStringNumberWithDouble(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -585,7 +585,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(1, result.get("a"));
@@ -596,7 +596,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordStringStringValid(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -608,7 +608,7 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("name", "Alice", "city", "NYC"), result);

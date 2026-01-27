@@ -31,7 +31,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstructorCallingSuperWithArgs(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     value: int
@@ -56,8 +56,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classB = classes.get("com.B");
+        Class<?> classB = runner.getClass("com.B");
         var instance = classB.getConstructor(int.class, int.class).newInstance(10, 5);
         assertEquals(
                 List.of(10, 5, 15),
@@ -72,7 +71,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstructorChaining(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Point {
                     x: int
@@ -91,7 +90,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     getY(): int { return this.y }
                   }
                 }""");
-        Class<?> classPoint = loadClass(map.get("com.Point"));
+        Class<?> classPoint = runner.getClass("com.Point");
 
         // Test two-parameter constructor
         var point1 = classPoint.getConstructor(int.class, int.class).newInstance(10, 20);
@@ -127,7 +126,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstructorChainingWithInheritance(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Point {
                     x: int
@@ -151,8 +150,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     getZ(): int { return this.z }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classPoint3D = classes.get("com.Point3D");
+        Class<?> classPoint3D = runner.getClass("com.Point3D");
 
         // Test three-parameter constructor
         var p1 = classPoint3D.getConstructor(int.class, int.class, int.class).newInstance(1, 2, 3);
@@ -180,7 +178,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstructorInitializingFields(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     value: int
@@ -192,7 +190,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor(int.class).newInstance(42);
         assertEquals(42, classA.getMethod("getValue").invoke(instance));
     }
@@ -200,7 +198,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstructorMultiLevelInheritance(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     a: int
@@ -227,8 +225,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     getSum(): int { return this.a + this.b + this.c }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classC = classes.get("com.C");
+        Class<?> classC = runner.getClass("com.C");
         var instance = classC.getConstructor(int.class, int.class, int.class).newInstance(1, 2, 3);
         assertEquals(
                 List.of(1, 2, 3, 6),
@@ -244,7 +241,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstructorOverloading(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Rectangle {
                     width: int
@@ -262,7 +259,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     getHeight(): int { return this.height }
                   }
                 }""");
-        Class<?> classRectangle = loadClass(map.get("com.Rectangle"));
+        Class<?> classRectangle = runner.getClass("com.Rectangle");
 
         // Test two-parameter constructor
         var rect1 = classRectangle.getConstructor(int.class, int.class).newInstance(10, 5);
@@ -290,7 +287,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstructorWithDifferentTypes(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Person {
                     name: String
@@ -306,7 +303,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     isActive(): boolean { return this.active }
                   }
                 }""");
-        Class<?> classPerson = loadClass(map.get("com.Person"));
+        Class<?> classPerson = runner.getClass("com.Person");
         var instance = classPerson.getConstructor(String.class, int.class, boolean.class).newInstance("John", 25, true);
         assertEquals(
                 Map.of("name", "John", "age", 25, "active", true),
@@ -321,7 +318,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstructorWithDoubleParameter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Circle {
                     radius: double
@@ -332,7 +329,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     getArea(): double { return 3.14159 * this.radius * this.radius }
                   }
                 }""");
-        Class<?> classCircle = loadClass(map.get("com.Circle"));
+        Class<?> classCircle = runner.getClass("com.Circle");
         var instance = classCircle.getConstructor(double.class).newInstance(5.0);
         assertEquals(5.0, classCircle.getMethod("getRadius").invoke(instance));
         assertEquals(78.53975, (double) classCircle.getMethod("getArea").invoke(instance), 0.00001);
@@ -341,7 +338,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstructorWithMultipleParameters(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Point {
                     x: int
@@ -355,7 +352,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     sum(): int { return this.x + this.y }
                   }
                 }""");
-        Class<?> classPoint = loadClass(map.get("com.Point"));
+        Class<?> classPoint = runner.getClass("com.Point");
         var instance = classPoint.getConstructor(int.class, int.class).newInstance(10, 20);
         assertEquals(
                 List.of(10, 20, 30),
@@ -370,7 +367,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstructorWithSingleParameter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Counter {
                     count: int
@@ -381,7 +378,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     increment(): void { this.count = this.count + 1 }
                   }
                 }""");
-        Class<?> classCounter = loadClass(map.get("com.Counter"));
+        Class<?> classCounter = runner.getClass("com.Counter");
         var instance = classCounter.getConstructor(int.class).newInstance(100);
         assertEquals(100, classCounter.getMethod("getCount").invoke(instance));
         classCounter.getMethod("increment").invoke(instance);

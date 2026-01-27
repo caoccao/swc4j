@@ -37,7 +37,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testDoubleConsumer(JdkVersion jdkVersion) throws Exception {
         // Single double parameter with void return -> DoubleConsumer
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { DoubleConsumer } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -46,8 +46,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var consumer = (DoubleConsumer) classA.getMethod("getConsumer").invoke(instance);
         assertNotNull(consumer);
@@ -59,7 +58,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testIntConsumer(JdkVersion jdkVersion) throws Exception {
         // Single int parameter with void return -> IntConsumer
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntConsumer } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -68,8 +67,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var consumer = (IntConsumer) classA.getMethod("getConsumer").invoke(instance);
         assertNotNull(consumer);
@@ -81,7 +79,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testIntPredicate(JdkVersion jdkVersion) throws Exception {
         // Single int parameter with boolean return -> IntPredicate
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntPredicate } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -93,8 +91,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var positiveFn = (IntPredicate) classA.getMethod("getPositive").invoke(instance);
@@ -113,7 +110,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testLongConsumer(JdkVersion jdkVersion) throws Exception {
         // Single long parameter with void return -> LongConsumer
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { LongConsumer } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -122,8 +119,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var consumer = (LongConsumer) classA.getMethod("getConsumer").invoke(instance);
         assertNotNull(consumer);
@@ -135,7 +131,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testManyParametersViaClosure(JdkVersion jdkVersion) throws Exception {
         // Edge case 6: Many parameters via closure capture
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -144,8 +140,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("createComputer", int.class, int.class, int.class, int.class)
                 .invoke(instance, 1, 2, 3, 4);
@@ -159,7 +154,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testNoParameters(JdkVersion jdkVersion) throws Exception {
         // Edge case 1: No parameters
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -168,8 +163,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);
@@ -180,7 +174,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testSingleDoubleParameter(JdkVersion jdkVersion) throws Exception {
         // Test with double parameter
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { DoubleUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -189,8 +183,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (DoubleUnaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(10.0, fn.applyAsDouble(5.0), 0.0001);
@@ -200,7 +193,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testSingleIntParameter(JdkVersion jdkVersion) throws Exception {
         // Edge case 4: Single parameter with parentheses
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -209,8 +202,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);
@@ -221,7 +213,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testSingleLongParameter(JdkVersion jdkVersion) throws Exception {
         // Test with long parameter
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { LongUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -230,8 +222,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (LongUnaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(200L, fn.applyAsLong(100L));
@@ -241,7 +232,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testTwoDoubleParameters(JdkVersion jdkVersion) throws Exception {
         // Two double parameters -> DoubleBinaryOperator
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { DoubleBinaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -250,8 +241,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (DoubleBinaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(8.5, fn.applyAsDouble(3.5, 5.0), 0.0001);
@@ -261,7 +251,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testTwoIntParameters(JdkVersion jdkVersion) throws Exception {
         // Edge case 5: Two int parameters -> IntBinaryOperator
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntBinaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -273,8 +263,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var adder = (IntBinaryOperator) classA.getMethod("getAdder").invoke(instance);
@@ -289,7 +278,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testTwoLongParameters(JdkVersion jdkVersion) throws Exception {
         // Two long parameters -> LongBinaryOperator
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { LongBinaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -298,8 +287,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (LongBinaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(30L, fn.applyAsLong(10L, 20L));
@@ -309,7 +297,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testTypedParametersMixed(JdkVersion jdkVersion) throws Exception {
         // Edge case 7: Typed parameters with mixed types (via capture)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -318,8 +306,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn2 = (IntUnaryOperator) classA.getMethod("createMultiplier", int.class).invoke(instance, 2);
         var fn3 = (IntUnaryOperator) classA.getMethod("createMultiplier", int.class).invoke(instance, 3);

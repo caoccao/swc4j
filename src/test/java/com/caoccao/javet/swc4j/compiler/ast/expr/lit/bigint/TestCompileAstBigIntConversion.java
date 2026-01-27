@@ -34,7 +34,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntLargeToInt(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -43,7 +43,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 2^32, wraps to 0
         assertEquals(0, classA.getMethod("test").invoke(instance));
@@ -52,7 +52,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntNegativeToInt(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -61,7 +61,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(-12345, classA.getMethod("test").invoke(instance));
     }
@@ -69,7 +69,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntToBoolean(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): boolean {
@@ -78,7 +78,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Non-zero BigInt → true
         assertTrue((boolean) classA.getMethod("test").invoke(instance));
@@ -87,7 +87,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntToByte(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): byte {
@@ -96,7 +96,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals((byte) 100, classA.getMethod("test").invoke(instance));
     }
@@ -104,7 +104,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntToDouble(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): double {
@@ -113,7 +113,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(123456789012345.0, (double) classA.getMethod("test").invoke(instance), 1.0);
     }
@@ -121,7 +121,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntToFloat(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): float {
@@ -130,7 +130,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(123456789f, (float) classA.getMethod("test").invoke(instance), 1.0f);
     }
@@ -138,7 +138,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntToInt(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -147,7 +147,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(12345, classA.getMethod("test").invoke(instance));
     }
@@ -155,7 +155,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntToIntTruncation(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -164,7 +164,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // BigInteger.intValue() truncates to lower 32 bits
         assertEquals(0, classA.getMethod("test").invoke(instance));
@@ -173,7 +173,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntToLong(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): long {
@@ -182,7 +182,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(1234567890123L, classA.getMethod("test").invoke(instance));
     }
@@ -190,7 +190,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntToLongTruncation(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): long {
@@ -199,7 +199,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 2^64, truncates to lower 64 bits
         assertEquals(0L, classA.getMethod("test").invoke(instance));
@@ -208,7 +208,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntToShort(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): short {
@@ -217,7 +217,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals((short) 30000, classA.getMethod("test").invoke(instance));
     }
@@ -225,7 +225,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBigIntZeroToBoolean(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): boolean {
@@ -234,7 +234,7 @@ public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Zero BigInt → false
         assertFalse((boolean) classA.getMethod("test").invoke(instance));

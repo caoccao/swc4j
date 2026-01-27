@@ -36,7 +36,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowWithBooleanExpression(JdkVersion jdkVersion) throws Exception {
         // Test arrow with boolean expression body
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntPredicate } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -48,8 +48,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var positiveFn = (IntPredicate) classA.getMethod("getPositive").invoke(instance);
@@ -68,7 +67,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowWithDoubleReturn(JdkVersion jdkVersion) throws Exception {
         // Test arrow with double return type
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { DoubleUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -77,8 +76,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);
@@ -89,7 +87,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testBlockBodyConditionalReturns(JdkVersion jdkVersion) throws Exception {
         // Edge case 26: Block body - conditional returns
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -102,8 +100,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("getClamp").invoke(instance);
 
@@ -117,7 +114,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testBlockBodyEmpty(JdkVersion jdkVersion) throws Exception {
         // Edge case 22: Block body empty (void return)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Runnable } from 'java.lang'
                 namespace com {
                   export class A {
@@ -126,8 +123,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);
@@ -139,7 +135,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testBlockBodyForLoop(JdkVersion jdkVersion) throws Exception {
         // Edge case 27 (extended): Block body with for loop
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -154,8 +150,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("getSum").invoke(instance);
 
@@ -169,7 +164,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testBlockBodyMultipleStatements(JdkVersion jdkVersion) throws Exception {
         // Edge case 24: Block body - multiple statements
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -183,8 +178,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("getComplex").invoke(instance);
 
@@ -198,7 +192,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testBlockBodyNoReturnVoid(JdkVersion jdkVersion) throws Exception {
         // Edge case 25: Block body - no return (void)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntConsumer } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -210,8 +204,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntConsumer) classA.getMethod("getConsumer").invoke(instance);
         // Just verify it doesn't throw - no observable side effect in this simple version
@@ -222,7 +215,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testBlockBodySingleReturn(JdkVersion jdkVersion) throws Exception {
         // Edge case 23: Block body with single return
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -231,8 +224,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);
@@ -243,7 +235,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testBlockBodyWithLoop(JdkVersion jdkVersion) throws Exception {
         // Edge case 27: Block body with loop
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -260,8 +252,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("getFactorial").invoke(instance);
         assertNotNull(fn);
@@ -275,7 +266,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testExpressionBodyBinaryOperation(JdkVersion jdkVersion) throws Exception {
         // Edge case 19: Expression body - binary operation
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -284,8 +275,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("getCompute").invoke(instance);
 
@@ -298,7 +288,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testExpressionBodyMethodCall(JdkVersion jdkVersion) throws Exception {
         // Edge case 20: Expression body - method call on captured String
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Supplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -308,8 +298,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (Supplier<?>) classA.getMethod("getValue").invoke(instance);
 
@@ -320,7 +309,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testExpressionBodyPrimitiveReturn(JdkVersion jdkVersion) throws Exception {
         // Edge case 15: Expression body with primitive return
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -329,8 +318,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);
@@ -341,7 +329,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testExpressionBodyTernary(JdkVersion jdkVersion) throws Exception {
         // Edge case 18: Expression body - ternary
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -353,8 +341,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var absFn = (IntUnaryOperator) classA.getMethod("getAbs").invoke(instance);

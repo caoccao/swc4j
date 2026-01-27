@@ -34,7 +34,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexComplexCharClass(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -42,7 +42,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -52,7 +52,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexConst(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -61,7 +61,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -72,7 +72,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexDeeplyNestedGroups(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -80,7 +80,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -90,7 +90,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexEmptyPattern(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -98,7 +98,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -109,7 +109,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexInferredType(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -117,7 +117,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Object result = classA.getMethod("test").invoke(instance);
         assertInstanceOf(Pattern.class, result);
@@ -128,7 +128,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexLet(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -137,7 +137,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -147,7 +147,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexManyAlternations(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -155,7 +155,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -167,7 +167,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexMultipleRegex(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -178,7 +178,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -189,7 +189,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexNegatedCharClass(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -197,7 +197,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -207,7 +207,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexReassignment(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -217,7 +217,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -227,7 +227,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexReturn(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -235,7 +235,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -245,7 +245,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexSlashInPattern(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -253,7 +253,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -263,7 +263,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexTypeAnnotation(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -272,7 +272,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -282,7 +282,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexVariable(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -291,7 +291,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -306,7 +306,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
         for (int i = 0; i < 100; i++) {
             pattern.append("a");
         }
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -314,7 +314,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""".formatted(pattern.toString()));
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern result = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(result);

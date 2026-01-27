@@ -36,7 +36,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6AssignmentBracketNotation(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Assignment with bracket notation (obj["prop"] = value → map.put("prop", value))
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -46,7 +46,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("a", 1, "b", "hello"), result);
@@ -58,7 +58,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6AssignmentComputedKey(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Assignment with computed key (obj[variable] = value → map.put(variable, value))
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -69,7 +69,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("a", 1, "b", 2), result);
@@ -79,7 +79,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6AssignmentDotNotation(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Assignment with dot notation (obj.prop = value → map.put("prop", value))
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -89,7 +89,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
@@ -99,7 +99,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6AssignmentModifyExisting(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Assignment that modifies existing property
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -109,7 +109,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("a", 1, "b", 99, "c", 3), result);
@@ -119,7 +119,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6AssignmentRecordType(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Assignment with Record type annotation
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -129,7 +129,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
@@ -139,7 +139,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6MemberAccessBracketNotation(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Member access with bracket notation (obj["prop"] → map.get("prop"))
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -148,7 +148,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("test").invoke(instance);
         assertEquals("hello", result);
@@ -158,7 +158,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6MemberAccessComputedKey(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Member access with computed key (obj[variable] → map.get(variable))
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -168,7 +168,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("test").invoke(instance);
         assertEquals(true, result);
@@ -180,7 +180,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6MemberAccessDotNotation(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Member access with dot notation (obj.prop → map.get("prop"))
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -189,7 +189,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("test").invoke(instance);
         assertEquals(1, result);
@@ -199,7 +199,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6MemberAccessNestedObjectSimple(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Member access on nested objects - first level only
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -210,7 +210,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("inner", 42), result);
@@ -220,7 +220,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6MemberAccessRecordType(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Member access with Record type annotations
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -229,7 +229,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("test").invoke(instance);
         assertEquals(2, result);
@@ -239,7 +239,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6ReturnTypeContextImplicit(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Return type context with implicit return type (type inference)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     getData() {
@@ -247,7 +247,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
         assertEquals(Map.of("a", 1, "b", "hello", "c", true), result);
@@ -257,7 +257,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6ReturnTypeContextNestedRecord(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Return type context with nested Record types
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     getData(): Record<string, Record<string, number>> {
@@ -268,7 +268,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
         assertEquals(Map.of(
@@ -281,7 +281,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6ReturnTypeContextRecordNumberString(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Return type context with Record<number, string>
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     getData(): Record<number, string> {
@@ -289,7 +289,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
         // With Record<number, string> return type, keys should be Integer
@@ -308,7 +308,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testPhase6ReturnTypeContextRecordStringNumber(JdkVersion jdkVersion) throws Exception {
         // Phase 6: Return type context with Record<string, number>
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     getData(): Record<string, number> {
@@ -316,7 +316,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
         assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);

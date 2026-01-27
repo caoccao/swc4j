@@ -29,7 +29,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBangFalse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -39,7 +39,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance)); // !false = true
     }
@@ -47,7 +47,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBangLiteralFalse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -56,7 +56,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance)); // !false = true
     }
@@ -64,7 +64,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBangLiteralTrue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -73,7 +73,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((boolean) classA.getMethod("test").invoke(instance)); // !true = false
     }
@@ -81,7 +81,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBangTrue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -91,7 +91,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((boolean) classA.getMethod("test").invoke(instance)); // !true = false
     }
@@ -99,7 +99,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testComparisonFalseNegated(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -110,7 +110,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance)); // !(5 > 10) = !(false) = true
     }
@@ -118,7 +118,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testComparisonTrueNegated(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -129,7 +129,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((boolean) classA.getMethod("test").invoke(instance)); // !(5 > 3) = !(true) = false
     }
@@ -137,7 +137,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoubleBang(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -148,7 +148,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance)); // !!(5 > 3) = !!(true) = true
     }
@@ -156,7 +156,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoubleBangFalse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -166,7 +166,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((boolean) classA.getMethod("test").invoke(instance)); // !!false = false
     }
@@ -174,7 +174,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoubleBangTrue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -184,7 +184,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance)); // !!true = true
     }
@@ -192,7 +192,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEqualityNegated(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -203,7 +203,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((boolean) classA.getMethod("test").invoke(instance)); // !(5 == 5) = !(true) = false
     }
@@ -211,7 +211,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testInequalityNegated(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -222,7 +222,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((boolean) classA.getMethod("test").invoke(instance)); // !(5 != 10) = !(true) = false
     }
@@ -230,7 +230,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLogicalAndNegated(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -241,7 +241,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance)); // !(true && false) = !(false) = true
     }
@@ -249,7 +249,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLogicalOrNegated(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -260,7 +260,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance)); // !(false || false) = !(false) = true
     }
@@ -268,7 +268,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleBang(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -278,7 +278,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((boolean) classA.getMethod("test").invoke(instance)); // !!!true = !!(false) = !(true) = false
     }
@@ -286,7 +286,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNestedComparison(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -298,7 +298,7 @@ public class TestCompileUnaryExprBang extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((boolean) classA.getMethod("test").invoke(instance)); // !((5 < 10) && (10 < 15)) = !(true && true) = !(true) = false
     }

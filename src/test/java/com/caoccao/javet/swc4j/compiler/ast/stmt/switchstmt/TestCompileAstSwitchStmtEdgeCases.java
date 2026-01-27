@@ -32,7 +32,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchAllCasesReturn(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -47,7 +47,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -60,7 +60,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testSwitchComplexFallThroughPattern(JdkVersion jdkVersion) throws Exception {
         // Simulating weekday classification
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(day: int): boolean {
@@ -82,7 +82,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -97,7 +97,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
     public void testSwitchDensityBoundary(JdkVersion jdkVersion) throws Exception {
         // Cases: 0, 1, 2, 4 (missing 3)
         // Density = 4/5 = 80% (above 50% threshold, should use tableswitch)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -120,7 +120,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -136,7 +136,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
     public void testSwitchDiscriminantSideEffect(JdkVersion jdkVersion) throws Exception {
         // Verify discriminant expression evaluation (already covered by testSwitchWithExpressionDiscriminant)
         // This test verifies that complex expressions work as discriminants
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(a: int, b: int): int {
@@ -154,7 +154,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class, int.class);
 
@@ -165,7 +165,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchEmpty(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -177,7 +177,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -187,7 +187,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchEmptyBlock(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -202,7 +202,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -213,7 +213,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchHexOctalBinaryCases(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -236,7 +236,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -272,8 +272,8 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
 
-        var map = getCompiler(jdkVersion).compile(code.toString());
-        Class<?> classA = loadClass(map.get("com.A"));
+        var runner = getCompiler(jdkVersion).compile(code.toString());
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -309,8 +309,8 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
 
-        var map = getCompiler(jdkVersion).compile(code.toString());
-        Class<?> classA = loadClass(map.get("com.A"));
+        var runner = getCompiler(jdkVersion).compile(code.toString());
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -323,7 +323,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchMaxIntValue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -343,7 +343,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -355,7 +355,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchVariableScope(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -374,7 +374,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -385,7 +385,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchWithComplexExpressions(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int, y: int): int {
@@ -402,7 +402,7 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class, int.class);
 

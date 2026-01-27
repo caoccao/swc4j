@@ -34,7 +34,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillBothNegative(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -44,7 +44,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of(1, 0, 0, 0, 5), classA.getMethod("test").invoke(instance));
     }
@@ -53,7 +53,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillEmptyArray(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -63,7 +63,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of(), classA.getMethod("test").invoke(instance));
     }
@@ -72,7 +72,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillEntireArray(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -82,7 +82,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of(0, 0, 0, 0, 0), classA.getMethod("test").invoke(instance));
     }
@@ -91,7 +91,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillMethodChaining(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -100,7 +100,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of(5, 4, 0, 0, 1), classA.getMethod("test").invoke(instance));
     }
@@ -109,7 +109,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillNegativeEnd(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -119,7 +119,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of(1, 0, 0, 0, 5), classA.getMethod("test").invoke(instance));
     }
@@ -128,7 +128,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillNegativeStart(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -138,7 +138,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of(1, 2, 0, 0, 0), classA.getMethod("test").invoke(instance));
     }
@@ -147,7 +147,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillOutOfBoundsStart(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -157,7 +157,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
     }
@@ -166,7 +166,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillReturnsArray(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -175,7 +175,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of(1, 2, 0, 0, 5), classA.getMethod("test").invoke(instance));
     }
@@ -184,7 +184,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillStartGreaterThanEnd(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -194,7 +194,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of(1, 2, 3, 4, 5), classA.getMethod("test").invoke(instance));
     }
@@ -203,7 +203,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillWithStart(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -213,7 +213,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of(1, 2, 0, 0, 0), classA.getMethod("test").invoke(instance));
     }
@@ -222,7 +222,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillWithStartAndEnd(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -232,7 +232,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of(1, 0, 0, 0, 5), classA.getMethod("test").invoke(instance));
     }
@@ -241,7 +241,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillWithString(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -251,7 +251,7 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(List.of(1, "x", "x", "x", 5), classA.getMethod("test").invoke(instance));
     }

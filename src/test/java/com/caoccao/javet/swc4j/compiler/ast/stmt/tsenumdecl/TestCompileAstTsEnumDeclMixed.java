@@ -16,7 +16,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testAutoIncrementFromZero(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Order {
                     First,
@@ -24,7 +24,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
                     Third
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Order"));
+        Class<?> enumClass = runner.getClass("com.Order");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
@@ -37,7 +37,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBinaryValues(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Binary {
                     Low = 0b0,
@@ -45,7 +45,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
                     High
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Binary"));
+        Class<?> enumClass = runner.getClass("com.Binary");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
@@ -58,7 +58,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testExplicitZeroValue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Status {
                     None = 0,
@@ -66,7 +66,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
                     Inactive
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Status"));
+        Class<?> enumClass = runner.getClass("com.Status");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
@@ -79,7 +79,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testHexValues(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Hex {
                     Red = 0xFF0000,
@@ -87,7 +87,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
                     Blue
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Hex"));
+        Class<?> enumClass = runner.getClass("com.Hex");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
@@ -100,7 +100,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLargeValueNumbers(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum BigNum {
                     Small = 1,
@@ -109,7 +109,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
                     VeryLarge
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.BigNum"));
+        Class<?> enumClass = runner.getClass("com.BigNum");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
@@ -123,7 +123,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMixedExplicitImplicit(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Code {
                     A = 1,
@@ -132,7 +132,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
                     D
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Code"));
+        Class<?> enumClass = runner.getClass("com.Code");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
@@ -146,7 +146,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNegativeValuesWithIncrement(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Temp {
                     Freezing = -10,
@@ -155,7 +155,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
                     Hot
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Temp"));
+        Class<?> enumClass = runner.getClass("com.Temp");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
@@ -169,7 +169,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testOctalValues(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Octal {
                     A = 0o10,
@@ -177,7 +177,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
                     C = 0o20
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Octal"));
+        Class<?> enumClass = runner.getClass("com.Octal");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
@@ -190,13 +190,13 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSingleExplicitValue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Single {
                     Only = 42
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Single"));
+        Class<?> enumClass = runner.getClass("com.Single");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object only = enumClass.getEnumConstants()[0];
@@ -207,7 +207,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSparseValues(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Sparse {
                     A = 1,
@@ -215,7 +215,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
                     C = 1000
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Sparse"));
+        Class<?> enumClass = runner.getClass("com.Sparse");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();

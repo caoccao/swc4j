@@ -32,7 +32,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchBreakFromWhileInCase(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -57,7 +57,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -69,7 +69,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchBreakInIfElse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int, y: int): int {
@@ -89,7 +89,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class, int.class);
 
@@ -100,7 +100,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchBreakInNestedLoop(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -120,7 +120,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -131,7 +131,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchContinueFromWhileInCase(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -152,7 +152,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -163,7 +163,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchContinueInLoop(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -182,7 +182,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -193,7 +193,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchMultipleBreaks(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int, condition1: boolean, condition2: boolean): int {
@@ -215,7 +215,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class, boolean.class, boolean.class);
 
@@ -227,7 +227,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchMultipleCasesWithReturns(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -246,7 +246,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -258,7 +258,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchNoBreakExit(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -275,7 +275,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -286,7 +286,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchReturnInsteadOfBreak(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -301,7 +301,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 

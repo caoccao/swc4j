@@ -35,7 +35,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexAllCompatibleFlags(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -43,7 +43,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -55,7 +55,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexCaseInsensitive(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -63,7 +63,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -74,7 +74,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexDotAll(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -82,7 +82,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -93,7 +93,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexFlagOrder(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -101,7 +101,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -113,7 +113,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexGlobalFlag(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -121,7 +121,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -151,7 +151,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexMultiline(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -159,7 +159,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -170,7 +170,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexMultipleFlags(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -178,7 +178,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);
@@ -209,7 +209,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexUnicodeMode(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Pattern {
@@ -217,7 +217,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
         assertNotNull(pattern);

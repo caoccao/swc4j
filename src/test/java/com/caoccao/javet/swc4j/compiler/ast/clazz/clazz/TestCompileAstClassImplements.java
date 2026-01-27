@@ -57,7 +57,7 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testClassExtendsAndImplements(JdkVersion jdkVersion) throws Exception {
         var compiler = createCompilerWithInterfaces(jdkVersion);
-        var map = compiler.compile("""
+        var runner = compiler.compile("""
                 namespace com {
                   export class Base {
                     getValue(): int { return 42 }
@@ -66,12 +66,11 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
                     run(): void { }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classDerived = classes.get("com.Derived");
+        Class<?> classDerived = runner.getClass("com.Derived");
 
         // Verify inheritance and interface implementation
         assertTrue(Runnable.class.isAssignableFrom(classDerived), "Derived should implement Runnable");
-        Class<?> classBase = classes.get("com.Base");
+        Class<?> classBase = runner.getClass("com.Base");
         assertTrue(classBase.isAssignableFrom(classDerived), "Derived should extend Base");
 
         // Test methods
@@ -88,13 +87,13 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testMultipleInterfaceImplementation(JdkVersion jdkVersion) throws Exception {
         var compiler = createCompilerWithInterfaces(jdkVersion);
-        var map = compiler.compile("""
+        var runner = compiler.compile("""
                 namespace com {
                   export class Multi implements Runnable, Serializable {
                     run(): void { }
                   }
                 }""");
-        Class<?> classMulti = loadClass(map.get("com.Multi"));
+        Class<?> classMulti = runner.getClass("com.Multi");
 
         // Verify both interfaces are implemented
         assertTrue(Runnable.class.isAssignableFrom(classMulti), "Multi should implement Runnable");
@@ -109,13 +108,13 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testSingleInterfaceImplementation(JdkVersion jdkVersion) throws Exception {
         var compiler = createCompilerWithInterfaces(jdkVersion);
-        var map = compiler.compile("""
+        var runner = compiler.compile("""
                 namespace com {
                   export class A implements Runnable {
                     run(): void { }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
 
         // Verify A implements Runnable
         assertTrue(Runnable.class.isAssignableFrom(classA), "A should implement Runnable");
@@ -129,7 +128,7 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testSingleInterfaceWithMethod(JdkVersion jdkVersion) throws Exception {
         var compiler = createCompilerWithInterfaces(jdkVersion);
-        var map = compiler.compile("""
+        var runner = compiler.compile("""
                 namespace com {
                   export class Counter implements Runnable {
                     count: int = 0
@@ -139,7 +138,7 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
                     getCount(): int { return this.count }
                   }
                 }""");
-        Class<?> classCounter = loadClass(map.get("com.Counter"));
+        Class<?> classCounter = runner.getClass("com.Counter");
 
         // Verify Counter implements Runnable
         assertTrue(Runnable.class.isAssignableFrom(classCounter), "Counter should implement Runnable");

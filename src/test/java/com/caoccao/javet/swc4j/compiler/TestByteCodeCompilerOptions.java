@@ -91,7 +91,7 @@ public class TestByteCodeCompilerOptions {
                 .build();
 
         ByteCodeCompiler compiler = ByteCodeCompiler.of(options);
-        Map<String, byte[]> result = compiler.compile("""
+        compiler.compile("""
                 namespace com {
                   export class A {
                     test(): Integer {
@@ -102,7 +102,7 @@ public class TestByteCodeCompilerOptions {
                   }
                 }""");
 
-        byte[] classBytes = result.get("com.A");
+        byte[] classBytes = compiler.getMemory().getByteCodeMap().get("com.A");
         assertNotNull(classBytes);
 
         // Verify the class file does NOT contain debug info
@@ -118,7 +118,7 @@ public class TestByteCodeCompilerOptions {
                 .build();
 
         ByteCodeCompiler compiler = ByteCodeCompiler.of(options);
-        Map<String, byte[]> result = compiler.compile("""
+        compiler.compile("""
                 namespace com {
                   export class A {
                     test(): Integer {
@@ -129,7 +129,7 @@ public class TestByteCodeCompilerOptions {
                   }
                 }""");
 
-        byte[] classBytes = result.get("com.A");
+        byte[] classBytes = compiler.getMemory().getByteCodeMap().get("com.A");
         assertNotNull(classBytes);
 
         // Verify the class file contains debug info

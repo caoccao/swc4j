@@ -39,7 +39,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMixedStaticAndInstanceFields(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class MixedClass {
                     static instanceCount: int = 0
@@ -52,7 +52,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                     getId(): int { return this.id }
                   }
                 }""");
-        Class<?> classMixed = loadClass(map.get("com.MixedClass"));
+        Class<?> classMixed = runner.getClass("com.MixedClass");
 
         assertEquals(0, classMixed.getMethod("getInstanceCount").invoke(null));
 
@@ -78,7 +78,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticFieldIncrement(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Counter {
                     static count: int = 0
@@ -93,7 +93,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classCounter = loadClass(map.get("com.Counter"));
+        Class<?> classCounter = runner.getClass("com.Counter");
 
         assertEquals(
                 List.of(0, 1, 2, 1),
@@ -112,7 +112,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticFieldWithDifferentTypes(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Settings {
                     static maxUsers: int = 1000
@@ -126,7 +126,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                     static getAppName(): String { return Settings.appName }
                   }
                 }""");
-        Class<?> classSettings = loadClass(map.get("com.Settings"));
+        Class<?> classSettings = runner.getClass("com.Settings");
         assertEquals(
                 Map.of(
                         "maxUsers", 1000,
@@ -146,7 +146,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticFieldWithExpressionInitializer(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Constants {
                     static PI: double = 3.14159
@@ -155,7 +155,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                     static getDoublePI(): double { return Constants.DOUBLE_PI }
                   }
                 }""");
-        Class<?> classConstants = loadClass(map.get("com.Constants"));
+        Class<?> classConstants = runner.getClass("com.Constants");
         assertEquals(3.14159, classConstants.getMethod("getPI").invoke(null));
         assertEquals(6.28318, (double) classConstants.getMethod("getDoublePI").invoke(null), 0.00001);
     }
@@ -163,7 +163,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticFieldWithInitializer(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Config {
                     static maxSize: int = 100
@@ -172,7 +172,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                     static getName(): String { return Config.name }
                   }
                 }""");
-        Class<?> classConfig = loadClass(map.get("com.Config"));
+        Class<?> classConfig = runner.getClass("com.Config");
         assertEquals(
                 List.of(100, "default"),
                 List.of(
@@ -185,7 +185,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticFieldWithoutInitializer(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Tracker {
                     static count: int
@@ -193,7 +193,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                     static setCount(v: int): void { Tracker.count = v }
                   }
                 }""");
-        Class<?> classTracker = loadClass(map.get("com.Tracker"));
+        Class<?> classTracker = runner.getClass("com.Tracker");
         // Default value for uninitialized static int is 0
         assertEquals(0, classTracker.getMethod("getCount").invoke(null));
         classTracker.getMethod("setCount", int.class).invoke(null, 42);

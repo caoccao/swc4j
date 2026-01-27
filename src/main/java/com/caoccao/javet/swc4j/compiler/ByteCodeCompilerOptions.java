@@ -18,11 +18,13 @@ package com.caoccao.javet.swc4j.compiler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public record ByteCodeCompilerOptions(
         JdkVersion jdkVersion,
         Map<String, String> typeAliasMap,
         String packagePrefix,
+        Optional<ClassLoader> optionalParentClassLoader,
         boolean debug) {
     private static final Map<String, String> DEFAULT_TYPE_ALIAS_MAP = new HashMap<>();
 
@@ -74,7 +76,7 @@ public record ByteCodeCompilerOptions(
     }
 
     public ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap) {
-        this(jdkVersion, typeAliasMap, "", false);
+        this(jdkVersion, typeAliasMap, "", Optional.empty(), false);
     }
 
     public ByteCodeCompilerOptions(JdkVersion jdkVersion) {
@@ -89,10 +91,11 @@ public record ByteCodeCompilerOptions(
         private boolean debug = false;
         private JdkVersion jdkVersion = JdkVersion.JDK_17;
         private String packagePrefix = "";
+        private ClassLoader parentClassLoader = null;
         private Map<String, String> typeAliasMap = new HashMap<>(DEFAULT_TYPE_ALIAS_MAP);
 
         public ByteCodeCompilerOptions build() {
-            return new ByteCodeCompilerOptions(jdkVersion, typeAliasMap, packagePrefix, debug);
+            return new ByteCodeCompilerOptions(jdkVersion, typeAliasMap, packagePrefix, Optional.ofNullable(parentClassLoader), debug);
         }
 
         public Builder debug(boolean debug) {
@@ -107,6 +110,11 @@ public record ByteCodeCompilerOptions(
 
         public Builder packagePrefix(String packagePrefix) {
             this.packagePrefix = packagePrefix;
+            return this;
+        }
+
+        public Builder parentClassLoader(ClassLoader parentClassLoader) {
+            this.parentClassLoader = parentClassLoader;
             return this;
         }
 

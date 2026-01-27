@@ -33,7 +33,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBooleanBoxedAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -42,7 +42,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((Boolean) classA.getMethod("test").invoke(instance));
     }
@@ -50,7 +50,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBooleanBoxedAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Boolean {
@@ -58,7 +58,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((Boolean) classA.getMethod("test").invoke(instance));
     }
@@ -66,7 +66,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBooleanBoxedConstFalse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Boolean {
@@ -75,7 +75,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((Boolean) classA.getMethod("test").invoke(instance));
     }
@@ -83,7 +83,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBooleanBoxedConstTrue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Boolean {
@@ -92,7 +92,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((Boolean) classA.getMethod("test").invoke(instance));
     }
@@ -100,7 +100,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBooleanBoxedFalse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Boolean {
@@ -108,7 +108,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((Boolean) classA.getMethod("test").invoke(instance));
     }
@@ -116,7 +116,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBooleanBoxedFalseMultiple(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Boolean {
@@ -126,7 +126,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((Boolean) classA.getMethod("test").invoke(instance));
     }
@@ -134,7 +134,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBooleanBoxedMixed(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Boolean {
@@ -144,7 +144,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((Boolean) classA.getMethod("test").invoke(instance));
     }
@@ -152,7 +152,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBooleanBoxedReturnFalse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Boolean {
@@ -162,7 +162,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((Boolean) classA.getMethod("test").invoke(instance));
     }
@@ -170,7 +170,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBooleanBoxedTrue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Boolean {
@@ -178,7 +178,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((Boolean) classA.getMethod("test").invoke(instance));
     }
@@ -186,7 +186,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBooleanBoxedTrueMultiple(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Boolean {
@@ -196,7 +196,7 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((Boolean) classA.getMethod("test").invoke(instance));
     }

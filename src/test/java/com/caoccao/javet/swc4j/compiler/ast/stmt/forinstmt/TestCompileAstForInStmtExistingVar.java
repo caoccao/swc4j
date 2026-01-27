@@ -31,7 +31,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testExistingVariable(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -44,7 +44,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Last key should be "c"
         assertEquals("c", classA.getMethod("test").invoke(instance));
@@ -53,7 +53,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testExistingVariableEmptyObject(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -66,7 +66,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Variable should retain initial value
         assertEquals("initial", classA.getMethod("test").invoke(instance));
@@ -75,7 +75,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testExistingVariableMultipleLoops(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -93,7 +93,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // First loop last key: "b", second loop last key: "y"
         assertEquals("b,y", classA.getMethod("test").invoke(instance));
@@ -103,7 +103,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testExistingVariableWithArray(JdkVersion jdkVersion) throws Exception {
         // For-in returns string indices in JavaScript semantics
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -116,7 +116,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Last index should be "2" (string)
         assertEquals("2", classA.getMethod("test").invoke(instance));
@@ -125,7 +125,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testExistingVariableWithBreak(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -140,7 +140,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Loop breaks at "c", so key is "c"
         assertEquals("c", classA.getMethod("test").invoke(instance));

@@ -32,7 +32,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchCaseGrouping(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -52,7 +52,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -67,7 +67,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchDefaultFallsThrough(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -83,7 +83,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -94,7 +94,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchFallThroughAll(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -113,7 +113,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test");
 
@@ -124,7 +124,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchFallThroughComplexPattern(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -148,7 +148,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -163,7 +163,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchFallThroughLastCase(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -182,7 +182,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test");
 
@@ -193,7 +193,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchFallThroughMultipleLevels(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -215,7 +215,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test");
 
@@ -226,7 +226,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchFallThroughSimple(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -243,7 +243,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test");
 
@@ -254,7 +254,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchFallThroughSkipsCase(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -271,7 +271,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test");
 
@@ -282,7 +282,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchFallThroughToDefault(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -297,7 +297,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -308,7 +308,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchFallThroughWithReturn(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -323,7 +323,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
@@ -336,7 +336,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchFallThroughWithStatements(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -358,7 +358,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test");
 
@@ -369,7 +369,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchMixedFallThrough(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -391,7 +391,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 

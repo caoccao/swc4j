@@ -35,7 +35,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testComplexNestedMixedTypes(JdkVersion jdkVersion) throws Exception {
         // Complex nested: object containing array with nested object
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -68,7 +68,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // firstName="item1", itemRest={value:10}, otherItems has 1 item, rest={meta:"M"}
         assertEquals("item1:value10:1:M", classA.getMethod("test").invoke(instance));
@@ -78,7 +78,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testDeepNestedObjectRest(JdkVersion jdkVersion) throws Exception {
         // Deep nested object with rest at multiple levels
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -111,7 +111,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // a=1, l2Rest={b:2}, l1Rest={extra:X}, topRest={top:T}
         assertEquals("1:b2:extraX:topT", classA.getMethod("test").invoke(instance));
@@ -121,7 +121,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testEmptyRestAtNestedLevel(JdkVersion jdkVersion) throws Exception {
         // Empty rest at nested level
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -135,7 +135,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test").invoke(instance));
     }
@@ -144,7 +144,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testMixedArrayObjectNestedRest(JdkVersion jdkVersion) throws Exception {
         // Array containing objects with rest: const [{ a, ...objRest }, ...arrRest] = data
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -167,7 +167,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // a=1, objRest={b:2}, arrRest has 2 items
         assertEquals("1:b2:2", classA.getMethod("test").invoke(instance));
@@ -177,7 +177,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testMixedNestedPatternWithStrings(JdkVersion jdkVersion) throws Exception {
         // Mixed nested with string values
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -198,7 +198,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // first="a", second="b", arrRest=["c","d"], objRest={key:K,val:V}
         assertEquals("ab:cd:KV", classA.getMethod("test").invoke(instance));
@@ -208,7 +208,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testMultipleNestedPatternsWithRest(JdkVersion jdkVersion) throws Exception {
         // Multiple nested patterns each with rest
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -230,7 +230,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // a=1, rest1=[2,3], b=4, rest2=[5,6]
         assertEquals("1:23:4:56", classA.getMethod("test").invoke(instance));
@@ -240,7 +240,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testNestedArrayCopyAll(JdkVersion jdkVersion) throws Exception {
         // Nested pattern with [...all] to copy entire inner array
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -258,7 +258,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // innerAll=[1,2,3], outer=[4,5]
         assertEquals("123:45", classA.getMethod("test").invoke(instance));
@@ -268,7 +268,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testNestedObjectCopyAll(JdkVersion jdkVersion) throws Exception {
         // Nested pattern with {...all} to copy entire inner object
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -288,7 +288,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // innerAll={a:1,b:2}, outer={x:3,y:4}
         assertEquals("a1b2:x3y4", classA.getMethod("test").invoke(instance));
@@ -298,7 +298,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testNestedObjectWithInnerRestOnly(JdkVersion jdkVersion) throws Exception {
         // Rest only at inner level: const { nested: { a, ...innerRest } } = obj
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -315,7 +315,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // a=1, innerRest={b:2,c:3}
         assertEquals("1:b2c3", classA.getMethod("test").invoke(instance));
@@ -325,7 +325,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testNestedRestUsedInCalculation(JdkVersion jdkVersion) throws Exception {
         // Use nested rest values in calculation
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -342,7 +342,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 10 + 20 + 30 + 40 + 50 + 60 = 210
         assertEquals(210, classA.getMethod("test").invoke(instance));
@@ -352,7 +352,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testNestedRestWithSingleElement(JdkVersion jdkVersion) throws Exception {
         // Nested pattern where inner array has only one element
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -376,7 +376,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // a=1, b=2, inner is empty, outer=[3]
         assertEquals("1:2:0:3", classA.getMethod("test").invoke(instance));
@@ -389,7 +389,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testObjectWithNestedArrayRest(JdkVersion jdkVersion) throws Exception {
         // Object containing array with rest: const { arr: [first, ...rest], ...objRest } = data
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -409,7 +409,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // first=1, arrRest=[2,3], objRest={x:X,y:Y}
         assertEquals("1:23:XY", classA.getMethod("test").invoke(instance));
@@ -419,7 +419,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestAtInnerLevelOnly(JdkVersion jdkVersion) throws Exception {
         // Rest only at inner level: const [a, [b, ...inner]] = data
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -437,7 +437,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // a=1, b=2, inner=[3,4,5]
         assertEquals("1:2:345", classA.getMethod("test").invoke(instance));
@@ -447,7 +447,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestAtOuterLevelOnly(JdkVersion jdkVersion) throws Exception {
         // Rest only at outer level: const [[a, b], ...outer] = data
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -467,7 +467,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // a=1, b=2, outer has 2 items
         assertEquals("1:2:2", classA.getMethod("test").invoke(instance));
@@ -477,7 +477,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testThreeLevelNestedArrayRest(JdkVersion jdkVersion) throws Exception {
         // Three-level nesting: const [[[a, ...l3], ...l2], ...l1] = nested
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -505,7 +505,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // a=1, l3=[2,3], l2 has 1 item [[4,5]], l1 has 1 item [[[6]]]
         assertEquals("1:23:1:1", classA.getMethod("test").invoke(instance));
@@ -515,7 +515,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testTwoLevelNestedArrayRest(JdkVersion jdkVersion) throws Exception {
         // const [a, [b, ...inner], ...outer] = nested
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -537,7 +537,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // a=1, b=2, inner=[3,4], outer=[5,6]
         assertEquals("1:2:34:56", classA.getMethod("test").invoke(instance));
@@ -547,7 +547,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testTwoLevelNestedObjectRest(JdkVersion jdkVersion) throws Exception {
         // const { x, nested: { y, ...innerRest }, ...outerRest } = obj
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -571,7 +571,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // x=1, y=2, innerRest={z:3,w:4}, outerRest={a:5,b:6}
         assertEquals("1:2:z3w4:a5b6", classA.getMethod("test").invoke(instance));

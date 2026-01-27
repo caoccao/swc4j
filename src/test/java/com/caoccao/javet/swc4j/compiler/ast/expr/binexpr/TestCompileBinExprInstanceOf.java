@@ -28,7 +28,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoubleInstanceOfNumber(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Double, Number } from 'java.lang'
                 namespace com {
                   export class A {
@@ -38,7 +38,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance));
     }
@@ -46,7 +46,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testInstanceOfInIfStatement(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Integer, String } from 'java.lang'
                 namespace com {
                   export class A {
@@ -66,7 +66,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         // String instanceof String should be true, returns 1
@@ -79,7 +79,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testInstanceOfStoreInVariable(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Integer, String } from 'java.lang'
                 namespace com {
                   export class A {
@@ -95,7 +95,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         assertTrue((boolean) classA.getMethod("testTrue").invoke(instance));
@@ -105,7 +105,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testInstanceOfWithNegation(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Integer, String } from 'java.lang'
                 namespace com {
                   export class A {
@@ -116,7 +116,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance));
     }
@@ -124,7 +124,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testInstanceOfWithOr(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Integer, Number, String } from 'java.lang'
                 namespace com {
                   export class A {
@@ -138,7 +138,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         // String is instanceof String, so true
@@ -151,7 +151,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIntegerInstanceOfNumber(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Integer, Number } from 'java.lang'
                 namespace com {
                   export class A {
@@ -161,7 +161,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance));
     }
@@ -169,7 +169,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLongInstanceOfNumber(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Long, Number } from 'java.lang'
                 namespace com {
                   export class A {
@@ -179,7 +179,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance));
     }
@@ -187,7 +187,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleInstanceOfChecks(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Integer, Number, String } from 'java.lang'
                 namespace com {
                   export class A {
@@ -201,7 +201,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance));
     }
@@ -209,7 +209,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNullInstanceOfFalse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { String } from 'java.lang'
                 namespace com {
                   export class A {
@@ -219,7 +219,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // null instanceof X always returns false
         assertFalse((boolean) classA.getMethod("test").invoke(instance));
@@ -228,7 +228,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testObjectInstanceOfObject(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Object } from 'java.lang'
                 namespace com {
                   export class A {
@@ -238,7 +238,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance));
     }
@@ -246,7 +246,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStringInstanceOfObject(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Object, String } from 'java.lang'
                 namespace com {
                   export class A {
@@ -256,7 +256,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance));
     }
@@ -264,7 +264,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStringInstanceOfStringFalse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Integer, String } from 'java.lang'
                 namespace com {
                   export class A {
@@ -274,7 +274,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertFalse((boolean) classA.getMethod("test").invoke(instance));
     }
@@ -282,7 +282,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStringInstanceOfStringTrue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { String } from 'java.lang'
                 namespace com {
                   export class A {
@@ -292,7 +292,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertTrue((boolean) classA.getMethod("test").invoke(instance));
     }

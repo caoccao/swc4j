@@ -30,7 +30,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testClassHierarchyCheck(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Animal {
                     speak(): String { return "..." }
@@ -42,10 +42,9 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     speak(): String { return "Meow" }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> animalClass = classes.get("com.Animal");
-        Class<?> dogClass = classes.get("com.Dog");
-        Class<?> catClass = classes.get("com.Cat");
+        Class<?> animalClass = runner.getClass("com.Animal");
+        Class<?> dogClass = runner.getClass("com.Dog");
+        Class<?> catClass = runner.getClass("com.Cat");
 
         // Check class hierarchy
         assertTrue(animalClass.isAssignableFrom(dogClass));
@@ -65,7 +64,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testExtendArrayList(JdkVersion jdkVersion) throws Exception {
         // Test that we can extend ArrayList and the class hierarchy is correct
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class MyList extends java.util.ArrayList<Object> {
                     customField: int = 42
@@ -74,7 +73,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> myListClass = loadClass(map.get("com.MyList"));
+        Class<?> myListClass = runner.getClass("com.MyList");
         assertNotNull(myListClass);
 
         // Verify it extends ArrayList
@@ -95,7 +94,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testExtendException(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class MyException extends java.lang.Exception {
                     errorCode: int = 0
@@ -108,7 +107,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> myExceptionClass = loadClass(map.get("com.MyException"));
+        Class<?> myExceptionClass = runner.getClass("com.MyException");
         assertNotNull(myExceptionClass);
 
         // Verify it extends Exception
@@ -125,7 +124,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testExtendHashMap(JdkVersion jdkVersion) throws Exception {
         // Test that we can extend HashMap and the class hierarchy is correct
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { HashMap } from "java.util"
                 namespace com {
                   export class MyMap extends HashMap<Object, Object> {
@@ -135,7 +134,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> myMapClass = loadClass(map.get("com.MyMap"));
+        Class<?> myMapClass = runner.getClass("com.MyMap");
         assertNotNull(myMapClass);
 
         // Verify it extends HashMap
@@ -156,7 +155,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testExtendLinkedHashMap(JdkVersion jdkVersion) throws Exception {
         // Test that we can extend LinkedHashMap and the class hierarchy is correct
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class MyLinkedHashMap extends java.util.LinkedHashMap<Object, Object> {
                     customField: int = 100
@@ -165,7 +164,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> myLinkedHashMapClass = loadClass(map.get("com.MyLinkedHashMap"));
+        Class<?> myLinkedHashMapClass = runner.getClass("com.MyLinkedHashMap");
         assertNotNull(myLinkedHashMapClass);
 
         // Verify it extends LinkedHashMap
@@ -189,7 +188,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     public void testExtendNumber(JdkVersion jdkVersion) throws Exception {
         // Test that we can extend Number and the class hierarchy is correct
         // Note: Number is abstract, so we need to implement its abstract methods
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class MyNumber extends java.lang.Number {
                     value: int = 0
@@ -203,7 +202,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     doubleValue(): double { return (this.value as double) }
                   }
                 }""");
-        Class<?> myNumberClass = loadClass(map.get("com.MyNumber"));
+        Class<?> myNumberClass = runner.getClass("com.MyNumber");
         assertNotNull(myNumberClass);
 
         // Verify it extends Number
@@ -219,7 +218,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testExtendRuntimeException(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class ValidationException extends java.lang.RuntimeException {
                     fieldName: String = ""
@@ -232,7 +231,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> validationExceptionClass = loadClass(map.get("com.ValidationException"));
+        Class<?> validationExceptionClass = runner.getClass("com.ValidationException");
         assertNotNull(validationExceptionClass);
 
         // Verify it extends RuntimeException
@@ -252,7 +251,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testExtendThread(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class MyThread extends java.lang.Thread {
                     result: int = 0
@@ -264,7 +263,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> myThreadClass = loadClass(map.get("com.MyThread"));
+        Class<?> myThreadClass = runner.getClass("com.MyThread");
         assertNotNull(myThreadClass);
 
         // Verify it extends Thread
@@ -284,7 +283,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testInheritedField(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     value: int = 42
@@ -295,8 +294,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classB = classes.get("com.B");
+        Class<?> classB = runner.getClass("com.B");
         var instance = classB.getConstructor().newInstance();
         assertEquals(42, classB.getMethod("getValue").invoke(instance));
     }
@@ -304,7 +302,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testInheritedFieldWithOverride(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     value: int = 10
@@ -314,9 +312,8 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     getValue(): int { return this.value * 2 }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
-        Class<?> classB = classes.get("com.B");
+        Class<?> classA = runner.getClass("com.A");
+        Class<?> classB = runner.getClass("com.B");
         assertEquals(
                 Map.of("A", 10, "B", 20),
                 Map.of(
@@ -329,7 +326,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMethodOverride(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     getValue(): int {
@@ -342,9 +339,8 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
-        Class<?> classB = classes.get("com.B");
+        Class<?> classA = runner.getClass("com.A");
+        Class<?> classB = runner.getClass("com.B");
         assertEquals(
                 Map.of("A", 100, "B", 200),
                 Map.of(
@@ -357,7 +353,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultiLevelInheritance(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     getA(): int { return 1 }
@@ -370,8 +366,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     getSum(): int { return this.getA() + this.getB() + this.getC() }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classC = classes.get("com.C");
+        Class<?> classC = runner.getClass("com.C");
         var instance = classC.getConstructor().newInstance();
         assertEquals(
                 List.of(1, 2, 3, 6),
@@ -387,7 +382,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSimpleInheritance(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     getValue(): int {
@@ -397,8 +392,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                   export class B extends A {
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classB = classes.get("com.B");
+        Class<?> classB = runner.getClass("com.B");
         var instance = classB.getConstructor().newInstance();
         // B inherits getValue() from A
         assertEquals(100, classB.getMethod("getValue").invoke(instance));
@@ -407,7 +401,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSuperCallInChain(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     compute(): int { return 10 }
@@ -419,13 +413,15 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     compute(): int { return super.compute() + 30 }
                   }
                 }""");
-        var classes = loadClasses(map);
+        Class<?> classA = runner.getClass("com.A");
+        Class<?> classB = runner.getClass("com.B");
+        Class<?> classC = runner.getClass("com.C");
         assertEquals(
                 List.of(10, 30, 60),
                 List.of(
-                        classes.get("com.A").getMethod("compute").invoke(classes.get("com.A").getConstructor().newInstance()),
-                        classes.get("com.B").getMethod("compute").invoke(classes.get("com.B").getConstructor().newInstance()),
-                        classes.get("com.C").getMethod("compute").invoke(classes.get("com.C").getConstructor().newInstance())
+                        classA.getMethod("compute").invoke(classA.getConstructor().newInstance()),
+                        classB.getMethod("compute").invoke(classB.getConstructor().newInstance()),
+                        classC.getMethod("compute").invoke(classC.getConstructor().newInstance())
                 )
         );
     }
@@ -433,7 +429,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSuperMethodCall(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     getValue(): int {
@@ -446,8 +442,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classB = classes.get("com.B");
+        Class<?> classB = runner.getClass("com.B");
         var instance = classB.getConstructor().newInstance();
         assertEquals(150, classB.getMethod("getValue").invoke(instance));
     }

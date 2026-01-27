@@ -36,13 +36,13 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
     @EnumSource(JdkVersion.class)
     public void testInterfaceExplicitBooleanGetter(JdkVersion jdkVersion) throws Exception {
         // Test: Explicit boolean getter (should use 'is' prefix)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Toggle {
                     get enabled(): boolean
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Toggle"));
+        Class<?> interfaceClass = runner.getClass("com.Toggle");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -57,13 +57,13 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
     @EnumSource(JdkVersion.class)
     public void testInterfaceExplicitGetter(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with explicit getter signature
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Valued {
                     get value(): int
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Valued"));
+        Class<?> interfaceClass = runner.getClass("com.Valued");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -82,14 +82,14 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
     @EnumSource(JdkVersion.class)
     public void testInterfaceExplicitGetterAndSetter(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with both explicit getter and setter
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Counter {
                     get count(): int
                     set count(v: int)
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Counter"));
+        Class<?> interfaceClass = runner.getClass("com.Counter");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -110,7 +110,7 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
     @EnumSource(JdkVersion.class)
     public void testInterfaceExplicitGetterAndSetterWithImplementation(JdkVersion jdkVersion) throws Exception {
         // Test: Explicit getter and setter with implementing class (using int to avoid double init issue)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Counter {
                     get value(): int
@@ -122,9 +122,8 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
                     setValue(v: int): void { this.value = v }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.Counter");
-        Class<?> implClass = classes.get("com.SimpleCounter");
+        Class<?> interfaceClass = runner.getClass("com.Counter");
+        Class<?> implClass = runner.getClass("com.SimpleCounter");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -145,13 +144,13 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
     @EnumSource(JdkVersion.class)
     public void testInterfaceExplicitSetter(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with explicit setter signature only
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Writer {
                     set output(data: String)
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Writer"));
+        Class<?> interfaceClass = runner.getClass("com.Writer");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -170,7 +169,7 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
     @EnumSource(JdkVersion.class)
     public void testInterfaceMixedAccessorsAndProperties(JdkVersion jdkVersion) throws Exception {
         // Test: Mix of explicit accessors and property signatures
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Config {
                     name: String
@@ -179,7 +178,7 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
                     readonly id: int
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Config"));
+        Class<?> interfaceClass = runner.getClass("com.Config");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -207,7 +206,7 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
     @EnumSource(JdkVersion.class)
     public void testInterfaceMultipleAccessors(JdkVersion jdkVersion) throws Exception {
         // Test: Multiple explicit accessors
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Point {
                     get x(): int
@@ -216,7 +215,7 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
                     set y(v: int)
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Point"));
+        Class<?> interfaceClass = runner.getClass("com.Point");
 
         assertTrue(interfaceClass.isInterface());
 

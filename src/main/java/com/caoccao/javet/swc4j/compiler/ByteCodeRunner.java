@@ -16,12 +16,16 @@
 
 package com.caoccao.javet.swc4j.compiler;
 
-public abstract class BaseTestCompileSuite {
-    protected ByteCodeCompiler getCompiler(JdkVersion jdkVersion) {
-        ByteCodeCompilerOptions options = ByteCodeCompilerOptions.builder()
-                .jdkVersion(jdkVersion)
-                .debug(true)
-                .build();
-        return ByteCodeCompiler.of(options);
+import java.util.Map;
+
+public class ByteCodeRunner {
+    protected final ByteArrayClassLoader classLoader;
+
+    public ByteCodeRunner(Map<String, byte[]> byteCodeMap, ClassLoader parentClassLoader) {
+        this.classLoader = new ByteArrayClassLoader(byteCodeMap, parentClassLoader);
+    }
+
+    public Class<?> getClass(String className) throws ClassNotFoundException {
+        return classLoader.getClass(className);
     }
 }

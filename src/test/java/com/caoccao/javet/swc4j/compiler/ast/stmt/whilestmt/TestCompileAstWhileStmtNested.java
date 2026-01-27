@@ -32,7 +32,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBreakInInnerLoop(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -53,7 +53,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Each inner loop runs 2 times (j=0,1), outer runs 3 times => 3*2 = 6
         assertEquals(6, classA.getMethod("test").invoke(instance));
@@ -62,7 +62,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testContinueInInnerLoop(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -83,7 +83,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Each inner loop: j=1,3,5 (odd values) => 3 iterations
         // Outer runs 3 times => 3*3 = 9
@@ -93,7 +93,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDeeplyNestedWithSum(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -119,7 +119,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 2 * 2 * 2 * 2 = 16 iterations
         assertEquals(16, classA.getMethod("test").invoke(instance));
@@ -128,7 +128,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testForInWhile(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -144,7 +144,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // While loop runs 3 times, for loop runs 2 times each => 3*2 = 6
         assertEquals(6, classA.getMethod("test").invoke(instance));
@@ -153,7 +153,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testInnerModifiesOuterVariable(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -169,7 +169,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // i starts at 0, inner loop increments i by 3 each outer iteration
         // i=0: inner runs 3 times => i=3
@@ -183,7 +183,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSharedVariables(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -201,7 +201,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // i=0: j<0 => 0 iterations
         // i=1: j<1 => 1 iteration
@@ -213,7 +213,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testThreeLevelNestedWhile(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -235,7 +235,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 2 * 2 * 2 = 8 iterations
         assertEquals(8, classA.getMethod("test").invoke(instance));
@@ -244,7 +244,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testTwoLevelNestedWhile(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -262,7 +262,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 3 * 3 = 9 iterations
         assertEquals(9, classA.getMethod("test").invoke(instance));
@@ -271,7 +271,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testWhileInFor(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -287,7 +287,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // For loop runs 3 times, while loop runs 2 times each => 3*2 = 6
         assertEquals(6, classA.getMethod("test").invoke(instance));

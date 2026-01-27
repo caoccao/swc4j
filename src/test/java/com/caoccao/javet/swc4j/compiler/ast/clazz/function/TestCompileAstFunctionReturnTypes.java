@@ -29,7 +29,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEarlyReturn(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
@@ -38,7 +38,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test", int.class).invoke(instance, -5));
         assertEquals(10, classA.getMethod("test", int.class).invoke(instance, 5));
@@ -47,7 +47,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleReturnStatements(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     sign(x: int): int {
@@ -57,7 +57,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(-1, classA.getMethod("sign", int.class).invoke(instance, -10));
         assertEquals(0, classA.getMethod("sign", int.class).invoke(instance, 0));
@@ -67,7 +67,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testReturnBoolean(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     isTrue(): boolean {
@@ -78,7 +78,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(true, classA.getMethod("isTrue").invoke(instance));
         assertEquals(false, classA.getMethod("isFalse").invoke(instance));
@@ -87,7 +87,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testReturnDouble(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): double {
@@ -95,7 +95,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(3.14159, (double) classA.getMethod("test").invoke(instance), 0.00001);
     }
@@ -103,7 +103,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testReturnInLoop(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     findFirst(arr: int[], target: int): int {
@@ -114,7 +114,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(2, classA.getMethod("findFirst", int[].class, int.class).invoke(instance, new int[]{1, 2, 3, 4, 5}, 3));
         assertEquals(-1, classA.getMethod("findFirst", int[].class, int.class).invoke(instance, new int[]{1, 2, 3, 4, 5}, 10));
@@ -123,7 +123,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testReturnInt(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -131,7 +131,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(42, classA.getMethod("test").invoke(instance));
     }
@@ -139,7 +139,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testReturnLong(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): long {
@@ -147,7 +147,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(9999999999L, classA.getMethod("test").invoke(instance));
     }
@@ -155,7 +155,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testReturnString(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): String {
@@ -163,7 +163,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("hello world", classA.getMethod("test").invoke(instance));
     }
@@ -171,7 +171,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testReturnVoid(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): void {
@@ -179,7 +179,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertNull(classA.getMethod("test").invoke(instance));
     }

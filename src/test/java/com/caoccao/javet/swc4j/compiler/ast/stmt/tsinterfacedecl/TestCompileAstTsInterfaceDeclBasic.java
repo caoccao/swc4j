@@ -37,7 +37,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testAmbientInterface(JdkVersion jdkVersion) throws Exception {
         // Test: Ambient interface (declare) should not generate bytecode
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   declare interface External {
                     value: int
@@ -45,14 +45,14 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                 }""");
 
         // Ambient declarations should not generate bytecode
-        assertNull(map.get("com.External"));
+        assertThrows(ClassNotFoundException.class, () -> runner.getClass("com.External"));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBasicInterfaceWithImplementation(JdkVersion jdkVersion) throws Exception {
         // Test: Basic interface with a single property and implementing class
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Person {
                     name: String
@@ -67,9 +67,8 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.Person");
-        Class<?> implClass = classes.get("com.PersonImpl");
+        Class<?> interfaceClass = runner.getClass("com.Person");
+        Class<?> implClass = runner.getClass("com.PersonImpl");
 
         // Verify it's an interface
         assertTrue(interfaceClass.isInterface());
@@ -102,12 +101,12 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEmptyInterface(JdkVersion jdkVersion) throws Exception {
         // Test: Empty interface (marker interface)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Marker {
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.Marker"));
+        Class<?> interfaceClass = runner.getClass("com.Marker");
 
         assertTrue(interfaceClass.isInterface());
         // Only inherited methods from Object
@@ -118,7 +117,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfaceAllPrimitiveTypes(JdkVersion jdkVersion) throws Exception {
         // Test: Interface declares all primitive types (no implementation needed)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface AllPrimitives {
                     byteVal: byte
@@ -131,7 +130,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                     boolVal: boolean
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.AllPrimitives"));
+        Class<?> interfaceClass = runner.getClass("com.AllPrimitives");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -160,7 +159,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfaceBooleanPropertyWithImplementation(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with boolean property (should use 'is' prefix) and implementation
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Toggleable {
                     enabled: boolean
@@ -175,9 +174,8 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.Toggleable");
-        Class<?> implClass = classes.get("com.Switch");
+        Class<?> interfaceClass = runner.getClass("com.Toggleable");
+        Class<?> implClass = runner.getClass("com.Switch");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -207,7 +205,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfaceMultiplePropertiesWithImplementation(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with multiple properties and implementing class
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface User {
                     id: int
@@ -226,9 +224,8 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                     setActive(active: boolean): void { this.active = active }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.User");
-        Class<?> implClass = classes.get("com.UserImpl");
+        Class<?> interfaceClass = runner.getClass("com.User");
+        Class<?> implClass = runner.getClass("com.UserImpl");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -265,7 +262,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfacePrimitiveTypesWithImplementation(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with primitive types and simple implementation
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface PrimitiveHolder {
                     intVal: int
@@ -280,9 +277,8 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                     setBoolVal(v: boolean): void { this.boolVal = v }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.PrimitiveHolder");
-        Class<?> implClass = classes.get("com.PrimitiveImpl");
+        Class<?> interfaceClass = runner.getClass("com.PrimitiveHolder");
+        Class<?> implClass = runner.getClass("com.PrimitiveImpl");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -310,7 +306,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfaceReadonlyPropertyWithImplementation(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with readonly property (no setter) and implementation
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Immutable {
                     readonly id: int
@@ -327,9 +323,8 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                     setName(name: String): void { this.name = name }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.Immutable");
-        Class<?> implClass = classes.get("com.ImmutableImpl");
+        Class<?> interfaceClass = runner.getClass("com.Immutable");
+        Class<?> implClass = runner.getClass("com.ImmutableImpl");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -361,7 +356,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfaceWithMethodImplementation(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with a method signature and implementation
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Calculator {
                     add(a: int, b: int): int
@@ -372,9 +367,8 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.Calculator");
-        Class<?> implClass = classes.get("com.SimpleCalculator");
+        Class<?> interfaceClass = runner.getClass("com.Calculator");
+        Class<?> implClass = runner.getClass("com.SimpleCalculator");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -397,7 +391,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfaceWithMixedMembersImplementation(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with both properties and methods, with implementation
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Entity {
                     id: int
@@ -425,9 +419,8 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                     getLastData(): String { return this.lastData }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.Entity");
-        Class<?> implClass = classes.get("com.EntityImpl");
+        Class<?> interfaceClass = runner.getClass("com.Entity");
+        Class<?> implClass = runner.getClass("com.EntityImpl");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -466,7 +459,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfaceWithVoidMethodImplementation(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with void method and implementation
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Logger {
                     log(message: String): void
@@ -481,9 +474,8 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.Logger");
-        Class<?> implClass = classes.get("com.SimpleLogger");
+        Class<?> interfaceClass = runner.getClass("com.Logger");
+        Class<?> implClass = runner.getClass("com.SimpleLogger");
 
         assertTrue(interfaceClass.isInterface());
 

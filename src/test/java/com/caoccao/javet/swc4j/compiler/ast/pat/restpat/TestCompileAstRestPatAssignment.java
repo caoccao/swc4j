@@ -33,7 +33,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrayRestAssignment(JdkVersion jdkVersion) throws Exception {
         // Basic array rest assignment
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -51,7 +51,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("1:2345", classA.getMethod("test").invoke(instance));
     }
@@ -60,7 +60,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrayRestAssignmentEmptyRest(JdkVersion jdkVersion) throws Exception {
         // Array rest assignment with empty rest
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -77,7 +77,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test").invoke(instance));
     }
@@ -86,7 +86,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrayRestAssignmentInLoop(JdkVersion jdkVersion) throws Exception {
         // Array rest assignment inside a loop
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -110,7 +110,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("1:2,4:1,6:0,", classA.getMethod("test").invoke(instance));
     }
@@ -119,7 +119,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrayRestAssignmentMultipleElements(JdkVersion jdkVersion) throws Exception {
         // Array rest assignment with multiple elements before rest
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -141,7 +141,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("ABC:DE", classA.getMethod("test").invoke(instance));
     }
@@ -150,7 +150,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrayRestAssignmentSum(JdkVersion jdkVersion) throws Exception {
         // Sum rest values after array assignment
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -166,7 +166,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 1 + 2 + 3 + 4 = 10
         assertEquals(10, classA.getMethod("test").invoke(instance));
@@ -176,7 +176,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrayRestAssignmentWithMixedTypes(JdkVersion jdkVersion) throws Exception {
         // Array rest assignment with mixed types
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -193,7 +193,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("42,true,end,", classA.getMethod("test").invoke(instance));
     }
@@ -202,7 +202,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrayRestSequentialAssignments(JdkVersion jdkVersion) throws Exception {
         // Multiple sequential array rest assignments
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -237,7 +237,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("1:2,4:4", classA.getMethod("test").invoke(instance));
     }
@@ -246,7 +246,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testObjectRestAssignment(JdkVersion jdkVersion) throws Exception {
         // Basic object rest assignment
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -264,7 +264,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("A:BC", classA.getMethod("test").invoke(instance));
     }
@@ -273,7 +273,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testObjectRestAssignmentEmptyRest(JdkVersion jdkVersion) throws Exception {
         // Object rest assignment with empty rest
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -290,7 +290,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test").invoke(instance));
     }
@@ -299,7 +299,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testObjectRestAssignmentInLoop(JdkVersion jdkVersion) throws Exception {
         // Object rest assignment inside a loop
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -327,7 +327,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("1:2,4:1,6:0,", classA.getMethod("test").invoke(instance));
     }
@@ -336,7 +336,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testObjectRestAssignmentMultipleProps(JdkVersion jdkVersion) throws Exception {
         // Object rest assignment with multiple properties before rest
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -358,7 +358,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("ABC:DE", classA.getMethod("test").invoke(instance));
     }
@@ -367,7 +367,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testObjectRestAssignmentPreservesOrder(JdkVersion jdkVersion) throws Exception {
         // Object rest assignment preserves insertion order
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -383,7 +383,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Order: z, m (a was extracted)
         assertEquals("zm", classA.getMethod("test").invoke(instance));
@@ -393,7 +393,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testObjectRestAssignmentSum(JdkVersion jdkVersion) throws Exception {
         // Sum rest values after object assignment
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -409,7 +409,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 10 + 20 + 30 = 60
         assertEquals(60, classA.getMethod("test").invoke(instance));
@@ -419,7 +419,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testObjectRestAssignmentWithDefault(JdkVersion jdkVersion) throws Exception {
         // Object rest assignment with default value
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -437,7 +437,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("default:BC", classA.getMethod("test").invoke(instance));
     }
@@ -446,7 +446,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testObjectRestAssignmentWithMixedTypes(JdkVersion jdkVersion) throws Exception {
         // Object rest assignment with mixed types
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -465,7 +465,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("test:42,true,", classA.getMethod("test").invoke(instance));
     }
@@ -474,7 +474,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testObjectRestAssignmentWithRename(JdkVersion jdkVersion) throws Exception {
         // Object rest assignment with property rename
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -492,7 +492,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("A:BC", classA.getMethod("test").invoke(instance));
     }
@@ -501,7 +501,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testObjectRestSequentialAssignments(JdkVersion jdkVersion) throws Exception {
         // Multiple sequential object rest assignments
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -536,7 +536,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("X:2,Y:4", classA.getMethod("test").invoke(instance));
     }

@@ -36,7 +36,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testCaptureBothParamAndLocal(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -46,8 +46,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("compute", int.class).invoke(instance, 5);
         assertNotNull(result);
@@ -57,7 +56,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testCaptureLocalVariable(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -68,8 +67,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("test").invoke(instance);
         assertNotNull(result);
@@ -79,7 +77,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testCaptureMethodParameter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -88,8 +86,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("createAdder", int.class).invoke(instance, 100);
         assertNotNull(result);
@@ -100,7 +97,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testCaptureMultipleLocalVariables(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -113,8 +110,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("test").invoke(instance);
         assertNotNull(result);
@@ -124,7 +120,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testCaptureThisAndLocal(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -135,8 +131,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("compute", int.class).invoke(instance, 5);
         assertNotNull(result);
@@ -146,7 +141,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testCaptureThisFieldAccess(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -156,8 +151,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("getValueFn").invoke(instance);
         assertNotNull(result);
@@ -167,7 +161,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleArrowsSameScope(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -179,8 +173,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var addOne = classA.getMethod("getAddOne").invoke(instance);
         var dbl = classA.getMethod("getDouble").invoke(instance);

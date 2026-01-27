@@ -32,7 +32,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBreakAndContinue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -52,7 +52,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Include: 1,3,5,7,9 (stop at 11) => sum = 25
         assertEquals(25, classA.getMethod("test").invoke(instance));
@@ -61,7 +61,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBreakFirstIteration(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -73,7 +73,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test").invoke(instance));
     }
@@ -81,7 +81,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBreakInNestedIf(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -98,7 +98,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(8, classA.getMethod("test").invoke(instance));
     }
@@ -106,7 +106,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testContinueAllIterations(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -121,7 +121,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(5, classA.getMethod("test").invoke(instance));
     }
@@ -129,7 +129,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testContinueInNestedIf(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -148,7 +148,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // sum = 1 + 2 + 3 + 8 + 9 + 10 = 33 (skip 4,5,6,7)
         assertEquals(33, classA.getMethod("test").invoke(instance));
@@ -157,7 +157,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleBreaks(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -175,7 +175,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(3, classA.getMethod("test").invoke(instance));
     }
@@ -183,7 +183,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleContinues(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -203,7 +203,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Skip: 2,3,4,6,8,9,10 => Include: 1,5,7 => sum = 13
         assertEquals(13, classA.getMethod("test").invoke(instance));
@@ -212,7 +212,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testWhileWithBreak(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -229,7 +229,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // sum = 0 + 1 + 2 + 3 + 4 + 5 = 15
         assertEquals(15, classA.getMethod("test").invoke(instance));
@@ -238,7 +238,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testWhileWithContinue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -255,7 +255,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // sum = 1 + 3 + 5 + 7 + 9 = 25 (only odd numbers)
         assertEquals(25, classA.getMethod("test").invoke(instance));

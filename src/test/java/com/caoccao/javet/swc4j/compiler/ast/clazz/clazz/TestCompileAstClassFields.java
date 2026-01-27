@@ -39,7 +39,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFieldAssignment(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     value: int = 10
@@ -51,7 +51,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(
                 List.of(10, 99),
@@ -66,7 +66,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFieldTypes(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     intValue: int = 42
@@ -80,7 +80,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     getString(): String { return this.stringValue }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(
                 Map.of(
@@ -101,7 +101,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFieldUsedInMultipleMethods(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Counter {
                     count: int = 0
@@ -111,7 +111,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     reset(): void { this.count = 0 }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.Counter"));
+        Class<?> classA = runner.getClass("com.Counter");
         var instance = classA.getConstructor().newInstance();
         var getCount = classA.getMethod("getCount");
         var increment = classA.getMethod("increment");
@@ -133,7 +133,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFieldWithExpressionInitializer(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     value: int = 10 + 20 * 2
@@ -142,7 +142,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(50, classA.getMethod("getValue").invoke(instance));
     }
@@ -150,7 +150,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFieldWithInitializer(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     value: int = 42
@@ -159,7 +159,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(42, classA.getMethod("getValue").invoke(instance));
     }
@@ -167,7 +167,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFieldWithTypeAnnotationOnly(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     value: int
@@ -176,7 +176,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Default value for int is 0
         assertEquals(0, classA.getMethod("getValue").invoke(instance));
@@ -185,7 +185,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleFields(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     x: int = 10
@@ -195,7 +195,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(30, classA.getMethod("sum").invoke(instance));
     }

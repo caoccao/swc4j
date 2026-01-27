@@ -30,7 +30,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDefaultBooleanParameter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Formatter {
                     format(value: int, uppercase: boolean = false): String {
@@ -41,7 +41,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classFormatter = loadClass(map.get("com.Formatter"));
+        Class<?> classFormatter = runner.getClass("com.Formatter");
         var instance = classFormatter.getConstructor().newInstance();
 
         assertEquals(
@@ -56,7 +56,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDefaultDoubleParameter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Math {
                     multiply(a: double, factor: double = 2.0): double {
@@ -64,7 +64,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classMath = loadClass(map.get("com.Math"));
+        Class<?> classMath = runner.getClass("com.Math");
         var instance = classMath.getConstructor().newInstance();
 
         assertEquals(
@@ -79,7 +79,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDefaultIntParameter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Calculator {
                     add(a: int, b: int = 10): int {
@@ -87,7 +87,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classCalc = loadClass(map.get("com.Calculator"));
+        Class<?> classCalc = runner.getClass("com.Calculator");
         var instance = classCalc.getConstructor().newInstance();
 
         assertEquals(
@@ -102,7 +102,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDefaultStringParameter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Greeter {
                     greet(name: String = "World"): String {
@@ -110,7 +110,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classGreeter = loadClass(map.get("com.Greeter"));
+        Class<?> classGreeter = runner.getClass("com.Greeter");
         var instance = classGreeter.getConstructor().newInstance();
 
         assertEquals(
@@ -125,7 +125,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleDefaultParameters(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Calculator {
                     compute(a: int, b: int = 10, c: int = 20): int {
@@ -133,7 +133,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classCalc = loadClass(map.get("com.Calculator"));
+        Class<?> classCalc = runner.getClass("com.Calculator");
         var instance = classCalc.getConstructor().newInstance();
 
         assertEquals(
@@ -149,7 +149,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticMethodWithDefaultParameter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Utils {
                     static max(a: int, b: int = 0): int {
@@ -160,7 +160,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classUtils = loadClass(map.get("com.Utils"));
+        Class<?> classUtils = runner.getClass("com.Utils");
 
         assertEquals(
                 List.of(10, 5, 0),

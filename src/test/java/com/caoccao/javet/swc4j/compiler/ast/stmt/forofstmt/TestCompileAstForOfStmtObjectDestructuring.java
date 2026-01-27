@@ -32,7 +32,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBasicObjectDestructuring(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -48,7 +48,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("Alice:30,Bob:25,", classA.getMethod("test").invoke(instance));
     }
@@ -56,7 +56,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstDeclaration(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -69,7 +69,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("12", classA.getMethod("test").invoke(instance));
     }
@@ -77,7 +77,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDefaultValue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -93,7 +93,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("Alice:User,Bob:Admin,", classA.getMethod("test").invoke(instance));
     }
@@ -101,7 +101,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEmptyArray(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -114,7 +114,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test").invoke(instance));
     }
@@ -122,7 +122,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLetDeclaration(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -135,7 +135,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("ab", classA.getMethod("test").invoke(instance));
     }
@@ -143,7 +143,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMixedTypes(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -160,7 +160,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("hello:42:true", classA.getMethod("test").invoke(instance));
     }
@@ -169,7 +169,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @EnumSource(JdkVersion.class)
     public void testMultipleDefaultValues(JdkVersion jdkVersion) throws Exception {
         // Test multiple properties all using default values
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -185,7 +185,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("ABCD", classA.getMethod("test").invoke(instance));
     }
@@ -193,7 +193,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleIterations(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -206,7 +206,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(100, classA.getMethod("test").invoke(instance));
     }
@@ -216,7 +216,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     public void testNestedLoopsSimple(JdkVersion jdkVersion) throws Exception {
         // Test nested for-of with object destructuring in outer loop
         // The inner loop iterates over a simple array, outer uses object destructuring
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -234,7 +234,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("AliceX,AliceY,BobX,BobY,", classA.getMethod("test").invoke(instance));
     }
@@ -244,7 +244,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     public void testPartialDefaultValue(JdkVersion jdkVersion) throws Exception {
         // Test that properties without values use defaults
         // Using string default since primitive default requires boxing
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -260,7 +260,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("a:?,b:Y,", classA.getMethod("test").invoke(instance));
     }
@@ -268,7 +268,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRenamedProperty(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -282,7 +282,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("Alice,Bob,", classA.getMethod("test").invoke(instance));
     }
@@ -290,7 +290,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRenamedPropertyMultiple(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -305,7 +305,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("Smith, Alice", classA.getMethod("test").invoke(instance));
     }
@@ -313,7 +313,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSingleElementArray(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -326,7 +326,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("value", classA.getMethod("test").invoke(instance));
     }
@@ -334,7 +334,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSingleProperty(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -348,7 +348,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("Alice,Bob,Charlie,", classA.getMethod("test").invoke(instance));
     }
@@ -356,7 +356,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testWithBreak(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -372,7 +372,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("a", classA.getMethod("test").invoke(instance));
     }
@@ -380,7 +380,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testWithContinue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -396,7 +396,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("ac", classA.getMethod("test").invoke(instance));
     }
@@ -404,7 +404,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testWithNumericComputation(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -417,7 +417,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 1*2 + 3*4 + 5*6 = 2 + 12 + 30 = 44
         assertEquals(44, classA.getMethod("test").invoke(instance));
@@ -426,7 +426,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testWithReturn(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Object {
@@ -438,7 +438,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("first", classA.getMethod("test").invoke(instance));
     }

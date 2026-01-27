@@ -36,7 +36,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowsWithJavaFunctionalInterfaceAlongsideCustomInterface(JdkVersion jdkVersion) throws Exception {
         // Test: Custom interface compiled alongside arrows using java.util.function
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export interface MyTransformer {
@@ -48,15 +48,14 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
 
         // Custom interface is compiled
-        Class<?> transformerInterface = classes.get("com.MyTransformer");
+        Class<?> transformerInterface = runner.getClass("com.MyTransformer");
         assertTrue(transformerInterface.isInterface());
         assertNotNull(transformerInterface.getMethod("transform", int.class));
 
         // Arrow works with Java functional interface
-        Class<?> calculatorClass = classes.get("com.Calculator");
+        Class<?> calculatorClass = runner.getClass("com.Calculator");
         var calculator = calculatorClass.getConstructor().newInstance();
         var doubler = calculatorClass.getMethod("getDoubler").invoke(calculator);
         assertNotNull(doubler);
@@ -67,13 +66,13 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testCustomInterfaceCompiles(JdkVersion jdkVersion) throws Exception {
         // Test: Custom interface compiles correctly with getter/setter
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface IntTransformer {
                     transform(x: int): int
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.IntTransformer"));
+        Class<?> interfaceClass = runner.getClass("com.IntTransformer");
 
         assertTrue(interfaceClass.isInterface());
         Method transformMethod = interfaceClass.getMethod("transform", int.class);
@@ -85,7 +84,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testCustomInterfaceWithBooleanReturn(JdkVersion jdkVersion) throws Exception {
         // Test: Custom interface with boolean return type
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface IntPredicate {
                     test(x: int): boolean
@@ -96,9 +95,8 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.IntPredicate");
-        Class<?> checkerClass = classes.get("com.PositiveChecker");
+        Class<?> interfaceClass = runner.getClass("com.IntPredicate");
+        Class<?> checkerClass = runner.getClass("com.PositiveChecker");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -112,7 +110,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testCustomInterfaceWithClassImplementation(JdkVersion jdkVersion) throws Exception {
         // Test: Custom interface implemented by a class
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface IntTransformer {
                     transform(x: int): int
@@ -123,9 +121,8 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.IntTransformer");
-        Class<?> doublerClass = classes.get("com.Doubler");
+        Class<?> interfaceClass = runner.getClass("com.IntTransformer");
+        Class<?> doublerClass = runner.getClass("com.Doubler");
 
         assertTrue(interfaceClass.isInterface());
         assertTrue(interfaceClass.isAssignableFrom(doublerClass));
@@ -139,7 +136,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testCustomInterfaceWithDoubleParam(JdkVersion jdkVersion) throws Exception {
         // Test: Custom interface with double parameter
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface DoubleTransformer {
                     transform(x: double): double
@@ -150,9 +147,8 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.DoubleTransformer");
-        Class<?> squarerClass = classes.get("com.DoubleSquarer");
+        Class<?> interfaceClass = runner.getClass("com.DoubleTransformer");
+        Class<?> squarerClass = runner.getClass("com.DoubleSquarer");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -165,7 +161,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testCustomInterfaceWithLongParam(JdkVersion jdkVersion) throws Exception {
         // Test: Custom interface with long parameter
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface LongTransformer {
                     transform(x: long): long
@@ -176,9 +172,8 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.LongTransformer");
-        Class<?> doublerClass = classes.get("com.LongDoubler");
+        Class<?> interfaceClass = runner.getClass("com.LongTransformer");
+        Class<?> doublerClass = runner.getClass("com.LongDoubler");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -191,7 +186,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testCustomInterfaceWithMultipleParams(JdkVersion jdkVersion) throws Exception {
         // Test: Custom interface with multiple parameters
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface BinaryOp {
                     compute(a: int, b: int): int
@@ -202,9 +197,8 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.BinaryOp");
-        Class<?> adderClass = classes.get("com.Adder");
+        Class<?> interfaceClass = runner.getClass("com.BinaryOp");
+        Class<?> adderClass = runner.getClass("com.Adder");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -217,7 +211,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testCustomInterfaceWithStringParam(JdkVersion jdkVersion) throws Exception {
         // Test: Custom interface with String parameter and return
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface StringTransformer {
                     transform(s: String): String
@@ -228,9 +222,8 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.StringTransformer");
-        Class<?> upperCaserClass = classes.get("com.UpperCaser");
+        Class<?> interfaceClass = runner.getClass("com.StringTransformer");
+        Class<?> upperCaserClass = runner.getClass("com.UpperCaser");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -243,7 +236,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testCustomInterfaceWithVoidReturn(JdkVersion jdkVersion) throws Exception {
         // Test: Custom interface with void return type
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface IntAction {
                     perform(x: int): void
@@ -258,9 +251,8 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> interfaceClass = classes.get("com.IntAction");
-        Class<?> setterClass = classes.get("com.ValueSetter");
+        Class<?> interfaceClass = runner.getClass("com.IntAction");
+        Class<?> setterClass = runner.getClass("com.ValueSetter");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -281,7 +273,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testCustomInterfacesMultiple(JdkVersion jdkVersion) throws Exception {
         // Test: Multiple custom interfaces compile correctly
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface IntSupplier {
                     get(): int
@@ -293,11 +285,10 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
                     transform(x: int): int
                   }
                 }""");
-        var classes = loadClasses(map);
 
-        Class<?> supplierInterface = classes.get("com.IntSupplier");
-        Class<?> consumerInterface = classes.get("com.IntConsumer");
-        Class<?> transformerInterface = classes.get("com.IntTransformer");
+        Class<?> supplierInterface = runner.getClass("com.IntSupplier");
+        Class<?> consumerInterface = runner.getClass("com.IntConsumer");
+        Class<?> transformerInterface = runner.getClass("com.IntTransformer");
 
         assertTrue(supplierInterface.isInterface());
         assertTrue(consumerInterface.isInterface());

@@ -32,7 +32,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayElementModifiesValue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -43,7 +43,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(12, classA.getMethod("test").invoke(instance));
     }
@@ -51,7 +51,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayElementPostfixDecrement(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -61,7 +61,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(10, classA.getMethod("test").invoke(instance));
     }
@@ -69,7 +69,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayElementPostfixIncrement(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -79,7 +79,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(2, classA.getMethod("test").invoke(instance));
     }
@@ -87,7 +87,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayElementPrefixDecrement(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -97,7 +97,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(9, classA.getMethod("test").invoke(instance));
     }
@@ -105,7 +105,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayElementPrefixIncrement(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -115,7 +115,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(3, classA.getMethod("test").invoke(instance));
     }
@@ -123,7 +123,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayElementWithVariableIndex(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -134,7 +134,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(4, classA.getMethod("test").invoke(instance));
     }

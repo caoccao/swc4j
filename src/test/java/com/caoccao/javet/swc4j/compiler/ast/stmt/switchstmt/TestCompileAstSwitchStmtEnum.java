@@ -32,7 +32,7 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchEnumAllValues(JdkVersion jdkVersion) throws Exception {
-        var byteCodeMap = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Day {
                     MON,
@@ -59,11 +59,10 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(byteCodeMap);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
 
         var instance = classA.getConstructor().newInstance();
-        Class<?> enumDay = classes.get("com.Day");
+        Class<?> enumDay = runner.getClass("com.Day");
         var testMethod = classA.getMethod("test", enumDay);
         Object[] enumConstants = enumDay.getEnumConstants();
 
@@ -79,7 +78,7 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchEnumBasic(JdkVersion jdkVersion) throws Exception {
-        var byteCodeMap = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Color {
                     RED,
@@ -105,9 +104,8 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(byteCodeMap);
-        Class<?> classA = classes.get("com.A");
-        Class<?> enumColor = classes.get("com.Color");
+        Class<?> classA = runner.getClass("com.A");
+        Class<?> enumColor = runner.getClass("com.Color");
 
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", enumColor);
@@ -121,7 +119,7 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchEnumExplicitValues(JdkVersion jdkVersion) throws Exception {
-        var byteCodeMap = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum HttpStatus {
                     OK = 200,
@@ -143,11 +141,10 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(byteCodeMap);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
 
         var instance = classA.getConstructor().newInstance();
-        Class<?> enumHttpStatus = classes.get("com.HttpStatus");
+        Class<?> enumHttpStatus = runner.getClass("com.HttpStatus");
         var testMethod = classA.getMethod("test", enumHttpStatus);
         Object[] enumConstants = enumHttpStatus.getEnumConstants();
 
@@ -159,7 +156,7 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchEnumFallThrough(JdkVersion jdkVersion) throws Exception {
-        var byteCodeMap = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Level {
                     LOW,
@@ -187,11 +184,10 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(byteCodeMap);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
 
         var instance = classA.getConstructor().newInstance();
-        Class<?> enumLevel = classes.get("com.Level");
+        Class<?> enumLevel = runner.getClass("com.Level");
         var testMethod = classA.getMethod("test", enumLevel);
         Object[] enumConstants = enumLevel.getEnumConstants();
 
@@ -204,7 +200,7 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchEnumMultipleEmpty(JdkVersion jdkVersion) throws Exception {
-        var byteCodeMap = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Priority {
                     LOWEST,
@@ -234,11 +230,10 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(byteCodeMap);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
 
         var instance = classA.getConstructor().newInstance();
-        Class<?> enumPriority = classes.get("com.Priority");
+        Class<?> enumPriority = runner.getClass("com.Priority");
         var testMethod = classA.getMethod("test", enumPriority);
         Object[] enumConstants = enumPriority.getEnumConstants();
 
@@ -252,7 +247,7 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchEnumNegativeValues(JdkVersion jdkVersion) throws Exception {
-        var byteCodeMap = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Direction {
                     BACK = -1,
@@ -271,11 +266,10 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(byteCodeMap);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
 
         var instance = classA.getConstructor().newInstance();
-        Class<?> enumDirection = classes.get("com.Direction");
+        Class<?> enumDirection = runner.getClass("com.Direction");
         var testMethod = classA.getMethod("test", enumDirection);
         Object[] enumConstants = enumDirection.getEnumConstants();
 
@@ -287,7 +281,7 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchEnumReturnsFromCase(JdkVersion jdkVersion) throws Exception {
-        var byteCodeMap = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum ErrorLevel {
                     INFO,
@@ -313,11 +307,10 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(byteCodeMap);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
 
         var instance = classA.getConstructor().newInstance();
-        Class<?> enumErrorLevel = classes.get("com.ErrorLevel");
+        Class<?> enumErrorLevel = runner.getClass("com.ErrorLevel");
         var testMethod = classA.getMethod("test", enumErrorLevel);
         Object[] enumConstants = enumErrorLevel.getEnumConstants();
 
@@ -330,7 +323,7 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchEnumWithDefault(JdkVersion jdkVersion) throws Exception {
-        var byteCodeMap = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Status {
                     PENDING,
@@ -357,9 +350,8 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(byteCodeMap);
-        Class<?> classA = classes.get("com.A");
-        Class<?> enumStatus = classes.get("com.Status");
+        Class<?> classA = runner.getClass("com.A");
+        Class<?> enumStatus = runner.getClass("com.Status");
 
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", enumStatus);

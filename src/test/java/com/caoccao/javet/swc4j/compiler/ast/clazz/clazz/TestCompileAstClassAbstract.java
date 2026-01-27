@@ -31,7 +31,7 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testAbstractClassExtendingAbstract(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export abstract class A {
                     abstract f(): int
@@ -44,10 +44,9 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
                     g(): int { return 2 }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
-        Class<?> classB = classes.get("com.B");
-        Class<?> classC = classes.get("com.C");
+        Class<?> classA = runner.getClass("com.A");
+        Class<?> classB = runner.getClass("com.B");
+        Class<?> classC = runner.getClass("com.C");
 
         // Verify A and B are abstract
         assertTrue(Modifier.isAbstract(classA.getModifiers()), "A should be abstract");
@@ -68,7 +67,7 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testAbstractClassWithAbstractMethod(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export abstract class Shape {
                     abstract area(): double
@@ -81,9 +80,8 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
                     area(): double { return 3.14159 * this.radius * this.radius }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classShape = classes.get("com.Shape");
-        Class<?> classCircle = classes.get("com.Circle");
+        Class<?> classShape = runner.getClass("com.Shape");
+        Class<?> classCircle = runner.getClass("com.Circle");
 
         // Verify Shape is abstract
         assertTrue(Modifier.isAbstract(classShape.getModifiers()), "Shape should be abstract");
@@ -104,7 +102,7 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testAbstractClassWithConcreteMethod(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export abstract class Base {
                     abstract compute(): int
@@ -114,9 +112,8 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
                     compute(): int { return this.helper() + 1 }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classBase = classes.get("com.Base");
-        Class<?> classDerived = classes.get("com.Derived");
+        Class<?> classBase = runner.getClass("com.Base");
+        Class<?> classDerived = runner.getClass("com.Derived");
 
         // Verify Base is abstract
         assertTrue(Modifier.isAbstract(classBase.getModifiers()), "Base should be abstract");
@@ -135,7 +132,7 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testAbstractClassWithField(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export abstract class Animal {
                     name: String
@@ -152,9 +149,8 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
                     speak(): String { return "Woof!" }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classAnimal = classes.get("com.Animal");
-        Class<?> classDog = classes.get("com.Dog");
+        Class<?> classAnimal = runner.getClass("com.Animal");
+        Class<?> classDog = runner.getClass("com.Dog");
 
         // Verify Animal is abstract
         assertTrue(Modifier.isAbstract(classAnimal.getModifiers()), "Animal should be abstract");
@@ -173,7 +169,7 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testAbstractClassWithMultipleAbstractMethods(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export abstract class Calculator {
                     abstract add(a: int, b: int): int
@@ -184,9 +180,8 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
                     multiply(a: int, b: int): int { return a * b }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classCalculator = classes.get("com.Calculator");
-        Class<?> classSimple = classes.get("com.SimpleCalculator");
+        Class<?> classCalculator = runner.getClass("com.Calculator");
+        Class<?> classSimple = runner.getClass("com.SimpleCalculator");
 
         // Verify Calculator is abstract
         assertTrue(Modifier.isAbstract(classCalculator.getModifiers()), "Calculator should be abstract");

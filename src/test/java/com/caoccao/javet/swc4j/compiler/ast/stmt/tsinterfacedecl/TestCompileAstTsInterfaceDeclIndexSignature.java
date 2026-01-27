@@ -38,13 +38,13 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
     @EnumSource(JdkVersion.class)
     public void testIndexSignatureBasic(JdkVersion jdkVersion) throws Exception {
         // Test: Basic index signature with string key and string value
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface StringDictionary {
                     [key: String]: String
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.StringDictionary"));
+        Class<?> interfaceClass = runner.getClass("com.StringDictionary");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -65,13 +65,13 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
     @EnumSource(JdkVersion.class)
     public void testIndexSignatureBooleanValue(JdkVersion jdkVersion) throws Exception {
         // Test: Index signature with boolean value type
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface BooleanDict {
                     [key: String]: boolean
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.BooleanDict"));
+        Class<?> interfaceClass = runner.getClass("com.BooleanDict");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -90,13 +90,13 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
     @EnumSource(JdkVersion.class)
     public void testIndexSignatureDoubleValue(JdkVersion jdkVersion) throws Exception {
         // Test: Index signature with double value type
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface DoubleDict {
                     [key: String]: double
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.DoubleDict"));
+        Class<?> interfaceClass = runner.getClass("com.DoubleDict");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -115,13 +115,13 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
     @EnumSource(JdkVersion.class)
     public void testIndexSignatureIntKey(JdkVersion jdkVersion) throws Exception {
         // Test: Index signature with int key and String value (like array-like access)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface NumberKeyDict {
                     [index: int]: String
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.NumberKeyDict"));
+        Class<?> interfaceClass = runner.getClass("com.NumberKeyDict");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -140,13 +140,13 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
     @EnumSource(JdkVersion.class)
     public void testIndexSignatureIntKeyBooleanValue(JdkVersion jdkVersion) throws Exception {
         // Test: Index signature with int key and boolean value (sparse boolean array)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface SparseBooleanArray {
                     [index: int]: boolean
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.SparseBooleanArray"));
+        Class<?> interfaceClass = runner.getClass("com.SparseBooleanArray");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -165,13 +165,13 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
     @EnumSource(JdkVersion.class)
     public void testIndexSignatureLongValue(JdkVersion jdkVersion) throws Exception {
         // Test: Index signature with long value type
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface LongDict {
                     [key: String]: long
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.LongDict"));
+        Class<?> interfaceClass = runner.getClass("com.LongDict");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -190,13 +190,13 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
     @EnumSource(JdkVersion.class)
     public void testIndexSignaturePrimitiveValue(JdkVersion jdkVersion) throws Exception {
         // Test: Index signature with String key and primitive int value
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface IntValueDict {
                     [key: String]: int
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.IntValueDict"));
+        Class<?> interfaceClass = runner.getClass("com.IntValueDict");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -215,13 +215,13 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
     @EnumSource(JdkVersion.class)
     public void testIndexSignatureReadonly(JdkVersion jdkVersion) throws Exception {
         // Test: Readonly index signature should only have getter, no setter
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface ReadonlyDict {
                     readonly [key: String]: String
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.ReadonlyDict"));
+        Class<?> interfaceClass = runner.getClass("com.ReadonlyDict");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -239,13 +239,13 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
     @EnumSource(JdkVersion.class)
     public void testIndexSignatureReadonlyWithIntValue(JdkVersion jdkVersion) throws Exception {
         // Test: Readonly index signature with primitive value type
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface ReadonlyIntDict {
                     readonly [key: String]: int
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.ReadonlyIntDict"));
+        Class<?> interfaceClass = runner.getClass("com.ReadonlyIntDict");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -263,7 +263,7 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
     @EnumSource(JdkVersion.class)
     public void testIndexSignatureWithMethods(JdkVersion jdkVersion) throws Exception {
         // Test: Index signature combined with method signatures
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface DictWithMethods {
                     [key: String]: int
@@ -271,7 +271,7 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                     size(): int
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.DictWithMethods"));
+        Class<?> interfaceClass = runner.getClass("com.DictWithMethods");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -298,14 +298,14 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
     @EnumSource(JdkVersion.class)
     public void testIndexSignatureWithProperties(JdkVersion jdkVersion) throws Exception {
         // Test: Index signature combined with regular properties
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface MixedDict {
                     name: String
                     [key: String]: String
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.MixedDict"));
+        Class<?> interfaceClass = runner.getClass("com.MixedDict");
 
         assertTrue(interfaceClass.isInterface());
 
@@ -332,14 +332,14 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
     @EnumSource(JdkVersion.class)
     public void testIndexSignatureWithReadonlyProperty(JdkVersion jdkVersion) throws Exception {
         // Test: Index signature combined with readonly property
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface MixedWithReadonly {
                     readonly id: int
                     [key: String]: int
                   }
                 }""");
-        Class<?> interfaceClass = loadClass(map.get("com.MixedWithReadonly"));
+        Class<?> interfaceClass = runner.getClass("com.MixedWithReadonly");
 
         assertTrue(interfaceClass.isInterface());
 

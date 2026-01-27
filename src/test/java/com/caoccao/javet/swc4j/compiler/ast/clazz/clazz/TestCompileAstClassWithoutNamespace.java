@@ -29,13 +29,13 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testClassWithoutNamespace(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 export class A {
                   test(): int {
                     return 42
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("A"));
+        Class<?> classA = runner.getClass("A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(42, classA.getMethod("test").invoke(instance));
     }
@@ -43,7 +43,7 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testClassWithoutNamespaceAndField(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 export class Counter {
                   count: int = 0
                   increment(): void {
@@ -53,7 +53,7 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                     return this.count
                   }
                 }""");
-        Class<?> counterClass = loadClass(map.get("Counter"));
+        Class<?> counterClass = runner.getClass("Counter");
         var instance = counterClass.getConstructor().newInstance();
         counterClass.getMethod("increment").invoke(instance);
         counterClass.getMethod("increment").invoke(instance);
@@ -63,7 +63,7 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testClassWithoutNamespaceCallingAnotherClass(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 export class Calculator {
                   add(a: int, b: int): int {
                     return a + b
@@ -75,8 +75,7 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                     return calc.add(10, 20)
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> userClass = classes.get("User");
+        Class<?> userClass = runner.getClass("User");
         var instance = userClass.getConstructor().newInstance();
         assertEquals(30, userClass.getMethod("compute").invoke(instance));
     }
@@ -84,10 +83,10 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testClassWithoutNamespaceEmpty(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 export class Empty {
                 }""");
-        Class<?> emptyClass = loadClass(map.get("Empty"));
+        Class<?> emptyClass = runner.getClass("Empty");
         var instance = emptyClass.getConstructor().newInstance();
         assertNotNull(instance);
     }
@@ -95,13 +94,13 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testClassWithoutNamespaceMultipleMethods(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 export class Math {
                   add(a: int, b: int): int { return a + b }
                   sub(a: int, b: int): int { return a - b }
                   mul(a: int, b: int): int { return a * b }
                 }""");
-        Class<?> mathClass = loadClass(map.get("Math"));
+        Class<?> mathClass = runner.getClass("Math");
         var instance = mathClass.getConstructor().newInstance();
         assertEquals(5, mathClass.getMethod("add", int.class, int.class).invoke(instance, 2, 3));
         assertEquals(7, mathClass.getMethod("sub", int.class, int.class).invoke(instance, 10, 3));
@@ -111,7 +110,7 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleClassesWithoutNamespace(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 export class A {
                   value(): int { return 1 }
                 }
@@ -121,10 +120,9 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                 export class C {
                   value(): int { return 3 }
                 }""");
-        var classes = loadClasses(map);
-        assertEquals(1, classes.get("A").getMethod("value").invoke(classes.get("A").getConstructor().newInstance()));
-        assertEquals(2, classes.get("B").getMethod("value").invoke(classes.get("B").getConstructor().newInstance()));
-        assertEquals(3, classes.get("C").getMethod("value").invoke(classes.get("C").getConstructor().newInstance()));
+        assertEquals(1, runner.getClass("A").getMethod("value").invoke(runner.getClass("A").getConstructor().newInstance()));
+        assertEquals(2, runner.getClass("B").getMethod("value").invoke(runner.getClass("B").getConstructor().newInstance()));
+        assertEquals(3, runner.getClass("C").getMethod("value").invoke(runner.getClass("C").getConstructor().newInstance()));
     }
 
 }

@@ -28,7 +28,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMultipleStaticMethods(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Math {
                     static add(a: int, b: int): int {
@@ -42,7 +42,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.Math"));
+        Class<?> classA = runner.getClass("com.Math");
         assertEquals(15, classA.getMethod("add", int.class, int.class).invoke(null, 10, 5));
         assertEquals(5, classA.getMethod("subtract", int.class, int.class).invoke(null, 10, 5));
         assertEquals(50, classA.getMethod("multiply", int.class, int.class).invoke(null, 10, 5));
@@ -51,7 +51,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticAndInstanceMethods(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     static staticMethod(): int {
@@ -62,7 +62,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         assertEquals(100, classA.getMethod("staticMethod").invoke(null));
         var instance = classA.getConstructor().newInstance();
         assertEquals(200, classA.getMethod("instanceMethod").invoke(instance));
@@ -71,7 +71,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticMethodNoParameters(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     static getValue(): int {
@@ -79,14 +79,14 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         assertEquals(42, classA.getMethod("getValue").invoke(null));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticMethodReturningBoolean(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     static isPositive(x: int): boolean {
@@ -94,7 +94,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         assertEquals(true, classA.getMethod("isPositive", int.class).invoke(null, 5));
         assertEquals(false, classA.getMethod("isPositive", int.class).invoke(null, -5));
     }
@@ -102,7 +102,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticMethodReturningDouble(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     static multiply(a: double, b: double): double {
@@ -110,14 +110,14 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         assertEquals(6.28, (double) classA.getMethod("multiply", double.class, double.class).invoke(null, 2.0, 3.14), 0.001);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticMethodReturningString(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     static greet(name: String): String {
@@ -125,14 +125,14 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         assertEquals("Hello, World", classA.getMethod("greet", String.class).invoke(null, "World"));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticMethodWithConditional(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     static max(a: int, b: int): int {
@@ -141,7 +141,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         assertEquals(20, classA.getMethod("max", int.class, int.class).invoke(null, 10, 20));
         assertEquals(30, classA.getMethod("max", int.class, int.class).invoke(null, 30, 20));
     }
@@ -150,7 +150,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
     // @ParameterizedTest
     // @EnumSource(JdkVersion.class)
     // public void testStaticMethodCallingAnotherStaticMethod(JdkVersion jdkVersion) throws Exception {
-    //     var map = getCompiler(jdkVersion).compile("""
+    //     var runner = getCompiler(jdkVersion).compile("""
     //             namespace com {
     //               export class A {
     //                 static helper(): int {
@@ -161,14 +161,14 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
     //                 }
     //               }
     //             }""");
-    //     Class<?> classA = loadClass(map.get("com.A"));
+    //     Class<?> classA = runner.getClass("com.A");
     //     assertEquals(20, classA.getMethod("test").invoke(null));
     // }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticMethodWithParameters(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     static add(a: int, b: int): int {
@@ -176,7 +176,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         assertEquals(30, classA.getMethod("add", int.class, int.class).invoke(null, 10, 20));
     }
 
@@ -184,7 +184,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
     // @ParameterizedTest
     // @EnumSource(JdkVersion.class)
     // public void testStaticMethodFromDifferentClass(JdkVersion jdkVersion) throws Exception {
-    //     var map = getCompiler(jdkVersion).compile("""
+    //     var runner = getCompiler(jdkVersion).compile("""
     //             namespace com {
     //               export class Helper {
     //                 static compute(x: int): int {
@@ -197,8 +197,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
     //                 }
     //               }
     //             }""");
-    //     var classes = loadClasses(map);
-    //     Class<?> userClass = classes.get("com.User");
+    //     Class<?> userClass = runner.getClass("com.User");
     //     var instance = userClass.getConstructor().newInstance();
     //     assertEquals(26, userClass.getMethod("calculate", int.class).invoke(instance, 5));
     // }

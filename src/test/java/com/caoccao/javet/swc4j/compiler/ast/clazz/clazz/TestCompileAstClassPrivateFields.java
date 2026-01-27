@@ -43,7 +43,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMixedStaticAndInstancePrivateFields(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     static #staticValue: int = 100
@@ -52,7 +52,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                     getInstanceValue(): int { return this.#instanceValue }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
 
         // Verify static field
         var staticField = classA.getDeclaredField("staticValue");
@@ -77,7 +77,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testPrivateFieldAssignment(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     #value: int = 10
@@ -85,7 +85,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                     getValue(): int { return this.#value }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(
                 List.of(10, 99),
@@ -100,14 +100,14 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testPrivateFieldBasicRead(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     #value: int = 42
                     getValue(): int { return this.#value }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
 
         // Verify field is private
         var valueField = classA.getDeclaredField("value");
@@ -121,7 +121,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testPrivateFieldInCounter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Counter {
                     #count: int = 0
@@ -131,7 +131,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                     reset(): void { this.#count = 0 }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.Counter"));
+        Class<?> classA = runner.getClass("com.Counter");
         var instance = classA.getConstructor().newInstance();
         var getCount = classA.getMethod("getCount");
         var increment = classA.getMethod("increment");
@@ -153,7 +153,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testPrivateFieldMixedWithPublic(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     publicValue: int = 5
@@ -163,7 +163,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                     getSum(): int { return this.publicValue + this.#privateValue }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
 
         // Verify access modifiers
         var publicField = classA.getDeclaredField("publicValue");
@@ -185,7 +185,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testPrivateFieldMultiple(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     #x: int = 10
@@ -193,7 +193,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                     sum(): int { return this.#x + this.#y }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(30, classA.getMethod("sum").invoke(instance));
     }
@@ -201,7 +201,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testPrivateFieldTypes(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     #intValue: int = 42
@@ -215,7 +215,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                     getString(): String { return this.#stringValue }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
 
         // Verify all fields are private
         for (String fieldName : List.of("intValue", "doubleValue", "boolValue", "stringValue")) {
@@ -243,14 +243,14 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testPrivateFieldWithExpressionInitializer(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     #value: int = 10 + 20 * 2
                     getValue(): int { return this.#value }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(50, classA.getMethod("getValue").invoke(instance));
     }
@@ -258,7 +258,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticPrivateFieldAssignment(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     static #counter: int = 0
@@ -266,7 +266,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                     static getCounter(): int { return A.#counter }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var increment = classA.getMethod("increment");
         var getCounter = classA.getMethod("getCounter");
 
@@ -283,14 +283,14 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticPrivateFieldBasic(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     static #count: int = 100
                     static getCount(): int { return A.#count }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
 
         // Verify field is private and static
         var countField = classA.getDeclaredField("count");
@@ -303,7 +303,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticPrivateFieldCounter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Counter {
                     static #count: int = 0
@@ -313,7 +313,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                     static reset(): void { Counter.#count = 0 }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.Counter"));
+        Class<?> classA = runner.getClass("com.Counter");
         var getCount = classA.getMethod("getCount");
         var increment = classA.getMethod("increment");
         var decrement = classA.getMethod("decrement");
@@ -334,7 +334,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticPrivateFieldTypes(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     static #intValue: int = 42
@@ -348,7 +348,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                     static getString(): String { return A.#stringValue }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
 
         // Verify all fields are private and static
         for (String fieldName : List.of("intValue", "doubleValue", "boolValue", "stringValue")) {

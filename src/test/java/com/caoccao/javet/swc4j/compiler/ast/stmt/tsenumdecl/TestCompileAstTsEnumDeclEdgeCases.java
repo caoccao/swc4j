@@ -19,7 +19,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testAmbientEnum(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   declare enum External {
                     Value
@@ -27,7 +27,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                 }""");
 
         // Ambient enum should not generate bytecode
-        assertNull(map.get("com.External"));
+        assertThrows(ClassNotFoundException.class, () ->runner.getClass("com.External"));
     }
 
     @ParameterizedTest
@@ -59,14 +59,14 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumFromValueNotFound(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Num {
                     One = 1,
                     Two = 2
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Num"));
+        Class<?> enumClass = runner.getClass("com.Num");
 
         var fromValueMethod = enumClass.getMethod("fromValue", int.class);
 
@@ -82,14 +82,14 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumFromValueWithDuplicates(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Dup2 {
                     First = 1,
                     Second = 1
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Dup2"));
+        Class<?> enumClass = runner.getClass("com.Dup2");
 
         var fromValueMethod = enumClass.getMethod("fromValue", int.class);
         Object result = fromValueMethod.invoke(null, 1);
@@ -101,14 +101,14 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumValueOfNotFound(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Letter {
                     A,
                     B
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Letter"));
+        Class<?> enumClass = runner.getClass("com.Letter");
 
         var valueOfMethod = enumClass.getMethod("valueOf", String.class);
 
@@ -124,7 +124,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumWithCamelCaseName(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Case {
                     camelCase,
@@ -132,7 +132,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                     UPPER_CASE
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Case"));
+        Class<?> enumClass = runner.getClass("com.Case");
 
         Object[] constants = enumClass.getEnumConstants();
         assertEquals("CAMELCASE", ((Enum<?>) constants[0]).name());
@@ -143,7 +143,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumWithDuplicateValues(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Dup {
                     A = 1,
@@ -151,7 +151,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                     C = 2
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Dup"));
+        Class<?> enumClass = runner.getClass("com.Dup");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
@@ -165,13 +165,13 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumWithEmptyString(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Empty {
                     Value = ""
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Empty"));
+        Class<?> enumClass = runner.getClass("com.Empty");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object value = enumClass.getEnumConstants()[0];
@@ -183,13 +183,13 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEnumWithLongString(JdkVersion jdkVersion) throws Exception {
         String longValue = "a".repeat(1000);
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum LongStr {
                     Value = "%s"
                   }
                 }""".formatted(longValue));
-        Class<?> enumClass = loadClass(map.get("com.LongStr"));
+        Class<?> enumClass = runner.getClass("com.LongStr");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object value = enumClass.getEnumConstants()[0];
@@ -200,13 +200,13 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumWithMaxIntValue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum MaxInt {
                     Max = 2147483647
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.MaxInt"));
+        Class<?> enumClass = runner.getClass("com.MaxInt");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object max = enumClass.getEnumConstants()[0];
@@ -217,13 +217,13 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumWithMinIntValue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum MinInt {
                     Min = -2147483647
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.MinInt"));
+        Class<?> enumClass = runner.getClass("com.MinInt");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object min = enumClass.getEnumConstants()[0];
@@ -234,7 +234,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumWithNumberInName(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Numeric {
                     Option1,
@@ -242,7 +242,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                     Option3
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Numeric"));
+        Class<?> enumClass = runner.getClass("com.Numeric");
 
         assertEquals(3, enumClass.getEnumConstants().length);
     }
@@ -250,7 +250,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumWithReservedKeywordNames(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Reserved {
                     Class = 1,
@@ -258,7 +258,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                     Static = 3
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Reserved"));
+        Class<?> enumClass = runner.getClass("com.Reserved");
 
         Object[] constants = enumClass.getEnumConstants();
         assertEquals("CLASS", ((Enum<?>) constants[0]).name());
@@ -269,13 +269,13 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumWithSingleMember(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Single {
                     Only
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Single"));
+        Class<?> enumClass = runner.getClass("com.Single");
 
         Object[] constants = enumClass.getEnumConstants();
         assertEquals(1, constants.length);
@@ -285,7 +285,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumWithSpecialCharsInString(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Special {
                     Tab = "\\t",
@@ -293,7 +293,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                     Quote = "\\""
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Special"));
+        Class<?> enumClass = runner.getClass("com.Special");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
@@ -306,7 +306,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumWithUnderscoreNames(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum Underscore {
                     _private,
@@ -314,7 +314,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                     value_with_underscore
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Underscore"));
+        Class<?> enumClass = runner.getClass("com.Underscore");
 
         Object[] constants = enumClass.getEnumConstants();
         assertEquals("_PRIVATE", ((Enum<?>) constants[0]).name());
@@ -326,13 +326,13 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEnumWithVeryLongName(JdkVersion jdkVersion) throws Exception {
         String longName = "VeryLongEnumMemberNameThatExceedsNormalLength";
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum LongNames {
                     %s = 1
                   }
                 }""".formatted(longName));
-        Class<?> enumClass = loadClass(map.get("com.LongNames"));
+        Class<?> enumClass = runner.getClass("com.LongNames");
 
         Object[] constants = enumClass.getEnumConstants();
         assertEquals(longName.toUpperCase(), ((Enum<?>) constants[0]).name());
@@ -341,7 +341,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEnumWithZeroAndNegativeValues(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export enum ZeroNeg {
                     Zero = 0,
@@ -349,7 +349,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                     NegativeHundred = -100
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.ZeroNeg"));
+        Class<?> enumClass = runner.getClass("com.ZeroNeg");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();

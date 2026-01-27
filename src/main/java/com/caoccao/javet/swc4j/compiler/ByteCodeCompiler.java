@@ -34,8 +34,6 @@ import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
-import java.util.Map;
-
 public sealed abstract class ByteCodeCompiler permits
         ByteCodeCompiler17 {
     protected final ArrayLiteralGenerator arrayLiteralGenerator;
@@ -160,11 +158,10 @@ public sealed abstract class ByteCodeCompiler permits
         };
     }
 
-    public Map<String, byte[]> compile(String code) throws Swc4jCoreException, Swc4jByteCodeCompilerException {
-        memory.getByteCodeMap().clear();
+    public ByteCodeRunner compile(String code) throws Swc4jCoreException, Swc4jByteCodeCompilerException {
         Swc4jParseOutput output = swc4j.parse(code, parseOptions);
         compileProgram(output.getProgram());
-        return memory.getByteCodeMap();
+        return new ByteCodeRunner(memory.getByteCodeMap(), options.optionalParentClassLoader().orElse(getClass().getClassLoader()));
     }
 
     abstract void compileProgram(ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException;

@@ -30,7 +30,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBasicIntZeroFillRightShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -41,7 +41,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(5, classA.getMethod("test").invoke(instance)); // 20 >>> 2 = 5
     }
@@ -49,7 +49,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testByteObjectZeroFillRShiftIntObject(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -60,7 +60,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(5, classA.getMethod("test").invoke(instance)); // 80 >>> 4 = 5
     }
@@ -68,7 +68,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testByteZeroFillRightShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -79,7 +79,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(3, classA.getMethod("test").invoke(instance)); // 12 >>> 2 = 3
     }
@@ -87,7 +87,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testChainedZeroFillRShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -98,7 +98,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // First: 32 >>> 2 = 8, then: 8 >>> 1 = 4
         assertEquals(4, classA.getMethod("test").invoke(instance));
@@ -107,7 +107,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testCharZeroFillRightShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -118,7 +118,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(65, classA.getMethod("test").invoke(instance)); // 130 >>> 1 = 65
     }
@@ -128,7 +128,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIntZeroFillRShiftBy0(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -139,7 +139,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(12345, classA.getMethod("test").invoke(instance));
     }
@@ -147,7 +147,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIntZeroFillRShiftBy32SameAs0(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -158,7 +158,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 32 & 0x1F = 0, so shifting by 32 is same as shifting by 0
         assertEquals(100, classA.getMethod("test").invoke(instance));
@@ -167,7 +167,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIntZeroFillRShiftBy33SameAs1(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -178,7 +178,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 33 & 0x1F = 1, so shifting by 33 is same as shifting by 1
         assertEquals(50, classA.getMethod("test").invoke(instance));
@@ -189,7 +189,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIntZeroFillRShiftByByte(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -200,7 +200,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(42, classA.getMethod("test").invoke(instance)); // 336 >>> 3 = 42
     }
@@ -208,7 +208,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIntZeroFillRShiftWithExplicitCastToInt(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -218,7 +218,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(7, classA.getMethod("test").invoke(instance));
     }
@@ -226,7 +226,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIntZeroFillRShiftWithExplicitCastToLong(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): long {
@@ -236,7 +236,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(100L, classA.getMethod("test").invoke(instance));
     }
@@ -244,7 +244,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIntegerObjectZeroFillRightShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -255,7 +255,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(8, classA.getMethod("test").invoke(instance)); // 32 >>> 2 = 8
     }
@@ -265,7 +265,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLargeIntZeroFillRShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -276,7 +276,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(100000, classA.getMethod("test").invoke(instance)); // 102400000 >>> 10 = 100000
     }
@@ -284,7 +284,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLargeLongZeroFillRShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -295,7 +295,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(1000000000L, classA.getMethod("test").invoke(instance)); // 1048576000000000 >>> 20 = 1000000000
     }
@@ -303,7 +303,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLongObjectZeroFillRShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -314,7 +314,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(12345L, classA.getMethod("test").invoke(instance)); // 395040 >>> 5 = 12345
     }
@@ -322,7 +322,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLongZeroFillRShiftBy0(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -333,7 +333,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(999999L, classA.getMethod("test").invoke(instance));
     }
@@ -343,7 +343,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLongZeroFillRShiftBy64SameAs0(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -354,7 +354,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 64 & 0x3F = 0, so shifting by 64 is same as shifting by 0
         assertEquals(1000L, classA.getMethod("test").invoke(instance));
@@ -363,7 +363,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLongZeroFillRShiftBy65SameAs1(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -374,7 +374,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // 65 & 0x3F = 1, so shifting by 65 is same as shifting by 1
         assertEquals(777L, classA.getMethod("test").invoke(instance));
@@ -385,7 +385,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLongZeroFillRShiftWithExplicitCastToInt(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -395,7 +395,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(25, classA.getMethod("test").invoke(instance));
     }
@@ -403,7 +403,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLongZeroFillRightShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -414,7 +414,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(1000000L, classA.getMethod("test").invoke(instance)); // 8000000 >>> 3 = 1000000
     }
@@ -424,7 +424,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNegativeIntZeroFillRShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -435,7 +435,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // -20 >>> 2 treats -20 as unsigned, fills with 0s
         assertEquals(1073741819, classA.getMethod("test").invoke(instance));
@@ -444,7 +444,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNegativeIntZeroFillRShiftBy31(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -455,7 +455,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Negative >>> 31 fills with 0s, resulting in 1
         assertEquals(1, classA.getMethod("test").invoke(instance));
@@ -466,7 +466,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNegativeLongZeroFillRShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -477,7 +477,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // -800 >>> 3 treats -800 as unsigned, fills with 0s
         assertEquals(2305843009213693852L, classA.getMethod("test").invoke(instance));
@@ -486,7 +486,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNegativeLongZeroFillRShiftBy63(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -497,7 +497,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Negative >>> 63 fills with 0s, resulting in 1
         assertEquals(1L, classA.getMethod("test").invoke(instance));
@@ -506,7 +506,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNegativeOneIntZeroFillRShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -517,7 +517,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // -1 is 0xFFFFFFFF, >>> 1 = 0x7FFFFFFF = 2147483647
         assertEquals(2147483647, classA.getMethod("test").invoke(instance));
@@ -528,7 +528,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNegativeOneLongZeroFillRShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -539,7 +539,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // -1L is 0xFFFFFFFFFFFFFFFF, >>> 1 = 0x7FFFFFFFFFFFFFFF = 9223372036854775807
         assertEquals(9223372036854775807L, classA.getMethod("test").invoke(instance));
@@ -550,7 +550,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testPositiveIntZeroFillRShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -561,7 +561,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(5, classA.getMethod("test").invoke(instance)); // 20 >>> 2 = 5
     }
@@ -569,7 +569,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testPositiveLongZeroFillRShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -580,7 +580,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(1000000L, classA.getMethod("test").invoke(instance)); // 8000000 >>> 3 = 1000000
     }
@@ -590,7 +590,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testShortZeroFillRShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -601,7 +601,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(10, classA.getMethod("test").invoke(instance)); // 40 >>> 2 = 10
     }
@@ -609,7 +609,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testShortZeroFillRShiftByLong(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -620,7 +620,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(15, classA.getMethod("test").invoke(instance)); // 60 >>> 2 = 15
     }
@@ -630,7 +630,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testZeroFillVsArithmeticShiftNegative(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -641,7 +641,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // For negative numbers, >>> gives large positive: 1073741799
         assertEquals(1073741799, classA.getMethod("test").invoke(instance));
@@ -650,7 +650,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testZeroFillVsArithmeticShiftPositive(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -661,7 +661,7 @@ public class TestCompileBinExprZeroFillRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // For positive numbers, >> and >>> give same result: 25
         assertEquals(25, classA.getMethod("test").invoke(instance));

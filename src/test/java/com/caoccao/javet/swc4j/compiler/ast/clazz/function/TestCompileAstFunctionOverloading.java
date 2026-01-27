@@ -33,7 +33,7 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstructorOverloadingByArity(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Point {
                     x: int = 0
@@ -45,7 +45,7 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
                     getY(): int { return this.y }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.Point"));
+        Class<?> classA = runner.getClass("com.Point");
 
         // Test no-arg constructor
         var instance1 = classA.getConstructor().newInstance();
@@ -72,7 +72,7 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstructorOverloadingByType(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Value {
                     intValue: int = 0
@@ -83,7 +83,7 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
                     getDouble(): double { return this.doubleValue }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.Value"));
+        Class<?> classA = runner.getClass("com.Value");
 
         var instance1 = classA.getConstructor(int.class).newInstance(42);
         var instance2 = classA.getConstructor(double.class).newInstance(3.14);
@@ -108,7 +108,7 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMethodOverloadingByArity(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Math {
                     sum(a: int): int { return a }
@@ -116,7 +116,7 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
                     sum(a: int, b: int, c: int): int { return a + b + c }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.Math"));
+        Class<?> classA = runner.getClass("com.Math");
         var instance = classA.getConstructor().newInstance();
 
         assertEquals(
@@ -132,7 +132,7 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMethodOverloadingByType(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Calculator {
                     add(a: int, b: int): int { return a + b }
@@ -140,7 +140,7 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
                     add(a: String, b: String): String { return a + b }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.Calculator"));
+        Class<?> classA = runner.getClass("com.Calculator");
         var instance = classA.getConstructor().newInstance();
 
         assertEquals(
@@ -156,7 +156,7 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testMethodOverloadingMixedArityAndType(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Formatter {
                     format(value: int): String { return "int:" + value }
@@ -165,7 +165,7 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
                     format(prefix: String, value: double): String { return prefix + value }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.Formatter"));
+        Class<?> classA = runner.getClass("com.Formatter");
         var instance = classA.getConstructor().newInstance();
 
         assertEquals(
@@ -182,14 +182,14 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testOverloadingWithArrayParameters(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class ArrayUtils {
                     getLength(values: int[]): int { return values.length }
                     getLength(values: String[]): int { return values.length }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.ArrayUtils"));
+        Class<?> classA = runner.getClass("com.ArrayUtils");
         var instance = classA.getConstructor().newInstance();
 
         assertEquals(
@@ -204,14 +204,14 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testOverloadingWithReturnTypeVariation(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Converter {
                     convert(value: int): String { return "" + value }
                     convert(value: String): int { return 0 }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.Converter"));
+        Class<?> classA = runner.getClass("com.Converter");
         var instance = classA.getConstructor().newInstance();
 
         assertEquals(
@@ -226,7 +226,7 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticMethodOverloading(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Utils {
                     static format(value: int): String { return "int:" + value }
@@ -234,7 +234,7 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
                     static format(value: String): String { return "string:" + value }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.Utils"));
+        Class<?> classA = runner.getClass("com.Utils");
 
         assertEquals(
                 List.of("int:42", "double:3.14", "string:hello"),

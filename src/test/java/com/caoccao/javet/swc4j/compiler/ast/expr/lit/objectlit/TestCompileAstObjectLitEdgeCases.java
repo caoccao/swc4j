@@ -37,7 +37,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase02DuplicateKeys(JdkVersion jdkVersion) throws Exception {
         // Edge case 2: Duplicate keys - later value wins
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -46,7 +46,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Later value should win (Map.put overwrites)
@@ -59,7 +59,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase06NonStringPrimitiveKeys(JdkVersion jdkVersion) throws Exception {
         // Edge case 6: Non-string primitive keys (boolean, null) converted to string
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -72,7 +72,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Primitive keys are converted to strings
@@ -83,7 +83,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase10ReservedKeywords(JdkVersion jdkVersion) throws Exception {
         // Edge case 10: Reserved keywords as keys work fine in Maps
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -98,7 +98,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Reserved keywords are just strings in Map keys
@@ -115,7 +115,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase11WhitespaceInKeys(JdkVersion jdkVersion) throws Exception {
         // Edge case 11: Whitespace in keys is preserved exactly
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -129,7 +129,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Whitespace is preserved exactly
@@ -144,7 +144,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase12UnicodeKeys(JdkVersion jdkVersion) throws Exception {
         // Edge case 12: Unicode keys are supported (Java strings support full Unicode)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -159,7 +159,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Unicode is fully supported
@@ -176,7 +176,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase14ObjectAsValueTypeAnnotation(JdkVersion jdkVersion) throws Exception {
         // Edge case 14: Object as value type annotation - still generates LinkedHashMap
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -185,7 +185,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Object type annotation doesn't prevent LinkedHashMap generation
@@ -196,7 +196,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase15MixedKeyTypes(JdkVersion jdkVersion) throws Exception {
         // Edge case 15: Mixed key types - all converted to String
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -206,7 +206,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // All keys coerced to String
@@ -217,7 +217,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase16TrailingCommas(JdkVersion jdkVersion) throws Exception {
         // Edge case 16: Trailing commas - AST handles this automatically
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -230,7 +230,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Trailing comma doesn't affect object creation
@@ -241,7 +241,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase17ComputedKeysEvaluationOrder(JdkVersion jdkVersion) throws Exception {
         // Edge case 17: Computed keys evaluation order - expressions evaluated left to right
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -254,7 +254,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Computed keys with string concat expressions - insertion order preserved
@@ -265,7 +265,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase17ComputedKeysWithExpressions(JdkVersion jdkVersion) throws Exception {
         // Edge case 17: Computed keys with expressions - evaluate in order
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -279,7 +279,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Expressions evaluated: keys are Integer 10, 11, 12
@@ -292,7 +292,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase17ComputedKeysWithVariableReferences(JdkVersion jdkVersion) throws Exception {
         // Edge case 17: Computed keys with variable references - evaluate in order
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -308,7 +308,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Keys are "0", "1", "2" (numeric keys coerced to string by default)
@@ -319,7 +319,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase18PropertyNameCollisions(JdkVersion jdkVersion) throws Exception {
         // Edge case 18: Property name collisions after coercion - later value wins
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -331,7 +331,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Both keys coerce to "1", later value wins
@@ -342,7 +342,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase19ExpressionValues(JdkVersion jdkVersion) throws Exception {
         // Edge case 19: Expression values - various expressions evaluated at runtime
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -359,7 +359,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // All expressions evaluated correctly
@@ -378,7 +378,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase20ObjectInReturnTypeContext(JdkVersion jdkVersion) throws Exception {
         // Edge case 20: Object in return type context - LinkedHashMap returned
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     getObject(): Object {
@@ -386,7 +386,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("getObject").invoke(instance);
         // Verify result is LinkedHashMap even with Object return type
@@ -426,7 +426,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
         // Edge case 24: Null values in Record<string, string> should be allowed (Java allows null)
         // Note: Java doesn't enforce non-nullable by default, so this test verifies null is allowed
         try {
-            var map = getCompiler(jdkVersion).compile("""
+            var runner = getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
                         test() {
@@ -438,7 +438,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                         }
                       }
                     }""");
-            Class<?> classA = loadClass(map.get("com.A"));
+            Class<?> classA = runner.getClass("com.A");
             var instance = classA.getConstructor().newInstance();
             var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
             // Null should be allowed in Java Maps
@@ -459,7 +459,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     public void testEdgeCase27WideningConversion(JdkVersion jdkVersion) throws Exception {
         // Edge case 27: Widening conversion - int literals widen to long type
         // Note: Current implementation stores values based on literal size
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -471,7 +471,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // int literals are stored as Integer when they fit in int range
@@ -484,7 +484,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
         // Edge case 28: Narrowing conversion - compiler allows long literals in int context
         // Note: Current implementation allows this (no strict narrowing validation)
         // The large value will be truncated/wrapped at runtime
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -496,7 +496,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("a", 1, "b", 42), result);
@@ -506,7 +506,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase29ObjectTypePermissive(JdkVersion jdkVersion) throws Exception {
         // Edge case 29: Record<string, Object> allows any value type (permissive)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -521,7 +521,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Verify primitive values
@@ -540,7 +540,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     public void testEdgeCase30UnionTypesIgnored(JdkVersion jdkVersion) throws Exception {
         // Edge case 30: Union types (number | string) compile but validation is not enforced
         // Note: Current implementation parses union types but treats them permissively (like Object)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -553,7 +553,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Union types are treated permissively - mixed types allowed
@@ -564,7 +564,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase31ArrayValuesInRecord(JdkVersion jdkVersion) throws Exception {
         // Edge case 31: Array values in Record<string, Object> - arrays work as values
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -576,7 +576,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Verify arrays are stored correctly
@@ -591,7 +591,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase32EmptyObjectWithStrictRecordType(JdkVersion jdkVersion) throws Exception {
         // Edge case 32: Empty object with strict Record type - should be valid
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -600,7 +600,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Empty map is valid for any Record type
@@ -612,7 +612,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase33ComputedPropertyMultipleKeys(JdkVersion jdkVersion) throws Exception {
         // Edge case 33: Multiple computed properties with type validation
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -627,7 +627,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Mix of computed and regular keys
@@ -640,7 +640,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase33ComputedPropertyWithCorrectNumericType(JdkVersion jdkVersion) throws Exception {
         // Edge case 33: Computed property with numeric key type - should work with Record<number, V>
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -650,7 +650,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Computed key with number type - TypeScript number maps to Double
@@ -661,7 +661,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testEdgeCase33ComputedPropertyWithCorrectType(JdkVersion jdkVersion) throws Exception {
         // Edge case 33: Computed property with type validation - correct type should work
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -671,7 +671,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Computed key with string type matches Record<string, number>

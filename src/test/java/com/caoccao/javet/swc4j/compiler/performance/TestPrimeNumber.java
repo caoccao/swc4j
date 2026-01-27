@@ -27,7 +27,7 @@ public class TestPrimeNumber extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void test(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Math } from 'java.lang'
                 export function isPrime(number: int): boolean {
                   const limit = Math.floor(number / 2)
@@ -38,7 +38,7 @@ public class TestPrimeNumber extends BaseTestCompileSuite {
                   }
                   return true
                 }""");
-        Class<?> classA = loadClass(map.get("$"));
+        Class<?> classA = runner.getClass("$");
         var instance = classA.getConstructor().newInstance();
         var method = classA.getMethod("isPrime", int.class);
         assertEquals(true, method.invoke(instance, 7));  // 7 is prime

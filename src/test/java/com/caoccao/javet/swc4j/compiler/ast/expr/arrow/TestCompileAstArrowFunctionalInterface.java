@@ -34,7 +34,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testBooleanSupplier(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { BooleanSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -43,8 +43,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);
@@ -54,7 +53,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoubleSupplier(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { DoubleSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -63,8 +62,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);
@@ -74,7 +72,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIntSupplier(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -83,8 +81,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);
@@ -94,7 +91,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testIntUnaryOperator(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -103,8 +100,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);
@@ -114,7 +110,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLongSupplier(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { LongSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -124,8 +120,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);
@@ -135,7 +130,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSupplierString(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Supplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -144,8 +139,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("get").invoke(instance);
         assertNotNull(fn);

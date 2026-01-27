@@ -17,7 +17,7 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstEnumFromValue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export const enum Code {
                     Success = 200,
@@ -25,7 +25,7 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
                     Error = 500
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Code"));
+        Class<?> enumClass = runner.getClass("com.Code");
 
         var fromValueMethod = enumClass.getMethod("fromValue", int.class);
         Object notFound = fromValueMethod.invoke(null, 404);
@@ -37,7 +37,7 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstEnumOrdinal(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export const enum Level {
                     Debug = 10,
@@ -45,7 +45,7 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
                     Warn = 30
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Level"));
+        Class<?> enumClass = runner.getClass("com.Level");
 
         Object[] constants = enumClass.getEnumConstants();
 
@@ -57,13 +57,13 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstEnumSingleMember(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export const enum Single {
                     Value = "value"
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Single"));
+        Class<?> enumClass = runner.getClass("com.Single");
 
         Object[] constants = enumClass.getEnumConstants();
         assertEquals(1, constants.length);
@@ -74,14 +74,14 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstEnumValueOf(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export const enum State {
                     Active = 1,
                     Inactive = 0
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.State"));
+        Class<?> enumClass = runner.getClass("com.State");
 
         var valueOfMethod = enumClass.getMethod("valueOf", String.class);
         Object active = valueOfMethod.invoke(null, "ACTIVE");
@@ -93,7 +93,7 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstEnumValues(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export const enum Priority {
                     Low,
@@ -101,7 +101,7 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
                     High
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Priority"));
+        Class<?> enumClass = runner.getClass("com.Priority");
 
         var valuesMethod = enumClass.getMethod("values");
         Object[] values = (Object[]) valuesMethod.invoke(null);
@@ -115,7 +115,7 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstNumericEnum(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export const enum Numbers {
                     One = 1,
@@ -123,7 +123,7 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
                     Three
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Numbers"));
+        Class<?> enumClass = runner.getClass("com.Numbers");
 
         assertTrue(Enum.class.isAssignableFrom(enumClass));
         var getValueMethod = enumClass.getMethod("getValue");
@@ -137,7 +137,7 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testConstStringEnum(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export const enum Colors {
                     Red = "red",
@@ -145,7 +145,7 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
                     Blue = "blue"
                   }
                 }""");
-        Class<?> enumClass = loadClass(map.get("com.Colors"));
+        Class<?> enumClass = runner.getClass("com.Colors");
 
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();

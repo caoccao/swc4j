@@ -37,7 +37,7 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrowBlockBodyWithMultipleStatements(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -51,8 +51,7 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("test").invoke(instance);
         assertNotNull(result);
@@ -63,7 +62,7 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrowBlockBodyWithReturn(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -75,8 +74,7 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("test").invoke(instance);
         assertNotNull(result);
@@ -86,7 +84,7 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrowExpressionBodyWithIntParam(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -96,8 +94,7 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("test").invoke(instance);
         assertNotNull(result);
@@ -109,7 +106,7 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrowExpressionBodyWithIntReturn(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -119,8 +116,7 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("test").invoke(instance);
         assertNotNull(result);
@@ -130,7 +126,7 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrowWithStringReturn(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Supplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -140,8 +136,7 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("test").invoke(instance);
         assertNotNull(result);

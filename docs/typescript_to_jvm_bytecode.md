@@ -362,7 +362,7 @@ Example test structure:
 @ParameterizedTest
 @EnumSource(JdkVersion.class)
 public void testReturnDouble(JdkVersion jdkVersion) throws Exception {
-    var map = getCompiler(jdkVersion).compile("""
+    var runner = getCompiler(jdkVersion).compile("""
         namespace com {
           export class A {
             test(): double {
@@ -370,7 +370,7 @@ public void testReturnDouble(JdkVersion jdkVersion) throws Exception {
             }
           }
         }""");
-    Class<?> classA = loadClass(map.get("com.A"));
+    Class<?> classA = runner.getClass("com.A");
     var instance = classA.getConstructor().newInstance();
     assertEquals(123.456D, (double) classA.getMethod("test").invoke(instance), 0.00001D);
 }

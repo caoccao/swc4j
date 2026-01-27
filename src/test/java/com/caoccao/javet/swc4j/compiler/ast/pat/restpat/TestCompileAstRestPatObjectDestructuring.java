@@ -34,7 +34,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     public void testBasicRestPattern(JdkVersion jdkVersion) throws Exception {
         // Basic rest pattern: { a, ...rest }
         // Count remaining properties by iterating
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -53,7 +53,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("A:2", classA.getMethod("test").invoke(instance));
     }
@@ -62,7 +62,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestAsOnlyProperty(JdkVersion jdkVersion) throws Exception {
         // Rest as only property: { ...all } copies entire object
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -77,7 +77,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(3, classA.getMethod("test").invoke(instance));
     }
@@ -86,7 +86,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestCollectingKeys(JdkVersion jdkVersion) throws Exception {
         // Collect keys from rest
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -102,7 +102,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("keyA,keyB,", classA.getMethod("test").invoke(instance));
     }
@@ -111,7 +111,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestConstDeclaration(JdkVersion jdkVersion) throws Exception {
         // Rest with const declaration
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -126,7 +126,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(2, classA.getMethod("test").invoke(instance));
     }
@@ -135,7 +135,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestEmptyArray(JdkVersion jdkVersion) throws Exception {
         // For-of over empty array with rest pattern
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -148,7 +148,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test").invoke(instance));
     }
@@ -157,7 +157,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestFromEmptyObject(JdkVersion jdkVersion) throws Exception {
         // Rest from empty object: rest = {}
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -172,7 +172,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test").invoke(instance));
     }
@@ -181,7 +181,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestIteratingValues(JdkVersion jdkVersion) throws Exception {
         // Iterate over rest values
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -196,7 +196,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("ABC", classA.getMethod("test").invoke(instance));
     }
@@ -205,7 +205,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestLetDeclaration(JdkVersion jdkVersion) throws Exception {
         // Rest with let declaration
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -220,7 +220,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(2, classA.getMethod("test").invoke(instance));
     }
@@ -229,7 +229,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestMultipleIterations(JdkVersion jdkVersion) throws Exception {
         // Each iteration creates new rest map
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -253,7 +253,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("1:2,2:1,3:0,", classA.getMethod("test").invoke(instance));
     }
@@ -262,7 +262,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestPreservesOrder(JdkVersion jdkVersion) throws Exception {
         // Rest preserves insertion order (LinkedHashMap)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -277,7 +277,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Should preserve order: c, a, d (b was extracted)
         assertEquals("cad", classA.getMethod("test").invoke(instance));
@@ -287,7 +287,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestWithBreak(JdkVersion jdkVersion) throws Exception {
         // Rest with break statement
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -303,7 +303,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(2, classA.getMethod("test").invoke(instance));
     }
@@ -312,7 +312,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestWithContinue(JdkVersion jdkVersion) throws Exception {
         // Rest with continue statement
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -330,7 +330,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         // Two iterations (a=1 and a=3), each has 1 property in rest
         assertEquals(2, classA.getMethod("test").invoke(instance));
@@ -340,7 +340,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestWithDefaultValue(JdkVersion jdkVersion) throws Exception {
         // Rest with default value property: { a = "default", ...rest }
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -359,7 +359,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("default:2", classA.getMethod("test").invoke(instance));
     }
@@ -368,7 +368,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestWithEmptyRemaining(JdkVersion jdkVersion) throws Exception {
         // Rest when all properties are extracted: rest = {}
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
@@ -383,7 +383,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals(0, classA.getMethod("test").invoke(instance));
     }
@@ -392,7 +392,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestWithMissingProperty(JdkVersion jdkVersion) throws Exception {
         // Extract property that doesn't exist (gets null), rest still works
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -411,7 +411,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("null:2", classA.getMethod("test").invoke(instance));
     }
@@ -420,7 +420,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestWithMixedTypes(JdkVersion jdkVersion) throws Exception {
         // Rest with mixed value types - collect values
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -436,7 +436,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("42,true,", classA.getMethod("test").invoke(instance));
     }
@@ -445,7 +445,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestWithMultipleExtracted(JdkVersion jdkVersion) throws Exception {
         // Multiple extracted properties before rest
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -466,7 +466,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("ABC:2", classA.getMethod("test").invoke(instance));
     }
@@ -475,7 +475,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestWithRenamedProperty(JdkVersion jdkVersion) throws Exception {
         // Rest with renamed property: { a: x, ...rest }
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): string {
@@ -494,7 +494,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("X:2", classA.getMethod("test").invoke(instance));
     }
@@ -503,7 +503,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
     @EnumSource(JdkVersion.class)
     public void testRestWithReturn(JdkVersion jdkVersion) throws Exception {
         // Rest with return statement - iterate to find value
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): Object {
@@ -521,7 +521,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         assertEquals("first", classA.getMethod("test").invoke(instance));
     }

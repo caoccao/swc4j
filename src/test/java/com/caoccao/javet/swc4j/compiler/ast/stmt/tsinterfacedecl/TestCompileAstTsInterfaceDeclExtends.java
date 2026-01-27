@@ -38,7 +38,7 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfaceDiamondInheritance(JdkVersion jdkVersion) throws Exception {
         // Test: Diamond inheritance pattern (D extends B, C; B extends A; C extends A)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface A {
                     id: int
@@ -53,11 +53,10 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
                     value: double
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> a = classes.get("com.A");
-        Class<?> b = classes.get("com.B");
-        Class<?> c = classes.get("com.C");
-        Class<?> d = classes.get("com.D");
+        Class<?> a = runner.getClass("com.A");
+        Class<?> b = runner.getClass("com.B");
+        Class<?> c = runner.getClass("com.C");
+        Class<?> d = runner.getClass("com.D");
 
         // D should extend both B and C
         Set<Class<?>> interfaces = Arrays.stream(d.getInterfaces()).collect(Collectors.toSet());
@@ -72,7 +71,7 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfaceExtendsChain(JdkVersion jdkVersion) throws Exception {
         // Test: Chain of interface inheritance (A extends B extends C)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Base {
                     id: int
@@ -84,10 +83,9 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
                     active: boolean
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> base = classes.get("com.Base");
-        Class<?> middle = classes.get("com.Middle");
-        Class<?> derived = classes.get("com.Derived");
+        Class<?> base = runner.getClass("com.Base");
+        Class<?> middle = runner.getClass("com.Middle");
+        Class<?> derived = runner.getClass("com.Derived");
 
         assertTrue(base.isInterface());
         assertTrue(middle.isInterface());
@@ -107,7 +105,7 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfaceExtendsMultiple(JdkVersion jdkVersion) throws Exception {
         // Test: Interface extending multiple interfaces
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Named {
                     name: String
@@ -119,10 +117,9 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
                     id: int
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> named = classes.get("com.Named");
-        Class<?> aged = classes.get("com.Aged");
-        Class<?> person = classes.get("com.Person");
+        Class<?> named = runner.getClass("com.Named");
+        Class<?> aged = runner.getClass("com.Aged");
+        Class<?> person = runner.getClass("com.Person");
 
         assertTrue(named.isInterface());
         assertTrue(aged.isInterface());
@@ -142,7 +139,7 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfaceExtendsSingle(JdkVersion jdkVersion) throws Exception {
         // Test: Interface extending a single interface
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Named {
                     name: String
@@ -151,9 +148,8 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
                     age: int
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> named = classes.get("com.Named");
-        Class<?> person = classes.get("com.Person");
+        Class<?> named = runner.getClass("com.Named");
+        Class<?> person = runner.getClass("com.Person");
 
         assertTrue(named.isInterface());
         assertTrue(person.isInterface());
@@ -174,7 +170,7 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testInterfaceExtendsWithMethods(JdkVersion jdkVersion) throws Exception {
         // Test: Extending interface with methods
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export interface Comparable {
                     compareTo(other: Object): int
@@ -184,9 +180,8 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
                     priority: int
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> comparable = classes.get("com.Comparable");
-        Class<?> sortableItem = classes.get("com.SortableItem");
+        Class<?> comparable = runner.getClass("com.Comparable");
+        Class<?> sortableItem = runner.getClass("com.SortableItem");
 
         assertTrue(comparable.isInterface());
         assertTrue(sortableItem.isInterface());

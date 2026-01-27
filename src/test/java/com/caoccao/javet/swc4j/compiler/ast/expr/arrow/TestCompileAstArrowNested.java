@@ -36,7 +36,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrowChainedWithCapture(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier, IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -50,8 +50,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var doubler = (IntUnaryOperator) classA.getMethod("getDoubler").invoke(instance);
@@ -65,7 +64,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowInStaticMethod(JdkVersion jdkVersion) throws Exception {
         // Edge case 57: Arrow inside static method
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -74,8 +73,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var multiplier2 = (IntUnaryOperator) classA.getMethod("createMultiplier", int.class).invoke(null, 2);
         var multiplier5 = (IntUnaryOperator) classA.getMethod("createMultiplier", int.class).invoke(null, 5);
         assertEquals(
@@ -87,7 +85,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowInsideArrow(JdkVersion jdkVersion) throws Exception {
         // Edge case 53: Arrow inside arrow - basic curried function
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -96,8 +94,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var adder5 = (IntUnaryOperator) classA.getMethod("createAdder", int.class).invoke(instance, 5);
         var adder10 = (IntUnaryOperator) classA.getMethod("createAdder", int.class).invoke(instance, 10);
@@ -110,7 +107,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowWithDifferentCaptureTypes(JdkVersion jdkVersion) throws Exception {
         // Arrow capturing different types of variables
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Supplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -119,8 +116,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var supplier = (Supplier<?>) classA.getMethod("createFormatter", String.class, int.class)
                 .invoke(instance, "Value: ", 42);
@@ -131,7 +127,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowWithDoubleCaptures(JdkVersion jdkVersion) throws Exception {
         // Arrow capturing double values
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { DoubleSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -140,8 +136,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var supplier = (DoubleSupplier) classA.getMethod("createProduct", double.class, double.class)
                 .invoke(instance, 2.5, 4.0);
@@ -152,7 +147,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowWithLongCaptures(JdkVersion jdkVersion) throws Exception {
         // Arrow capturing long values
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { LongSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -161,8 +156,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var supplier = (LongSupplier) classA.getMethod("createSum", long.class, long.class)
                 .invoke(instance, 1000000000L, 2000000000L);
@@ -173,7 +167,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowWithMixedTypeCaptures(JdkVersion jdkVersion) throws Exception {
         // Arrow capturing int, long, and double
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { DoubleSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -182,8 +176,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var supplier = (DoubleSupplier) classA.getMethod("createComplex", int.class, long.class, double.class)
                 .invoke(instance, 10, 20L, 30.5);
@@ -195,7 +188,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowWithMultiplePrimitiveCaptures(JdkVersion jdkVersion) throws Exception {
         // Arrow capturing multiple primitive values
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -204,8 +197,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var supplier = (IntSupplier) classA.getMethod("createComputer", int.class, int.class, int.class, int.class)
                 .invoke(instance, 2, 3, 4, 5);
@@ -216,7 +208,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrowWithOffsetCapture(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -225,8 +217,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("createAdder", int.class).invoke(instance, 5);
         assertNotNull(fn);
@@ -236,7 +227,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrowWithStringCapture(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Supplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -246,8 +237,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("createGreeter", String.class).invoke(instance, "World");
         assertNotNull(fn);
@@ -257,7 +247,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrowWithThisCapture(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -267,8 +257,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = classA.getMethod("createValueGetter").invoke(instance);
         assertNotNull(fn);
@@ -279,7 +268,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testDeeplyNestedArrows(JdkVersion jdkVersion) throws Exception {
         // Edge case 58: Deeply nested arrows (capturing multiple values)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -288,8 +277,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("createAdder", int.class, int.class, int.class)
                 .invoke(instance, 1, 2, 3);
@@ -304,7 +292,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testMultiLevelCapture(JdkVersion jdkVersion) throws Exception {
         // Edge case 37: Multi-level capture - capturing multiple params
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -313,8 +301,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var combiner = (IntUnaryOperator) classA.getMethod("createCombiner", int.class, int.class)
                 .invoke(instance, 10, 20);
@@ -328,7 +315,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testMultipleArrowsFromSameClass(JdkVersion jdkVersion) throws Exception {
         // Multiple arrows returned from the same class
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator, IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -340,8 +327,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var doubler = (IntUnaryOperator) classA.getMethod("getDoubler").invoke(instance);
         var adder = (IntUnaryOperator) classA.getMethod("getAdder", int.class).invoke(instance, 10);

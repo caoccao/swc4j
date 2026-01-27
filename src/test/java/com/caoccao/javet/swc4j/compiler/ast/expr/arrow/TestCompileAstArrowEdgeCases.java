@@ -36,7 +36,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowAsMethodReturn(JdkVersion jdkVersion) throws Exception {
         // Edge case 46: As return value
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -45,8 +45,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("getAdder", int.class).invoke(instance, 10);
         assertEquals(15, fn.applyAsInt(5));
@@ -56,7 +55,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowAssignedToLocalVariable(JdkVersion jdkVersion) throws Exception {
         // Arrow assigned to local variable and returned
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -71,8 +70,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var fn1 = (IntSupplier) classA.getMethod("getSupplier").invoke(instance);
@@ -87,7 +85,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowCaptureMultipleVariables(JdkVersion jdkVersion) throws Exception {
         // Edge case 30: Capture multiple local variables
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -99,8 +97,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntSupplier) classA.getMethod("test").invoke(instance);
         assertEquals(60, fn.getAsInt());
@@ -110,7 +107,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowCapturePrimitiveAndObject(JdkVersion jdkVersion) throws Exception {
         // Test arrow capturing both primitive and object
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Supplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -121,8 +118,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (Supplier<?>) classA.getMethod("test").invoke(instance);
         assertEquals("Value: 42", fn.get());
@@ -132,7 +128,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowCaptureStaticField(JdkVersion jdkVersion) throws Exception {
         // Edge case 39: Capture static field
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -142,8 +138,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var fn = (IntSupplier) classA.getMethod("getMultiplied", int.class).invoke(null, 5);
         assertEquals(50, fn.getAsInt());
     }
@@ -152,7 +147,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowCaptureThisAndLocalVars(JdkVersion jdkVersion) throws Exception {
         // Edge case 33: Capture both this and local variables
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -163,8 +158,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntSupplier) classA.getMethod("compute", int.class).invoke(instance, 5);
         assertEquals(20, fn.getAsInt()); // 5 * 2 + 10 = 20
@@ -174,7 +168,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowCapturingBoolean(JdkVersion jdkVersion) throws Exception {
         // Arrow capturing boolean values
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { BooleanSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -183,8 +177,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var trueFn = (BooleanSupplier) classA.getMethod("createSupplier", boolean.class).invoke(instance, true);
@@ -198,7 +191,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowCapturingString(JdkVersion jdkVersion) throws Exception {
         // Arrow capturing String and returning it
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { Supplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -210,8 +203,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var fn1 = (Supplier<?>) classA.getMethod("getString", String.class).invoke(instance, "hello");
@@ -227,7 +219,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowInConditionalExpression(JdkVersion jdkVersion) throws Exception {
         // Edge case 50: Arrow in conditional expression
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -236,8 +228,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var addFn = (IntUnaryOperator) classA.getMethod("getOperator", boolean.class).invoke(instance, true);
@@ -253,7 +244,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowInConstructor(JdkVersion jdkVersion) throws Exception {
         // Edge case 56: Arrow inside constructor - arrow assigned to field
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -267,8 +258,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor(int.class).newInstance(21);
         var fn = (IntSupplier) classA.getMethod("getSupplier").invoke(instance);
 
@@ -279,7 +269,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowInFieldInitializer(JdkVersion jdkVersion) throws Exception {
         // Edge case 49: As field initializer (simplified - stores as field)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -289,8 +279,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("getProcessor").invoke(instance);
         assertEquals(10, fn.applyAsInt(5));
@@ -300,7 +289,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowInStaticMethod(JdkVersion jdkVersion) throws Exception {
         // Edge case 57: Arrow inside static method
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -309,8 +298,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var fn = (IntUnaryOperator) classA.getMethod("getDoubler").invoke(null);
 
         assertEquals(
@@ -322,7 +310,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowReassignment(JdkVersion jdkVersion) throws Exception {
         // Edge case 42: Arrow assigned to let variable (reassignment)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -335,8 +323,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var doublerFn = (IntUnaryOperator) classA.getMethod("compute", boolean.class).invoke(instance, true);
@@ -351,7 +338,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowWithComplexCondition(JdkVersion jdkVersion) throws Exception {
         // Arrow with complex boolean condition
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntPredicate } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -360,8 +347,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntPredicate) classA.getMethod("getInRangeChecker", int.class, int.class)
                 .invoke(instance, 10, 20);
@@ -375,7 +361,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowWithMultiParamCapture(JdkVersion jdkVersion) throws Exception {
         // Arrow capturing multiple parameters
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -384,8 +370,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("createAdder", int.class, int.class).invoke(instance, 10, 5);
 
@@ -398,7 +383,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testArrowWithNestedTernary(JdkVersion jdkVersion) throws Exception {
         // Test arrow with nested ternary
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -407,8 +392,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("getSign").invoke(instance);
         assertEquals(1, fn.applyAsInt(5));
@@ -420,7 +404,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testCaptureFromConstructor(JdkVersion jdkVersion) throws Exception {
         // Edge case 38: Capture from constructor
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -433,8 +417,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance1 = classA.getConstructor(int.class).newInstance(42);
         var instance2 = classA.getConstructor(int.class).newInstance(100);
 
@@ -450,7 +433,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testMultipleArrowsDifferentTypes(JdkVersion jdkVersion) throws Exception {
         // Multiple arrows with different functional interfaces
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 import { IntSupplier } from 'java.util.function'
                 import { IntPredicate } from 'java.util.function'
@@ -467,8 +450,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var doubler = (IntUnaryOperator) classA.getMethod("getDoubler").invoke(instance);
@@ -485,7 +467,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testMultipleArrowsInSameMethod(JdkVersion jdkVersion) throws Exception {
         // Multiple arrows in same method with different captures, returned as list
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator, IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -500,8 +482,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var adder5 = (IntUnaryOperator) classA.getMethod("getAdder", int.class).invoke(instance, 5);

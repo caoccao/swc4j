@@ -38,7 +38,7 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testGenericClassBasic(JdkVersion jdkVersion) throws Exception {
         // Basic generic class - T erases to Object
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Box<T> {
                     value: T
@@ -47,7 +47,7 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                     setValue(value: T): void { this.value = value }
                   }
                 }""");
-        Class<?> classBox = loadClass(map.get("com.Box"));
+        Class<?> classBox = runner.getClass("com.Box");
         assertNotNull(classBox);
 
         // Verify field type is Object (type erasure)
@@ -77,7 +77,7 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testGenericClassMultipleTypeParams(JdkVersion jdkVersion) throws Exception {
         // Generic class with multiple type parameters
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Pair<K, V> {
                     key: K
@@ -87,7 +87,7 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                     getVal(): V { return this.val }
                   }
                 }""");
-        Class<?> classPair = loadClass(map.get("com.Pair"));
+        Class<?> classPair = runner.getClass("com.Pair");
         assertNotNull(classPair);
 
         // Verify both fields are Object (no constraints)
@@ -110,7 +110,7 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testGenericClassTwoTypeParamsWithConstraints(JdkVersion jdkVersion) throws Exception {
         // Generic class with two type params, one constrained
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class KeyValue<K extends String, V> {
                     key: K
@@ -120,7 +120,7 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                     getVal(): V { return this.val }
                   }
                 }""");
-        Class<?> classKV = loadClass(map.get("com.KeyValue"));
+        Class<?> classKV = runner.getClass("com.KeyValue");
         assertNotNull(classKV);
 
         // Verify field types - K erases to String, V erases to Object
@@ -143,7 +143,7 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testGenericClassWithConstraint(JdkVersion jdkVersion) throws Exception {
         // Generic class with constraint - T erases to String (the constraint)
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class StrBox<T extends String> {
                     value: T
@@ -151,7 +151,7 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                     getValue(): T { return this.value }
                   }
                 }""");
-        Class<?> classStrBox = loadClass(map.get("com.StrBox"));
+        Class<?> classStrBox = runner.getClass("com.StrBox");
         assertNotNull(classStrBox);
 
         // Verify field type is String (constraint type)
@@ -171,7 +171,7 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testGenericClassWithMultipleMethods(JdkVersion jdkVersion) throws Exception {
         // Generic class with multiple methods using the type parameter
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Holder<T> {
                     value: T
@@ -181,7 +181,7 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                     transform(newValue: T): T { return newValue }
                   }
                 }""");
-        Class<?> classHolder = loadClass(map.get("com.Holder"));
+        Class<?> classHolder = runner.getClass("com.Holder");
         assertNotNull(classHolder);
 
         // Verify field type is Object (erased type)
@@ -211,13 +211,13 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testGenericInstanceMethodBasic(JdkVersion jdkVersion) throws Exception {
         // Generic instance method
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Container {
                     wrap<T>(value: T): T { return value }
                   }
                 }""");
-        Class<?> classContainer = loadClass(map.get("com.Container"));
+        Class<?> classContainer = runner.getClass("com.Container");
         assertNotNull(classContainer);
 
         // Verify method signature uses Object
@@ -239,14 +239,14 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testGenericMethodBasic(JdkVersion jdkVersion) throws Exception {
         // Generic method in a non-generic class
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Utils {
                     static identity<T>(value: T): T { return value }
                     static first<T>(a: T, b: T): T { return a }
                   }
                 }""");
-        Class<?> classUtils = loadClass(map.get("com.Utils"));
+        Class<?> classUtils = runner.getClass("com.Utils");
         assertNotNull(classUtils);
 
         // Verify method signatures use Object
@@ -271,13 +271,13 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testGenericMethodWithConstraint(JdkVersion jdkVersion) throws Exception {
         // Generic method with constraint - T erases to String
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class Utils {
                     static echo<T extends String>(value: T): T { return value }
                   }
                 }""");
-        Class<?> classUtils = loadClass(map.get("com.Utils"));
+        Class<?> classUtils = runner.getClass("com.Utils");
         assertNotNull(classUtils);
 
         // Verify method signature uses String (constraint)

@@ -37,7 +37,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceBinaryOperations(JdkVersion jdkVersion) throws Exception {
         // Return type inference from various binary operations
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntBinaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -52,8 +52,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var adder = (IntBinaryOperator) classA.getMethod("getAdder").invoke(instance);
@@ -69,7 +68,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceBitwiseOperations(JdkVersion jdkVersion) throws Exception {
         // Return type inference from bitwise operations
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntBinaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -84,8 +83,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var andOp = (IntBinaryOperator) classA.getMethod("getAnd").invoke(instance);
@@ -104,7 +102,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceBooleanExpression(JdkVersion jdkVersion) throws Exception {
         // Return type inferred as boolean from comparison
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntPredicate } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -116,8 +114,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var positiveFn = (IntPredicate) classA.getMethod("getPositive").invoke(instance);
         var evenFn = (IntPredicate) classA.getMethod("getEven").invoke(instance);
@@ -134,7 +131,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceComplexExpression(JdkVersion jdkVersion) throws Exception {
         // Return type inferred from complex expression
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -143,8 +140,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("get").invoke(instance);
         // f(x) = x^2 + x - 1
@@ -157,7 +153,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceConditionalReturns(JdkVersion jdkVersion) throws Exception {
         // Return type inference with conditional returns in block
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -170,8 +166,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(
@@ -184,7 +179,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceDouble(JdkVersion jdkVersion) throws Exception {
         // Return type inferred as double from x * 2.0 where x is double
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { DoubleUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -193,8 +188,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (DoubleUnaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(2.0, fn.applyAsDouble(1.0), 0.0001);
@@ -205,7 +199,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceDoubleBinaryOperations(JdkVersion jdkVersion) throws Exception {
         // Return type inference from double binary operations
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { DoubleBinaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -217,8 +211,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var adder = (DoubleBinaryOperator) classA.getMethod("getAdder").invoke(instance);
@@ -232,7 +225,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceFromCapturedVariable(JdkVersion jdkVersion) throws Exception {
         // Return type inferred from captured variable type
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -241,8 +234,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntSupplier) classA.getMethod("getValue", int.class).invoke(instance, 5);
         assertEquals(10, fn.getAsInt());
@@ -252,7 +244,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceFromConstVariable(JdkVersion jdkVersion) throws Exception {
         // Return type inferred from const variable type
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { LongUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -264,8 +256,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (LongUnaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(
@@ -277,7 +268,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceFromExpression(JdkVersion jdkVersion) throws Exception {
         // Edge case 60: Inferred return type from expression
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -286,8 +277,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(
@@ -299,7 +289,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceFromLocalVariable(JdkVersion jdkVersion) throws Exception {
         // Return type inferred from local variable type
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -311,8 +301,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(
@@ -324,7 +313,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceFromReturnStatement(JdkVersion jdkVersion) throws Exception {
         // Edge case 61: Inferred return type from return statement
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -333,8 +322,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(
@@ -346,7 +334,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceLong(JdkVersion jdkVersion) throws Exception {
         // Return type inferred as long from x * 2 where x is long
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { LongUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -355,8 +343,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (LongUnaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(
@@ -368,7 +355,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceLongBinaryOperations(JdkVersion jdkVersion) throws Exception {
         // Return type inference from long binary operations
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { LongBinaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -380,8 +367,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var adder = (LongBinaryOperator) classA.getMethod("getAdder").invoke(instance);
@@ -396,7 +382,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceMultipleStatements(JdkVersion jdkVersion) throws Exception {
         // Return type inferred from return statement in block with multiple statements
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -409,8 +395,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("get").invoke(instance);
         // f(x) = x * 2 + 1
@@ -423,7 +408,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceNestedTernary(JdkVersion jdkVersion) throws Exception {
         // Return type inference from nested ternary
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -432,8 +417,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("getSign").invoke(instance);
         assertEquals(
@@ -445,7 +429,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceSuppliers(JdkVersion jdkVersion) throws Exception {
         // Return type inference for various supplier types
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 import { LongSupplier } from 'java.util.function'
                 import { DoubleSupplier } from 'java.util.function'
@@ -467,8 +451,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
 
         var intSupplier = (IntSupplier) classA.getMethod("getIntSupplier").invoke(instance);
@@ -486,7 +469,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceTernary(JdkVersion jdkVersion) throws Exception {
         // Return type inferred from ternary expression
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -495,8 +478,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(
@@ -508,7 +490,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceUnaryOperations(JdkVersion jdkVersion) throws Exception {
         // Return type inference from unary operations
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -517,8 +499,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntUnaryOperator) classA.getMethod("getNegator").invoke(instance);
         assertEquals(
@@ -530,7 +511,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeInferenceWithCapture(JdkVersion jdkVersion) throws Exception {
         // Return type inferred when using captured variables
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { IntSupplier } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -539,8 +520,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (IntSupplier) classA.getMethod("createSupplier", int.class, int.class, int.class)
                 .invoke(instance, 10, 20, 30);
@@ -551,7 +531,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
     @EnumSource(JdkVersion.class)
     public void testReturnTypeWidening(JdkVersion jdkVersion) throws Exception {
         // When mixing int and long in expression, should widen to long
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 import { LongUnaryOperator } from 'java.util.function'
                 namespace com {
                   export class A {
@@ -560,8 +540,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
+        Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var fn = (LongUnaryOperator) classA.getMethod("get").invoke(instance);
         assertEquals(

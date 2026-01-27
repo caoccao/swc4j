@@ -31,7 +31,7 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testPrivateField(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     private value: int = 42
@@ -39,7 +39,7 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
                     setValue(v: int): void { this.value = v }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
 
         // Verify field is private
         var valueField = classA.getDeclaredField("value");
@@ -56,14 +56,14 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testPrivateMethod(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     private helper(): int { return 1 }
                     public test(): int { return this.helper() }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
 
         // Verify helper is private
         var helperMethod = classA.getDeclaredMethod("helper");
@@ -81,7 +81,7 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testProtectedField(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     protected value: int = 10
@@ -89,7 +89,7 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
                     setValue(v: int): void { this.value = v }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
 
         // Verify field is protected
         var valueField = classA.getDeclaredField("value");
@@ -106,7 +106,7 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testProtectedMethodInheritance(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     protected helper(): int { return 1 }
@@ -115,9 +115,8 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
                     test(): int { return this.helper() }
                   }
                 }""");
-        var classes = loadClasses(map);
-        Class<?> classA = classes.get("com.A");
-        Class<?> classB = classes.get("com.B");
+        Class<?> classA = runner.getClass("com.A");
+        Class<?> classB = runner.getClass("com.B");
 
         // Verify helper is protected
         var helperMethod = classA.getDeclaredMethod("helper");
@@ -131,14 +130,14 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testPublicIsDefault(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     value: int = 10
                     test(): int { return this.value }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
 
         // Verify field is public (default)
         var valueField = classA.getDeclaredField("value");
@@ -156,14 +155,14 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStaticPrivateField(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     private static secret: int = 42
                     static getSecret(): int { return A.secret }
                   }
                 }""");
-        Class<?> classA = loadClass(map.get("com.A"));
+        Class<?> classA = runner.getClass("com.A");
 
         // Verify field is private and static
         var secretField = classA.getDeclaredField("secret");
