@@ -133,16 +133,37 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         }
     }
 
-    private ArrowTypeInfo analyzeArrowType(Swc4jAstArrowExpr arrowExpr) throws Swc4jByteCodeCompilerException {
+    /**
+     * Analyze arrow type with optional target type context for parameter type inference.
+     *
+     * @param arrowExpr      the arrow expression
+     * @param targetTypeInfo optional target type info for inferring parameter types
+     * @return ArrowTypeInfo containing the resolved types
+     */
+    private ArrowTypeInfo analyzeArrowType(Swc4jAstArrowExpr arrowExpr, ReturnTypeInfo targetTypeInfo)
+            throws Swc4jByteCodeCompilerException {
         List<ISwc4jAstPat> params = arrowExpr.getParams();
         ISwc4jAstBlockStmtOrExpr body = arrowExpr.getBody();
+
+        // Try to get parameter types from target functional interface
+        List<String> targetParamTypes = null;
+        if (targetTypeInfo != null && targetTypeInfo.descriptor() != null) {
+            targetParamTypes = getTargetInterfaceParamTypes(targetTypeInfo.descriptor());
+        }
 
         // Build parameter types
         List<String> paramTypes = new ArrayList<>();
         List<String> paramNames = new ArrayList<>();
-        for (ISwc4jAstPat param : params) {
+        for (int i = 0; i < params.size(); i++) {
+            ISwc4jAstPat param = params.get(i);
             String paramType = compiler.getTypeResolver().extractParameterType(param);
             String paramName = extractParamName(param);
+
+            // If parameter type is Object and we have target type info, try to infer from target
+            if ("Ljava/lang/Object;".equals(paramType) && targetParamTypes != null && i < targetParamTypes.size()) {
+                paramType = targetParamTypes.get(i);
+            }
+
             paramTypes.add(paramType);
             paramNames.add(paramName != null ? paramName : "arg" + paramTypes.size());
         }
@@ -511,7 +532,8 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             List<CapturedVariable> capturedVariables = analyzeCapturedVariables(arrowExpr);
 
             // Determine the functional interface and method signature
-            ArrowTypeInfo typeInfo = analyzeArrowType(arrowExpr);
+            // Pass returnTypeInfo to enable parameter type inference from target type context
+            ArrowTypeInfo typeInfo = analyzeArrowType(arrowExpr, returnTypeInfo);
 
             // Generate the anonymous inner class bytecode
             byte[] lambdaBytecode = generateLambdaClass(lambdaClassName, arrowExpr, typeInfo, capturedVariables);
@@ -1270,6 +1292,79 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
 
     private int getSlotSize(String type) {
         return ("J".equals(type) || "D".equals(type)) ? 2 : 1;
+    }
+
+    /**
+     * Get parameter types from a target functional interface descriptor.
+     * This enables parameter type inference from context.
+     *
+     * @param interfaceDescriptor the interface type descriptor (e.g., "Ljava/util/function/IntUnaryOperator;")
+     * @return list of parameter type descriptors, or null if unknown interface
+     */
+    private List<String> getTargetInterfaceParamTypes(String interfaceDescriptor) {
+        if (interfaceDescriptor == null || !interfaceDescriptor.startsWith("L") || !interfaceDescriptor.endsWith(";")) {
+            return null;
+        }
+
+        String interfaceName = interfaceDescriptor.substring(1, interfaceDescriptor.length() - 1);
+
+        // Map well-known functional interfaces to their parameter types
+        return switch (interfaceName) {
+            // Suppliers - no parameters
+            case "java/util/function/Supplier",
+                 "java/util/function/IntSupplier",
+                 "java/util/function/LongSupplier",
+                 "java/util/function/DoubleSupplier",
+                 "java/util/function/BooleanSupplier" -> List.of();
+
+            // Consumers - single parameter
+            case "java/util/function/Consumer" -> List.of("Ljava/lang/Object;");
+            case "java/util/function/IntConsumer" -> List.of("I");
+            case "java/util/function/LongConsumer" -> List.of("J");
+            case "java/util/function/DoubleConsumer" -> List.of("D");
+
+            // Predicates - single parameter, return boolean
+            case "java/util/function/Predicate" -> List.of("Ljava/lang/Object;");
+            case "java/util/function/IntPredicate" -> List.of("I");
+            case "java/util/function/LongPredicate" -> List.of("J");
+            case "java/util/function/DoublePredicate" -> List.of("D");
+
+            // Functions - single parameter, return type varies
+            case "java/util/function/Function" -> List.of("Ljava/lang/Object;");
+            case "java/util/function/IntFunction" -> List.of("I");
+            case "java/util/function/LongFunction" -> List.of("J");
+            case "java/util/function/DoubleFunction" -> List.of("D");
+            case "java/util/function/ToIntFunction" -> List.of("Ljava/lang/Object;");
+            case "java/util/function/ToLongFunction" -> List.of("Ljava/lang/Object;");
+            case "java/util/function/ToDoubleFunction" -> List.of("Ljava/lang/Object;");
+
+            // Unary operators - single parameter, same return type
+            case "java/util/function/UnaryOperator" -> List.of("Ljava/lang/Object;");
+            case "java/util/function/IntUnaryOperator" -> List.of("I");
+            case "java/util/function/LongUnaryOperator" -> List.of("J");
+            case "java/util/function/DoubleUnaryOperator" -> List.of("D");
+
+            // Binary operators - two parameters
+            case "java/util/function/BiFunction" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
+            case "java/util/function/BiConsumer" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
+            case "java/util/function/BiPredicate" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
+            case "java/util/function/BinaryOperator" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
+            case "java/util/function/IntBinaryOperator" -> List.of("I", "I");
+            case "java/util/function/LongBinaryOperator" -> List.of("J", "J");
+            case "java/util/function/DoubleBinaryOperator" -> List.of("D", "D");
+
+            // ToInt/Long/Double binary functions
+            case "java/util/function/ToIntBiFunction" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
+            case "java/util/function/ToLongBiFunction" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
+            case "java/util/function/ToDoubleBiFunction" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
+
+            // Other common functional interfaces
+            case "java/lang/Runnable" -> List.of();
+            case "java/util/concurrent/Callable" -> List.of();
+            case "java/util/Comparator" -> List.of("Ljava/lang/Object;", "Ljava/lang/Object;");
+
+            default -> null;
+        };
     }
 
     private String getSupplierInterface(ReturnTypeInfo returnInfo) {

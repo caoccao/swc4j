@@ -547,4 +547,238 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 List.of(2L, 101L, 1001L),
                 List.of(fn.applyAsLong(1L), fn.applyAsLong(100L), fn.applyAsLong(1000L)));
     }
+
+    // --- Phase 5: Parameter Type Inference from Context Tests ---
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParamTypeInferenceIntUnaryOperator(JdkVersion jdkVersion) throws Exception {
+        // Parameter type inferred from IntUnaryOperator context
+        var runner = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    get(): IntUnaryOperator {
+                      return x => x * 2
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntUnaryOperator) classA.getMethod("get").invoke(instance);
+        assertEquals(
+                List.of(2, 10, 20),
+                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParamTypeInferenceLongUnaryOperator(JdkVersion jdkVersion) throws Exception {
+        // Parameter type inferred from LongUnaryOperator context
+        var runner = getCompiler(jdkVersion).compile("""
+                import { LongUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    get(): LongUnaryOperator {
+                      return x => x * 3
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (LongUnaryOperator) classA.getMethod("get").invoke(instance);
+        assertEquals(
+                List.of(3L, 15L, 30L),
+                List.of(fn.applyAsLong(1L), fn.applyAsLong(5L), fn.applyAsLong(10L)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParamTypeInferenceDoubleUnaryOperator(JdkVersion jdkVersion) throws Exception {
+        // Parameter type inferred from DoubleUnaryOperator context
+        var runner = getCompiler(jdkVersion).compile("""
+                import { DoubleUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    get(): DoubleUnaryOperator {
+                      return x => x * 2.5
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (DoubleUnaryOperator) classA.getMethod("get").invoke(instance);
+        assertEquals(2.5, fn.applyAsDouble(1.0), 0.0001);
+        assertEquals(12.5, fn.applyAsDouble(5.0), 0.0001);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParamTypeInferenceIntPredicate(JdkVersion jdkVersion) throws Exception {
+        // Parameter type inferred from IntPredicate context
+        var runner = getCompiler(jdkVersion).compile("""
+                import { IntPredicate } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    isPositive(): IntPredicate {
+                      return x => x > 0
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntPredicate) classA.getMethod("isPositive").invoke(instance);
+        assertEquals(
+                List.of(true, false, false),
+                List.of(fn.test(5), fn.test(-5), fn.test(0)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParamTypeInferenceIntBinaryOperator(JdkVersion jdkVersion) throws Exception {
+        // Parameter types inferred from IntBinaryOperator context
+        var runner = getCompiler(jdkVersion).compile("""
+                import { IntBinaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    getAdder(): IntBinaryOperator {
+                      return (x, y) => x + y
+                    }
+                    getMultiplier(): IntBinaryOperator {
+                      return (a, b) => a * b
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var adder = (IntBinaryOperator) classA.getMethod("getAdder").invoke(instance);
+        var multiplier = (IntBinaryOperator) classA.getMethod("getMultiplier").invoke(instance);
+        assertEquals(
+                List.of(8, 15),
+                List.of(adder.applyAsInt(3, 5), multiplier.applyAsInt(3, 5)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParamTypeInferenceLongBinaryOperator(JdkVersion jdkVersion) throws Exception {
+        // Parameter types inferred from LongBinaryOperator context
+        var runner = getCompiler(jdkVersion).compile("""
+                import { LongBinaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    get(): LongBinaryOperator {
+                      return (x, y) => x - y
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (LongBinaryOperator) classA.getMethod("get").invoke(instance);
+        assertEquals(7L, fn.applyAsLong(10L, 3L));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParamTypeInferenceDoubleBinaryOperator(JdkVersion jdkVersion) throws Exception {
+        // Parameter types inferred from DoubleBinaryOperator context
+        var runner = getCompiler(jdkVersion).compile("""
+                import { DoubleBinaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    get(): DoubleBinaryOperator {
+                      return (x, y) => x / y
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (DoubleBinaryOperator) classA.getMethod("get").invoke(instance);
+        assertEquals(2.0, fn.applyAsDouble(10.0, 5.0), 0.0001);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParamTypeInferenceWithCapture(JdkVersion jdkVersion) throws Exception {
+        // Parameter type inferred, with closure capture
+        var runner = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    multiplier: int = 3
+                    get(): IntUnaryOperator {
+                      return x => x * this.multiplier
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntUnaryOperator) classA.getMethod("get").invoke(instance);
+        assertEquals(
+                List.of(3, 15, 30),
+                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParamTypeInferenceBlockBody(JdkVersion jdkVersion) throws Exception {
+        // Parameter type inferred with block body
+        var runner = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    get(): IntUnaryOperator {
+                      return x => {
+                        const doubled: int = x * 2
+                        return doubled + 1
+                      }
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntUnaryOperator) classA.getMethod("get").invoke(instance);
+        assertEquals(
+                List.of(3, 11, 21),
+                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParamTypeInferenceVariableAssignment(JdkVersion jdkVersion) throws Exception {
+        // Parameter type inferred from variable type annotation
+        // Return the function and call it from Java side
+        var runner = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    get(): IntUnaryOperator {
+                      const fn: IntUnaryOperator = x => x * 2
+                      return fn
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntUnaryOperator) classA.getMethod("get").invoke(instance);
+        assertEquals(10, fn.applyAsInt(5));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParamTypeInferenceIntConsumer(JdkVersion jdkVersion) throws Exception {
+        // Parameter type inferred from IntConsumer context - void return
+        var runner = getCompiler(jdkVersion).compile("""
+                import { IntConsumer } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    get(): IntConsumer {
+                      return (x: int) => { }
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var consumer = (java.util.function.IntConsumer) classA.getMethod("get").invoke(instance);
+        consumer.accept(42); // Should not throw
+    }
 }

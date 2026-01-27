@@ -371,10 +371,10 @@ When arrow expressions are assigned to standard functional interfaces (e.g., `In
 
 ### Phase 5: Type Inference - Priority: MEDIUM
 
-**Status:** PARTIALLY IMPLEMENTED
+**Status:** IMPLEMENTED
 
 **Scope:**
-- Infer parameter types from context (target interface) - LIMITED (requires explicit type annotations)
+- Infer parameter types from context (target interface) ✓
 - Infer return type from expression or return statements ✓
 - Handle generic type parameters - LIMITED (type erasure to Object)
 
@@ -398,14 +398,29 @@ When arrow expressions are assigned to standard functional interfaces (e.g., `In
    - int + double → double
    - Follows JVM numeric promotion rules
 
-4. **Parameter Type Inference from Context**: Limited. Parameters require explicit type annotations:
+4. **Parameter Type Inference from Context**: ✓ **IMPLEMENTED** for well-known functional interfaces. When an arrow is assigned to a known functional interface type, parameter types are inferred automatically:
    ```typescript
-   // Works: explicit parameter type
-   const fn: IntUnaryOperator = (x: int) => x * 2
+   // Works: parameter type inferred from IntUnaryOperator
+   const fn: IntUnaryOperator = x => x * 2
 
-   // NOT supported: inferring x:int from IntUnaryOperator
-   // const fn: IntUnaryOperator = x => x * 2
+   // Works: both parameter types inferred from IntBinaryOperator
+   const add: IntBinaryOperator = (x, y) => x + y
+
+   // Works: block body with inferred parameter
+   const process: IntUnaryOperator = x => {
+     const doubled = x * 2
+     return doubled + 1
+   }
    ```
+
+   **Supported Functional Interfaces for Parameter Inference:**
+   - **Suppliers**: Supplier, IntSupplier, LongSupplier, DoubleSupplier, BooleanSupplier
+   - **Consumers**: Consumer, IntConsumer, LongConsumer, DoubleConsumer
+   - **Predicates**: Predicate, IntPredicate, LongPredicate, DoublePredicate
+   - **Functions**: Function, IntFunction, LongFunction, DoubleFunction, ToIntFunction, ToLongFunction, ToDoubleFunction
+   - **Unary Operators**: UnaryOperator, IntUnaryOperator, LongUnaryOperator, DoubleUnaryOperator
+   - **Binary Operators**: BiFunction, BiConsumer, BiPredicate, BinaryOperator, IntBinaryOperator, LongBinaryOperator, DoubleBinaryOperator
+   - **Other**: Runnable, Callable, Comparator
 
 5. **Generic Type Parameters**: Limited. Generic arrows like `<T>(x: T): T => x` are parsed but use type erasure to Object. Full generic support would require:
    - Type parameter propagation
@@ -1306,7 +1321,7 @@ Use primitive specializations to avoid boxing:
 - [x] Phase 4: Basic parameter types working (typed params, multiple params, param capture)
 - [x] Phase 4: Advanced parameter features (destructuring) - ✓ FULLY IMPLEMENTED
 - [x] Phase 5: Return type inference working (expressions, statements, operators)
-- [ ] Phase 5: Parameter type inference from context - LIMITED
+- [x] Phase 5: Parameter type inference from context - ✓ IMPLEMENTED for well-known functional interfaces
 - [ ] Phase 5: Generic type parameters - LIMITED (type erasure)
 - [x] Phase 6: Nested arrows working (curried functions, multi-level capture, mixed type captures)
 - [x] Phase 7: Async arrows - NOT SUPPORTED (intentionally excluded)
@@ -1418,6 +1433,17 @@ The following edge cases are now covered by tests:
 - Conditional returns in block body ✓
 - Multiple suppliers (IntSupplier, LongSupplier, DoubleSupplier, BooleanSupplier) ✓
 - Binary operators (IntBinaryOperator, LongBinaryOperator, DoubleBinaryOperator) ✓
+- **Parameter type inference from IntUnaryOperator** ✓
+- **Parameter type inference from LongUnaryOperator** ✓
+- **Parameter type inference from DoubleUnaryOperator** ✓
+- **Parameter type inference from IntPredicate** ✓
+- **Parameter type inference from IntBinaryOperator** ✓
+- **Parameter type inference from LongBinaryOperator** ✓
+- **Parameter type inference from DoubleBinaryOperator** ✓
+- **Parameter type inference with closure capture** ✓
+- **Parameter type inference with block body** ✓
+- **Parameter type inference with variable assignment** ✓
+- **Parameter type inference from IntConsumer** ✓
 
 **Nested Arrows (TestCompileAstArrowNested.java):**
 - Edge case 53: Arrow inside arrow - curried function pattern ✓
@@ -1458,6 +1484,6 @@ The following edge cases are now covered by tests:
 ---
 
 *Last Updated: January 27, 2026*
-*Status: MOSTLY COMPLETE (Phase 1-6 implemented with IIFE support)*
-*Remaining Work: Mutable captures with holder objects, recursive arrows, custom interface type inference*
-*Note: Some features (destructuring, async, generator) are intentionally not supported due to complexity*
+*Status: MOSTLY COMPLETE (Phase 1-6 implemented with IIFE support, Phase 5 parameter type inference added)*
+*Remaining Work: Mutable captures with holder objects, recursive arrows, generic type parameters*
+*Note: Async and generator arrows are intentionally not supported due to complexity*
