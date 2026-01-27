@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstNewExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -25,6 +26,8 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
+import java.util.List;
 
 /**
  * Generates bytecode for constructor calls (new expressions).
@@ -69,14 +72,28 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
         // Duplicate the reference for the constructor call
         code.dup();
 
-        // For now, assume parameterless constructor
-        // TODO: Handle constructors with parameters
-        if (newExpr.getArgs().isPresent() && !newExpr.getArgs().get().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(newExpr, "Constructors with parameters not yet supported");
+        // Generate arguments and build constructor descriptor
+        StringBuilder paramDescriptors = new StringBuilder();
+        if (newExpr.getArgs().isPresent()) {
+            List<Swc4jAstExprOrSpread> args = newExpr.getArgs().get();
+            for (Swc4jAstExprOrSpread arg : args) {
+                if (arg.getSpread().isPresent()) {
+                    throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported in constructor calls");
+                }
+                // Generate argument expression
+                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                // Infer argument type for descriptor
+                String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
+                if (argType == null) {
+                    argType = "Ljava/lang/Object;";
+                }
+                paramDescriptors.append(argType);
+            }
         }
 
-        // Generate: invokespecial <class>.<init>()V
-        int constructorRef = cp.addMethodRef(internalClassName, "<init>", "()V");
+        // Generate: invokespecial <class>.<init>(args)V
+        String constructorDescriptor = "(" + paramDescriptors + ")V";
+        int constructorRef = cp.addMethodRef(internalClassName, "<init>", constructorDescriptor);
         code.invokespecial(constructorRef);
 
         // After this, the new object reference is on the stack

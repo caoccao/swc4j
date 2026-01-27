@@ -4,7 +4,21 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstTryStmt` (try-catch-finally statements) in TypeScript to JVM bytecode compilation. Try statements provide structured exception handling, allowing code to catch and handle errors gracefully.
 
-**Current Status:** NOT IMPLEMENTED
+**Current Status:** PARTIALLY IMPLEMENTED (12/29 tests passing)
+
+**Implemented:**
+- Basic try-catch statements (Phase 1)
+- Try-catch with returns in try/catch blocks
+- Try-catch without catch parameter (ES2019+)
+- Throw statement support
+- Exception table generation
+- Terminal statement handling
+
+**Remaining Work:**
+- Try-finally with returns (requires return value buffering)
+- Try-catch-finally (requires complex control flow handling)
+- Finally blocks with exceptions
+- Some edge cases with exception access
 
 **Strategy:** TypeScript try-catch-finally will be compiled directly to JVM try-catch-finally bytecode structures. The TypeScript `error` object will be a Java `Throwable` (or a specific exception type), with `error.message` mapping to `getMessage()` and `error.stack` mapping to the stack trace.
 

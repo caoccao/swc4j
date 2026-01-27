@@ -17,14 +17,12 @@
 package com.caoccao.javet.swc4j.compiler.memory;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.compiler.jdk17.GenericTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariableTable;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Compilation context for a single method.
@@ -38,7 +36,9 @@ public class CompilationContext {
     private final Map<String, GenericTypeInfo> genericTypeInfoMap;
     private final Stack<Map<String, String>> inferredTypesScopes;
     private final LocalVariableTable localVariableTable;
+    private final Stack<Swc4jAstBlockStmt> pendingFinallyBlocks;
     private final Stack<TypeParameterScope> typeParameterScopes;
+    private int inlineFinallyDepth;
     private int tempIdCounter;
 
     public CompilationContext() {
@@ -46,12 +46,32 @@ public class CompilationContext {
         capturedVariables = new HashMap<>();
         classStack = new Stack<>();
         continueLabels = new Stack<>();
+        pendingFinallyBlocks = new Stack<>();
         genericTypeInfoMap = new HashMap<>();
         inferredTypesScopes = new Stack<>();
         inferredTypesScopes.push(new HashMap<>()); // Base scope
         localVariableTable = new LocalVariableTable();
         typeParameterScopes = new Stack<>();
         tempIdCounter = 0;
+        inlineFinallyDepth = 0;
+    }
+
+    /**
+     * Enter inline finally execution mode.
+     * Call this before generating finally block code inline for a return statement.
+     */
+    public void enterInlineFinally() {
+        inlineFinallyDepth++;
+    }
+
+    /**
+     * Exit inline finally execution mode.
+     * Call this after generating finally block code inline.
+     */
+    public void exitInlineFinally() {
+        if (inlineFinallyDepth > 0) {
+            inlineFinallyDepth--;
+        }
     }
 
     /**
@@ -175,6 +195,36 @@ public class CompilationContext {
     }
 
     /**
+     * Get all pending finally blocks from innermost to outermost.
+     * These blocks need to be executed before a return or throw.
+     *
+     * @return list of finally blocks in execution order (innermost first)
+     */
+    public List<Swc4jAstBlockStmt> getPendingFinallyBlocks() {
+        return new ArrayList<>(pendingFinallyBlocks);
+    }
+
+    /**
+     * Check if there are any pending finally blocks.
+     *
+     * @return true if there are pending finally blocks
+     */
+    public boolean hasPendingFinallyBlocks() {
+        return !pendingFinallyBlocks.isEmpty();
+    }
+
+    /**
+     * Check if we're currently inside inline finally execution.
+     * When true, return statements should not try to execute pending finally blocks
+     * because they're already being executed inline.
+     *
+     * @return true if inside inline finally execution
+     */
+    public boolean isInsideInlineFinally() {
+        return inlineFinallyDepth > 0;
+    }
+
+    /**
      * Check if a type name is a type parameter in any active scope.
      *
      * @param typeName the type name to check
@@ -208,6 +258,16 @@ public class CompilationContext {
     public void popContinueLabel() {
         if (!continueLabels.isEmpty()) {
             continueLabels.pop();
+        }
+    }
+
+    /**
+     * Pop the current finally block from the pending stack.
+     * Call this when exiting a try-finally block normally.
+     */
+    public void popFinallyBlock() {
+        if (!pendingFinallyBlocks.isEmpty()) {
+            pendingFinallyBlocks.pop();
         }
     }
 
@@ -251,6 +311,16 @@ public class CompilationContext {
     }
 
     /**
+     * Push a finally block onto the pending stack.
+     * Call this when entering a try-finally block.
+     *
+     * @param finallyBlock the finally block to execute before returns
+     */
+    public void pushFinallyBlock(Swc4jAstBlockStmt finallyBlock) {
+        pendingFinallyBlocks.push(finallyBlock);
+    }
+
+    /**
      * Push a new inferred types scope onto the stack.
      * Call this when entering a new scope that may have its own type bindings
      * (e.g., arrow function parameter types for return type inference).
@@ -290,11 +360,13 @@ public class CompilationContext {
         capturedVariables.clear();
         continueLabels.clear();
         genericTypeInfoMap.clear();
+        pendingFinallyBlocks.clear();
         // Clear all inferred types scopes and reset to a single base scope
         inferredTypesScopes.clear();
         inferredTypesScopes.push(new HashMap<>());
         localVariableTable.reset(isStatic);
         tempIdCounter = 0;
+        inlineFinallyDepth = 0;
         // Note: classStack and typeParameterScopes are NOT cleared - class context persists across method resets
     }
 

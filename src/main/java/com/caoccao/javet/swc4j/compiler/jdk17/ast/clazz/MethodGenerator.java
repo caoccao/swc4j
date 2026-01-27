@@ -227,9 +227,9 @@ public final class MethodGenerator extends BaseAstProcessor {
 
         // Add implicit return for void methods if not already present
         if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.VOID) {
-            // Check if the last bytecode is not already a return
+            // Check if the last bytecode is not already a terminal instruction
             byte[] bytecode = code.toByteArray();
-            if (bytecode.length == 0 || bytecode[bytecode.length - 1] != (byte) 0xB1) { // 0xB1 is return void
+            if (bytecode.length == 0 || !isTerminalBytecode(bytecode[bytecode.length - 1] & 0xFF)) {
                 code.returnVoid();
             }
         }
@@ -436,6 +436,27 @@ public final class MethodGenerator extends BaseAstProcessor {
 
     private int getSlotSize(String type) {
         return ("J".equals(type) || "D".equals(type)) ? 2 : 1;
+    }
+
+    /**
+     * Check if a bytecode opcode is a terminal instruction that ends a method.
+     * Terminal instructions include all return types and athrow.
+     *
+     * @param opcode the bytecode opcode
+     * @return true if the opcode is a terminal instruction
+     */
+    private boolean isTerminalBytecode(int opcode) {
+        return switch (opcode) {
+            case 0xAC, // ireturn
+                 0xAD, // lreturn
+                 0xAE, // freturn
+                 0xAF, // dreturn
+                 0xB0, // areturn
+                 0xB1, // return (void)
+                 0xBF  // athrow
+                    -> true;
+            default -> false;
+        };
     }
 
     private void loadParameter(CodeBuilder code, int slot, String paramType) {

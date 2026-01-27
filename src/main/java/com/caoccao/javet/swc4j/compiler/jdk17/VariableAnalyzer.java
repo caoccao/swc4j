@@ -160,6 +160,39 @@ public final class VariableAnalyzer {
             for (ISwc4jAstStmt childStmt : blockStmt.getStmts()) {
                 analyzeStatement(childStmt);
             }
+        } else if (stmt instanceof Swc4jAstTryStmt tryStmt) {
+            // Analyze try block
+            for (ISwc4jAstStmt childStmt : tryStmt.getBlock().getStmts()) {
+                analyzeStatement(childStmt);
+            }
+            // Analyze catch clause
+            if (tryStmt.getHandler().isPresent()) {
+                var catchClause = tryStmt.getHandler().get();
+                // Allocate the catch exception variable
+                if (catchClause.getParam().isPresent()) {
+                    ISwc4jAstPat param = catchClause.getParam().get();
+                    if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+                        String varName = bindingIdent.getId().getSym();
+                        String varType = "Ljava/lang/Throwable;";
+                        if (bindingIdent.getTypeAnn().isPresent()) {
+                            var typeAnn = bindingIdent.getTypeAnn().get();
+                            varType = compiler.getTypeResolver().mapTsTypeToDescriptor(typeAnn.getTypeAnn());
+                        }
+                        context.getLocalVariableTable().allocateVariable(varName, varType);
+                        context.getInferredTypes().put(varName, varType);
+                    }
+                }
+                // Analyze catch body
+                for (ISwc4jAstStmt childStmt : catchClause.getBody().getStmts()) {
+                    analyzeStatement(childStmt);
+                }
+            }
+            // Analyze finally block
+            if (tryStmt.getFinalizer().isPresent()) {
+                for (ISwc4jAstStmt childStmt : tryStmt.getFinalizer().get().getStmts()) {
+                    analyzeStatement(childStmt);
+                }
+            }
         }
     }
 

@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -35,6 +36,17 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
     public StatementGenerator(ByteCodeCompiler compiler) {
         super(compiler);
+    }
+
+    /**
+     * Check if a block ends with a terminal statement.
+     */
+    private boolean blockEndsWithTerminal(Swc4jAstBlockStmt block) {
+        var stmts = block.getStmts();
+        if (stmts.isEmpty()) {
+            return false;
+        }
+        return isTerminalStatement(stmts.get(stmts.size() - 1));
     }
 
     /**
@@ -84,6 +96,10 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
             generateBlockStmt(code, cp, blockStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstSwitchStmt switchStmt) {
             compiler.getSwitchStatementGenerator().generate(code, cp, switchStmt, returnTypeInfo);
+        } else if (stmt instanceof Swc4jAstThrowStmt throwStmt) {
+            compiler.getThrowStatementGenerator().generate(code, cp, throwStmt, returnTypeInfo);
+        } else if (stmt instanceof Swc4jAstTryStmt tryStmt) {
+            compiler.getTryStatementGenerator().generate(code, cp, tryStmt, returnTypeInfo);
         } else {
             throw new Swc4jByteCodeCompilerException(stmt,
                     "Unsupported statement type: " + stmt.getClass().getSimpleName());
@@ -148,34 +164,149 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
         // Note: CallExpr already pops its return value in generateCallExpr
     }
 
+    /**
+     * Generate the appropriate return instruction based on return type.
+     */
+    private void generateReturnInstruction(CodeBuilder code, ReturnTypeInfo returnTypeInfo) {
+        if (returnTypeInfo != null) {
+            switch (returnTypeInfo.type()) {
+                case INT, BOOLEAN, BYTE, CHAR, SHORT -> code.ireturn();
+                case LONG -> code.lreturn();
+                case FLOAT -> code.freturn();
+                case DOUBLE -> code.dreturn();
+                case OBJECT, STRING -> code.areturn();
+                default -> code.areturn();
+            }
+        } else {
+            code.areturn();
+        }
+    }
+
     private void generateReturnStmt(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstReturnStmt returnStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
+        var context = compiler.getMemory().getCompilationContext();
+
+        // If we're already inside inline finally execution, don't try to execute
+        // finally blocks again - just generate the return directly
+        if (context.isInsideInlineFinally()) {
+            generateSimpleReturn(code, cp, returnStmt, returnTypeInfo);
+            return;
+        }
+
+        // Get a copy of pending finally blocks
+        var pendingFinallyBlocks = context.getPendingFinallyBlocks();
+
         if (returnStmt.getArg().isPresent()) {
             // Generate the return value expression
             compiler.getExpressionGenerator().generate(code, cp, returnStmt.getArg().get(),
                     returnTypeInfo);
 
-            // Generate the appropriate return instruction
-            if (returnTypeInfo != null) {
-                switch (returnTypeInfo.type()) {
-                    case INT, BOOLEAN, BYTE, CHAR, SHORT -> code.ireturn();
-                    case LONG -> code.lreturn();
-                    case FLOAT -> code.freturn();
-                    case DOUBLE -> code.dreturn();
-                    case OBJECT, STRING -> code.areturn();
-                    default -> code.areturn();
+            // If there are pending finally blocks, save return value and execute them
+            if (!pendingFinallyBlocks.isEmpty()) {
+                // Determine the return type descriptor
+                String returnType = getDescriptorForReturnType(returnTypeInfo);
+
+                // Allocate temp variable to store return value
+                String tempName = "$returnValue$" + context.getNextTempId();
+                context.getLocalVariableTable().allocateVariable(tempName, returnType);
+                LocalVariable tempVar = context.getLocalVariableTable().getVariable(tempName);
+
+                // Store return value
+                storeByType(code, returnTypeInfo, tempVar.index());
+
+                // Mark that we're inside inline finally execution
+                context.enterInlineFinally();
+
+                try {
+                    // Execute pending finally blocks (iterate the copy, don't modify context)
+                    for (Swc4jAstBlockStmt finallyBlock : pendingFinallyBlocks) {
+                        for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
+                            generate(code, cp, stmt, returnTypeInfo);
+                            // If finally has its own return/throw, that takes precedence
+                            if (isTerminalStatement(stmt)) {
+                                return; // Finally's return/throw supersedes the original return
+                            }
+                        }
+                    }
+                } finally {
+                    context.exitInlineFinally();
                 }
-            } else {
-                code.areturn();
+
+                // Load return value (only reached if no finally was terminal)
+                loadByType(code, returnTypeInfo, tempVar.index());
             }
+
+            // Generate the appropriate return instruction
+            generateReturnInstruction(code, returnTypeInfo);
         } else {
-            // Void return
+            // Void return - still need to execute finally blocks
+            if (!pendingFinallyBlocks.isEmpty()) {
+                context.enterInlineFinally();
+                try {
+                    for (Swc4jAstBlockStmt finallyBlock : pendingFinallyBlocks) {
+                        for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
+                            generate(code, cp, stmt, returnTypeInfo);
+                            if (isTerminalStatement(stmt)) {
+                                return; // Finally's return/throw supersedes the original return
+                            }
+                        }
+                    }
+                } finally {
+                    context.exitInlineFinally();
+                }
+            }
             code.returnVoid();
         }
+    }
+
+    /**
+     * Generate a simple return without considering pending finally blocks.
+     * Used when we're already inside inline finally execution.
+     */
+    private void generateSimpleReturn(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstReturnStmt returnStmt,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+
+        if (returnStmt.getArg().isPresent()) {
+            compiler.getExpressionGenerator().generate(code, cp, returnStmt.getArg().get(),
+                    returnTypeInfo);
+            generateReturnInstruction(code, returnTypeInfo);
+        } else {
+            code.returnVoid();
+        }
+    }
+
+    /**
+     * Get the JVM descriptor for a return type.
+     */
+    private String getDescriptorForReturnType(ReturnTypeInfo returnTypeInfo) {
+        if (returnTypeInfo == null) {
+            return "Ljava/lang/Object;";
+        }
+        // If descriptor is available, use it
+        if (returnTypeInfo.descriptor() != null) {
+            return returnTypeInfo.descriptor();
+        }
+        // Otherwise, derive from type
+        return switch (returnTypeInfo.type()) {
+            case INT -> "I";
+            case LONG -> "J";
+            case FLOAT -> "F";
+            case DOUBLE -> "D";
+            case BOOLEAN -> "Z";
+            case BYTE -> "B";
+            case CHAR -> "C";
+            case SHORT -> "S";
+            case VOID -> "V";
+            case STRING -> "Ljava/lang/String;";
+            default -> "Ljava/lang/Object;";
+        };
     }
 
     /**
@@ -188,6 +319,41 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
     private boolean isTerminalStatement(ISwc4jAstStmt stmt) {
         return stmt instanceof Swc4jAstBreakStmt ||
                 stmt instanceof Swc4jAstContinueStmt ||
-                stmt instanceof Swc4jAstReturnStmt;
+                stmt instanceof Swc4jAstReturnStmt ||
+                stmt instanceof Swc4jAstThrowStmt;
+    }
+
+    /**
+     * Load a value based on its type.
+     */
+    private void loadByType(CodeBuilder code, ReturnTypeInfo returnTypeInfo, int index) {
+        if (returnTypeInfo == null) {
+            code.aload(index);
+            return;
+        }
+        switch (returnTypeInfo.type()) {
+            case INT, BOOLEAN, BYTE, CHAR, SHORT -> code.iload(index);
+            case LONG -> code.lload(index);
+            case FLOAT -> code.fload(index);
+            case DOUBLE -> code.dload(index);
+            default -> code.aload(index);
+        }
+    }
+
+    /**
+     * Store a value based on its type.
+     */
+    private void storeByType(CodeBuilder code, ReturnTypeInfo returnTypeInfo, int index) {
+        if (returnTypeInfo == null) {
+            code.astore(index);
+            return;
+        }
+        switch (returnTypeInfo.type()) {
+            case INT, BOOLEAN, BYTE, CHAR, SHORT -> code.istore(index);
+            case LONG -> code.lstore(index);
+            case FLOAT -> code.fstore(index);
+            case DOUBLE -> code.dstore(index);
+            default -> code.astore(index);
+        }
     }
 }

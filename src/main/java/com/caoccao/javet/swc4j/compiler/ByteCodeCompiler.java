@@ -80,6 +80,8 @@ public sealed abstract class ByteCodeCompiler permits
     protected final Swc4j swc4j;
     protected final SwitchStatementGenerator switchStatementGenerator;
     protected final ThisExpressionGenerator thisExpressionGenerator;
+    protected final ThrowStatementGenerator throwStatementGenerator;
+    protected final TryStatementGenerator tryStatementGenerator;
     protected final TsAsExpressionGenerator tsAsExpressionGenerator;
     protected final TsInterfaceCollector tsInterfaceCollector;
     protected final TsInterfaceGenerator tsInterfaceGenerator;
@@ -140,9 +142,11 @@ public sealed abstract class ByteCodeCompiler permits
         statementGenerator = new StatementGenerator(this);
         stringLiteralGenerator = new StringLiteralGenerator(this);
         switchStatementGenerator = new SwitchStatementGenerator(this);
+        thisExpressionGenerator = new ThisExpressionGenerator(this);
+        throwStatementGenerator = new ThrowStatementGenerator(this);
+        tryStatementGenerator = new TryStatementGenerator(this);
         tsInterfaceCollector = new TsInterfaceCollector(this);
         tsInterfaceGenerator = new TsInterfaceGenerator(this);
-        thisExpressionGenerator = new ThisExpressionGenerator(this);
         tsAsExpressionGenerator = new TsAsExpressionGenerator(this);
         typeAliasCollector = new TypeAliasCollector(this);
         typeResolver = new TypeResolver(this);
@@ -334,6 +338,14 @@ public sealed abstract class ByteCodeCompiler permits
 
     public ThisExpressionGenerator getThisExpressionGenerator() {
         return thisExpressionGenerator;
+    }
+
+    public ThrowStatementGenerator getThrowStatementGenerator() {
+        return throwStatementGenerator;
+    }
+
+    public TryStatementGenerator getTryStatementGenerator() {
+        return tryStatementGenerator;
     }
 
     public TsAsExpressionGenerator getTsAsExpressionGenerator() {
