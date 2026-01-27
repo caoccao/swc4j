@@ -167,6 +167,35 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testBlockBodyMultipleStatements(JdkVersion jdkVersion) throws Exception {
+        // Edge case 24: Block body - multiple statements
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    getComplex(): IntUnaryOperator {
+                      return (x: int) => {
+                        const doubled: int = x * 2
+                        const incremented: int = doubled + 1
+                        const result: int = incremented * 3
+                        return result
+                      }
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntUnaryOperator) classA.getMethod("getComplex").invoke(instance);
+
+        // x=5: doubled=10, incremented=11, result=33
+        assertEquals(
+                List.of(3, 33, 63),
+                List.of(fn.applyAsInt(0), fn.applyAsInt(5), fn.applyAsInt(10)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testBlockBodyNoReturnVoid(JdkVersion jdkVersion) throws Exception {
         // Edge case 25: Block body - no return (void)
         var map = getCompiler(jdkVersion).compile("""

@@ -1348,6 +1348,7 @@ The following edge cases are now covered by tests:
 - Edge case 20: Expression body - captured value return ✓
 - Edge case 22: Block body - empty (void) ✓
 - Edge case 23: Block body - single return ✓
+- Edge case 24: Block body - multiple statements ✓
 - Edge case 25: Block body - no return (void) ✓
 - Edge case 26: Block body - conditional returns ✓
 - Edge case 27: Block body - while/for loop ✓
@@ -1355,12 +1356,21 @@ The following edge cases are now covered by tests:
 **Edge Cases (TestCompileAstArrowEdgeCases.java):**
 - Edge case 30: Capture multiple local variables ✓
 - Edge case 33: Capture both `this` and local variables ✓
+- Edge case 38: Capture from constructor ✓
 - Edge case 39: Capture static field ✓
+- Edge case 42: Arrow reassignment (let variable) ✓
 - Edge case 46: As return value ✓
 - Edge case 49: As field initializer ✓
+- Edge case 50: Arrow in conditional expression ✓
+- Edge case 56: Arrow inside constructor ✓
 - Edge case 57: Arrow inside static method ✓
 - Multiple arrows with different functional interface types ✓
 - Multiple parameter capture ✓
+- Arrow capturing boolean values ✓
+- Arrow with complex boolean condition ✓
+- Arrow assigned to local variable ✓
+- Arrow capturing String (reference type) ✓
+- Multiple arrows in same method (composition) ✓
 
 **Parameters (TestCompileAstArrowParams.java):**
 - Edge case 1: No parameters ✓
@@ -1397,6 +1407,7 @@ The following edge cases are now covered by tests:
 - Edge case 53: Arrow inside arrow - curried function pattern ✓
 - Edge case 37: Multi-level capture - capturing multiple params ✓
 - Edge case 57: Arrow inside static method with capture ✓
+- Edge case 58: Deeply nested arrows (capturing multiple values) ✓
 - Arrow with offset capture (parameter capture) ✓
 - Arrow with string capture (reference type capture) ✓
 - Arrow with this capture (instance field access) ✓
@@ -1410,6 +1421,6 @@ The following edge cases are now covered by tests:
 
 ---
 
-*Last Updated: January 26, 2026*
+*Last Updated: January 27, 2026*
 *Status: PARTIALLY IMPLEMENTED (Phase 1-3 complete, Phase 4-6 mostly complete with documented limitations)*
 *Next Step: Consider implementing Phase 4 advanced features (destructuring parameters) or improving Phase 5 parameter type inference from context*

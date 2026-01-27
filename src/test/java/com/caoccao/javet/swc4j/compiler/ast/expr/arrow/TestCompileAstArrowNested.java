@@ -277,6 +277,31 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testDeeplyNestedArrows(JdkVersion jdkVersion) throws Exception {
+        // Edge case 58: Deeply nested arrows (capturing multiple values)
+        var map = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    createAdder(a: int, b: int, c: int): IntUnaryOperator {
+                      return (x: int) => x + a + b + c
+                    }
+                  }
+                }""");
+        var classes = loadClasses(map);
+        Class<?> classA = classes.get("com.A");
+        var instance = classA.getConstructor().newInstance();
+        var fn = (IntUnaryOperator) classA.getMethod("createAdder", int.class, int.class, int.class)
+                .invoke(instance, 1, 2, 3);
+
+        // x + 1 + 2 + 3 = x + 6
+        assertEquals(
+                List.of(6, 16, 106),
+                List.of(fn.applyAsInt(0), fn.applyAsInt(10), fn.applyAsInt(100)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testMultiLevelCapture(JdkVersion jdkVersion) throws Exception {
         // Edge case 37: Multi-level capture - capturing multiple params
         var map = getCompiler(jdkVersion).compile("""
