@@ -49,9 +49,44 @@ public class LocalVariableTable {
         return null;
     }
 
+    /**
+     * Allocate a holder slot for a mutable captured variable and update the variable record.
+     *
+     * @param name the variable name
+     * @return the holder slot index, or -1 if variable not found
+     */
+    public int allocateHolderForVariable(String name) {
+        LocalVariable existing = getVariable(name);
+        if (existing == null || !existing.mutable()) {
+            return -1;
+        }
+
+        // Allocate holder array slot
+        String holderType = existing.getHolderType();
+        int holderIndex = nextIndex;
+        nextIndex += 1; // arrays always take 1 slot
+
+        // Create new LocalVariable with holder info and update all references
+        LocalVariable updated = existing.withHolder(holderIndex);
+        updateVariable(name, updated);
+        return holderIndex;
+    }
+
     public int allocateVariable(String name, String type) {
+        return allocateVariable(name, type, false);
+    }
+
+    /**
+     * Allocate a variable with mutability tracking.
+     *
+     * @param name    the variable name
+     * @param type    the JVM type descriptor
+     * @param mutable true if declared with 'let' or 'var'
+     * @return the allocated slot index
+     */
+    public int allocateVariable(String name, String type, boolean mutable) {
         int index = nextIndex;
-        LocalVariable var = new LocalVariable(name, type, index);
+        LocalVariable var = new LocalVariable(name, type, index, mutable);
         scopes.get(scopes.size() - 1).put(name, var);
         allVariables.add(var);
         // Doubles and longs take 2 slots
@@ -103,5 +138,28 @@ public class LocalVariableTable {
         scopes.clear();
         scopes.add(new HashMap<>());
         nextIndex = isStatic ? 0 : 1;
+    }
+
+    /**
+     * Update a variable with new information (e.g., holder index).
+     * Updates the variable in all scope maps where it appears.
+     *
+     * @param name    the variable name
+     * @param updated the updated LocalVariable
+     */
+    public void updateVariable(String name, LocalVariable updated) {
+        // Update in scopes
+        for (Map<String, LocalVariable> scope : scopes) {
+            if (scope.containsKey(name)) {
+                scope.put(name, updated);
+            }
+        }
+        // Update in allVariables list
+        for (int i = 0; i < allVariables.size(); i++) {
+            if (allVariables.get(i).name().equals(name) &&
+                    allVariables.get(i).index() == updated.index()) {
+                allVariables.set(i, updated);
+            }
+        }
     }
 }

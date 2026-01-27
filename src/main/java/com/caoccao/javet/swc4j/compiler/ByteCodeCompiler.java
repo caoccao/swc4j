@@ -63,6 +63,7 @@ public sealed abstract class ByteCodeCompiler permits
     protected final MemberExpressionGenerator memberExpressionGenerator;
     protected final ByteCodeCompilerMemory memory;
     protected final MethodGenerator methodGenerator;
+    protected final MutableCaptureAnalyzer mutableCaptureAnalyzer;
     protected final NewExpressionGenerator newExpressionGenerator;
     protected final NullLiteralGenerator nullLiteralGenerator;
     protected final NumberLiteralGenerator numberLiteralGenerator;
@@ -126,6 +127,7 @@ public sealed abstract class ByteCodeCompiler permits
         labeledStatementGenerator = new LabeledStatementGenerator(this);
         memberExpressionGenerator = new MemberExpressionGenerator(this);
         methodGenerator = new MethodGenerator(this);
+        mutableCaptureAnalyzer = new MutableCaptureAnalyzer(this);
         newExpressionGenerator = new NewExpressionGenerator(this);
         nullLiteralGenerator = new NullLiteralGenerator(this);
         numberLiteralGenerator = new NumberLiteralGenerator(this);
@@ -272,6 +274,10 @@ public sealed abstract class ByteCodeCompiler permits
 
     public MethodGenerator getMethodGenerator() {
         return methodGenerator;
+    }
+
+    public MutableCaptureAnalyzer getMutableCaptureAnalyzer() {
+        return mutableCaptureAnalyzer;
     }
 
     public NewExpressionGenerator getNewExpressionGenerator() {

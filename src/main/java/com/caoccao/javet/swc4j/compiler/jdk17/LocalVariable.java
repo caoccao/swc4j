@@ -16,5 +16,50 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
-public record LocalVariable(String name, String type, int index) {
+/**
+ * Represents a local variable in the compilation context.
+ *
+ * @param name        the variable name
+ * @param type        the JVM type descriptor
+ * @param index       the local variable slot index
+ * @param mutable     true if declared with 'let' or 'var' (can be reassigned)
+ * @param needsHolder true if this mutable variable is captured by a lambda and modified
+ * @param holderIndex the slot index for the holder array (only valid if needsHolder is true)
+ */
+public record LocalVariable(String name, String type, int index, boolean mutable, boolean needsHolder,
+                            int holderIndex) {
+
+    /**
+     * Creates a simple immutable variable (backward compatible constructor).
+     */
+    public LocalVariable(String name, String type, int index) {
+        this(name, type, index, false, false, -1);
+    }
+
+    /**
+     * Creates a variable with mutability tracking.
+     */
+    public LocalVariable(String name, String type, int index, boolean mutable) {
+        this(name, type, index, mutable, false, -1);
+    }
+
+    /**
+     * Gets the holder type descriptor for this variable's type.
+     * For example, "I" (int) becomes "[I" (int[]).
+     *
+     * @return the holder array type descriptor
+     */
+    public String getHolderType() {
+        return "[" + type;
+    }
+
+    /**
+     * Creates a copy of this variable with holder information.
+     *
+     * @param holderIndex the slot index for the holder array
+     * @return a new LocalVariable with needsHolder=true and the given holder index
+     */
+    public LocalVariable withHolder(int holderIndex) {
+        return new LocalVariable(name, type, index, mutable, true, holderIndex);
+    }
 }

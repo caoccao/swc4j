@@ -314,7 +314,10 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             GenericTypeInfo genericTypeInfo = context.getGenericTypeInfoMap().get(varName);
             ReturnTypeInfo varTypeInfo = ReturnTypeInfo.of(declarator, localVar.type(), genericTypeInfo);
 
-            if (isSelfReferencingArrow) {
+            // Check if this variable needs a holder (mutable variable captured by lambda)
+            if (localVar.needsHolder()) {
+                generateHolderInitialization(code, cp, localVar, init, varTypeInfo);
+            } else if (isSelfReferencingArrow) {
                 // Pre-initialize to null (for reference types) or default value (for primitives)
                 // This ensures the variable slot is initialized when captured by the lambda
                 switch (localVar.type()) {
@@ -375,29 +378,210 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 }
             }
         } else {
-            // Generate default initialization for variables without initializers
-            // This is required by the JVM verifier to track variable initialization
-            switch (localVar.type()) {
-                case "I", "S", "C", "Z", "B" -> {
-                    code.iconst(0);
-                    code.istore(localVar.index());
+            // Check if this variable needs a holder even without initializer
+            if (localVar.needsHolder()) {
+                generateHolderDefaultInitialization(code, cp, localVar);
+            } else {
+                // Generate default initialization for variables without initializers
+                // This is required by the JVM verifier to track variable initialization
+                switch (localVar.type()) {
+                    case "I", "S", "C", "Z", "B" -> {
+                        code.iconst(0);
+                        code.istore(localVar.index());
+                    }
+                    case "J" -> {
+                        code.lconst(0);
+                        code.lstore(localVar.index());
+                    }
+                    case "F" -> {
+                        code.fconst(0);
+                        code.fstore(localVar.index());
+                    }
+                    case "D" -> {
+                        code.dconst(0);
+                        code.dstore(localVar.index());
+                    }
+                    default -> {
+                        code.aconst_null();
+                        code.astore(localVar.index());
+                    }
                 }
-                case "J" -> {
-                    code.lconst(0);
-                    code.lstore(localVar.index());
+            }
+        }
+    }
+
+    /**
+     * Generate holder array with default value for a variable without initializer.
+     * Creates: type[] holder = new type[1]; // element initialized to default
+     */
+    private void generateHolderDefaultInitialization(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            LocalVariable localVar) {
+        String type = localVar.type();
+        int holderSlot = localVar.holderIndex();
+
+        switch (type) {
+            case "I" -> {
+                code.iconst(1);
+                code.newarray(10); // T_INT
+                code.astore(holderSlot);
+            }
+            case "J" -> {
+                code.iconst(1);
+                code.newarray(11); // T_LONG
+                code.astore(holderSlot);
+            }
+            case "D" -> {
+                code.iconst(1);
+                code.newarray(7); // T_DOUBLE
+                code.astore(holderSlot);
+            }
+            case "F" -> {
+                code.iconst(1);
+                code.newarray(6); // T_FLOAT
+                code.astore(holderSlot);
+            }
+            case "Z" -> {
+                code.iconst(1);
+                code.newarray(4); // T_BOOLEAN
+                code.astore(holderSlot);
+            }
+            case "B" -> {
+                code.iconst(1);
+                code.newarray(8); // T_BYTE
+                code.astore(holderSlot);
+            }
+            case "C" -> {
+                code.iconst(1);
+                code.newarray(5); // T_CHAR
+                code.astore(holderSlot);
+            }
+            case "S" -> {
+                code.iconst(1);
+                code.newarray(9); // T_SHORT
+                code.astore(holderSlot);
+            }
+            default -> {
+                // Reference type - create an array of the appropriate element type
+                code.iconst(1);
+                // Extract element type from descriptor (e.g., "Ljava/lang/String;" -> "java/lang/String")
+                String elementType;
+                if (type.startsWith("L") && type.endsWith(";")) {
+                    elementType = type.substring(1, type.length() - 1);
+                } else {
+                    elementType = "java/lang/Object";
                 }
-                case "F" -> {
-                    code.fconst(0);
-                    code.fstore(localVar.index());
+                int elementClass = cp.addClass(elementType);
+                code.anewarray(elementClass);
+                code.astore(holderSlot);
+            }
+        }
+    }
+
+    /**
+     * Generate holder array initialization with a value.
+     * Creates: type[] holder = new type[] { value };
+     */
+    private void generateHolderInitialization(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            LocalVariable localVar,
+            com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr init,
+            ReturnTypeInfo varTypeInfo) throws Swc4jByteCodeCompilerException {
+        String type = localVar.type();
+        int holderSlot = localVar.holderIndex();
+
+        switch (type) {
+            case "I" -> {
+                code.iconst(1);
+                code.newarray(10); // T_INT
+                code.dup();
+                code.iconst(0);
+                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                code.iastore();
+                code.astore(holderSlot);
+            }
+            case "J" -> {
+                code.iconst(1);
+                code.newarray(11); // T_LONG
+                code.dup();
+                code.iconst(0);
+                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                code.lastore();
+                code.astore(holderSlot);
+            }
+            case "D" -> {
+                code.iconst(1);
+                code.newarray(7); // T_DOUBLE
+                code.dup();
+                code.iconst(0);
+                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                code.dastore();
+                code.astore(holderSlot);
+            }
+            case "F" -> {
+                code.iconst(1);
+                code.newarray(6); // T_FLOAT
+                code.dup();
+                code.iconst(0);
+                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                code.fastore();
+                code.astore(holderSlot);
+            }
+            case "Z" -> {
+                code.iconst(1);
+                code.newarray(4); // T_BOOLEAN
+                code.dup();
+                code.iconst(0);
+                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                code.bastore();
+                code.astore(holderSlot);
+            }
+            case "B" -> {
+                code.iconst(1);
+                code.newarray(8); // T_BYTE
+                code.dup();
+                code.iconst(0);
+                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                code.bastore();
+                code.astore(holderSlot);
+            }
+            case "C" -> {
+                code.iconst(1);
+                code.newarray(5); // T_CHAR
+                code.dup();
+                code.iconst(0);
+                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                code.castore();
+                code.astore(holderSlot);
+            }
+            case "S" -> {
+                code.iconst(1);
+                code.newarray(9); // T_SHORT
+                code.dup();
+                code.iconst(0);
+                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                code.sastore();
+                code.astore(holderSlot);
+            }
+            default -> {
+                // Reference type - create an array of the appropriate element type
+                code.iconst(1);
+                // Extract element type from descriptor (e.g., "Ljava/lang/String;" -> "java/lang/String")
+                String elementType;
+                if (type.startsWith("L") && type.endsWith(";")) {
+                    elementType = type.substring(1, type.length() - 1);
+                } else {
+                    elementType = "java/lang/Object";
                 }
-                case "D" -> {
-                    code.dconst(0);
-                    code.dstore(localVar.index());
-                }
-                default -> {
-                    code.aconst_null();
-                    code.astore(localVar.index());
-                }
+                int elementClass = cp.addClass(elementType);
+                code.anewarray(elementClass);
+                code.dup();
+                code.iconst(0);
+                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                code.aastore();
+                code.astore(holderSlot);
             }
         }
     }

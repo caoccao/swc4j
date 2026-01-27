@@ -19,7 +19,6 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
@@ -821,18 +820,14 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstStr) {
             return "Ljava/lang/String;";
         } else if (expr instanceof Swc4jAstAssignExpr assignExpr) {
-            // For compound assignments (+=, -=, etc.), the result is the type of the left operand
-            // For simple assignment (=), the result is the type of the right operand
-            if (assignExpr.getOp() != Swc4jAstAssignOp.Assign) {
-                // Compound assignment - result type is the left operand (variable) type
-                var left = assignExpr.getLeft();
-                if (left instanceof Swc4jAstBindingIdent bindingIdent) {
-                    String varName = bindingIdent.getId().getSym();
-                    return context.getInferredType(varName, "Ljava/lang/Object;");
-                }
-                return inferTypeFromExpr(assignExpr.getRight());
+            // Assignment expression result is the type of the left operand (the variable being assigned to)
+            // because the right operand is converted to the left operand's type before storing
+            var left = assignExpr.getLeft();
+            if (left instanceof Swc4jAstBindingIdent bindingIdent) {
+                String varName = bindingIdent.getId().getSym();
+                return context.getInferredType(varName, "Ljava/lang/Object;");
             }
-            // Simple assignment - result type is the right operand type
+            // For other left-hand side types (member expressions, etc.), fall back to right operand type
             return inferTypeFromExpr(assignExpr.getRight());
         } else if (expr instanceof Swc4jAstIdent ident) {
             return context.getInferredType(ident.getSym(), "Ljava/lang/Object;");

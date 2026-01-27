@@ -30,6 +30,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -144,6 +145,16 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             throws Swc4jByteCodeCompilerException {
         List<ISwc4jAstPat> params = arrowExpr.getParams();
         ISwc4jAstBlockStmtOrExpr body = arrowExpr.getBody();
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        // Register type parameters from the arrow expression (e.g., <T>(x: T): T => x)
+        // This enables type erasure when extracting parameter types
+        boolean hasTypeParams = arrowExpr.getTypeParams().isPresent();
+        if (hasTypeParams) {
+            var typeParamDecl = arrowExpr.getTypeParams().get();
+            TypeParameterScope typeScope = TypeParameterScope.fromDecl(typeParamDecl);
+            context.pushTypeParameterScope(typeScope);
+        }
 
         // Try to get parameter types from target functional interface
         List<String> targetParamTypes = null;
@@ -170,7 +181,6 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
 
         // Push a new scope for parameter types to enable return type inference
         // This allows inferTypeFromExpr to correctly infer types like x * 2 when x is a long
-        CompilationContext context = compiler.getMemory().getCompilationContext();
         Map<String, String> paramScope = context.pushInferredTypesScope();
         for (int i = 0; i < paramNames.size(); i++) {
             paramScope.put(paramNames.get(i), paramTypes.get(i));
@@ -186,6 +196,29 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         String interfaceName;
         String methodName;
         String methodDescriptor;
+
+        // First check if target type info specifies a functional interface directly
+        // This is needed for generic arrows like <T>(x: T): T => x assigned to UnaryOperator<Object>
+        if (targetTypeInfo != null && targetTypeInfo.descriptor() != null) {
+            String targetDesc = targetTypeInfo.descriptor();
+            // Extract interface name from descriptor (e.g., "Ljava/util/function/UnaryOperator;" -> "java/util/function/UnaryOperator")
+            if (targetDesc.startsWith("L") && targetDesc.endsWith(";")) {
+                String targetInterface = targetDesc.substring(1, targetDesc.length() - 1);
+                FunctionalInterfaceInfo info = getFunctionalInterfaceInfo(targetInterface, paramTypes, returnInfo);
+                if (info != null) {
+                    interfaceName = info.interfaceName;
+                    methodName = info.methodName;
+                    methodDescriptor = info.methodDescriptor;
+
+                    // Pop type parameter scope before returning
+                    if (hasTypeParams) {
+                        context.popTypeParameterScope();
+                    }
+
+                    return new ArrowTypeInfo(interfaceName, methodName, methodDescriptor, paramTypes, paramNames, returnInfo);
+                }
+            }
+        }
 
         if (params.isEmpty() && returnInfo.type() == ReturnType.VOID) {
             // () => void -> Runnable
@@ -229,8 +262,17 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             }
         } else {
             // For more than 2 parameters, we'll generate a custom interface or use Object varargs
+            // Pop type parameter scope before throwing
+            if (hasTypeParams) {
+                context.popTypeParameterScope();
+            }
             throw new Swc4jByteCodeCompilerException(arrowExpr,
                     "Arrow functions with more than 2 parameters are not yet supported");
+        }
+
+        // Pop type parameter scope before returning
+        if (hasTypeParams) {
+            context.popTypeParameterScope();
         }
 
         return new ArrowTypeInfo(interfaceName, methodName, methodDescriptor, paramTypes, paramNames, returnInfo);
@@ -288,7 +330,20 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             if (localVar != null) {
                 // Check if this is a self-reference (recursive arrow)
                 boolean isSelfRef = varName.equals(selfReferenceName);
-                captured.add(new CapturedVariable(varName, localVar.type(), localVar.index(), isSelfRef));
+                // Check if this variable needs a holder (mutable capture)
+                if (localVar.needsHolder()) {
+                    // Capture the holder array instead of the value
+                    captured.add(new CapturedVariable(
+                            varName,
+                            localVar.getHolderType(),  // e.g., "[I" for int[]
+                            localVar.holderIndex(),    // slot of the holder array
+                            isSelfRef,
+                            true,                       // isHolder = true
+                            localVar.type()            // original type e.g., "I"
+                    ));
+                } else {
+                    captured.add(new CapturedVariable(varName, localVar.type(), localVar.index(), isSelfRef));
+                }
             }
         }
 
@@ -809,15 +864,17 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
 
         // Map captured variables to field access - register them in the compilation context
         for (CapturedVariable captured : capturedVariables) {
-            // Store in inferred types so the identifier generator knows the type
-            lambdaContext.getInferredTypes().put(captured.name(), captured.type());
+            // Store in inferred types - use original type for type checking, not holder type
+            lambdaContext.getInferredTypes().put(captured.name(), captured.originalType());
             // Register as captured variable for field access resolution
             lambdaContext.getCapturedVariables().put(
                     captured.name(),
                     new com.caoccao.javet.swc4j.compiler.memory.CapturedVariable(
                             captured.name(),
                             "captured$" + captured.name(),
-                            captured.type()
+                            captured.type(),
+                            captured.isHolder(),
+                            captured.originalType()
                     )
             );
         }
@@ -1317,6 +1374,64 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         return "apply";
     }
 
+    /**
+     * Get functional interface info for a known interface type.
+     * This supports type erasure for generic functional interfaces.
+     *
+     * @param interfaceName the internal name of the interface (e.g., "java/util/function/UnaryOperator")
+     * @param paramTypes    the arrow's parameter types
+     * @param returnInfo    the arrow's return type info
+     * @return FunctionalInterfaceInfo or null if not a known interface
+     */
+    private FunctionalInterfaceInfo getFunctionalInterfaceInfo(String interfaceName, List<String> paramTypes, ReturnTypeInfo returnInfo) {
+        // UnaryOperator<T> - single param, same return type
+        if (interfaceName.equals("java/util/function/UnaryOperator")) {
+            // UnaryOperator.apply(Object): Object
+            return new FunctionalInterfaceInfo(interfaceName, "apply", "(Ljava/lang/Object;)Ljava/lang/Object;");
+        }
+        // Function<T, R> - single param, different return type
+        if (interfaceName.equals("java/util/function/Function")) {
+            // Function.apply(Object): Object
+            return new FunctionalInterfaceInfo(interfaceName, "apply", "(Ljava/lang/Object;)Ljava/lang/Object;");
+        }
+        // Supplier<T> - no params, returns T
+        if (interfaceName.equals("java/util/function/Supplier")) {
+            // Supplier.get(): Object
+            return new FunctionalInterfaceInfo(interfaceName, "get", "()Ljava/lang/Object;");
+        }
+        // Consumer<T> - single param, void return
+        if (interfaceName.equals("java/util/function/Consumer")) {
+            // Consumer.accept(Object): void
+            return new FunctionalInterfaceInfo(interfaceName, "accept", "(Ljava/lang/Object;)V");
+        }
+        // Predicate<T> - single param, boolean return
+        if (interfaceName.equals("java/util/function/Predicate")) {
+            // Predicate.test(Object): boolean
+            return new FunctionalInterfaceInfo(interfaceName, "test", "(Ljava/lang/Object;)Z");
+        }
+        // BiFunction<T, U, R> - two params, returns R
+        if (interfaceName.equals("java/util/function/BiFunction")) {
+            // BiFunction.apply(Object, Object): Object
+            return new FunctionalInterfaceInfo(interfaceName, "apply", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+        }
+        // BinaryOperator<T> - two params same type, returns same type
+        if (interfaceName.equals("java/util/function/BinaryOperator")) {
+            // BinaryOperator.apply(Object, Object): Object
+            return new FunctionalInterfaceInfo(interfaceName, "apply", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+        }
+        // BiConsumer<T, U> - two params, void return
+        if (interfaceName.equals("java/util/function/BiConsumer")) {
+            // BiConsumer.accept(Object, Object): void
+            return new FunctionalInterfaceInfo(interfaceName, "accept", "(Ljava/lang/Object;Ljava/lang/Object;)V");
+        }
+        // BiPredicate<T, U> - two params, boolean return
+        if (interfaceName.equals("java/util/function/BiPredicate")) {
+            // BiPredicate.test(Object, Object): boolean
+            return new FunctionalInterfaceInfo(interfaceName, "test", "(Ljava/lang/Object;Ljava/lang/Object;)Z");
+        }
+        return null;
+    }
+
     private int getOrAllocateTempSlot(CompilationContext context, String tempName, String type) {
         LocalVariable tempVar = context.getLocalVariableTable().getVariable(tempName);
         if (tempVar == null) {
@@ -1447,14 +1562,27 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
      * Represents a captured variable with information about whether it's a self-reference.
      *
      * @param name            variable name
-     * @param type            JVM type descriptor
-     * @param outerSlot       slot index in outer scope
+     * @param type            JVM type descriptor (holder array type if isHolder is true)
+     * @param outerSlot       slot index in outer scope (holder slot if isHolder is true)
      * @param isSelfReference true if this is a self-referencing capture (recursive arrow)
+     * @param isHolder        true if this capture is via a holder array (for mutable captures)
+     * @param originalType    the original variable type (before holder wrapping), same as type if not a holder
      */
-    private record CapturedVariable(String name, String type, int outerSlot, boolean isSelfReference) {
+    private record CapturedVariable(String name, String type, int outerSlot, boolean isSelfReference, boolean isHolder,
+                                    String originalType) {
         CapturedVariable(String name, String type, int outerSlot) {
-            this(name, type, outerSlot, false);
+            this(name, type, outerSlot, false, false, type);
         }
+
+        CapturedVariable(String name, String type, int outerSlot, boolean isSelfReference) {
+            this(name, type, outerSlot, isSelfReference, false, type);
+        }
+    }
+
+    /**
+     * Helper record for functional interface info lookup.
+     */
+    private record FunctionalInterfaceInfo(String interfaceName, String methodName, String methodDescriptor) {
     }
 
     /**

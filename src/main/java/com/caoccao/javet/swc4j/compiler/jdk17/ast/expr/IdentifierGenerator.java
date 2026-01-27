@@ -49,17 +49,50 @@ public final class IdentifierGenerator extends BaseAstProcessor<Swc4jAstIdent> {
             code.aload(0);  // Load 'this' (the lambda instance)
             int fieldRef = cp.addFieldRef(currentClass, capturedVar.fieldName(), capturedVar.type());
             code.getfield(fieldRef);
+
+            // If it's a holder, need to extract the value from the array
+            if (capturedVar.isHolder()) {
+                code.iconst(0);
+                // Use originalType to determine the correct array load instruction
+                switch (capturedVar.originalType()) {
+                    case "I" -> code.iaload();
+                    case "J" -> code.laload();
+                    case "F" -> code.faload();
+                    case "D" -> code.daload();
+                    case "Z", "B" -> code.baload();
+                    case "C" -> code.caload();
+                    case "S" -> code.saload();
+                    default -> code.aaload();
+                }
+            }
             return;
         }
 
         LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
         if (localVar != null) {
-            switch (localVar.type()) {
-                case "I", "S", "C", "Z", "B" -> code.iload(localVar.index());
-                case "J" -> code.lload(localVar.index());
-                case "F" -> code.fload(localVar.index());
-                case "D" -> code.dload(localVar.index());
-                default -> code.aload(localVar.index());
+            // Check if variable uses a holder (for mutable captures)
+            if (localVar.needsHolder()) {
+                // Load value from holder array: holder[0]
+                code.aload(localVar.holderIndex());
+                code.iconst(0);
+                switch (localVar.type()) {
+                    case "I" -> code.iaload();
+                    case "J" -> code.laload();
+                    case "F" -> code.faload();
+                    case "D" -> code.daload();
+                    case "Z", "B" -> code.baload();
+                    case "C" -> code.caload();
+                    case "S" -> code.saload();
+                    default -> code.aaload();
+                }
+            } else {
+                switch (localVar.type()) {
+                    case "I", "S", "C", "Z", "B" -> code.iload(localVar.index());
+                    case "J" -> code.lload(localVar.index());
+                    case "F" -> code.fload(localVar.index());
+                    case "D" -> code.dload(localVar.index());
+                    default -> code.aload(localVar.index());
+                }
             }
 
             // Handle boxing if needed

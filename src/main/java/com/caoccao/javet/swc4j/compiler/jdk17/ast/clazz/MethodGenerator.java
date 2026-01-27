@@ -104,6 +104,9 @@ public final class MethodGenerator extends BaseAstProcessor {
                 // Analyze variable declarations and infer types
                 compiler.getVariableAnalyzer().analyzeVariableDeclarations(body);
 
+                // Analyze mutable captures to determine which variables need holder objects
+                compiler.getMutableCaptureAnalyzer().analyze(body);
+
                 // Determine return type from method body or explicit annotation
                 ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, body);
                 String descriptor = generateDescriptor(function, returnTypeInfo);

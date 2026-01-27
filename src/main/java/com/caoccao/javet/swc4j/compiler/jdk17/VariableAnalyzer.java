@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
@@ -164,13 +165,15 @@ public final class VariableAnalyzer {
 
     private void analyzeVarDecl(Swc4jAstVarDecl varDecl) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
+        // let and var are mutable, const is not
+        boolean isMutable = varDecl.getKind() != Swc4jAstVarDeclKind.Const;
 
         for (Swc4jAstVarDeclarator declarator : varDecl.getDecls()) {
             ISwc4jAstPat name = declarator.getName();
             if (name instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
                 String varType = compiler.getTypeResolver().extractType(bindingIdent, declarator.getInit());
-                context.getLocalVariableTable().allocateVariable(varName, varType);
+                context.getLocalVariableTable().allocateVariable(varName, varType, isMutable);
                 context.getInferredTypes().put(varName, varType);
 
                 // Phase 2: Extract GenericTypeInfo for Record types

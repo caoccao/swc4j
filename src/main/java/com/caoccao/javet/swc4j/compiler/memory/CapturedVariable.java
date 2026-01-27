@@ -20,9 +20,18 @@ package com.caoccao.javet.swc4j.compiler.memory;
  * Represents a variable captured by a lambda/arrow function.
  * Captured variables are stored as fields in the lambda class.
  *
- * @param name      the variable name in source code
- * @param fieldName the field name in the lambda class (e.g., "captured$x")
- * @param type      the JVM type descriptor (e.g., "I", "Ljava/lang/String;")
+ * @param name         the variable name in source code
+ * @param fieldName    the field name in the lambda class (e.g., "captured$x")
+ * @param type         the JVM type descriptor (e.g., "I", "Ljava/lang/String;", or "[I" for holder)
+ * @param isHolder     true if this capture is via a holder array (for mutable captures)
+ * @param originalType the original variable type before holder wrapping (e.g., "I" for int)
  */
-public record CapturedVariable(String name, String fieldName, String type) {
+public record CapturedVariable(String name, String fieldName, String type, boolean isHolder, String originalType) {
+
+    /**
+     * Creates a simple captured variable (backward compatible constructor).
+     */
+    public CapturedVariable(String name, String fieldName, String type) {
+        this(name, fieldName, type, false, type);
+    }
 }

@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstArrowExpr` in TypeScript to JVM bytecode compilation. Arrow expressions (arrow functions/lambdas) are first-class function values that capture variables from their enclosing scope.
 
-**Current Status:** MOSTLY COMPLETE (Phases 1-6 implemented with documented limitations, recursive arrows supported)
+**Current Status:** COMPLETE (Phases 1-6 implemented with documented limitations, recursive arrows, mutable captures, and generic type parameters supported)
 
 **Strategy:** Arrow expressions will be implemented as **Anonymous Inner Classes** that implement a functional interface. This approach is compatible with JDK 17 and provides full closure semantics.
 
@@ -48,6 +48,8 @@ class Calculator {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowCustomInterface.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowTypeInference.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowRecursive.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowMutableCapture.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowGeneric.java` ✓
 
 **AST Definition:** [Swc4jAstArrowExpr.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr.java)
 
@@ -272,7 +274,7 @@ Methods within the inner class:
 
 ### Phase 2: Variable Capture (Closures) - Priority: HIGH
 
-**Status:** IMPLEMENTED (basic capture, method parameter capture, and `this` capture work; mutable capture not yet implemented)
+**Status:** IMPLEMENTED (basic capture, method parameter capture, `this` capture, and mutable captures with holder objects all working)
 
 **Scope:**
 - Capture local variables from enclosing scope
@@ -423,10 +425,7 @@ When arrow expressions are assigned to standard functional interfaces (e.g., `In
    - **Binary Operators**: BiFunction, BiConsumer, BiPredicate, BinaryOperator, IntBinaryOperator, LongBinaryOperator, DoubleBinaryOperator
    - **Other**: Runnable, Callable, Comparator
 
-5. **Generic Type Parameters**: Limited. Generic arrows like `<T>(x: T): T => x` are parsed but use type erasure to Object. Full generic support would require:
-   - Type parameter propagation
-   - Constraint resolution
-   - Specialized interface generation
+5. **Generic Type Parameters**: ✓ IMPLEMENTED. Generic arrows like `<T>(x: T): T => x` use type erasure to Object. The type parameter scope is registered before extracting parameter types, enabling proper type resolution. When assigned to generic functional interfaces (UnaryOperator<Object>, Function<Object, R>, etc.), the target interface is used directly.
 
 ### Phase 6: Nested Arrows - Priority: MEDIUM
 
@@ -1323,7 +1322,7 @@ Use primitive specializations to avoid boxing:
 - [x] Phase 4: Advanced parameter features (destructuring) - ✓ FULLY IMPLEMENTED
 - [x] Phase 5: Return type inference working (expressions, statements, operators)
 - [x] Phase 5: Parameter type inference from context - ✓ IMPLEMENTED for well-known functional interfaces
-- [ ] Phase 5: Generic type parameters - LIMITED (type erasure)
+- [x] Phase 5: Generic type parameters - ✓ IMPLEMENTED (type erasure to Object)
 - [x] Phase 6: Nested arrows working (curried functions, multi-level capture, mixed type captures)
 - [x] Phase 7: Async arrows - NOT SUPPORTED (intentionally excluded)
 - [x] Phase 8: Generator arrows - NOT SUPPORTED (intentionally excluded, also invalid syntax)
@@ -1344,7 +1343,7 @@ Use primitive specializations to avoid boxing:
 1. **Async Arrows**: NOT SUPPORTED - Async/await requires state machine transformation too complex for bytecode compilation
 2. **Generator Arrows**: NOT SUPPORTED - Generator arrow functions are not valid TypeScript/JavaScript syntax; the AST flag exists but should never be true for valid code
 3. **Union Return Types**: NOT SUPPORTED - JVM requires single return type
-4. **Mutable Captures**: Require holder object pattern (performance overhead) - not yet fully implemented
+4. **Mutable Captures**: ✓ IMPLEMENTED - Uses holder object pattern (int[], long[], Object[], etc.) for variables declared with `let` that are modified after lambda creation
 5. **IIFE (Immediately Invoked Function Expression)**: IMPLEMENTED - Generates custom interface with naming convention $interfaceN and anonymous implementation class
 6. **Destructuring Parameters**: NOT SUPPORTED - Object/array destructuring in parameters not implemented
 7. **Default/Rest/Optional Parameters**: LIMITED - Only work with custom interfaces, not standard functional interfaces
@@ -1491,9 +1490,31 @@ The following edge cases are now covered by tests:
 - Recursive arrow - with additional captured variable ✓
 - Recursive arrow - with 'this' capture ✓
 
+**Mutable Captures (TestCompileAstArrowMutableCapture.java):**
+- Edge case 34: Mutable int capture - variable modified after lambda creation ✓
+- Mutable long capture ✓
+- Mutable double capture ✓
+- Mutable boolean capture ✓
+- Mutable object (String) capture ✓
+- Multiple modifications before reading ✓
+- Edge case 91: Arrow with side effects (counter increment inside lambda) ✓
+- Mutable capture in returned lambda (counter closure) ✓
+- Mixed mutable and immutable captures ✓
+- Mutable capture in loop (variable read after multiple modifications) ✓
+- Multiple mutable variables captured ✓
+
+**Generic Type Parameters (TestCompileAstArrowGeneric.java):**
+- Edge case 68: Generic arrow function with type erasure `<T>(x: T): T => x` ✓
+- Generic identity with Object type ✓
+- Generic function with transformation (`x.toString()`) ✓
+- Generic arrow with capture of outer variable ✓
+- Generic arrow returned from method ✓
+- Edge case 70: Multiple type parameters (erased to Object) ✓
+- Generic arrow chained calls ✓
+- Generic arrow with block body ✓
+
 ---
 
 *Last Updated: January 27, 2026*
-*Status: MOSTLY COMPLETE (Phase 1-6 implemented with IIFE support, recursive arrows, Phase 5 parameter type inference)*
-*Remaining Work: Mutable captures with holder objects, generic type parameters*
+*Status: COMPLETE (Phase 1-6 implemented with IIFE support, recursive arrows, Phase 5 parameter type inference, mutable captures, generic type parameters)*
 *Note: Async and generator arrows are intentionally not supported due to complexity*
