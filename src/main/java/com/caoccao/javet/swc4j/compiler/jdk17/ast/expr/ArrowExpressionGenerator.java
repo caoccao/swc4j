@@ -18,17 +18,16 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstBlockStmtOrExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
-import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPat;
-import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
-import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.ast.pat.*;
 import com.caoccao.javet.swc4j.ast.stmt.*;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
@@ -71,6 +70,66 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             if (returnTypeInfo.type() == ReturnType.VOID) {
                 code.returnVoid();
             }
+        }
+    }
+
+    /**
+     * Allocate variables for nested patterns recursively.
+     *
+     * @param context     compilation context
+     * @param pat         the pattern to allocate variables for
+     * @param elementType the type descriptor for elements (e.g., "I" for int from List<int>)
+     */
+    private void allocateNestedPatternVariables(CompilationContext context, ISwc4jAstPat pat, String elementType) {
+        if (pat instanceof Swc4jAstBindingIdent bindingIdent) {
+            allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), elementType);
+        } else if (pat instanceof Swc4jAstArrayPat arrayPat) {
+            for (var optElem : arrayPat.getElems()) {
+                if (optElem.isPresent()) {
+                    ISwc4jAstPat elem = optElem.get();
+                    if (elem instanceof Swc4jAstRestPat restPat) {
+                        allocateRestPatternVariable(context, restPat, true);
+                    } else {
+                        allocateNestedPatternVariables(context, elem, elementType);
+                    }
+                }
+            }
+        } else if (pat instanceof Swc4jAstObjectPat objectPat) {
+            for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
+                if (prop instanceof Swc4jAstAssignPatProp assignProp) {
+                    allocateVariableIfNeeded(context, assignProp.getKey().getId().getSym(), elementType);
+                } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
+                    allocateNestedPatternVariables(context, keyValueProp.getValue(), elementType);
+                } else if (prop instanceof Swc4jAstRestPat restPat) {
+                    allocateRestPatternVariable(context, restPat, false);
+                }
+            }
+        }
+    }
+
+    /**
+     * Allocate variable for rest pattern.
+     */
+    private void allocateRestPatternVariable(CompilationContext context, Swc4jAstRestPat restPat, boolean isArrayRest) {
+        ISwc4jAstPat arg = restPat.getArg();
+        if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
+            String varName = bindingIdent.getId().getSym();
+            String varType = isArrayRest ? "Ljava/util/ArrayList;" : "Ljava/util/LinkedHashMap;";
+            allocateVariableIfNeeded(context, varName, varType);
+        }
+    }
+
+    /**
+     * Allocate variable if it doesn't exist.
+     */
+    private void allocateVariableIfNeeded(CompilationContext context, String varName, String varType) {
+        LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
+        if (localVar == null) {
+            localVar = context.getLocalVariableTable().addExistingVariableToCurrentScope(varName, varType);
+        }
+        if (localVar == null) {
+            context.getLocalVariableTable().allocateVariable(varName, varType);
+            context.getInferredTypes().put(varName, varType);
         }
     }
 
@@ -310,6 +369,30 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         return false;
     }
 
+    /**
+     * Extract element type from a parameter's type annotation.
+     * For List<int>, returns "I". For Map<String, int>, returns "I" (value type).
+     *
+     * @param param the parameter pattern
+     * @return element type descriptor, or "Ljava/lang/Object;" if cannot determine
+     */
+    private String extractElementType(ISwc4jAstPat param) {
+        if (param instanceof Swc4jAstArrayPat arrayPat) {
+            // Array pattern - check type annotation
+            var typeAnn = arrayPat.getTypeAnn();
+            if (typeAnn.isPresent()) {
+                return extractTypeFromAnnotation(typeAnn.get().getTypeAnn(), true);
+            }
+        } else if (param instanceof Swc4jAstObjectPat objectPat) {
+            // Object pattern - check type annotation
+            var typeAnn = objectPat.getTypeAnn();
+            if (typeAnn.isPresent()) {
+                return extractTypeFromAnnotation(typeAnn.get().getTypeAnn(), false);
+            }
+        }
+        return "Ljava/lang/Object;";
+    }
+
     private String extractParamName(ISwc4jAstPat param) {
         if (param instanceof Swc4jAstBindingIdent bindingIdent) {
             return bindingIdent.getId().getSym();
@@ -319,8 +402,51 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         } else if (param instanceof Swc4jAstAssignPat assignPat) {
             // Default parameter: x = 10 -> extract "x"
             return extractParamName(assignPat.getLeft());
+        } else if (param instanceof Swc4jAstArrayPat || param instanceof Swc4jAstObjectPat) {
+            // Destructuring parameter - will use temporary parameter name
+            return null;
         }
         return null;
+    }
+
+    /**
+     * Extract property name from ISwc4jAstPropName.
+     */
+    private String extractPropertyName(ISwc4jAstPropName propName) {
+        if (propName instanceof Swc4jAstIdentName identName) {
+            return identName.getSym();
+        } else if (propName instanceof Swc4jAstStr str) {
+            return str.getValue();
+        }
+        return null;
+    }
+
+    /**
+     * Extract element/value type from a type annotation.
+     *
+     * @param tsType  the TypeScript type
+     * @param isArray true for List (returns element type), false for Map (returns value type)
+     * @return type descriptor
+     */
+    private String extractTypeFromAnnotation(ISwc4jAstTsType tsType, boolean isArray) {
+        if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
+            var typeParams = typeRef.getTypeParams();
+            if (typeParams.isPresent()) {
+                var params = typeParams.get().getParams();
+                if (!params.isEmpty()) {
+                    // For List<T>, take first param. For Map<K,V>, take second param (value type)
+                    int index = isArray ? 0 : (params.size() > 1 ? 1 : 0);
+                    if (index < params.size()) {
+                        try {
+                            return compiler.getTypeResolver().mapTsTypeToDescriptor(params.get(index));
+                        } catch (Exception e) {
+                            // Fall through to default
+                        }
+                    }
+                }
+            }
+        }
+        return "Ljava/lang/Object;";
     }
 
     private ReturnTypeInfo findReturnType(ISwc4jAstStmt stmt, Map<String, String> varTypes)
@@ -397,6 +523,95 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             generateInstantiation(code, cp, lambdaClassName, capturedVariables);
         } catch (IOException e) {
             throw new Swc4jByteCodeCompilerException(arrowExpr, "Failed to generate lambda class", e);
+        }
+    }
+
+    /**
+     * Generate bytecode for array pattern extraction from a value already on the stack (parameter).
+     */
+    public void generateArrayPatternExtraction(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            CompilationContext context,
+            Swc4jAstArrayPat arrayPat) throws Swc4jByteCodeCompilerException {
+
+        int listClass = cp.addClass("java/util/List");
+        code.checkcast(listClass);
+        int tempListSlot = getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), "Ljava/util/List;");
+        code.astore(tempListSlot);
+
+        int listGetRef = cp.addInterfaceMethodRef("java/util/List", "get", "(I)Ljava/lang/Object;");
+        int listSizeRef = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
+        int listAddRef = cp.addInterfaceMethodRef("java/util/List", "add", "(Ljava/lang/Object;)Z");
+
+        // Extract element type from the array pattern's type annotation
+        String elementType = extractElementType(arrayPat);
+
+        // Allocate variables for all elements including rest pattern
+        int restStartIndex = 0;
+        for (var optElem : arrayPat.getElems()) {
+            if (!optElem.isPresent()) {
+                restStartIndex++;
+                continue;
+            }
+            ISwc4jAstPat elem = optElem.get();
+            if (elem instanceof Swc4jAstBindingIdent bindingIdent) {
+                String varName = bindingIdent.getId().getSym();
+                allocateVariableIfNeeded(context, varName, elementType);
+                restStartIndex++;
+            } else if (elem instanceof Swc4jAstArrayPat || elem instanceof Swc4jAstObjectPat) {
+                // Nested pattern - allocate variables recursively
+                allocateNestedPatternVariables(context, elem, elementType);
+                restStartIndex++;
+            } else if (elem instanceof Swc4jAstRestPat restPat) {
+                allocateRestPatternVariable(context, restPat, true);
+                break;
+            }
+        }
+
+        // Extract elements
+        int currentIndex = 0;
+        for (var optElem : arrayPat.getElems()) {
+            if (!optElem.isPresent()) {
+                currentIndex++;
+                continue;
+            }
+            ISwc4jAstPat elem = optElem.get();
+            if (elem instanceof Swc4jAstBindingIdent bindingIdent) {
+                String varName = bindingIdent.getId().getSym();
+                LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
+
+                // list.get(index)
+                code.aload(tempListSlot);
+                code.iconst(currentIndex);
+                code.invokeinterface(listGetRef, 2);
+
+                // Add type conversion/unboxing if needed
+                generateUnboxingIfNeeded(code, cp, elementType);
+                storeValueByType(code, localVar.index(), elementType);
+                currentIndex++;
+
+            } else if (elem instanceof Swc4jAstArrayPat nestedArrayPat) {
+                // Nested array pattern: [a, [b, ...inner], ...outer]
+                code.aload(tempListSlot);
+                code.iconst(currentIndex);
+                code.invokeinterface(listGetRef, 2);
+                // Recursively extract nested array pattern
+                generateArrayPatternExtraction(code, cp, context, nestedArrayPat);
+                currentIndex++;
+
+            } else if (elem instanceof Swc4jAstObjectPat nestedObjectPat) {
+                // Nested object pattern: [a, {b, ...inner}, ...outer]
+                code.aload(tempListSlot);
+                code.iconst(currentIndex);
+                code.invokeinterface(listGetRef, 2);
+                // Recursively extract nested object pattern
+                generateObjectPatternExtraction(code, cp, context, nestedObjectPat);
+                currentIndex++;
+
+            } else if (elem instanceof Swc4jAstRestPat restPat) {
+                generateRestPatternExtraction(code, cp, context, restPat, tempListSlot, restStartIndex, true, listGetRef, listSizeRef, listAddRef);
+            }
         }
     }
 
@@ -536,6 +751,27 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         // Generate method body
         CodeBuilder code = new CodeBuilder();
 
+        // Generate destructuring extraction code for parameters
+        List<ISwc4jAstPat> params = arrowExpr.getParams();
+        for (int i = 0; i < params.size(); i++) {
+            ISwc4jAstPat param = params.get(i);
+            if (param instanceof Swc4jAstArrayPat arrayPat) {
+                // Load the parameter value onto the stack
+                String paramName = typeInfo.paramNames().get(i);
+                LocalVariable paramVar = lambdaContext.getLocalVariableTable().getVariable(paramName);
+                code.aload(paramVar.index());
+                // Generate array destructuring extraction
+                generateArrayPatternExtraction(code, cp, lambdaContext, arrayPat);
+            } else if (param instanceof Swc4jAstObjectPat objectPat) {
+                // Load the parameter value onto the stack
+                String paramName = typeInfo.paramNames().get(i);
+                LocalVariable paramVar = lambdaContext.getLocalVariableTable().getVariable(paramName);
+                code.aload(paramVar.index());
+                // Generate object destructuring extraction
+                generateObjectPatternExtraction(code, cp, lambdaContext, objectPat);
+            }
+        }
+
         ISwc4jAstBlockStmtOrExpr body = arrowExpr.getBody();
         if (body instanceof Swc4jAstBlockStmt blockStmt) {
             // Block body - generate statements
@@ -570,6 +806,277 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         compiler.getMemory().popCompilationContext();
     }
 
+    /**
+     * Generate bytecode for object pattern extraction from a value already on the stack (parameter).
+     */
+    public void generateObjectPatternExtraction(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            CompilationContext context,
+            Swc4jAstObjectPat objectPat) throws Swc4jByteCodeCompilerException {
+
+        int mapClass = cp.addClass("java/util/Map");
+        code.checkcast(mapClass);
+        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), "Ljava/util/Map;");
+        code.astore(tempMapSlot);
+
+        int mapGetRef = cp.addInterfaceMethodRef("java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
+        int mapRemoveRef = cp.addInterfaceMethodRef("java/util/Map", "remove", "(Ljava/lang/Object;)Ljava/lang/Object;");
+
+        // Extract value type from the object pattern's type annotation (Map<K, V> -> V)
+        String valueType = extractElementType(objectPat);
+
+        List<String> extractedKeys = new ArrayList<>();
+
+        // First pass: allocate variables and collect extracted keys
+        for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
+            if (prop instanceof Swc4jAstAssignPatProp assignProp) {
+                String varName = assignProp.getKey().getId().getSym();
+                extractedKeys.add(varName);
+                allocateVariableIfNeeded(context, varName, valueType);
+            } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
+                String keyName = extractPropertyName(keyValueProp.getKey());
+                extractedKeys.add(keyName);
+                ISwc4jAstPat valuePat = keyValueProp.getValue();
+                if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
+                    allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), valueType);
+                } else if (valuePat instanceof Swc4jAstArrayPat || valuePat instanceof Swc4jAstObjectPat) {
+                    // Nested pattern - allocate variables recursively
+                    allocateNestedPatternVariables(context, valuePat, valueType);
+                }
+            } else if (prop instanceof Swc4jAstRestPat restPat) {
+                allocateRestPatternVariable(context, restPat, false);
+            }
+        }
+
+        // Second pass: extract values
+        for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
+            if (prop instanceof Swc4jAstAssignPatProp assignProp) {
+                String varName = assignProp.getKey().getId().getSym();
+                LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
+
+                // Load map and call get(key)
+                code.aload(tempMapSlot);
+                int keyRef = cp.addString(varName);
+                code.ldc(keyRef);
+                code.invokeinterface(mapGetRef, 2);
+
+                // Add type conversion/unboxing if needed
+                generateUnboxingIfNeeded(code, cp, valueType);
+                storeValueByType(code, localVar.index(), valueType);
+
+            } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
+                String keyName = extractPropertyName(keyValueProp.getKey());
+                ISwc4jAstPat valuePat = keyValueProp.getValue();
+
+                // Load map and call get(key)
+                code.aload(tempMapSlot);
+                int keyRef = cp.addString(keyName);
+                code.ldc(keyRef);
+                code.invokeinterface(mapGetRef, 2);
+
+                if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
+                    String varName = bindingIdent.getId().getSym();
+                    LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
+                    // Add type conversion/unboxing if needed
+                    generateUnboxingIfNeeded(code, cp, valueType);
+                    storeValueByType(code, localVar.index(), valueType);
+                } else if (valuePat instanceof Swc4jAstArrayPat nestedArrayPat) {
+                    // Nested array pattern: { arr: [a, ...rest] }
+                    generateArrayPatternExtraction(code, cp, context, nestedArrayPat);
+                } else if (valuePat instanceof Swc4jAstObjectPat nestedObjectPat) {
+                    // Nested object pattern: { nested: { y, ...rest } }
+                    generateObjectPatternExtraction(code, cp, context, nestedObjectPat);
+                }
+
+            } else if (prop instanceof Swc4jAstRestPat restPat) {
+                generateObjectRestExtraction(code, cp, context, restPat, tempMapSlot, extractedKeys, mapRemoveRef);
+            }
+        }
+    }
+
+    /**
+     * Generate bytecode for object rest pattern extraction {...rest}.
+     */
+    private void generateObjectRestExtraction(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            CompilationContext context,
+            Swc4jAstRestPat restPat,
+            int tempMapSlot,
+            List<String> extractedKeys,
+            int mapRemoveRef) throws Swc4jByteCodeCompilerException {
+
+        ISwc4jAstPat arg = restPat.getArg();
+        if (!(arg instanceof Swc4jAstBindingIdent bindingIdent)) {
+            throw new Swc4jByteCodeCompilerException(restPat, "Rest pattern argument must be a binding identifier");
+        }
+
+        String restVarName = bindingIdent.getId().getSym();
+        LocalVariable restVar = context.getLocalVariableTable().getVariable(restVarName);
+
+        // Create a new LinkedHashMap for the rest object
+        int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
+        code.newInstance(linkedHashMapClass);
+        code.dup();
+        int linkedHashMapInitRef = cp.addMethodRef("java/util/LinkedHashMap", "<init>", "()V");
+        code.invokespecial(linkedHashMapInitRef);
+        int restMapSlot = getOrAllocateTempSlot(context, "$restMap" + context.getNextTempId(), "Ljava/util/LinkedHashMap;");
+        code.astore(restMapSlot);
+
+        // Copy all entries from original map except extracted keys
+        int mapEntrySetRef = cp.addInterfaceMethodRef("java/util/Map", "entrySet", "()Ljava/util/Set;");
+        int setIteratorRef = cp.addInterfaceMethodRef("java/util/Set", "iterator", "()Ljava/util/Iterator;");
+        int iteratorHasNextRef = cp.addInterfaceMethodRef("java/util/Iterator", "hasNext", "()Z");
+        int iteratorNextRef = cp.addInterfaceMethodRef("java/util/Iterator", "next", "()Ljava/lang/Object;");
+        int entryGetKeyRef = cp.addInterfaceMethodRef("java/util/Map$Entry", "getKey", "()Ljava/lang/Object;");
+        int entryGetValueRef = cp.addInterfaceMethodRef("java/util/Map$Entry", "getValue", "()Ljava/lang/Object;");
+        int mapPutRef = cp.addInterfaceMethodRef("java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+        int objectEqualsRef = cp.addMethodRef("java/lang/Object", "equals", "(Ljava/lang/Object;)Z");
+
+        // Get iterator from original map's entry set
+        code.aload(tempMapSlot);
+        code.invokeinterface(mapEntrySetRef, 1);
+        code.invokeinterface(setIteratorRef, 1);
+        int iteratorSlot = getOrAllocateTempSlot(context, "$iterator" + context.getNextTempId(), "Ljava/util/Iterator;");
+        code.astore(iteratorSlot);
+
+        // Loop through entries
+        int loopStart = code.getCurrentOffset();
+        code.aload(iteratorSlot);
+        code.invokeinterface(iteratorHasNextRef, 1);
+        code.ifeq(0); // Placeholder
+        int loopExitPos = code.getCurrentOffset() - 2;
+
+        // Get next entry
+        code.aload(iteratorSlot);
+        code.invokeinterface(iteratorNextRef, 1);
+        int entryClass = cp.addClass("java/util/Map$Entry");
+        code.checkcast(entryClass);
+        int entrySlot = getOrAllocateTempSlot(context, "$entry" + context.getNextTempId(), "Ljava/util/Map$Entry;");
+        code.astore(entrySlot);
+
+        // Get key from entry
+        code.aload(entrySlot);
+        code.invokeinterface(entryGetKeyRef, 1);
+        int keySlot = getOrAllocateTempSlot(context, "$key" + context.getNextTempId(), "Ljava/lang/Object;");
+        code.astore(keySlot);
+
+        // Check if key is in extracted keys - if so, skip adding to rest map
+        List<Integer> skipAddPositions = new ArrayList<>();
+        for (String extractedKey : extractedKeys) {
+            code.aload(keySlot);
+            int extractedKeyRef = cp.addString(extractedKey);
+            code.ldc(extractedKeyRef);
+            code.invokevirtual(objectEqualsRef);
+            code.ifne(0); // If equal, skip adding this entry
+            skipAddPositions.add(code.getCurrentOffset() - 2);
+        }
+
+        // If we get here, key is not in extracted keys - add to rest map
+        code.aload(restMapSlot);
+        code.aload(keySlot);
+        code.aload(entrySlot);
+        code.invokeinterface(entryGetValueRef, 1);
+        code.invokeinterface(mapPutRef, 3);
+        code.pop(); // Discard return value from put
+
+        // Patch all skip jumps to here (after the add)
+        int skipTarget = code.getCurrentOffset();
+        for (int skipPos : skipAddPositions) {
+            int offset = skipTarget - (skipPos - 1);
+            code.patchShort(skipPos, offset);
+        }
+
+        // Jump back to loop start
+        int gotoPos = code.getCurrentOffset();
+        code.goto_(0);
+        int gotoOffsetPos = code.getCurrentOffset() - 2;
+        int backwardOffset = loopStart - gotoPos;
+        code.patchShort(gotoOffsetPos, backwardOffset);
+
+        // Patch loop exit
+        int loopEnd = code.getCurrentOffset();
+        int exitOffset = loopEnd - (loopExitPos - 1);
+        code.patchShort(loopExitPos, exitOffset);
+
+        // Store rest map in rest variable
+        code.aload(restMapSlot);
+        code.astore(restVar.index());
+    }
+
+    /**
+     * Generate bytecode for rest pattern extraction [...rest].
+     */
+    private void generateRestPatternExtraction(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            CompilationContext context,
+            Swc4jAstRestPat restPat,
+            int tempListSlot,
+            int restStartIndex,
+            boolean isArrayRest,
+            int listGetRef,
+            int listSizeRef,
+            int listAddRef) throws Swc4jByteCodeCompilerException {
+
+        ISwc4jAstPat arg = restPat.getArg();
+        if (!(arg instanceof Swc4jAstBindingIdent bindingIdent)) {
+            throw new Swc4jByteCodeCompilerException(restPat, "Rest pattern argument must be a binding identifier");
+        }
+
+        String restVarName = bindingIdent.getId().getSym();
+        LocalVariable restVar = context.getLocalVariableTable().getVariable(restVarName);
+
+        // Create a new ArrayList for the rest elements
+        int arrayListClass = cp.addClass("java/util/ArrayList");
+        code.newInstance(arrayListClass);
+        code.dup();
+        int arrayListInitRef = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
+        code.invokespecial(arrayListInitRef);
+        code.astore(restVar.index());
+
+        // Get list size
+        code.aload(tempListSlot);
+        code.invokeinterface(listSizeRef, 1);
+        int sizeSlot = getOrAllocateTempSlot(context, "$size" + context.getNextTempId(), "I");
+        code.istore(sizeSlot);
+
+        // Loop from restStartIndex to size, adding elements to rest array
+        int indexSlot = getOrAllocateTempSlot(context, "$index" + context.getNextTempId(), "I");
+        code.iconst(restStartIndex);
+        code.istore(indexSlot);
+
+        int loopStart = code.getCurrentOffset();
+        code.iload(indexSlot);
+        code.iload(sizeSlot);
+        code.if_icmpge(0); // Placeholder
+        int loopExitPos = code.getCurrentOffset() - 2;
+
+        // Add element to rest array
+        code.aload(restVar.index());
+        code.aload(tempListSlot);
+        code.iload(indexSlot);
+        code.invokeinterface(listGetRef, 2);
+        code.invokeinterface(listAddRef, 2);
+        code.pop(); // Discard boolean return value
+
+        // Increment index
+        code.iinc(indexSlot, 1);
+
+        // Jump back to loop start
+        int gotoPos = code.getCurrentOffset();
+        code.goto_(0);
+        int gotoOffsetPos = code.getCurrentOffset() - 2;
+        int backwardOffset = loopStart - gotoPos;
+        code.patchShort(gotoOffsetPos, backwardOffset);
+
+        // Patch loop exit
+        int loopEnd = code.getCurrentOffset();
+        int exitOffset = loopEnd - (loopExitPos - 1);
+        code.patchShort(loopExitPos, exitOffset);
+    }
+
     private void generateReturn(CodeBuilder code, ReturnTypeInfo returnTypeInfo) {
         switch (returnTypeInfo.type()) {
             case VOID -> code.returnVoid();
@@ -578,6 +1085,71 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             case FLOAT -> code.freturn();
             case DOUBLE -> code.dreturn();
             case STRING, OBJECT -> code.areturn();
+        }
+    }
+
+    /**
+     * Generate unboxing code if the target type is a primitive.
+     * Converts boxed types (Integer, Long, etc.) to primitives (int, long, etc.).
+     */
+    private void generateUnboxingIfNeeded(CodeBuilder code, ClassWriter.ConstantPool cp, String targetType) {
+        switch (targetType) {
+            case "I" -> { // int
+                int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int integerClass = cp.addClass("java/lang/Integer");
+                code.checkcast(integerClass);
+                code.invokevirtual(intValueRef);
+            }
+            case "J" -> { // long
+                int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
+                int longClass = cp.addClass("java/lang/Long");
+                code.checkcast(longClass);
+                code.invokevirtual(longValueRef);
+            }
+            case "D" -> { // double
+                int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
+                int doubleClass = cp.addClass("java/lang/Double");
+                code.checkcast(doubleClass);
+                code.invokevirtual(doubleValueRef);
+            }
+            case "F" -> { // float
+                int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
+                int floatClass = cp.addClass("java/lang/Float");
+                code.checkcast(floatClass);
+                code.invokevirtual(floatValueRef);
+            }
+            case "Z" -> { // boolean
+                int booleanValueRef = cp.addMethodRef("java/lang/Boolean", "booleanValue", "()Z");
+                int booleanClass = cp.addClass("java/lang/Boolean");
+                code.checkcast(booleanClass);
+                code.invokevirtual(booleanValueRef);
+            }
+            case "B" -> { // byte
+                int byteValueRef = cp.addMethodRef("java/lang/Byte", "byteValue", "()B");
+                int byteClass = cp.addClass("java/lang/Byte");
+                code.checkcast(byteClass);
+                code.invokevirtual(byteValueRef);
+            }
+            case "C" -> { // char
+                int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
+                int charClass = cp.addClass("java/lang/Character");
+                code.checkcast(charClass);
+                code.invokevirtual(charValueRef);
+            }
+            case "S" -> { // short
+                int shortValueRef = cp.addMethodRef("java/lang/Short", "shortValue", "()S");
+                int shortClass = cp.addClass("java/lang/Short");
+                code.checkcast(shortClass);
+                code.invokevirtual(shortValueRef);
+            }
+            default -> {
+                // Reference type or Object - just cast
+                if (targetType.startsWith("L") && targetType.endsWith(";")) {
+                    String className = targetType.substring(1, targetType.length() - 1);
+                    int classRef = cp.addClass(className);
+                    code.checkcast(classRef);
+                }
+            }
         }
     }
 
@@ -671,6 +1243,15 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         return "apply";
     }
 
+    private int getOrAllocateTempSlot(CompilationContext context, String tempName, String type) {
+        LocalVariable tempVar = context.getLocalVariableTable().getVariable(tempName);
+        if (tempVar == null) {
+            context.getLocalVariableTable().allocateVariable(tempName, type);
+            tempVar = context.getLocalVariableTable().getVariable(tempName);
+        }
+        return tempVar.index();
+    }
+
     private String getReturnDescriptor(ReturnTypeInfo returnInfo) {
         return switch (returnInfo.type()) {
             case VOID -> "V";
@@ -749,6 +1330,19 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
      */
     public void reset() {
         lambdaCounter = 0;
+    }
+
+    /**
+     * Store value to local variable slot based on type.
+     */
+    private void storeValueByType(CodeBuilder code, int slot, String type) {
+        switch (type) {
+            case "I", "Z", "B", "C", "S" -> code.istore(slot);
+            case "J" -> code.lstore(slot);
+            case "F" -> code.fstore(slot);
+            case "D" -> code.dstore(slot);
+            default -> code.astore(slot);
+        }
     }
 
     /**

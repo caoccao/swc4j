@@ -18,13 +18,12 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
-import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPat;
-import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
-import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
+import com.caoccao.javet.swc4j.ast.pat.*;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
@@ -468,6 +467,27 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
 
         // Generate method body
         CodeBuilder code = new CodeBuilder();
+
+        // Generate destructuring extraction code for parameters
+        List<ISwc4jAstPat> params = arrowExpr.getParams();
+        for (int i = 0; i < params.size(); i++) {
+            ISwc4jAstPat param = params.get(i);
+            if (param instanceof Swc4jAstArrayPat arrayPat) {
+                // Load the parameter value onto the stack
+                String paramName = typeInfo.paramNames().get(i);
+                LocalVariable paramVar = methodContext.getLocalVariableTable().getVariable(paramName);
+                code.aload(paramVar.index());
+                // Generate array destructuring extraction
+                compiler.getArrowExpressionGenerator().generateArrayPatternExtraction(code, cp, methodContext, arrayPat);
+            } else if (param instanceof Swc4jAstObjectPat objectPat) {
+                // Load the parameter value onto the stack
+                String paramName = typeInfo.paramNames().get(i);
+                LocalVariable paramVar = methodContext.getLocalVariableTable().getVariable(paramName);
+                code.aload(paramVar.index());
+                // Generate object destructuring extraction
+                compiler.getArrowExpressionGenerator().generateObjectPatternExtraction(code, cp, methodContext, objectPat);
+            }
+        }
 
         ISwc4jAstBlockStmtOrExpr body = arrowExpr.getBody();
         if (body instanceof Swc4jAstBlockStmt blockStmt) {

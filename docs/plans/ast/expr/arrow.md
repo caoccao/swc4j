@@ -326,7 +326,7 @@ Methods within the inner class:
 - Multiple parameters with types ✓
 - Default parameter values (limited - see notes)
 - Rest parameters (`...args`) (limited - see notes)
-- Destructuring parameters (object, array) ✗
+- Destructuring parameters (object, array) ✓
 - Parameter type inference ✓
 
 **Implementation Notes:**
@@ -351,7 +351,17 @@ When arrow expressions are assigned to standard functional interfaces (e.g., `In
    const fn: IntUnaryOperator = (x?: int) => x ?? 0
    ```
 
-4. **Destructuring Parameters**: Requires generating field/array access code. Not yet implemented.
+4. **Destructuring Parameters**: ✓ **FULLY IMPLEMENTED**
+   - Array destructuring `([a, b]: List<T>)` - extracts elements from List, with proper type inference
+   - Object destructuring `({x, y}: Map<String, T>)` - extracts values from Map, with proper type inference
+   - Rest patterns `([first, ...rest])` and `({a, ...rest})` - collects remaining elements/entries
+   - **Type Inference**: Automatically extracts element types from generic annotations:
+     - `List<int>` → elements are `int` (with automatic unboxing)
+     - `Map<String, long>` → values are `long` (with automatic unboxing)
+     - `List<String>` → elements are `String` (reference types work correctly)
+   - **Unboxing**: Automatically unboxes Integer → int, Long → long, etc. for primitives
+   - Test file: `TestCompileAstArrowDestructuring.java` - 8 tests, all passing
+   - Works with IIFEs: `(([a, b]: List<int>): int => a + b)([1, 2])`
 
 **Working Features:**
 - Single and multiple typed parameters (int, long, double, boolean, object)
@@ -1294,7 +1304,7 @@ Use primitive specializations to avoid boxing:
 - [x] Phase 2: Variable capture (closures) working (local vars, params, and `this` capture)
 - [x] Phase 3: Functional interface resolution working
 - [x] Phase 4: Basic parameter types working (typed params, multiple params, param capture)
-- [ ] Phase 4: Advanced parameter features (destructuring) - NOT IMPLEMENTED
+- [x] Phase 4: Advanced parameter features (destructuring) - ✓ FULLY IMPLEMENTED
 - [x] Phase 5: Return type inference working (expressions, statements, operators)
 - [ ] Phase 5: Parameter type inference from context - LIMITED
 - [ ] Phase 5: Generic type parameters - LIMITED (type erasure)
