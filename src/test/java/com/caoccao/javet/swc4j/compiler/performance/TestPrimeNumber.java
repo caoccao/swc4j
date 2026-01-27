@@ -38,7 +38,7 @@ public class TestPrimeNumber extends BaseTestCompileSuite {
                   }
                   return true
                 }""");
-        Class<?> classA = runner.getClass("$");
+        Class<?> classA = runner.getDefaultClass();
         var instance = classA.getConstructor().newInstance();
         var method = classA.getMethod("isPrime", int.class);
         assertEquals(true, method.invoke(instance, 7));  // 7 is prime

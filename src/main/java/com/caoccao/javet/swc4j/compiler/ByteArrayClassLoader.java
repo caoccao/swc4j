@@ -22,6 +22,7 @@ import java.util.Map;
 public class ByteArrayClassLoader extends ClassLoader {
     protected final Map<String, byte[]> byteCodeMap;
     protected final Map<String, Class<?>> classMap;
+    protected final Object lock = new Object();
 
     public ByteArrayClassLoader(Map<String, byte[]> byteCodeMap, ClassLoader parent) {
         super(parent);
@@ -34,18 +35,24 @@ public class ByteArrayClassLoader extends ClassLoader {
         if (classMap.containsKey(name)) {
             return classMap.get(name);
         }
-        byte[] bytes = byteCodeMap.get(name);
         Class<?> clazz;
-        if (bytes != null) {
-            clazz = defineClass(name, bytes, 0, bytes.length);
-        } else {
-            clazz = super.findClass(name);
+        synchronized (lock) {
+            if (classMap.containsKey(name)) {
+                clazz = classMap.get(name);
+            } else {
+                byte[] bytes = byteCodeMap.get(name);
+                if (bytes != null) {
+                    clazz = defineClass(name, bytes, 0, bytes.length);
+                } else {
+                    clazz = super.findClass(name);
+                }
+                classMap.put(name, clazz);
+            }
         }
-        classMap.put(name, clazz);
         return clazz;
     }
 
-    public synchronized Class<?> getClass(String name) throws ClassNotFoundException {
+    public Class<?> getClass(String name) throws ClassNotFoundException {
         return findClass(name);
     }
 }

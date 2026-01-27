@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstArrowExpr` in TypeScript to JVM bytecode compilation. Arrow expressions (arrow functions/lambdas) are first-class function values that capture variables from their enclosing scope.
 
-**Current Status:** PARTIALLY IMPLEMENTED
+**Current Status:** MOSTLY COMPLETE (Phases 1-6 implemented with documented limitations)
 
 **Strategy:** Arrow expressions will be implemented as **Anonymous Inner Classes** that implement a functional interface. This approach is compatible with JDK 17 and provides full closure semantics.
 
@@ -1318,11 +1318,15 @@ Use primitive specializations to avoid boxing:
 1. **Async Arrows**: NOT SUPPORTED - Async/await requires state machine transformation too complex for bytecode compilation
 2. **Generator Arrows**: NOT SUPPORTED - Generator arrow functions are not valid TypeScript/JavaScript syntax; the AST flag exists but should never be true for valid code
 3. **Union Return Types**: NOT SUPPORTED - JVM requires single return type
-4. **Mutable Captures**: Require holder object pattern (performance overhead)
-5. **Reflection on Arrows**: Limited - Anonymous inner class details not accessible
-6. **Serialization**: Anonymous inner classes may have serialization issues
-7. **Debugging**: Anonymous class names may be harder to debug
-8. **Custom Interfaces**: Arrow expressions currently only implement java.util.function interfaces. Direct implementation of custom TypeScript interfaces is NOT YET SUPPORTED - use explicit class implementations instead
+4. **Mutable Captures**: Require holder object pattern (performance overhead) - not yet fully implemented
+5. **IIFE (Immediately Invoked Function Expression)**: NOT YET SUPPORTED - Call expression on arrow immediately requires additional implementation
+6. **Destructuring Parameters**: NOT SUPPORTED - Object/array destructuring in parameters not implemented
+7. **Default/Rest/Optional Parameters**: LIMITED - Only work with custom interfaces, not standard functional interfaces
+8. **Recursive Arrows**: LIMITED - Requires complex self-reference pattern not yet fully implemented
+9. **Reflection on Arrows**: Limited - Anonymous inner class details not accessible
+10. **Serialization**: Anonymous inner classes may have serialization issues
+11. **Debugging**: Anonymous class names may be harder to debug
+12. **Custom Interfaces**: Arrow expressions currently only implement java.util.function interfaces. Direct implementation of custom TypeScript interfaces (Callable, Comparator, etc.) has type inference issues
 
 ---
 
@@ -1358,7 +1362,9 @@ The following edge cases are now covered by tests:
 - Edge case 33: Capture both `this` and local variables ✓
 - Edge case 38: Capture from constructor ✓
 - Edge case 39: Capture static field ✓
+- Edge case 40: Pure function (no capture) ✓
 - Edge case 42: Arrow reassignment (let variable) ✓
+- Edge case 43: Assigned to typed variable ✓
 - Edge case 46: As return value ✓
 - Edge case 49: As field initializer ✓
 - Edge case 50: Arrow in conditional expression ✓
@@ -1422,5 +1428,6 @@ The following edge cases are now covered by tests:
 ---
 
 *Last Updated: January 27, 2026*
-*Status: PARTIALLY IMPLEMENTED (Phase 1-3 complete, Phase 4-6 mostly complete with documented limitations)*
-*Next Step: Consider implementing Phase 4 advanced features (destructuring parameters) or improving Phase 5 parameter type inference from context*
+*Status: MOSTLY COMPLETE (Phase 1-6 implemented with documented limitations)*
+*Remaining Work: IIFE support, mutable captures with holder objects, recursive arrows, custom interface type inference*
+*Note: Some features (destructuring, async, generator) are intentionally not supported due to complexity*

@@ -8,7 +8,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Phase 6: Edge Cases (21 tests)
@@ -27,7 +28,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                 }""");
 
         // Ambient enum should not generate bytecode
-        assertThrows(ClassNotFoundException.class, () ->runner.getClass("com.External"));
+        assertThrows(ClassNotFoundException.class, () -> runner.getClass("com.External"));
     }
 
     @ParameterizedTest

@@ -28,4 +28,8 @@ public class ByteCodeRunner {
     public Class<?> getClass(String className) throws ClassNotFoundException {
         return classLoader.getClass(className);
     }
+
+    public Class<?> getDefaultClass() throws ClassNotFoundException {
+        return getClass("$");
+    }
 }

@@ -359,6 +359,36 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testArrowWithExplicitTypedVariable(JdkVersion jdkVersion) throws Exception {
+        // Edge case 43: Assigned to typed variable
+        var runner = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    getDoubler(): IntUnaryOperator {
+                      const fn: IntUnaryOperator = (x: int) => x * 2
+                      return fn
+                    }
+                    getTripler(): IntUnaryOperator {
+                      const fn: IntUnaryOperator = (x: int) => x * 3
+                      return fn
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+
+        var doubler = (IntUnaryOperator) classA.getMethod("getDoubler").invoke(instance);
+        var tripler = (IntUnaryOperator) classA.getMethod("getTripler").invoke(instance);
+
+        assertEquals(
+                List.of(10, 15),
+                List.of(doubler.applyAsInt(5), tripler.applyAsInt(5))
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testArrowWithMultiParamCapture(JdkVersion jdkVersion) throws Exception {
         // Arrow capturing multiple parameters
         var runner = getCompiler(jdkVersion).compile("""
@@ -492,5 +522,33 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
         // supplier5() = 50, doubler(50) = 100, adder5(100) = 105
         int result = adder5.applyAsInt(doubler.applyAsInt(supplier5.getAsInt()));
         assertEquals(105, result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPureFunctionNoCapture(JdkVersion jdkVersion) throws Exception {
+        // Edge case 40: Pure function with no external dependencies
+        var runner = getCompiler(jdkVersion).compile("""
+                import { IntBinaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    getAdder(): IntBinaryOperator {
+                      return (x: int, y: int) => x + y
+                    }
+                    getMultiplier(): IntBinaryOperator {
+                      return (x: int, y: int) => x * y
+                    }
+                  }
+                }""");
+        Class<?> classA = runner.getClass("com.A");
+        var instance = classA.getConstructor().newInstance();
+
+        var adder = (IntBinaryOperator) classA.getMethod("getAdder").invoke(instance);
+        var multiplier = (IntBinaryOperator) classA.getMethod("getMultiplier").invoke(instance);
+
+        assertEquals(
+                List.of(8, 15),
+                List.of(adder.applyAsInt(3, 5), multiplier.applyAsInt(3, 5))
+        );
     }
 }

@@ -39,7 +39,7 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                 export function mul(a: int, b: int): int {
                   return a * b
                 }""");
-        Class<?> dummyClass = runner.getClass("$");
+        Class<?> dummyClass = runner.getDefaultClass();
         assertEquals(15, dummyClass.getMethod("add", int.class, int.class).invoke(null, 10, 5));
         assertEquals(5, dummyClass.getMethod("sub", int.class, int.class).invoke(null, 10, 5));
         assertEquals(50, dummyClass.getMethod("mul", int.class, int.class).invoke(null, 10, 5));
@@ -53,7 +53,7 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                 export function add(a: int, b: int): int {
                   return a + b
                 }""");
-        Class<?> dummyClass = runner.getClass("$");
+        Class<?> dummyClass = runner.getDefaultClass();
         assertEquals(30, dummyClass.getMethod("add", int.class, int.class).invoke(null, 10, 20));
     }
 
@@ -83,7 +83,7 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                   return 42
                 }""");
         // Class $ should exist with its own method
-        Class<?> dollarClass = runner.getClass("$");
+        Class<?> dollarClass = runner.getDefaultClass();
         var instance = dollarClass.getConstructor().newInstance();
         assertEquals(100, dollarClass.getMethod("getValue").invoke(instance));
         // Function should be in $1
@@ -127,7 +127,7 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                 export function helper(): int {
                   return 3
                 }""");
-        assertEquals(1, runner.getClass("$").getMethod("getValue").invoke(runner.getClass("$").getConstructor().newInstance()));
+        assertEquals(1, runner.getDefaultClass().getMethod("getValue").invoke(runner.getDefaultClass().getConstructor().newInstance()));
         assertEquals(2, runner.getClass("$1").getMethod("getValue").invoke(runner.getClass("$1").getConstructor().newInstance()));
         assertEquals(3, runner.getClass("$2").getMethod("helper").invoke(null));
     }
@@ -150,7 +150,7 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
         var instance = calcClass.getConstructor().newInstance();
         assertEquals(30, calcClass.getMethod("add", int.class, int.class).invoke(instance, 10, 20));
         // Standalone function in $
-        Class<?> dummyClass = runner.getClass("$");
+        Class<?> dummyClass = runner.getDefaultClass();
         assertEquals(20, dummyClass.getMethod("helper", int.class).invoke(null, 10));
     }
 }
