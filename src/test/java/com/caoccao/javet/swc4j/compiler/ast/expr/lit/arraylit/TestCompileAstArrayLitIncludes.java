@@ -41,9 +41,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance));
+        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -61,9 +59,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance));
+        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -79,9 +75,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance));
+        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -97,9 +91,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance));
+        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -115,9 +107,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance));
+        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -133,9 +123,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance));
+        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -151,9 +139,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance));
+        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -169,9 +155,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance));
+        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -187,9 +171,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance));
+        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -205,8 +187,6 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance));
+        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

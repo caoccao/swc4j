@@ -41,9 +41,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("1,2,3,4,5", classA.getMethod("test").invoke(instance));
+        assertEquals("1,2,3,4,5", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -61,9 +59,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("0-1-2-3", classA.getMethod("test").invoke(instance));
+        assertEquals("0-1-2-3", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -79,9 +75,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("apple - banana - cherry", classA.getMethod("test").invoke(instance));
+        assertEquals("apple - banana - cherry", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -97,9 +91,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("1,2,3", classA.getMethod("test").invoke(instance));
+        assertEquals("1,2,3", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -118,9 +110,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("", classA.getMethod("test").invoke(instance));
+        assertEquals("", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -136,9 +126,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("abc", classA.getMethod("test").invoke(instance));
+        assertEquals("abc", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -154,9 +142,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("1|hello|true|3.14", classA.getMethod("test").invoke(instance));
+        assertEquals("1|hello|true|3.14", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -172,9 +158,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("one and two and three", classA.getMethod("test").invoke(instance));
+        assertEquals("one and two and three", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -190,9 +174,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("10 20 30 40 50", classA.getMethod("test").invoke(instance));
+        assertEquals("10 20 30 40 50", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -208,8 +190,6 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("42", classA.getMethod("test").invoke(instance));
+        assertEquals("42", runner.createInstanceRunner("com.A").invoke("test"));
     }
 }
