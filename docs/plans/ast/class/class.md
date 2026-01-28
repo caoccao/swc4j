@@ -4,7 +4,11 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstClass` in TypeScript to JVM bytecode compilation. Classes are fundamental constructs that contain methods, properties, constructors, and support inheritance.
 
-**Current Status:** COMPLETE - All class features implemented (basic, inheritance, abstract, interfaces, constructors, fields, static members, access modifiers, generics, direct access for classes without namespace)
+**Current Status:** IN PROGRESS - Most class features implemented (basic, inheritance, abstract, interfaces, constructors, fields, static members, access modifiers, generics, direct access for classes without namespace)
+
+**Remaining Work:**
+- ES2022 Private Methods (`#method` syntax) - NOT YET IMPLEMENTED
+- Explicit Static Blocks (`static { ... }` syntax) - NOT YET IMPLEMENTED
 
 **Syntax:**
 ```typescript
@@ -265,22 +269,115 @@ Existing tests in `TestCompileAstClass.java`:
 
 ### Phase 7: Static Members - Priority: MEDIUM
 
-**Status:** IMPLEMENTED
+**Status:** PARTIALLY IMPLEMENTED
 
 - Static field declaration - IMPLEMENTED
 - Static method declaration - IMPLEMENTED
 - Static field initializers - IMPLEMENTED (via <clinit>)
-- Static block (clinit) - IMPLEMENTED
 - Static member access (getstatic/putstatic) - IMPLEMENTED
+- Explicit static blocks (`static { ... }`) - NOT IMPLEMENTED
+
+### Phase 7.1: Explicit Static Blocks - Priority: MEDIUM
+
+**Status:** NOT IMPLEMENTED
+
+**Scope:**
+- Support `Swc4jAstStaticBlock` AST node
+- Generate code in `<clinit>` method for explicit static blocks
+- Support multiple static blocks (executed in order)
+- Support mixing static field initializers and static blocks
+
+**Syntax:**
+```typescript
+class A {
+  static value: int = 0
+
+  static {
+    // Explicit static initialization block
+    A.value = computeInitialValue()
+    console.log("Class A initialized")
+  }
+
+  static {
+    // Multiple static blocks are allowed
+    A.value = A.value + 1
+  }
+}
+```
+
+**Implementation Steps:**
+1. Update `ClassCollector` to collect `Swc4jAstStaticBlock` nodes
+2. Update `ClassGenerator.generateClinitMethod()` to:
+   - Process both static field initializers AND static blocks
+   - Maintain declaration order for proper initialization sequence
+   - Generate bytecode for statements inside static blocks
+3. Handle static blocks that reference other static members
+
+**Test Coverage:**
+1. Basic static block with simple statements
+2. Static block initializing static field
+3. Static block with method calls
+4. Multiple static blocks in order
+5. Static block with control flow (if, loops)
+6. Static block accessing other static members
+7. Mix of static field initializers and static blocks
 
 ### Phase 8: Access Modifiers - Priority: MEDIUM
 
-**Status:** IMPLEMENTED
+**Status:** PARTIALLY IMPLEMENTED
 
 - Public (default) - IMPLEMENTED
-- Private methods/fields - IMPLEMENTED
+- Private methods/fields (TypeScript `private` keyword) - IMPLEMENTED
 - Protected methods/fields - IMPLEMENTED
-- Private class fields (#field) - IMPLEMENTED (ES2022 syntax)
+- Private class fields (`#field` ES2022 syntax) - IMPLEMENTED
+- Private class methods (`#method` ES2022 syntax) - NOT IMPLEMENTED
+
+### Phase 8.1: ES2022 Private Methods (#method) - Priority: MEDIUM
+
+**Status:** NOT IMPLEMENTED
+
+**Scope:**
+- Support `Swc4jAstPrivateMethod` AST node
+- Generate private methods with `#` prefix using ACC_PRIVATE flag
+- Support `this.#method()` call expressions
+- Support static private methods (`static #method()`)
+
+**Syntax:**
+```typescript
+class A {
+  #privateHelper(): int {
+    return 42
+  }
+
+  static #staticPrivateHelper(): int {
+    return 100
+  }
+
+  public test(): int {
+    return this.#privateHelper() + A.#staticPrivateHelper()
+  }
+}
+```
+
+**Implementation Steps:**
+1. Update `ClassGenerator` to handle `Swc4jAstPrivateMethod`:
+   - Extract method name (without `#` prefix for JVM)
+   - Set ACC_PRIVATE access flag
+   - Generate method body like regular methods
+2. Update `ClassCollector` to register private method signatures
+3. Update `CallExpressionGenerator` to handle `this.#method()` calls:
+   - Recognize `Swc4jAstPrivateName` in member expressions
+   - Generate `invokevirtual` or `invokestatic` with private method name
+4. Update `TypeResolver` to infer return types for private method calls
+
+**Test Coverage:**
+1. Basic private method definition and call
+2. Private method with parameters
+3. Private method with return value
+4. Static private method
+5. Private method calling another private method
+6. Private method accessing private fields
+7. Multiple private methods in same class
 
 ### Phase 9: Decorators - Priority: LOW
 
@@ -1046,7 +1143,9 @@ Field:
 - [x] Phase 5: Constructors fully working
 - [x] Phase 6: Instance fields working
 - [x] Phase 7: Static members working (methods and fields)
-- [x] Phase 8: Access modifiers working (including ES2022 #field)
+- [ ] Phase 7.1: Explicit Static Blocks (`static { }` syntax) - NOT YET IMPLEMENTED
+- [x] Phase 8: Access modifiers working (TypeScript private/protected keywords)
+- [ ] Phase 8.1: ES2022 Private Methods (#method syntax) - NOT YET IMPLEMENTED
 - [x] Phase 9: Decorators - NOT SUPPORTED (intentionally excluded)
 - [x] Phase 10: Generics working (type erasure)
 - [x] All current tests passing
@@ -1167,9 +1266,11 @@ Field:
 3. **Decorators**: Intentionally not supported
 4. **Generics**: Fully supported with type erasure (type parameters erase to Object or constraint type)
 5. **Private Fields (#)**: ES2022 private fields fully supported (both instance and static)
-6. **Multiple Inheritance**: Only single class inheritance (Java limitation)
-7. **Dynamic Class Loading**: Not supported at compile time
-8. **Generic Type Constraints**: Simple constraints (T extends SomeType) are supported; complex constraints may need fully qualified class names
+6. **Private Methods (#)**: ES2022 private methods (`#method` syntax) NOT YET IMPLEMENTED
+7. **Static Blocks**: Explicit static blocks (`static { ... }` syntax) NOT YET IMPLEMENTED
+8. **Multiple Inheritance**: Only single class inheritance (Java limitation)
+9. **Dynamic Class Loading**: Not supported at compile time
+10. **Generic Type Constraints**: Simple constraints (T extends SomeType) are supported; complex constraints may need fully qualified class names
 
 ---
 

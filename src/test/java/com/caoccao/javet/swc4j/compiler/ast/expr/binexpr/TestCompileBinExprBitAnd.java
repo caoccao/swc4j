@@ -41,9 +41,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(8, classA.getMethod("test").invoke(instance)); // 12 & 10 = 8
+        assertEquals(8, (int) runner.createInstanceRunner("com.A").invoke("test")); // 12 & 10 = 8
     }
 
     @ParameterizedTest
@@ -61,9 +59,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // (16 & 8) + (8 & 4) = 0 + 0 = 0
+        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test")); // (16 & 8) + (8 & 4) = 0 + 0 = 0
     }
 
     @ParameterizedTest
@@ -160,9 +156,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // 123 & 0 = 0
+        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test")); // 123 & 0 = 0
     }
 
     @ParameterizedTest
@@ -238,9 +232,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(-14, classA.getMethod("test").invoke(instance)); // -10 & -5 = -14
+        assertEquals(-14, (int) runner.createInstanceRunner("com.A").invoke("test")); // -10 & -5 = -14
     }
 
     @ParameterizedTest
@@ -257,9 +249,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(7, classA.getMethod("test").invoke(instance)); // 15 & 7 = 7
+        assertEquals(7, (int) runner.createInstanceRunner("com.A").invoke("test")); // 15 & 7 = 7
     }
 
     // Edge case tests
@@ -278,9 +268,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(9, classA.getMethod("test").invoke(instance)); // 25 & 15 = 9
+        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test")); // 25 & 15 = 9
     }
 
     @ParameterizedTest
@@ -317,9 +305,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(63, classA.getMethod("test").invoke(instance)); // 255 & 127 & 63 = 63
+        assertEquals(63, (int) runner.createInstanceRunner("com.A").invoke("test")); // 255 & 127 & 63 = 63
     }
 
     @ParameterizedTest
@@ -336,9 +322,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(128L, classA.getMethod("test").invoke(instance)); // 200 & 150 = 128 (widened to long)
+        assertEquals(128L, (long) runner.createInstanceRunner("com.A").invoke("test")); // 200 & 150 = 128 (widened to long)
     }
 
     // Chained operations
@@ -357,9 +341,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(12, classA.getMethod("test").invoke(instance)); // 28 & 12 = 12
+        assertEquals(12, (int) runner.createInstanceRunner("com.A").invoke("test")); // 28 & 12 = 12
     }
 
     @ParameterizedTest
@@ -376,9 +358,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(127L, classA.getMethod("test").invoke(instance)); // 255 & 127 = 127
+        assertEquals(127L, (long) runner.createInstanceRunner("com.A").invoke("test")); // 255 & 127 = 127
     }
 
     // Bit masking tests
@@ -397,9 +377,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(480L, classA.getMethod("test").invoke(instance)); // 1000 & 500 = 480
+        assertEquals(480L, (long) runner.createInstanceRunner("com.A").invoke("test")); // 1000 & 500 = 480
     }
 
     @ParameterizedTest
@@ -416,9 +394,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(12, classA.getMethod("test").invoke(instance)); // -20 & 15 = 12
+        assertEquals(12, (int) runner.createInstanceRunner("com.A").invoke("test")); // -20 & 15 = 12
     }
 
     @ParameterizedTest
@@ -435,9 +411,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(224L, classA.getMethod("test").invoke(instance)); // -800 & 255 = 224
+        assertEquals(224L, (long) runner.createInstanceRunner("com.A").invoke("test")); // -800 & 255 = 224
     }
 
     @ParameterizedTest
@@ -454,8 +428,6 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(32, classA.getMethod("test").invoke(instance)); // 100 & 50 = 32
+        assertEquals(32, (int) runner.createInstanceRunner("com.A").invoke("test")); // 100 & 50 = 32
     }
 }
