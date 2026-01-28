@@ -16,10 +16,17 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstCatchClause;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPatProp;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstKeyValuePatProp;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstObjectPat;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -60,6 +67,24 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
             return false;
         }
         return isTerminalStatement(stmts.get(stmts.size() - 1));
+    }
+
+    /**
+     * Extract property name from ISwc4jAstPropName.
+     *
+     * @param propName the property name AST node
+     * @return the string representation of the property name
+     * @throws Swc4jByteCodeCompilerException if the property name type is not supported
+     */
+    private String extractPropertyName(ISwc4jAstPropName propName) throws Swc4jByteCodeCompilerException {
+        if (propName instanceof Swc4jAstIdentName identName) {
+            return identName.getSym();
+        } else if (propName instanceof Swc4jAstStr str) {
+            return str.getValue();
+        } else {
+            throw new Swc4jByteCodeCompilerException(propName,
+                    "Unsupported property name type in catch destructuring: " + propName.getClass().getName());
+        }
     }
 
     /**
@@ -107,6 +132,96 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
     }
 
     /**
+     * Generate bytecode to extract properties from an exception for catch destructuring.
+     * <p>
+     * Supported properties:
+     * <ul>
+     *   <li>{@code message} - maps to {@code Throwable.getMessage()}</li>
+     *   <li>{@code stack} - maps to {@code Arrays.toString(Throwable.getStackTrace())}</li>
+     *   <li>{@code cause} - maps to {@code Throwable.getCause()}</li>
+     *   <li>{@code name} - maps to {@code JsError.getName()} or class simple name for other exceptions</li>
+     * </ul>
+     *
+     * @param code          the code builder
+     * @param cp            the constant pool
+     * @param objectPat     the object destructuring pattern
+     * @param exceptionSlot the local variable slot containing the caught exception
+     * @param exceptionType the exception type descriptor
+     * @throws Swc4jByteCodeCompilerException if code generation fails
+     */
+    private void generateCatchDestructuring(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstObjectPat objectPat,
+            int exceptionSlot,
+            String exceptionType) throws Swc4jByteCodeCompilerException {
+        var context = compiler.getMemory().getCompilationContext();
+
+        // Determine the exception class for method refs (remove L and ; from descriptor)
+        String exceptionClassName = exceptionType.substring(1, exceptionType.length() - 1);
+
+        for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
+            if (prop instanceof Swc4jAstAssignPatProp assignProp) {
+                // Shorthand property: { message } or { message = "default" }
+                String varName = assignProp.getKey().getId().getSym();
+                String propertyName = varName;
+
+                // Get the variable type for this property
+                String varType = getPropertyType(propertyName);
+
+                // Allocate variable if not already allocated
+                LocalVariable variable = context.getLocalVariableTable().getVariable(varName);
+                if (variable == null) {
+                    context.getLocalVariableTable().allocateVariable(varName, varType);
+                    variable = context.getLocalVariableTable().getVariable(varName);
+                }
+
+                // Register inferred type so the type resolver can use it
+                context.getInferredTypes().put(varName, varType);
+
+                // Generate code to extract the property
+                generatePropertyExtraction(code, cp, exceptionSlot, exceptionClassName, propertyName, variable);
+
+                // Handle default value if present
+                if (assignProp.getValue().isPresent()) {
+                    handleDefaultValue(code, cp, assignProp, variable);
+                }
+
+            } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
+                // Renamed property: { message: msg }
+                String propertyName = extractPropertyName(keyValueProp.getKey());
+                ISwc4jAstPat valuePat = keyValueProp.getValue();
+
+                if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
+                    String varName = bindingIdent.getId().getSym();
+
+                    // Get the variable type for this property
+                    String varType = getPropertyType(propertyName);
+
+                    // Allocate variable if not already allocated
+                    LocalVariable variable = context.getLocalVariableTable().getVariable(varName);
+                    if (variable == null) {
+                        context.getLocalVariableTable().allocateVariable(varName, varType);
+                        variable = context.getLocalVariableTable().getVariable(varName);
+                    }
+
+                    // Register inferred type so the type resolver can use it
+                    context.getInferredTypes().put(varName, varType);
+
+                    // Generate code to extract the property
+                    generatePropertyExtraction(code, cp, exceptionSlot, exceptionClassName, propertyName, variable);
+                } else {
+                    throw new Swc4jByteCodeCompilerException(keyValueProp,
+                            "Unsupported value pattern type in catch destructuring: " + valuePat.getClass().getName());
+                }
+            } else {
+                throw new Swc4jByteCodeCompilerException(prop,
+                        "Unsupported property type in catch destructuring: " + prop.getClass().getName());
+            }
+        }
+    }
+
+    /**
      * Generate finally block code.
      * This code will be duplicated for each exit path (normal and exception).
      */
@@ -117,6 +232,93 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
             compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+        }
+    }
+
+    /**
+     * Generate bytecode to extract a single property from the caught exception.
+     *
+     * @param code               the code builder
+     * @param cp                 the constant pool
+     * @param exceptionSlot      the local variable slot containing the exception
+     * @param exceptionClassName the internal class name of the exception
+     * @param propertyName       the property name to extract (message, stack, cause, name)
+     * @param variable           the local variable to store the extracted value
+     * @throws Swc4jByteCodeCompilerException if the property is not supported
+     */
+    private void generatePropertyExtraction(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            int exceptionSlot,
+            String exceptionClassName,
+            String propertyName,
+            LocalVariable variable) throws Swc4jByteCodeCompilerException {
+        switch (propertyName) {
+            case "message" -> {
+                // exception.getMessage() -> String
+                code.aload(exceptionSlot);
+                int getMessageRef = cp.addMethodRef("java/lang/Throwable", "getMessage", "()Ljava/lang/String;");
+                code.invokevirtual(getMessageRef);
+                code.astore(variable.index());
+            }
+            case "stack" -> {
+                // Arrays.toString(exception.getStackTrace()) -> String
+                code.aload(exceptionSlot);
+                int getStackTraceRef = cp.addMethodRef("java/lang/Throwable", "getStackTrace",
+                        "()[Ljava/lang/StackTraceElement;");
+                code.invokevirtual(getStackTraceRef);
+                int arraysToStringRef = cp.addMethodRef("java/util/Arrays", "toString",
+                        "([Ljava/lang/Object;)Ljava/lang/String;");
+                code.invokestatic(arraysToStringRef);
+                code.astore(variable.index());
+            }
+            case "cause" -> {
+                // exception.getCause() -> Throwable
+                code.aload(exceptionSlot);
+                int getCauseRef = cp.addMethodRef("java/lang/Throwable", "getCause", "()Ljava/lang/Throwable;");
+                code.invokevirtual(getCauseRef);
+                code.astore(variable.index());
+            }
+            case "name" -> {
+                // For JsError types, use getName(); for others, use class simple name
+                // Use runtime instanceof check since catch type may be Throwable
+                int jsErrorClass = cp.addClass("com/caoccao/javet/swc4j/exceptions/JsError");
+
+                // Check if exception instanceof JsError
+                code.aload(exceptionSlot);
+                code.instanceof_(jsErrorClass);
+                code.ifeq(0); // Jump to else if not JsError
+                int elseJumpPos = code.getCurrentOffset() - 2;
+                int elseJumpOpcodePos = code.getCurrentOffset() - 3;
+
+                // True branch: cast to JsError and call getName()
+                code.aload(exceptionSlot);
+                code.checkcast(jsErrorClass);
+                int getNameRef = cp.addMethodRef("com/caoccao/javet/swc4j/exceptions/JsError", "getName",
+                        "()Ljava/lang/String;");
+                code.invokevirtual(getNameRef);
+                code.astore(variable.index());
+                code.gotoLabel(0); // Jump to end
+                int endJumpPos = code.getCurrentOffset() - 2;
+                int endJumpOpcodePos = code.getCurrentOffset() - 3;
+
+                // Else branch: use getClass().getSimpleName()
+                int elseLabel = code.getCurrentOffset();
+                code.patchShort(elseJumpPos, elseLabel - elseJumpOpcodePos);
+                code.aload(exceptionSlot);
+                int getClassRef = cp.addMethodRef("java/lang/Object", "getClass", "()Ljava/lang/Class;");
+                code.invokevirtual(getClassRef);
+                int getSimpleNameRef = cp.addMethodRef("java/lang/Class", "getSimpleName", "()Ljava/lang/String;");
+                code.invokevirtual(getSimpleNameRef);
+                code.astore(variable.index());
+
+                // End label - patch the goto from true branch
+                int endLabel = code.getCurrentOffset();
+                code.patchShort(endJumpPos, endLabel - endJumpOpcodePos);
+            }
+            default -> throw new Swc4jByteCodeCompilerException(null,
+                    "Unsupported property in catch destructuring: " + propertyName +
+                            ". Supported properties: message, stack, cause, name");
         }
     }
 
@@ -178,6 +380,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
 
         // Store exception in local variable if catch has a parameter
         String catchType = "Ljava/lang/Throwable;";  // Default to Throwable
+        var context = compiler.getMemory().getCompilationContext();
         if (catchClause.getParam().isPresent()) {
             ISwc4jAstPat param = catchClause.getParam().get();
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
@@ -192,7 +395,6 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
                 }
 
                 // Get the exception variable (already pre-allocated by VariableAnalyzer)
-                var context = compiler.getMemory().getCompilationContext();
                 LocalVariable exceptionVar = context.getLocalVariableTable().getVariable(varName);
                 if (exceptionVar == null) {
                     // Fallback: allocate if not pre-allocated
@@ -202,8 +404,24 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
 
                 // Store exception
                 code.astore(exceptionVar.index());
+            } else if (param instanceof Swc4jAstObjectPat objectPat) {
+                // Object destructuring: catch ({message, stack})
+                // Check for type annotation to determine catch type
+                if (objectPat.getTypeAnn().isPresent()) {
+                    var typeAnn = objectPat.getTypeAnn().get();
+                    catchType = compiler.getTypeResolver().mapTsTypeToDescriptor(typeAnn.getTypeAnn());
+                }
+
+                // Store exception in temporary variable for destructuring
+                String tempName = "$catchException$" + System.identityHashCode(catchClause);
+                context.getLocalVariableTable().allocateVariable(tempName, catchType);
+                LocalVariable tempVar = context.getLocalVariableTable().getVariable(tempName);
+                code.astore(tempVar.index());
+
+                // Generate destructuring code
+                generateCatchDestructuring(code, cp, objectPat, tempVar.index(), catchType);
             } else {
-                // Catch without parameter or complex destructuring - pop exception
+                // Other pattern types - pop exception
                 code.pop();
             }
         } else {
@@ -339,8 +557,24 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
 
                 // Store exception
                 code.astore(exceptionVar.index());
+            } else if (param instanceof Swc4jAstObjectPat objectPat) {
+                // Object destructuring: catch ({message, stack})
+                // Check for type annotation to determine catch type
+                if (objectPat.getTypeAnn().isPresent()) {
+                    var typeAnn = objectPat.getTypeAnn().get();
+                    catchType = compiler.getTypeResolver().mapTsTypeToDescriptor(typeAnn.getTypeAnn());
+                }
+
+                // Store exception in temporary variable for destructuring
+                String tempName = "$catchException$" + System.identityHashCode(catchClause);
+                context.getLocalVariableTable().allocateVariable(tempName, catchType);
+                LocalVariable tempVar = context.getLocalVariableTable().getVariable(tempName);
+                code.astore(tempVar.index());
+
+                // Generate destructuring code
+                generateCatchDestructuring(code, cp, objectPat, tempVar.index(), catchType);
             } else {
-                // Catch without parameter or complex destructuring - pop exception
+                // Other pattern types - pop exception
                 code.pop();
             }
         } else {
@@ -550,6 +784,51 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         if (tryStartPc < tryEndPc) {
             code.addExceptionHandler(tryStartPc, tryEndPc, finallyHandlerPc, 0);
         }
+    }
+
+    /**
+     * Get the type descriptor for a catch destructuring property.
+     *
+     * @param propertyName the property name
+     * @return the type descriptor for the property
+     */
+    private String getPropertyType(String propertyName) {
+        return switch (propertyName) {
+            case "message", "stack", "name" -> "Ljava/lang/String;";
+            case "cause" -> "Ljava/lang/Throwable;";
+            default -> "Ljava/lang/Object;";
+        };
+    }
+
+    /**
+     * Handle default value for catch destructuring property.
+     * If the extracted property value is null, use the default value instead.
+     *
+     * @param code       the code builder
+     * @param cp         the constant pool
+     * @param assignProp the assign pattern property with default value
+     * @param variable   the local variable storing the property
+     * @throws Swc4jByteCodeCompilerException if code generation fails
+     */
+    private void handleDefaultValue(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstAssignPatProp assignProp,
+            LocalVariable variable) throws Swc4jByteCodeCompilerException {
+        // Load the current value
+        code.aload(variable.index());
+        // If not null, skip the default value assignment
+        code.ifnonnull(0); // Placeholder
+        int skipDefaultPos = code.getCurrentOffset() - 2;
+
+        // Value is null, generate default value and store
+        compiler.getExpressionGenerator().generate(code, cp, assignProp.getValue().get(), null);
+        code.astore(variable.index());
+
+        // Patch the skip jump
+        int afterDefaultLabel = code.getCurrentOffset();
+        int skipOffset = afterDefaultLabel - (skipDefaultPos - 1);
+        code.patchShort(skipDefaultPos, (short) skipOffset);
     }
 
     /**

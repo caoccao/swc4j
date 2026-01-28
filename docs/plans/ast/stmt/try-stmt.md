@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstTryStmt` (try-catch-finally statements) in TypeScript to JVM bytecode compilation. Try statements provide structured exception handling, allowing code to catch and handle errors gracefully.
 
-**Current Status:** IMPLEMENTED (29/29 tests passing)
+**Current Status:** IMPLEMENTED (65/65 tests passing)
 
 **Implemented:**
 - Basic try-catch statements (Phase 1) ✓
@@ -19,13 +19,21 @@ This document outlines the implementation plan for supporting `Swc4jAstTryStmt` 
 - Finally block context management ✓
 - Return value buffering for finally blocks ✓
 - JS Error type aliases (Error → JsError, TypeError → JsTypeError, etc.) ✓
+- Catch with destructuring parameter (Phase 4) ✓
+  - `catch ({message})` - extracts error message
+  - `catch ({stack})` - extracts stack trace as string
+  - `catch ({cause})` - extracts error cause
+  - `catch ({name})` - extracts error name (via JsError.getName() or class name)
+  - `catch ({message: msg})` - renamed destructuring
+  - `catch ({message = "default"})` - default values
 
 **Remaining Work:**
-- Phase 4: Catch with destructuring parameter (e.g., `catch ({message})`)
-- Phase 5: Multiple catch clauses / type guards
 - Phase 6: Break/continue with finally in loops
 - Phase 7: Deeper nesting edge cases
 - Phase 8: Stack map frame optimization
+
+**Not Supported:**
+- Phase 5: Multiple catch clauses - TypeScript/JavaScript only supports a single catch clause per try statement
 
 **Strategy:** TypeScript try-catch-finally will be compiled directly to JVM try-catch-finally bytecode structures. The TypeScript `error` object will be a Java `Throwable` (or a specific exception type), with `error.message` mapping to `getMessage()` and `error.stack` mapping to the stack trace.
 
@@ -444,7 +452,7 @@ end:
 
 ### Phase 4: Catch Parameter Variations - Priority: MEDIUM
 
-**Status:** PARTIALLY IMPLEMENTED (no-param and typed-param done; destructuring pending)
+**Status:** IMPLEMENTED ✓
 
 **Scope:**
 - Catch without parameter (`catch { }` - ES2019+)
@@ -1785,16 +1793,16 @@ exception_table {
 - [x] Phase 1: Basic try-catch working
 - [x] Phase 2: Try-finally working
 - [x] Phase 3: Try-catch-finally working
-- [ ] Phase 4: Catch parameter variations (no param, typed done; destructuring pending)
-- [ ] Phase 5: Type guards in catch working
+- [x] Phase 4: Catch parameter variations (no param, typed, destructuring) ✓
+- [N/A] Phase 5: Multiple catch clauses (not supported - TypeScript limitation)
 - [x] Phase 6: Control flow (return) with finally (break/continue pending)
 - [x] Phase 7: Nested try statements working
 - [x] Phase 8: Stack map frames correct
 - [x] Exception table generation correct
-- [ ] error.message maps to getMessage()
-- [ ] error.stack maps to stack trace
+- [x] error.message maps to getMessage() ✓
+- [x] error.stack maps to stack trace ✓
 - [x] All 90 edge cases documented
-- [x] Comprehensive tests passing (29/29)
+- [x] Comprehensive tests passing (65/65)
 
 ### Quality Gates:
 - [x] Exception table entries in correct order
@@ -1830,5 +1838,5 @@ exception_table {
 ---
 
 *Last Updated: January 28, 2026*
-*Status: IMPLEMENTED (Phases 1-3 complete, 29/29 tests passing)*
-*Next Step: Implement Phase 4 - Catch with destructuring parameter*
+*Status: IMPLEMENTED (Phases 1-4 complete, Phase 5 not supported, 65/65 tests passing)*
+*Next Step: Implement Phase 6 - Break/continue with finally in loops*
