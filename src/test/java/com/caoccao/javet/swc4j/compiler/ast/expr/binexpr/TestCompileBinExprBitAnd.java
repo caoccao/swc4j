@@ -76,9 +76,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(591751049L, classA.getMethod("test").invoke(instance)); // Extract low 32 bits (4886718345 & 4294967295 = 591751049)
+        assertEquals(591751049L, (long) runner.createInstanceRunner("com.A").invoke("test")); // Extract low 32 bits (4886718345 & 4294967295 = 591751049)
     }
 
     @ParameterizedTest
@@ -95,9 +93,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(789, classA.getMethod("test").invoke(instance)); // 789 & 789 = 789 (idempotent)
+        assertEquals(789, (int) runner.createInstanceRunner("com.A").invoke("test")); // 789 & 789 = 789 (idempotent)
     }
 
     // Wrapper type tests
@@ -116,9 +112,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(456, classA.getMethod("test").invoke(instance)); // 456 & -1 = 456 (all bits set)
+        assertEquals(456, (int) runner.createInstanceRunner("com.A").invoke("test")); // 456 & -1 = 456 (all bits set)
     }
 
     @ParameterizedTest
@@ -135,9 +129,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(1073741823, classA.getMethod("test").invoke(instance)); // MAX_VALUE & smaller = smaller
+        assertEquals(1073741823, (int) runner.createInstanceRunner("com.A").invoke("test")); // MAX_VALUE & smaller = smaller
     }
 
     // Mixed type tests
@@ -173,9 +165,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0xAB00, classA.getMethod("test").invoke(instance)); // Extract high byte
+        assertEquals(0xAB00, (int) runner.createInstanceRunner("com.A").invoke("test")); // Extract high byte
     }
 
     @ParameterizedTest
@@ -192,9 +182,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0x78, classA.getMethod("test").invoke(instance)); // Extract low byte
+        assertEquals(0x78, (int) runner.createInstanceRunner("com.A").invoke("test")); // Extract low byte
     }
 
     // Negative number tests
@@ -213,9 +201,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0xAAAA, classA.getMethod("test").invoke(instance)); // Extract odd bits (10101010...)
+        assertEquals(0xAAAA, (int) runner.createInstanceRunner("com.A").invoke("test")); // Extract odd bits (10101010...)
     }
 
     @ParameterizedTest
@@ -285,9 +271,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(20, classA.getMethod("test").invoke(instance)); // 30 & 20 = 20
+        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test")); // 30 & 20 = 20
     }
 
     @ParameterizedTest

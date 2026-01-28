@@ -41,9 +41,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(254, classA.getMethod("test").invoke(instance)); // byte promotes to int for operations
+        assertEquals(254, (int) runner.createInstanceRunner("com.A").invoke("test")); // byte promotes to int for operations
     }
 
     @ParameterizedTest
@@ -60,9 +58,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(30, classA.getMethod("test").invoke(instance));
+        assertEquals(30, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -79,9 +75,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(20L, classA.getMethod("test").invoke(instance));
+        assertEquals(20L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -99,9 +93,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(120, classA.getMethod("test").invoke(instance));
+        assertEquals(120, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -118,9 +110,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(134, classA.getMethod("test").invoke(instance)); // 'C' (67) * 2 = 134
+        assertEquals(134, (int) runner.createInstanceRunner("com.A").invoke("test")); // 'C' (67) * 2 = 134
     }
 
     // Mixed primitive type tests
@@ -139,9 +129,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(15, classA.getMethod("test").invoke(instance)); // 5 * 3 = 15
+        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test")); // 5 * 3 = 15
     }
 
     @ParameterizedTest
@@ -160,9 +148,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(60, classA.getMethod("test").invoke(instance));
+        assertEquals(60, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -198,9 +184,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(26.25, classA.getMethod("test").invoke(instance));
+        assertEquals(26.25, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -216,9 +200,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(35.0, classA.getMethod("test").invoke(instance));
+        assertEquals(35.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -234,9 +216,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(24.0f, classA.getMethod("test").invoke(instance));
+        assertEquals(24.0f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Wrapper type tests
@@ -254,9 +234,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(40, classA.getMethod("test").invoke(instance));
+        assertEquals(40, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -272,9 +250,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(40, classA.getMethod("test").invoke(instance));
+        assertEquals(40, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -290,9 +266,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(27L, classA.getMethod("test").invoke(instance));
+        assertEquals(27L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -308,9 +282,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(36L, classA.getMethod("test").invoke(instance));
+        assertEquals(36L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -326,9 +298,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(19.5f, classA.getMethod("test").invoke(instance));
+        assertEquals(19.5f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -344,9 +314,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(20, classA.getMethod("test").invoke(instance));
+        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -362,9 +330,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(20L, classA.getMethod("test").invoke(instance));
+        assertEquals(20L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Mixed primitive and wrapper tests
@@ -382,9 +348,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(16.25f, classA.getMethod("test").invoke(instance));
+        assertEquals(16.25f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -436,9 +400,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(12, classA.getMethod("test").invoke(instance));
+        assertEquals(12, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -454,9 +416,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(24L, classA.getMethod("test").invoke(instance));
+        assertEquals(24L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -490,9 +450,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(24.0, classA.getMethod("test").invoke(instance));
+        assertEquals(24.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -508,9 +466,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(15.0f, classA.getMethod("test").invoke(instance));
+        assertEquals(15.0f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -526,9 +482,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(30L, classA.getMethod("test").invoke(instance));
+        assertEquals(30L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -544,9 +498,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(75.0, classA.getMethod("test").invoke(instance));
+        assertEquals(75.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -562,9 +514,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(65.0, classA.getMethod("test").invoke(instance));
+        assertEquals(65.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Explicit type cast tests - Widening conversions
@@ -582,9 +532,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(200L, classA.getMethod("test").invoke(instance));
+        assertEquals(200L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -600,9 +548,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(108L, classA.getMethod("test").invoke(instance));
+        assertEquals(108L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -618,9 +564,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(700.0, classA.getMethod("test").invoke(instance));
+        assertEquals(700.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -636,9 +580,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(220.0f, classA.getMethod("test").invoke(instance));
+        assertEquals(220.0f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -654,9 +596,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(400, classA.getMethod("test").invoke(instance));
+        assertEquals(400, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -672,9 +612,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(3000.0, classA.getMethod("test").invoke(instance));
+        assertEquals(3000.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -690,9 +628,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(210.0f, classA.getMethod("test").invoke(instance));
+        assertEquals(210.0f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -709,9 +645,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(60.0, classA.getMethod("test").invoke(instance));
+        assertEquals(60.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -727,9 +661,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(120.0, classA.getMethod("test").invoke(instance));
+        assertEquals(120.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -745,9 +677,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(90.0, classA.getMethod("test").invoke(instance));
+        assertEquals(90.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Explicit cast tests - Narrowing conversions
@@ -765,9 +695,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(75.0f, classA.getMethod("test").invoke(instance));
+        assertEquals(75.0f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -783,9 +711,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(300, classA.getMethod("test").invoke(instance));
+        assertEquals(300, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -801,9 +727,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(300, classA.getMethod("test").invoke(instance));
+        assertEquals(300, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -819,9 +743,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(250L, classA.getMethod("test").invoke(instance));
+        assertEquals(250L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -857,9 +779,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(7.0, classA.getMethod("test").invoke(instance));
+        assertEquals(7.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Explicit cast tests - Wrapper to primitive conversions
@@ -878,9 +798,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(9.0, classA.getMethod("test").invoke(instance));
+        assertEquals(9.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -897,9 +815,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(7.0, classA.getMethod("test").invoke(instance));
+        assertEquals(7.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -916,9 +832,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(16.5, classA.getMethod("test").invoke(instance));
+        assertEquals(16.5, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -935,9 +849,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(26.25f, classA.getMethod("test").invoke(instance));
+        assertEquals(26.25f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -954,9 +866,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(12.5, classA.getMethod("test").invoke(instance));
+        assertEquals(12.5, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -973,9 +883,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(7.5f, classA.getMethod("test").invoke(instance));
+        assertEquals(7.5f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -992,9 +900,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(30, classA.getMethod("test").invoke(instance));
+        assertEquals(30, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1011,9 +917,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(20L, classA.getMethod("test").invoke(instance));
+        assertEquals(20L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1030,9 +934,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(24L, classA.getMethod("test").invoke(instance));
+        assertEquals(24L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1049,9 +951,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(15.0, classA.getMethod("test").invoke(instance));
+        assertEquals(15.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1068,9 +968,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(12.5f, classA.getMethod("test").invoke(instance));
+        assertEquals(12.5f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1087,9 +985,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(40L, classA.getMethod("test").invoke(instance));
+        assertEquals(40L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1106,9 +1002,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(25, classA.getMethod("test").invoke(instance));
+        assertEquals(25, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1125,9 +1019,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(70L, classA.getMethod("test").invoke(instance));
+        assertEquals(70L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1144,9 +1036,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(25.0, classA.getMethod("test").invoke(instance));
+        assertEquals(25.0, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1163,9 +1053,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(25.0f, classA.getMethod("test").invoke(instance));
+        assertEquals(25.0f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1182,9 +1070,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(52.5, classA.getMethod("test").invoke(instance));
+        assertEquals(52.5, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1201,9 +1087,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(37.5f, classA.getMethod("test").invoke(instance));
+        assertEquals(37.5f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Edge case tests
@@ -1222,9 +1106,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(220L, classA.getMethod("test").invoke(instance));
+        assertEquals(220L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1241,9 +1123,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance));
+        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1260,9 +1140,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(30000, classA.getMethod("test").invoke(instance));
+        assertEquals(30000, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1279,9 +1157,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(30, classA.getMethod("test").invoke(instance)); // -10 * -3 = 30
+        assertEquals(30, (int) runner.createInstanceRunner("com.A").invoke("test")); // -10 * -3 = 30
     }
 
     @ParameterizedTest
@@ -1298,9 +1174,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(60, classA.getMethod("test").invoke(instance)); // 10 * (2 * 3) = 10 * 6 = 60
+        assertEquals(60, (int) runner.createInstanceRunner("com.A").invoke("test")); // 10 * (2 * 3) = 10 * 6 = 60
     }
 
     @ParameterizedTest
@@ -1317,9 +1191,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(-30000, classA.getMethod("test").invoke(instance));
+        assertEquals(-30000, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1336,9 +1208,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(20, classA.getMethod("test").invoke(instance));
+        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1355,9 +1225,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(48L, classA.getMethod("test").invoke(instance));
+        assertEquals(48L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1392,8 +1260,6 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(50, classA.getMethod("test").invoke(instance));
+        assertEquals(50, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

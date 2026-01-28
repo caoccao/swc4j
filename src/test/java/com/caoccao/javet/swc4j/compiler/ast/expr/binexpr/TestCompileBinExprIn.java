@@ -535,10 +535,9 @@ public class TestCompileBinExprIn extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("testTrue").invoke(instance));
-        assertEquals(0, classA.getMethod("testFalse").invoke(instance));
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(1, (int) instanceRunner.invoke("testTrue"));
+        assertEquals(0, (int) instanceRunner.invoke("testFalse"));
     }
 
     @ParameterizedTest
