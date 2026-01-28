@@ -46,10 +46,9 @@ public class TestCompileAstBigIntContext extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(new BigInteger("100"), classA.getMethod("test", boolean.class).invoke(instance, true));
-        assertEquals(new BigInteger("200"), classA.getMethod("test", boolean.class).invoke(instance, false));
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(new BigInteger("100"), instanceRunner.invoke("test", true));
+        assertEquals(new BigInteger("200"), instanceRunner.invoke("test", false));
     }
 
     @ParameterizedTest
@@ -64,9 +63,7 @@ public class TestCompileAstBigIntContext extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(new BigInteger("12345"), classA.getMethod("test").invoke(instance));
+        assertEquals(new BigInteger("12345"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -82,9 +79,7 @@ public class TestCompileAstBigIntContext extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(new BigInteger("9999"), classA.getMethod("test").invoke(instance));
+        assertEquals(new BigInteger("9999"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -100,9 +95,7 @@ public class TestCompileAstBigIntContext extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(new BigInteger("123456789"), classA.getMethod("test").invoke(instance));
+        assertEquals(new BigInteger("123456789"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -122,11 +115,10 @@ public class TestCompileAstBigIntContext extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(new BigInteger("111"), classA.getMethod("test1").invoke(instance));
-        assertEquals(new BigInteger("222"), classA.getMethod("test2").invoke(instance));
-        assertEquals(new BigInteger("333"), classA.getMethod("test3").invoke(instance));
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(new BigInteger("111"), instanceRunner.invoke("test1"));
+        assertEquals(new BigInteger("222"), instanceRunner.invoke("test2"));
+        assertEquals(new BigInteger("333"), instanceRunner.invoke("test3"));
     }
 
     @ParameterizedTest
@@ -143,9 +135,7 @@ public class TestCompileAstBigIntContext extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(new BigInteger("300"), classA.getMethod("test").invoke(instance));
+        assertEquals(new BigInteger("300"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -159,9 +149,7 @@ public class TestCompileAstBigIntContext extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(new BigInteger("42"), classA.getMethod("test").invoke(instance));
+        assertEquals(new BigInteger("42"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -178,9 +166,7 @@ public class TestCompileAstBigIntContext extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(new BigInteger("20"), classA.getMethod("test").invoke(instance));
+        assertEquals(new BigInteger("20"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -195,9 +181,7 @@ public class TestCompileAstBigIntContext extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(new BigInteger("777"), classA.getMethod("test").invoke(instance));
+        assertEquals(new BigInteger("777"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -212,8 +196,6 @@ public class TestCompileAstBigIntContext extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(new BigInteger("555"), classA.getMethod("test").invoke(instance));
+        assertEquals(new BigInteger("555"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

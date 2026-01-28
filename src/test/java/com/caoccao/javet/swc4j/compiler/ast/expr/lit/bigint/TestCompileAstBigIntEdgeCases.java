@@ -42,10 +42,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // 300 wraps to 44 in byte range
-        assertEquals((byte) 300, classA.getMethod("test").invoke(instance));
+        assertEquals((byte) 300, (byte) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -59,10 +56,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Double negation: -(-123n) = 123n
-        assertEquals(new BigInteger("123"), classA.getMethod("test").invoke(instance));
+        assertEquals(new BigInteger("123"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -81,9 +75,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(new BigInteger("555"), classA.getMethod("test").invoke(instance));
+        assertEquals(new BigInteger("555"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -97,10 +89,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // -0n should equal 0n (BigInteger.ZERO)
-        assertEquals(BigInteger.ZERO, classA.getMethod("test").invoke(instance));
+        assertEquals(BigInteger.ZERO, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -114,10 +103,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Integer.MAX_VALUE + 1 = 2147483648, wraps to Integer.MIN_VALUE
-        assertEquals(Integer.MIN_VALUE, classA.getMethod("test").invoke(instance));
+        assertEquals(Integer.MIN_VALUE, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -131,10 +117,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Long.MAX_VALUE + 1, wraps to Long.MIN_VALUE
-        assertEquals(Long.MIN_VALUE, classA.getMethod("test").invoke(instance));
+        assertEquals(Long.MIN_VALUE, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -148,10 +131,8 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Very large BigInt loses precision when converted to double
-        double result = (double) classA.getMethod("test").invoke(instance);
+        double result = (double) runner.createInstanceRunner("com.A").invoke("test");
         // Check that it's approximately correct (precision loss expected)
         assertEquals(1.2345678901234567e28, result, 1e20);
     }
@@ -167,10 +148,8 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Large BigInt loses precision when converted to float
-        float result = (float) classA.getMethod("test").invoke(instance);
+        float result = (float) runner.createInstanceRunner("com.A").invoke("test");
         // Check that it's approximately correct (precision loss expected)
         assertEquals(1.23456789e14f, result, 1e8f);
     }
@@ -186,10 +165,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // 40000 wraps to -25536 in short range
-        assertEquals((short) 40000, classA.getMethod("test").invoke(instance));
+        assertEquals((short) 40000, (short) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -209,11 +185,10 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(new BigInteger("123"), classA.getMethod("testPositive").invoke(instance));
-        assertEquals(new BigInteger("-123"), classA.getMethod("testNegative").invoke(instance));
-        assertEquals(new BigInteger("123"), classA.getMethod("testNoSign").invoke(instance));
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(new BigInteger("123"), instanceRunner.invoke("testPositive"));
+        assertEquals(new BigInteger("-123"), instanceRunner.invoke("testNegative"));
+        assertEquals(new BigInteger("123"), instanceRunner.invoke("testNoSign"));
     }
 
     @ParameterizedTest
@@ -227,10 +202,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Integer.MIN_VALUE - 1 = -2147483649, wraps to Integer.MAX_VALUE
-        assertEquals(Integer.MAX_VALUE, classA.getMethod("test").invoke(instance));
+        assertEquals(Integer.MAX_VALUE, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -244,10 +216,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Long.MIN_VALUE - 1, wraps to Long.MAX_VALUE
-        assertEquals(Long.MAX_VALUE, classA.getMethod("test").invoke(instance));
+        assertEquals(Long.MAX_VALUE, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -261,10 +230,8 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("-12345678901234567890123456789012345678901234567890"),
-                classA.getMethod("test").invoke(instance));
+                runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -278,10 +245,8 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         assertEquals(new BigInteger("98765432109876543210987654321098765432109876543210"),
-                classA.getMethod("test").invoke(instance));
+                runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -298,11 +263,9 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // 0n → false
-        assertEquals(false, classA.getMethod("testZero").invoke(instance));
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(false, instanceRunner.invoke("testZero"));
         // 1n → true
-        assertEquals(true, classA.getMethod("testNonZero").invoke(instance));
+        assertEquals(true, instanceRunner.invoke("testNonZero"));
     }
 }
