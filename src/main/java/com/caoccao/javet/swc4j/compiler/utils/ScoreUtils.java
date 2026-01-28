@@ -72,18 +72,15 @@ public final class ScoreUtils {
         // Utility class, prevent instantiation
     }
 
-    // ========== Methods for JVM Type Descriptors (String) ==========
-
     /**
-     * Finds the best matching constructor for the given class and arguments.
+     * Finds the best matching constructor from a cached array of constructors.
      * Uses a scoring system to evaluate all constructors and returns the one with the highest score.
      *
-     * @param clazz           the class to find a constructor for
+     * @param constructors    the array of constructors to search
      * @param constructorArgs the constructor arguments
      * @return the best matching constructor, or null if no matching constructor found
      */
-    public static Constructor<?> findBestConstructor(Class<?> clazz, Object[] constructorArgs) {
-        Constructor<?>[] constructors = clazz.getConstructors();
+    public static Constructor<?> findBestConstructor(Constructor<?>[] constructors, Object[] constructorArgs) {
         Constructor<?> bestConstructor = null;
         double bestScore = -1.0;
 
@@ -102,20 +99,15 @@ public final class ScoreUtils {
      * Finds the best matching method for the given class, method name, and arguments.
      * Uses a scoring system to evaluate all methods with the given name and returns the one with the highest score.
      *
-     * @param clazz      the class to find a method in
-     * @param methodName the method name
-     * @param args       the method arguments
+     * @param methods the methods
+     * @param args    the method arguments
      * @return the best matching method, or null if no matching method found
      */
-    public static Method findBestMethod(Class<?> clazz, String methodName, Object[] args) {
-        Method[] methods = clazz.getMethods();
+    public static Method findBestMethod(Method[] methods, Object[] args) {
         Method bestMethod = null;
         double bestScore = -1.0;
 
         for (Method method : methods) {
-            if (!method.getName().equals(methodName)) {
-                continue;
-            }
             double score = scoreMethod(method, args);
             if (score > bestScore) {
                 bestScore = score;
@@ -313,8 +305,6 @@ public final class ScoreUtils {
         }
         return 0.0;
     }
-
-    // ========== Methods for Runtime Class Objects ==========
 
     /**
      * Scores a constructor based on how well the argument types match the parameter types.

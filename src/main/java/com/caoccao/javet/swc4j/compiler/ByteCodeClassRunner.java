@@ -21,18 +21,25 @@ import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
 public final class ByteCodeClassRunner {
     private final Class<?> clazz;
     private final Object instance;
+    private final Map<String, Method[]> methodNameToMethodsMap;
+    private final Method[] methods;
 
     private ByteCodeClassRunner(Class<?> clazz, Object instance) {
         this.clazz = clazz;
         this.instance = instance;
+        methods = clazz.getMethods();
+        methodNameToMethodsMap = new HashMap<>();
     }
 
     public static ByteCodeClassRunner createInstance(Class<?> clazz, Object... constructorArgs) {
-        Constructor<?> constructor = ScoreUtils.findBestConstructor(clazz, constructorArgs);
+        Constructor<?> constructor = ScoreUtils.findBestConstructor(clazz.getConstructors(), constructorArgs);
         if (constructor == null) {
             throw new IllegalArgumentException("No matching constructor found for " + clazz.getName());
         }
@@ -55,8 +62,14 @@ public final class ByteCodeClassRunner {
         return instance;
     }
 
+    private Method[] getMethods(String methodName) {
+        return methodNameToMethodsMap.computeIfAbsent(methodName, k -> Stream.of(methods)
+                .filter(method -> method.getName().equals(methodName))
+                .toArray(Method[]::new));
+    }
+
     public <T> T invoke(String methodName, Object... args) throws InvocationTargetException, IllegalAccessException {
-        Method method = ScoreUtils.findBestMethod(clazz, methodName, args);
+        Method method = ScoreUtils.findBestMethod(getMethods(methodName), args);
         if (method == null) {
             throw new IllegalArgumentException("No matching method found: " + methodName);
         }
