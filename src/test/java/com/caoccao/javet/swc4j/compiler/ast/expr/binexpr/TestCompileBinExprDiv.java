@@ -1271,7 +1271,7 @@ public class TestCompileBinExprDiv extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-3, (Integer) runner.createInstanceRunner("com.A").invoke("test")); // -7/2 = -3 (truncated toward zero)
+        assertEquals(-3, (int) runner.createInstanceRunner("com.A").invoke("test")); // -7/2 = -3 (truncated toward zero)
     }
 
     @ParameterizedTest
@@ -1288,7 +1288,7 @@ public class TestCompileBinExprDiv extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(5, (Integer) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -1338,6 +1338,6 @@ public class TestCompileBinExprDiv extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (Integer) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }
