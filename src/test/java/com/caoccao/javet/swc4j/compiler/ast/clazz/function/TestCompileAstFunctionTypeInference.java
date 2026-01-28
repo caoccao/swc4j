@@ -36,7 +36,7 @@ public class TestCompileAstFunctionTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(true, (boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -50,7 +50,7 @@ public class TestCompileAstFunctionTypeInference extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3.14, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertEquals(3.14, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
     }
 
     @ParameterizedTest
@@ -160,7 +160,7 @@ public class TestCompileAstFunctionTypeInference extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals("hello", (String) instanceRunner.invoke("test"));
+        assertEquals("hello", instanceRunner.invoke("test"));
     }
 
     @ParameterizedTest

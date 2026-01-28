@@ -92,8 +92,8 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                   }
                 }""");
         var staticRunner = runner.createStaticRunner("com.A");
-        assertEquals(true, (boolean) staticRunner.invoke("isPositive", 5));
-        assertEquals(false, (boolean) staticRunner.invoke("isPositive", -5));
+        assertEquals(true, staticRunner.invoke("isPositive", 5));
+        assertEquals(false, staticRunner.invoke("isPositive", -5));
     }
 
     @ParameterizedTest
@@ -107,7 +107,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(6.28, (double) runner.createStaticRunner("com.A").invoke("multiply", 2.0, 3.14), 0.001);
+        assertEquals(6.28, runner.createStaticRunner("com.A").invoke("multiply", 2.0, 3.14), 0.001);
     }
 
     @ParameterizedTest
@@ -121,7 +121,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("Hello, World", (String) runner.createStaticRunner("com.A").invoke("greet", "World"));
+        assertEquals("Hello, World", runner.createStaticRunner("com.A").invoke("greet", "World"));
     }
 
     @ParameterizedTest

@@ -16,10 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassProp;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateProp;
+import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
@@ -194,6 +191,43 @@ public final class ClassCollector {
                         String fullDescriptor = "(" + paramDescriptors + ")" + returnDescriptor;
 
                         // Register method signature in ScopedJavaClassRegistry
+                        compiler.getMemory().getScopedJavaTypeRegistry()
+                                .registerClassMethod(qualifiedName, methodName, fullDescriptor);
+                    }
+                } catch (Swc4jByteCodeCompilerException e) {
+                    // Ignore methods that can't be analyzed
+                }
+            } else if (member instanceof Swc4jAstPrivateMethod privateMethod) {
+                // ES2022 private methods (#method)
+                try {
+                    String methodName = privateMethod.getKey().getName(); // Without # prefix
+                    var function = privateMethod.getFunction();
+                    var bodyOpt = function.getBody();
+                    if (bodyOpt.isPresent()) {
+                        Swc4jAstBlockStmt blockStmt = bodyOpt.get();
+                        ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, blockStmt);
+
+                        // Build full method descriptor with parameters
+                        StringBuilder paramDescriptors = new StringBuilder();
+                        for (var param : function.getParams()) {
+                            String paramType = compiler.getTypeResolver().extractParameterType(param.getPat());
+                            paramDescriptors.append(paramType);
+                        }
+
+                        // Get return descriptor from ReturnTypeInfo
+                        String returnDescriptor;
+                        if (returnTypeInfo.descriptor() != null) {
+                            returnDescriptor = returnTypeInfo.descriptor();
+                        } else {
+                            returnDescriptor = returnTypeInfo.getPrimitiveTypeDescriptor();
+                            if (returnDescriptor == null) {
+                                returnDescriptor = "V";
+                            }
+                        }
+
+                        String fullDescriptor = "(" + paramDescriptors + ")" + returnDescriptor;
+
+                        // Register private method signature in ScopedJavaClassRegistry
                         compiler.getMemory().getScopedJavaTypeRegistry()
                                 .registerClassMethod(qualifiedName, methodName, fullDescriptor);
                     }

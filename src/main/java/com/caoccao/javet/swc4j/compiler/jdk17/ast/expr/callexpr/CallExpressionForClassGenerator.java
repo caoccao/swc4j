@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
@@ -83,12 +84,16 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
 
         // Determine if it's a Java class static method call or TS class instance method call
         JavaTypeInfo javaTypeInfo = null;
+        boolean isPrivateMethodCall = isPrivateMethod(memberExpr.getProp());
+
         if (memberExpr.getObj() instanceof Swc4jAstIdent objIdent) {
             String className = objIdent.getSym();
             javaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
         }
 
-        boolean isJavaStaticCall = javaTypeInfo != null;
+        // Private method calls on TypeScript classes should be handled as TS class calls, not Java static calls
+        // Java classes don't have #method syntax, so if the prop is PrivateName, it must be a TS class
+        boolean isJavaStaticCall = javaTypeInfo != null && !isPrivateMethodCall;
 
         // Infer argument types
         var args = callExpr.getArgs();
@@ -144,14 +149,35 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             int methodRef = cp.addMethodRef(internalClassName, methodName, methodDescriptor);
             code.invokestatic(methodRef);
         } else {
-            // TypeScript class instance method call
-            String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
+            // TypeScript class instance/static method call
+            String objType = null;
+            boolean isStaticCall = false;
+
+            // Handle static private method calls like A.#helper()
+            // Check if obj is a class identifier (before inferring type which returns Object)
+            if (memberExpr.getObj() instanceof Swc4jAstIdent objIdent && isPrivateMethodCall) {
+                String className = objIdent.getSym();
+                JavaTypeInfo tsTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
+                if (tsTypeInfo != null) {
+                    // This is a static private method call on a TS class
+                    objType = "L" + tsTypeInfo.getInternalName() + ";";
+                    isStaticCall = true;
+                }
+            }
+
+            // For non-static calls, infer the object type
+            if (objType == null) {
+                objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
+            }
+
             if (objType == null || !objType.startsWith("L") || !objType.endsWith(";")) {
                 throw new Swc4jByteCodeCompilerException(memberExpr, "Invalid object type for TS class method call: " + objType);
             }
 
-            // Generate the object reference first
-            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+            // Generate the object reference for instance calls
+            if (!isStaticCall) {
+                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+            }
 
             // Generate arguments
             StringBuilder paramDescriptors = new StringBuilder();
@@ -177,10 +203,21 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
 
             methodDescriptor = paramDescriptor + returnType;
 
-            // Determine if the target is an interface (use invokeinterface) or class (use invokevirtual)
+            // Check if this is a private method call (ES2022 #method)
+            boolean isPrivate = isPrivateMethod(memberExpr.getProp());
+
+            // Determine if the target is an interface (use invokeinterface) or class (use invokevirtual/invokespecial)
             boolean isInterface = isInterface(qualifiedClassName);
 
-            if (isInterface) {
+            if (isPrivate && isStaticCall) {
+                // Static private method call - use invokestatic
+                int methodRef = cp.addMethodRef(internalClassName, methodName, methodDescriptor);
+                code.invokestatic(methodRef);
+            } else if (isPrivate) {
+                // Instance private method call - use invokespecial (like constructor calls)
+                int methodRef = cp.addMethodRef(internalClassName, methodName, methodDescriptor);
+                code.invokespecial(methodRef);
+            } else if (isInterface) {
                 // Interface method call - use invokeinterface
                 int methodRef = cp.addInterfaceMethodRef(internalClassName, methodName, methodDescriptor);
                 // invokeinterface needs the argument count (including 'this')
@@ -204,6 +241,9 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             return ident.getSym();
         } else if (prop instanceof Swc4jAstIdentName identName) {
             return identName.getSym();
+        } else if (prop instanceof Swc4jAstPrivateName privateName) {
+            // ES2022 private method - return name without # prefix
+            return privateName.getName();
         }
         return null;
     }
@@ -223,6 +263,13 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             // If class not found, assume it's not an interface (could be a TS class)
             return false;
         }
+    }
+
+    /**
+     * Checks if the member property is a private name (ES2022 #method).
+     */
+    private boolean isPrivateMethod(ISwc4jAstMemberProp prop) {
+        return prop instanceof Swc4jAstPrivateName;
     }
 
     /**

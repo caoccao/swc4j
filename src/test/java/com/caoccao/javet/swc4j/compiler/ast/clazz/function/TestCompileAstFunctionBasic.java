@@ -102,10 +102,10 @@ public class TestCompileAstFunctionBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(true, (boolean) instanceRunner.invoke("isEven", 4));
-        assertEquals(false, (boolean) instanceRunner.invoke("isEven", 3));
-        assertEquals(true, (boolean) instanceRunner.invoke("isOdd", 5));
-        assertEquals(false, (boolean) instanceRunner.invoke("isOdd", 6));
+        assertEquals(true, instanceRunner.invoke("isEven", 4));
+        assertEquals(false, instanceRunner.invoke("isEven", 3));
+        assertEquals(true, instanceRunner.invoke("isOdd", 5));
+        assertEquals(false, instanceRunner.invoke("isOdd", 6));
     }
 
     @ParameterizedTest

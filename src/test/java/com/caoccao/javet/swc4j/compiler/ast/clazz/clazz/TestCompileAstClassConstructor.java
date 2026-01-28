@@ -60,8 +60,8 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         assertEquals(
                 List.of(10, 5, 15),
                 List.of(
-                        (int) instanceRunner.invoke("getValue"),
-                        (int) instanceRunner.invoke("getExtra"),
+                        instanceRunner.invoke("getValue"),
+                        instanceRunner.invoke("getExtra"),
                         (int) instanceRunner.invoke("getTotal")
                 )
         );
@@ -95,7 +95,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         assertEquals(
                 List.of(10, 20),
                 List.of(
-                        (int) runner.createInstanceRunner("com.Point", 10, 20).invoke("getX"),
+                        runner.createInstanceRunner("com.Point", 10, 20).invoke("getX"),
                         (int) runner.createInstanceRunner("com.Point", 10, 20).invoke("getY")
                 )
         );
@@ -104,7 +104,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         assertEquals(
                 List.of(5, 5),
                 List.of(
-                        (int) runner.createInstanceRunner("com.Point", 5).invoke("getX"),
+                        runner.createInstanceRunner("com.Point", 5).invoke("getX"),
                         (int) runner.createInstanceRunner("com.Point", 5).invoke("getY")
                 )
         );
@@ -113,7 +113,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         assertEquals(
                 List.of(0, 0),
                 List.of(
-                        (int) runner.createInstanceRunner("com.Point").invoke("getX"),
+                        runner.createInstanceRunner("com.Point").invoke("getX"),
                         (int) runner.createInstanceRunner("com.Point").invoke("getY")
                 )
         );
@@ -152,8 +152,8 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         assertEquals(
                 List.of(1, 2, 3),
                 List.of(
-                        (int) runner.createInstanceRunner("com.Point3D", 1, 2, 3).invoke("getX"),
-                        (int) runner.createInstanceRunner("com.Point3D", 1, 2, 3).invoke("getY"),
+                        runner.createInstanceRunner("com.Point3D", 1, 2, 3).invoke("getX"),
+                        runner.createInstanceRunner("com.Point3D", 1, 2, 3).invoke("getY"),
                         (int) runner.createInstanceRunner("com.Point3D", 1, 2, 3).invoke("getZ")
                 )
         );
@@ -162,8 +162,8 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         assertEquals(
                 List.of(5, 5, 5),
                 List.of(
-                        (int) runner.createInstanceRunner("com.Point3D", 5).invoke("getX"),
-                        (int) runner.createInstanceRunner("com.Point3D", 5).invoke("getY"),
+                        runner.createInstanceRunner("com.Point3D", 5).invoke("getX"),
+                        runner.createInstanceRunner("com.Point3D", 5).invoke("getY"),
                         (int) runner.createInstanceRunner("com.Point3D", 5).invoke("getZ")
                 )
         );
@@ -221,9 +221,9 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         assertEquals(
                 List.of(1, 2, 3, 6),
                 List.of(
-                        (int) instanceRunner.invoke("getA"),
-                        (int) instanceRunner.invoke("getB"),
-                        (int) instanceRunner.invoke("getC"),
+                        instanceRunner.invoke("getA"),
+                        instanceRunner.invoke("getB"),
+                        instanceRunner.invoke("getC"),
                         (int) instanceRunner.invoke("getSum")
                 )
         );
@@ -256,8 +256,8 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         assertEquals(
                 List.of(10, 5, 50),
                 List.of(
-                        (int) runner.createInstanceRunner("com.Rectangle", 10, 5).invoke("getWidth"),
-                        (int) runner.createInstanceRunner("com.Rectangle", 10, 5).invoke("getHeight"),
+                        runner.createInstanceRunner("com.Rectangle", 10, 5).invoke("getWidth"),
+                        runner.createInstanceRunner("com.Rectangle", 10, 5).invoke("getHeight"),
                         (int) runner.createInstanceRunner("com.Rectangle", 10, 5).invoke("getArea")
                 )
         );
@@ -266,8 +266,8 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         assertEquals(
                 List.of(7, 7, 49),
                 List.of(
-                        (int) runner.createInstanceRunner("com.Rectangle", 7).invoke("getWidth"),
-                        (int) runner.createInstanceRunner("com.Rectangle", 7).invoke("getHeight"),
+                        runner.createInstanceRunner("com.Rectangle", 7).invoke("getWidth"),
+                        runner.createInstanceRunner("com.Rectangle", 7).invoke("getHeight"),
                         (int) runner.createInstanceRunner("com.Rectangle", 7).invoke("getArea")
                 )
         );
@@ -296,7 +296,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         assertEquals(
                 Map.of("name", "John", "age", 25, "active", true),
                 Map.of(
-                        "name", (String) instanceRunner.invoke("getName"),
+                        "name", instanceRunner.invoke("getName"),
                         "age", (int) instanceRunner.invoke("getAge"),
                         "active", (boolean) instanceRunner.invoke("isActive")
                 )
@@ -319,7 +319,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.Circle", 5.0);
         assertEquals(5.0, (double) instanceRunner.invoke("getRadius"));
-        assertEquals(78.53975, (double) instanceRunner.invoke("getArea"), 0.00001);
+        assertEquals(78.53975, instanceRunner.invoke("getArea"), 0.00001);
     }
 
     @ParameterizedTest
@@ -343,8 +343,8 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         assertEquals(
                 List.of(10, 20, 30),
                 List.of(
-                        (int) instanceRunner.invoke("getX"),
-                        (int) instanceRunner.invoke("getY"),
+                        instanceRunner.invoke("getX"),
+                        instanceRunner.invoke("getY"),
                         (int) instanceRunner.invoke("sum")
                 )
         );

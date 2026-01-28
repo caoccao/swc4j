@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateMethod;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -173,6 +174,111 @@ public final class MethodGenerator extends BaseAstProcessor {
         }
     }
 
+    /**
+     * Generate bytecode for an ES2022 private method (#method).
+     * Private methods are compiled with ACC_PRIVATE access and the method name
+     * without the # prefix (stored as a regular private method in bytecode).
+     */
+    public void generate(
+            ClassWriter classWriter,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstPrivateMethod method) throws Swc4jByteCodeCompilerException {
+        // Get method name from PrivateName (without the # prefix)
+        String methodName = method.getKey().getName();
+        Swc4jAstFunction function = method.getFunction();
+
+        // Handle abstract private methods (rare but possible in interfaces)
+        if (method.isAbstract()) {
+            generateAbstractPrivateMethod(classWriter, cp, method, methodName, function);
+            return;
+        }
+
+        // Handle methods with bodies
+        var bodyOpt = function.getBody();
+        if (bodyOpt.isPresent()) {
+            // Push type parameters scope for generic methods (type erasure)
+            TypeParameterScope methodTypeParamScope = function.getTypeParams()
+                    .map(TypeParameterScope::fromDecl)
+                    .orElse(null);
+            if (methodTypeParamScope != null) {
+                compiler.getMemory().getCompilationContext().pushTypeParameterScope(methodTypeParamScope);
+            }
+
+            try {
+                Swc4jAstBlockStmt body = bodyOpt.get();
+
+                // Reset compilation context for this method
+                compiler.getMemory().resetCompilationContext(method.isStatic());
+                CompilationContext context = compiler.getMemory().getCompilationContext();
+
+                // Analyze function parameters and allocate local variable slots
+                compiler.getVariableAnalyzer().analyzeParameters(function);
+
+                // Analyze variable declarations and infer types
+                compiler.getVariableAnalyzer().analyzeVariableDeclarations(body);
+
+                // Analyze mutable captures to determine which variables need holder objects
+                compiler.getMutableCaptureAnalyzer().analyze(body);
+
+                // Determine return type from method body or explicit annotation
+                ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, body);
+                String descriptor = generateDescriptor(function, returnTypeInfo);
+                CodeBuilder code = generateCode(cp, body, returnTypeInfo);
+
+                // Private methods are always ACC_PRIVATE (0x0002)
+                int accessFlags = 0x0002; // ACC_PRIVATE
+                if (method.isStatic()) {
+                    accessFlags |= 0x0008; // ACC_STATIC
+                }
+                // Check if method has varargs (RestPat in last parameter)
+                if (!function.getParams().isEmpty()) {
+                    Swc4jAstParam lastParam = function.getParams().get(function.getParams().size() - 1);
+                    if (lastParam.getPat() instanceof Swc4jAstRestPat) {
+                        accessFlags |= 0x0080; // ACC_VARARGS
+                    }
+                }
+
+                int maxStack = Math.max(returnTypeInfo.maxStack(), returnTypeInfo.type().getMinStack());
+                maxStack = Math.max(maxStack, 10);
+                int maxLocals = context.getLocalVariableTable().getMaxLocals();
+
+                // Add debug information if enabled
+                if (compiler.getOptions().debug()) {
+                    List<ClassWriter.LineNumberEntry> lineNumbers = code.getLineNumbers();
+                    List<ClassWriter.LocalVariableEntry> localVariableTable = new java.util.ArrayList<>();
+
+                    int codeLength = code.getCurrentOffset();
+                    for (LocalVariable var : context.getLocalVariableTable().getAllVariables()) {
+                        localVariableTable.add(new ClassWriter.LocalVariableEntry(
+                                0, codeLength, var.name(), var.type(), var.index()
+                        ));
+                    }
+
+                    boolean isStatic = (accessFlags & 0x0008) != 0;
+                    var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName(), descriptor, classWriter.getConstantPool());
+                    var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
+                    classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
+                            lineNumbers, localVariableTable, stackMapTable, exceptionTable);
+                } else {
+                    boolean isStatic = (accessFlags & 0x0008) != 0;
+                    var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName(), descriptor, classWriter.getConstantPool());
+                    var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
+                    classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
+                            null, null, stackMapTable, exceptionTable);
+                }
+
+                // Generate overloaded methods for default parameters
+                generateDefaultParameterOverloadsForPrivateMethod(classWriter, cp, method, methodName, function, returnTypeInfo, accessFlags);
+            } catch (Exception e) {
+                throw new Swc4jByteCodeCompilerException(method, "Failed to generate private method: " + methodName, e);
+            } finally {
+                if (methodTypeParamScope != null) {
+                    compiler.getMemory().getCompilationContext().popTypeParameterScope();
+                }
+            }
+        }
+    }
+
     private void generateAbstractMethod(
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
@@ -208,6 +314,39 @@ public final class MethodGenerator extends BaseAstProcessor {
             classWriter.addMethod(accessFlags, methodName, descriptor, null, 0, 0);
         } finally {
             // Pop the method type parameter scope when done
+            if (methodTypeParamScope != null) {
+                compiler.getMemory().getCompilationContext().popTypeParameterScope();
+            }
+        }
+    }
+
+    private void generateAbstractPrivateMethod(
+            ClassWriter classWriter,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstPrivateMethod method,
+            String methodName,
+            Swc4jAstFunction function) throws Swc4jByteCodeCompilerException {
+        TypeParameterScope methodTypeParamScope = function.getTypeParams()
+                .map(TypeParameterScope::fromDecl)
+                .orElse(null);
+        if (methodTypeParamScope != null) {
+            compiler.getMemory().getCompilationContext().pushTypeParameterScope(methodTypeParamScope);
+        }
+
+        try {
+            compiler.getMemory().resetCompilationContext(method.isStatic());
+            compiler.getVariableAnalyzer().analyzeParameters(function);
+            ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, null);
+            String descriptor = generateDescriptor(function, returnTypeInfo);
+
+            // ACC_PRIVATE + ACC_ABSTRACT
+            int accessFlags = 0x0002 | 0x0400; // ACC_PRIVATE | ACC_ABSTRACT
+            if (method.isStatic()) {
+                accessFlags |= 0x0008; // ACC_STATIC
+            }
+
+            classWriter.addMethod(accessFlags, methodName, descriptor, null, 0, 0);
+        } finally {
             if (methodTypeParamScope != null) {
                 compiler.getMemory().getCompilationContext().popTypeParameterScope();
             }
@@ -275,6 +414,40 @@ public final class MethodGenerator extends BaseAstProcessor {
         // - add(int a, int b) calls add(a, b, 20)
         for (int paramCount = firstDefaultIndex; paramCount < params.size(); paramCount++) {
             generateOverloadMethod(classWriter, cp, method, methodName, function, returnTypeInfo,
+                    baseAccessFlags, paramCount, fullDescriptor, internalClassName);
+        }
+    }
+
+    /**
+     * Generates overloaded methods for private methods with default parameters.
+     */
+    private void generateDefaultParameterOverloadsForPrivateMethod(
+            ClassWriter classWriter,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstPrivateMethod method,
+            String methodName,
+            Swc4jAstFunction function,
+            ReturnTypeInfo returnTypeInfo,
+            int baseAccessFlags) throws Swc4jByteCodeCompilerException {
+        List<Swc4jAstParam> params = function.getParams();
+
+        int firstDefaultIndex = -1;
+        for (int i = 0; i < params.size(); i++) {
+            if (compiler.getTypeResolver().hasDefaultValue(params.get(i).getPat())) {
+                firstDefaultIndex = i;
+                break;
+            }
+        }
+
+        if (firstDefaultIndex == -1) {
+            return;
+        }
+
+        String fullDescriptor = generateDescriptor(function, returnTypeInfo);
+        String internalClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+
+        for (int paramCount = firstDefaultIndex; paramCount < params.size(); paramCount++) {
+            generatePrivateOverloadMethod(classWriter, cp, method, methodName, function, returnTypeInfo,
                     baseAccessFlags, paramCount, fullDescriptor, internalClassName);
         }
     }
@@ -388,6 +561,79 @@ public final class MethodGenerator extends BaseAstProcessor {
         classWriter.addMethod(baseAccessFlags, methodName, overloadDescriptor, code.toByteArray(),
                 10, // max stack
                 maxLocals);
+    }
+
+    /**
+     * Generates a single overload method for a private method.
+     */
+    private void generatePrivateOverloadMethod(
+            ClassWriter classWriter,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstPrivateMethod method,
+            String methodName,
+            Swc4jAstFunction function,
+            ReturnTypeInfo returnTypeInfo,
+            int baseAccessFlags,
+            int paramCount,
+            String fullDescriptor,
+            String internalClassName) throws Swc4jByteCodeCompilerException {
+        List<Swc4jAstParam> params = function.getParams();
+        boolean isStatic = method.isStatic();
+
+        compiler.getMemory().resetCompilationContext(isStatic);
+
+        StringBuilder overloadParamDescriptors = new StringBuilder();
+        for (int i = 0; i < paramCount; i++) {
+            String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
+            overloadParamDescriptors.append(paramType);
+        }
+        String returnDescriptor = getReturnDescriptor(returnTypeInfo);
+        String overloadDescriptor = "(" + overloadParamDescriptors + ")" + returnDescriptor;
+
+        CodeBuilder code = new CodeBuilder();
+
+        int slot = 0;
+        if (!isStatic) {
+            code.aload(0);
+            slot = 1;
+        }
+
+        for (int i = 0; i < paramCount; i++) {
+            String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
+            loadParameter(code, slot, paramType);
+            slot += getSlotSize(paramType);
+        }
+
+        for (int i = paramCount; i < params.size(); i++) {
+            ISwc4jAstExpr defaultValue = compiler.getTypeResolver().extractDefaultValue(params.get(i).getPat());
+            if (defaultValue != null) {
+                String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
+                ReturnTypeInfo expectedType = createReturnTypeInfoFromDescriptor(paramType);
+                compiler.getExpressionGenerator().generate(code, cp, defaultValue, expectedType);
+            } else {
+                throw new Swc4jByteCodeCompilerException(params.get(i),
+                        "Expected default value for parameter at index " + i);
+            }
+        }
+
+        int methodRef = cp.addMethodRef(internalClassName, methodName, fullDescriptor);
+        if (isStatic) {
+            code.invokestatic(methodRef);
+        } else {
+            // Private methods use invokespecial
+            code.invokespecial(methodRef);
+        }
+
+        generateReturn(code, returnTypeInfo);
+
+        int maxLocals = isStatic ? 0 : 1;
+        for (int i = 0; i < paramCount; i++) {
+            String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
+            maxLocals += getSlotSize(paramType);
+        }
+
+        classWriter.addMethod(baseAccessFlags, methodName, overloadDescriptor, code.toByteArray(),
+                10, maxLocals);
     }
 
     private void generateReturn(CodeBuilder code, ReturnTypeInfo returnTypeInfo) {

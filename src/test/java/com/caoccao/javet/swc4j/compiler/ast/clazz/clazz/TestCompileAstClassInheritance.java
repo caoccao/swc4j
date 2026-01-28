@@ -313,7 +313,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
         assertEquals(
                 Map.of("A", 10, "B", 20),
                 Map.of(
-                        "A", (int) runner.createInstanceRunner("com.A").invoke("getValue"),
+                        "A", runner.createInstanceRunner("com.A").invoke("getValue"),
                         "B", (int) runner.createInstanceRunner("com.B").invoke("getValue")
                 )
         );
@@ -338,7 +338,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
         assertEquals(
                 Map.of("A", 100, "B", 200),
                 Map.of(
-                        "A", (int) runner.createInstanceRunner("com.A").invoke("getValue"),
+                        "A", runner.createInstanceRunner("com.A").invoke("getValue"),
                         "B", (int) runner.createInstanceRunner("com.B").invoke("getValue")
                 )
         );
@@ -364,9 +364,9 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
         assertEquals(
                 List.of(1, 2, 3, 6),
                 List.of(
-                        (int) instanceRunner.invoke("getA"),
-                        (int) instanceRunner.invoke("getB"),
-                        (int) instanceRunner.invoke("getC"),
+                        instanceRunner.invoke("getA"),
+                        instanceRunner.invoke("getB"),
+                        instanceRunner.invoke("getC"),
                         (int) instanceRunner.invoke("getSum")
                 )
         );
@@ -408,8 +408,8 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
         assertEquals(
                 List.of(10, 30, 60),
                 List.of(
-                        (int) runner.createInstanceRunner("com.A").invoke("compute"),
-                        (int) runner.createInstanceRunner("com.B").invoke("compute"),
+                        runner.createInstanceRunner("com.A").invoke("compute"),
+                        runner.createInstanceRunner("com.B").invoke("compute"),
                         (int) runner.createInstanceRunner("com.C").invoke("compute")
                 )
         );

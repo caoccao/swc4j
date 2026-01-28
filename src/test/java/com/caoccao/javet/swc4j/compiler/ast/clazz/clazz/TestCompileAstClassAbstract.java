@@ -58,7 +58,7 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         assertEquals(
                 List.of(1, 2),
                 List.of(
-                        (int) instanceRunner.invoke("f"),
+                        instanceRunner.invoke("f"),
                         (int) instanceRunner.invoke("g")
                 )
         );
@@ -94,7 +94,7 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         assertTrue(Modifier.isAbstract(areaMethod.getModifiers()), "area() should be abstract in Shape");
 
         // Create a Circle instance and test
-        double area = (double) runner.createInstanceRunner("com.Circle", 5.0).invoke("area");
+        double area = runner.createInstanceRunner("com.Circle", 5.0).invoke("area");
         assertEquals(78.53975, area, 0.00001);
     }
 
@@ -122,7 +122,7 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         assertEquals(
                 List.of(101, 100),
                 List.of(
-                        (int) instanceRunner.invoke("compute"),
+                        instanceRunner.invoke("compute"),
                         (int) instanceRunner.invoke("helper")
                 )
         );
@@ -159,7 +159,7 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         assertEquals(
                 List.of("Buddy", "Woof!"),
                 List.of(
-                        (String) instanceRunner.invoke("getName"),
+                        instanceRunner.invoke("getName"),
                         (String) instanceRunner.invoke("speak")
                 )
         );
@@ -196,7 +196,7 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         assertEquals(
                 List.of(8, 15),
                 List.of(
-                        (int) instanceRunner.invoke("add", 3, 5),
+                        instanceRunner.invoke("add", 3, 5),
                         (int) instanceRunner.invoke("multiply", 3, 5)
                 )
         );

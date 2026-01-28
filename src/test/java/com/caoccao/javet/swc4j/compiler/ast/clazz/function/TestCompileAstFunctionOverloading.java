@@ -238,8 +238,8 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
         assertEquals(
                 List.of("int:42", "double:3.14", "string:hello"),
                 List.of(
-                        (String) staticRunner.invoke("format", 42),
-                        (String) staticRunner.invoke("format", 3.14),
+                        staticRunner.invoke("format", 42),
+                        staticRunner.invoke("format", 3.14),
                         (String) staticRunner.invoke("format", "hello")
                 )
         );

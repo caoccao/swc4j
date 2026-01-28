@@ -164,8 +164,8 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
         assertEquals(
                 List.of(10, 5, 0),
                 List.of(
-                        (int) staticRunner.invoke("max", 5, 10),
-                        (int) staticRunner.invoke("max", 5),
+                        staticRunner.invoke("max", 5, 10),
+                        staticRunner.invoke("max", 5),
                         (int) staticRunner.invoke("max", -5) // max(-5, 0) = 0
                 )
         );

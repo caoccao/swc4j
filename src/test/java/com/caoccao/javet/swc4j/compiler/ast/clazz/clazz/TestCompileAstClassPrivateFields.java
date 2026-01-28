@@ -68,7 +68,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
         assertEquals(
                 List.of(100, 50),
                 List.of(
-                        (int) runner.createStaticRunner("com.A").invoke("getStaticValue"),
+                        runner.createStaticRunner("com.A").invoke("getStaticValue"),
                         (int) instanceRunner.invoke("getInstanceValue")
                 )
         );
@@ -168,8 +168,8 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
         assertEquals(
                 List.of(5, 10, 15),
                 List.of(
-                        (int) instanceRunner.invoke("getPublic"),
-                        (int) instanceRunner.invoke("getPrivate"),
+                        instanceRunner.invoke("getPublic"),
+                        instanceRunner.invoke("getPrivate"),
                         (int) instanceRunner.invoke("getSum")
                 )
         );
@@ -223,8 +223,8 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                         "string", "Hello"
                 ),
                 Map.of(
-                        "int", (int) instanceRunner.invoke("getInt"),
-                        "double", (double) instanceRunner.invoke("getDouble"),
+                        "int", instanceRunner.invoke("getInt"),
+                        "double", instanceRunner.invoke("getDouble"),
                         "bool", (boolean) instanceRunner.invoke("getBool"),
                         "string", (String) instanceRunner.invoke("getString")
                 )
@@ -349,8 +349,8 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                         "string", "Hello"
                 ),
                 Map.of(
-                        "int", (int) staticRunner.invoke("getInt"),
-                        "double", (double) staticRunner.invoke("getDouble"),
+                        "int", staticRunner.invoke("getInt"),
+                        "double", staticRunner.invoke("getDouble"),
                         "bool", (boolean) staticRunner.invoke("getBool"),
                         "string", (String) staticRunner.invoke("getString")
                 )

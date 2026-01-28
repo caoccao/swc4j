@@ -40,6 +40,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents an item to be initialized in the static initializer (&lt;clinit&gt;).
+ * Can be either a static field initializer or a static block.
+ */
+sealed interface StaticInitItem permits StaticInitItem.FieldInit, StaticInitItem.BlockInit {
+    record BlockInit(Swc4jAstStaticBlock staticBlock) implements StaticInitItem {
+    }
+
+    record FieldInit(FieldInfo fieldInfo) implements StaticInitItem {
+    }
+}
+
 public final class ClassGenerator extends BaseAstProcessor {
     public ClassGenerator(ByteCodeCompiler compiler) {
         super(compiler);
@@ -112,8 +124,8 @@ public final class ClassGenerator extends BaseAstProcessor {
                 typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
             }
 
-            // Collect static fields for <clinit> initialization
-            List<FieldInfo> staticFields = new ArrayList<>();
+            // Collect static initialization items (fields and static blocks) in declaration order
+            List<StaticInitItem> staticInitItems = new ArrayList<>();
 
             // Generate field declarations
             for (ISwc4jAstClassMember member : clazz.getBody()) {
@@ -127,7 +139,7 @@ public final class ClassGenerator extends BaseAstProcessor {
                             accessFlags |= 0x0008; // ACC_STATIC
                             // Collect static fields for <clinit> initialization
                             if (fieldInfo.initializer().isPresent()) {
-                                staticFields.add(fieldInfo);
+                                staticInitItems.add(new StaticInitItem.FieldInit(fieldInfo));
                             }
                         }
                         classWriter.addField(accessFlags, fieldInfo.name(), fieldInfo.descriptor());
@@ -148,7 +160,7 @@ public final class ClassGenerator extends BaseAstProcessor {
                         if (fieldInfo.isStatic()) {
                             accessFlags |= 0x0008; // ACC_STATIC
                             if (fieldInfo.initializer().isPresent()) {
-                                staticFields.add(fieldInfo);
+                                staticInitItems.add(new StaticInitItem.FieldInit(fieldInfo));
                             }
                         }
                         classWriter.addField(accessFlags, fieldInfo.name(), fieldInfo.descriptor());
@@ -158,12 +170,15 @@ public final class ClassGenerator extends BaseAstProcessor {
                             instanceFields.add(fieldInfo);
                         }
                     }
+                } else if (member instanceof Swc4jAstStaticBlock staticBlock) {
+                    // ES2022 static block - add to static initialization sequence
+                    staticInitItems.add(new StaticInitItem.BlockInit(staticBlock));
                 }
             }
 
-            // Generate <clinit> for static field initialization if needed
-            if (!staticFields.isEmpty()) {
-                generateClinitMethod(classWriter, cp, internalClassName, staticFields);
+            // Generate <clinit> for static field initialization and static blocks if needed
+            if (!staticInitItems.isEmpty()) {
+                generateClinitMethod(classWriter, cp, internalClassName, staticInitItems);
             }
 
             // Collect all explicit constructors
@@ -189,6 +204,9 @@ public final class ClassGenerator extends BaseAstProcessor {
             for (ISwc4jAstClassMember member : clazz.getBody()) {
                 if (member instanceof Swc4jAstClassMethod method) {
                     compiler.getMethodGenerator().generate(classWriter, cp, method);
+                } else if (member instanceof Swc4jAstPrivateMethod privateMethod) {
+                    // ES2022 private methods (#method)
+                    compiler.getMethodGenerator().generate(classWriter, cp, privateMethod);
                 }
             }
 
@@ -204,30 +222,58 @@ public final class ClassGenerator extends BaseAstProcessor {
     }
 
     /**
-     * Generates the &lt;clinit&gt; method for static field initialization.
+     * Generates the &lt;clinit&gt; method for static field initialization and static blocks.
+     * Items are processed in declaration order to ensure correct initialization sequence.
      */
     private void generateClinitMethod(
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
             String internalClassName,
-            List<FieldInfo> staticFields) throws Swc4jByteCodeCompilerException {
+            List<StaticInitItem> staticInitItems) throws Swc4jByteCodeCompilerException {
         // Reset compilation context for static initialization
         compiler.getMemory().resetCompilationContext(true); // is static
 
         CodeBuilder code = new CodeBuilder();
 
-        // Initialize static fields with their initializers
-        for (FieldInfo field : staticFields) {
-            if (field.initializer().isPresent()) {
-                // Generate code for the initializer expression
-                compiler.getExpressionGenerator().generate(code, cp, field.initializer().get(), null);
-                // Store to static field
-                int fieldRef = cp.addFieldRef(internalClassName, field.name(), field.descriptor());
-                code.putstatic(fieldRef);
+        // Process static initialization items in declaration order
+        for (StaticInitItem item : staticInitItems) {
+            if (item instanceof StaticInitItem.FieldInit fieldInit) {
+                FieldInfo field = fieldInit.fieldInfo();
+                if (field.initializer().isPresent()) {
+                    // Generate code for the initializer expression
+                    compiler.getExpressionGenerator().generate(code, cp, field.initializer().get(), null);
+                    // Store to static field
+                    int fieldRef = cp.addFieldRef(internalClassName, field.name(), field.descriptor());
+                    code.putstatic(fieldRef);
+                }
+            } else if (item instanceof StaticInitItem.BlockInit blockInit) {
+                // ES2022 static block - generate code for each statement in the block
+                Swc4jAstStaticBlock staticBlock = blockInit.staticBlock();
+                Swc4jAstBlockStmt body = staticBlock.getBody();
+
+                // Analyze variable declarations in the static block
+                compiler.getVariableAnalyzer().analyzeVariableDeclarations(body);
+
+                // Generate code for each statement in the static block
+                for (ISwc4jAstStmt stmt : body.getStmts()) {
+                    compiler.getStatementGenerator().generate(code, cp, stmt, null);
+                }
             }
         }
 
         code.returnVoid(); // return
+
+        int maxLocals = compiler.getMemory().getCompilationContext().getLocalVariableTable().getMaxLocals();
+
+        // Generate stack map table for branches (loops, conditionals) in static blocks
+        var stackMapTable = code.generateStackMapTable(
+                Math.max(maxLocals, 1),
+                true, // isStatic
+                internalClassName,
+                "()V",
+                cp
+        );
+        var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
 
         classWriter.addMethod(
                 0x0008, // ACC_STATIC
@@ -235,7 +281,11 @@ public final class ClassGenerator extends BaseAstProcessor {
                 "()V",
                 code.toByteArray(),
                 10, // max stack
-                0   // max locals
+                Math.max(maxLocals, 1), // max locals (at least 1 for static blocks with local vars)
+                null, // line numbers
+                null, // local variable table
+                stackMapTable,
+                exceptionTable
         );
     }
 

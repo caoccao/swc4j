@@ -89,8 +89,8 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                         "string", "Hello"
                 ),
                 Map.of(
-                        "int", (int) instanceRunner.invoke("getInt"),
-                        "double", (double) instanceRunner.invoke("getDouble"),
+                        "int", instanceRunner.invoke("getInt"),
+                        "double", instanceRunner.invoke("getDouble"),
                         "bool", (boolean) instanceRunner.invoke("getBool"),
                         "string", (String) instanceRunner.invoke("getString")
                 )

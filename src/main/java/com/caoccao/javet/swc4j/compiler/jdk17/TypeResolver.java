@@ -1239,8 +1239,17 @@ public final class TypeResolver {
                 // Check if it's an object method call (Java or TypeScript class)
                 if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
                     String qualifiedClassName = objType.substring(1, objType.length() - 1).replace('/', '.');
+                    String methodName = null;
+
+                    // Handle public methods (IdentName) and private methods (PrivateName)
                     if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-                        String methodName = propIdent.getSym();
+                        methodName = propIdent.getSym();
+                    } else if (memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
+                        // ES2022 private method (#method) - name without # prefix
+                        methodName = privateName.getName();
+                    }
+
+                    if (methodName != null) {
                         // Build parameter descriptor from call arguments
                         StringBuilder paramDescriptors = new StringBuilder();
                         for (var arg : callExpr.getArgs()) {

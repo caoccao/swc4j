@@ -59,7 +59,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
         assertEquals(
                 Map.of("count", 1, "id", 1),
                 Map.of(
-                        "count", (int) staticRunner.invoke("getInstanceCount"),
+                        "count", staticRunner.invoke("getInstanceCount"),
                         "id", (int) instanceRunner1.invoke("getId")
                 )
         );
@@ -68,7 +68,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
         assertEquals(
                 Map.of("count", 2, "id", 2),
                 Map.of(
-                        "count", (int) staticRunner.invoke("getInstanceCount"),
+                        "count", staticRunner.invoke("getInstanceCount"),
                         "id", (int) instanceRunner2.invoke("getId")
                 )
         );

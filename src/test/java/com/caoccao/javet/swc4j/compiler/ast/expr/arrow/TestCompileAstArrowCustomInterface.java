@@ -153,7 +153,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
 
         var squarerRunner = runner.createInstanceRunner("com.DoubleSquarer");
         Method transformMethod = interfaceClass.getMethod("transform", double.class);
-        assertEquals(25.0, (double) squarerRunner.invoke("transform", 5.0), 0.0001);
+        assertEquals(25.0, squarerRunner.invoke("transform", 5.0), 0.0001);
     }
 
     @ParameterizedTest

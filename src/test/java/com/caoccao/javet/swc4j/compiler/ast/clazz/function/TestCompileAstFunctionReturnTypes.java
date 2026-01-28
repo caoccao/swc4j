@@ -77,8 +77,8 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(true, (boolean) instanceRunner.invoke("isTrue"));
-        assertEquals(false, (boolean) instanceRunner.invoke("isFalse"));
+        assertEquals(true, instanceRunner.invoke("isTrue"));
+        assertEquals(false, instanceRunner.invoke("isFalse"));
     }
 
     @ParameterizedTest
@@ -92,7 +92,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3.14159, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
+        assertEquals(3.14159, runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
     }
 
     @ParameterizedTest

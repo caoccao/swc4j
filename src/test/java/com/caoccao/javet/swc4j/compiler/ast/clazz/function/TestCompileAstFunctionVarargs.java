@@ -37,7 +37,7 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new int[]{2, 3, 4}, (int[]) runner.createInstanceRunner("com.A").invoke("test", 1, new int[]{2, 3, 4}));
+        assertArrayEquals(new int[]{2, 3, 4}, runner.createInstanceRunner("com.A").invoke("test", 1, new int[]{2, 3, 4}));
     }
 
     @ParameterizedTest
@@ -51,7 +51,7 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new int[]{1, 2, 3}, (int[]) runner.createInstanceRunner("com.A").invoke("test", new int[]{1, 2, 3}));
+        assertArrayEquals(new int[]{1, 2, 3}, runner.createInstanceRunner("com.A").invoke("test", new int[]{1, 2, 3}));
     }
 
     @ParameterizedTest
@@ -65,7 +65,7 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1.5, (double) runner.createInstanceRunner("com.A").invoke("test", new double[]{1.5, 2.5}), 0.001);
+        assertEquals(1.5, runner.createInstanceRunner("com.A").invoke("test", new double[]{1.5, 2.5}), 0.001);
     }
 
     @ParameterizedTest
@@ -172,6 +172,6 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello", (String) runner.createInstanceRunner("com.A").invoke("test", "test", new String[]{"hello", "world"}));
+        assertEquals("hello", runner.createInstanceRunner("com.A").invoke("test", "test", new String[]{"hello", "world"}));
     }
 }
