@@ -42,10 +42,10 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.Math");
-        assertEquals(15, classA.getMethod("add", int.class, int.class).invoke(null, 10, 5));
-        assertEquals(5, classA.getMethod("subtract", int.class, int.class).invoke(null, 10, 5));
-        assertEquals(50, classA.getMethod("multiply", int.class, int.class).invoke(null, 10, 5));
+        var staticRunner = runner.createStaticRunner("com.Math");
+        assertEquals(15, (int) staticRunner.invoke("add", 10, 5));
+        assertEquals(5, (int) staticRunner.invoke("subtract", 10, 5));
+        assertEquals(50, (int) staticRunner.invoke("multiply", 10, 5));
     }
 
     @ParameterizedTest
@@ -62,10 +62,8 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        assertEquals(100, classA.getMethod("staticMethod").invoke(null));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(200, classA.getMethod("instanceMethod").invoke(instance));
+        assertEquals(100, (int) runner.createStaticRunner("com.A").invoke("staticMethod"));
+        assertEquals(200, (int) runner.createInstanceRunner("com.A").invoke("instanceMethod"));
     }
 
     @ParameterizedTest
@@ -79,8 +77,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        assertEquals(42, classA.getMethod("getValue").invoke(null));
+        assertEquals(42, (int) runner.createStaticRunner("com.A").invoke("getValue"));
     }
 
     @ParameterizedTest
@@ -94,9 +91,9 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        assertEquals(true, classA.getMethod("isPositive", int.class).invoke(null, 5));
-        assertEquals(false, classA.getMethod("isPositive", int.class).invoke(null, -5));
+        var staticRunner = runner.createStaticRunner("com.A");
+        assertEquals(true, (boolean) staticRunner.invoke("isPositive", 5));
+        assertEquals(false, (boolean) staticRunner.invoke("isPositive", -5));
     }
 
     @ParameterizedTest
@@ -110,8 +107,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        assertEquals(6.28, (double) classA.getMethod("multiply", double.class, double.class).invoke(null, 2.0, 3.14), 0.001);
+        assertEquals(6.28, (double) runner.createStaticRunner("com.A").invoke("multiply", 2.0, 3.14), 0.001);
     }
 
     @ParameterizedTest
@@ -125,8 +121,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        assertEquals("Hello, World", classA.getMethod("greet", String.class).invoke(null, "World"));
+        assertEquals("Hello, World", (String) runner.createStaticRunner("com.A").invoke("greet", "World"));
     }
 
     @ParameterizedTest
@@ -141,9 +136,9 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        assertEquals(20, classA.getMethod("max", int.class, int.class).invoke(null, 10, 20));
-        assertEquals(30, classA.getMethod("max", int.class, int.class).invoke(null, 30, 20));
+        var staticRunner = runner.createStaticRunner("com.A");
+        assertEquals(20, (int) staticRunner.invoke("max", 10, 20));
+        assertEquals(30, (int) staticRunner.invoke("max", 30, 20));
     }
 
     // TODO: This test requires static method call resolution (A.helper())
@@ -176,8 +171,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        assertEquals(30, classA.getMethod("add", int.class, int.class).invoke(null, 10, 20));
+        assertEquals(30, (int) runner.createStaticRunner("com.A").invoke("add", 10, 20));
     }
 
     // TODO: This test requires static method call resolution from different class (Helper.compute())

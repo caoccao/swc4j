@@ -62,15 +62,15 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
         assertNotNull(setValue);
 
         // Test instance with String
-        var instance = classBox.getConstructor(Object.class).newInstance("Hello");
-        assertEquals("Hello", getValue.invoke(instance));
+        var instanceRunner1 = runner.createInstanceRunner("com.Box", "Hello");
+        assertEquals("Hello", instanceRunner1.invoke("getValue"));
 
-        setValue.invoke(instance, "World");
-        assertEquals("World", getValue.invoke(instance));
+        instanceRunner1.invoke("setValue", "World");
+        assertEquals("World", instanceRunner1.invoke("getValue"));
 
         // Test instance with Integer
-        var instance2 = classBox.getConstructor(Object.class).newInstance(42);
-        assertEquals(42, getValue.invoke(instance2));
+        var instanceRunner2 = runner.createInstanceRunner("com.Box", 42);
+        assertEquals(42, (int) instanceRunner2.invoke("getValue"));
     }
 
     @ParameterizedTest
@@ -96,12 +96,12 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
         assertEquals(List.of(Object.class, Object.class), List.of(keyField.getType(), valField.getType()));
 
         // Test instance
-        var instance = classPair.getConstructor(Object.class, Object.class).newInstance("name", 42);
+        var instanceRunner = runner.createInstanceRunner("com.Pair", "name", 42);
         assertEquals(
                 List.of("name", 42),
                 List.of(
-                        classPair.getMethod("getKey").invoke(instance),
-                        classPair.getMethod("getVal").invoke(instance)
+                        instanceRunner.invoke("getKey"),
+                        instanceRunner.invoke("getVal")
                 )
         );
     }
@@ -129,12 +129,12 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
         assertEquals(List.of(String.class, Object.class), List.of(keyField.getType(), valField.getType()));
 
         // Test instance
-        var instance = classKV.getConstructor(String.class, Object.class).newInstance("name", 42);
+        var instanceRunner = runner.createInstanceRunner("com.KeyValue", "name", 42);
         assertEquals(
                 List.of("name", 42),
                 List.of(
-                        classKV.getMethod("getKey").invoke(instance),
-                        classKV.getMethod("getVal").invoke(instance)
+                        instanceRunner.invoke("getKey"),
+                        instanceRunner.invoke("getVal")
                 )
         );
     }
@@ -163,8 +163,8 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
         assertEquals(String.class, getValue.getReturnType());
 
         // Test instance
-        var instance = classStrBox.getConstructor(String.class).newInstance("Hello");
-        assertEquals("Hello", getValue.invoke(instance));
+        var instanceRunner = runner.createInstanceRunner("com.StrBox", "Hello");
+        assertEquals("Hello", instanceRunner.invoke("getValue"));
     }
 
     @ParameterizedTest
@@ -200,11 +200,11 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
         assertEquals(Object.class, transform.getReturnType());
 
         // Test instance
-        var instance = classHolder.getConstructor(Object.class).newInstance("Hello");
-        assertEquals("Hello", get.invoke(instance));
-        set.invoke(instance, "World");
-        assertEquals("World", get.invoke(instance));
-        assertEquals("New", transform.invoke(instance, "New"));
+        var instanceRunner = runner.createInstanceRunner("com.Holder", "Hello");
+        assertEquals("Hello", instanceRunner.invoke("get"));
+        instanceRunner.invoke("set", "World");
+        assertEquals("World", instanceRunner.invoke("get"));
+        assertEquals("New", instanceRunner.invoke("transform", "New"));
     }
 
     @ParameterizedTest
@@ -225,12 +225,12 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
         assertEquals(Object.class, wrap.getReturnType());
 
         // Test method
-        var instance = classContainer.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.Container");
         assertEquals(
                 List.of("Hello", 42),
                 List.of(
-                        wrap.invoke(instance, "Hello"),
-                        wrap.invoke(instance, 42)
+                        instanceRunner.invoke("wrap", "Hello"),
+                        instanceRunner.invoke("wrap", 42)
                 )
         );
     }
@@ -257,12 +257,13 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
         assertEquals(Object.class, first.getReturnType());
 
         // Test methods
+        var staticRunner = runner.createStaticRunner("com.Utils");
         assertEquals(
                 List.of("Hello", 42, "A"),
                 List.of(
-                        identity.invoke(null, "Hello"),
-                        identity.invoke(null, 42),
-                        first.invoke(null, "A", "B")
+                        staticRunner.invoke("identity", "Hello"),
+                        staticRunner.invoke("identity", 42),
+                        staticRunner.invoke("first", "A", "B")
                 )
         );
     }
@@ -285,11 +286,12 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
         assertEquals(String.class, echo.getReturnType());
 
         // Test method
+        var staticRunner = runner.createStaticRunner("com.Utils");
         assertEquals(
                 List.of("Hello", "World"),
                 List.of(
-                        echo.invoke(null, "Hello"),
-                        echo.invoke(null, "World")
+                        staticRunner.invoke("echo", "Hello"),
+                        staticRunner.invoke("echo", "World")
                 )
         );
     }

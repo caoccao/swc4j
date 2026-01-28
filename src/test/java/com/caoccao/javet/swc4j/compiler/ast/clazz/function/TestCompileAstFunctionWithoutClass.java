@@ -39,10 +39,10 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                 export function mul(a: int, b: int): int {
                   return a * b
                 }""");
-        Class<?> dummyClass = runner.getDefaultClass();
-        assertEquals(15, dummyClass.getMethod("add", int.class, int.class).invoke(null, 10, 5));
-        assertEquals(5, dummyClass.getMethod("sub", int.class, int.class).invoke(null, 10, 5));
-        assertEquals(50, dummyClass.getMethod("mul", int.class, int.class).invoke(null, 10, 5));
+        var staticRunner = runner.createStaticRunner("$");
+        assertEquals(15, (int) staticRunner.invoke("add", 10, 5));
+        assertEquals(5, (int) staticRunner.invoke("sub", 10, 5));
+        assertEquals(50, (int) staticRunner.invoke("mul", 10, 5));
     }
 
     @ParameterizedTest
@@ -53,8 +53,8 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                 export function add(a: int, b: int): int {
                   return a + b
                 }""");
-        Class<?> dummyClass = runner.getDefaultClass();
-        assertEquals(30, dummyClass.getMethod("add", int.class, int.class).invoke(null, 10, 20));
+        var staticRunner = runner.createStaticRunner("$");
+        assertEquals(30, (int) staticRunner.invoke("add", 10, 20));
     }
 
     @ParameterizedTest
@@ -67,8 +67,8 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                     return a * b
                   }
                 }""");
-        Class<?> dummyClass = runner.getClass("com.$");
-        assertEquals(50, dummyClass.getMethod("multiply", int.class, int.class).invoke(null, 5, 10));
+        var staticRunner = runner.createStaticRunner("com.$");
+        assertEquals(50, (int) staticRunner.invoke("multiply", 5, 10));
     }
 
     @ParameterizedTest
@@ -83,12 +83,11 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                   return 42
                 }""");
         // Class $ should exist with its own method
-        Class<?> dollarClass = runner.getDefaultClass();
-        var instance = dollarClass.getConstructor().newInstance();
-        assertEquals(100, dollarClass.getMethod("getValue").invoke(instance));
+        var instanceRunner = runner.createInstanceRunner("$");
+        assertEquals(100, (int) instanceRunner.invoke("getValue"));
         // Function should be in $1
-        Class<?> dollar1Class = runner.getClass("$1");
-        assertEquals(42, dollar1Class.getMethod("helper").invoke(null));
+        var staticRunner = runner.createStaticRunner("$1");
+        assertEquals(42, (int) staticRunner.invoke("helper"));
     }
 
     @ParameterizedTest
@@ -105,12 +104,11 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                   }
                 }""");
         // Class com.$ should exist
-        Class<?> dollarClass = runner.getClass("com.$");
-        var instance = dollarClass.getConstructor().newInstance();
-        assertEquals(200, dollarClass.getMethod("getValue").invoke(instance));
+        var instanceRunner = runner.createInstanceRunner("com.$");
+        assertEquals(200, (int) instanceRunner.invoke("getValue"));
         // Function should be in com.$1
-        Class<?> dollar1Class = runner.getClass("com.$1");
-        assertEquals(84, dollar1Class.getMethod("helper").invoke(null));
+        var staticRunner = runner.createStaticRunner("com.$1");
+        assertEquals(84, (int) staticRunner.invoke("helper"));
     }
 
     @ParameterizedTest
@@ -127,9 +125,12 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                 export function helper(): int {
                   return 3
                 }""");
-        assertEquals(1, runner.getDefaultClass().getMethod("getValue").invoke(runner.getDefaultClass().getConstructor().newInstance()));
-        assertEquals(2, runner.getClass("$1").getMethod("getValue").invoke(runner.getClass("$1").getConstructor().newInstance()));
-        assertEquals(3, runner.getClass("$2").getMethod("helper").invoke(null));
+        var instanceRunner = runner.createInstanceRunner("$");
+        assertEquals(1, (int) instanceRunner.invoke("getValue"));
+        var instanceRunner1 = runner.createInstanceRunner("$1");
+        assertEquals(2, (int) instanceRunner1.invoke("getValue"));
+        var staticRunner = runner.createStaticRunner("$2");
+        assertEquals(3, (int) staticRunner.invoke("helper"));
     }
 
     @ParameterizedTest
@@ -146,11 +147,10 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                   return x * 2
                 }""");
         // Regular class
-        Class<?> calcClass = runner.getClass("Calculator");
-        var instance = calcClass.getConstructor().newInstance();
-        assertEquals(30, calcClass.getMethod("add", int.class, int.class).invoke(instance, 10, 20));
+        var instanceRunner = runner.createInstanceRunner("Calculator");
+        assertEquals(30, (int) instanceRunner.invoke("add", 10, 20));
         // Standalone function in $
-        Class<?> dummyClass = runner.getDefaultClass();
-        assertEquals(20, dummyClass.getMethod("helper", int.class).invoke(null, 10));
+        var staticRunner = runner.createStaticRunner("$");
+        assertEquals(20, (int) staticRunner.invoke("helper", 10));
     }
 }

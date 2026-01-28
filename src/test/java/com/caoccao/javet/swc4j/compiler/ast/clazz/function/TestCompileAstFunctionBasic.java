@@ -40,9 +40,7 @@ public class TestCompileAstFunctionBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(15, classA.getMethod("test").invoke(instance));
+        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -56,9 +54,7 @@ public class TestCompileAstFunctionBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -72,9 +68,7 @@ public class TestCompileAstFunctionBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(42, classA.getMethod("test").invoke(instance));
+        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -88,9 +82,7 @@ public class TestCompileAstFunctionBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(100, classA.getMethod("getValue").invoke(instance));
+        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("getValue"));
     }
 
     @ParameterizedTest
@@ -109,12 +101,11 @@ public class TestCompileAstFunctionBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("isEven", int.class).invoke(instance, 4));
-        assertEquals(false, classA.getMethod("isEven", int.class).invoke(instance, 3));
-        assertEquals(true, classA.getMethod("isOdd", int.class).invoke(instance, 5));
-        assertEquals(false, classA.getMethod("isOdd", int.class).invoke(instance, 6));
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(true, (boolean) instanceRunner.invoke("isEven", 4));
+        assertEquals(false, (boolean) instanceRunner.invoke("isEven", 3));
+        assertEquals(true, (boolean) instanceRunner.invoke("isOdd", 5));
+        assertEquals(false, (boolean) instanceRunner.invoke("isOdd", 6));
     }
 
     @ParameterizedTest
@@ -129,10 +120,9 @@ public class TestCompileAstFunctionBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(120, classA.getMethod("factorial", int.class).invoke(instance, 5));
-        assertEquals(1, classA.getMethod("factorial", int.class).invoke(instance, 0));
-        assertEquals(1, classA.getMethod("factorial", int.class).invoke(instance, 1));
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(120, (int) instanceRunner.invoke("factorial", 5));
+        assertEquals(1, (int) instanceRunner.invoke("factorial", 0));
+        assertEquals(1, (int) instanceRunner.invoke("factorial", 1));
     }
 }

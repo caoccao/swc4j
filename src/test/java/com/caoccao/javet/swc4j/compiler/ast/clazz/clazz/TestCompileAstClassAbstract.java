@@ -54,12 +54,12 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         assertFalse(Modifier.isAbstract(classC.getModifiers()), "C should not be abstract");
 
         // Create a C instance and test
-        var c = classC.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.C");
         assertEquals(
                 List.of(1, 2),
                 List.of(
-                        classC.getMethod("f").invoke(c),
-                        classC.getMethod("g").invoke(c)
+                        (int) instanceRunner.invoke("f"),
+                        (int) instanceRunner.invoke("g")
                 )
         );
     }
@@ -94,8 +94,7 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         assertTrue(Modifier.isAbstract(areaMethod.getModifiers()), "area() should be abstract in Shape");
 
         // Create a Circle instance and test
-        var circle = classCircle.getConstructor(double.class).newInstance(5.0);
-        double area = (double) classCircle.getMethod("area").invoke(circle);
+        double area = (double) runner.createInstanceRunner("com.Circle", 5.0).invoke("area");
         assertEquals(78.53975, area, 0.00001);
     }
 
@@ -119,12 +118,12 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         assertTrue(Modifier.isAbstract(classBase.getModifiers()), "Base should be abstract");
 
         // Create a Derived instance and test
-        var derived = classDerived.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.Derived");
         assertEquals(
                 List.of(101, 100),
                 List.of(
-                        classDerived.getMethod("compute").invoke(derived),
-                        classDerived.getMethod("helper").invoke(derived)
+                        (int) instanceRunner.invoke("compute"),
+                        (int) instanceRunner.invoke("helper")
                 )
         );
     }
@@ -156,12 +155,12 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         assertTrue(Modifier.isAbstract(classAnimal.getModifiers()), "Animal should be abstract");
 
         // Create a Dog instance and test
-        var dog = classDog.getConstructor(String.class).newInstance("Buddy");
+        var instanceRunner = runner.createInstanceRunner("com.Dog", "Buddy");
         assertEquals(
                 List.of("Buddy", "Woof!"),
                 List.of(
-                        classDog.getMethod("getName").invoke(dog),
-                        classDog.getMethod("speak").invoke(dog)
+                        (String) instanceRunner.invoke("getName"),
+                        (String) instanceRunner.invoke("speak")
                 )
         );
     }
@@ -193,12 +192,12 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         assertTrue(Modifier.isAbstract(multiplyMethod.getModifiers()), "multiply() should be abstract");
 
         // Create a SimpleCalculator instance and test
-        var calc = classSimple.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.SimpleCalculator");
         assertEquals(
                 List.of(8, 15),
                 List.of(
-                        classSimple.getMethod("add", int.class, int.class).invoke(calc, 3, 5),
-                        classSimple.getMethod("multiply", int.class, int.class).invoke(calc, 3, 5)
+                        (int) instanceRunner.invoke("add", 3, 5),
+                        (int) instanceRunner.invoke("multiply", 3, 5)
                 )
         );
     }

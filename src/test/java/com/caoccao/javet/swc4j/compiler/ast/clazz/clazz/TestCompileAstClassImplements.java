@@ -74,11 +74,10 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
         assertTrue(classBase.isAssignableFrom(classDerived), "Derived should extend Base");
 
         // Test methods
-        var instance = classDerived.getConstructor().newInstance();
         assertEquals(
                 List.of(42),
                 List.of(
-                        classDerived.getMethod("getValue").invoke(instance)
+                        (int) runner.createInstanceRunner("com.Derived").invoke("getValue")
                 )
         );
     }
@@ -99,9 +98,8 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
         assertTrue(Runnable.class.isAssignableFrom(classMulti), "Multi should implement Runnable");
         assertTrue(Serializable.class.isAssignableFrom(classMulti), "Multi should implement Serializable");
 
-        // Create instance
-        var instance = classMulti.getConstructor().newInstance();
-        classMulti.getMethod("run").invoke(instance);
+        // Create instance and call run
+        runner.createInstanceRunner("com.Multi").invoke("run");
     }
 
     @ParameterizedTest
@@ -120,8 +118,7 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
         assertTrue(Runnable.class.isAssignableFrom(classA), "A should implement Runnable");
 
         // Create instance and call run()
-        var instance = classA.getConstructor().newInstance();
-        classA.getMethod("run").invoke(instance);
+        runner.createInstanceRunner("com.A").invoke("run");
     }
 
     @ParameterizedTest
@@ -144,15 +141,15 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
         assertTrue(Runnable.class.isAssignableFrom(classCounter), "Counter should implement Runnable");
 
         // Test run() increments count
-        var instance = classCounter.getConstructor().newInstance();
-        assertEquals(0, classCounter.getMethod("getCount").invoke(instance));
+        var instanceRunner = runner.createInstanceRunner("com.Counter");
+        assertEquals(0, (int) instanceRunner.invoke("getCount"));
 
         // Call run() multiple times
-        classCounter.getMethod("run").invoke(instance);
-        assertEquals(1, classCounter.getMethod("getCount").invoke(instance));
+        instanceRunner.invoke("run");
+        assertEquals(1, (int) instanceRunner.invoke("getCount"));
 
-        classCounter.getMethod("run").invoke(instance);
-        classCounter.getMethod("run").invoke(instance);
-        assertEquals(3, classCounter.getMethod("getCount").invoke(instance));
+        instanceRunner.invoke("run");
+        instanceRunner.invoke("run");
+        assertEquals(3, (int) instanceRunner.invoke("getCount"));
     }
 }

@@ -52,25 +52,24 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                     getId(): int { return this.id }
                   }
                 }""");
-        Class<?> classMixed = runner.getClass("com.MixedClass");
+        var staticRunner = runner.createStaticRunner("com.MixedClass");
+        assertEquals(0, (int) staticRunner.invoke("getInstanceCount"));
 
-        assertEquals(0, classMixed.getMethod("getInstanceCount").invoke(null));
-
-        var obj1 = classMixed.getConstructor().newInstance();
+        var instanceRunner1 = runner.createInstanceRunner("com.MixedClass");
         assertEquals(
                 Map.of("count", 1, "id", 1),
                 Map.of(
-                        "count", classMixed.getMethod("getInstanceCount").invoke(null),
-                        "id", classMixed.getMethod("getId").invoke(obj1)
+                        "count", (int) staticRunner.invoke("getInstanceCount"),
+                        "id", (int) instanceRunner1.invoke("getId")
                 )
         );
 
-        var obj2 = classMixed.getConstructor().newInstance();
+        var instanceRunner2 = runner.createInstanceRunner("com.MixedClass");
         assertEquals(
                 Map.of("count", 2, "id", 2),
                 Map.of(
-                        "count", classMixed.getMethod("getInstanceCount").invoke(null),
-                        "id", classMixed.getMethod("getId").invoke(obj2)
+                        "count", (int) staticRunner.invoke("getInstanceCount"),
+                        "id", (int) instanceRunner2.invoke("getId")
                 )
         );
     }

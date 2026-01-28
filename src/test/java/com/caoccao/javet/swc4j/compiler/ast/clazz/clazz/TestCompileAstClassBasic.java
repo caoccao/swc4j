@@ -37,9 +37,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(42, classA.getMethod("test").invoke(instance));
+        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -59,9 +57,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> userClass = runner.getClass("com.User");
-        var instance = userClass.getConstructor().newInstance();
-        assertEquals(30, userClass.getMethod("compute").invoke(instance));
+        assertEquals(30, (int) runner.createInstanceRunner("com.User").invoke("compute"));
     }
 
     @ParameterizedTest
@@ -78,9 +74,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(15, classA.getMethod("test").invoke(instance));
+        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -100,11 +94,9 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("first").invoke(instance));
-        assertEquals(2, classA.getMethod("second").invoke(instance));
-        assertEquals(3, classA.getMethod("third").invoke(instance));
+        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("first"));
+        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("second"));
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("third"));
     }
 
     @ParameterizedTest
@@ -115,9 +107,8 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                   export class Empty {
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.Empty");
-        var instance = classA.getConstructor().newInstance();
-        assertNotNull(instance);
+        var instanceRunner = runner.createInstanceRunner("com.Empty");
+        assertNotNull(instanceRunner.getInstance());
     }
 
     @ParameterizedTest
@@ -135,12 +126,9 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     value(): int { return 3 }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        Class<?> classB = runner.getClass("com.B");
-        Class<?> classC = runner.getClass("com.C");
-        assertEquals(1, classA.getMethod("value").invoke(classA.getConstructor().newInstance()));
-        assertEquals(2, classB.getMethod("value").invoke(classB.getConstructor().newInstance()));
-        assertEquals(3, classC.getMethod("value").invoke(classC.getConstructor().newInstance()));
+        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("value"));
+        assertEquals(2, (int) runner.createInstanceRunner("com.B").invoke("value"));
+        assertEquals(3, (int) runner.createInstanceRunner("com.C").invoke("value"));
     }
 
     @ParameterizedTest
@@ -159,9 +147,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123, classA.getMethod("test").invoke(instance));
+        assertEquals(123, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -180,8 +166,6 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123, classA.getMethod("test").invoke(instance));
+        assertEquals(123, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

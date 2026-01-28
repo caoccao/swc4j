@@ -46,11 +46,11 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
         assertTrue(Modifier.isPrivate(valueField.getModifiers()), "value field should be private");
 
         // Test functionality through accessors
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(42, classA.getMethod("getValue").invoke(instance));
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(42, (int) instanceRunner.invoke("getValue"));
 
-        classA.getMethod("setValue", int.class).invoke(instance, 100);
-        assertEquals(100, classA.getMethod("getValue").invoke(instance));
+        instanceRunner.invoke("setValue", 100);
+        assertEquals(100, (int) instanceRunner.invoke("getValue"));
     }
 
     @ParameterizedTest
@@ -74,8 +74,7 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
         assertTrue(Modifier.isPublic(testMethod.getModifiers()), "test() should be public");
 
         // Test functionality
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(1, testMethod.invoke(instance));
+        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -96,11 +95,11 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
         assertTrue(Modifier.isProtected(valueField.getModifiers()), "value field should be protected");
 
         // Test functionality through same class methods
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(10, classA.getMethod("getValue").invoke(instance));
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(10, (int) instanceRunner.invoke("getValue"));
 
-        classA.getMethod("setValue", int.class).invoke(instance, 20);
-        assertEquals(20, classA.getMethod("getValue").invoke(instance));
+        instanceRunner.invoke("setValue", 20);
+        assertEquals(20, (int) instanceRunner.invoke("getValue"));
     }
 
     @ParameterizedTest
@@ -123,8 +122,7 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
         assertTrue(Modifier.isProtected(helperMethod.getModifiers()), "helper() should be protected");
 
         // Test functionality
-        var instance = classB.getConstructor().newInstance();
-        assertEquals(1, classB.getMethod("test").invoke(instance));
+        assertEquals(1, (int) runner.createInstanceRunner("com.B").invoke("test"));
     }
 
     @ParameterizedTest
@@ -148,8 +146,7 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
         assertTrue(Modifier.isPublic(testMethod.getModifiers()), "test() should be public by default");
 
         // Test functionality
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(10, testMethod.invoke(instance));
+        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -170,6 +167,6 @@ public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
         assertTrue(Modifier.isStatic(secretField.getModifiers()), "secret should be static");
 
         // Test functionality
-        assertEquals(42, classA.getMethod("getSecret").invoke(null));
+        assertEquals(42, (int) runner.createStaticRunner("com.A").invoke("getSecret"));
     }
 }

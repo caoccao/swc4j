@@ -56,14 +56,13 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classB = runner.getClass("com.B");
-        var instance = classB.getConstructor(int.class, int.class).newInstance(10, 5);
+        var instanceRunner = runner.createInstanceRunner("com.B", 10, 5);
         assertEquals(
                 List.of(10, 5, 15),
                 List.of(
-                        classB.getMethod("getValue").invoke(instance),
-                        classB.getMethod("getExtra").invoke(instance),
-                        classB.getMethod("getTotal").invoke(instance)
+                        (int) instanceRunner.invoke("getValue"),
+                        (int) instanceRunner.invoke("getExtra"),
+                        (int) instanceRunner.invoke("getTotal")
                 )
         );
     }
@@ -93,32 +92,29 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         Class<?> classPoint = runner.getClass("com.Point");
 
         // Test two-parameter constructor
-        var point1 = classPoint.getConstructor(int.class, int.class).newInstance(10, 20);
         assertEquals(
                 List.of(10, 20),
                 List.of(
-                        classPoint.getMethod("getX").invoke(point1),
-                        classPoint.getMethod("getY").invoke(point1)
+                        (int) runner.createInstanceRunner("com.Point", 10, 20).invoke("getX"),
+                        (int) runner.createInstanceRunner("com.Point", 10, 20).invoke("getY")
                 )
         );
 
         // Test single-parameter constructor which calls this(v, v)
-        var point2 = classPoint.getConstructor(int.class).newInstance(5);
         assertEquals(
                 List.of(5, 5),
                 List.of(
-                        classPoint.getMethod("getX").invoke(point2),
-                        classPoint.getMethod("getY").invoke(point2)
+                        (int) runner.createInstanceRunner("com.Point", 5).invoke("getX"),
+                        (int) runner.createInstanceRunner("com.Point", 5).invoke("getY")
                 )
         );
 
         // Test no-parameter constructor which calls this(0, 0)
-        var point3 = classPoint.getConstructor().newInstance();
         assertEquals(
                 List.of(0, 0),
                 List.of(
-                        classPoint.getMethod("getX").invoke(point3),
-                        classPoint.getMethod("getY").invoke(point3)
+                        (int) runner.createInstanceRunner("com.Point").invoke("getX"),
+                        (int) runner.createInstanceRunner("com.Point").invoke("getY")
                 )
         );
     }
@@ -153,24 +149,22 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         Class<?> classPoint3D = runner.getClass("com.Point3D");
 
         // Test three-parameter constructor
-        var p1 = classPoint3D.getConstructor(int.class, int.class, int.class).newInstance(1, 2, 3);
         assertEquals(
                 List.of(1, 2, 3),
                 List.of(
-                        classPoint3D.getMethod("getX").invoke(p1),
-                        classPoint3D.getMethod("getY").invoke(p1),
-                        classPoint3D.getMethod("getZ").invoke(p1)
+                        (int) runner.createInstanceRunner("com.Point3D", 1, 2, 3).invoke("getX"),
+                        (int) runner.createInstanceRunner("com.Point3D", 1, 2, 3).invoke("getY"),
+                        (int) runner.createInstanceRunner("com.Point3D", 1, 2, 3).invoke("getZ")
                 )
         );
 
         // Test single-parameter constructor which calls this(v, v, v)
-        var p2 = classPoint3D.getConstructor(int.class).newInstance(5);
         assertEquals(
                 List.of(5, 5, 5),
                 List.of(
-                        classPoint3D.getMethod("getX").invoke(p2),
-                        classPoint3D.getMethod("getY").invoke(p2),
-                        classPoint3D.getMethod("getZ").invoke(p2)
+                        (int) runner.createInstanceRunner("com.Point3D", 5).invoke("getX"),
+                        (int) runner.createInstanceRunner("com.Point3D", 5).invoke("getY"),
+                        (int) runner.createInstanceRunner("com.Point3D", 5).invoke("getZ")
                 )
         );
     }
@@ -190,9 +184,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor(int.class).newInstance(42);
-        assertEquals(42, classA.getMethod("getValue").invoke(instance));
+        assertEquals(42, (int) runner.createInstanceRunner("com.A", 42).invoke("getValue"));
     }
 
     @ParameterizedTest
@@ -225,15 +217,14 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     getSum(): int { return this.a + this.b + this.c }
                   }
                 }""");
-        Class<?> classC = runner.getClass("com.C");
-        var instance = classC.getConstructor(int.class, int.class, int.class).newInstance(1, 2, 3);
+        var instanceRunner = runner.createInstanceRunner("com.C", 1, 2, 3);
         assertEquals(
                 List.of(1, 2, 3, 6),
                 List.of(
-                        classC.getMethod("getA").invoke(instance),
-                        classC.getMethod("getB").invoke(instance),
-                        classC.getMethod("getC").invoke(instance),
-                        classC.getMethod("getSum").invoke(instance)
+                        (int) instanceRunner.invoke("getA"),
+                        (int) instanceRunner.invoke("getB"),
+                        (int) instanceRunner.invoke("getC"),
+                        (int) instanceRunner.invoke("getSum")
                 )
         );
     }
@@ -262,24 +253,22 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         Class<?> classRectangle = runner.getClass("com.Rectangle");
 
         // Test two-parameter constructor
-        var rect1 = classRectangle.getConstructor(int.class, int.class).newInstance(10, 5);
         assertEquals(
                 List.of(10, 5, 50),
                 List.of(
-                        classRectangle.getMethod("getWidth").invoke(rect1),
-                        classRectangle.getMethod("getHeight").invoke(rect1),
-                        classRectangle.getMethod("getArea").invoke(rect1)
+                        (int) runner.createInstanceRunner("com.Rectangle", 10, 5).invoke("getWidth"),
+                        (int) runner.createInstanceRunner("com.Rectangle", 10, 5).invoke("getHeight"),
+                        (int) runner.createInstanceRunner("com.Rectangle", 10, 5).invoke("getArea")
                 )
         );
 
         // Test single-parameter constructor (square)
-        var rect2 = classRectangle.getConstructor(int.class).newInstance(7);
         assertEquals(
                 List.of(7, 7, 49),
                 List.of(
-                        classRectangle.getMethod("getWidth").invoke(rect2),
-                        classRectangle.getMethod("getHeight").invoke(rect2),
-                        classRectangle.getMethod("getArea").invoke(rect2)
+                        (int) runner.createInstanceRunner("com.Rectangle", 7).invoke("getWidth"),
+                        (int) runner.createInstanceRunner("com.Rectangle", 7).invoke("getHeight"),
+                        (int) runner.createInstanceRunner("com.Rectangle", 7).invoke("getArea")
                 )
         );
     }
@@ -303,14 +292,13 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     isActive(): boolean { return this.active }
                   }
                 }""");
-        Class<?> classPerson = runner.getClass("com.Person");
-        var instance = classPerson.getConstructor(String.class, int.class, boolean.class).newInstance("John", 25, true);
+        var instanceRunner = runner.createInstanceRunner("com.Person", "John", 25, true);
         assertEquals(
                 Map.of("name", "John", "age", 25, "active", true),
                 Map.of(
-                        "name", classPerson.getMethod("getName").invoke(instance),
-                        "age", classPerson.getMethod("getAge").invoke(instance),
-                        "active", classPerson.getMethod("isActive").invoke(instance)
+                        "name", (String) instanceRunner.invoke("getName"),
+                        "age", (int) instanceRunner.invoke("getAge"),
+                        "active", (boolean) instanceRunner.invoke("isActive")
                 )
         );
     }
@@ -329,10 +317,9 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     getArea(): double { return 3.14159 * this.radius * this.radius }
                   }
                 }""");
-        Class<?> classCircle = runner.getClass("com.Circle");
-        var instance = classCircle.getConstructor(double.class).newInstance(5.0);
-        assertEquals(5.0, classCircle.getMethod("getRadius").invoke(instance));
-        assertEquals(78.53975, (double) classCircle.getMethod("getArea").invoke(instance), 0.00001);
+        var instanceRunner = runner.createInstanceRunner("com.Circle", 5.0);
+        assertEquals(5.0, (double) instanceRunner.invoke("getRadius"));
+        assertEquals(78.53975, (double) instanceRunner.invoke("getArea"), 0.00001);
     }
 
     @ParameterizedTest
@@ -352,14 +339,13 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     sum(): int { return this.x + this.y }
                   }
                 }""");
-        Class<?> classPoint = runner.getClass("com.Point");
-        var instance = classPoint.getConstructor(int.class, int.class).newInstance(10, 20);
+        var instanceRunner = runner.createInstanceRunner("com.Point", 10, 20);
         assertEquals(
                 List.of(10, 20, 30),
                 List.of(
-                        classPoint.getMethod("getX").invoke(instance),
-                        classPoint.getMethod("getY").invoke(instance),
-                        classPoint.getMethod("sum").invoke(instance)
+                        (int) instanceRunner.invoke("getX"),
+                        (int) instanceRunner.invoke("getY"),
+                        (int) instanceRunner.invoke("sum")
                 )
         );
     }
@@ -378,10 +364,9 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     increment(): void { this.count = this.count + 1 }
                   }
                 }""");
-        Class<?> classCounter = runner.getClass("com.Counter");
-        var instance = classCounter.getConstructor(int.class).newInstance(100);
-        assertEquals(100, classCounter.getMethod("getCount").invoke(instance));
-        classCounter.getMethod("increment").invoke(instance);
-        assertEquals(101, classCounter.getMethod("getCount").invoke(instance));
+        var instanceRunner = runner.createInstanceRunner("com.Counter", 100);
+        assertEquals(100, (int) instanceRunner.invoke("getCount"));
+        instanceRunner.invoke("increment");
+        assertEquals(101, (int) instanceRunner.invoke("getCount"));
     }
 }

@@ -160,14 +160,13 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classUtils = runner.getClass("com.Utils");
-
+        var staticRunner = runner.createStaticRunner("com.Utils");
         assertEquals(
                 List.of(10, 5, 0),
                 List.of(
-                        classUtils.getMethod("max", int.class, int.class).invoke(null, 5, 10),
-                        classUtils.getMethod("max", int.class).invoke(null, 5),
-                        classUtils.getMethod("max", int.class).invoke(null, -5) // max(-5, 0) = 0
+                        (int) staticRunner.invoke("max", 5, 10),
+                        (int) staticRunner.invoke("max", 5),
+                        (int) staticRunner.invoke("max", -5) // max(-5, 0) = 0
                 )
         );
     }

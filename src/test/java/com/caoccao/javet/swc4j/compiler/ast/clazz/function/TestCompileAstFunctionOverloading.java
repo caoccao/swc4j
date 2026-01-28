@@ -234,14 +234,13 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
                     static format(value: String): String { return "string:" + value }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.Utils");
-
+        var staticRunner = runner.createStaticRunner("com.Utils");
         assertEquals(
                 List.of("int:42", "double:3.14", "string:hello"),
                 List.of(
-                        classA.getMethod("format", int.class).invoke(null, 42),
-                        classA.getMethod("format", double.class).invoke(null, 3.14),
-                        classA.getMethod("format", String.class).invoke(null, "hello")
+                        (String) staticRunner.invoke("format", 42),
+                        (String) staticRunner.invoke("format", 3.14),
+                        (String) staticRunner.invoke("format", "hello")
                 )
         );
     }

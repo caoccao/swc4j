@@ -80,8 +80,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     getString(): String { return this.stringValue }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
         assertEquals(
                 Map.of(
                         "int", 42,
@@ -90,10 +89,10 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                         "string", "Hello"
                 ),
                 Map.of(
-                        "int", classA.getMethod("getInt").invoke(instance),
-                        "double", classA.getMethod("getDouble").invoke(instance),
-                        "bool", classA.getMethod("getBool").invoke(instance),
-                        "string", classA.getMethod("getString").invoke(instance)
+                        "int", (int) instanceRunner.invoke("getInt"),
+                        "double", (double) instanceRunner.invoke("getDouble"),
+                        "bool", (boolean) instanceRunner.invoke("getBool"),
+                        "string", (String) instanceRunner.invoke("getString")
                 )
         );
     }
@@ -111,21 +110,16 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     reset(): void { this.count = 0 }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.Counter");
-        var instance = classA.getConstructor().newInstance();
-        var getCount = classA.getMethod("getCount");
-        var increment = classA.getMethod("increment");
-        var decrement = classA.getMethod("decrement");
-        var reset = classA.getMethod("reset");
+        var instanceRunner = runner.createInstanceRunner("com.Counter");
 
         assertEquals(
                 List.of(0, 1, 2, 1, 0),
                 List.of(
-                        getCount.invoke(instance),
-                        invokeAfter(() -> increment.invoke(instance), () -> getCount.invoke(instance)),
-                        invokeAfter(() -> increment.invoke(instance), () -> getCount.invoke(instance)),
-                        invokeAfter(() -> decrement.invoke(instance), () -> getCount.invoke(instance)),
-                        invokeAfter(() -> reset.invoke(instance), () -> getCount.invoke(instance))
+                        (int) instanceRunner.invoke("getCount"),
+                        invokeAfter(() -> instanceRunner.invoke("increment"), () -> instanceRunner.invoke("getCount")),
+                        invokeAfter(() -> instanceRunner.invoke("increment"), () -> instanceRunner.invoke("getCount")),
+                        invokeAfter(() -> instanceRunner.invoke("decrement"), () -> instanceRunner.invoke("getCount")),
+                        invokeAfter(() -> instanceRunner.invoke("reset"), () -> instanceRunner.invoke("getCount"))
                 )
         );
     }
@@ -142,9 +136,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(50, classA.getMethod("getValue").invoke(instance));
+        assertEquals(50, (int) runner.createInstanceRunner("com.A").invoke("getValue"));
     }
 
     @ParameterizedTest
@@ -159,9 +151,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(42, classA.getMethod("getValue").invoke(instance));
+        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("getValue"));
     }
 
     @ParameterizedTest
@@ -176,10 +166,8 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Default value for int is 0
-        assertEquals(0, classA.getMethod("getValue").invoke(instance));
+        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("getValue"));
     }
 
     @ParameterizedTest
@@ -195,9 +183,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(30, classA.getMethod("sum").invoke(instance));
+        assertEquals(30, (int) runner.createInstanceRunner("com.A").invoke("sum"));
     }
 
     @FunctionalInterface

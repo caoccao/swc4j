@@ -35,9 +35,7 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                     return 42
                   }
                 }""");
-        Class<?> classA = runner.getClass("A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(42, classA.getMethod("test").invoke(instance));
+        assertEquals(42, (int) runner.createInstanceRunner("A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -53,11 +51,10 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                     return this.count
                   }
                 }""");
-        Class<?> counterClass = runner.getClass("Counter");
-        var instance = counterClass.getConstructor().newInstance();
-        counterClass.getMethod("increment").invoke(instance);
-        counterClass.getMethod("increment").invoke(instance);
-        assertEquals(2, counterClass.getMethod("getCount").invoke(instance));
+        var instanceRunner = runner.createInstanceRunner("Counter");
+        instanceRunner.invoke("increment");
+        instanceRunner.invoke("increment");
+        assertEquals(2, (int) instanceRunner.invoke("getCount"));
     }
 
     @ParameterizedTest
@@ -75,9 +72,7 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                     return calc.add(10, 20)
                   }
                 }""");
-        Class<?> userClass = runner.getClass("User");
-        var instance = userClass.getConstructor().newInstance();
-        assertEquals(30, userClass.getMethod("compute").invoke(instance));
+        assertEquals(30, (int) runner.createInstanceRunner("User").invoke("compute"));
     }
 
     @ParameterizedTest
@@ -86,9 +81,8 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
         var runner = getCompiler(jdkVersion).compile("""
                 export class Empty {
                 }""");
-        Class<?> emptyClass = runner.getClass("Empty");
-        var instance = emptyClass.getConstructor().newInstance();
-        assertNotNull(instance);
+        var instanceRunner = runner.createInstanceRunner("Empty");
+        assertNotNull(instanceRunner.getInstance());
     }
 
     @ParameterizedTest
@@ -100,11 +94,9 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                   sub(a: int, b: int): int { return a - b }
                   mul(a: int, b: int): int { return a * b }
                 }""");
-        Class<?> mathClass = runner.getClass("Math");
-        var instance = mathClass.getConstructor().newInstance();
-        assertEquals(5, mathClass.getMethod("add", int.class, int.class).invoke(instance, 2, 3));
-        assertEquals(7, mathClass.getMethod("sub", int.class, int.class).invoke(instance, 10, 3));
-        assertEquals(12, mathClass.getMethod("mul", int.class, int.class).invoke(instance, 3, 4));
+        assertEquals(5, (int) runner.createInstanceRunner("Math").invoke("add", 2, 3));
+        assertEquals(7, (int) runner.createInstanceRunner("Math").invoke("sub", 10, 3));
+        assertEquals(12, (int) runner.createInstanceRunner("Math").invoke("mul", 3, 4));
     }
 
     @ParameterizedTest
@@ -120,9 +112,9 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                 export class C {
                   value(): int { return 3 }
                 }""");
-        assertEquals(1, runner.getClass("A").getMethod("value").invoke(runner.getClass("A").getConstructor().newInstance()));
-        assertEquals(2, runner.getClass("B").getMethod("value").invoke(runner.getClass("B").getConstructor().newInstance()));
-        assertEquals(3, runner.getClass("C").getMethod("value").invoke(runner.getClass("C").getConstructor().newInstance()));
+        assertEquals(1, (int) runner.createInstanceRunner("A").invoke("value"));
+        assertEquals(2, (int) runner.createInstanceRunner("B").invoke("value"));
+        assertEquals(3, (int) runner.createInstanceRunner("C").invoke("value"));
     }
 
 }
