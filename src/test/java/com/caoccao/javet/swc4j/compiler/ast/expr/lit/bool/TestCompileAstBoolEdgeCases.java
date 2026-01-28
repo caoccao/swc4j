@@ -45,9 +45,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((Boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -65,9 +63,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertFalse((Boolean) classA.getMethod("test").invoke(instance));
+        assertFalse((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -86,9 +82,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((Boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -107,9 +101,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertFalse((Boolean) classA.getMethod("test").invoke(instance));
+        assertFalse((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -128,9 +120,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((Boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -146,9 +136,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertFalse((Boolean) classA.getMethod("test").invoke(instance));
+        assertFalse((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -167,9 +155,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertFalse((Boolean) classA.getMethod("test").invoke(instance));
+        assertFalse((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -186,9 +172,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((Boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -202,9 +186,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertFalse((Boolean) classA.getMethod("test").invoke(instance));
+        assertFalse((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -218,8 +200,6 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((Boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }
