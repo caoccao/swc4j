@@ -190,15 +190,8 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
 
         var context = compiler.getMemory().getCompilationContext();
 
-        // If we're already inside inline finally execution, don't try to execute
-        // finally blocks again - just generate the return directly
-        if (context.isInsideInlineFinally()) {
-            generateSimpleReturn(code, cp, returnStmt, returnTypeInfo);
-            return;
-        }
-
-        // Get a copy of pending finally blocks
-        var pendingFinallyBlocks = context.getPendingFinallyBlocks();
+        // Get pending finally blocks (excluding those already being executed inline)
+        var pendingFinallyBlocks = context.getPendingFinallyBlocksExcludingInline();
 
         if (returnStmt.getArg().isPresent()) {
             // Generate the return value expression
@@ -218,12 +211,10 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
                 // Store return value
                 storeByType(code, returnTypeInfo, tempVar.index());
 
-                // Mark that we're inside inline finally execution
-                context.enterInlineFinally();
-
-                try {
-                    // Execute pending finally blocks (iterate the copy, don't modify context)
-                    for (Swc4jAstBlockStmt finallyBlock : pendingFinallyBlocks) {
+                // Execute pending finally blocks
+                for (Swc4jAstBlockStmt finallyBlock : pendingFinallyBlocks) {
+                    context.markFinallyBlockAsInlineExecuting(finallyBlock);
+                    try {
                         for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
                             generate(code, cp, stmt, returnTypeInfo);
                             // If finally has its own return/throw, that takes precedence
@@ -231,9 +222,9 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
                                 return; // Finally's return/throw supersedes the original return
                             }
                         }
+                    } finally {
+                        context.unmarkFinallyBlockAsInlineExecuting(finallyBlock);
                     }
-                } finally {
-                    context.exitInlineFinally();
                 }
 
                 // Load return value (only reached if no finally was terminal)
@@ -244,40 +235,19 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
             generateReturnInstruction(code, returnTypeInfo);
         } else {
             // Void return - still need to execute finally blocks
-            if (!pendingFinallyBlocks.isEmpty()) {
-                context.enterInlineFinally();
+            for (Swc4jAstBlockStmt finallyBlock : pendingFinallyBlocks) {
+                context.markFinallyBlockAsInlineExecuting(finallyBlock);
                 try {
-                    for (Swc4jAstBlockStmt finallyBlock : pendingFinallyBlocks) {
-                        for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
-                            generate(code, cp, stmt, returnTypeInfo);
-                            if (isTerminalStatement(stmt)) {
-                                return; // Finally's return/throw supersedes the original return
-                            }
+                    for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
+                        generate(code, cp, stmt, returnTypeInfo);
+                        if (isTerminalStatement(stmt)) {
+                            return; // Finally's return/throw supersedes the original return
                         }
                     }
                 } finally {
-                    context.exitInlineFinally();
+                    context.unmarkFinallyBlockAsInlineExecuting(finallyBlock);
                 }
             }
-            code.returnVoid();
-        }
-    }
-
-    /**
-     * Generate a simple return without considering pending finally blocks.
-     * Used when we're already inside inline finally execution.
-     */
-    private void generateSimpleReturn(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstReturnStmt returnStmt,
-            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-
-        if (returnStmt.getArg().isPresent()) {
-            compiler.getExpressionGenerator().generate(code, cp, returnStmt.getArg().get(),
-                    returnTypeInfo);
-            generateReturnInstruction(code, returnTypeInfo);
-        } else {
             code.returnVoid();
         }
     }

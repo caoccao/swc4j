@@ -35,10 +35,10 @@ public class CompilationContext {
     private final Stack<LoopLabelInfo> continueLabels;
     private final Map<String, GenericTypeInfo> genericTypeInfoMap;
     private final Stack<Map<String, String>> inferredTypesScopes;
+    private final Set<Swc4jAstBlockStmt> inlineExecutingFinallyBlocks;
     private final LocalVariableTable localVariableTable;
     private final Stack<Swc4jAstBlockStmt> pendingFinallyBlocks;
     private final Stack<TypeParameterScope> typeParameterScopes;
-    private int inlineFinallyDepth;
     private int tempIdCounter;
 
     public CompilationContext() {
@@ -46,6 +46,7 @@ public class CompilationContext {
         capturedVariables = new HashMap<>();
         classStack = new Stack<>();
         continueLabels = new Stack<>();
+        inlineExecutingFinallyBlocks = new HashSet<>();
         pendingFinallyBlocks = new Stack<>();
         genericTypeInfoMap = new HashMap<>();
         inferredTypesScopes = new Stack<>();
@@ -53,25 +54,6 @@ public class CompilationContext {
         localVariableTable = new LocalVariableTable();
         typeParameterScopes = new Stack<>();
         tempIdCounter = 0;
-        inlineFinallyDepth = 0;
-    }
-
-    /**
-     * Enter inline finally execution mode.
-     * Call this before generating finally block code inline for a return statement.
-     */
-    public void enterInlineFinally() {
-        inlineFinallyDepth++;
-    }
-
-    /**
-     * Exit inline finally execution mode.
-     * Call this after generating finally block code inline.
-     */
-    public void exitInlineFinally() {
-        if (inlineFinallyDepth > 0) {
-            inlineFinallyDepth--;
-        }
     }
 
     /**
@@ -205,6 +187,22 @@ public class CompilationContext {
     }
 
     /**
+     * Get the pending finally blocks that are not currently being executed inline.
+     * This allows nested finally blocks inside inline finally execution to still run.
+     *
+     * @return list of finally blocks excluding those being executed inline
+     */
+    public List<Swc4jAstBlockStmt> getPendingFinallyBlocksExcludingInline() {
+        List<Swc4jAstBlockStmt> result = new ArrayList<>();
+        for (Swc4jAstBlockStmt block : pendingFinallyBlocks) {
+            if (!inlineExecutingFinallyBlocks.contains(block)) {
+                result.add(block);
+            }
+        }
+        return result;
+    }
+
+    /**
      * Check if there are any pending finally blocks.
      *
      * @return true if there are pending finally blocks
@@ -214,14 +212,13 @@ public class CompilationContext {
     }
 
     /**
-     * Check if we're currently inside inline finally execution.
-     * When true, return statements should not try to execute pending finally blocks
-     * because they're already being executed inline.
+     * Check if a specific finally block is currently being executed inline.
      *
-     * @return true if inside inline finally execution
+     * @param block the finally block to check
+     * @return true if this specific block is being executed inline
      */
-    public boolean isInsideInlineFinally() {
-        return inlineFinallyDepth > 0;
+    public boolean isFinallyBlockInlineExecuting(Swc4jAstBlockStmt block) {
+        return inlineExecutingFinallyBlocks.contains(block);
     }
 
     /**
@@ -237,6 +234,16 @@ public class CompilationContext {
             }
         }
         return false;
+    }
+
+    /**
+     * Mark a finally block as being executed inline.
+     * Call this before generating finally block code inline for a return/break/continue.
+     *
+     * @param block the finally block being executed inline
+     */
+    public void markFinallyBlockAsInlineExecuting(Swc4jAstBlockStmt block) {
+        inlineExecutingFinallyBlocks.add(block);
     }
 
     public void popBreakLabel() {
@@ -366,7 +373,7 @@ public class CompilationContext {
         inferredTypesScopes.push(new HashMap<>());
         localVariableTable.reset(isStatic);
         tempIdCounter = 0;
-        inlineFinallyDepth = 0;
+        inlineExecutingFinallyBlocks.clear();
         // Note: classStack and typeParameterScopes are NOT cleared - class context persists across method resets
     }
 
@@ -397,5 +404,15 @@ public class CompilationContext {
         }
         // Not found - return a special marker (we use Optional<Optional> pattern via empty)
         return Optional.empty();
+    }
+
+    /**
+     * Unmark a finally block as being executed inline.
+     * Call this after generating finally block code inline.
+     *
+     * @param block the finally block that finished inline execution
+     */
+    public void unmarkFinallyBlockAsInlineExecuting(Swc4jAstBlockStmt block) {
+        inlineExecutingFinallyBlocks.remove(block);
     }
 }

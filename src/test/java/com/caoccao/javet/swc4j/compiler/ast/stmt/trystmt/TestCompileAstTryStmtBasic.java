@@ -189,7 +189,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                     private handleError(error: Error): Error {
                       return error
                     }
-
+                
                     test(): Error {
                       try {
                         throw new Error()
@@ -212,7 +212,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     private lastError: Error = null
-
+                
                     test(): Error {
                       try {
                         throw new Error()
@@ -247,7 +247,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("test message", (String) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals("test message", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest

@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstTryStmt` (try-catch-finally statements) in TypeScript to JVM bytecode compilation. Try statements provide structured exception handling, allowing code to catch and handle errors gracefully.
 
-**Current Status:** IMPLEMENTED (65/65 tests passing)
+**Current Status:** IMPLEMENTED (96/96 tests passing)
 
 **Implemented:**
 - Basic try-catch statements (Phase 1) ✓
@@ -26,11 +26,20 @@ This document outlines the implementation plan for supporting `Swc4jAstTryStmt` 
   - `catch ({name})` - extracts error name (via JsError.getName() or class name)
   - `catch ({message: msg})` - renamed destructuring
   - `catch ({message = "default"})` - default values
+- Break/continue with finally in loops (Phase 6) ✓
+  - `break` in try executes finally before breaking
+  - `continue` in try executes finally before continuing
+  - Labeled break/continue with finally blocks
+  - Nested finally blocks with break/continue
+- Nested try statements (Phase 7) ✓
+  - Try-catch nested in try, catch, and finally blocks
+  - Multiple levels of nesting (up to 5 levels)
+  - Sequential try blocks
+  - Nested try-catch-finally inside inline finally execution ✓
+  - Return/break/continue inside nested try within inline finally ✓
 
 **Remaining Work:**
-- Phase 6: Break/continue with finally in loops
-- Phase 7: Deeper nesting edge cases
-- Phase 8: Stack map frame optimization
+- Phase 8: Stack map frame optimization (advanced scenarios)
 
 **Not Supported:**
 - Phase 5: Multiple catch clauses - TypeScript/JavaScript only supports a single catch clause per try statement
@@ -591,7 +600,7 @@ Exception table:
 
 ### Phase 6: Control Flow in Try-Catch-Finally - Priority: MEDIUM
 
-**Status:** NOT IMPLEMENTED
+**Status:** IMPLEMENTED ✓
 
 **Scope:**
 - Return statements in various blocks
@@ -647,7 +656,7 @@ while (true) {
 
 ### Phase 7: Nested Try Statements - Priority: MEDIUM
 
-**Status:** NOT IMPLEMENTED
+**Status:** IMPLEMENTED ✓
 
 **Scope:**
 - Try inside try block
@@ -1795,14 +1804,14 @@ exception_table {
 - [x] Phase 3: Try-catch-finally working
 - [x] Phase 4: Catch parameter variations (no param, typed, destructuring) ✓
 - [N/A] Phase 5: Multiple catch clauses (not supported - TypeScript limitation)
-- [x] Phase 6: Control flow (return) with finally (break/continue pending)
-- [x] Phase 7: Nested try statements working
+- [x] Phase 6: Control flow (return, break, continue) with finally ✓
+- [x] Phase 7: Nested try statements working ✓
 - [x] Phase 8: Stack map frames correct
 - [x] Exception table generation correct
 - [x] error.message maps to getMessage() ✓
 - [x] error.stack maps to stack trace ✓
 - [x] All 90 edge cases documented
-- [x] Comprehensive tests passing (65/65)
+- [x] Comprehensive tests passing (96/96)
 
 ### Quality Gates:
 - [x] Exception table entries in correct order
@@ -1838,5 +1847,5 @@ exception_table {
 ---
 
 *Last Updated: January 28, 2026*
-*Status: IMPLEMENTED (Phases 1-4 complete, Phase 5 not supported, 65/65 tests passing)*
-*Next Step: Implement Phase 6 - Break/continue with finally in loops*
+*Status: IMPLEMENTED (Phases 1-4, 6-7 complete, Phase 5 not supported, 96/96 tests passing)*
+*Next Step: Phase 8 (Stack map frame optimization for advanced scenarios)*

@@ -16,7 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstContinueStmt;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -31,9 +32,17 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * <p>
  * Continue statements skip to the next iteration of the innermost loop (or labeled loop)
  * by jumping to the update label (or test label if no update).
+ * If there are pending finally blocks (from enclosing try-finally statements), they are
+ * executed before the continue.
  * <p>
- * Bytecode pattern:
+ * Bytecode pattern (without finally):
  * <pre>
+ *   goto UPDATE_LABEL      // Jump to continue target
+ * </pre>
+ * <p>
+ * Bytecode pattern (with finally):
+ * <pre>
+ *   [finally block code]   // Execute pending finally blocks
  *   goto UPDATE_LABEL      // Jump to continue target
  * </pre>
  */
@@ -81,6 +90,23 @@ public final class ContinueStatementGenerator extends BaseAstProcessor<Swc4jAstC
             }
         }
 
+        // Execute pending finally blocks before continue (excluding those already being executed inline)
+        var pendingFinallyBlocks = context.getPendingFinallyBlocksExcludingInline();
+        for (Swc4jAstBlockStmt finallyBlock : pendingFinallyBlocks) {
+            context.markFinallyBlockAsInlineExecuting(finallyBlock);
+            try {
+                for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
+                    compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+                    // If finally has its own terminal statement, it takes precedence
+                    if (isTerminalStatement(stmt)) {
+                        return; // Finally's return/throw supersedes the continue
+                    }
+                }
+            } finally {
+                context.unmarkFinallyBlockAsInlineExecuting(finallyBlock);
+            }
+        }
+
         // Generate goto with placeholder (will be patched later)
         code.gotoLabel(0);
 
@@ -88,5 +114,15 @@ public final class ContinueStatementGenerator extends BaseAstProcessor<Swc4jAstC
         int gotoOffsetPos = code.getCurrentOffset() - 2;
         int gotoOpcodePos = code.getCurrentOffset() - 3;
         continueLabel.addPatchPosition(gotoOffsetPos, gotoOpcodePos);
+    }
+
+    /**
+     * Check if a statement is a terminal control flow statement.
+     */
+    private boolean isTerminalStatement(ISwc4jAstStmt stmt) {
+        return stmt instanceof Swc4jAstBreakStmt ||
+                stmt instanceof Swc4jAstContinueStmt ||
+                stmt instanceof Swc4jAstReturnStmt ||
+                stmt instanceof Swc4jAstThrowStmt;
     }
 }
