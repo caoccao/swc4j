@@ -43,9 +43,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals((byte) 100, classA.getMethod("test").invoke(instance));
+        assertEquals((byte) 100, (byte) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -59,9 +57,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals((byte) 127, classA.getMethod("test").invoke(instance));
+        assertEquals((byte) 127, (byte) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Long boxed tests
@@ -78,9 +74,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123.5, classA.getMethod("test").invoke(instance));
+        assertEquals(123.5, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -94,9 +88,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123.5, classA.getMethod("test").invoke(instance));
+        assertEquals(123.5, (double) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Float boxed tests
@@ -113,9 +105,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123.5f, classA.getMethod("test").invoke(instance));
+        assertEquals(123.5f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -129,9 +119,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123.5f, classA.getMethod("test").invoke(instance));
+        assertEquals(123.5f, (float) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Double boxed tests
@@ -148,9 +136,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123, classA.getMethod("test").invoke(instance));
+        assertEquals(123, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -164,9 +150,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123, classA.getMethod("test").invoke(instance));
+        assertEquals(123, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Byte boxed tests
@@ -183,9 +167,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123L, classA.getMethod("test").invoke(instance));
+        assertEquals(123L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -199,9 +181,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123L, classA.getMethod("test").invoke(instance));
+        assertEquals(123L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Short boxed tests
@@ -218,9 +198,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals((short) 123, classA.getMethod("test").invoke(instance));
+        assertEquals((short) 123, (short) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -234,8 +212,6 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals((short) 123, classA.getMethod("test").invoke(instance));
+        assertEquals((short) 123, (short) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

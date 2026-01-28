@@ -43,9 +43,7 @@ public class TestCompileAstNullAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -60,9 +58,7 @@ public class TestCompileAstNullAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -78,9 +74,7 @@ public class TestCompileAstNullAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -95,9 +89,7 @@ public class TestCompileAstNullAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -112,9 +104,7 @@ public class TestCompileAstNullAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -131,9 +121,7 @@ public class TestCompileAstNullAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -150,9 +138,7 @@ public class TestCompileAstNullAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -168,8 +154,6 @@ public class TestCompileAstNullAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

@@ -29,8 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
 
-    // Byte tests
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testByteMaxValue(JdkVersion jdkVersion) throws Exception {
@@ -42,9 +40,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(Byte.MAX_VALUE, classA.getMethod("test").invoke(instance));
+        assertEquals(Byte.MAX_VALUE, (byte) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -58,9 +54,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(Byte.MIN_VALUE, classA.getMethod("test").invoke(instance));
+        assertEquals(Byte.MIN_VALUE, (byte) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -74,9 +68,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals((byte) -100, classA.getMethod("test").invoke(instance));
+        assertEquals((byte) -100, (byte) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -90,9 +82,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals((byte) 100, classA.getMethod("test").invoke(instance));
+        assertEquals((byte) 100, (byte) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -106,9 +96,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals((byte) 0, classA.getMethod("test").invoke(instance));
+        assertEquals((byte) 0, (byte) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -123,9 +111,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals((byte) -128, classA.getMethod("test").invoke(instance));
+        assertEquals((byte) -128, (byte) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -139,12 +125,8 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals((byte) 50, classA.getMethod("test").invoke(instance));
+        assertEquals((byte) 50, (byte) runner.createInstanceRunner("com.A").invoke("test"));
     }
-
-    // Short tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -158,9 +140,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(Short.MAX_VALUE, (short) classA.getMethod("test").invoke(instance));
+        assertEquals(Short.MAX_VALUE, (short) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -175,9 +155,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(Short.MIN_VALUE, (short) classA.getMethod("test").invoke(instance));
+        assertEquals(Short.MIN_VALUE, (short) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -192,9 +170,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(-1, (short) classA.getMethod("test").invoke(instance));
+        assertEquals(-1, (short) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -209,9 +185,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123, (short) classA.getMethod("test").invoke(instance));
+        assertEquals(123, (short) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -225,8 +199,6 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123, (short) classA.getMethod("test").invoke(instance));
+        assertEquals(123, (short) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }
