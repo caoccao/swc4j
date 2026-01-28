@@ -41,9 +41,7 @@ public class TestCompileAstCondExprNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("B", classA.getMethod("test").invoke(instance));
+        assertEquals("B", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -60,9 +58,7 @@ public class TestCompileAstCondExprNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(3, classA.getMethod("test").invoke(instance));
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -78,9 +74,7 @@ public class TestCompileAstCondExprNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(2, classA.getMethod("test").invoke(instance));
+        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -96,8 +90,6 @@ public class TestCompileAstCondExprNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(2, classA.getMethod("test").invoke(instance));
+        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }
