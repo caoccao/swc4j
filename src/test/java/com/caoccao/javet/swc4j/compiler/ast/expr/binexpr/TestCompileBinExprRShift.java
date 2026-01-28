@@ -109,10 +109,8 @@ public class TestCompileBinExprRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // First: 32 >> 2 = 8, then: 8 >> 1 = 4
-        assertEquals(4, classA.getMethod("test").invoke(instance));
+        assertEquals(4, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -201,10 +199,8 @@ public class TestCompileBinExprRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // 32 & 0x1F = 0, so shifting by 32 is same as shifting by 0
-        assertEquals(100, classA.getMethod("test").invoke(instance));
+        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -221,10 +217,8 @@ public class TestCompileBinExprRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // 33 & 0x1F = 1, so shifting by 33 is same as shifting by 1
-        assertEquals(50, classA.getMethod("test").invoke(instance));
+        assertEquals(50, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -258,11 +252,9 @@ public class TestCompileBinExprRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // -1 & 0x1F = 31, so shifting by -1 is same as shifting by 31
         // -1024 >> 31 = -1 (arithmetic shift preserves sign)
-        assertEquals(-1, classA.getMethod("test").invoke(instance));
+        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Negative shift amount tests
@@ -457,10 +449,8 @@ public class TestCompileBinExprRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // 64 & 0x3F = 0, so shifting by 64 is same as shifting by 0
-        assertEquals(1000L, classA.getMethod("test").invoke(instance));
+        assertEquals(1000L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -477,10 +467,8 @@ public class TestCompileBinExprRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // 65 & 0x3F = 1, so shifting by 65 is same as shifting by 1
-        assertEquals(777L, classA.getMethod("test").invoke(instance));
+        assertEquals(777L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -497,11 +485,9 @@ public class TestCompileBinExprRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // -1 & 0x3F = 63, so shifting by -1 is same as shifting by 63
         // -1024 >> 63 = -1 (arithmetic shift preserves sign)
-        assertEquals(-1L, classA.getMethod("test").invoke(instance));
+        assertEquals(-1L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Chained shift operations
@@ -555,10 +541,8 @@ public class TestCompileBinExprRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Shifting negative by 31 fills with 1s, resulting in -1
-        assertEquals(-1, classA.getMethod("test").invoke(instance));
+        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Large value tests
@@ -594,10 +578,8 @@ public class TestCompileBinExprRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Shifting negative by 63 fills with 1s, resulting in -1
-        assertEquals(-1L, classA.getMethod("test").invoke(instance));
+        assertEquals(-1L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // Maximum shift amount tests (for int: 31, for long: 63)
@@ -688,10 +670,8 @@ public class TestCompileBinExprRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // -1 in binary is all 1s, shifting right still all 1s, so -1
-        assertEquals(-1, classA.getMethod("test").invoke(instance));
+        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -708,9 +688,7 @@ public class TestCompileBinExprRShift extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // -1 in binary is all 1s, shifting right still all 1s, so -1
-        assertEquals(-1L, classA.getMethod("test").invoke(instance));
+        assertEquals(-1L, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

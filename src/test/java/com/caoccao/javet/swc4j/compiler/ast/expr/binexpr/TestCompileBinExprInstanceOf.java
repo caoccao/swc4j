@@ -38,9 +38,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -66,14 +64,11 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-
         // String instanceof String should be true, returns 1
-        assertEquals(1, classA.getMethod("testWithString").invoke(instance));
+        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("testWithString"));
 
         // Integer instanceof String should be false, returns 0
-        assertEquals(0, classA.getMethod("testWithInteger").invoke(instance));
+        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("testWithInteger"));
     }
 
     @ParameterizedTest
@@ -95,11 +90,8 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-
-        assertTrue((boolean) classA.getMethod("testTrue").invoke(instance));
-        assertFalse((boolean) classA.getMethod("testFalse").invoke(instance));
+        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("testTrue"));
+        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("testFalse"));
     }
 
     @ParameterizedTest
@@ -116,9 +108,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -138,14 +128,11 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-
         // String is instanceof String, so true
-        assertTrue((boolean) classA.getMethod("testStringOrNumber").invoke(instance));
+        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("testStringOrNumber"));
 
         // Integer is instanceof Number, so true
-        assertTrue((boolean) classA.getMethod("testNumberOrString").invoke(instance));
+        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("testNumberOrString"));
     }
 
     @ParameterizedTest
@@ -161,9 +148,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -179,9 +164,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -201,9 +184,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -219,10 +200,8 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // null instanceof X always returns false
-        assertFalse((boolean) classA.getMethod("test").invoke(instance));
+        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -238,9 +217,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -256,9 +233,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -274,9 +249,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertFalse((boolean) classA.getMethod("test").invoke(instance));
+        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -292,8 +265,6 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertTrue((boolean) classA.getMethod("test").invoke(instance));
+        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }
