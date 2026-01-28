@@ -46,9 +46,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var consumer = (DoubleConsumer) classA.getMethod("getConsumer").invoke(instance);
+        var consumer = (DoubleConsumer) runner.createInstanceRunner("com.A").invoke("getConsumer");
         assertNotNull(consumer);
         // Verify it doesn't throw
         consumer.accept(3.14);
@@ -67,9 +65,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var consumer = (IntConsumer) classA.getMethod("getConsumer").invoke(instance);
+        var consumer = (IntConsumer) runner.createInstanceRunner("com.A").invoke("getConsumer");
         assertNotNull(consumer);
         // Verify it doesn't throw
         consumer.accept(42);
@@ -91,11 +87,10 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        var positiveFn = (IntPredicate) classA.getMethod("getPositive").invoke(instance);
-        var evenFn = (IntPredicate) classA.getMethod("getEven").invoke(instance);
+        var positiveFn = (IntPredicate) instanceRunner.invoke("getPositive");
+        var evenFn = (IntPredicate) instanceRunner.invoke("getEven");
 
         assertEquals(
                 List.of(true, false, false),
@@ -119,9 +114,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var consumer = (LongConsumer) classA.getMethod("getConsumer").invoke(instance);
+        var consumer = (LongConsumer) runner.createInstanceRunner("com.A").invoke("getConsumer");
         assertNotNull(consumer);
         // Verify it doesn't throw
         consumer.accept(42L);
@@ -140,10 +133,8 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = (IntUnaryOperator) classA.getMethod("createComputer", int.class, int.class, int.class, int.class)
-                .invoke(instance, 1, 2, 3, 4);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var fn = (IntUnaryOperator) instanceRunner.invoke("createComputer", 1, 2, 3, 4);
 
         assertEquals(
                 List.of(10, 15, 20, 110),
@@ -163,9 +154,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("get").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("get");
         assertNotNull(fn);
         assertEquals(42, ((IntSupplier) fn).getAsInt());
     }
@@ -183,9 +172,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = (DoubleUnaryOperator) classA.getMethod("get").invoke(instance);
+        var fn = (DoubleUnaryOperator) runner.createInstanceRunner("com.A").invoke("get");
         assertEquals(10.0, fn.applyAsDouble(5.0), 0.0001);
     }
 
@@ -202,9 +189,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("get").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("get");
         assertNotNull(fn);
         assertEquals(10, ((IntUnaryOperator) fn).applyAsInt(5));
     }
@@ -222,9 +207,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = (LongUnaryOperator) classA.getMethod("get").invoke(instance);
+        var fn = (LongUnaryOperator) runner.createInstanceRunner("com.A").invoke("get");
         assertEquals(200L, fn.applyAsLong(100L));
     }
 
@@ -241,9 +224,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = (DoubleBinaryOperator) classA.getMethod("get").invoke(instance);
+        var fn = (DoubleBinaryOperator) runner.createInstanceRunner("com.A").invoke("get");
         assertEquals(8.5, fn.applyAsDouble(3.5, 5.0), 0.0001);
     }
 
@@ -263,11 +244,10 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        var adder = (IntBinaryOperator) classA.getMethod("getAdder").invoke(instance);
-        var multiplier = (IntBinaryOperator) classA.getMethod("getMultiplier").invoke(instance);
+        var adder = (IntBinaryOperator) instanceRunner.invoke("getAdder");
+        var multiplier = (IntBinaryOperator) instanceRunner.invoke("getMultiplier");
 
         assertEquals(
                 List.of(8, 15),
@@ -287,9 +267,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = (LongBinaryOperator) classA.getMethod("get").invoke(instance);
+        var fn = (LongBinaryOperator) runner.createInstanceRunner("com.A").invoke("get");
         assertEquals(30L, fn.applyAsLong(10L, 20L));
     }
 
@@ -306,10 +284,9 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn2 = (IntUnaryOperator) classA.getMethod("createMultiplier", int.class).invoke(instance, 2);
-        var fn3 = (IntUnaryOperator) classA.getMethod("createMultiplier", int.class).invoke(instance, 3);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var fn2 = (IntUnaryOperator) instanceRunner.invoke("createMultiplier", 2);
+        var fn3 = (IntUnaryOperator) instanceRunner.invoke("createMultiplier", 3);
 
         // fn2.applyAsInt(5) = 5*2 = 10
         // fn3.applyAsInt(5) = 5*3 = 15

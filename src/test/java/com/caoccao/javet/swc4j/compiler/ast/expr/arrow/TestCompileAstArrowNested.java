@@ -50,11 +50,10 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        var doubler = (IntUnaryOperator) classA.getMethod("getDoubler").invoke(instance);
-        var incrementer = (IntUnaryOperator) classA.getMethod("getIncrementer").invoke(instance);
+        var doubler = (IntUnaryOperator) instanceRunner.invoke("getDoubler");
+        var incrementer = (IntUnaryOperator) instanceRunner.invoke("getIncrementer");
 
         assertEquals(10, doubler.applyAsInt(5));   // 5 * 2 = 10
         assertEquals(6, incrementer.applyAsInt(5)); // 5 + 1 = 6
@@ -73,9 +72,9 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var multiplier2 = (IntUnaryOperator) classA.getMethod("createMultiplier", int.class).invoke(null, 2);
-        var multiplier5 = (IntUnaryOperator) classA.getMethod("createMultiplier", int.class).invoke(null, 5);
+        var staticRunner = runner.createStaticRunner("com.A");
+        var multiplier2 = (IntUnaryOperator) staticRunner.invoke("createMultiplier", 2);
+        var multiplier5 = (IntUnaryOperator) staticRunner.invoke("createMultiplier", 5);
         assertEquals(
                 List.of(6, 10, 15, 25),
                 List.of(multiplier2.applyAsInt(3), multiplier2.applyAsInt(5), multiplier5.applyAsInt(3), multiplier5.applyAsInt(5)));
@@ -94,10 +93,9 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var adder5 = (IntUnaryOperator) classA.getMethod("createAdder", int.class).invoke(instance, 5);
-        var adder10 = (IntUnaryOperator) classA.getMethod("createAdder", int.class).invoke(instance, 10);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var adder5 = (IntUnaryOperator) instanceRunner.invoke("createAdder", 5);
+        var adder10 = (IntUnaryOperator) instanceRunner.invoke("createAdder", 10);
         assertEquals(
                 List.of(8, 13, 12, 17),
                 List.of(adder5.applyAsInt(3), adder5.applyAsInt(8), adder10.applyAsInt(2), adder10.applyAsInt(7)));
@@ -116,10 +114,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var supplier = (Supplier<?>) classA.getMethod("createFormatter", String.class, int.class)
-                .invoke(instance, "Value: ", 42);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var supplier = (Supplier<?>) instanceRunner.invoke("createFormatter", "Value: ", 42);
         assertEquals("Value: 42", supplier.get());
     }
 
@@ -136,10 +132,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var supplier = (DoubleSupplier) classA.getMethod("createProduct", double.class, double.class)
-                .invoke(instance, 2.5, 4.0);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var supplier = (DoubleSupplier) instanceRunner.invoke("createProduct", 2.5, 4.0);
         assertEquals(10.0, supplier.getAsDouble(), 0.0001);
     }
 
@@ -156,10 +150,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var supplier = (LongSupplier) classA.getMethod("createSum", long.class, long.class)
-                .invoke(instance, 1000000000L, 2000000000L);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var supplier = (LongSupplier) instanceRunner.invoke("createSum", 1000000000L, 2000000000L);
         assertEquals(3000000000L, supplier.getAsLong());
     }
 
@@ -176,10 +168,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var supplier = (DoubleSupplier) classA.getMethod("createComplex", int.class, long.class, double.class)
-                .invoke(instance, 10, 20L, 30.5);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var supplier = (DoubleSupplier) instanceRunner.invoke("createComplex", 10, 20L, 30.5);
         // 10 + 20 + 30.5 = 60.5
         assertEquals(60.5, supplier.getAsDouble(), 0.0001);
     }
@@ -197,10 +187,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var supplier = (IntSupplier) classA.getMethod("createComputer", int.class, int.class, int.class, int.class)
-                .invoke(instance, 2, 3, 4, 5);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var supplier = (IntSupplier) instanceRunner.invoke("createComputer", 2, 3, 4, 5);
         // 2 * 3 + 4 * 5 = 6 + 20 = 26
         assertEquals(26, supplier.getAsInt());
     }
@@ -217,9 +205,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("createAdder", int.class).invoke(instance, 5);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var fn = instanceRunner.invoke("createAdder", 5);
         assertNotNull(fn);
         assertEquals(15, ((IntUnaryOperator) fn).applyAsInt(10));  // 10 + 5 = 15
     }
@@ -237,9 +224,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("createGreeter", String.class).invoke(instance, "World");
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var fn = instanceRunner.invoke("createGreeter", "World");
         assertNotNull(fn);
         assertEquals("Hello, World", ((java.util.function.Supplier<?>) fn).get());
     }
@@ -257,9 +243,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("createValueGetter").invoke(instance);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var fn = instanceRunner.invoke("createValueGetter");
         assertNotNull(fn);
         assertEquals(100, ((IntSupplier) fn).getAsInt());
     }
@@ -277,10 +262,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = (IntUnaryOperator) classA.getMethod("createAdder", int.class, int.class, int.class)
-                .invoke(instance, 1, 2, 3);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var fn = (IntUnaryOperator) instanceRunner.invoke("createAdder", 1, 2, 3);
 
         // x + 1 + 2 + 3 = x + 6
         assertEquals(
@@ -301,10 +284,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var combiner = (IntUnaryOperator) classA.getMethod("createCombiner", int.class, int.class)
-                .invoke(instance, 10, 20);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var combiner = (IntUnaryOperator) instanceRunner.invoke("createCombiner", 10, 20);
         // x + a + b = x + 10 + 20 = x + 30
         assertEquals(
                 List.of(30, 35, 40),
@@ -327,10 +308,9 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var doubler = (IntUnaryOperator) classA.getMethod("getDoubler").invoke(instance);
-        var adder = (IntUnaryOperator) classA.getMethod("getAdder", int.class).invoke(instance, 10);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var doubler = (IntUnaryOperator) instanceRunner.invoke("getDoubler");
+        var adder = (IntUnaryOperator) instanceRunner.invoke("getAdder", 10);
         assertEquals(
                 List.of(10, 20, 15, 20),
                 List.of(doubler.applyAsInt(5), doubler.applyAsInt(10), adder.applyAsInt(5), adder.applyAsInt(10)));

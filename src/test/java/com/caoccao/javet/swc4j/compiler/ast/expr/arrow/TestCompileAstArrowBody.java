@@ -48,11 +48,10 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        var positiveFn = (IntPredicate) classA.getMethod("getPositive").invoke(instance);
-        var evenFn = (IntPredicate) classA.getMethod("getEven").invoke(instance);
+        var positiveFn = (IntPredicate) instanceRunner.invoke("getPositive");
+        var evenFn = (IntPredicate) instanceRunner.invoke("getEven");
 
         assertTrue(positiveFn.test(5));
         assertFalse(positiveFn.test(-5));
@@ -76,9 +75,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("get").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("get");
         assertNotNull(fn);
         assertEquals(12.5, ((DoubleUnaryOperator) fn).applyAsDouble(5.0), 0.0001);
     }
@@ -100,9 +97,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = (IntUnaryOperator) classA.getMethod("getClamp").invoke(instance);
+        var fn = (IntUnaryOperator) runner.createInstanceRunner("com.A").invoke("getClamp");
 
         assertEquals(
                 List.of(0, 0, 50, 100, 100),
@@ -123,9 +118,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("get").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("get");
         assertNotNull(fn);
         // Just verify it doesn't throw
         ((Runnable) fn).run();
@@ -150,9 +143,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = (IntUnaryOperator) classA.getMethod("getSum").invoke(instance);
+        var fn = (IntUnaryOperator) runner.createInstanceRunner("com.A").invoke("getSum");
 
         assertEquals(
                 List.of(0, 1, 3, 6, 10, 55),
@@ -178,9 +169,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = (IntUnaryOperator) classA.getMethod("getComplex").invoke(instance);
+        var fn = (IntUnaryOperator) runner.createInstanceRunner("com.A").invoke("getComplex");
 
         // x=5: doubled=10, incremented=11, result=33
         assertEquals(
@@ -204,9 +193,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = (IntConsumer) classA.getMethod("getConsumer").invoke(instance);
+        var fn = (IntConsumer) runner.createInstanceRunner("com.A").invoke("getConsumer");
         // Just verify it doesn't throw - no observable side effect in this simple version
         fn.accept(5);
     }
@@ -224,9 +211,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("get").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("get");
         assertNotNull(fn);
         assertEquals(10, ((IntUnaryOperator) fn).applyAsInt(5));
     }
@@ -252,9 +237,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("getFactorial").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("getFactorial");
         assertNotNull(fn);
         assertEquals(1, ((IntUnaryOperator) fn).applyAsInt(0));
         assertEquals(1, ((IntUnaryOperator) fn).applyAsInt(1));
@@ -275,9 +258,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = (IntUnaryOperator) classA.getMethod("getCompute").invoke(instance);
+        var fn = (IntUnaryOperator) runner.createInstanceRunner("com.A").invoke("getCompute");
 
         assertEquals(
                 List.of(3, 15, 30),
@@ -298,9 +279,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = (Supplier<?>) classA.getMethod("getValue").invoke(instance);
+        var fn = (Supplier<?>) runner.createInstanceRunner("com.A").invoke("getValue");
 
         assertEquals("hello", fn.get());
     }
@@ -318,9 +297,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("get").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("get");
         assertNotNull(fn);
         assertEquals(10, ((IntUnaryOperator) fn).applyAsInt(5));
     }
@@ -341,11 +318,10 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        var absFn = (IntUnaryOperator) classA.getMethod("getAbs").invoke(instance);
-        var maxFn = (IntUnaryOperator) classA.getMethod("getMax").invoke(instance);
+        var absFn = (IntUnaryOperator) instanceRunner.invoke("getAbs");
+        var maxFn = (IntUnaryOperator) instanceRunner.invoke("getMax");
 
         assertEquals(
                 List.of(5, 5, 0),

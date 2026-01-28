@@ -43,9 +43,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("get").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("get");
         assertNotNull(fn);
         assertTrue(((BooleanSupplier) fn).getAsBoolean());
     }
@@ -62,9 +60,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("get").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("get");
         assertNotNull(fn);
         assertEquals(3.14159, ((DoubleSupplier) fn).getAsDouble(), 0.00001);
     }
@@ -81,9 +77,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("get").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("get");
         assertNotNull(fn);
         assertEquals(42, ((IntSupplier) fn).getAsInt());
     }
@@ -100,9 +94,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("get").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("get");
         assertNotNull(fn);
         assertEquals(10, ((IntUnaryOperator) fn).applyAsInt(5));
     }
@@ -120,9 +112,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("get").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("get");
         assertNotNull(fn);
         assertEquals(123456789012345L, ((LongSupplier) fn).getAsLong());
     }
@@ -139,9 +129,7 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var fn = classA.getMethod("get").invoke(instance);
+        var fn = runner.createInstanceRunner("com.A").invoke("get");
         assertNotNull(fn);
         assertEquals("hello", ((Supplier<?>) fn).get());
     }

@@ -55,9 +55,8 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
         assertNotNull(transformerInterface.getMethod("transform", int.class));
 
         // Arrow works with Java functional interface
-        Class<?> calculatorClass = runner.getClass("com.Calculator");
-        var calculator = calculatorClass.getConstructor().newInstance();
-        var doubler = calculatorClass.getMethod("getDoubler").invoke(calculator);
+        var calculatorRunner = runner.createInstanceRunner("com.Calculator");
+        var doubler = calculatorRunner.invoke("getDoubler");
         assertNotNull(doubler);
         assertEquals(10, ((IntUnaryOperator) doubler).applyAsInt(5));
     }
@@ -100,10 +99,10 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
 
         assertTrue(interfaceClass.isInterface());
 
-        var checker = checkerClass.getConstructor().newInstance();
+        var checkerRunner = runner.createInstanceRunner("com.PositiveChecker");
         Method testMethod = interfaceClass.getMethod("test", int.class);
-        assertTrue((boolean) testMethod.invoke(checker, 5));
-        assertFalse((boolean) testMethod.invoke(checker, -5));
+        assertTrue((boolean) checkerRunner.invoke("test", 5));
+        assertFalse((boolean) checkerRunner.invoke("test", -5));
     }
 
     @ParameterizedTest
@@ -127,9 +126,9 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
         assertTrue(interfaceClass.isInterface());
         assertTrue(interfaceClass.isAssignableFrom(doublerClass));
 
-        var doubler = doublerClass.getConstructor().newInstance();
+        var doublerRunner = runner.createInstanceRunner("com.Doubler");
         Method transformMethod = interfaceClass.getMethod("transform", int.class);
-        assertEquals(10, transformMethod.invoke(doubler, 5));
+        assertEquals(10, (int) doublerRunner.invoke("transform", 5));
     }
 
     @ParameterizedTest
@@ -152,9 +151,9 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
 
         assertTrue(interfaceClass.isInterface());
 
-        var squarer = squarerClass.getConstructor().newInstance();
+        var squarerRunner = runner.createInstanceRunner("com.DoubleSquarer");
         Method transformMethod = interfaceClass.getMethod("transform", double.class);
-        assertEquals(25.0, (double) transformMethod.invoke(squarer, 5.0), 0.0001);
+        assertEquals(25.0, (double) squarerRunner.invoke("transform", 5.0), 0.0001);
     }
 
     @ParameterizedTest
@@ -177,9 +176,9 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
 
         assertTrue(interfaceClass.isInterface());
 
-        var doubler = doublerClass.getConstructor().newInstance();
+        var doublerRunner = runner.createInstanceRunner("com.LongDoubler");
         Method transformMethod = interfaceClass.getMethod("transform", long.class);
-        assertEquals(20000000000L, transformMethod.invoke(doubler, 10000000000L));
+        assertEquals(20000000000L, (long) doublerRunner.invoke("transform", 10000000000L));
     }
 
     @ParameterizedTest
@@ -202,9 +201,9 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
 
         assertTrue(interfaceClass.isInterface());
 
-        var adder = adderClass.getConstructor().newInstance();
+        var adderRunner = runner.createInstanceRunner("com.Adder");
         Method computeMethod = interfaceClass.getMethod("compute", int.class, int.class);
-        assertEquals(8, computeMethod.invoke(adder, 3, 5));
+        assertEquals(8, (int) adderRunner.invoke("compute", 3, 5));
     }
 
     @ParameterizedTest
@@ -227,9 +226,9 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
 
         assertTrue(interfaceClass.isInterface());
 
-        var upperCaser = upperCaserClass.getConstructor().newInstance();
+        var upperCaserRunner = runner.createInstanceRunner("com.UpperCaser");
         Method transformMethod = interfaceClass.getMethod("transform", String.class);
-        assertEquals("HELLO", transformMethod.invoke(upperCaser, "hello"));
+        assertEquals("HELLO", upperCaserRunner.invoke("transform", "hello"));
     }
 
     @ParameterizedTest
@@ -256,17 +255,17 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
 
         assertTrue(interfaceClass.isInterface());
 
-        var setter = setterClass.getConstructor().newInstance();
+        var setterRunner = runner.createInstanceRunner("com.ValueSetter");
 
         // Initially 0
-        assertEquals(0, setterClass.getMethod("getLastValue").invoke(setter));
+        assertEquals(0, (int) setterRunner.invoke("getLastValue"));
 
         // Call perform
         Method performMethod = interfaceClass.getMethod("perform", int.class);
-        performMethod.invoke(setter, 42);
+        setterRunner.invoke("perform", 42);
 
         // Value updated
-        assertEquals(42, setterClass.getMethod("getLastValue").invoke(setter));
+        assertEquals(42, (int) setterRunner.invoke("getLastValue"));
     }
 
     @ParameterizedTest

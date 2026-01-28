@@ -50,9 +50,7 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(120, result);  // 5! = 120
     }
 
@@ -72,9 +70,7 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("getFactorial").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("getFactorial");
         assertNotNull(result);
         IntUnaryOperator factorial = (IntUnaryOperator) result;
         assertEquals(1, factorial.applyAsInt(0));
@@ -107,9 +103,7 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(55, result);  // fib(10) = 55
     }
 
@@ -135,9 +129,7 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("getFibonacci").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("getFibonacci");
         assertNotNull(result);
         IntUnaryOperator fib = (IntUnaryOperator) result;
         assertEquals(0, fib.applyAsInt(0));
@@ -173,9 +165,7 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(55, result);  // 1+2+3+...+10 = 55
     }
 
@@ -200,9 +190,7 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(10, result);  // 2+2+2+2+2 = 10
     }
 
@@ -227,9 +215,7 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(16, result);  // 5+4+3+2+1+1(base) = 16
     }
 }

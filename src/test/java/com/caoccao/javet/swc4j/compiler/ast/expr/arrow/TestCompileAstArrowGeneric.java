@@ -45,9 +45,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals("nested", result);
     }
 
@@ -68,9 +66,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals("test", result);
     }
 
@@ -89,9 +85,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals("Value: 42", result);
     }
 
@@ -109,9 +103,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals("value123", result);
     }
 
@@ -130,9 +122,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals("hello", result);
     }
 
@@ -150,9 +140,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals("value42", result);
     }
 
@@ -173,9 +161,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals("block", result);
     }
 
@@ -194,9 +180,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals("first", result);
     }
 }

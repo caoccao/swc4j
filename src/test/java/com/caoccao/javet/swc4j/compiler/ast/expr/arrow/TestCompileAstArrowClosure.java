@@ -46,9 +46,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("compute", int.class).invoke(instance, 5);
+        var result = runner.createInstanceRunner("com.A").invoke("compute", 5);
         assertNotNull(result);
         assertEquals(50, ((IntSupplier) result).getAsInt());  // 5 * 10 = 50
     }
@@ -67,9 +65,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(result);
         assertEquals(42, ((IntSupplier) result).getAsInt());
     }
@@ -86,9 +82,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("createAdder", int.class).invoke(instance, 100);
+        var result = runner.createInstanceRunner("com.A").invoke("createAdder", 100);
         assertNotNull(result);
         assertEquals(105, ((IntUnaryOperator) result).applyAsInt(5));   // 5 + 100 = 105
         assertEquals(110, ((IntUnaryOperator) result).applyAsInt(10));  // 10 + 100 = 110
@@ -110,9 +104,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(result);
         assertEquals(60, ((IntSupplier) result).getAsInt());  // 10 + 20 + 30 = 60
     }
@@ -131,9 +123,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("compute", int.class).invoke(instance, 5);
+        var result = runner.createInstanceRunner("com.A").invoke("compute", 5);
         assertNotNull(result);
         assertEquals(20, ((IntSupplier) result).getAsInt());  // 5 * 2 + 10 = 20
     }
@@ -151,9 +141,7 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("getValueFn").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("getValueFn");
         assertNotNull(result);
         assertEquals(42, ((IntSupplier) result).getAsInt());
     }
@@ -173,10 +161,9 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var addOne = classA.getMethod("getAddOne").invoke(instance);
-        var dbl = classA.getMethod("getDouble").invoke(instance);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var addOne = instanceRunner.invoke("getAddOne");
+        var dbl = instanceRunner.invoke("getDouble");
         assertNotNull(addOne);
         assertNotNull(dbl);
         assertEquals(6, ((IntUnaryOperator) addOne).applyAsInt(5));   // 5 + 1 = 6

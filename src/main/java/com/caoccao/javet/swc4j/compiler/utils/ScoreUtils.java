@@ -330,18 +330,36 @@ public final class ScoreUtils {
 
         // Handle varargs constructors
         if (constructor.isVarArgs() && paramTypes.length > 0) {
-            if (constructorArgs.length < paramTypes.length - 1) {
+            int regularParamCount = paramTypes.length - 1;
+            Class<?> varargArrayType = paramTypes[paramTypes.length - 1];
+            Class<?> varargComponentType = varargArrayType.getComponentType();
+
+            // Check if args matches the varargs as a direct array pass
+            if (constructorArgs.length == paramTypes.length) {
+                Object lastArg = constructorArgs[constructorArgs.length - 1];
+                if (lastArg != null && varargArrayType.isAssignableFrom(lastArg.getClass())) {
+                    // Direct array pass - score as exact match
+                    double totalScore = 0.0;
+                    for (int i = 0; i < regularParamCount; i++) {
+                        totalScore += scoreClassMatch(constructorArgs[i], paramTypes[i]);
+                    }
+                    // Exact array type match scores 1.0, compatible array scores 0.95
+                    totalScore += lastArg.getClass().equals(varargArrayType) ? 1.0 : 0.95;
+                    return totalScore / paramTypes.length;
+                }
+            }
+
+            // Varargs as individual elements
+            if (constructorArgs.length < regularParamCount) {
                 return 0.0;
             }
 
             double totalScore = 0.0;
-            int regularParamCount = paramTypes.length - 1;
 
             for (int i = 0; i < regularParamCount; i++) {
                 totalScore += scoreClassMatch(constructorArgs[i], paramTypes[i]);
             }
 
-            Class<?> varargComponentType = paramTypes[paramTypes.length - 1].getComponentType();
             for (int i = regularParamCount; i < constructorArgs.length; i++) {
                 totalScore += 0.95 * scoreClassMatch(constructorArgs[i], varargComponentType);
             }
@@ -488,18 +506,37 @@ public final class ScoreUtils {
         Class<?>[] paramTypes = method.getParameterTypes();
 
         if (method.isVarArgs() && paramTypes.length > 0) {
-            if (args.length < paramTypes.length - 1) {
+            int regularParamCount = paramTypes.length - 1;
+            Class<?> varargArrayType = paramTypes[paramTypes.length - 1];
+            Class<?> varargComponentType = varargArrayType.getComponentType();
+
+            // Check if args matches the varargs as a direct array pass
+            // e.g., test(double[]) called with invoke("test", new double[]{1.5, 2.5})
+            if (args.length == paramTypes.length) {
+                Object lastArg = args[args.length - 1];
+                if (lastArg != null && varargArrayType.isAssignableFrom(lastArg.getClass())) {
+                    // Direct array pass - score as exact match
+                    double totalScore = 0.0;
+                    for (int i = 0; i < regularParamCount; i++) {
+                        totalScore += scoreClassMatch(args[i], paramTypes[i]);
+                    }
+                    // Exact array type match scores 1.0, compatible array scores 0.95
+                    totalScore += lastArg.getClass().equals(varargArrayType) ? 1.0 : 0.95;
+                    return totalScore / paramTypes.length;
+                }
+            }
+
+            // Varargs as individual elements
+            if (args.length < regularParamCount) {
                 return 0.0;
             }
 
             double totalScore = 0.0;
-            int regularParamCount = paramTypes.length - 1;
 
             for (int i = 0; i < regularParamCount; i++) {
                 totalScore += scoreClassMatch(args[i], paramTypes[i]);
             }
 
-            Class<?> varargComponentType = paramTypes[paramTypes.length - 1].getComponentType();
             for (int i = regularParamCount; i < args.length; i++) {
                 totalScore += 0.95 * scoreClassMatch(args[i], varargComponentType);
             }

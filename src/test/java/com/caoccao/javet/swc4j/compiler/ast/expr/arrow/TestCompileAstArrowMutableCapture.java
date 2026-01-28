@@ -48,9 +48,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(true, result);
     }
 
@@ -76,9 +74,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(60, result);  // 10 + 20 + 30 = 60
     }
 
@@ -99,9 +95,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(110, result);  // 100 + 10 = 110
     }
 
@@ -123,9 +117,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(4, result);  // Should return final value
     }
 
@@ -147,9 +139,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(30, result);  // 10 + 20 = 30
     }
 
@@ -170,9 +160,8 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var counter = (IntSupplier) classA.getMethod("createCounter").invoke(instance);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var counter = (IntSupplier) instanceRunner.invoke("createCounter");
         assertEquals(List.of(1, 2, 3), List.of(counter.getAsInt(), counter.getAsInt(), counter.getAsInt()));
     }
 
@@ -197,9 +186,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(6, result);  // 1 + 2 + 3 = 6
     }
 
@@ -218,9 +205,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(2.5, result);
     }
 
@@ -241,9 +226,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(20, result);  // Should return 20, not 10
     }
 
@@ -262,9 +245,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(200L, result);
     }
 
@@ -283,9 +264,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals("world", result);
     }
 }

@@ -47,9 +47,8 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var result = instanceRunner.invoke("test");
         assertEquals(30, result);
     }
 
@@ -72,9 +71,8 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var result = instanceRunner.invoke("test");
         assertEquals(6, result);
     }
 
@@ -97,9 +95,8 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var result = instanceRunner.invoke("test");
         assertEquals(60, result);
     }
 
@@ -119,9 +116,8 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var result = instanceRunner.invoke("test");
         assertEquals("John Doe", result);
     }
 
@@ -141,9 +137,8 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var result = instanceRunner.invoke("test");
         assertEquals("Hello World", result);
     }
 
@@ -165,9 +160,8 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var result = instanceRunner.invoke("test");
         assertEquals(36, result);
     }
 
@@ -189,9 +183,8 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var result = instanceRunner.invoke("test");
         assertEquals(30, result);
     }
 
@@ -214,9 +207,8 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        var result = instanceRunner.invoke("test");
         assertEquals(130, result);
     }
 }
