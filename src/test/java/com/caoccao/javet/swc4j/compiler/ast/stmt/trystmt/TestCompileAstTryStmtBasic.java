@@ -56,10 +56,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        assertEquals(42, result);
+        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest

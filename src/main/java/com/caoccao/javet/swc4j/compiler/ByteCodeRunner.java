@@ -25,6 +25,14 @@ public class ByteCodeRunner {
         this.classLoader = new ByteArrayClassLoader(byteCodeMap, parentClassLoader);
     }
 
+    public ByteCodeClassRunner createInstanceRunner(String className, Object... constructorArgs) throws ClassNotFoundException {
+        return ByteCodeClassRunner.createInstance(getClass(className), constructorArgs);
+    }
+
+    public ByteCodeClassRunner createStaticRunner(String className) throws ClassNotFoundException {
+        return ByteCodeClassRunner.createStatic(getClass(className));
+    }
+
     public Class<?> getClass(String className) throws ClassNotFoundException {
         return classLoader.getClass(className);
     }
