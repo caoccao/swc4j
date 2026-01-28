@@ -55,17 +55,13 @@ public final class ByteCodeClassRunner {
         return instance;
     }
 
-    public <T> T invoke(String methodName, Object... args) {
+    public <T> T invoke(String methodName, Object... args) throws InvocationTargetException, IllegalAccessException {
         Method method = ScoreUtils.findBestMethod(clazz, methodName, args);
         if (method == null) {
             throw new IllegalArgumentException("No matching method found: " + methodName);
         }
-        try {
-            @SuppressWarnings("unchecked")
-            T result = (T) method.invoke(instance, args);
-            return result;
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException("Failed to invoke method: " + methodName, e);
-        }
+        @SuppressWarnings("unchecked")
+        T result = (T) method.invoke(instance, args);
+        return result;
     }
 }

@@ -54,10 +54,7 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        assertEquals(15, result);  // 10 + 5
+        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));  // 10 + 5
     }
 
     @ParameterizedTest
@@ -88,10 +85,7 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        assertEquals(20, result);  // 10 + 5 + 3 + 2 = 20
+        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test"));  // 10 + 5 + 3 + 2 = 20
     }
 
     @ParameterizedTest
@@ -110,10 +104,7 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        assertEquals(42, result);
+        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -139,13 +130,11 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
         assertThrows(Exception.class, () -> {
-            classA.getMethod("test").invoke(instance);
+            instanceRunner.invoke("test");
         });
-        var finallyRan = classA.getMethod("didFinallyRun").invoke(instance);
-        assertTrue((Boolean) finallyRan);
+        assertTrue((Boolean) instanceRunner.invoke("didFinallyRun"));
     }
 
     @ParameterizedTest
@@ -167,10 +156,9 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
         try {
-            classA.getMethod("test").invoke(instance);
+            instanceRunner.invoke("test");
             fail("Should throw exception");
         } catch (Exception e) {
             assertTrue(e.getCause().getMessage().contains("finally"));
@@ -200,12 +188,9 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        var finallyRan = classA.getMethod("didFinallyRun").invoke(instance);
-        assertEquals(99, result);
-        assertTrue((Boolean) finallyRan);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(99, (int) instanceRunner.invoke("test"));
+        assertTrue((Boolean) instanceRunner.invoke("didFinallyRun"));
     }
 
     @ParameterizedTest
@@ -227,10 +212,7 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        assertEquals(3, result);  // Finally return wins
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));  // Finally return wins
     }
 
     @ParameterizedTest
@@ -255,12 +237,9 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        var finallyRan = classA.getMethod("didFinallyRun").invoke(instance);
-        assertEquals(42, result);
-        assertTrue((Boolean) finallyRan);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(42, (int) instanceRunner.invoke("test"));
+        assertTrue((Boolean) instanceRunner.invoke("didFinallyRun"));
     }
 
     @ParameterizedTest
@@ -285,10 +264,7 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        assertEquals(35, result);  // 10 + 20 + 5 = 35
+        assertEquals(35, (int) runner.createInstanceRunner("com.A").invoke("test"));  // 10 + 20 + 5 = 35
     }
 
     @ParameterizedTest
@@ -312,9 +288,6 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        assertEquals(25, result);  // 20 + 5
+        assertEquals(25, (int) runner.createInstanceRunner("com.A").invoke("test"));  // 20 + 5
     }
 }
