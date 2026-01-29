@@ -21,7 +21,8 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class TestPrimeNumber extends BaseTestCompileSuite {
     @ParameterizedTest
@@ -41,7 +42,7 @@ public class TestPrimeNumber extends BaseTestCompileSuite {
         Class<?> classA = runner.getDefaultClass();
         var instance = classA.getConstructor().newInstance();
         var method = classA.getMethod("isPrime", int.class);
-        assertEquals(true, method.invoke(instance, 7));  // 7 is prime
-        assertEquals(false, method.invoke(instance, 8)); // 8 is not prime
+        assertThat((boolean) method.invoke(instance, 7)).isTrue();  // 7 is prime
+        assertThat((boolean) method.invoke(instance, 8)).isFalse(); // 8 is not prime
     }
 }

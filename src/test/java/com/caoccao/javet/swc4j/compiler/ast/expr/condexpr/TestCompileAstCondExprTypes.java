@@ -41,7 +41,7 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1.5, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertEquals(1.5, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
     }
 
     @ParameterizedTest
@@ -58,7 +58,7 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10.0, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertEquals(10.0, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
     }
 
     @ParameterizedTest
@@ -73,7 +73,7 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10.0, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertEquals(10.0, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
     }
 
     @ParameterizedTest

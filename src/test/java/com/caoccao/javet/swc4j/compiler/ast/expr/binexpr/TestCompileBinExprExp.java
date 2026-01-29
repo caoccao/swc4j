@@ -79,7 +79,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
         // 2 ** 3 ** 2 = 2 ** 9 = 512 (right-associative in most languages)
         // However, if evaluated left-to-right: (2 ** 3) ** 2 = 8 ** 2 = 64
         // Let's test what we actually get
-        double result = (double) runner.createInstanceRunner("com.A").invoke("test");
+        double result = runner.createInstanceRunner("com.A").invoke("test");
         // Just verify it's either 512 or 64, both are valid depending on associativity
         assertTrue(result == 512.0 || result == 64.0);
     }
@@ -132,7 +132,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3.0, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.001); // Approximate cube root
+        assertEquals(3.0, runner.createInstanceRunner("com.A").invoke("test"), 0.001); // Approximate cube root
     }
 
     @ParameterizedTest
@@ -149,7 +149,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1.331, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
+        assertEquals(1.331, runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
     }
 
     @ParameterizedTest
@@ -284,7 +284,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(6.25, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
+        assertEquals(6.25, runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
     }
 
     @ParameterizedTest
@@ -301,7 +301,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3.375, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
+        assertEquals(3.375, runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
     }
 
     // Edge cases
@@ -320,7 +320,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(2.0, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.00001); // Square root of 4
+        assertEquals(2.0, runner.createInstanceRunner("com.A").invoke("test"), 0.00001); // Square root of 4
     }
 
     @ParameterizedTest
@@ -337,7 +337,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(2.0, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
+        assertEquals(2.0, runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
     }
 
     @ParameterizedTest

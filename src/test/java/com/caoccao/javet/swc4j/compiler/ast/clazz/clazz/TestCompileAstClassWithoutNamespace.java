@@ -21,8 +21,8 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
 
@@ -35,7 +35,7 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                     return 42
                   }
                 }""");
-        assertEquals(42, (int) runner.createInstanceRunner("A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("A").invoke("test")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -54,7 +54,7 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("Counter");
         instanceRunner.invoke("increment");
         instanceRunner.invoke("increment");
-        assertEquals(2, (int) instanceRunner.invoke("getCount"));
+        assertThat((int) instanceRunner.invoke("getCount")).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -72,7 +72,7 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                     return calc.add(10, 20)
                   }
                 }""");
-        assertEquals(30, (int) runner.createInstanceRunner("User").invoke("compute"));
+        assertThat((int) runner.createInstanceRunner("User").invoke("compute")).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -82,7 +82,7 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                 export class Empty {
                 }""");
         var instanceRunner = runner.createInstanceRunner("Empty");
-        assertNotNull(instanceRunner.getInstance());
+        assertThat(instanceRunner.getInstance()).isNotNull();
     }
 
     @ParameterizedTest
@@ -94,9 +94,9 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                   sub(a: int, b: int): int { return a - b }
                   mul(a: int, b: int): int { return a * b }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("Math").invoke("add", 2, 3));
-        assertEquals(7, (int) runner.createInstanceRunner("Math").invoke("sub", 10, 3));
-        assertEquals(12, (int) runner.createInstanceRunner("Math").invoke("mul", 3, 4));
+        assertThat((int) runner.createInstanceRunner("Math").invoke("add", 2, 3)).isEqualTo(5);
+        assertThat((int) runner.createInstanceRunner("Math").invoke("sub", 10, 3)).isEqualTo(7);
+        assertThat((int) runner.createInstanceRunner("Math").invoke("mul", 3, 4)).isEqualTo(12);
     }
 
     @ParameterizedTest
@@ -112,9 +112,9 @@ public class TestCompileAstClassWithoutNamespace extends BaseTestCompileSuite {
                 export class C {
                   value(): int { return 3 }
                 }""");
-        assertEquals(1, (int) runner.createInstanceRunner("A").invoke("value"));
-        assertEquals(2, (int) runner.createInstanceRunner("B").invoke("value"));
-        assertEquals(3, (int) runner.createInstanceRunner("C").invoke("value"));
+        assertThat((int) runner.createInstanceRunner("A").invoke("value")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("B").invoke("value")).isEqualTo(2);
+        assertThat((int) runner.createInstanceRunner("C").invoke("value")).isEqualTo(3);
     }
 
 }

@@ -25,7 +25,8 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests for ES2022 private fields (#field syntax).
@@ -56,21 +57,22 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
 
         // Verify static field
         var staticField = classA.getDeclaredField("staticValue");
-        assertTrue(Modifier.isPrivate(staticField.getModifiers()), "#staticValue should be private");
-        assertTrue(Modifier.isStatic(staticField.getModifiers()), "#staticValue should be static");
+        assertThat(Modifier.isPrivate(staticField.getModifiers())).as("#staticValue should be private").isTrue();
+        assertThat(Modifier.isStatic(staticField.getModifiers())).as("#staticValue should be static").isTrue();
 
         // Verify instance field
         var instanceField = classA.getDeclaredField("instanceValue");
-        assertTrue(Modifier.isPrivate(instanceField.getModifiers()), "#instanceValue should be private");
-        assertFalse(Modifier.isStatic(instanceField.getModifiers()), "#instanceValue should not be static");
+        assertThat(Modifier.isPrivate(instanceField.getModifiers())).as("#instanceValue should be private").isTrue();
+        assertThat(Modifier.isStatic(instanceField.getModifiers())).as("#instanceValue should not be static").isFalse();
 
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(
-                List.of(100, 50),
+        assertThat(
                 List.of(
                         runner.createStaticRunner("com.A").invoke("getStaticValue"),
                         (int) instanceRunner.invoke("getInstanceValue")
                 )
+        ).isEqualTo(
+                List.of(100, 50)
         );
     }
 
@@ -86,13 +88,14 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(
-                List.of(10, 99),
+        assertThat(
                 List.of(
                         (int) instanceRunner.invoke("getValue"),
                         invokeAfter(() -> instanceRunner.invoke("setValue", 99),
                                 () -> instanceRunner.invoke("getValue"))
                 )
+        ).isEqualTo(
+                List.of(10, 99)
         );
     }
 
@@ -110,10 +113,10 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
 
         // Verify field is private
         var valueField = classA.getDeclaredField("value");
-        assertTrue(Modifier.isPrivate(valueField.getModifiers()), "#value should be private");
+        assertThat(Modifier.isPrivate(valueField.getModifiers())).as("#value should be private").isTrue();
 
         // Test functionality
-        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("getValue"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("getValue")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -131,8 +134,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.Counter");
 
-        assertEquals(
-                List.of(0, 1, 2, 1, 0),
+        assertThat(
                 List.of(
                         (int) instanceRunner.invoke("getCount"),
                         invokeAfter(() -> instanceRunner.invoke("increment"), () -> instanceRunner.invoke("getCount")),
@@ -140,6 +142,8 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                         invokeAfter(() -> instanceRunner.invoke("decrement"), () -> instanceRunner.invoke("getCount")),
                         invokeAfter(() -> instanceRunner.invoke("reset"), () -> instanceRunner.invoke("getCount"))
                 )
+        ).isEqualTo(
+                List.of(0, 1, 2, 1, 0)
         );
     }
 
@@ -161,17 +165,18 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
         // Verify access modifiers
         var publicField = classA.getDeclaredField("publicValue");
         var privateField = classA.getDeclaredField("privateValue");
-        assertTrue(Modifier.isPublic(publicField.getModifiers()), "publicValue should be public");
-        assertTrue(Modifier.isPrivate(privateField.getModifiers()), "#privateValue should be private");
+        assertThat(Modifier.isPublic(publicField.getModifiers())).as("publicValue should be public").isTrue();
+        assertThat(Modifier.isPrivate(privateField.getModifiers())).as("#privateValue should be private").isTrue();
 
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(
-                List.of(5, 10, 15),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("getPublic"),
                         instanceRunner.invoke("getPrivate"),
                         (int) instanceRunner.invoke("getSum")
                 )
+        ).isEqualTo(
+                List.of(5, 10, 15)
         );
     }
 
@@ -186,7 +191,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                     sum(): int { return this.#x + this.#y }
                   }
                 }""");
-        assertEquals(30, (int) runner.createInstanceRunner("com.A").invoke("sum"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("sum")).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -211,22 +216,23 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
         // Verify all fields are private
         for (String fieldName : List.of("intValue", "doubleValue", "boolValue", "stringValue")) {
             var field = classA.getDeclaredField(fieldName);
-            assertTrue(Modifier.isPrivate(field.getModifiers()), "#" + fieldName + " should be private");
+            assertThat(Modifier.isPrivate(field.getModifiers())).as("#" + fieldName + " should be private").isTrue();
         }
 
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(
-                Map.of(
-                        "int", 42,
-                        "double", 3.14,
-                        "bool", true,
-                        "string", "Hello"
-                ),
+        assertThat(
                 Map.of(
                         "int", instanceRunner.invoke("getInt"),
                         "double", instanceRunner.invoke("getDouble"),
                         "bool", (boolean) instanceRunner.invoke("getBool"),
                         "string", (String) instanceRunner.invoke("getString")
+                )
+        ).isEqualTo(
+                Map.of(
+                        "int", 42,
+                        "double", 3.14,
+                        "bool", true,
+                        "string", "Hello"
                 )
         );
     }
@@ -241,7 +247,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                     getValue(): int { return this.#value }
                   }
                 }""");
-        assertEquals(50, (int) runner.createInstanceRunner("com.A").invoke("getValue"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("getValue")).isEqualTo(50);
     }
 
     @ParameterizedTest
@@ -257,13 +263,14 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                 }""");
         var staticRunner = runner.createStaticRunner("com.A");
 
-        assertEquals(
-                List.of(0, 1, 2),
+        assertThat(
                 List.of(
                         (int) staticRunner.invoke("getCounter"),
                         invokeAfter(() -> staticRunner.invoke("increment"), () -> staticRunner.invoke("getCounter")),
                         invokeAfter(() -> staticRunner.invoke("increment"), () -> staticRunner.invoke("getCounter"))
                 )
+        ).isEqualTo(
+                List.of(0, 1, 2)
         );
     }
 
@@ -281,10 +288,10 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
 
         // Verify field is private and static
         var countField = classA.getDeclaredField("count");
-        assertTrue(Modifier.isPrivate(countField.getModifiers()), "#count should be private");
-        assertTrue(Modifier.isStatic(countField.getModifiers()), "#count should be static");
+        assertThat(Modifier.isPrivate(countField.getModifiers())).as("#count should be private").isTrue();
+        assertThat(Modifier.isStatic(countField.getModifiers())).as("#count should be static").isTrue();
 
-        assertEquals(100, (int) runner.createStaticRunner("com.A").invoke("getCount"));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("getCount")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -302,8 +309,7 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                 }""");
         var staticRunner = runner.createStaticRunner("com.Counter");
 
-        assertEquals(
-                List.of(0, 1, 2, 1, 0),
+        assertThat(
                 List.of(
                         (int) staticRunner.invoke("getCount"),
                         invokeAfter(() -> staticRunner.invoke("increment"), () -> staticRunner.invoke("getCount")),
@@ -311,6 +317,8 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
                         invokeAfter(() -> staticRunner.invoke("decrement"), () -> staticRunner.invoke("getCount")),
                         invokeAfter(() -> staticRunner.invoke("reset"), () -> staticRunner.invoke("getCount"))
                 )
+        ).isEqualTo(
+                List.of(0, 1, 2, 1, 0)
         );
     }
 
@@ -336,23 +344,24 @@ public class TestCompileAstClassPrivateFields extends BaseTestCompileSuite {
         // Verify all fields are private and static
         for (String fieldName : List.of("intValue", "doubleValue", "boolValue", "stringValue")) {
             var field = classA.getDeclaredField(fieldName);
-            assertTrue(Modifier.isPrivate(field.getModifiers()), "#" + fieldName + " should be private");
-            assertTrue(Modifier.isStatic(field.getModifiers()), "#" + fieldName + " should be static");
+            assertThat(Modifier.isPrivate(field.getModifiers())).as("#" + fieldName + " should be private").isTrue();
+            assertThat(Modifier.isStatic(field.getModifiers())).as("#" + fieldName + " should be static").isTrue();
         }
 
         var staticRunner = runner.createStaticRunner("com.A");
-        assertEquals(
-                Map.of(
-                        "int", 42,
-                        "double", 3.14,
-                        "bool", true,
-                        "string", "Hello"
-                ),
+        assertThat(
                 Map.of(
                         "int", staticRunner.invoke("getInt"),
                         "double", staticRunner.invoke("getDouble"),
                         "bool", (boolean) staticRunner.invoke("getBool"),
                         "string", (String) staticRunner.invoke("getString")
+                )
+        ).isEqualTo(
+                Map.of(
+                        "int", 42,
+                        "double", 3.14,
+                        "bool", true,
+                        "string", "Hello"
                 )
         );
     }

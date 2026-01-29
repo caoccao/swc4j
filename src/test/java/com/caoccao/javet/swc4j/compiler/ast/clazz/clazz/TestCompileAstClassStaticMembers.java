@@ -24,7 +24,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 
 public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
 
@@ -53,24 +55,26 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                   }
                 }""");
         var staticRunner = runner.createStaticRunner("com.MixedClass");
-        assertEquals(0, (int) staticRunner.invoke("getInstanceCount"));
+        assertThat((int) staticRunner.invoke("getInstanceCount")).isEqualTo(0);
 
         var instanceRunner1 = runner.createInstanceRunner("com.MixedClass");
-        assertEquals(
-                Map.of("count", 1, "id", 1),
+        assertThat(
                 Map.of(
                         "count", staticRunner.invoke("getInstanceCount"),
                         "id", (int) instanceRunner1.invoke("getId")
                 )
+        ).isEqualTo(
+                Map.of("count", 1, "id", 1)
         );
 
         var instanceRunner2 = runner.createInstanceRunner("com.MixedClass");
-        assertEquals(
-                Map.of("count", 2, "id", 2),
+        assertThat(
                 Map.of(
                         "count", staticRunner.invoke("getInstanceCount"),
                         "id", (int) instanceRunner2.invoke("getId")
                 )
+        ).isEqualTo(
+                Map.of("count", 2, "id", 2)
         );
     }
 
@@ -94,8 +98,7 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                 }""");
         Class<?> classCounter = runner.getClass("com.Counter");
 
-        assertEquals(
-                List.of(0, 1, 2, 1),
+        assertThat(
                 List.of(
                         classCounter.getMethod("getCount").invoke(null),
                         invokeAfter(() -> classCounter.getMethod("increment").invoke(null),
@@ -105,6 +108,8 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                         invokeAfter(() -> classCounter.getMethod("decrement").invoke(null),
                                 () -> classCounter.getMethod("getCount").invoke(null))
                 )
+        ).isEqualTo(
+                List.of(0, 1, 2, 1)
         );
     }
 
@@ -126,18 +131,19 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> classSettings = runner.getClass("com.Settings");
-        assertEquals(
-                Map.of(
-                        "maxUsers", 1000,
-                        "timeout", 30.5,
-                        "enabled", true,
-                        "appName", "MyApp"
-                ),
+        assertThat(
                 Map.of(
                         "maxUsers", classSettings.getMethod("getMaxUsers").invoke(null),
                         "timeout", classSettings.getMethod("getTimeout").invoke(null),
                         "enabled", classSettings.getMethod("isEnabled").invoke(null),
                         "appName", classSettings.getMethod("getAppName").invoke(null)
+                )
+        ).isEqualTo(
+                Map.of(
+                        "maxUsers", 1000,
+                        "timeout", 30.5,
+                        "enabled", true,
+                        "appName", "MyApp"
                 )
         );
     }
@@ -155,8 +161,8 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> classConstants = runner.getClass("com.Constants");
-        assertEquals(3.14159, classConstants.getMethod("getPI").invoke(null));
-        assertEquals(6.28318, (double) classConstants.getMethod("getDoublePI").invoke(null), 0.00001);
+        assertThat(classConstants.getMethod("getPI").invoke(null)).isEqualTo(3.14159);
+        assertThat((double) classConstants.getMethod("getDoublePI").invoke(null)).isCloseTo(6.28318, within(0.00001));
     }
 
     @ParameterizedTest
@@ -172,12 +178,13 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> classConfig = runner.getClass("com.Config");
-        assertEquals(
-                List.of(100, "default"),
+        assertThat(
                 List.of(
                         classConfig.getMethod("getMaxSize").invoke(null),
                         classConfig.getMethod("getName").invoke(null)
                 )
+        ).isEqualTo(
+                List.of(100, "default")
         );
     }
 
@@ -194,9 +201,9 @@ public class TestCompileAstClassStaticMembers extends BaseTestCompileSuite {
                 }""");
         Class<?> classTracker = runner.getClass("com.Tracker");
         // Default value for uninitialized static int is 0
-        assertEquals(0, classTracker.getMethod("getCount").invoke(null));
+        assertThat(classTracker.getMethod("getCount").invoke(null)).isEqualTo(0);
         classTracker.getMethod("setCount", int.class).invoke(null, 42);
-        assertEquals(42, classTracker.getMethod("getCount").invoke(null));
+        assertThat(classTracker.getMethod("getCount").invoke(null)).isEqualTo(42);
     }
 
     @FunctionalInterface

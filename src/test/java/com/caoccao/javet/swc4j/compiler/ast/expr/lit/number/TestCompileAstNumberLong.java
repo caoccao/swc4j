@@ -21,7 +21,8 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests for long number literals.
@@ -41,7 +42,7 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(999L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(999L);
     }
 
     @ParameterizedTest
@@ -56,7 +57,7 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(42L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(42L);
     }
 
     @ParameterizedTest
@@ -70,7 +71,7 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(Long.MAX_VALUE, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(Long.MAX_VALUE);
     }
 
     @ParameterizedTest
@@ -85,7 +86,7 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(Long.MIN_VALUE + 1, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(Long.MIN_VALUE + 1);
     }
 
     @ParameterizedTest
@@ -99,7 +100,7 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1L);
     }
 
     @ParameterizedTest
@@ -113,7 +114,7 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(123L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123L);
     }
 
     @ParameterizedTest
@@ -127,7 +128,7 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(100L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(100L);
     }
 
     @ParameterizedTest
@@ -141,7 +142,7 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(((long) Integer.MAX_VALUE) + 1L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(((long) Integer.MAX_VALUE) + 1L);
     }
 
     @ParameterizedTest
@@ -156,7 +157,7 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-123L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-123L);
     }
 
     @ParameterizedTest
@@ -171,7 +172,7 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(123L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123L);
     }
 
     @ParameterizedTest
@@ -185,7 +186,7 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(123L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123L);
     }
 
     @ParameterizedTest
@@ -199,6 +200,6 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(0L);
     }
 }

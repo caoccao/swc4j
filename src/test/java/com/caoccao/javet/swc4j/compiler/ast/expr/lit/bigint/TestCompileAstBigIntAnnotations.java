@@ -90,7 +90,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(987654321.0, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertEquals(987654321.0, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
     }
 
     @ParameterizedTest
@@ -105,7 +105,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(654321f, (float) runner.createInstanceRunner("com.A").invoke("test"), 0.001f);
+        assertEquals(654321f, runner.createInstanceRunner("com.A").invoke("test"), 0.001f);
     }
 
     @ParameterizedTest

@@ -21,7 +21,8 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class TestByteCodeCompilerOptions {
 
@@ -102,11 +103,11 @@ public class TestByteCodeCompilerOptions {
                 }""");
 
         byte[] classBytes = compiler.getMemory().getByteCodeMap().get("com.A");
-        assertNotNull(classBytes);
+        assertThat(classBytes).isNotNull();
 
         // Verify the class file does NOT contain debug info
-        assertFalse(containsUtf8(classBytes, "LineNumberTable"), "Class should NOT contain LineNumberTable attribute");
-        assertFalse(containsUtf8(classBytes, "LocalVariableTable"), "Class should NOT contain LocalVariableTable attribute");
+        assertThat(containsUtf8(classBytes, "LineNumberTable")).as("Class should NOT contain LineNumberTable attribute").isFalse();
+        assertThat(containsUtf8(classBytes, "LocalVariableTable")).as("Class should NOT contain LocalVariableTable attribute").isFalse();
     }
 
     @Test
@@ -129,11 +130,11 @@ public class TestByteCodeCompilerOptions {
                 }""");
 
         byte[] classBytes = compiler.getMemory().getByteCodeMap().get("com.A");
-        assertNotNull(classBytes);
+        assertThat(classBytes).isNotNull();
 
         // Verify the class file contains debug info
         // We'll check for the presence of LineNumberTable and LocalVariableTable attribute names in the constant pool
-        assertTrue(containsUtf8(classBytes, "LineNumberTable"), "Class should contain LineNumberTable attribute");
-        assertTrue(containsUtf8(classBytes, "LocalVariableTable"), "Class should contain LocalVariableTable attribute");
+        assertThat(containsUtf8(classBytes, "LineNumberTable")).as("Class should contain LineNumberTable attribute").isTrue();
+        assertThat(containsUtf8(classBytes, "LocalVariableTable")).as("Class should contain LocalVariableTable attribute").isTrue();
     }
 }

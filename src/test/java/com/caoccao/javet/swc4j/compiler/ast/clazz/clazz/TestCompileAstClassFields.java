@@ -24,7 +24,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class TestCompileAstClassFields extends BaseTestCompileSuite {
 
@@ -53,13 +54,14 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
-        assertEquals(
-                List.of(10, 99),
+        assertThat(
                 List.of(
                         classA.getMethod("getValue").invoke(instance),
                         invokeAfter(() -> classA.getMethod("setValue", int.class).invoke(instance, 99),
                                 () -> classA.getMethod("getValue").invoke(instance))
                 )
+        ).isEqualTo(
+                List.of(10, 99)
         );
     }
 
@@ -81,18 +83,19 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(
-                Map.of(
-                        "int", 42,
-                        "double", 3.14,
-                        "bool", true,
-                        "string", "Hello"
-                ),
+        assertThat(
                 Map.of(
                         "int", instanceRunner.invoke("getInt"),
                         "double", instanceRunner.invoke("getDouble"),
                         "bool", (boolean) instanceRunner.invoke("getBool"),
                         "string", (String) instanceRunner.invoke("getString")
+                )
+        ).isEqualTo(
+                Map.of(
+                        "int", 42,
+                        "double", 3.14,
+                        "bool", true,
+                        "string", "Hello"
                 )
         );
     }
@@ -112,8 +115,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.Counter");
 
-        assertEquals(
-                List.of(0, 1, 2, 1, 0),
+        assertThat(
                 List.of(
                         (int) instanceRunner.invoke("getCount"),
                         invokeAfter(() -> instanceRunner.invoke("increment"), () -> instanceRunner.invoke("getCount")),
@@ -121,6 +123,8 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                         invokeAfter(() -> instanceRunner.invoke("decrement"), () -> instanceRunner.invoke("getCount")),
                         invokeAfter(() -> instanceRunner.invoke("reset"), () -> instanceRunner.invoke("getCount"))
                 )
+        ).isEqualTo(
+                List.of(0, 1, 2, 1, 0)
         );
     }
 
@@ -136,7 +140,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(50, (int) runner.createInstanceRunner("com.A").invoke("getValue"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("getValue")).isEqualTo(50);
     }
 
     @ParameterizedTest
@@ -151,7 +155,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("getValue"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("getValue")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -167,7 +171,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                   }
                 }""");
         // Default value for int is 0
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("getValue"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("getValue")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -183,7 +187,7 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(30, (int) runner.createInstanceRunner("com.A").invoke("sum"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("sum")).isEqualTo(30);
     }
 
     @FunctionalInterface

@@ -23,8 +23,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests for generics support (type erasure to JVM bytecode).
@@ -48,29 +48,29 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> classBox = runner.getClass("com.Box");
-        assertNotNull(classBox);
+        assertThat(classBox).isNotNull();
 
         // Verify field type is Object (type erasure)
         var valueField = classBox.getDeclaredField("value");
-        assertEquals(Object.class, valueField.getType());
+        assertThat(valueField.getType()).isEqualTo(Object.class);
 
         // Verify method signatures use Object
         var getValue = classBox.getMethod("getValue");
-        assertEquals(Object.class, getValue.getReturnType());
+        assertThat(getValue.getReturnType()).isEqualTo(Object.class);
 
         var setValue = classBox.getMethod("setValue", Object.class);
-        assertNotNull(setValue);
+        assertThat(setValue).isNotNull();
 
         // Test instance with String
         var instanceRunner1 = runner.createInstanceRunner("com.Box", "Hello");
-        assertEquals("Hello", instanceRunner1.invoke("getValue"));
+        assertThat((String) instanceRunner1.invoke("getValue")).isEqualTo("Hello");
 
         instanceRunner1.invoke("setValue", "World");
-        assertEquals("World", instanceRunner1.invoke("getValue"));
+        assertThat((String) instanceRunner1.invoke("getValue")).isEqualTo("World");
 
         // Test instance with Integer
         var instanceRunner2 = runner.createInstanceRunner("com.Box", 42);
-        assertEquals(42, (int) instanceRunner2.invoke("getValue"));
+        assertThat((int) instanceRunner2.invoke("getValue")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -88,21 +88,22 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> classPair = runner.getClass("com.Pair");
-        assertNotNull(classPair);
+        assertThat(classPair).isNotNull();
 
         // Verify both fields are Object (no constraints)
         var keyField = classPair.getDeclaredField("key");
         var valField = classPair.getDeclaredField("val");
-        assertEquals(List.of(Object.class, Object.class), List.of(keyField.getType(), valField.getType()));
+        assertThat(List.of(keyField.getType(), valField.getType())).isEqualTo(List.of(Object.class, Object.class));
 
         // Test instance
         var instanceRunner = runner.createInstanceRunner("com.Pair", "name", 42);
-        assertEquals(
-                List.of("name", 42),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("getKey"),
                         instanceRunner.invoke("getVal")
                 )
+        ).isEqualTo(
+                List.of("name", 42)
         );
     }
 
@@ -121,21 +122,22 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> classKV = runner.getClass("com.KeyValue");
-        assertNotNull(classKV);
+        assertThat(classKV).isNotNull();
 
         // Verify field types - K erases to String, V erases to Object
         var keyField = classKV.getDeclaredField("key");
         var valField = classKV.getDeclaredField("val");
-        assertEquals(List.of(String.class, Object.class), List.of(keyField.getType(), valField.getType()));
+        assertThat(List.of(keyField.getType(), valField.getType())).isEqualTo(List.of(String.class, Object.class));
 
         // Test instance
         var instanceRunner = runner.createInstanceRunner("com.KeyValue", "name", 42);
-        assertEquals(
-                List.of("name", 42),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("getKey"),
                         instanceRunner.invoke("getVal")
                 )
+        ).isEqualTo(
+                List.of("name", 42)
         );
     }
 
@@ -152,19 +154,19 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> classStrBox = runner.getClass("com.StrBox");
-        assertNotNull(classStrBox);
+        assertThat(classStrBox).isNotNull();
 
         // Verify field type is String (constraint type)
         var valueField = classStrBox.getDeclaredField("value");
-        assertEquals(String.class, valueField.getType());
+        assertThat(valueField.getType()).isEqualTo(String.class);
 
         // Verify method signatures use String
         var getValue = classStrBox.getMethod("getValue");
-        assertEquals(String.class, getValue.getReturnType());
+        assertThat(getValue.getReturnType()).isEqualTo(String.class);
 
         // Test instance
         var instanceRunner = runner.createInstanceRunner("com.StrBox", "Hello");
-        assertEquals("Hello", instanceRunner.invoke("getValue"));
+        assertThat((String) instanceRunner.invoke("getValue")).isEqualTo("Hello");
     }
 
     @ParameterizedTest
@@ -182,29 +184,29 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> classHolder = runner.getClass("com.Holder");
-        assertNotNull(classHolder);
+        assertThat(classHolder).isNotNull();
 
         // Verify field type is Object (erased type)
         var valueField = classHolder.getDeclaredField("value");
-        assertEquals(Object.class, valueField.getType());
+        assertThat(valueField.getType()).isEqualTo(Object.class);
 
         // Verify method signatures
         var get = classHolder.getMethod("get");
-        assertEquals(Object.class, get.getReturnType());
+        assertThat(get.getReturnType()).isEqualTo(Object.class);
 
         var set = classHolder.getMethod("set", Object.class);
-        assertNotNull(set);
-        assertEquals(void.class, set.getReturnType());
+        assertThat(set).isNotNull();
+        assertThat(set.getReturnType()).isEqualTo(void.class);
 
         var transform = classHolder.getMethod("transform", Object.class);
-        assertEquals(Object.class, transform.getReturnType());
+        assertThat(transform.getReturnType()).isEqualTo(Object.class);
 
         // Test instance
         var instanceRunner = runner.createInstanceRunner("com.Holder", "Hello");
-        assertEquals("Hello", instanceRunner.invoke("get"));
+        assertThat((String) instanceRunner.invoke("get")).isEqualTo("Hello");
         instanceRunner.invoke("set", "World");
-        assertEquals("World", instanceRunner.invoke("get"));
-        assertEquals("New", instanceRunner.invoke("transform", "New"));
+        assertThat((String) instanceRunner.invoke("get")).isEqualTo("World");
+        assertThat((String) instanceRunner.invoke("transform", "New")).isEqualTo("New");
     }
 
     @ParameterizedTest
@@ -218,20 +220,21 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> classContainer = runner.getClass("com.Container");
-        assertNotNull(classContainer);
+        assertThat(classContainer).isNotNull();
 
         // Verify method signature uses Object
         var wrap = classContainer.getMethod("wrap", Object.class);
-        assertEquals(Object.class, wrap.getReturnType());
+        assertThat(wrap.getReturnType()).isEqualTo(Object.class);
 
         // Test method
         var instanceRunner = runner.createInstanceRunner("com.Container");
-        assertEquals(
-                List.of("Hello", 42),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("wrap", "Hello"),
                         instanceRunner.invoke("wrap", 42)
                 )
+        ).isEqualTo(
+                List.of("Hello", 42)
         );
     }
 
@@ -247,24 +250,25 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> classUtils = runner.getClass("com.Utils");
-        assertNotNull(classUtils);
+        assertThat(classUtils).isNotNull();
 
         // Verify method signatures use Object
         var identity = classUtils.getMethod("identity", Object.class);
-        assertEquals(Object.class, identity.getReturnType());
+        assertThat(identity.getReturnType()).isEqualTo(Object.class);
 
         var first = classUtils.getMethod("first", Object.class, Object.class);
-        assertEquals(Object.class, first.getReturnType());
+        assertThat(first.getReturnType()).isEqualTo(Object.class);
 
         // Test methods
         var staticRunner = runner.createStaticRunner("com.Utils");
-        assertEquals(
-                List.of("Hello", 42, "A"),
+        assertThat(
                 List.of(
                         staticRunner.invoke("identity", "Hello"),
                         staticRunner.invoke("identity", 42),
                         staticRunner.invoke("first", "A", "B")
                 )
+        ).isEqualTo(
+                List.of("Hello", 42, "A")
         );
     }
 
@@ -279,20 +283,21 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> classUtils = runner.getClass("com.Utils");
-        assertNotNull(classUtils);
+        assertThat(classUtils).isNotNull();
 
         // Verify method signature uses String (constraint)
         var echo = classUtils.getMethod("echo", String.class);
-        assertEquals(String.class, echo.getReturnType());
+        assertThat(echo.getReturnType()).isEqualTo(String.class);
 
         // Test method
         var staticRunner = runner.createStaticRunner("com.Utils");
-        assertEquals(
-                List.of("Hello", "World"),
+        assertThat(
                 List.of(
                         staticRunner.invoke("echo", "Hello"),
                         staticRunner.invoke("echo", "World")
                 )
+        ).isEqualTo(
+                List.of("Hello", "World")
         );
     }
 }

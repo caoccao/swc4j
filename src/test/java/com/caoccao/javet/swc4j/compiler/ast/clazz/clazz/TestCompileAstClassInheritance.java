@@ -23,7 +23,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
 
@@ -47,16 +48,17 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
         Class<?> catClass = runner.getClass("com.Cat");
 
         // Check class hierarchy
-        assertTrue(animalClass.isAssignableFrom(dogClass));
-        assertTrue(animalClass.isAssignableFrom(catClass));
+        assertThat(animalClass.isAssignableFrom(dogClass)).isTrue();
+        assertThat(animalClass.isAssignableFrom(catClass)).isTrue();
 
-        assertEquals(
-                Map.of("Animal", "...", "Dog", "Woof", "Cat", "Meow"),
+        assertThat(
                 Map.of(
                         "Animal", runner.createInstanceRunner("com.Animal").invoke("speak"),
                         "Dog", runner.createInstanceRunner("com.Dog").invoke("speak"),
                         "Cat", runner.createInstanceRunner("com.Cat").invoke("speak")
                 )
+        ).isEqualTo(
+                Map.of("Animal", "...", "Dog", "Woof", "Cat", "Meow")
         );
     }
 
@@ -74,21 +76,21 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> myListClass = runner.getClass("com.MyList");
-        assertNotNull(myListClass);
+        assertThat(myListClass).isNotNull();
 
         // Verify it extends ArrayList
-        assertTrue(ArrayList.class.isAssignableFrom(myListClass));
+        assertThat(ArrayList.class.isAssignableFrom(myListClass)).isTrue();
 
         // Test custom field and method work
         var instanceRunner = runner.createInstanceRunner("com.MyList");
-        assertEquals(42, (int) instanceRunner.invoke("getCustomField"));
+        assertThat((int) instanceRunner.invoke("getCustomField")).isEqualTo(42);
 
         // Inherited methods from ArrayList should be available via reflection
         // Using ArrayList's add method directly (which is inherited)
         @SuppressWarnings("unchecked")
         ArrayList<Object> list = (ArrayList<Object>) instanceRunner.getInstance();
         list.add("Hello");
-        assertEquals(1, list.size());
+        assertThat(list.size()).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -108,16 +110,16 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> myExceptionClass = runner.getClass("com.MyException");
-        assertNotNull(myExceptionClass);
+        assertThat(myExceptionClass).isNotNull();
 
         // Verify it extends Exception
-        assertTrue(Exception.class.isAssignableFrom(myExceptionClass));
+        assertThat(Exception.class.isAssignableFrom(myExceptionClass)).isTrue();
 
         // Test functionality
         var instanceRunner = runner.createInstanceRunner("com.MyException", "Test error", 500);
-        assertInstanceOf(Exception.class, instanceRunner.getInstance());
-        assertEquals(500, (int) instanceRunner.invoke("getErrorCode"));
-        assertEquals("Test error", instanceRunner.invoke("getMessage"));
+        assertThat(instanceRunner.getInstance()).isInstanceOf(Exception.class);
+        assertThat((int) instanceRunner.invoke("getErrorCode")).isEqualTo(500);
+        assertThat((String) instanceRunner.invoke("getMessage")).isEqualTo("Test error");
     }
 
     @ParameterizedTest
@@ -135,20 +137,20 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> myMapClass = runner.getClass("com.MyMap");
-        assertNotNull(myMapClass);
+        assertThat(myMapClass).isNotNull();
 
         // Verify it extends HashMap
-        assertTrue(HashMap.class.isAssignableFrom(myMapClass));
+        assertThat(HashMap.class.isAssignableFrom(myMapClass)).isTrue();
 
         // Test custom field and method work
         var instanceRunner = runner.createInstanceRunner("com.MyMap");
-        assertEquals("custom", instanceRunner.invoke("getCustomField"));
+        assertThat((String) instanceRunner.invoke("getCustomField")).isEqualTo("custom");
 
         // Inherited methods from HashMap should be available via casting
         @SuppressWarnings("unchecked")
         HashMap<Object, Object> hashMap = (HashMap<Object, Object>) instanceRunner.getInstance();
         hashMap.put("key", "value");
-        assertEquals("value", hashMap.get("key"));
+        assertThat(hashMap.get("key")).isEqualTo("value");
     }
 
     @ParameterizedTest
@@ -165,22 +167,22 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> myLinkedHashMapClass = runner.getClass("com.MyLinkedHashMap");
-        assertNotNull(myLinkedHashMapClass);
+        assertThat(myLinkedHashMapClass).isNotNull();
 
         // Verify it extends LinkedHashMap
-        assertTrue(LinkedHashMap.class.isAssignableFrom(myLinkedHashMapClass));
+        assertThat(LinkedHashMap.class.isAssignableFrom(myLinkedHashMapClass)).isTrue();
 
         // Test custom field and method work
         var instanceRunner = runner.createInstanceRunner("com.MyLinkedHashMap");
-        assertEquals(100, (int) instanceRunner.invoke("getCustomField"));
+        assertThat((int) instanceRunner.invoke("getCustomField")).isEqualTo(100);
 
         // Inherited methods from LinkedHashMap should be available via casting
         @SuppressWarnings("unchecked")
         LinkedHashMap<Object, Object> linkedHashMap = (LinkedHashMap<Object, Object>) instanceRunner.getInstance();
         linkedHashMap.put("a", 1);
         linkedHashMap.put("b", 2);
-        assertEquals(1, linkedHashMap.get("a"));
-        assertEquals(2, linkedHashMap.size());
+        assertThat(linkedHashMap.get("a")).isEqualTo(1);
+        assertThat(linkedHashMap.size()).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -203,16 +205,16 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> myNumberClass = runner.getClass("com.MyNumber");
-        assertNotNull(myNumberClass);
+        assertThat(myNumberClass).isNotNull();
 
         // Verify it extends Number
-        assertTrue(Number.class.isAssignableFrom(myNumberClass));
+        assertThat(Number.class.isAssignableFrom(myNumberClass)).isTrue();
 
         // Test functionality
         var instanceRunner = runner.createInstanceRunner("com.MyNumber", 42);
         Number number = (Number) instanceRunner.getInstance();
 
-        assertEquals(42, number.intValue());
+        assertThat(number.intValue()).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -232,18 +234,19 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> validationExceptionClass = runner.getClass("com.ValidationException");
-        assertNotNull(validationExceptionClass);
+        assertThat(validationExceptionClass).isNotNull();
 
         // Verify it extends RuntimeException
-        assertTrue(RuntimeException.class.isAssignableFrom(validationExceptionClass));
+        assertThat(RuntimeException.class.isAssignableFrom(validationExceptionClass)).isTrue();
 
         var instanceRunner = runner.createInstanceRunner("com.ValidationException", "email", "Invalid email format");
-        assertEquals(
-                List.of("email", "Invalid email format"),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("getFieldName"),
                         instanceRunner.invoke("getMessage")
                 )
+        ).isEqualTo(
+                List.of("email", "Invalid email format")
         );
     }
 
@@ -263,10 +266,10 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> myThreadClass = runner.getClass("com.MyThread");
-        assertNotNull(myThreadClass);
+        assertThat(myThreadClass).isNotNull();
 
         // Verify it extends Thread
-        assertTrue(Thread.class.isAssignableFrom(myThreadClass));
+        assertThat(Thread.class.isAssignableFrom(myThreadClass)).isTrue();
 
         // Test functionality
         var instanceRunner = runner.createInstanceRunner("com.MyThread");
@@ -274,7 +277,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
         thread.start();
         thread.join(); // Wait for thread to complete
 
-        assertEquals(42, (int) instanceRunner.invoke("getResult"));
+        assertThat((int) instanceRunner.invoke("getResult")).isEqualTo(42);
     }
 
     // ==================== JDK Built-in Class Extension Tests ====================
@@ -294,7 +297,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.B");
-        assertEquals(42, (int) instanceRunner.invoke("getValue"));
+        assertThat((int) instanceRunner.invoke("getValue")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -310,12 +313,13 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     getValue(): int { return this.value * 2 }
                   }
                 }""");
-        assertEquals(
-                Map.of("A", 10, "B", 20),
+        assertThat(
                 Map.of(
                         "A", runner.createInstanceRunner("com.A").invoke("getValue"),
                         "B", (int) runner.createInstanceRunner("com.B").invoke("getValue")
                 )
+        ).isEqualTo(
+                Map.of("A", 10, "B", 20)
         );
     }
 
@@ -335,12 +339,13 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(
-                Map.of("A", 100, "B", 200),
+        assertThat(
                 Map.of(
                         "A", runner.createInstanceRunner("com.A").invoke("getValue"),
                         "B", (int) runner.createInstanceRunner("com.B").invoke("getValue")
                 )
+        ).isEqualTo(
+                Map.of("A", 100, "B", 200)
         );
     }
 
@@ -361,14 +366,15 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.C");
-        assertEquals(
-                List.of(1, 2, 3, 6),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("getA"),
                         instanceRunner.invoke("getB"),
                         instanceRunner.invoke("getC"),
                         (int) instanceRunner.invoke("getSum")
                 )
+        ).isEqualTo(
+                List.of(1, 2, 3, 6)
         );
     }
 
@@ -387,7 +393,7 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.B");
         // B inherits getValue() from A
-        assertEquals(100, (int) instanceRunner.invoke("getValue"));
+        assertThat((int) instanceRunner.invoke("getValue")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -405,13 +411,14 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                     compute(): int { return super.compute() + 30 }
                   }
                 }""");
-        assertEquals(
-                List.of(10, 30, 60),
+        assertThat(
                 List.of(
                         runner.createInstanceRunner("com.A").invoke("compute"),
                         runner.createInstanceRunner("com.B").invoke("compute"),
                         (int) runner.createInstanceRunner("com.C").invoke("compute")
                 )
+        ).isEqualTo(
+                List.of(10, 30, 60)
         );
     }
 
@@ -432,6 +439,6 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.B");
-        assertEquals(150, (int) instanceRunner.invoke("getValue"));
+        assertThat((int) instanceRunner.invoke("getValue")).isEqualTo(150);
     }
 }

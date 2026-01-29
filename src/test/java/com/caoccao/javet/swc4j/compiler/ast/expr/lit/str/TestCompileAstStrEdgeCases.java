@@ -43,7 +43,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) '\uFFFF', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('\uFFFF', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest

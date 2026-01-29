@@ -21,7 +21,8 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests for ES2022 static blocks (static { } syntax).
@@ -41,7 +42,7 @@ public class TestCompileAstClassStaticBlock extends BaseTestCompileSuite {
                     static getValue(): int { return A.value }
                   }
                 }""");
-        assertEquals(42, (int) runner.createStaticRunner("com.A").invoke("getValue"));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("getValue")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -64,7 +65,7 @@ public class TestCompileAstClassStaticBlock extends BaseTestCompileSuite {
                   }
                 }""");
         // 0 -> 10 -> 30 -> 60
-        assertEquals(60, (int) runner.createStaticRunner("com.A").invoke("getValue"));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("getValue")).isEqualTo(60);
     }
 
     @ParameterizedTest
@@ -92,7 +93,7 @@ public class TestCompileAstClassStaticBlock extends BaseTestCompileSuite {
                 }""");
         // 10th Fibonacci number (0-indexed): 0,1,1,2,3,5,8,13,21,34,55
         // After 10 iterations: a = 55
-        assertEquals(55, (int) runner.createStaticRunner("com.Fibonacci").invoke("getFib10"));
+        assertThat((int) runner.createStaticRunner("com.Fibonacci").invoke("getFib10")).isEqualTo(55);
     }
 
     @ParameterizedTest
@@ -108,7 +109,7 @@ public class TestCompileAstClassStaticBlock extends BaseTestCompileSuite {
                     static getSecret(): int { return A.#secret }
                   }
                 }""");
-        assertEquals(999, (int) runner.createStaticRunner("com.A").invoke("getSecret"));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("getSecret")).isEqualTo(999);
     }
 
     @ParameterizedTest
@@ -132,8 +133,8 @@ public class TestCompileAstClassStaticBlock extends BaseTestCompileSuite {
                 }""");
         // a: 1 -> 10
         // b: 10 + 5 = 15 -> 30
-        assertEquals(10, (int) runner.createStaticRunner("com.A").invoke("getA"));
-        assertEquals(30, (int) runner.createStaticRunner("com.A").invoke("getB"));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("getA")).isEqualTo(10);
+        assertThat((int) runner.createStaticRunner("com.A").invoke("getB")).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -154,7 +155,7 @@ public class TestCompileAstClassStaticBlock extends BaseTestCompileSuite {
                     static getResult(): int { return A.result }
                   }
                 }""");
-        assertEquals(100, (int) runner.createStaticRunner("com.A").invoke("getResult"));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("getResult")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -172,7 +173,7 @@ public class TestCompileAstClassStaticBlock extends BaseTestCompileSuite {
                     static getResult(): int { return A.result }
                   }
                 }""");
-        assertEquals(30, (int) runner.createStaticRunner("com.A").invoke("getResult"));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("getResult")).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -193,7 +194,7 @@ public class TestCompileAstClassStaticBlock extends BaseTestCompileSuite {
                   }
                 }""");
         // 1 + 2 + 3 + 4 + 5 = 15
-        assertEquals(15, (int) runner.createStaticRunner("com.A").invoke("getSum"));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("getSum")).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -210,6 +211,6 @@ public class TestCompileAstClassStaticBlock extends BaseTestCompileSuite {
                     static isInitialized(): boolean { return A.initialized }
                   }
                 }""");
-        assertEquals(true, runner.createStaticRunner("com.A").invoke("isInitialized"));
+        assertThat((boolean) runner.createStaticRunner("com.A").invoke("isInitialized")).isTrue();
     }
 }

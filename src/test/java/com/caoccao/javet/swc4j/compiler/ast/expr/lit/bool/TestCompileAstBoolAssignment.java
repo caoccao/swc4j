@@ -21,8 +21,8 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests for boolean constants and variable assignments.
@@ -43,7 +43,7 @@ public class TestCompileAstBoolAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((Boolean) runner.createInstanceRunner("com.A").invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -59,7 +59,7 @@ public class TestCompileAstBoolAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((Boolean) runner.createInstanceRunner("com.A").invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -74,7 +74,7 @@ public class TestCompileAstBoolAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((Boolean) runner.createInstanceRunner("com.A").invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -89,7 +89,7 @@ public class TestCompileAstBoolAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((Boolean) runner.createInstanceRunner("com.A").invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -105,7 +105,7 @@ public class TestCompileAstBoolAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((Boolean) runner.createInstanceRunner("com.A").invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -121,7 +121,7 @@ public class TestCompileAstBoolAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((Boolean) runner.createInstanceRunner("com.A").invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -138,7 +138,7 @@ public class TestCompileAstBoolAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((Boolean) runner.createInstanceRunner("com.A").invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -154,6 +154,6 @@ public class TestCompileAstBoolAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((Boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((Boolean) runner.createInstanceRunner("com.A").invoke("test")).isFalse();
     }
 }

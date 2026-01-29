@@ -42,7 +42,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("[a-zA-Z0-9_\\-.+]", pattern.pattern());
     }
@@ -59,7 +59,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("pattern", pattern.pattern());
         assertEquals(Pattern.CASE_INSENSITIVE, pattern.flags());
@@ -76,7 +76,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("((((((((((a))))))))))", pattern.pattern());
     }
@@ -92,7 +92,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         // Empty non-capturing group
         assertEquals("(?:)", pattern.pattern());
@@ -127,7 +127,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("test", pattern.pattern());
     }
@@ -143,7 +143,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertTrue(pattern.matcher("a").matches());
         assertTrue(pattern.matcher("z").matches());
@@ -164,7 +164,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("third", pattern.pattern());
         assertEquals(Pattern.MULTILINE, pattern.flags());
@@ -181,7 +181,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("[^a-z]", pattern.pattern());
     }
@@ -199,7 +199,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("second", pattern.pattern());
     }
@@ -215,7 +215,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("pattern", pattern.pattern());
     }
@@ -231,7 +231,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("[/]", pattern.pattern());
     }
@@ -248,7 +248,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("test", pattern.pattern());
     }
@@ -265,7 +265,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("pattern", pattern.pattern());
     }
@@ -286,7 +286,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""".formatted(pattern.toString()));
-        Pattern result = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern result = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(result);
         assertEquals(pattern.toString(), result.pattern());
     }

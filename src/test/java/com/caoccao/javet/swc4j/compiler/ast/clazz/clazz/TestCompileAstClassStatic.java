@@ -21,7 +21,9 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 
 public class TestCompileAstClassStatic extends BaseTestCompileSuite {
 
@@ -43,9 +45,9 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                   }
                 }""");
         var staticRunner = runner.createStaticRunner("com.Math");
-        assertEquals(15, (int) staticRunner.invoke("add", 10, 5));
-        assertEquals(5, (int) staticRunner.invoke("subtract", 10, 5));
-        assertEquals(50, (int) staticRunner.invoke("multiply", 10, 5));
+        assertThat((int) staticRunner.invoke("add", 10, 5)).isEqualTo(15);
+        assertThat((int) staticRunner.invoke("subtract", 10, 5)).isEqualTo(5);
+        assertThat((int) staticRunner.invoke("multiply", 10, 5)).isEqualTo(50);
     }
 
     @ParameterizedTest
@@ -62,8 +64,8 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(100, (int) runner.createStaticRunner("com.A").invoke("staticMethod"));
-        assertEquals(200, (int) runner.createInstanceRunner("com.A").invoke("instanceMethod"));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("staticMethod")).isEqualTo(100);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("instanceMethod")).isEqualTo(200);
     }
 
     @ParameterizedTest
@@ -77,7 +79,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(42, (int) runner.createStaticRunner("com.A").invoke("getValue"));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("getValue")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -92,8 +94,8 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                   }
                 }""");
         var staticRunner = runner.createStaticRunner("com.A");
-        assertEquals(true, staticRunner.invoke("isPositive", 5));
-        assertEquals(false, staticRunner.invoke("isPositive", -5));
+        assertThat((boolean) staticRunner.invoke("isPositive", 5)).isTrue();
+        assertThat((boolean) staticRunner.invoke("isPositive", -5)).isFalse();
     }
 
     @ParameterizedTest
@@ -107,7 +109,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(6.28, runner.createStaticRunner("com.A").invoke("multiply", 2.0, 3.14), 0.001);
+        assertThat((double) runner.createStaticRunner("com.A").invoke("multiply", 2.0, 3.14)).isCloseTo(6.28, within(0.001));
     }
 
     @ParameterizedTest
@@ -121,7 +123,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("Hello, World", runner.createStaticRunner("com.A").invoke("greet", "World"));
+        assertThat((String) runner.createStaticRunner("com.A").invoke("greet", "World")).isEqualTo("Hello, World");
     }
 
     @ParameterizedTest
@@ -137,8 +139,8 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                   }
                 }""");
         var staticRunner = runner.createStaticRunner("com.A");
-        assertEquals(20, (int) staticRunner.invoke("max", 10, 20));
-        assertEquals(30, (int) staticRunner.invoke("max", 30, 20));
+        assertThat((int) staticRunner.invoke("max", 10, 20)).isEqualTo(20);
+        assertThat((int) staticRunner.invoke("max", 30, 20)).isEqualTo(30);
     }
 
     // TODO: This test requires static method call resolution (A.helper())
@@ -157,7 +159,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
     //               }
     //             }""");
     //     Class<?> classA = runner.getClass("com.A");
-    //     assertEquals(20, classA.getMethod("test").invoke(null));
+    //     assertThat(classA.getMethod("test").invoke(null)).isEqualTo(20);
     // }
 
     @ParameterizedTest
@@ -171,7 +173,7 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(30, (int) runner.createStaticRunner("com.A").invoke("add", 10, 20));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("add", 10, 20)).isEqualTo(30);
     }
 
     // TODO: This test requires static method call resolution from different class (Helper.compute())
@@ -193,6 +195,6 @@ public class TestCompileAstClassStatic extends BaseTestCompileSuite {
     //             }""");
     //     Class<?> userClass = runner.getClass("com.User");
     //     var instance = userClass.getConstructor().newInstance();
-    //     assertEquals(26, userClass.getMethod("calculate", int.class).invoke(instance, 5));
+    //     assertThat(userClass.getMethod("calculate", int.class).invoke(instance, 5)).isEqualTo(26);
     // }
 }

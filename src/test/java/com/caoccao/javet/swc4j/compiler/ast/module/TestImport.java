@@ -41,8 +41,8 @@ public class TestImport extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(5.0, (double) instanceRunner.invoke("test", -5.0), 0.001);
-        assertEquals(3.7, (double) instanceRunner.invoke("test", 3.7), 0.001);
+        assertEquals(5.0, instanceRunner.invoke("test", -5.0), 0.001);
+        assertEquals(3.7, instanceRunner.invoke("test", 3.7), 0.001);
     }
 
     @ParameterizedTest
@@ -58,8 +58,8 @@ public class TestImport extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(3.0, (double) instanceRunner.invoke("test", 3.7), 0.001);
-        assertEquals(5.0, (double) instanceRunner.invoke("test", 5.2), 0.001);
+        assertEquals(3.0, instanceRunner.invoke("test", 3.7), 0.001);
+        assertEquals(5.0, instanceRunner.invoke("test", 5.2), 0.001);
     }
 
     @ParameterizedTest
@@ -75,8 +75,8 @@ public class TestImport extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(5.0, (double) instanceRunner.invoke("test", 3.0, 5.0), 0.001);
-        assertEquals(10.0, (double) instanceRunner.invoke("test", 10.0, 2.0), 0.001);
+        assertEquals(5.0, instanceRunner.invoke("test", 3.0, 5.0), 0.001);
+        assertEquals(10.0, instanceRunner.invoke("test", 10.0, 2.0), 0.001);
     }
 
     @ParameterizedTest
@@ -106,7 +106,7 @@ public class TestImport extends BaseTestCompileSuite {
                     public testInt(a: int, b: int): int {
                       return Math.min(a, b)
                     }
-
+                
                     public testDouble(a: double, b: double): double {
                       return Math.min(a, b)
                     }
@@ -118,6 +118,6 @@ public class TestImport extends BaseTestCompileSuite {
         assertEquals(3, (int) instanceRunner.invoke("testInt", 3, 5));
 
         // Test that double args select min(double, double)
-        assertEquals(3.5, (double) instanceRunner.invoke("testDouble", 3.5, 5.2), 0.001);
+        assertEquals(3.5, instanceRunner.invoke("testDouble", 3.5, 5.2), 0.001);
     }
 }

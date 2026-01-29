@@ -24,7 +24,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 
 public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
 
@@ -57,13 +59,14 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.B", 10, 5);
-        assertEquals(
-                List.of(10, 5, 15),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("getValue"),
                         instanceRunner.invoke("getExtra"),
                         (int) instanceRunner.invoke("getTotal")
                 )
+        ).isEqualTo(
+                List.of(10, 5, 15)
         );
     }
 
@@ -92,30 +95,33 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         Class<?> classPoint = runner.getClass("com.Point");
 
         // Test two-parameter constructor
-        assertEquals(
-                List.of(10, 20),
+        assertThat(
                 List.of(
                         runner.createInstanceRunner("com.Point", 10, 20).invoke("getX"),
                         (int) runner.createInstanceRunner("com.Point", 10, 20).invoke("getY")
                 )
+        ).isEqualTo(
+                List.of(10, 20)
         );
 
         // Test single-parameter constructor which calls this(v, v)
-        assertEquals(
-                List.of(5, 5),
+        assertThat(
                 List.of(
                         runner.createInstanceRunner("com.Point", 5).invoke("getX"),
                         (int) runner.createInstanceRunner("com.Point", 5).invoke("getY")
                 )
+        ).isEqualTo(
+                List.of(5, 5)
         );
 
         // Test no-parameter constructor which calls this(0, 0)
-        assertEquals(
-                List.of(0, 0),
+        assertThat(
                 List.of(
                         runner.createInstanceRunner("com.Point").invoke("getX"),
                         (int) runner.createInstanceRunner("com.Point").invoke("getY")
                 )
+        ).isEqualTo(
+                List.of(0, 0)
         );
     }
 
@@ -149,23 +155,25 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         Class<?> classPoint3D = runner.getClass("com.Point3D");
 
         // Test three-parameter constructor
-        assertEquals(
-                List.of(1, 2, 3),
+        assertThat(
                 List.of(
                         runner.createInstanceRunner("com.Point3D", 1, 2, 3).invoke("getX"),
                         runner.createInstanceRunner("com.Point3D", 1, 2, 3).invoke("getY"),
                         (int) runner.createInstanceRunner("com.Point3D", 1, 2, 3).invoke("getZ")
                 )
+        ).isEqualTo(
+                List.of(1, 2, 3)
         );
 
         // Test single-parameter constructor which calls this(v, v, v)
-        assertEquals(
-                List.of(5, 5, 5),
+        assertThat(
                 List.of(
                         runner.createInstanceRunner("com.Point3D", 5).invoke("getX"),
                         runner.createInstanceRunner("com.Point3D", 5).invoke("getY"),
                         (int) runner.createInstanceRunner("com.Point3D", 5).invoke("getZ")
                 )
+        ).isEqualTo(
+                List.of(5, 5, 5)
         );
     }
 
@@ -184,7 +192,7 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(42, (int) runner.createInstanceRunner("com.A", 42).invoke("getValue"));
+        assertThat((int) runner.createInstanceRunner("com.A", 42).invoke("getValue")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -218,14 +226,15 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.C", 1, 2, 3);
-        assertEquals(
-                List.of(1, 2, 3, 6),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("getA"),
                         instanceRunner.invoke("getB"),
                         instanceRunner.invoke("getC"),
                         (int) instanceRunner.invoke("getSum")
                 )
+        ).isEqualTo(
+                List.of(1, 2, 3, 6)
         );
     }
 
@@ -253,23 +262,25 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
         Class<?> classRectangle = runner.getClass("com.Rectangle");
 
         // Test two-parameter constructor
-        assertEquals(
-                List.of(10, 5, 50),
+        assertThat(
                 List.of(
                         runner.createInstanceRunner("com.Rectangle", 10, 5).invoke("getWidth"),
                         runner.createInstanceRunner("com.Rectangle", 10, 5).invoke("getHeight"),
                         (int) runner.createInstanceRunner("com.Rectangle", 10, 5).invoke("getArea")
                 )
+        ).isEqualTo(
+                List.of(10, 5, 50)
         );
 
         // Test single-parameter constructor (square)
-        assertEquals(
-                List.of(7, 7, 49),
+        assertThat(
                 List.of(
                         runner.createInstanceRunner("com.Rectangle", 7).invoke("getWidth"),
                         runner.createInstanceRunner("com.Rectangle", 7).invoke("getHeight"),
                         (int) runner.createInstanceRunner("com.Rectangle", 7).invoke("getArea")
                 )
+        ).isEqualTo(
+                List.of(7, 7, 49)
         );
     }
 
@@ -293,13 +304,14 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.Person", "John", 25, true);
-        assertEquals(
-                Map.of("name", "John", "age", 25, "active", true),
+        assertThat(
                 Map.of(
                         "name", instanceRunner.invoke("getName"),
                         "age", (int) instanceRunner.invoke("getAge"),
                         "active", (boolean) instanceRunner.invoke("isActive")
                 )
+        ).isEqualTo(
+                Map.of("name", "John", "age", 25, "active", true)
         );
     }
 
@@ -318,8 +330,8 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.Circle", 5.0);
-        assertEquals(5.0, (double) instanceRunner.invoke("getRadius"));
-        assertEquals(78.53975, instanceRunner.invoke("getArea"), 0.00001);
+        assertThat((double) instanceRunner.invoke("getRadius")).isEqualTo(5.0);
+        assertThat((double) instanceRunner.invoke("getArea")).isCloseTo(78.53975, within(0.00001));
     }
 
     @ParameterizedTest
@@ -340,13 +352,14 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.Point", 10, 20);
-        assertEquals(
-                List.of(10, 20, 30),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("getX"),
                         instanceRunner.invoke("getY"),
                         (int) instanceRunner.invoke("sum")
                 )
+        ).isEqualTo(
+                List.of(10, 20, 30)
         );
     }
 
@@ -365,8 +378,8 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.Counter", 100);
-        assertEquals(100, (int) instanceRunner.invoke("getCount"));
+        assertThat((int) instanceRunner.invoke("getCount")).isEqualTo(100);
         instanceRunner.invoke("increment");
-        assertEquals(101, (int) instanceRunner.invoke("getCount"));
+        assertThat((int) instanceRunner.invoke("getCount")).isEqualTo(101);
     }
 }

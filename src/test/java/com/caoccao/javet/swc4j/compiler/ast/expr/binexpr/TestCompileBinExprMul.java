@@ -165,7 +165,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0.02, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
+        assertEquals(0.02, runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
     }
 
     @ParameterizedTest
@@ -362,7 +362,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(13.75, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.0001);
+        assertEquals(13.75, runner.createInstanceRunner("com.A").invoke("test"), 0.0001);
     }
 
     @ParameterizedTest
@@ -378,7 +378,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3.75, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.0001);
+        assertEquals(3.75, runner.createInstanceRunner("com.A").invoke("test"), 0.0001);
     }
 
     @ParameterizedTest
@@ -426,7 +426,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(8.25, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.0001);
+        assertEquals(8.25, runner.createInstanceRunner("com.A").invoke("test"), 0.0001);
     }
 
     @ParameterizedTest
@@ -752,7 +752,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0.09f, (float) runner.createInstanceRunner("com.A").invoke("test"), 0.00001f);
+        assertEquals(0.09f, runner.createInstanceRunner("com.A").invoke("test"), 0.00001f);
     }
 
     @ParameterizedTest

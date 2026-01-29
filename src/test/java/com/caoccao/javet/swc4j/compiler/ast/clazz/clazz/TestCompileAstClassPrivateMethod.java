@@ -23,7 +23,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.Modifier;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests for ES2022 private methods (#method syntax).
@@ -48,10 +49,10 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
 
         // Verify method is private
         var helperMethod = classA.getDeclaredMethod("helper");
-        assertTrue(Modifier.isPrivate(helperMethod.getModifiers()), "#helper should be private");
+        assertThat(Modifier.isPrivate(helperMethod.getModifiers())).as("#helper should be private").isTrue();
 
         // Test functionality
-        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("getValue"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("getValue")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -76,10 +77,10 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
         var privateMethod = classA.getDeclaredMethod("privateHelper");
         var publicMethod = classA.getDeclaredMethod("publicMethod");
 
-        assertTrue(Modifier.isPrivate(privateMethod.getModifiers()), "#privateHelper should be private");
-        assertTrue(Modifier.isPublic(publicMethod.getModifiers()), "publicMethod should be public");
+        assertThat(Modifier.isPrivate(privateMethod.getModifiers())).as("#privateHelper should be private").isTrue();
+        assertThat(Modifier.isPublic(publicMethod.getModifiers())).as("publicMethod should be public").isTrue();
 
-        assertEquals(30, (int) runner.createInstanceRunner("com.A").invoke("combined"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("combined")).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -97,7 +98,7 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("getValue"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("getValue")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -118,7 +119,7 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
                   }
                 }""");
         // 5 * 2 + 1 = 11
-        assertEquals(11, (int) runner.createInstanceRunner("com.A").invoke("getValue"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("getValue")).isEqualTo(11);
     }
 
     @ParameterizedTest
@@ -135,7 +136,7 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("Hello, World!", runner.createInstanceRunner("com.A").invoke("greet", "World"));
+        assertThat((String) runner.createInstanceRunner("com.A").invoke("greet", "World")).isEqualTo("Hello, World!");
     }
 
     @ParameterizedTest
@@ -153,8 +154,8 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(true, instanceRunner.invoke("checkEven", 4));
-        assertEquals(false, instanceRunner.invoke("checkEven", 5));
+        assertThat((boolean) instanceRunner.invoke("checkEven", 4)).isTrue();
+        assertThat((boolean) instanceRunner.invoke("checkEven", 5)).isFalse();
     }
 
     @ParameterizedTest
@@ -178,9 +179,9 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(1, (int) instanceRunner.invoke("computeFactorial", 0));
-        assertEquals(1, (int) instanceRunner.invoke("computeFactorial", 1));
-        assertEquals(120, (int) instanceRunner.invoke("computeFactorial", 5));
+        assertThat((int) instanceRunner.invoke("computeFactorial", 0)).isEqualTo(1);
+        assertThat((int) instanceRunner.invoke("computeFactorial", 1)).isEqualTo(1);
+        assertThat((int) instanceRunner.invoke("computeFactorial", 5)).isEqualTo(120);
     }
 
     @ParameterizedTest
@@ -197,7 +198,7 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(40, (int) runner.createInstanceRunner("com.A").invoke("quadruple", 10));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("quadruple", 10)).isEqualTo(40);
     }
 
     @ParameterizedTest
@@ -214,7 +215,7 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(30, (int) runner.createInstanceRunner("com.A").invoke("compute", 10, 20));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("compute", 10, 20)).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -236,9 +237,9 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(0, (int) instanceRunner.invoke("getValue"));
+        assertThat((int) instanceRunner.invoke("getValue")).isEqualTo(0);
         instanceRunner.invoke("addOne");
-        assertEquals(1, (int) instanceRunner.invoke("getValue"));
+        assertThat((int) instanceRunner.invoke("getValue")).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -259,10 +260,10 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
 
         // Verify method is private and static
         var helperMethod = classA.getDeclaredMethod("helper");
-        assertTrue(Modifier.isPrivate(helperMethod.getModifiers()), "#helper should be private");
-        assertTrue(Modifier.isStatic(helperMethod.getModifiers()), "#helper should be static");
+        assertThat(Modifier.isPrivate(helperMethod.getModifiers())).as("#helper should be private").isTrue();
+        assertThat(Modifier.isStatic(helperMethod.getModifiers())).as("#helper should be static").isTrue();
 
-        assertEquals(99, (int) runner.createStaticRunner("com.A").invoke("getValue"));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("getValue")).isEqualTo(99);
     }
 
     @ParameterizedTest
@@ -283,9 +284,9 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
                   }
                 }""");
         var staticRunner = runner.createStaticRunner("com.A");
-        assertEquals(0, (int) staticRunner.invoke("next"));
-        assertEquals(1, (int) staticRunner.invoke("next"));
-        assertEquals(2, (int) staticRunner.invoke("next"));
+        assertThat((int) staticRunner.invoke("next")).isEqualTo(0);
+        assertThat((int) staticRunner.invoke("next")).isEqualTo(1);
+        assertThat((int) staticRunner.invoke("next")).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -302,6 +303,6 @@ public class TestCompileAstClassPrivateMethod extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(200, (int) runner.createStaticRunner("com.A").invoke("compute", 10, 20));
+        assertThat((int) runner.createStaticRunner("com.A").invoke("compute", 10, 20)).isEqualTo(200);
     }
 }

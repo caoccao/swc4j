@@ -18,8 +18,7 @@ package com.caoccao.javet.swc4j.compiler.memory;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link JavaTypeInfo#isAssignableTo(String)}.
@@ -30,71 +29,61 @@ public class TestJavaTypeInfo {
     @Test
     public void testArrayListAssignableToCollection() {
         JavaTypeInfo arrayListType = new JavaTypeInfo("ArrayList", "java.util", "java/util/ArrayList");
-        assertTrue(arrayListType.isAssignableTo("Ljava/util/Collection;"),
-                "ArrayList should be assignable to Collection");
+        assertThat(arrayListType.isAssignableTo("Ljava/util/Collection;")).as("ArrayList should be assignable to Collection").isTrue();
     }
 
     @Test
     public void testArrayListAssignableToIterable() {
         JavaTypeInfo arrayListType = new JavaTypeInfo("ArrayList", "java.util", "java/util/ArrayList");
-        assertTrue(arrayListType.isAssignableTo("Ljava/lang/Iterable;"),
-                "ArrayList should be assignable to Iterable");
+        assertThat(arrayListType.isAssignableTo("Ljava/lang/Iterable;")).as("ArrayList should be assignable to Iterable").isTrue();
     }
 
     @Test
     public void testArrayListAssignableToList() {
         JavaTypeInfo arrayListType = new JavaTypeInfo("ArrayList", "java.util", "java/util/ArrayList");
-        assertTrue(arrayListType.isAssignableTo("Ljava/util/List;"),
-                "ArrayList should be assignable to List");
+        assertThat(arrayListType.isAssignableTo("Ljava/util/List;")).as("ArrayList should be assignable to List").isTrue();
     }
 
     @Test
     public void testArrayListAssignableToObject() {
         JavaTypeInfo arrayListType = new JavaTypeInfo("ArrayList", "java.util", "java/util/ArrayList");
-        assertTrue(arrayListType.isAssignableTo("Ljava/lang/Object;"),
-                "ArrayList should be assignable to Object");
+        assertThat(arrayListType.isAssignableTo("Ljava/lang/Object;")).as("ArrayList should be assignable to Object").isTrue();
     }
 
     @Test
     public void testArrayListNotAssignableToMap() {
         JavaTypeInfo arrayListType = new JavaTypeInfo("ArrayList", "java.util", "java/util/ArrayList");
-        assertFalse(arrayListType.isAssignableTo("Ljava/util/Map;"),
-                "ArrayList should NOT be assignable to Map");
+        assertThat(arrayListType.isAssignableTo("Ljava/util/Map;")).as("ArrayList should NOT be assignable to Map").isFalse();
     }
 
     @Test
     public void testArrayListNotAssignableToString() {
         JavaTypeInfo arrayListType = new JavaTypeInfo("ArrayList", "java.util", "java/util/ArrayList");
-        assertFalse(arrayListType.isAssignableTo("Ljava/lang/String;"),
-                "ArrayList should NOT be assignable to String");
+        assertThat(arrayListType.isAssignableTo("Ljava/lang/String;")).as("ArrayList should NOT be assignable to String").isFalse();
     }
 
     @Test
     public void testDirectMatchArrayList() {
         JavaTypeInfo arrayListType = new JavaTypeInfo("ArrayList", "java.util", "java/util/ArrayList");
-        assertTrue(arrayListType.isAssignableTo("Ljava/util/ArrayList;"),
-                "ArrayList should be assignable to ArrayList");
+        assertThat(arrayListType.isAssignableTo("Ljava/util/ArrayList;")).as("ArrayList should be assignable to ArrayList").isTrue();
     }
 
     @Test
     public void testDirectMatchHashMap() {
         JavaTypeInfo hashMapType = new JavaTypeInfo("HashMap", "java.util", "java/util/HashMap");
-        assertTrue(hashMapType.isAssignableTo("Ljava/util/HashMap;"),
-                "HashMap should be assignable to HashMap");
+        assertThat(hashMapType.isAssignableTo("Ljava/util/HashMap;")).as("HashMap should be assignable to HashMap").isTrue();
     }
 
     @Test
     public void testDirectMatchLinkedHashMap() {
         JavaTypeInfo linkedHashMapType = new JavaTypeInfo("LinkedHashMap", "java.util", "java/util/LinkedHashMap");
-        assertTrue(linkedHashMapType.isAssignableTo("Ljava/util/LinkedHashMap;"),
-                "LinkedHashMap should be assignable to LinkedHashMap");
+        assertThat(linkedHashMapType.isAssignableTo("Ljava/util/LinkedHashMap;")).as("LinkedHashMap should be assignable to LinkedHashMap").isTrue();
     }
 
     @Test
     public void testDirectMatchString() {
         JavaTypeInfo stringType = new JavaTypeInfo("String", "java.lang", "java/lang/String");
-        assertTrue(stringType.isAssignableTo("Ljava/lang/String;"),
-                "String should be assignable to String");
+        assertThat(stringType.isAssignableTo("Ljava/lang/String;")).as("String should be assignable to String").isTrue();
     }
 
     @Test
@@ -102,157 +91,134 @@ public class TestJavaTypeInfo {
         // User-defined type with no parents (fallback path used)
         JavaTypeInfo customType = new JavaTypeInfo("Isolated", "com.example", "com/example/Isolated");
         // Should only be assignable to itself
-        assertTrue(customType.isAssignableTo("Lcom/example/Isolated;"),
-                "Type with no parents should be assignable to itself");
-        assertFalse(customType.isAssignableTo("Ljava/lang/Object;"),
-                "User-defined type with no parents should not match Object via fallback");
+        assertThat(customType.isAssignableTo("Lcom/example/Isolated;")).as("Type with no parents should be assignable to itself").isTrue();
+        assertThat(customType.isAssignableTo("Ljava/lang/Object;")).as("User-defined type with no parents should not match Object via fallback").isFalse();
     }
 
     @Test
     public void testEnumAssignableToSelf() {
         JavaTypeInfo colorEnum = new JavaTypeInfo("Color", "com.example", "com/example/Color", JavaType.ENUM);
-        assertTrue(colorEnum.isAssignableTo("Lcom/example/Color;"),
-                "Enum should be assignable to itself");
+        assertThat(colorEnum.isAssignableTo("Lcom/example/Color;")).as("Enum should be assignable to itself").isTrue();
     }
 
     @Test
     public void testEnumNotAssignableToList() {
         JavaTypeInfo colorEnum = new JavaTypeInfo("Color", "com.example", "com/example/Color", JavaType.ENUM);
-        assertFalse(colorEnum.isAssignableTo("Ljava/util/List;"),
-                "Enum should NOT be assignable to List");
+        assertThat(colorEnum.isAssignableTo("Ljava/util/List;")).as("Enum should NOT be assignable to List").isFalse();
     }
 
     @Test
     public void testEnumNotAssignableToString() {
         JavaTypeInfo colorEnum = new JavaTypeInfo("Color", "com.example", "com/example/Color", JavaType.ENUM);
-        assertFalse(colorEnum.isAssignableTo("Ljava/lang/String;"),
-                "Enum should NOT be assignable to String");
+        assertThat(colorEnum.isAssignableTo("Ljava/lang/String;")).as("Enum should NOT be assignable to String").isFalse();
     }
 
     @Test
     public void testHashMapAssignableToMap() {
         JavaTypeInfo hashMapType = new JavaTypeInfo("HashMap", "java.util", "java/util/HashMap");
-        assertTrue(hashMapType.isAssignableTo("Ljava/util/Map;"),
-                "HashMap should be assignable to Map");
+        assertThat(hashMapType.isAssignableTo("Ljava/util/Map;")).as("HashMap should be assignable to Map").isTrue();
     }
 
     @Test
     public void testHashMapAssignableToObject() {
         JavaTypeInfo hashMapType = new JavaTypeInfo("HashMap", "java.util", "java/util/HashMap");
-        assertTrue(hashMapType.isAssignableTo("Ljava/lang/Object;"),
-                "HashMap should be assignable to Object");
+        assertThat(hashMapType.isAssignableTo("Ljava/lang/Object;")).as("HashMap should be assignable to Object").isTrue();
     }
 
     @Test
     public void testHashMapNotAssignableToList() {
         JavaTypeInfo hashMapType = new JavaTypeInfo("HashMap", "java.util", "java/util/HashMap");
-        assertFalse(hashMapType.isAssignableTo("Ljava/util/List;"),
-                "HashMap should NOT be assignable to List");
+        assertThat(hashMapType.isAssignableTo("Ljava/util/List;")).as("HashMap should NOT be assignable to List").isFalse();
     }
 
     @Test
     public void testHashMapNotAssignableToString() {
         JavaTypeInfo hashMapType = new JavaTypeInfo("HashMap", "java.util", "java/util/HashMap");
-        assertFalse(hashMapType.isAssignableTo("Ljava/lang/String;"),
-                "HashMap should NOT be assignable to String");
+        assertThat(hashMapType.isAssignableTo("Ljava/lang/String;")).as("HashMap should NOT be assignable to String").isFalse();
     }
 
     @Test
     public void testIsAssignableToClassCrossType() {
         JavaTypeInfo arrayListType = new JavaTypeInfo("ArrayList", "java.util", "java/util/ArrayList");
-        assertFalse(arrayListType.isAssignableTo(java.util.Map.class),
-                "ArrayList should NOT be assignable to Map.class");
+        assertThat(arrayListType.isAssignableTo(java.util.Map.class)).as("ArrayList should NOT be assignable to Map.class").isFalse();
     }
 
     @Test
     public void testIsAssignableToClassNegative() {
         JavaTypeInfo stringType = new JavaTypeInfo("String", "java.lang", "java/lang/String");
-        assertFalse(stringType.isAssignableTo(java.util.List.class),
-                "String should NOT be assignable to List.class");
+        assertThat(stringType.isAssignableTo(java.util.List.class)).as("String should NOT be assignable to List.class").isFalse();
     }
 
     @Test
     public void testIsAssignableToClassWithHashMap() {
         JavaTypeInfo hashMapType = new JavaTypeInfo("HashMap", "java.util", "java/util/HashMap");
-        assertTrue(hashMapType.isAssignableTo(java.util.Map.class),
-                "HashMap should be assignable to Map.class");
+        assertThat(hashMapType.isAssignableTo(java.util.Map.class)).as("HashMap should be assignable to Map.class").isTrue();
     }
 
     @Test
     public void testIsAssignableToClassWithKnownType() {
         JavaTypeInfo arrayListType = new JavaTypeInfo("ArrayList", "java.util", "java/util/ArrayList");
-        assertTrue(arrayListType.isAssignableTo(java.util.List.class),
-                "ArrayList should be assignable to List.class");
+        assertThat(arrayListType.isAssignableTo(java.util.List.class)).as("ArrayList should be assignable to List.class").isTrue();
     }
 
     @Test
     public void testLinkedHashMapAssignableToHashMap() {
         JavaTypeInfo linkedHashMapType = new JavaTypeInfo("LinkedHashMap", "java.util", "java/util/LinkedHashMap");
-        assertTrue(linkedHashMapType.isAssignableTo("Ljava/util/HashMap;"),
-                "LinkedHashMap should be assignable to HashMap (LinkedHashMap extends HashMap)");
+        assertThat(linkedHashMapType.isAssignableTo("Ljava/util/HashMap;")).as("LinkedHashMap should be assignable to HashMap (LinkedHashMap extends HashMap)").isTrue();
     }
 
     @Test
     public void testLinkedHashMapAssignableToMap() {
         JavaTypeInfo linkedHashMapType = new JavaTypeInfo("LinkedHashMap", "java.util", "java/util/LinkedHashMap");
-        assertTrue(linkedHashMapType.isAssignableTo("Ljava/util/Map;"),
-                "LinkedHashMap should be assignable to Map");
+        assertThat(linkedHashMapType.isAssignableTo("Ljava/util/Map;")).as("LinkedHashMap should be assignable to Map").isTrue();
     }
 
     @Test
     public void testListNotAssignableToArrayList() {
         JavaTypeInfo listType = new JavaTypeInfo("List", "java.util", "java/util/List", JavaType.INTERFACE);
-        assertFalse(listType.isAssignableTo("Ljava/util/ArrayList;"),
-                "List should NOT be assignable to ArrayList (List is interface, ArrayList is implementation)");
+        assertThat(listType.isAssignableTo("Ljava/util/ArrayList;")).as("List should NOT be assignable to ArrayList (List is interface, ArrayList is implementation)").isFalse();
     }
 
     @Test
     public void testMapNotAssignableToHashMap() {
         JavaTypeInfo mapType = new JavaTypeInfo("Map", "java.util", "java/util/Map", JavaType.INTERFACE);
-        assertFalse(mapType.isAssignableTo("Ljava/util/HashMap;"),
-                "Map should NOT be assignable to HashMap");
+        assertThat(mapType.isAssignableTo("Ljava/util/HashMap;")).as("Map should NOT be assignable to HashMap").isFalse();
     }
 
     @Test
     public void testSelfAssignability() {
         JavaTypeInfo type = new JavaTypeInfo("Custom", "com.example", "com/example/Custom");
-        assertTrue(type.isAssignableTo("Lcom/example/Custom;"),
-                "Type should always be assignable to itself");
+        assertThat(type.isAssignableTo("Lcom/example/Custom;")).as("Type should always be assignable to itself").isTrue();
     }
 
     @Test
     public void testStringAssignableToCharSequence() {
         JavaTypeInfo stringType = new JavaTypeInfo("String", "java.lang", "java/lang/String");
-        assertTrue(stringType.isAssignableTo("Ljava/lang/CharSequence;"),
-                "String should be assignable to CharSequence");
+        assertThat(stringType.isAssignableTo("Ljava/lang/CharSequence;")).as("String should be assignable to CharSequence").isTrue();
     }
 
     @Test
     public void testStringAssignableToComparable() {
         JavaTypeInfo stringType = new JavaTypeInfo("String", "java.lang", "java/lang/String");
-        assertTrue(stringType.isAssignableTo("Ljava/lang/Comparable;"),
-                "String should be assignable to Comparable");
+        assertThat(stringType.isAssignableTo("Ljava/lang/Comparable;")).as("String should be assignable to Comparable").isTrue();
     }
 
     @Test
     public void testStringAssignableToObject() {
         JavaTypeInfo stringType = new JavaTypeInfo("String", "java.lang", "java/lang/String");
-        assertTrue(stringType.isAssignableTo("Ljava/lang/Object;"),
-                "String should be assignable to Object");
+        assertThat(stringType.isAssignableTo("Ljava/lang/Object;")).as("String should be assignable to Object").isTrue();
     }
 
     @Test
     public void testStringNotAssignableToList() {
         JavaTypeInfo stringType = new JavaTypeInfo("String", "java.lang", "java/lang/String");
-        assertFalse(stringType.isAssignableTo("Ljava/util/List;"),
-                "String should NOT be assignable to List");
+        assertThat(stringType.isAssignableTo("Ljava/util/List;")).as("String should NOT be assignable to List").isFalse();
     }
 
     @Test
     public void testStringNotAssignableToMap() {
         JavaTypeInfo stringType = new JavaTypeInfo("String", "java.lang", "java/lang/String");
-        assertFalse(stringType.isAssignableTo("Ljava/util/Map;"),
-                "String should NOT be assignable to Map");
+        assertThat(stringType.isAssignableTo("Ljava/util/Map;")).as("String should NOT be assignable to Map").isFalse();
     }
 
     @Test
@@ -265,8 +231,7 @@ public class TestJavaTypeInfo {
         grandChildType.addParentTypeInfo(childType);
 
         // GrandChildList should be assignable to List (via ChildList -> ArrayList -> List)
-        assertTrue(grandChildType.isAssignableTo("Ljava/util/List;"),
-                "Deep hierarchy should be traversed: GrandChildList should be assignable to List");
+        assertThat(grandChildType.isAssignableTo("Ljava/util/List;")).as("Deep hierarchy should be traversed: GrandChildList should be assignable to List").isTrue();
     }
 
     @Test
@@ -277,8 +242,7 @@ public class TestJavaTypeInfo {
         customList.addParentTypeInfo(arrayListParent);
 
         // MyList should NOT be assignable to Map (no Map in hierarchy)
-        assertFalse(customList.isAssignableTo("Ljava/util/Map;"),
-                "User-defined class with List hierarchy should NOT be assignable to Map");
+        assertThat(customList.isAssignableTo("Ljava/util/Map;")).as("User-defined class with List hierarchy should NOT be assignable to Map").isFalse();
     }
 
     @Test
@@ -289,8 +253,7 @@ public class TestJavaTypeInfo {
         customList.addParentTypeInfo(arrayListParent);
 
         // MyList should be assignable to List (via ArrayList parent)
-        assertTrue(customList.isAssignableTo("Ljava/util/List;"),
-                "User-defined class extending ArrayList should be assignable to List");
+        assertThat(customList.isAssignableTo("Ljava/util/List;")).as("User-defined class extending ArrayList should be assignable to List").isTrue();
     }
 
     @Test
@@ -301,8 +264,7 @@ public class TestJavaTypeInfo {
         customMap.addParentTypeInfo(linkedHashMapParent);
 
         // MyMap should be assignable to Map (via LinkedHashMap parent)
-        assertTrue(customMap.isAssignableTo("Ljava/util/Map;"),
-                "User-defined class extending LinkedHashMap should be assignable to Map");
+        assertThat(customMap.isAssignableTo("Ljava/util/Map;")).as("User-defined class extending LinkedHashMap should be assignable to Map").isTrue();
     }
 
     @Test
@@ -319,7 +281,6 @@ public class TestJavaTypeInfo {
 
         // Note: This uses the fallback path since com/example/MyClass doesn't exist
         // The test verifies the parentTypeInfos mechanism works correctly
-        assertTrue(customClass.isAssignableTo("Lcom/example/MyClass;"),
-                "User-defined class should be assignable to itself");
+        assertThat(customClass.isAssignableTo("Lcom/example/MyClass;")).as("User-defined class should be assignable to itself").isTrue();
     }
 }

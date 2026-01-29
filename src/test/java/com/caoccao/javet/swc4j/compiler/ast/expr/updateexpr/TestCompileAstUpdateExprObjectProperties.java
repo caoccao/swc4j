@@ -21,7 +21,8 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Test suite for update expressions (++ and --) on object properties.
@@ -43,7 +44,7 @@ public class TestCompileAstUpdateExprObjectProperties extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -59,7 +60,7 @@ public class TestCompileAstUpdateExprObjectProperties extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals(11, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(11);
     }
 
     @ParameterizedTest
@@ -76,7 +77,7 @@ public class TestCompileAstUpdateExprObjectProperties extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -93,7 +94,7 @@ public class TestCompileAstUpdateExprObjectProperties extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals(7, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(7);
     }
 
     @ParameterizedTest
@@ -109,7 +110,7 @@ public class TestCompileAstUpdateExprObjectProperties extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -125,7 +126,7 @@ public class TestCompileAstUpdateExprObjectProperties extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -141,7 +142,7 @@ public class TestCompileAstUpdateExprObjectProperties extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(9);
     }
 
     @ParameterizedTest
@@ -157,6 +158,6 @@ public class TestCompileAstUpdateExprObjectProperties extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(6);
     }
 }

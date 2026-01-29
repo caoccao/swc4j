@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class TestCompileAstClassImplements extends BaseTestCompileSuite {
 
@@ -69,16 +69,17 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
         Class<?> classDerived = runner.getClass("com.Derived");
 
         // Verify inheritance and interface implementation
-        assertTrue(Runnable.class.isAssignableFrom(classDerived), "Derived should implement Runnable");
+        assertThat(Runnable.class.isAssignableFrom(classDerived)).as("Derived should implement Runnable").isTrue();
         Class<?> classBase = runner.getClass("com.Base");
-        assertTrue(classBase.isAssignableFrom(classDerived), "Derived should extend Base");
+        assertThat(classBase.isAssignableFrom(classDerived)).as("Derived should extend Base").isTrue();
 
         // Test methods
-        assertEquals(
-                List.of(42),
+        assertThat(
                 List.of(
                         (int) runner.createInstanceRunner("com.Derived").invoke("getValue")
                 )
+        ).isEqualTo(
+                List.of(42)
         );
     }
 
@@ -95,8 +96,8 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
         Class<?> classMulti = runner.getClass("com.Multi");
 
         // Verify both interfaces are implemented
-        assertTrue(Runnable.class.isAssignableFrom(classMulti), "Multi should implement Runnable");
-        assertTrue(Serializable.class.isAssignableFrom(classMulti), "Multi should implement Serializable");
+        assertThat(Runnable.class.isAssignableFrom(classMulti)).as("Multi should implement Runnable").isTrue();
+        assertThat(Serializable.class.isAssignableFrom(classMulti)).as("Multi should implement Serializable").isTrue();
 
         // Create instance and call run
         runner.createInstanceRunner("com.Multi").invoke("run");
@@ -115,7 +116,7 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
         Class<?> classA = runner.getClass("com.A");
 
         // Verify A implements Runnable
-        assertTrue(Runnable.class.isAssignableFrom(classA), "A should implement Runnable");
+        assertThat(Runnable.class.isAssignableFrom(classA)).as("A should implement Runnable").isTrue();
 
         // Create instance and call run()
         runner.createInstanceRunner("com.A").invoke("run");
@@ -138,18 +139,18 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
         Class<?> classCounter = runner.getClass("com.Counter");
 
         // Verify Counter implements Runnable
-        assertTrue(Runnable.class.isAssignableFrom(classCounter), "Counter should implement Runnable");
+        assertThat(Runnable.class.isAssignableFrom(classCounter)).as("Counter should implement Runnable").isTrue();
 
         // Test run() increments count
         var instanceRunner = runner.createInstanceRunner("com.Counter");
-        assertEquals(0, (int) instanceRunner.invoke("getCount"));
+        assertThat((int) instanceRunner.invoke("getCount")).isEqualTo(0);
 
         // Call run() multiple times
         instanceRunner.invoke("run");
-        assertEquals(1, (int) instanceRunner.invoke("getCount"));
+        assertThat((int) instanceRunner.invoke("getCount")).isEqualTo(1);
 
         instanceRunner.invoke("run");
         instanceRunner.invoke("run");
-        assertEquals(3, (int) instanceRunner.invoke("getCount"));
+        assertThat((int) instanceRunner.invoke("getCount")).isEqualTo(3);
     }
 }

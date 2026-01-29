@@ -40,7 +40,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) 'A', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('A', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -54,7 +54,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) '中', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('中', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest

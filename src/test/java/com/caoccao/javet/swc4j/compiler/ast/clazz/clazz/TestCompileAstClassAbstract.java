@@ -24,7 +24,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 
 public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
 
@@ -49,18 +51,19 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         Class<?> classC = runner.getClass("com.C");
 
         // Verify A and B are abstract
-        assertTrue(Modifier.isAbstract(classA.getModifiers()), "A should be abstract");
-        assertTrue(Modifier.isAbstract(classB.getModifiers()), "B should be abstract");
-        assertFalse(Modifier.isAbstract(classC.getModifiers()), "C should not be abstract");
+        assertThat(Modifier.isAbstract(classA.getModifiers())).as("A should be abstract").isTrue();
+        assertThat(Modifier.isAbstract(classB.getModifiers())).as("B should be abstract").isTrue();
+        assertThat(Modifier.isAbstract(classC.getModifiers())).as("C should not be abstract").isFalse();
 
         // Create a C instance and test
         var instanceRunner = runner.createInstanceRunner("com.C");
-        assertEquals(
-                List.of(1, 2),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("f"),
                         (int) instanceRunner.invoke("g")
                 )
+        ).isEqualTo(
+                List.of(1, 2)
         );
     }
 
@@ -84,18 +87,18 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         Class<?> classCircle = runner.getClass("com.Circle");
 
         // Verify Shape is abstract
-        assertTrue(Modifier.isAbstract(classShape.getModifiers()), "Shape should be abstract");
+        assertThat(Modifier.isAbstract(classShape.getModifiers())).as("Shape should be abstract").isTrue();
 
         // Verify Circle is not abstract
-        assertFalse(Modifier.isAbstract(classCircle.getModifiers()), "Circle should not be abstract");
+        assertThat(Modifier.isAbstract(classCircle.getModifiers())).as("Circle should not be abstract").isFalse();
 
         // Verify area method is abstract in Shape
         var areaMethod = classShape.getDeclaredMethod("area");
-        assertTrue(Modifier.isAbstract(areaMethod.getModifiers()), "area() should be abstract in Shape");
+        assertThat(Modifier.isAbstract(areaMethod.getModifiers())).as("area() should be abstract in Shape").isTrue();
 
         // Create a Circle instance and test
         double area = runner.createInstanceRunner("com.Circle", 5.0).invoke("area");
-        assertEquals(78.53975, area, 0.00001);
+        assertThat(area).isCloseTo(78.53975, within(0.00001));
     }
 
     @ParameterizedTest
@@ -115,16 +118,17 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         Class<?> classDerived = runner.getClass("com.Derived");
 
         // Verify Base is abstract
-        assertTrue(Modifier.isAbstract(classBase.getModifiers()), "Base should be abstract");
+        assertThat(Modifier.isAbstract(classBase.getModifiers())).as("Base should be abstract").isTrue();
 
         // Create a Derived instance and test
         var instanceRunner = runner.createInstanceRunner("com.Derived");
-        assertEquals(
-                List.of(101, 100),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("compute"),
                         (int) instanceRunner.invoke("helper")
                 )
+        ).isEqualTo(
+                List.of(101, 100)
         );
     }
 
@@ -152,16 +156,17 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         Class<?> classDog = runner.getClass("com.Dog");
 
         // Verify Animal is abstract
-        assertTrue(Modifier.isAbstract(classAnimal.getModifiers()), "Animal should be abstract");
+        assertThat(Modifier.isAbstract(classAnimal.getModifiers())).as("Animal should be abstract").isTrue();
 
         // Create a Dog instance and test
         var instanceRunner = runner.createInstanceRunner("com.Dog", "Buddy");
-        assertEquals(
-                List.of("Buddy", "Woof!"),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("getName"),
                         (String) instanceRunner.invoke("speak")
                 )
+        ).isEqualTo(
+                List.of("Buddy", "Woof!")
         );
     }
 
@@ -183,22 +188,23 @@ public class TestCompileAstClassAbstract extends BaseTestCompileSuite {
         Class<?> classSimple = runner.getClass("com.SimpleCalculator");
 
         // Verify Calculator is abstract
-        assertTrue(Modifier.isAbstract(classCalculator.getModifiers()), "Calculator should be abstract");
+        assertThat(Modifier.isAbstract(classCalculator.getModifiers())).as("Calculator should be abstract").isTrue();
 
         // Verify abstract methods
         var addMethod = classCalculator.getDeclaredMethod("add", int.class, int.class);
         var multiplyMethod = classCalculator.getDeclaredMethod("multiply", int.class, int.class);
-        assertTrue(Modifier.isAbstract(addMethod.getModifiers()), "add() should be abstract");
-        assertTrue(Modifier.isAbstract(multiplyMethod.getModifiers()), "multiply() should be abstract");
+        assertThat(Modifier.isAbstract(addMethod.getModifiers())).as("add() should be abstract").isTrue();
+        assertThat(Modifier.isAbstract(multiplyMethod.getModifiers())).as("multiply() should be abstract").isTrue();
 
         // Create a SimpleCalculator instance and test
         var instanceRunner = runner.createInstanceRunner("com.SimpleCalculator");
-        assertEquals(
-                List.of(8, 15),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("add", 3, 5),
                         (int) instanceRunner.invoke("multiply", 3, 5)
                 )
+        ).isEqualTo(
+                List.of(8, 15)
         );
     }
 }

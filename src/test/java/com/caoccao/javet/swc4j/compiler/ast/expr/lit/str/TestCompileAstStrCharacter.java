@@ -41,7 +41,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) 'Z', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('Z', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -55,7 +55,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) '9', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('9', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -69,7 +69,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) '\0', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('\0', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -83,7 +83,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) 'X', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('X', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -97,7 +97,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) '\0', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('\0', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -111,7 +111,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) 'A', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('A', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -126,7 +126,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) 'a', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('a', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -140,6 +140,6 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) 'a', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('a', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

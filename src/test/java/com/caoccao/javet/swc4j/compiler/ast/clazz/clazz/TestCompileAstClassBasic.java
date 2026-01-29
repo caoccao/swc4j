@@ -21,8 +21,8 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class TestCompileAstClassBasic extends BaseTestCompileSuite {
 
@@ -37,7 +37,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -57,7 +57,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(30, (int) runner.createInstanceRunner("com.User").invoke("compute"));
+        assertThat((int) runner.createInstanceRunner("com.User").invoke("compute")).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -74,7 +74,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -94,9 +94,9 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("first"));
-        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("second"));
-        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("third"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("first")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("second")).isEqualTo(2);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("third")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -108,7 +108,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.Empty");
-        assertNotNull(instanceRunner.getInstance());
+        assertThat(instanceRunner.getInstance()).isNotNull();
     }
 
     @ParameterizedTest
@@ -126,9 +126,9 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     value(): int { return 3 }
                   }
                 }""");
-        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("value"));
-        assertEquals(2, (int) runner.createInstanceRunner("com.B").invoke("value"));
-        assertEquals(3, (int) runner.createInstanceRunner("com.C").invoke("value"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("value")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("com.B").invoke("value")).isEqualTo(2);
+        assertThat((int) runner.createInstanceRunner("com.C").invoke("value")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -147,7 +147,7 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(123, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123);
     }
 
     @ParameterizedTest
@@ -166,6 +166,6 @@ public class TestCompileAstClassBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(123, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123);
     }
 }

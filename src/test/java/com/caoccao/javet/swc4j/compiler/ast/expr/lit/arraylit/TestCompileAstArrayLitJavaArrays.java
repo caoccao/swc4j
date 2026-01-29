@@ -55,7 +55,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1.41, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertEquals(1.41, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
     }
 
     @ParameterizedTest

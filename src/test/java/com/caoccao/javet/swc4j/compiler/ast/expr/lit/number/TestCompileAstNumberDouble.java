@@ -21,7 +21,9 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 
 /**
  * Tests for double number literals.
@@ -40,7 +42,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-123.456, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(-123.456, within(0.001));
     }
 
     @ParameterizedTest
@@ -54,7 +56,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1.0, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(1.0, within(0.0));
     }
 
     @ParameterizedTest
@@ -68,7 +70,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(123.456, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(123.456, within(0.001));
     }
 
     @ParameterizedTest
@@ -82,7 +84,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0.000001, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.0000001);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(0.000001, within(0.0000001));
     }
 
     @ParameterizedTest
@@ -96,7 +98,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0.0, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(0.0, within(0.0));
     }
 
     @ParameterizedTest
@@ -111,7 +113,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(123.456D, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.00001D);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(123.456D, within(0.00001D));
     }
 
     @ParameterizedTest
@@ -125,6 +127,6 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(123.456D, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.00001D);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(123.456D, within(0.00001D));
     }
 }

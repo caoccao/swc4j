@@ -23,7 +23,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Test suite for edge cases and error scenarios with update expressions (++ and --).
@@ -45,7 +45,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((byte) -128, (byte) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) -128);
     }
 
     @ParameterizedTest
@@ -61,13 +61,13 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((byte) 127, (byte) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) 127);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testCompoundUpdateDecrementOnDecrement(JdkVersion jdkVersion) {
-        assertThrows(Exception.class, () -> {
+        assertThatThrownBy(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -78,13 +78,13 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                         }
                       }
                     }""");
-        });
+        }).isInstanceOf(Exception.class);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testCompoundUpdatePostfixOnPostfix(JdkVersion jdkVersion) {
-        assertThrows(Exception.class, () -> {
+        assertThatThrownBy(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -95,13 +95,13 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                         }
                       }
                     }""");
-        });
+        }).isInstanceOf(Exception.class);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testCompoundUpdatePrefixOnPrefix(JdkVersion jdkVersion) {
-        assertThrows(Exception.class, () -> {
+        assertThatThrownBy(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -112,7 +112,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                         }
                       }
                     }""");
-        });
+        }).isInstanceOf(Exception.class);
     }
 
     @ParameterizedTest
@@ -129,7 +129,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(7, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(7);
     }
 
     @ParameterizedTest
@@ -146,7 +146,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(2.1, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.0001);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(2.1, within(0.0001));
     }
 
     @ParameterizedTest
@@ -162,7 +162,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(Integer.MIN_VALUE, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(Integer.MIN_VALUE);
     }
 
     @ParameterizedTest
@@ -178,7 +178,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(Long.MIN_VALUE, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(Long.MIN_VALUE);
     }
 
     @ParameterizedTest
@@ -196,7 +196,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(11, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(11);
     }
 
     @ParameterizedTest
@@ -213,7 +213,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(16, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(16);
     }
 
     @ParameterizedTest
@@ -229,13 +229,13 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-4, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-4);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullWrapperThrowsNPE(JdkVersion jdkVersion) throws ClassNotFoundException {
-        var runner = assertDoesNotThrow(() -> getCompiler(jdkVersion).compile("""
+    public void testNullWrapperThrowsNPE(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
@@ -244,17 +244,17 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                       return x
                     }
                   }
-                }"""));
+                }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThrows(InvocationTargetException.class, () -> {
+        assertThatThrownBy(() -> {
             instanceRunner.invoke("test");
-        });
+        }).isInstanceOf(InvocationTargetException.class);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testUpdateOnExpression(JdkVersion jdkVersion) {
-        assertThrows(Exception.class, () -> {
+        assertThatThrownBy(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -266,13 +266,13 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                         }
                       }
                     }""");
-        });
+        }).isInstanceOf(Exception.class);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testUpdateOnLiteral(JdkVersion jdkVersion) {
-        assertThrows(Exception.class, () -> {
+        assertThatThrownBy(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -282,6 +282,6 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                         }
                       }
                     }""");
-        });
+        }).isInstanceOf(Exception.class);
     }
 }

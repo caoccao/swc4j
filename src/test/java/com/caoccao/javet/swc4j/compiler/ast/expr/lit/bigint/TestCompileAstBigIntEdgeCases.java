@@ -132,7 +132,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         // Very large BigInt loses precision when converted to double
-        double result = (double) runner.createInstanceRunner("com.A").invoke("test");
+        double result = runner.createInstanceRunner("com.A").invoke("test");
         // Check that it's approximately correct (precision loss expected)
         assertEquals(1.2345678901234567e28, result, 1e20);
     }
@@ -149,7 +149,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         // Large BigInt loses precision when converted to float
-        float result = (float) runner.createInstanceRunner("com.A").invoke("test");
+        float result = runner.createInstanceRunner("com.A").invoke("test");
         // Check that it's approximately correct (precision loss expected)
         assertEquals(1.23456789e14f, result, 1e8f);
     }

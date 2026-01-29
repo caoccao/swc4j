@@ -40,7 +40,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) '\n', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('\n', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -54,7 +54,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((char) '\t', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertEquals('\t', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest

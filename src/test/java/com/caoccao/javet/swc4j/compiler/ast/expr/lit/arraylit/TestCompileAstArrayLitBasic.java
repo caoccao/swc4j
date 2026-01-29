@@ -44,7 +44,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new int[]{1, 2, 3}, (int[]) runner.createInstanceRunner("com.A").invoke("test"));
+        assertArrayEquals(new int[]{1, 2, 3}, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -92,7 +92,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new boolean[]{true, false, true}, (boolean[]) runner.createInstanceRunner("com.A").invoke("test"));
+        assertArrayEquals(new boolean[]{true, false, true}, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -108,7 +108,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new double[]{1.5, 2.5, 3.5}, (double[]) runner.createInstanceRunner("com.A").invoke("test"));
+        assertArrayEquals(new double[]{1.5, 2.5, 3.5}, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -125,7 +125,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10.5, (Double) runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertEquals(10.5, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
     }
 
 
@@ -141,7 +141,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new int[]{}, (int[]) runner.createInstanceRunner("com.A").invoke("test"));
+        assertArrayEquals(new int[]{}, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -157,7 +157,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new float[]{1.0f, 2.0f, 3.0f}, (float[]) runner.createInstanceRunner("com.A").invoke("test"));
+        assertArrayEquals(new float[]{1.0f, 2.0f, 3.0f}, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -189,7 +189,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new long[]{100L, 200L, 300L}, (long[]) runner.createInstanceRunner("com.A").invoke("test"));
+        assertArrayEquals(new long[]{100L, 200L, 300L}, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 
@@ -243,7 +243,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new String[]{"hello", "world"}, (String[]) runner.createInstanceRunner("com.A").invoke("test"));
+        assertArrayEquals(new String[]{"hello", "world"}, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
 

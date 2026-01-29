@@ -42,7 +42,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?>abc)", pattern.pattern());
     }
@@ -58,7 +58,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(a)\\1", pattern.pattern());
     }
@@ -74,7 +74,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertTrue(pattern.matcher("test@example.com").matches());
         assertFalse(pattern.matcher("invalid@").matches());
@@ -91,8 +91,8 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        Pattern startPattern = (Pattern) instanceRunner.invoke("testStart");
-        Pattern endPattern = (Pattern) instanceRunner.invoke("testEnd");
+        Pattern startPattern = instanceRunner.invoke("testStart");
+        Pattern endPattern = instanceRunner.invoke("testEnd");
         assertEquals("^", startPattern.pattern());
         assertEquals("$", endPattern.pattern());
         assertEquals(Pattern.MULTILINE, startPattern.flags());
@@ -110,7 +110,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?=pattern)", pattern.pattern());
     }
@@ -126,7 +126,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?<=pattern)", pattern.pattern());
     }
@@ -142,7 +142,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?<name>a)\\k<name>", pattern.pattern());
     }
@@ -158,7 +158,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?<name>\\d+)", pattern.pattern());
     }
@@ -174,7 +174,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?!pattern)", pattern.pattern());
     }
@@ -190,7 +190,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?<!pattern)", pattern.pattern());
     }
@@ -206,7 +206,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\B", pattern.pattern());
     }
@@ -222,7 +222,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("a++", pattern.pattern());
     }
@@ -238,7 +238,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\p{L}", pattern.pattern());
     }
@@ -254,7 +254,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
+        Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\b", pattern.pattern());
     }
