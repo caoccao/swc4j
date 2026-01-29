@@ -45,10 +45,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Overflow wraps around in Java
-        assertEquals((byte) -128, classA.getMethod("test").invoke(instance));
+        assertEquals((byte) -128, (byte) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -64,10 +61,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Underflow wraps around in Java
-        assertEquals((byte) 127, classA.getMethod("test").invoke(instance));
+        assertEquals((byte) 127, (byte) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -135,9 +129,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(7, classA.getMethod("test").invoke(instance));
+        assertEquals(7, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -154,9 +146,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(2.1, (double) classA.getMethod("test").invoke(instance), 0.0001);
+        assertEquals(2.1, (double) runner.createInstanceRunner("com.A").invoke("test"), 0.0001);
     }
 
     @ParameterizedTest
@@ -172,9 +162,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(Integer.MIN_VALUE, classA.getMethod("test").invoke(instance));
+        assertEquals(Integer.MIN_VALUE, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -190,9 +178,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(Long.MIN_VALUE, classA.getMethod("test").invoke(instance));
+        assertEquals(Long.MIN_VALUE, (long) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -210,9 +196,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(11, classA.getMethod("test").invoke(instance));
+        assertEquals(11, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -229,9 +213,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(16, classA.getMethod("test").invoke(instance));
+        assertEquals(16, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -247,9 +229,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(-4, classA.getMethod("test").invoke(instance));
+        assertEquals(-4, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -265,10 +245,9 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }"""));
-        Class<?> classA = runner.getClass("com.A");
-        var instance = assertDoesNotThrow(() -> classA.getConstructor().newInstance());
+        var instanceRunner = runner.createInstanceRunner("com.A");
         assertThrows(InvocationTargetException.class, () -> {
-            classA.getMethod("test").invoke(instance);
+            instanceRunner.invoke("test");
         });
     }
 
