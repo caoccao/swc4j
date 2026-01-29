@@ -52,10 +52,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Include: 1,3,5,7,9 (stop at 11) => sum = 25
-        assertEquals(25, classA.getMethod("test").invoke(instance));
+        assertEquals(25, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -73,9 +70,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance));
+        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -98,9 +93,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(8, classA.getMethod("test").invoke(instance));
+        assertEquals(8, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -121,9 +114,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(5, classA.getMethod("test").invoke(instance));
+        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -148,10 +139,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // sum = 1 + 2 + 3 + 8 + 9 + 10 = 33 (skip 4,5,6,7)
-        assertEquals(33, classA.getMethod("test").invoke(instance));
+        assertEquals(33, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -175,9 +163,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(3, classA.getMethod("test").invoke(instance));
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -203,10 +189,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Skip: 2,3,4,6,8,9,10 => Include: 1,5,7 => sum = 13
-        assertEquals(13, classA.getMethod("test").invoke(instance));
+        assertEquals(13, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -229,10 +212,7 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // sum = 0 + 1 + 2 + 3 + 4 + 5 = 15
-        assertEquals(15, classA.getMethod("test").invoke(instance));
+        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -255,9 +235,6 @@ public class TestCompileAstWhileStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // sum = 1 + 3 + 5 + 7 + 9 = 25 (only odd numbers)
-        assertEquals(25, classA.getMethod("test").invoke(instance));
+        assertEquals(25, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

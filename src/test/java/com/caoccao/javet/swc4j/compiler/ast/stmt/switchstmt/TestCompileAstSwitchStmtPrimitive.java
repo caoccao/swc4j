@@ -52,14 +52,12 @@ public class TestCompileAstSwitchStmtPrimitive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", byte.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(10, testMethod.invoke(instance, (byte) 1));
-        assertEquals(20, testMethod.invoke(instance, (byte) 2));
-        assertEquals(30, testMethod.invoke(instance, (byte) 3));
-        assertEquals(0, testMethod.invoke(instance, (byte) 4)); // No match
+        assertEquals(10, (int) instanceRunner.invoke("test", (byte) 1));
+        assertEquals(20, (int) instanceRunner.invoke("test", (byte) 2));
+        assertEquals(30, (int) instanceRunner.invoke("test", (byte) 3));
+        assertEquals(0, (int) instanceRunner.invoke("test", (byte) 4)); // No match
     }
 
     @ParameterizedTest
@@ -84,13 +82,11 @@ public class TestCompileAstSwitchStmtPrimitive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", byte.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(11, testMethod.invoke(instance, (byte) 1)); // 1 + 10
-        assertEquals(10, testMethod.invoke(instance, (byte) 2)); // 10
-        assertEquals(100, testMethod.invoke(instance, (byte) 3)); // 100
+        assertEquals(11, (int) instanceRunner.invoke("test", (byte) 1)); // 1 + 10
+        assertEquals(10, (int) instanceRunner.invoke("test", (byte) 2)); // 10
+        assertEquals(100, (int) instanceRunner.invoke("test", (byte) 3)); // 100
     }
 
     @ParameterizedTest
@@ -116,14 +112,12 @@ public class TestCompileAstSwitchStmtPrimitive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", byte.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, (byte) -10));
-        assertEquals(2, testMethod.invoke(instance, (byte) 0));
-        assertEquals(3, testMethod.invoke(instance, (byte) 10));
-        assertEquals(0, testMethod.invoke(instance, (byte) 5)); // No match
+        assertEquals(1, (int) instanceRunner.invoke("test", (byte) -10));
+        assertEquals(2, (int) instanceRunner.invoke("test", (byte) 0));
+        assertEquals(3, (int) instanceRunner.invoke("test", (byte) 10));
+        assertEquals(0, (int) instanceRunner.invoke("test", (byte) 5)); // No match
     }
 
     @ParameterizedTest
@@ -143,15 +137,13 @@ public class TestCompileAstSwitchStmtPrimitive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", byte.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, (byte) 1));
-        assertEquals(2, testMethod.invoke(instance, (byte) 10));
-        assertEquals(3, testMethod.invoke(instance, (byte) 20));
-        assertEquals(4, testMethod.invoke(instance, (byte) 50));
-        assertEquals(0, testMethod.invoke(instance, (byte) 5)); // Default
+        assertEquals(1, (int) instanceRunner.invoke("test", (byte) 1));
+        assertEquals(2, (int) instanceRunner.invoke("test", (byte) 10));
+        assertEquals(3, (int) instanceRunner.invoke("test", (byte) 20));
+        assertEquals(4, (int) instanceRunner.invoke("test", (byte) 50));
+        assertEquals(0, (int) instanceRunner.invoke("test", (byte) 5)); // Default
     }
 
     @ParameterizedTest
@@ -177,14 +169,12 @@ public class TestCompileAstSwitchStmtPrimitive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", char.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, 'a'));
-        assertEquals(2, testMethod.invoke(instance, 'b'));
-        assertEquals(3, testMethod.invoke(instance, 'c'));
-        assertEquals(0, testMethod.invoke(instance, 'd')); // No match
+        assertEquals(1, (int) instanceRunner.invoke("test", 'a'));
+        assertEquals(2, (int) instanceRunner.invoke("test", 'b'));
+        assertEquals(3, (int) instanceRunner.invoke("test", 'c'));
+        assertEquals(0, (int) instanceRunner.invoke("test", 'd')); // No match
     }
 
     @ParameterizedTest
@@ -210,14 +200,12 @@ public class TestCompileAstSwitchStmtPrimitive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", char.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(0, testMethod.invoke(instance, '0'));
-        assertEquals(5, testMethod.invoke(instance, '5'));
-        assertEquals(9, testMethod.invoke(instance, '9'));
-        assertEquals(-1, testMethod.invoke(instance, 'a')); // Default
+        assertEquals(0, (int) instanceRunner.invoke("test", '0'));
+        assertEquals(5, (int) instanceRunner.invoke("test", '5'));
+        assertEquals(9, (int) instanceRunner.invoke("test", '9'));
+        assertEquals(-1, (int) instanceRunner.invoke("test", 'a')); // Default
     }
 
     @ParameterizedTest
@@ -246,17 +234,15 @@ public class TestCompileAstSwitchStmtPrimitive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", char.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, 'A'));
-        assertEquals(1, testMethod.invoke(instance, 'a'));
-        assertEquals(2, testMethod.invoke(instance, 'B'));
-        assertEquals(2, testMethod.invoke(instance, 'b'));
-        assertEquals(3, testMethod.invoke(instance, 'C'));
-        assertEquals(3, testMethod.invoke(instance, 'c'));
-        assertEquals(0, testMethod.invoke(instance, 'D')); // No match
+        assertEquals(1, (int) instanceRunner.invoke("test", 'A'));
+        assertEquals(1, (int) instanceRunner.invoke("test", 'a'));
+        assertEquals(2, (int) instanceRunner.invoke("test", 'B'));
+        assertEquals(2, (int) instanceRunner.invoke("test", 'b'));
+        assertEquals(3, (int) instanceRunner.invoke("test", 'C'));
+        assertEquals(3, (int) instanceRunner.invoke("test", 'c'));
+        assertEquals(0, (int) instanceRunner.invoke("test", 'D')); // No match
     }
 
     @ParameterizedTest
@@ -282,14 +268,12 @@ public class TestCompileAstSwitchStmtPrimitive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", short.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, (short) 100));
-        assertEquals(2, testMethod.invoke(instance, (short) 200));
-        assertEquals(3, testMethod.invoke(instance, (short) 300));
-        assertEquals(0, testMethod.invoke(instance, (short) 400)); // No match
+        assertEquals(1, (int) instanceRunner.invoke("test", (short) 100));
+        assertEquals(2, (int) instanceRunner.invoke("test", (short) 200));
+        assertEquals(3, (int) instanceRunner.invoke("test", (short) 300));
+        assertEquals(0, (int) instanceRunner.invoke("test", (short) 400)); // No match
     }
 
     @ParameterizedTest
@@ -310,16 +294,14 @@ public class TestCompileAstSwitchStmtPrimitive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", short.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(0, testMethod.invoke(instance, (short) 0));
-        assertEquals(1, testMethod.invoke(instance, (short) 1));
-        assertEquals(2, testMethod.invoke(instance, (short) 2));
-        assertEquals(3, testMethod.invoke(instance, (short) 3));
-        assertEquals(4, testMethod.invoke(instance, (short) 4));
-        assertEquals(-1, testMethod.invoke(instance, (short) 5)); // Default
+        assertEquals(0, (int) instanceRunner.invoke("test", (short) 0));
+        assertEquals(1, (int) instanceRunner.invoke("test", (short) 1));
+        assertEquals(2, (int) instanceRunner.invoke("test", (short) 2));
+        assertEquals(3, (int) instanceRunner.invoke("test", (short) 3));
+        assertEquals(4, (int) instanceRunner.invoke("test", (short) 4));
+        assertEquals(-1, (int) instanceRunner.invoke("test", (short) 5)); // Default
     }
 
     @ParameterizedTest
@@ -345,13 +327,11 @@ public class TestCompileAstSwitchStmtPrimitive extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", short.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(10, testMethod.invoke(instance, (short) 1));
-        assertEquals(20, testMethod.invoke(instance, (short) 2));
-        assertEquals(99, testMethod.invoke(instance, (short) 3)); // Default
-        assertEquals(99, testMethod.invoke(instance, (short) 1000)); // Default
+        assertEquals(10, (int) instanceRunner.invoke("test", (short) 1));
+        assertEquals(20, (int) instanceRunner.invoke("test", (short) 2));
+        assertEquals(99, (int) instanceRunner.invoke("test", (short) 3)); // Default
+        assertEquals(99, (int) instanceRunner.invoke("test", (short) 1000)); // Default
     }
 }

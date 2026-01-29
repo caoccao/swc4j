@@ -59,20 +59,17 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
         Class<?> enumDay = runner.getClass("com.Day");
-        var testMethod = classA.getMethod("test", enumDay);
         Object[] enumConstants = enumDay.getEnumConstants();
 
-        assertEquals(1, testMethod.invoke(instance, enumConstants[0])); // MON
-        assertEquals(2, testMethod.invoke(instance, enumConstants[1])); // TUE
-        assertEquals(3, testMethod.invoke(instance, enumConstants[2])); // WED
-        assertEquals(4, testMethod.invoke(instance, enumConstants[3])); // THU
-        assertEquals(5, testMethod.invoke(instance, enumConstants[4])); // FRI
-        assertEquals(6, testMethod.invoke(instance, enumConstants[5])); // SAT
-        assertEquals(7, testMethod.invoke(instance, enumConstants[6])); // SUN
+        assertEquals(1, (int) instanceRunner.invoke("test", enumConstants[0])); // MON
+        assertEquals(2, (int) instanceRunner.invoke("test", enumConstants[1])); // TUE
+        assertEquals(3, (int) instanceRunner.invoke("test", enumConstants[2])); // WED
+        assertEquals(4, (int) instanceRunner.invoke("test", enumConstants[3])); // THU
+        assertEquals(5, (int) instanceRunner.invoke("test", enumConstants[4])); // FRI
+        assertEquals(6, (int) instanceRunner.invoke("test", enumConstants[5])); // SAT
+        assertEquals(7, (int) instanceRunner.invoke("test", enumConstants[6])); // SUN
     }
 
     @ParameterizedTest
@@ -104,16 +101,13 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
+        var instanceRunner = runner.createInstanceRunner("com.A");
         Class<?> enumColor = runner.getClass("com.Color");
-
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", enumColor);
         Object[] enumConstants = enumColor.getEnumConstants();
 
-        assertEquals(1, testMethod.invoke(instance, enumConstants[0])); // RED
-        assertEquals(2, testMethod.invoke(instance, enumConstants[1])); // GREEN
-        assertEquals(3, testMethod.invoke(instance, enumConstants[2])); // BLUE
+        assertEquals(1, (int) instanceRunner.invoke("test", enumConstants[0])); // RED
+        assertEquals(2, (int) instanceRunner.invoke("test", enumConstants[1])); // GREEN
+        assertEquals(3, (int) instanceRunner.invoke("test", enumConstants[2])); // BLUE
     }
 
     @ParameterizedTest
@@ -141,16 +135,13 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
         Class<?> enumHttpStatus = runner.getClass("com.HttpStatus");
-        var testMethod = classA.getMethod("test", enumHttpStatus);
         Object[] enumConstants = enumHttpStatus.getEnumConstants();
 
-        assertEquals("ok", testMethod.invoke(instance, enumConstants[0])); // OK
-        assertEquals("not found", testMethod.invoke(instance, enumConstants[1])); // NOT_FOUND
-        assertEquals("error", testMethod.invoke(instance, enumConstants[2])); // INTERNAL_ERROR
+        assertEquals("ok", instanceRunner.invoke("test", enumConstants[0])); // OK
+        assertEquals("not found", instanceRunner.invoke("test", enumConstants[1])); // NOT_FOUND
+        assertEquals("error", instanceRunner.invoke("test", enumConstants[2])); // INTERNAL_ERROR
     }
 
     @ParameterizedTest
@@ -184,17 +175,14 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
         Class<?> enumLevel = runner.getClass("com.Level");
-        var testMethod = classA.getMethod("test", enumLevel);
         Object[] enumConstants = enumLevel.getEnumConstants();
 
-        assertEquals(11, testMethod.invoke(instance, enumConstants[0])); // LOW: 1 + 10
-        assertEquals(10, testMethod.invoke(instance, enumConstants[1])); // MEDIUM: 10
-        assertEquals(1100, testMethod.invoke(instance, enumConstants[2])); // HIGH: 100 + 1000
-        assertEquals(1000, testMethod.invoke(instance, enumConstants[3])); // CRITICAL: 1000
+        assertEquals(11, (int) instanceRunner.invoke("test", enumConstants[0])); // LOW: 1 + 10
+        assertEquals(10, (int) instanceRunner.invoke("test", enumConstants[1])); // MEDIUM: 10
+        assertEquals(1100, (int) instanceRunner.invoke("test", enumConstants[2])); // HIGH: 100 + 1000
+        assertEquals(1000, (int) instanceRunner.invoke("test", enumConstants[3])); // CRITICAL: 1000
     }
 
     @ParameterizedTest
@@ -230,18 +218,15 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
         Class<?> enumPriority = runner.getClass("com.Priority");
-        var testMethod = classA.getMethod("test", enumPriority);
         Object[] enumConstants = enumPriority.getEnumConstants();
 
-        assertEquals(1, testMethod.invoke(instance, enumConstants[0])); // LOWEST
-        assertEquals(1, testMethod.invoke(instance, enumConstants[1])); // LOW
-        assertEquals(2, testMethod.invoke(instance, enumConstants[2])); // NORMAL
-        assertEquals(3, testMethod.invoke(instance, enumConstants[3])); // HIGH
-        assertEquals(3, testMethod.invoke(instance, enumConstants[4])); // HIGHEST
+        assertEquals(1, (int) instanceRunner.invoke("test", enumConstants[0])); // LOWEST
+        assertEquals(1, (int) instanceRunner.invoke("test", enumConstants[1])); // LOW
+        assertEquals(2, (int) instanceRunner.invoke("test", enumConstants[2])); // NORMAL
+        assertEquals(3, (int) instanceRunner.invoke("test", enumConstants[3])); // HIGH
+        assertEquals(3, (int) instanceRunner.invoke("test", enumConstants[4])); // HIGHEST
     }
 
     @ParameterizedTest
@@ -266,16 +251,13 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
         Class<?> enumDirection = runner.getClass("com.Direction");
-        var testMethod = classA.getMethod("test", enumDirection);
         Object[] enumConstants = enumDirection.getEnumConstants();
 
-        assertEquals(-10, testMethod.invoke(instance, enumConstants[0])); // BACK
-        assertEquals(0, testMethod.invoke(instance, enumConstants[1])); // STAY
-        assertEquals(10, testMethod.invoke(instance, enumConstants[2])); // FORWARD
+        assertEquals(-10, (int) instanceRunner.invoke("test", enumConstants[0])); // BACK
+        assertEquals(0, (int) instanceRunner.invoke("test", enumConstants[1])); // STAY
+        assertEquals(10, (int) instanceRunner.invoke("test", enumConstants[2])); // FORWARD
     }
 
     @ParameterizedTest
@@ -307,17 +289,14 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
         Class<?> enumErrorLevel = runner.getClass("com.ErrorLevel");
-        var testMethod = classA.getMethod("test", enumErrorLevel);
         Object[] enumConstants = enumErrorLevel.getEnumConstants();
 
-        assertEquals("info", testMethod.invoke(instance, enumConstants[0])); // INFO
-        assertEquals("warning", testMethod.invoke(instance, enumConstants[1])); // WARNING
-        assertEquals("error", testMethod.invoke(instance, enumConstants[2])); // ERROR
-        assertEquals("fatal", testMethod.invoke(instance, enumConstants[3])); // FATAL
+        assertEquals("info", instanceRunner.invoke("test", enumConstants[0])); // INFO
+        assertEquals("warning", instanceRunner.invoke("test", enumConstants[1])); // WARNING
+        assertEquals("error", instanceRunner.invoke("test", enumConstants[2])); // ERROR
+        assertEquals("fatal", instanceRunner.invoke("test", enumConstants[3])); // FATAL
     }
 
     @ParameterizedTest
@@ -350,16 +329,13 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
+        var instanceRunner = runner.createInstanceRunner("com.A");
         Class<?> enumStatus = runner.getClass("com.Status");
-
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", enumStatus);
         Object[] enumConstants = enumStatus.getEnumConstants();
 
-        assertEquals(1, testMethod.invoke(instance, enumConstants[0])); // PENDING
-        assertEquals(2, testMethod.invoke(instance, enumConstants[1])); // ACTIVE
-        assertEquals(99, testMethod.invoke(instance, enumConstants[2])); // COMPLETED (default)
-        assertEquals(99, testMethod.invoke(instance, enumConstants[3])); // CANCELLED (default)
+        assertEquals(1, (int) instanceRunner.invoke("test", enumConstants[0])); // PENDING
+        assertEquals(2, (int) instanceRunner.invoke("test", enumConstants[1])); // ACTIVE
+        assertEquals(99, (int) instanceRunner.invoke("test", enumConstants[2])); // COMPLETED (default)
+        assertEquals(99, (int) instanceRunner.invoke("test", enumConstants[3])); // CANCELLED (default)
     }
 }

@@ -47,13 +47,11 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, 1));
-        assertEquals(2, testMethod.invoke(instance, 2));
-        assertEquals(-1, testMethod.invoke(instance, 99));
+        assertEquals(1, (int) instanceRunner.invoke("test", 1));
+        assertEquals(2, (int) instanceRunner.invoke("test", 2));
+        assertEquals(-1, (int) instanceRunner.invoke("test", 99));
     }
 
     @ParameterizedTest
@@ -82,14 +80,12 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(true, testMethod.invoke(instance, 0));  // Sunday
-        assertEquals(false, testMethod.invoke(instance, 1)); // Monday
-        assertEquals(false, testMethod.invoke(instance, 5)); // Friday
-        assertEquals(true, testMethod.invoke(instance, 6));  // Saturday
+        assertEquals(true, instanceRunner.invoke("test", 0));  // Sunday
+        assertEquals(false, instanceRunner.invoke("test", 1)); // Monday
+        assertEquals(false, instanceRunner.invoke("test", 5)); // Friday
+        assertEquals(true, instanceRunner.invoke("test", 6));  // Saturday
     }
 
     @ParameterizedTest
@@ -120,15 +116,13 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(0, testMethod.invoke(instance, 0));
-        assertEquals(1, testMethod.invoke(instance, 1));
-        assertEquals(2, testMethod.invoke(instance, 2));
-        assertEquals(0, testMethod.invoke(instance, 3)); // Missing case
-        assertEquals(4, testMethod.invoke(instance, 4));
+        assertEquals(0, (int) instanceRunner.invoke("test", 0));
+        assertEquals(1, (int) instanceRunner.invoke("test", 1));
+        assertEquals(2, (int) instanceRunner.invoke("test", 2));
+        assertEquals(0, (int) instanceRunner.invoke("test", 3)); // Missing case
+        assertEquals(4, (int) instanceRunner.invoke("test", 4));
     }
 
     @ParameterizedTest
@@ -154,12 +148,10 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class, int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, 2, 3)); // 2+3 = 5
-        assertEquals(2, testMethod.invoke(instance, 7, 3)); // 7+3 = 10
+        assertEquals(1, (int) instanceRunner.invoke("test", 2, 3)); // 2+3 = 5
+        assertEquals(2, (int) instanceRunner.invoke("test", 7, 3)); // 7+3 = 10
     }
 
     @ParameterizedTest
@@ -177,11 +169,9 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, 5)); // Switch does nothing
+        assertEquals(1, (int) instanceRunner.invoke("test", 5)); // Switch does nothing
     }
 
     @ParameterizedTest
@@ -202,12 +192,10 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(2, testMethod.invoke(instance, 1)); // Empty case 1 falls to case 2
-        assertEquals(2, testMethod.invoke(instance, 2));
+        assertEquals(2, (int) instanceRunner.invoke("test", 1)); // Empty case 1 falls to case 2
+        assertEquals(2, (int) instanceRunner.invoke("test", 2));
     }
 
     @ParameterizedTest
@@ -236,15 +224,13 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
         // 0x10 = 16, 0o24 = 20, 0b100000 = 32
-        assertEquals(1, testMethod.invoke(instance, 16));  // Hex
-        assertEquals(2, testMethod.invoke(instance, 20));  // Octal
-        assertEquals(3, testMethod.invoke(instance, 32));  // Binary
-        assertEquals(4, testMethod.invoke(instance, 64));  // Decimal
+        assertEquals(1, (int) instanceRunner.invoke("test", 16));  // Hex
+        assertEquals(2, (int) instanceRunner.invoke("test", 20));  // Octal
+        assertEquals(3, (int) instanceRunner.invoke("test", 32));  // Binary
+        assertEquals(4, (int) instanceRunner.invoke("test", 64));  // Decimal
     }
 
     @ParameterizedTest
@@ -273,14 +259,12 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                 }""");
 
         var runner = getCompiler(jdkVersion).compile(code.toString());
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(0, testMethod.invoke(instance, 0));
-        assertEquals(100, testMethod.invoke(instance, 10));
-        assertEquals(490, testMethod.invoke(instance, 49));
-        assertEquals(0, testMethod.invoke(instance, 50)); // No match
+        assertEquals(0, (int) instanceRunner.invoke("test", 0));
+        assertEquals(100, (int) instanceRunner.invoke("test", 10));
+        assertEquals(490, (int) instanceRunner.invoke("test", 49));
+        assertEquals(0, (int) instanceRunner.invoke("test", 50)); // No match
     }
 
     @ParameterizedTest
@@ -310,14 +294,12 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                 }""");
 
         var runner = getCompiler(jdkVersion).compile(code.toString());
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, 1));
-        assertEquals(16, testMethod.invoke(instance, 16));
-        assertEquals(512, testMethod.invoke(instance, 512));
-        assertEquals(0, testMethod.invoke(instance, 3)); // No match
+        assertEquals(1, (int) instanceRunner.invoke("test", 1));
+        assertEquals(16, (int) instanceRunner.invoke("test", 16));
+        assertEquals(512, (int) instanceRunner.invoke("test", 512));
+        assertEquals(0, (int) instanceRunner.invoke("test", 3)); // No match
     }
 
     @ParameterizedTest
@@ -343,13 +325,11 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, 1000000));
-        assertEquals(2, testMethod.invoke(instance, -1000000));
-        assertEquals(3, testMethod.invoke(instance, 0));
+        assertEquals(1, (int) instanceRunner.invoke("test", 1000000));
+        assertEquals(2, (int) instanceRunner.invoke("test", -1000000));
+        assertEquals(3, (int) instanceRunner.invoke("test", 0));
     }
 
     @ParameterizedTest
@@ -374,12 +354,10 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(10, testMethod.invoke(instance, 1));
-        assertEquals(20, testMethod.invoke(instance, 2));
+        assertEquals(10, (int) instanceRunner.invoke("test", 1));
+        assertEquals(20, (int) instanceRunner.invoke("test", 2));
     }
 
     @ParameterizedTest
@@ -402,11 +380,9 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class, int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(10, testMethod.invoke(instance, 2, 4));  // 2 + 4*2 = 10
-        assertEquals(20, testMethod.invoke(instance, 4, 8));  // 4 + 8*2 = 20
+        assertEquals(10, (int) instanceRunner.invoke("test", 2, 4));  // 2 + 4*2 = 10
+        assertEquals(20, (int) instanceRunner.invoke("test", 4, 8));  // 4 + 8*2 = 20
     }
 }

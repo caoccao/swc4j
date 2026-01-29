@@ -52,16 +52,14 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(123, testMethod.invoke(instance, 1));
-        assertEquals(123, testMethod.invoke(instance, 2));
-        assertEquals(123, testMethod.invoke(instance, 3));
-        assertEquals(45, testMethod.invoke(instance, 4));
-        assertEquals(45, testMethod.invoke(instance, 5));
-        assertEquals(0, testMethod.invoke(instance, 6));
+        assertEquals(123, (int) instanceRunner.invoke("test", 1));
+        assertEquals(123, (int) instanceRunner.invoke("test", 2));
+        assertEquals(123, (int) instanceRunner.invoke("test", 3));
+        assertEquals(45, (int) instanceRunner.invoke("test", 4));
+        assertEquals(45, (int) instanceRunner.invoke("test", 5));
+        assertEquals(0, (int) instanceRunner.invoke("test", 6));
     }
 
     @ParameterizedTest
@@ -83,12 +81,10 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, 1)); // Case 1 only
-        assertEquals(11, testMethod.invoke(instance, 99)); // Default (10) + Case 1 (1) = 11
+        assertEquals(1, (int) instanceRunner.invoke("test", 1)); // Case 1 only
+        assertEquals(11, (int) instanceRunner.invoke("test", 99)); // Default (10) + Case 1 (1) = 11
     }
 
     @ParameterizedTest
@@ -113,12 +109,8 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test");
-
         // All cases execute: 1 + 2 + 3 + 10 = 16
-        assertEquals(16, testMethod.invoke(instance));
+        assertEquals(16, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -148,16 +140,14 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(0, testMethod.invoke(instance, 0));     // Case 0, break
-        assertEquals(12, testMethod.invoke(instance, 1));    // Cases 1-2, break
-        assertEquals(12, testMethod.invoke(instance, 2));    // Cases 1-2, break
-        assertEquals(107, testMethod.invoke(instance, 3));   // Case 3 (3) + Case 4 (4) + default (100) = 107
-        assertEquals(104, testMethod.invoke(instance, 4));   // Case 4 (4) + default (100) = 104
-        assertEquals(100, testMethod.invoke(instance, 99));  // Default only
+        assertEquals(0, (int) instanceRunner.invoke("test", 0));     // Case 0, break
+        assertEquals(12, (int) instanceRunner.invoke("test", 1));    // Cases 1-2, break
+        assertEquals(12, (int) instanceRunner.invoke("test", 2));    // Cases 1-2, break
+        assertEquals(107, (int) instanceRunner.invoke("test", 3));   // Case 3 (3) + Case 4 (4) + default (100) = 107
+        assertEquals(104, (int) instanceRunner.invoke("test", 4));   // Case 4 (4) + default (100) = 104
+        assertEquals(100, (int) instanceRunner.invoke("test", 99));  // Default only
     }
 
     @ParameterizedTest
@@ -182,12 +172,8 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test");
-
         // Last case without break still works
-        assertEquals(3, testMethod.invoke(instance));
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -215,12 +201,8 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test");
-
         // All 5 cases execute: 1 + 2 + 3 + 4 + 5 = 15
-        assertEquals(15, testMethod.invoke(instance));
+        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -243,12 +225,8 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test");
-
         // Case 2 executes: result += 2, then falls through to case 3: result += 3
-        assertEquals(5, testMethod.invoke(instance)); // 2 + 3 = 5
+        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test")); // 2 + 3 = 5
     }
 
     @ParameterizedTest
@@ -271,12 +249,8 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test");
-
         // Case 2 is empty, falls through to case 3
-        assertEquals(3, testMethod.invoke(instance));
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -297,12 +271,10 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(11, testMethod.invoke(instance, 1)); // Case 1 (1) + default (10) = 11
-        assertEquals(10, testMethod.invoke(instance, 99)); // Default only
+        assertEquals(11, (int) instanceRunner.invoke("test", 1)); // Case 1 (1) + default (10) = 11
+        assertEquals(10, (int) instanceRunner.invoke("test", 99)); // Default only
     }
 
     @ParameterizedTest
@@ -323,14 +295,12 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
         // Return stops execution, no fall-through
-        assertEquals(1, testMethod.invoke(instance, 1));
-        assertEquals(2, testMethod.invoke(instance, 2));
-        assertEquals(-1, testMethod.invoke(instance, 99));
+        assertEquals(1, (int) instanceRunner.invoke("test", 1));
+        assertEquals(2, (int) instanceRunner.invoke("test", 2));
+        assertEquals(-1, (int) instanceRunner.invoke("test", 99));
     }
 
     @ParameterizedTest
@@ -358,12 +328,8 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test");
-
         // Case 2 (result=2, count=1) + Case 3 (result=5, count=2) = result=5, count=2 -> 52
-        assertEquals(52, testMethod.invoke(instance));
+        assertEquals(52, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -391,13 +357,11 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, 1));  // Case 1, break
-        assertEquals(5, testMethod.invoke(instance, 2));  // Case 2 (2) + Case 3 (3) = 5
-        assertEquals(3, testMethod.invoke(instance, 3));  // Case 3, break
-        assertEquals(4, testMethod.invoke(instance, 4));  // Case 4, break
+        assertEquals(1, (int) instanceRunner.invoke("test", 1));  // Case 1, break
+        assertEquals(5, (int) instanceRunner.invoke("test", 2));  // Case 2 (2) + Case 3 (3) = 5
+        assertEquals(3, (int) instanceRunner.invoke("test", 3));  // Case 3, break
+        assertEquals(4, (int) instanceRunner.invoke("test", 4));  // Case 4, break
     }
 }

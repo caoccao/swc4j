@@ -53,10 +53,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Each inner loop runs 2 times (j=0,1), outer runs 3 times => 3*2 = 6
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -83,11 +80,9 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Each inner loop: j=1,3,5 (odd values) => 3 iterations
         // Outer runs 3 times => 3*3 = 9
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -119,10 +114,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // 2 * 2 * 2 * 2 = 16 iterations
-        assertEquals(16, classA.getMethod("test").invoke(instance));
+        assertEquals(16, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -144,10 +136,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // While loop runs 3 times, for loop runs 2 times each => 3*2 = 6
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -169,15 +158,13 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // i starts at 0, inner loop increments i by 3 each outer iteration
         // i=0: inner runs 3 times => i=3
         // i=3: inner runs 3 times => i=6
         // ... continues until i>=100
         // i increments by 3 each outer iteration: 0,3,6,...,99,102
         // At i=99, inner adds 3 => i=102 >= 100, stops
-        assertEquals(102, classA.getMethod("test").invoke(instance));
+        assertEquals(102, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -201,13 +188,11 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // i=0: j<0 => 0 iterations
         // i=1: j<1 => 1 iteration
         // i=2: j<2 => 2 iterations
         // Total: 0 + 1 + 2 = 3
-        assertEquals(3, classA.getMethod("test").invoke(instance));
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -235,10 +220,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // 2 * 2 * 2 = 8 iterations
-        assertEquals(8, classA.getMethod("test").invoke(instance));
+        assertEquals(8, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -262,10 +244,7 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // 3 * 3 = 9 iterations
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -287,9 +266,6 @@ public class TestCompileAstWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // For loop runs 3 times, while loop runs 2 times each => 3*2 = 6
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

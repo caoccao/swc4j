@@ -57,13 +57,11 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
         // 0+1+2+3+4 = 10, then +50 = 60
-        assertEquals(60, testMethod.invoke(instance, 1));
-        assertEquals(200, testMethod.invoke(instance, 2));
+        assertEquals(60, (int) instanceRunner.invoke("test", 1));
+        assertEquals(200, (int) instanceRunner.invoke("test", 2));
     }
 
     @ParameterizedTest
@@ -89,12 +87,10 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class, int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(100, testMethod.invoke(instance, 1, 10)); // y>5, break in if
-        assertEquals(60, testMethod.invoke(instance, 1, 3));   // y<=5, else then +10
+        assertEquals(100, (int) instanceRunner.invoke("test", 1, 10)); // y>5, break in if
+        assertEquals(60, (int) instanceRunner.invoke("test", 1, 3));   // y<=5, else then +10
     }
 
     @ParameterizedTest
@@ -120,12 +116,10 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
         // 0+1+2+3+4 = 10, then +100 = 110
-        assertEquals(110, testMethod.invoke(instance, 1));
+        assertEquals(110, (int) instanceRunner.invoke("test", 1));
     }
 
     @ParameterizedTest
@@ -152,12 +146,10 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
         // 1+2+4+5 = 12 (skips 3)
-        assertEquals(12, testMethod.invoke(instance, 1));
+        assertEquals(12, (int) instanceRunner.invoke("test", 1));
     }
 
     @ParameterizedTest
@@ -182,12 +174,10 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
         // 0+1+3+4 = 8 (skips 2)
-        assertEquals(8, testMethod.invoke(instance, 1));
+        assertEquals(8, (int) instanceRunner.invoke("test", 1));
     }
 
     @ParameterizedTest
@@ -215,13 +205,11 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class, boolean.class, boolean.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, 1, true, false));   // First break
-        assertEquals(10, testMethod.invoke(instance, 1, false, true));  // Second break
-        assertEquals(100, testMethod.invoke(instance, 1, false, false)); // Third break
+        assertEquals(1, (int) instanceRunner.invoke("test", 1, true, false));   // First break
+        assertEquals(10, (int) instanceRunner.invoke("test", 1, false, true));  // Second break
+        assertEquals(100, (int) instanceRunner.invoke("test", 1, false, false)); // Third break
     }
 
     @ParameterizedTest
@@ -246,13 +234,11 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, 1));   // Break, return result
-        assertEquals(2, testMethod.invoke(instance, 2));   // Return directly
-        assertEquals(-1, testMethod.invoke(instance, 99)); // Break, return result
+        assertEquals(1, (int) instanceRunner.invoke("test", 1));   // Break, return result
+        assertEquals(2, (int) instanceRunner.invoke("test", 2));   // Return directly
+        assertEquals(-1, (int) instanceRunner.invoke("test", 99)); // Break, return result
     }
 
     @ParameterizedTest
@@ -275,12 +261,10 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(11, testMethod.invoke(instance, 1)); // 1 + 10
-        assertEquals(12, testMethod.invoke(instance, 2)); // 2 + 10 (no break but last case)
+        assertEquals(11, (int) instanceRunner.invoke("test", 1)); // 1 + 10
+        assertEquals(12, (int) instanceRunner.invoke("test", 2)); // 2 + 10 (no break but last case)
     }
 
     @ParameterizedTest
@@ -301,12 +285,10 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(100, testMethod.invoke(instance, 1));
-        assertEquals(200, testMethod.invoke(instance, 2));
-        assertEquals(-1, testMethod.invoke(instance, 99));
+        assertEquals(100, (int) instanceRunner.invoke("test", 1));
+        assertEquals(200, (int) instanceRunner.invoke("test", 2));
+        assertEquals(-1, (int) instanceRunner.invoke("test", 99));
     }
 }

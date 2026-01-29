@@ -51,12 +51,10 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(3, testMethod.invoke(instance, 1)); // 0+1+2 = 3
-        assertEquals(100, testMethod.invoke(instance, 2));
+        assertEquals(3, (int) instanceRunner.invoke("test", 1)); // 0+1+2 = 3
+        assertEquals(100, (int) instanceRunner.invoke("test", 2));
     }
 
     @ParameterizedTest
@@ -85,13 +83,11 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
         // i=0,1,2,3,4 sum=10, then +100 = 110
-        assertEquals(110, testMethod.invoke(instance, 1));
-        assertEquals(200, testMethod.invoke(instance, 2));
+        assertEquals(110, (int) instanceRunner.invoke("test", 1));
+        assertEquals(200, (int) instanceRunner.invoke("test", 2));
     }
 
     @ParameterizedTest
@@ -121,12 +117,8 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test");
-
         // i=0: +1, i=1: +1, i=2: +2, i=3: +2, i=4: +5 = 11
-        assertEquals(11, testMethod.invoke(instance));
+        assertEquals(11, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -156,12 +148,8 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test");
-
         // i=0: +1, i=1: +10, i=2: +100 = 111
-        assertEquals(111, testMethod.invoke(instance));
+        assertEquals(111, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -197,13 +185,11 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class, int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(10, testMethod.invoke(instance, 1, 10));   // Simulates breaking outer
-        assertEquals(120, testMethod.invoke(instance, 1, 20));  // Breaks inner, continues: 20+100
-        assertEquals(200, testMethod.invoke(instance, 2, 10));
+        assertEquals(10, (int) instanceRunner.invoke("test", 1, 10));   // Simulates breaking outer
+        assertEquals(120, (int) instanceRunner.invoke("test", 1, 20));  // Breaks inner, continues: 20+100
+        assertEquals(200, (int) instanceRunner.invoke("test", 2, 10));
     }
 
     @ParameterizedTest
@@ -233,14 +219,12 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class, int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(110, testMethod.invoke(instance, 1, 10));
-        assertEquals(120, testMethod.invoke(instance, 1, 20));
-        assertEquals(0, testMethod.invoke(instance, 1, 30)); // Inner switch no match
-        assertEquals(2, testMethod.invoke(instance, 2, 10));
+        assertEquals(110, (int) instanceRunner.invoke("test", 1, 10));
+        assertEquals(120, (int) instanceRunner.invoke("test", 1, 20));
+        assertEquals(0, (int) instanceRunner.invoke("test", 1, 30)); // Inner switch no match
+        assertEquals(2, (int) instanceRunner.invoke("test", 2, 10));
     }
 
     @ParameterizedTest
@@ -271,14 +255,12 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class, int.class, int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(111, testMethod.invoke(instance, 1, 10, 100));
-        assertEquals(112, testMethod.invoke(instance, 1, 10, 200));
-        assertEquals(0, testMethod.invoke(instance, 1, 10, 300));
-        assertEquals(0, testMethod.invoke(instance, 1, 20, 100));
+        assertEquals(111, (int) instanceRunner.invoke("test", 1, 10, 100));
+        assertEquals(112, (int) instanceRunner.invoke("test", 1, 10, 200));
+        assertEquals(0, (int) instanceRunner.invoke("test", 1, 10, 300));
+        assertEquals(0, (int) instanceRunner.invoke("test", 1, 20, 100));
     }
 
     @ParameterizedTest
@@ -306,13 +288,11 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class, int.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(32, testMethod.invoke(instance, 1, 10)); // Inner: 10+20, outer falls: +2 = 32
-        assertEquals(22, testMethod.invoke(instance, 1, 20)); // Inner: 20, outer falls: +2 = 22
-        assertEquals(2, testMethod.invoke(instance, 1, 30));  // Inner no match, outer falls: +2 = 2
-        assertEquals(2, testMethod.invoke(instance, 2, 10));  // Outer case 2: 2
+        assertEquals(32, (int) instanceRunner.invoke("test", 1, 10)); // Inner: 10+20, outer falls: +2 = 32
+        assertEquals(22, (int) instanceRunner.invoke("test", 1, 20)); // Inner: 20, outer falls: +2 = 22
+        assertEquals(2, (int) instanceRunner.invoke("test", 1, 30));  // Inner no match, outer falls: +2 = 2
+        assertEquals(2, (int) instanceRunner.invoke("test", 2, 10));  // Outer case 2: 2
     }
 }

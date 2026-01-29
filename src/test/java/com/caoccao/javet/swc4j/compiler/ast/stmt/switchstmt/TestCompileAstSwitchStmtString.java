@@ -52,14 +52,12 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", String.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, "foo"));
-        assertEquals(2, testMethod.invoke(instance, "bar"));
-        assertEquals(3, testMethod.invoke(instance, "baz"));
-        assertEquals(0, testMethod.invoke(instance, "other"));
+        assertEquals(1, (int) instanceRunner.invoke("test", "foo"));
+        assertEquals(2, (int) instanceRunner.invoke("test", "bar"));
+        assertEquals(3, (int) instanceRunner.invoke("test", "baz"));
+        assertEquals(0, (int) instanceRunner.invoke("test", "other"));
     }
 
     @ParameterizedTest
@@ -85,13 +83,11 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", String.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, "Foo"));
-        assertEquals(2, testMethod.invoke(instance, "foo"));
-        assertEquals(3, testMethod.invoke(instance, "FOO"));
+        assertEquals(1, (int) instanceRunner.invoke("test", "Foo"));
+        assertEquals(2, (int) instanceRunner.invoke("test", "foo"));
+        assertEquals(3, (int) instanceRunner.invoke("test", "FOO"));
     }
 
     @ParameterizedTest
@@ -114,12 +110,10 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", String.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(0, testMethod.invoke(instance, ""));
-        assertEquals(1, testMethod.invoke(instance, "foo"));
+        assertEquals(0, (int) instanceRunner.invoke("test", ""));
+        assertEquals(1, (int) instanceRunner.invoke("test", "foo"));
     }
 
     @ParameterizedTest
@@ -144,13 +138,11 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", String.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(11, testMethod.invoke(instance, "a")); // 1 + 10 = 11
-        assertEquals(10, testMethod.invoke(instance, "b")); // 10
-        assertEquals(100, testMethod.invoke(instance, "c")); // 100
+        assertEquals(11, (int) instanceRunner.invoke("test", "a")); // 1 + 10 = 11
+        assertEquals(10, (int) instanceRunner.invoke("test", "b")); // 10
+        assertEquals(100, (int) instanceRunner.invoke("test", "c")); // 100
     }
 
     @ParameterizedTest
@@ -174,13 +166,11 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", String.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, "Aa"));
-        assertEquals(2, testMethod.invoke(instance, "BB"));
-        assertEquals(0, testMethod.invoke(instance, "other"));
+        assertEquals(1, (int) instanceRunner.invoke("test", "Aa"));
+        assertEquals(2, (int) instanceRunner.invoke("test", "BB"));
+        assertEquals(0, (int) instanceRunner.invoke("test", "other"));
     }
 
     @ParameterizedTest
@@ -203,12 +193,10 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", String.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, "a very long string literal that exceeds normal length"));
-        assertEquals(2, testMethod.invoke(instance, "another long string"));
+        assertEquals(1, (int) instanceRunner.invoke("test", "a very long string literal that exceeds normal length"));
+        assertEquals(2, (int) instanceRunner.invoke("test", "another long string"));
     }
 
     @ParameterizedTest
@@ -234,15 +222,13 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", String.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, "red"));
-        assertEquals(1, testMethod.invoke(instance, "green"));
-        assertEquals(1, testMethod.invoke(instance, "blue"));
-        assertEquals(2, testMethod.invoke(instance, "yellow"));
-        assertEquals(2, testMethod.invoke(instance, "orange"));
+        assertEquals(1, (int) instanceRunner.invoke("test", "red"));
+        assertEquals(1, (int) instanceRunner.invoke("test", "green"));
+        assertEquals(1, (int) instanceRunner.invoke("test", "blue"));
+        assertEquals(2, (int) instanceRunner.invoke("test", "yellow"));
+        assertEquals(2, (int) instanceRunner.invoke("test", "orange"));
     }
 
     @ParameterizedTest
@@ -265,12 +251,10 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", String.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, "hello\nworld"));
-        assertEquals(2, testMethod.invoke(instance, "tab\there"));
+        assertEquals(1, (int) instanceRunner.invoke("test", "hello\nworld"));
+        assertEquals(2, (int) instanceRunner.invoke("test", "tab\there"));
     }
 
     @ParameterizedTest
@@ -296,13 +280,11 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", String.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, "你好"));
-        assertEquals(2, testMethod.invoke(instance, "مرحبا"));
-        assertEquals(3, testMethod.invoke(instance, "🚀"));
+        assertEquals(1, (int) instanceRunner.invoke("test", "你好"));
+        assertEquals(2, (int) instanceRunner.invoke("test", "مرحبا"));
+        assertEquals(3, (int) instanceRunner.invoke("test", "🚀"));
     }
 
     @ParameterizedTest
@@ -328,12 +310,10 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", String.class);
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, testMethod.invoke(instance, "apple"));
-        assertEquals(2, testMethod.invoke(instance, "banana"));
-        assertEquals(-1, testMethod.invoke(instance, "xyz"));
+        assertEquals(1, (int) instanceRunner.invoke("test", "apple"));
+        assertEquals(2, (int) instanceRunner.invoke("test", "banana"));
+        assertEquals(-1, (int) instanceRunner.invoke("test", "xyz"));
     }
 }

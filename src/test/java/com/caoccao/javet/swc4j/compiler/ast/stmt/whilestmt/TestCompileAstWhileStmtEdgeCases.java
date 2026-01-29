@@ -43,9 +43,7 @@ public class TestCompileAstWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(42, classA.getMethod("test").invoke(instance));
+        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -65,10 +63,7 @@ public class TestCompileAstWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Due to floating point precision, this iterates 11 times (0.1*10 > 1.0 due to rounding)
-        assertEquals(11, classA.getMethod("test").invoke(instance));
+        assertEquals(11, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -92,10 +87,7 @@ public class TestCompileAstWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // i=1: neither, i=2: neither, i=3: 3%3==0, return 30
-        assertEquals(30, classA.getMethod("test").invoke(instance));
+        assertEquals(30, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -121,10 +113,7 @@ public class TestCompileAstWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // sumA = 0+1+2+3+4 = 10, sumB = 0+1+2+3+4 = 10
-        assertEquals(110, classA.getMethod("test").invoke(instance));
+        assertEquals(110, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -149,10 +138,7 @@ public class TestCompileAstWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // even = 5 (0,2,4,6,8), odd = 5 (1,3,5,7,9)
-        assertEquals(55, classA.getMethod("test").invoke(instance));
+        assertEquals(55, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -173,9 +159,7 @@ public class TestCompileAstWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(70, classA.getMethod("test").invoke(instance));
+        assertEquals(70, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -193,9 +177,7 @@ public class TestCompileAstWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(100000, classA.getMethod("test").invoke(instance));
+        assertEquals(100000, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -217,10 +199,9 @@ public class TestCompileAstWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(45, classA.getMethod("test", boolean.class).invoke(instance, true));
-        assertEquals(0, classA.getMethod("test", boolean.class).invoke(instance, false));
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(45, (int) instanceRunner.invoke("test", true));
+        assertEquals(0, (int) instanceRunner.invoke("test", false));
     }
 
     @ParameterizedTest
@@ -241,8 +222,6 @@ public class TestCompileAstWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(15, classA.getMethod("test").invoke(instance));
+        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }
