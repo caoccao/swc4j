@@ -43,9 +43,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("true", "yes", "false", "no"), result);
     }
 
@@ -61,9 +59,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("a", 3), result); // Last value wins
     }
 
@@ -80,9 +76,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("nested", Map.of("inner", 42)), result);
     }
 
@@ -98,9 +92,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("2", "two", "10", "ten"), result);
     }
 
@@ -116,9 +108,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("42", "answer", "0", "zero"), result);
     }
 
@@ -134,9 +124,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("key1", "value1", "key2", "value2"), result);
     }
 
@@ -152,9 +140,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("computed", "value"), result);
     }
 
@@ -171,9 +157,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("dynamic", "value"), result);
     }
 

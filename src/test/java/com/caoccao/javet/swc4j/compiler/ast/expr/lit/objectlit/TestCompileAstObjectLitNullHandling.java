@@ -51,9 +51,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(SimpleMap.of(
                 "outer", SimpleMap.of("inner1", null, "inner2", 42),
                 "value", null), result);
@@ -75,9 +73,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(SimpleMap.of("a", null, "b", 2), result);
     }
 
@@ -98,9 +94,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(SimpleMap.of("computed", null, "regular", null, "value", 42), result);
     }
 
@@ -124,9 +118,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(SimpleMap.of("a", null, "b", 42, "c", null), result);
     }
 
@@ -147,9 +139,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(SimpleMap.of("a", null, "b", 2, "c", null, "d", 4), result);
     }
 
@@ -169,9 +159,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(3, result.size());
         assertEquals(List.of(1, 2, 3), result.get("a"));
         assertEquals(List.of(4, 5), result.get("b"));
@@ -194,9 +182,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(3, result.size());
         var aValue = (ArrayList<?>) result.get("a");
         assertEquals(List.of(List.of(1, 2), List.of(3, 4)), aValue);
@@ -221,9 +207,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(SimpleMap.of("a", null, "b", 42, "c", null), result);
     }
 

@@ -46,9 +46,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("a", 1, "b", "hello"), result);
     }
 
@@ -69,9 +67,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("a", 1, "b", 2), result);
     }
 
@@ -89,9 +85,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
     }
 
@@ -109,9 +103,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("a", 1, "b", 99, "c", 3), result);
     }
 
@@ -129,9 +121,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
     }
 
@@ -148,9 +138,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals("hello", result);
     }
 
@@ -168,9 +156,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(true, result);
     }
 
@@ -189,9 +175,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(1, result);
     }
 
@@ -210,9 +194,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("inner", 42), result);
     }
 
@@ -229,9 +211,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
+        var result = runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(2, result);
     }
 
@@ -247,9 +227,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("getData");
         assertEquals(Map.of("a", 1, "b", "hello", "c", true), result);
     }
 
@@ -268,9 +246,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("getData");
         assertEquals(Map.of(
                 "outer1", Map.of("inner", 42),
                 "outer2", Map.of("value", 99)
@@ -289,9 +265,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("getData");
         // With Record<number, string> return type, keys should be Integer
         assertEquals(3, result.size());
         assertTrue(result.containsKey(1) || result.containsKey("1"));
@@ -316,9 +290,7 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("getData");
         assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
     }
 

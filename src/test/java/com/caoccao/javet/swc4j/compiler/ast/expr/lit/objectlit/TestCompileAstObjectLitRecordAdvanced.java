@@ -47,9 +47,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of(
                 "outer1", Map.of(),
                 "outer2", Map.of("inner", 42)
@@ -71,9 +69,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of(
                 "a", Map.of("x", 1, "y", 2.5),
                 "b", Map.of("z", 100)
@@ -95,9 +91,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of(
                 "outer1", Map.of("inner1", 42, "inner2", 99),
                 "outer2", Map.of("inner3", 100)
@@ -120,9 +114,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Expected: First key is 42.0 (Double from variable), second key is 2 (Integer from expression)
         var expected = new LinkedHashMap<>();
         expected.put(42.0, "forty-two");
@@ -146,9 +138,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("computed", 42, "key1", 99), result);
     }
 
@@ -175,9 +165,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("x", 10, "y", 20.0, "computed", 40, "z", 30.0, "key2", 50, "literal", 60), result);
     }
 
@@ -199,9 +187,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("a", 1, "b", 2, "cd", 3), result);
     }
 
@@ -229,9 +215,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("a", 1, "c", 3.0, "b", 2, "d", 4.0, "e", 5), result);
     }
 
@@ -255,9 +239,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of(
                 "outer1", Map.of("inner1", 1),
                 "outer2", Map.of("inner2", 2),
@@ -285,9 +267,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("a", 1, "b", 2, "c", 3.0, "d", 4, "e", 5), result);
     }
 
@@ -309,9 +289,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Later properties override earlier ones
         assertEquals(Map.of("a", 99.0, "b", 88), result);
     }
@@ -331,9 +309,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(2, result.size());
         assertEquals(42, result.get(1));
         assertEquals(3.14, result.get(2));
@@ -357,9 +333,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of(10, "ten", 11, "eleven", 20, "twenty"), result);
     }
 
@@ -383,9 +357,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of(0, "zero", 1, "one", 2, "two", 10, "ten", 11, "eleven"), result);
     }
 
@@ -406,9 +378,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of(1, "a", 2, "b", 3, "c", 4, "d", 5, "e"), result);
     }
 
@@ -426,9 +396,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("x", 10.0, "y", 20.0, "z", 30), result);
     }
 
@@ -447,9 +415,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("a", 1.0, "b", 2.0, "c", 3.0), result);
     }
 
@@ -469,9 +435,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("name", "Alice", "city", "NYC"), result);
     }
 
@@ -489,9 +453,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
     }
 
@@ -513,9 +475,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of(
                 "outer1", Map.of("inner1", 1, "inner2", 2),
                 "outer2", Map.of("inner3", 3)
@@ -546,9 +506,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of(
                 "a", Map.of("x", 1),
                 "b", Map.of("y", 2),
@@ -569,9 +527,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Spread overwrites earlier properties
         assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
     }
@@ -589,9 +545,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("c", 3, "a", 1, "b", 2, "d", 4), result);
     }
 
@@ -615,9 +569,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("key1", 1, "key2", 2, "literal", 3), result);
     }
 
@@ -643,9 +595,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // x typed as 'number' becomes 100.0 (TypeScript number -> Java Double)
         assertEquals(SimpleMap.of(
                 "regular", 10,
@@ -673,9 +623,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Variables typed as 'number' are stored as Double
         assertEquals(Map.of("a", 10.0, "b", 20.0, "c", 30.0), result);
     }
@@ -695,9 +643,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5), result);
     }
 
@@ -721,9 +667,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of(
                 "empty1", Map.of(),
                 "with2", Map.of(
@@ -834,9 +778,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of(
                 "a", Map.of(
                         "b", Map.of("c", 1, "d", 3),
@@ -872,9 +814,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         assertEquals(Map.of(
                 "level1", Map.of(
                         "level2a", Map.of("level3a", 100, "level3b", 200),
