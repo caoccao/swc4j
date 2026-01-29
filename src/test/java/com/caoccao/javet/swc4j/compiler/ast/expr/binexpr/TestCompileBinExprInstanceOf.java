@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
 
@@ -38,7 +38,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -65,10 +65,10 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                   }
                 }""");
         // String instanceof String should be true, returns 1
-        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("testWithString"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("testWithString")).isEqualTo(1);
 
         // Integer instanceof String should be false, returns 0
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("testWithInteger"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("testWithInteger")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -90,8 +90,8 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("testTrue"));
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("testFalse"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("testTrue")).isTrue();
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("testFalse")).isFalse();
     }
 
     @ParameterizedTest
@@ -108,7 +108,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -129,10 +129,10 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                   }
                 }""");
         // String is instanceof String, so true
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("testStringOrNumber"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("testStringOrNumber")).isTrue();
 
         // Integer is instanceof Number, so true
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("testNumberOrString"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("testNumberOrString")).isTrue();
     }
 
     @ParameterizedTest
@@ -148,7 +148,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -164,7 +164,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -184,7 +184,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -201,7 +201,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                   }
                 }""");
         // null instanceof X always returns false
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -217,7 +217,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -233,7 +233,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -249,7 +249,7 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -265,6 +265,6 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 }

@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
 
@@ -41,7 +41,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(8, (int) runner.createInstanceRunner("com.A").invoke("test")); // 12 & 10 = 8
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(8); // 12 & 10 = 8
     }
 
     @ParameterizedTest
@@ -59,7 +59,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test")); // (16 & 8) + (8 & 4) = 0 + 0 = 0
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0); //(16 & 8) + (8 & 4) = 0 + 0 = 0
     }
 
     @ParameterizedTest
@@ -76,7 +76,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(591751049L, (long) runner.createInstanceRunner("com.A").invoke("test")); // Extract low 32 bits (4886718345 & 4294967295 = 591751049)
+        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(591751049L); //Extract low 32 bits (4886718345 & 4294967295 = 591751049)
     }
 
     @ParameterizedTest
@@ -93,7 +93,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(789, (int) runner.createInstanceRunner("com.A").invoke("test")); // 789 & 789 = 789 (idempotent)
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(789); //789 & 789 = 789 (idempotent)
     }
 
     // Wrapper type tests
@@ -112,7 +112,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(456, (int) runner.createInstanceRunner("com.A").invoke("test")); // 456 & -1 = 456 (all bits set)
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(456); //456 & -1 = 456 (all bits set)
     }
 
     @ParameterizedTest
@@ -129,7 +129,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1073741823, (int) runner.createInstanceRunner("com.A").invoke("test")); // MAX_VALUE & smaller = smaller
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1073741823); // MAX_VALUE & smaller = smaller
     }
 
     // Mixed type tests
@@ -148,7 +148,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test")); // 123 & 0 = 0
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0); // 123 & 0 = 0
     }
 
     @ParameterizedTest
@@ -165,7 +165,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0xAB00, (int) runner.createInstanceRunner("com.A").invoke("test")); // Extract high byte
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0xAB00); // Extract high byte
     }
 
     @ParameterizedTest
@@ -182,7 +182,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0x78, (int) runner.createInstanceRunner("com.A").invoke("test")); // Extract low byte
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0x78); // Extract low byte
     }
 
     // Negative number tests
@@ -201,7 +201,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0xAAAA, (int) runner.createInstanceRunner("com.A").invoke("test")); // Extract odd bits (10101010...)
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0xAAAA); //Extract odd bits (10101010...)
     }
 
     @ParameterizedTest
@@ -218,7 +218,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-14, (int) runner.createInstanceRunner("com.A").invoke("test")); // -10 & -5 = -14
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-14); // -10 & -5 = -14
     }
 
     @ParameterizedTest
@@ -235,7 +235,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(7, (int) runner.createInstanceRunner("com.A").invoke("test")); // 15 & 7 = 7
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(7); // 15 & 7 = 7
     }
 
     // Edge case tests
@@ -254,7 +254,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test")); // 25 & 15 = 9
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(9); // 25 & 15 = 9
     }
 
     @ParameterizedTest
@@ -271,7 +271,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test")); // 30 & 20 = 20
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20); // 30 & 20 = 20
     }
 
     @ParameterizedTest
@@ -289,7 +289,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(63, (int) runner.createInstanceRunner("com.A").invoke("test")); // 255 & 127 & 63 = 63
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(63); // 255 & 127 & 63 = 63
     }
 
     @ParameterizedTest
@@ -306,7 +306,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(128L, (long) runner.createInstanceRunner("com.A").invoke("test")); // 200 & 150 = 128 (widened to long)
+        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(128L); //200 & 150 = 128 (widened to long)
     }
 
     // Chained operations
@@ -325,7 +325,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(12, (int) runner.createInstanceRunner("com.A").invoke("test")); // 28 & 12 = 12
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(12); // 28 & 12 = 12
     }
 
     @ParameterizedTest
@@ -342,7 +342,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(127L, (long) runner.createInstanceRunner("com.A").invoke("test")); // 255 & 127 = 127
+        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(127L); // 255 & 127 = 127
     }
 
     // Bit masking tests
@@ -361,7 +361,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(480L, (long) runner.createInstanceRunner("com.A").invoke("test")); // 1000 & 500 = 480
+        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(480L); // 1000 & 500 = 480
     }
 
     @ParameterizedTest
@@ -378,7 +378,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(12, (int) runner.createInstanceRunner("com.A").invoke("test")); // -20 & 15 = 12
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(12); // -20 & 15 = 12
     }
 
     @ParameterizedTest
@@ -395,7 +395,7 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(224L, (long) runner.createInstanceRunner("com.A").invoke("test")); // -800 & 255 = 224
+        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(224L); // -800 & 255 = 224
     }
 
     @ParameterizedTest
@@ -412,6 +412,6 @@ public class TestCompileBinExprBitAnd extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(32, (int) runner.createInstanceRunner("com.A").invoke("test")); // 100 & 50 = 32
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(32); // 100 & 50 = 32
     }
 }

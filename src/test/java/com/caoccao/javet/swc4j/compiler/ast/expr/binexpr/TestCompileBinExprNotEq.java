@@ -20,9 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
 
@@ -40,7 +39,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -57,7 +56,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -74,7 +73,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -91,7 +90,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -111,7 +110,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Both comparisons are false (0 != 0 = 0)
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); //Both comparisons are false (0 != 0 = 0)
     }
 
     @ParameterizedTest
@@ -131,7 +130,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Both are 0, so 0 !== 0 = 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Both are 0, so 0 !== 0 = 0
     }
 
     @ParameterizedTest
@@ -148,7 +147,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -165,7 +164,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -182,7 +181,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -199,7 +198,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -216,7 +215,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal strings should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal strings should return 0
     }
 
     @ParameterizedTest
@@ -233,7 +232,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -250,7 +249,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -267,7 +266,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -284,7 +283,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -301,7 +300,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -318,7 +317,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -335,7 +334,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -352,7 +351,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -369,7 +368,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -386,7 +385,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -403,7 +402,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -420,7 +419,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -437,7 +436,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -454,7 +453,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -471,7 +470,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -488,7 +487,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -505,7 +504,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -522,7 +521,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -539,7 +538,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -556,7 +555,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -573,7 +572,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -590,7 +589,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal strings should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal strings should return 0
     }
 
     @ParameterizedTest
@@ -607,7 +606,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -624,7 +623,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -641,7 +640,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -661,7 +660,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Both are 0, so 0 !== 0 = 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Both are 0, so 0 !== 0 = 0
     }
 
     @ParameterizedTest
@@ -678,7 +677,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -695,7 +694,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -712,7 +711,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -729,7 +728,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -746,7 +745,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -763,7 +762,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -780,7 +779,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal strings should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal strings should return 0
     }
 
     @ParameterizedTest
@@ -797,7 +796,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal strings should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal strings should return 1
     }
 
     @ParameterizedTest
@@ -814,7 +813,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal strings should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal strings should return 0
     }
 
     @ParameterizedTest
@@ -831,7 +830,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal strings should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal strings should return 1
     }
 
     @ParameterizedTest
@@ -848,7 +847,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -865,7 +864,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -882,7 +881,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: equal values should return 0
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -899,7 +898,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -916,6 +915,6 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // Inverted: unequal values should return 1
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // Inverted: unequal values should return 1
     }
 }

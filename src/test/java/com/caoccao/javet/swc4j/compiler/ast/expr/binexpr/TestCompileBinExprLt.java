@@ -20,9 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestCompileBinExprLt extends BaseTestCompileSuite {
 
@@ -40,7 +39,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 50 < 50 is false
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // 50 < 50 is false
     }
 
     @ParameterizedTest
@@ -57,7 +56,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 49 < 50 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // 49 < 50 is true
     }
 
     @ParameterizedTest
@@ -74,7 +73,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 100 < 99 is false
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // 100 < 99 is false
     }
 
 
@@ -92,7 +91,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 3.15 < 3.14 is false
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // 3.15 < 3.14 is false
     }
 
     @ParameterizedTest
@@ -109,7 +108,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 3.13 < 3.14 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // 3.13 < 3.14 is true
     }
 
     @ParameterizedTest
@@ -126,7 +125,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 1.4 < 1.5 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // 1.4 < 1.5 is true
     }
 
     @ParameterizedTest
@@ -143,7 +142,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 2.5 < 2.4 is false
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // 2.5 < 2.4 is false
     }
 
     @ParameterizedTest
@@ -160,7 +159,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 1.4 < 1.5 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // 1.4 < 1.5 is true
     }
 
     @ParameterizedTest
@@ -177,7 +176,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 43 < 42 is false
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // 43 < 42 is false
     }
 
     @ParameterizedTest
@@ -194,7 +193,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 42 < 43 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // 42 < 43 is true
     }
 
     @ParameterizedTest
@@ -211,7 +210,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 101 < 100 is false
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // 101 < 100 is false
     }
 
     @ParameterizedTest
@@ -228,7 +227,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 99 < 100 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // 99 < 100 is true
     }
 
     @ParameterizedTest
@@ -245,7 +244,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // First is less than second
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // First is less than second
     }
 
     @ParameterizedTest
@@ -262,7 +261,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 1234567891 < 1234567890 is false
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // 1234567891 < 1234567890 is false
     }
 
     @ParameterizedTest
@@ -279,7 +278,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 1234567889 < 1234567890 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // 1234567889 < 1234567890 is true
     }
 
     @ParameterizedTest
@@ -296,7 +295,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // MAX_VALUE - 1 < MAX_VALUE is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // MAX_VALUE - 1 < MAX_VALUE is true
     }
 
     @ParameterizedTest
@@ -313,7 +312,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // -2147483647 < -2147483646 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // -2147483647 < -2147483646 is true
     }
 
     @ParameterizedTest
@@ -330,7 +329,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // -3.14160 < -3.14159 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // -3.14160 < -3.14159 is true
     }
 
     @ParameterizedTest
@@ -347,7 +346,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // -2.6 < -2.5 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // -2.6 < -2.5 is true
     }
 
     @ParameterizedTest
@@ -364,7 +363,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // -43 < -42 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // -43 < -42 is true
     }
 
     @ParameterizedTest
@@ -381,7 +380,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // -1234567891 < -1234567890 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // -1234567891 < -1234567890 is true
     }
 
     @ParameterizedTest
@@ -398,7 +397,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 32001 < 32000 is false
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // 32001 < 32000 is false
     }
 
     @ParameterizedTest
@@ -415,7 +414,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 31999 < 32000 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // 31999 < 32000 is true
     }
 
     @ParameterizedTest
@@ -432,7 +431,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 0.0 < 0.1 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // 0.0 < 0.1 is true
     }
 
     @ParameterizedTest
@@ -449,7 +448,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 0 < 0 is false
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse(); // 0 < 0 is false
     }
 
     @ParameterizedTest
@@ -466,7 +465,7 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // -1 < 0 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // -1 < 0 is true
     }
 
     @ParameterizedTest
@@ -483,6 +482,6 @@ public class TestCompileBinExprLt extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test")); // 0 < 1 is true
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue(); // 0 < 1 is true
     }
 }
