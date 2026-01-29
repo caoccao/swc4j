@@ -43,9 +43,7 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\\\", pattern.pattern());
     }
@@ -61,9 +59,7 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\^", pattern.pattern());
     }
@@ -79,9 +75,7 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\$", pattern.pattern());
     }
@@ -97,9 +91,7 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\.", pattern.pattern());
     }
@@ -115,9 +107,7 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         // Hex escape for null character
         assertEquals("\\x00", pattern.pattern());
@@ -134,9 +124,7 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\|", pattern.pattern());
     }
@@ -152,9 +140,7 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\+", pattern.pattern());
     }
@@ -170,9 +156,7 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\?", pattern.pattern());
     }
@@ -188,9 +172,7 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\[\\]\\(\\)\\{\\}", pattern.pattern());
     }
@@ -206,9 +188,7 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\*", pattern.pattern());
     }
@@ -224,9 +204,7 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         // \v should be converted to \x0B
         assertEquals("\\x0B", pattern.pattern());

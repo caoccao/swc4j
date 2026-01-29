@@ -43,9 +43,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("pattern", pattern.pattern());
         // i=2, m=8, s=32, u=256+64=320 → 2|8|32|320 = 362
@@ -63,9 +61,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("abc", pattern.pattern());
         assertEquals(Pattern.CASE_INSENSITIVE, pattern.flags());
@@ -82,9 +78,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals(".", pattern.pattern());
         assertEquals(Pattern.DOTALL, pattern.flags());
@@ -101,9 +95,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         // Order should not matter: msi = ims
         int expected = Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE;
@@ -121,9 +113,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("pattern", pattern.pattern());
         // Global flag is ignored (not a Pattern flag)
@@ -159,9 +149,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("^start", pattern.pattern());
         assertEquals(Pattern.MULTILINE, pattern.flags());
@@ -178,9 +166,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("pattern", pattern.pattern());
         // g is ignored, i=2, m=8 → 10
@@ -217,9 +203,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\w+", pattern.pattern());
         // u flag = UNICODE_CHARACTER_CLASS (256) | UNICODE_CASE (64) = 320

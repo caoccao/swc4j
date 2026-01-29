@@ -42,9 +42,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?>abc)", pattern.pattern());
     }
@@ -60,9 +58,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(a)\\1", pattern.pattern());
     }
@@ -78,9 +74,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertTrue(pattern.matcher("test@example.com").matches());
         assertFalse(pattern.matcher("invalid@").matches());
@@ -96,10 +90,9 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     testEnd(): Pattern { return /$/m }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern startPattern = (Pattern) classA.getMethod("testStart").invoke(instance);
-        Pattern endPattern = (Pattern) classA.getMethod("testEnd").invoke(instance);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        Pattern startPattern = (Pattern) instanceRunner.invoke("testStart");
+        Pattern endPattern = (Pattern) instanceRunner.invoke("testEnd");
         assertEquals("^", startPattern.pattern());
         assertEquals("$", endPattern.pattern());
         assertEquals(Pattern.MULTILINE, startPattern.flags());
@@ -117,9 +110,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?=pattern)", pattern.pattern());
     }
@@ -135,9 +126,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?<=pattern)", pattern.pattern());
     }
@@ -153,9 +142,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?<name>a)\\k<name>", pattern.pattern());
     }
@@ -171,9 +158,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?<name>\\d+)", pattern.pattern());
     }
@@ -189,9 +174,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?!pattern)", pattern.pattern());
     }
@@ -207,9 +190,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("(?<!pattern)", pattern.pattern());
     }
@@ -225,9 +206,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\B", pattern.pattern());
     }
@@ -243,9 +222,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("a++", pattern.pattern());
     }
@@ -261,9 +238,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\p{L}", pattern.pattern());
     }
@@ -279,9 +254,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        Pattern pattern = (Pattern) classA.getMethod("test").invoke(instance);
+        Pattern pattern = (Pattern) runner.createInstanceRunner("com.A").invoke("test");
         assertNotNull(pattern);
         assertEquals("\\b", pattern.pattern());
     }
