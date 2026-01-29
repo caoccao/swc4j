@@ -22,9 +22,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.regex.Pattern;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Tests for escape sequences.
@@ -44,8 +43,8 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\\\", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\\\");
     }
 
     @ParameterizedTest
@@ -60,8 +59,8 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\^", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\^");
     }
 
     @ParameterizedTest
@@ -76,8 +75,8 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\$", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\$");
     }
 
     @ParameterizedTest
@@ -92,8 +91,8 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\.", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\.");
     }
 
     @ParameterizedTest
@@ -108,9 +107,9 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
+        assertThat(pattern).isNotNull();
         // Hex escape for null character
-        assertEquals("\\x00", pattern.pattern());
+        assertThat(pattern.pattern()).isEqualTo("\\x00");
     }
 
     @ParameterizedTest
@@ -125,8 +124,8 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\|", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\|");
     }
 
     @ParameterizedTest
@@ -141,8 +140,8 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\+", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\+");
     }
 
     @ParameterizedTest
@@ -157,8 +156,8 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\?", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\?");
     }
 
     @ParameterizedTest
@@ -173,8 +172,8 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\[\\]\\(\\)\\{\\}", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\[\\]\\(\\)\\{\\}");
     }
 
     @ParameterizedTest
@@ -189,8 +188,8 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\*", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\*");
     }
 
     @ParameterizedTest
@@ -205,8 +204,8 @@ public class TestCompileAstRegexEscapes extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
+        assertThat(pattern).isNotNull();
         // \v should be converted to \x0B
-        assertEquals("\\x0B", pattern.pattern());
+        assertThat(pattern.pattern()).isEqualTo("\\x0B");
     }
 }

@@ -23,8 +23,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.regex.Pattern;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for regex flags.
@@ -44,10 +45,10 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("pattern", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("pattern");
         // i=2, m=8, s=32, u=256+64=320 → 2|8|32|320 = 362
-        assertEquals(362, pattern.flags());
+        assertThat(pattern.flags()).isEqualTo(362);
     }
 
     @ParameterizedTest
@@ -62,9 +63,9 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("abc", pattern.pattern());
-        assertEquals(Pattern.CASE_INSENSITIVE, pattern.flags());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("abc");
+        assertThat(pattern.flags()).isEqualTo(Pattern.CASE_INSENSITIVE);
     }
 
     @ParameterizedTest
@@ -79,9 +80,9 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals(".", pattern.pattern());
-        assertEquals(Pattern.DOTALL, pattern.flags());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo(".");
+        assertThat(pattern.flags()).isEqualTo(Pattern.DOTALL);
     }
 
     @ParameterizedTest
@@ -96,10 +97,10 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
+        assertThat(pattern).isNotNull();
         // Order should not matter: msi = ims
         int expected = Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE;
-        assertEquals(expected, pattern.flags());
+        assertThat(pattern.flags()).isEqualTo(expected);
     }
 
     @ParameterizedTest
@@ -114,16 +115,16 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("pattern", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("pattern");
         // Global flag is ignored (not a Pattern flag)
-        assertEquals(0, pattern.flags());
+        assertThat(pattern.flags()).isEqualTo(0);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexIndicesFlagError(JdkVersion jdkVersion) {
-        var exception = assertThrows(Swc4jByteCodeCompilerException.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -133,9 +134,10 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                       }
                     }""");
         });
+        assertThat(exception).isInstanceOf(Swc4jByteCodeCompilerException.class);
         // Check the root cause message
-        assertNotNull(exception.getCause());
-        assertTrue(exception.getCause().getMessage().contains("Indices flag 'd' is not supported"));
+        assertThat(exception.getCause()).isNotNull();
+        assertThat(exception.getCause().getMessage().contains("Indices flag 'd' is not supported")).isTrue();
     }
 
     @ParameterizedTest
@@ -150,9 +152,9 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("^start", pattern.pattern());
-        assertEquals(Pattern.MULTILINE, pattern.flags());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("^start");
+        assertThat(pattern.flags()).isEqualTo(Pattern.MULTILINE);
     }
 
     @ParameterizedTest
@@ -167,17 +169,17 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("pattern", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("pattern");
         // g is ignored, i=2, m=8 → 10
         int expected = Pattern.CASE_INSENSITIVE | Pattern.MULTILINE;
-        assertEquals(expected, pattern.flags());
+        assertThat(pattern.flags()).isEqualTo(expected);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRegexStickyFlagError(JdkVersion jdkVersion) {
-        var exception = assertThrows(Swc4jByteCodeCompilerException.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -187,9 +189,10 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                       }
                     }""");
         });
+        assertThat(exception).isInstanceOf(Swc4jByteCodeCompilerException.class);
         // Check the root cause message
-        assertNotNull(exception.getCause());
-        assertTrue(exception.getCause().getMessage().contains("Sticky flag 'y' is not supported"));
+        assertThat(exception.getCause()).isNotNull();
+        assertThat(exception.getCause().getMessage().contains("Sticky flag 'y' is not supported")).isTrue();
     }
 
     @ParameterizedTest
@@ -204,10 +207,10 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\w+", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\w+");
         // u flag = UNICODE_CHARACTER_CLASS (256) | UNICODE_CASE (64) = 320
         int expected = Pattern.UNICODE_CHARACTER_CLASS | Pattern.UNICODE_CASE;
-        assertEquals(expected, pattern.flags());
+        assertThat(pattern.flags()).isEqualTo(expected);
     }
 }

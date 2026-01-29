@@ -25,9 +25,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Tests for property shorthand syntax in object literals.
@@ -49,7 +48,7 @@ public class TestCompileAstObjectLitShorthand extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("x", 10, "dynamic", 20, "normal", 30), result);
+        assertThat(result).isEqualTo(Map.of("x", 10, "dynamic", 20, "normal", 30));
     }
 
     @ParameterizedTest
@@ -67,7 +66,7 @@ public class TestCompileAstObjectLitShorthand extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1, "x", 10, "b", 2, "y", 20, "c", 3), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "x", 10, "b", 2, "y", 20, "c", 3));
     }
 
     @ParameterizedTest
@@ -86,7 +85,7 @@ public class TestCompileAstObjectLitShorthand extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 2, "c", 3));
     }
 
     @ParameterizedTest
@@ -105,12 +104,12 @@ public class TestCompileAstObjectLitShorthand extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(3, result.size());
+        assertThat(result.size()).isEqualTo(3);
         // LinkedHashMap preserves insertion order
         var keys = result.keySet().toArray();
-        assertEquals("z", keys[0]);
-        assertEquals("a", keys[1]);
-        assertEquals("m", keys[2]);
+        assertThat(keys[0]).isEqualTo("z");
+        assertThat(keys[1]).isEqualTo("a");
+        assertThat(keys[2]).isEqualTo("m");
     }
 
     @ParameterizedTest
@@ -127,7 +126,7 @@ public class TestCompileAstObjectLitShorthand extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("x", 10), result);
+        assertThat(result).isEqualTo(Map.of("x", 10));
     }
 
     @ParameterizedTest
@@ -144,10 +143,10 @@ public class TestCompileAstObjectLitShorthand extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(1, result.size());
+        assertThat(result.size()).isEqualTo(1);
         var arr = (ArrayList<?>) result.get("arr");
-        assertNotNull(arr);
-        assertEquals(List.of(1, 2, 3), arr);
+        assertThat(arr).isNotNull();
+        assertThat(arr).isEqualTo(List.of(1, 2, 3));
     }
 
     @ParameterizedTest
@@ -166,7 +165,7 @@ public class TestCompileAstObjectLitShorthand extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("num", 42, "str", "hello", "bool", true), result);
+        assertThat(result).isEqualTo(Map.of("num", 42, "str", "hello", "bool", true));
     }
 
     @ParameterizedTest
@@ -183,7 +182,7 @@ public class TestCompileAstObjectLitShorthand extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("nested", Map.of("inner", 42)), result);
+        assertThat(result).isEqualTo(Map.of("nested", Map.of("inner", 42)));
     }
 
 }

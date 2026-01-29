@@ -22,8 +22,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.math.BigInteger;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for BigInt edge cases and boundary conditions.
@@ -42,7 +43,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((byte) 300, (byte) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) 300);
     }
 
     @ParameterizedTest
@@ -56,7 +57,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(new BigInteger("123"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(new BigInteger("123"));
     }
 
     @ParameterizedTest
@@ -75,7 +76,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(new BigInteger("555"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(new BigInteger("555"));
     }
 
     @ParameterizedTest
@@ -89,7 +90,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(BigInteger.ZERO, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(BigInteger.ZERO);
     }
 
     @ParameterizedTest
@@ -103,7 +104,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(Integer.MIN_VALUE, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(Integer.MIN_VALUE);
     }
 
     @ParameterizedTest
@@ -117,7 +118,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(Long.MIN_VALUE, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(Long.MIN_VALUE);
     }
 
     @ParameterizedTest
@@ -132,9 +133,9 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         // Very large BigInt loses precision when converted to double
-        double result = runner.createInstanceRunner("com.A").invoke("test");
+        double result = runner.createInstanceRunner("com.A").<Double>invoke("test");
         // Check that it's approximately correct (precision loss expected)
-        assertEquals(1.2345678901234567e28, result, 1e20);
+        assertThat(result).isCloseTo(1.2345678901234567e28, within(1e20));
     }
 
     @ParameterizedTest
@@ -149,9 +150,9 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         // Large BigInt loses precision when converted to float
-        float result = runner.createInstanceRunner("com.A").invoke("test");
+        float result = runner.createInstanceRunner("com.A").<Float>invoke("test");
         // Check that it's approximately correct (precision loss expected)
-        assertEquals(1.23456789e14f, result, 1e8f);
+        assertThat(result).isCloseTo(1.23456789e14f, within(1e8f));
     }
 
     @ParameterizedTest
@@ -165,7 +166,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((short) 40000, (short) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((short) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((short) 40000);
     }
 
     @ParameterizedTest
@@ -186,9 +187,9 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(new BigInteger("123"), instanceRunner.invoke("testPositive"));
-        assertEquals(new BigInteger("-123"), instanceRunner.invoke("testNegative"));
-        assertEquals(new BigInteger("123"), instanceRunner.invoke("testNoSign"));
+        assertThat(instanceRunner.<Object>invoke("testPositive")).isEqualTo(new BigInteger("123"));
+        assertThat(instanceRunner.<Object>invoke("testNegative")).isEqualTo(new BigInteger("-123"));
+        assertThat(instanceRunner.<Object>invoke("testNoSign")).isEqualTo(new BigInteger("123"));
     }
 
     @ParameterizedTest
@@ -202,7 +203,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(Integer.MAX_VALUE, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(Integer.MAX_VALUE);
     }
 
     @ParameterizedTest
@@ -216,7 +217,7 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(Long.MAX_VALUE, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(Long.MAX_VALUE);
     }
 
     @ParameterizedTest
@@ -230,8 +231,11 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(new BigInteger("-12345678901234567890123456789012345678901234567890"),
-                runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(
+                runner.createInstanceRunner("com.A").<Object>invoke("test")
+        ).isEqualTo(
+                new BigInteger("-12345678901234567890123456789012345678901234567890")
+        );;
     }
 
     @ParameterizedTest
@@ -245,8 +249,11 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(new BigInteger("98765432109876543210987654321098765432109876543210"),
-                runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(
+                runner.createInstanceRunner("com.A").<Object>invoke("test")
+        ).isEqualTo(
+                new BigInteger("98765432109876543210987654321098765432109876543210")
+        );;
     }
 
     @ParameterizedTest
@@ -264,8 +271,8 @@ public class TestCompileAstBigIntEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(false, instanceRunner.invoke("testZero"));
+        assertThat(instanceRunner.<Boolean>invoke("testZero")).isFalse();
         // 1n → true
-        assertEquals(true, instanceRunner.invoke("testNonZero"));
+        assertThat(instanceRunner.<Boolean>invoke("testNonZero")).isTrue();
     }
 }

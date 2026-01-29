@@ -22,8 +22,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.regex.Pattern;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for edge cases and variable contexts.
@@ -43,8 +43,8 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("[a-zA-Z0-9_\\-.+]", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("[a-zA-Z0-9_\\-.+]");
     }
 
     @ParameterizedTest
@@ -60,9 +60,9 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("pattern", pattern.pattern());
-        assertEquals(Pattern.CASE_INSENSITIVE, pattern.flags());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("pattern");
+        assertThat(pattern.flags()).isEqualTo(Pattern.CASE_INSENSITIVE);
     }
 
     @ParameterizedTest
@@ -77,8 +77,8 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("((((((((((a))))))))))", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("((((((((((a))))))))))");
     }
 
     @ParameterizedTest
@@ -93,9 +93,9 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
+        assertThat(pattern).isNotNull();
         // Empty non-capturing group
-        assertEquals("(?:)", pattern.pattern());
+        assertThat(pattern.pattern()).isEqualTo("(?:)");
     }
 
     @ParameterizedTest
@@ -110,9 +110,9 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Object result = runner.createInstanceRunner("com.A").invoke("test");
-        assertInstanceOf(Pattern.class, result);
+        assertThat(result).isInstanceOf(Pattern.class);
         Pattern pattern = (Pattern) result;
-        assertEquals("pattern", pattern.pattern());
+        assertThat(pattern.pattern()).isEqualTo("pattern");
     }
 
     @ParameterizedTest
@@ -128,8 +128,8 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("test", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("test");
     }
 
     @ParameterizedTest
@@ -144,10 +144,10 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertTrue(pattern.matcher("a").matches());
-        assertTrue(pattern.matcher("z").matches());
-        assertFalse(pattern.matcher("1").matches());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.matcher("a").matches()).isTrue();
+        assertThat(pattern.matcher("z").matches()).isTrue();
+        assertThat(pattern.matcher("1").matches()).isFalse();
     }
 
     @ParameterizedTest
@@ -165,9 +165,9 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("third", pattern.pattern());
-        assertEquals(Pattern.MULTILINE, pattern.flags());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("third");
+        assertThat(pattern.flags()).isEqualTo(Pattern.MULTILINE);
     }
 
     @ParameterizedTest
@@ -182,8 +182,8 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("[^a-z]", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("[^a-z]");
     }
 
     @ParameterizedTest
@@ -200,8 +200,8 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("second", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("second");
     }
 
     @ParameterizedTest
@@ -216,8 +216,8 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("pattern", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("pattern");
     }
 
     @ParameterizedTest
@@ -232,8 +232,8 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("[/]", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("[/]");
     }
 
     @ParameterizedTest
@@ -249,8 +249,8 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("test", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("test");
     }
 
     @ParameterizedTest
@@ -266,8 +266,8 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("pattern", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("pattern");
     }
 
     @ParameterizedTest
@@ -287,7 +287,7 @@ public class TestCompileAstRegexEdgeCases extends BaseTestCompileSuite {
                   }
                 }""".formatted(pattern.toString()));
         Pattern result = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(result);
-        assertEquals(pattern.toString(), result.pattern());
+        assertThat(result).isNotNull();
+        assertThat(result.pattern()).isEqualTo(pattern.toString());
     }
 }

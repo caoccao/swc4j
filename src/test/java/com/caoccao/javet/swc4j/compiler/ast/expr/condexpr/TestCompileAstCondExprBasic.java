@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for basic conditional expressions (ternary operator).
@@ -40,7 +40,7 @@ public class TestCompileAstCondExprBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Integer>invoke("test")).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -54,7 +54,7 @@ public class TestCompileAstCondExprBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -69,7 +69,7 @@ public class TestCompileAstCondExprBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -84,6 +84,6 @@ public class TestCompileAstCondExprBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(100);
     }
 }

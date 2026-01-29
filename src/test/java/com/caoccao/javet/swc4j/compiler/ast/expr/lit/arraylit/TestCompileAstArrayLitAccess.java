@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for array element access and indexing operations.
@@ -42,7 +42,7 @@ public class TestCompileAstArrayLitAccess extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
     }
 
 
@@ -59,7 +59,7 @@ public class TestCompileAstArrayLitAccess extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
     }
 
 
@@ -75,7 +75,7 @@ public class TestCompileAstArrayLitAccess extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
     }
 
 
@@ -92,7 +92,7 @@ public class TestCompileAstArrayLitAccess extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(99, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(99);
     }
 
 
@@ -108,6 +108,6 @@ public class TestCompileAstArrayLitAccess extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
     }
 }

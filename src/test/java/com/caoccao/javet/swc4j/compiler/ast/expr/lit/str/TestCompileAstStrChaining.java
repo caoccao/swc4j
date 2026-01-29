@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for chaining multiple String methods
@@ -39,7 +39,7 @@ public class TestCompileAstStrChaining extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello");
     }
 
     @ParameterizedTest
@@ -53,7 +53,7 @@ public class TestCompileAstStrChaining extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello there", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello there");
     }
 
     @ParameterizedTest
@@ -67,7 +67,7 @@ public class TestCompileAstStrChaining extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("HELLO THERE", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("HELLO THERE");
     }
 
     @ParameterizedTest
@@ -81,7 +81,7 @@ public class TestCompileAstStrChaining extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hehehe", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hehehe");
     }
 
     @ParameterizedTest
@@ -95,7 +95,7 @@ public class TestCompileAstStrChaining extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello");
     }
 
     @ParameterizedTest
@@ -109,6 +109,6 @@ public class TestCompileAstStrChaining extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello");
     }
 }

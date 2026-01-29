@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for string edge cases and boundary conditions.
@@ -43,7 +43,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals('\uFFFF', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('\uFFFF');
     }
 
     @ParameterizedTest
@@ -57,7 +57,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("0123456789", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("0123456789");
     }
 
     @ParameterizedTest
@@ -71,7 +71,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("          ", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("          ");
     }
 
     @ParameterizedTest
@@ -85,7 +85,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("line1\nline2\rline3\r\nline4", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("line1\nline2\rline3\r\nline4");
     }
 
     @ParameterizedTest
@@ -99,7 +99,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("\uFFFF", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("\uFFFF");
     }
 
     @ParameterizedTest
@@ -113,7 +113,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("\u0000", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("\u0000");
     }
 
     @ParameterizedTest
@@ -127,7 +127,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("     ", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("     ");
     }
 
     @ParameterizedTest
@@ -141,7 +141,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("aaaaaaaaaa", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("aaaaaaaaaa");
     }
 
     @ParameterizedTest
@@ -155,7 +155,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("!@#$%^&*()_+-=[]{}|;:,.<>?/", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("!@#$%^&*()_+-=[]{}|;:,.<>?/");
     }
 
     @ParameterizedTest
@@ -169,7 +169,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("TextA中🚀End", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("TextA中🚀End");
     }
 
     @ParameterizedTest
@@ -190,7 +190,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""".formatted(expected));
-        assertEquals(expected, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(expected);
     }
 
     @ParameterizedTest
@@ -204,7 +204,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("a\nb\tc\rd\\e'f\"g\bh\fi", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a\nb\tc\rd\\e'f\"g\bh\fi");
     }
 
     // NOTE: testStringEmojiLength removed - .length property access is out of scope

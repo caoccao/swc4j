@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for Unicode and international characters.
@@ -40,7 +40,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals('A', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('A');
     }
 
     @ParameterizedTest
@@ -54,7 +54,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals('中', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('中');
     }
 
     @ParameterizedTest
@@ -68,7 +68,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("Hello 🌍 World 🚀", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("Hello 🌍 World 🚀");
     }
 
     @ParameterizedTest
@@ -82,7 +82,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("😀😁😂🤣😃", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("😀😁😂🤣😃");
     }
 
     @ParameterizedTest
@@ -96,7 +96,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("Hello 世界 🌍", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("Hello 世界 🌍");
     }
 
     @ParameterizedTest
@@ -110,7 +110,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("مرحبا", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("مرحبا");
     }
 
     @ParameterizedTest
@@ -124,7 +124,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("A", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("A");
     }
 
     @ParameterizedTest
@@ -138,7 +138,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("你好世界", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("你好世界");
     }
 
     @ParameterizedTest
@@ -152,7 +152,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("你好", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("你好");
     }
 
     @ParameterizedTest
@@ -166,7 +166,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("こんにちは", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("こんにちは");
     }
 
     @ParameterizedTest
@@ -180,7 +180,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("안녕하세요", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("안녕하세요");
     }
 
     @ParameterizedTest
@@ -194,6 +194,6 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("Hello", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("Hello");
     }
 }

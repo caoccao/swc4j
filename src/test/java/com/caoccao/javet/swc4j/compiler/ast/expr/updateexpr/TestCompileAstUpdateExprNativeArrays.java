@@ -44,7 +44,7 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) 11);
+        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) 11);
     }
 
     @ParameterizedTest
@@ -60,7 +60,7 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(2.5, within(0.001));
+        assertThat((Double) runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(2.5, within(0.001));
     }
 
     @ParameterizedTest
@@ -76,7 +76,7 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Float) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(10.5f, within(0.001f));
+        assertThat((Float) runner.createInstanceRunner("com.A").<Float>invoke("test")).isCloseTo(10.5f, within(0.001f));
     }
 
     @ParameterizedTest
@@ -93,7 +93,7 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(30); // arr[2] before increment
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(30); // arr[2] before increment
     }
 
     @ParameterizedTest
@@ -110,7 +110,7 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(12);
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(12);
     }
 
     @ParameterizedTest
@@ -126,7 +126,7 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(10);
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -142,7 +142,7 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(2);
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -158,7 +158,7 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(9);
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(9);
     }
 
     @ParameterizedTest
@@ -174,7 +174,7 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -191,7 +191,7 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(4);
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(4);
     }
 
     @ParameterizedTest
@@ -207,7 +207,7 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(201L);
+        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(201L);
     }
 
     @ParameterizedTest
@@ -223,6 +223,6 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((short) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((short) 299);
+        assertThat((short) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((short) 299);
     }
 }

@@ -24,8 +24,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for advanced Record features including nested records, mixed features, spreads, computed properties, and shorthands.
@@ -48,10 +49,14 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                Map.of(
                 "outer1", Map.of(),
                 "outer2", Map.of("inner", 42)
-        ), result);
+        )
+        );;
     }
 
     @ParameterizedTest
@@ -70,10 +75,14 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                Map.of(
                 "a", Map.of("x", 1, "y", 2.5),
                 "b", Map.of("z", 100)
-        ), result);
+        )
+        );;
     }
 
     @ParameterizedTest
@@ -92,10 +101,14 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                Map.of(
                 "outer1", Map.of("inner1", 42, "inner2", 99),
                 "outer2", Map.of("inner3", 100)
-        ), result);
+        )
+        );;
     }
 
     @ParameterizedTest
@@ -119,7 +132,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
         var expected = new LinkedHashMap<>();
         expected.put(42.0, "forty-two");
         expected.put(2, "two");
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     @ParameterizedTest
@@ -139,7 +152,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("computed", 42, "key1", 99), result);
+        assertThat(result).isEqualTo(Map.of("computed", 42, "key1", 99));
     }
 
     @ParameterizedTest
@@ -166,7 +179,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("x", 10, "y", 20.0, "computed", 40, "z", 30.0, "key2", 50, "literal", 60), result);
+        assertThat(result).isEqualTo(Map.of("x", 10, "y", 20.0, "computed", 40, "z", 30.0, "key2", 50, "literal", 60));
     }
 
     @ParameterizedTest
@@ -188,7 +201,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1, "b", 2, "cd", 3), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 2, "cd", 3));
     }
 
     // Phase 7: Null Handling
@@ -216,7 +229,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1, "c", 3.0, "b", 2, "d", 4.0, "e", 5), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "c", 3.0, "b", 2, "d", 4.0, "e", 5));
     }
 
     @ParameterizedTest
@@ -240,11 +253,15 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                Map.of(
                 "outer1", Map.of("inner1", 1),
                 "outer2", Map.of("inner2", 2),
                 "outer3", Map.of("inner3", 3)
-        ), result);
+        )
+        );;
     }
 
     @ParameterizedTest
@@ -268,7 +285,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1, "b", 2, "c", 3.0, "d", 4, "e", 5), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 2, "c", 3.0, "d", 4, "e", 5));
     }
 
     @ParameterizedTest
@@ -291,7 +308,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Later properties override earlier ones
-        assertEquals(Map.of("a", 99.0, "b", 88), result);
+        assertThat(result).isEqualTo(Map.of("a", 99.0, "b", 88));
     }
 
     @ParameterizedTest
@@ -310,9 +327,9 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(2, result.size());
-        assertEquals(42, result.get(1));
-        assertEquals(3.14, result.get(2));
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.get(1)).isEqualTo(42);
+        assertThat(result.get(2)).isEqualTo(3.14);
     }
 
     @ParameterizedTest
@@ -334,7 +351,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(10, "ten", 11, "eleven", 20, "twenty"), result);
+        assertThat(result).isEqualTo(Map.of(10, "ten", 11, "eleven", 20, "twenty"));
     }
 
     @ParameterizedTest
@@ -358,7 +375,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(0, "zero", 1, "one", 2, "two", 10, "ten", 11, "eleven"), result);
+        assertThat(result).isEqualTo(Map.of(0, "zero", 1, "one", 2, "two", 10, "ten", 11, "eleven"));
     }
 
     // Phase 7: Edge Cases 23-30 (Type Conversion and Validation)
@@ -379,7 +396,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(1, "a", 2, "b", 3, "c", 4, "d", 5, "e"), result);
+        assertThat(result).isEqualTo(Map.of(1, "a", 2, "b", 3, "c", 4, "d", 5, "e"));
     }
 
     @ParameterizedTest
@@ -397,7 +414,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("x", 10.0, "y", 20.0, "z", 30), result);
+        assertThat(result).isEqualTo(Map.of("x", 10.0, "y", 20.0, "z", 30));
     }
 
     @ParameterizedTest
@@ -416,7 +433,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1.0, "b", 2.0, "c", 3.0), result);
+        assertThat(result).isEqualTo(Map.of("a", 1.0, "b", 2.0, "c", 3.0));
     }
 
     // Phase 7: Edge Cases 17-19 (Computed Keys, Collisions, Expression Values)
@@ -436,7 +453,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("name", "Alice", "city", "NYC"), result);
+        assertThat(result).isEqualTo(Map.of("name", "Alice", "city", "NYC"));
     }
 
     @ParameterizedTest
@@ -454,7 +471,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 2, "c", 3));
     }
 
     @ParameterizedTest
@@ -476,10 +493,14 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                Map.of(
                 "outer1", Map.of("inner1", 1, "inner2", 2),
                 "outer2", Map.of("inner3", 3)
-        ), result);
+        )
+        );;
     }
 
     // Phase 7: Edge Cases 14-16, 20 (Object Type Annotation, Mixed Keys, Trailing Commas, Return Context)
@@ -507,11 +528,15 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                Map.of(
                 "a", Map.of("x", 1),
                 "b", Map.of("y", 2),
                 "c", Map.of("z", 3)
-        ), result);
+        )
+        );;
     }
 
     @ParameterizedTest
@@ -529,7 +554,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Spread overwrites earlier properties
-        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 2, "c", 3));
     }
 
     @ParameterizedTest
@@ -546,7 +571,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("c", 3, "a", 1, "b", 2, "d", 4), result);
+        assertThat(result).isEqualTo(Map.of("c", 3, "a", 1, "b", 2, "d", 4));
     }
 
     // Phase 7: Edge Cases 31-32 (Array Values in Record, Empty Object with Strict Type)
@@ -570,7 +595,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("key1", 1, "key2", 2, "literal", 3), result);
+        assertThat(result).isEqualTo(Map.of("key1", 1, "key2", 2, "literal", 3));
     }
 
     @ParameterizedTest
@@ -597,14 +622,18 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // x typed as 'number' becomes 100.0 (TypeScript number -> Java Double)
-        assertEquals(SimpleMap.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                SimpleMap.of(
                 "regular", 10,
                 "x", 100.0,
                 "dynamic", 20,
                 "a", 1,
                 "b", 2,
                 "final", 30
-        ), result);
+        )
+        );;
     }
 
     @ParameterizedTest
@@ -625,7 +654,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Variables typed as 'number' are stored as Double
-        assertEquals(Map.of("a", 10.0, "b", 20.0, "c", 30.0), result);
+        assertThat(result).isEqualTo(Map.of("a", 10.0, "b", 20.0, "c", 30.0));
     }
 
     @ParameterizedTest
@@ -644,7 +673,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5));
     }
 
     @ParameterizedTest
@@ -668,19 +697,23 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                Map.of(
                 "empty1", Map.of(),
                 "with2", Map.of(
                         "empty2", Map.of(),
                         "with3", Map.of("value", 42)
                 )
-        ), result);
+        )
+        );;
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testThreeLevelNestedRecordInvalidDeepestKey(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -697,17 +730,16 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key 'a'") &&
-                        causeMessage.contains("String"),
-                "Expected deepest level key type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected deepest level key type mismatch error, got: " + causeMessage).contains("Key 'a'").contains("String");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testThreeLevelNestedRecordInvalidDeepestValue(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -724,17 +756,16 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Property 'level3'") &&
-                        causeMessage.contains("String"),
-                "Expected deepest level type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected deepest level type mismatch error, got: " + causeMessage).contains("Property 'level3'").contains("String");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testThreeLevelNestedRecordInvalidMiddleValue(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -749,11 +780,10 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Property 'level2'") &&
-                        causeMessage.contains("String"),
-                "Expected middle level type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected middle level type mismatch error, got: " + causeMessage).contains("Property 'level2'").contains("String");
     }
 
     @ParameterizedTest
@@ -779,12 +809,16 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                Map.of(
                 "a", Map.of(
                         "b", Map.of("c", 1, "d", 3),
                         "e", Map.of("f", 100)
                 )
-        ), result);
+        )
+        );;
     }
 
     @ParameterizedTest
@@ -815,7 +849,10 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                Map.of(
                 "level1", Map.of(
                         "level2a", Map.of("level3a", 100, "level3b", 200),
                         "level2b", Map.of("level3c", 300)
@@ -823,7 +860,8 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 "another1", Map.of(
                         "another2", Map.of("another3", 400)
                 )
-        ), result);
+        )
+        );;
     }
 
 }

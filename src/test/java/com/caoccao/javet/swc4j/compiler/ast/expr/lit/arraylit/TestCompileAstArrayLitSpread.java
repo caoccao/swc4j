@@ -22,8 +22,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for the spread operator with arrays.
@@ -43,7 +43,7 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
 
@@ -59,7 +59,7 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of());
     }
 
 
@@ -75,7 +75,7 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3, 4), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4));
     }
 
 
@@ -92,7 +92,7 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3, 4), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4));
     }
 
 
@@ -109,7 +109,7 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5, 6, 7));
     }
 
 
@@ -125,7 +125,7 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
 
@@ -141,6 +141,6 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of("hello", "world", "!"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of("hello", "world", "!"));
     }
 }

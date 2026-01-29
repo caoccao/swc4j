@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Tests for null with different reference types.
@@ -40,7 +40,7 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
     }
 
     @ParameterizedTest
@@ -54,7 +54,7 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
     }
 
     @ParameterizedTest
@@ -68,7 +68,7 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
     }
 
     @ParameterizedTest
@@ -82,7 +82,7 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
     }
 
     @ParameterizedTest
@@ -96,7 +96,7 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
     }
 
     @ParameterizedTest
@@ -110,7 +110,7 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
     }
 
     @ParameterizedTest
@@ -124,7 +124,7 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
     }
 
     @ParameterizedTest
@@ -138,7 +138,7 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
     }
 
     @ParameterizedTest
@@ -152,6 +152,6 @@ public class TestCompileAstNullTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
     }
 }

@@ -22,9 +22,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.math.BigInteger;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for BigInt with various type annotations.
@@ -44,7 +44,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(new BigInteger("12345"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(new BigInteger("12345"));
     }
 
     @ParameterizedTest
@@ -60,7 +60,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                   }
                 }""");
         // Non-zero BigInt → true
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -75,7 +75,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((byte) 127, (byte) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) 127);
     }
 
     @ParameterizedTest
@@ -90,7 +90,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(987654321.0, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertThat(runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(987654321.0, within(0.001));
     }
 
     @ParameterizedTest
@@ -105,7 +105,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(654321f, runner.createInstanceRunner("com.A").invoke("test"), 0.001f);
+        assertThat(runner.createInstanceRunner("com.A").<Float>invoke("test")).isCloseTo(654321f, within(0.001f));
     }
 
     @ParameterizedTest
@@ -120,7 +120,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(54321, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(54321);
     }
 
     @ParameterizedTest
@@ -135,7 +135,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(9876543210L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(9876543210L);
     }
 
     @ParameterizedTest
@@ -150,7 +150,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(new BigInteger("111"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(new BigInteger("111"));
     }
 
     @ParameterizedTest
@@ -164,7 +164,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(new BigInteger("222"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(new BigInteger("222"));
     }
 
     @ParameterizedTest
@@ -179,6 +179,6 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals((short) 32767, (short) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((short) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((short) 32767);
     }
 }

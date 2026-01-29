@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for String modification methods: concat, repeat, replace, replaceAll, trim, trimStart, trimEnd, padStart, padEnd
@@ -39,7 +39,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("abcd", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("abcd");
     }
 
     @ParameterizedTest
@@ -53,7 +53,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello world", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello world");
     }
 
     @ParameterizedTest
@@ -67,7 +67,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("500", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("500");
     }
 
     @ParameterizedTest
@@ -81,7 +81,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hiaba", runner.createInstanceRunner("com.A").invoke("test")); // Truncates padding
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hiaba"); // Truncates padding
     }
 
     @ParameterizedTest
@@ -95,7 +95,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("005", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("005");
     }
 
     @ParameterizedTest
@@ -109,7 +109,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("abahi", runner.createInstanceRunner("com.A").invoke("test")); // Truncates padding
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("abahi"); // Truncates padding
     }
 
     @ParameterizedTest
@@ -123,7 +123,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("ababab", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ababab");
     }
 
     @ParameterizedTest
@@ -137,7 +137,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("");
     }
 
     @ParameterizedTest
@@ -151,7 +151,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hi hi", runner.createInstanceRunner("com.A").invoke("test")); // All occurrences
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hi hi"); // All occurrences
     }
 
     @ParameterizedTest
@@ -165,7 +165,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello there", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello there");
     }
 
     @ParameterizedTest
@@ -179,7 +179,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hi hello", runner.createInstanceRunner("com.A").invoke("test")); // Only first occurrence
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hi hello"); // Only first occurrence
     }
 
     @ParameterizedTest
@@ -193,7 +193,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello");
     }
 
     @ParameterizedTest
@@ -207,7 +207,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("  hello", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("  hello");
     }
 
     @ParameterizedTest
@@ -221,7 +221,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("");
     }
 
     @ParameterizedTest
@@ -235,7 +235,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("  hello world", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("  hello world");
     }
 
     @ParameterizedTest
@@ -249,7 +249,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("  hello", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("  hello");
     }
 
     @ParameterizedTest
@@ -263,7 +263,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello  ", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello  ");
     }
 
     @ParameterizedTest
@@ -277,7 +277,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("  hello", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("  hello");
     }
 
     @ParameterizedTest
@@ -291,7 +291,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello  ", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello  ");
     }
 
     @ParameterizedTest
@@ -305,7 +305,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("");
     }
 
     @ParameterizedTest
@@ -319,7 +319,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello world  ", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello world  ");
     }
 
     @ParameterizedTest
@@ -333,7 +333,7 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello  ", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello  ");
     }
 
     @ParameterizedTest
@@ -347,6 +347,6 @@ public class TestCompileAstStrModify extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello");
     }
 }

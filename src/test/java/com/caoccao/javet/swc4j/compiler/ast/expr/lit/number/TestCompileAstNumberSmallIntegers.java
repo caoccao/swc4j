@@ -41,7 +41,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(Byte.MAX_VALUE);
+        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(Byte.MAX_VALUE);
     }
 
     @ParameterizedTest
@@ -55,7 +55,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(Byte.MIN_VALUE);
+        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(Byte.MIN_VALUE);
     }
 
     @ParameterizedTest
@@ -69,7 +69,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) -100);
+        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) -100);
     }
 
     @ParameterizedTest
@@ -83,7 +83,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) 100);
+        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) 100);
     }
 
     @ParameterizedTest
@@ -97,7 +97,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) 0);
+        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) 0);
     }
 
     @ParameterizedTest
@@ -112,7 +112,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) -128);
+        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) -128);
     }
 
     @ParameterizedTest
@@ -126,7 +126,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) 50);
+        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) 50);
     }
 
     @ParameterizedTest
@@ -141,7 +141,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((short) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(Short.MAX_VALUE);
+        assertThat((short) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(Short.MAX_VALUE);
     }
 
     @ParameterizedTest
@@ -156,7 +156,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((short) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(Short.MIN_VALUE);
+        assertThat((short) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(Short.MIN_VALUE);
     }
 
     @ParameterizedTest
@@ -171,7 +171,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((short) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((short) -1);
+        assertThat((short) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((short) -1);
     }
 
     @ParameterizedTest
@@ -186,7 +186,7 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((short) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((short) 123);
+        assertThat((short) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((short) 123);
     }
 
     @ParameterizedTest
@@ -200,6 +200,6 @@ public class TestCompileAstNumberSmallIntegers extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((short) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((short) 123);
+        assertThat((short) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((short) 123);
     }
 }

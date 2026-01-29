@@ -42,7 +42,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(-123.456f, within(0.001f));
+        assertThat((float) runner.createInstanceRunner("com.A").<Float>invoke("test")).isCloseTo(-123.456f, within(0.001f));
     }
 
     @ParameterizedTest
@@ -56,7 +56,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(1.0f, within(0.0f));
+        assertThat((float) runner.createInstanceRunner("com.A").<Float>invoke("test")).isCloseTo(1.0f, within(0.0f));
     }
 
     @ParameterizedTest
@@ -70,7 +70,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(123.456f, within(0.001f));
+        assertThat((float) runner.createInstanceRunner("com.A").<Float>invoke("test")).isCloseTo(123.456f, within(0.001f));
     }
 
     @ParameterizedTest
@@ -84,7 +84,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(0.001f, within(0.00001f));
+        assertThat((float) runner.createInstanceRunner("com.A").<Float>invoke("test")).isCloseTo(0.001f, within(0.00001f));
     }
 
     @ParameterizedTest
@@ -98,7 +98,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(2.0f, within(0.0f));
+        assertThat((float) runner.createInstanceRunner("com.A").<Float>invoke("test")).isCloseTo(2.0f, within(0.0f));
     }
 
     @ParameterizedTest
@@ -112,7 +112,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(0.0f, within(0.0f));
+        assertThat((float) runner.createInstanceRunner("com.A").<Float>invoke("test")).isCloseTo(0.0f, within(0.0f));
     }
 
     @ParameterizedTest
@@ -127,7 +127,7 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(123.456F, within(0.00001F));
+        assertThat(runner.createInstanceRunner("com.A").<Float>invoke("test")).isCloseTo(123.456F, within(0.00001F));
     }
 
     @ParameterizedTest
@@ -141,6 +141,6 @@ public class TestCompileAstNumberFloat extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(123.456F, within(0.00001F));
+        assertThat(runner.createInstanceRunner("com.A").<Float>invoke("test")).isCloseTo(123.456F, within(0.00001F));
     }
 }

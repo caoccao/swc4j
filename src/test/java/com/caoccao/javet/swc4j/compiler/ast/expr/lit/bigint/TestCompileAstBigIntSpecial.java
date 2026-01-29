@@ -22,8 +22,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.math.BigInteger;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for special BigInt values and edge cases.
@@ -43,8 +43,11 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                   }
                 }""");
         // 100! = 93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000
-        assertEquals(new BigInteger("93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000"),
-                runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(
+                runner.createInstanceRunner("com.A").<Object>invoke("test")
+        ).isEqualTo(
+                new BigInteger("93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000")
+        );;
     }
 
     @ParameterizedTest
@@ -58,7 +61,7 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(new BigInteger("9223372036854775808"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(new BigInteger("9223372036854775808"));
     }
 
     @ParameterizedTest
@@ -72,7 +75,7 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(new BigInteger("9223372036854775807"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(new BigInteger("9223372036854775807"));
     }
 
     @ParameterizedTest
@@ -86,7 +89,7 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(new BigInteger("-9223372036854775809"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(new BigInteger("-9223372036854775809"));
     }
 
     @ParameterizedTest
@@ -100,7 +103,7 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(new BigInteger("-9223372036854775808"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(new BigInteger("-9223372036854775808"));
     }
 
     @ParameterizedTest
@@ -114,7 +117,7 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(BigInteger.ONE, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(BigInteger.ONE);
     }
 
     @ParameterizedTest
@@ -129,8 +132,11 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                   }
                 }""");
         // 2^128 = 340282366920938463463374607431768211456
-        assertEquals(new BigInteger("340282366920938463463374607431768211456"),
-                runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(
+                runner.createInstanceRunner("com.A").<Object>invoke("test")
+        ).isEqualTo(
+                new BigInteger("340282366920938463463374607431768211456")
+        );;
     }
 
     @ParameterizedTest
@@ -144,7 +150,7 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(BigInteger.TEN, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(BigInteger.TEN);
     }
 
     @ParameterizedTest
@@ -158,8 +164,11 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(new BigInteger("-999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"),
-                runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(
+                runner.createInstanceRunner("com.A").<Object>invoke("test")
+        ).isEqualTo(
+                new BigInteger("-999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999")
+        );;
     }
 
     @ParameterizedTest
@@ -173,6 +182,6 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(BigInteger.ZERO, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(BigInteger.ZERO);
     }
 }

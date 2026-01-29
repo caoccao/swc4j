@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for Array.indexOf() and Array.lastIndexOf() methods.
@@ -41,7 +41,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
     }
 
 
@@ -59,7 +59,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
     }
 
 
@@ -75,7 +75,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
     }
 
 
@@ -91,7 +91,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
     }
 
 
@@ -107,7 +107,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
     }
 
 
@@ -123,7 +123,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-1);
     }
 
 
@@ -139,7 +139,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-1);
     }
 
 
@@ -155,7 +155,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
     }
 
 
@@ -171,7 +171,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-1);
     }
 
 
@@ -187,7 +187,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
     }
 
 
@@ -203,7 +203,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
     }
 
 
@@ -221,7 +221,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
     }
 
 
@@ -237,7 +237,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
     }
 
 
@@ -253,7 +253,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
     }
 
 
@@ -269,7 +269,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
     }
 
 
@@ -285,7 +285,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
     }
 
 
@@ -301,7 +301,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-1);
     }
 
 
@@ -317,7 +317,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-1);
     }
 
 
@@ -333,7 +333,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
     }
 
 
@@ -349,7 +349,7 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-1);
     }
 
 
@@ -365,6 +365,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
     }
 }

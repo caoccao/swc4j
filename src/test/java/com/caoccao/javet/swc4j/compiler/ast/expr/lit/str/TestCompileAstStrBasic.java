@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for basic string literal functionality.
@@ -40,7 +40,7 @@ public class TestCompileAstStrBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("test", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("test");
     }
 
     @ParameterizedTest
@@ -54,7 +54,7 @@ public class TestCompileAstStrBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("abc123xyz", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("abc123xyz");
     }
 
     @ParameterizedTest
@@ -69,7 +69,7 @@ public class TestCompileAstStrBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("test message", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("test message");
     }
 
     @ParameterizedTest
@@ -83,7 +83,7 @@ public class TestCompileAstStrBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("");
     }
 
     @ParameterizedTest
@@ -97,7 +97,7 @@ public class TestCompileAstStrBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("HeLLo WoRLd", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("HeLLo WoRLd");
     }
 
     @ParameterizedTest
@@ -111,7 +111,7 @@ public class TestCompileAstStrBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello world", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello world");
     }
 
     @ParameterizedTest
@@ -125,7 +125,7 @@ public class TestCompileAstStrBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("12345", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("12345");
     }
 
     @ParameterizedTest
@@ -139,7 +139,7 @@ public class TestCompileAstStrBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("Hello, World!", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("Hello, World!");
     }
 
     @ParameterizedTest
@@ -153,7 +153,7 @@ public class TestCompileAstStrBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("a", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a");
     }
 
     @ParameterizedTest
@@ -167,6 +167,6 @@ public class TestCompileAstStrBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("  hello  ", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("  hello  ");
     }
 }

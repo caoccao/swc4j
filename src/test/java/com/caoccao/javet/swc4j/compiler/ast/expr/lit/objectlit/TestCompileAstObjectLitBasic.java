@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for basic object literal creation with simple properties, keys, and values.
@@ -51,7 +51,7 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("intVal", 42, "doubleVal", 3.14, "boolVal", false, "strVal", "text"), result);
+        assertThat(result).isEqualTo(Map.of("intVal", 42, "doubleVal", 3.14, "boolVal", false, "strVal", "text"));
     }
 
     @ParameterizedTest
@@ -68,7 +68,7 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Later value should win
-        assertEquals(Map.of("a", 3, "b", 2), result);
+        assertThat(result).isEqualTo(Map.of("a", 3, "b", 2));
     }
 
     @ParameterizedTest
@@ -84,7 +84,7 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of(), result);
+        assertThat(result).isEqualTo(Map.of());
     }
 
     // Phase 3: Computed Key Type Validation
@@ -103,7 +103,7 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("normal", 1, "literal", 2, "comp", 3, "2", 4), result);
+        assertThat(result).isEqualTo(Map.of("normal", 1, "literal", 2, "comp", 3, "2", 4));
     }
 
     @ParameterizedTest
@@ -120,7 +120,7 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Numeric key coerced to string
-        assertEquals(Map.of("normal", 1, "string-literal", 2, "42", 3), result);
+        assertThat(result).isEqualTo(Map.of("normal", 1, "string-literal", 2, "42", 3));
     }
 
     @ParameterizedTest
@@ -142,7 +142,7 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("outer", Map.of("inner", Map.of("value", 42))), result);
+        assertThat(result).isEqualTo(Map.of("outer", Map.of("inner", Map.of("value", 42))));
     }
 
     @ParameterizedTest
@@ -158,9 +158,9 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(2, result.size());
-        assertNull(result.get("a"));
-        assertEquals(2, result.get("b"));
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.get("a")).isNull();
+        assertThat(result.get("b")).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -177,7 +177,7 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Numeric keys are coerced to strings (JavaScript behavior)
-        assertEquals(Map.of("0", "zero", "1", "one", "42", "answer"), result);
+        assertThat(result).isEqualTo(Map.of("0", "zero", "1", "one", "42", "answer"));
     }
 
     // Phase 4: Spread Operator
@@ -199,9 +199,9 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(2, result.size());
-        assertEquals(List.of(1, 2, 3), result.get("data"));
-        assertEquals(List.of(4, 5), result.get("key2"));
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.get("data")).isEqualTo(List.of(1, 2, 3));
+        assertThat(result.get("key2")).isEqualTo(List.of(4, 5));
     }
 
     @ParameterizedTest
@@ -223,10 +223,10 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(3, result.size());
-        assertEquals(List.of(1, 2, 3), result.get("a"));
-        assertEquals(List.of(4, 5), result.get("b"));
-        assertEquals(List.of(6, 7), result.get("c"));
+        assertThat(result.size()).isEqualTo(3);
+        assertThat(result.get("a")).isEqualTo(List.of(1, 2, 3));
+        assertThat(result.get("b")).isEqualTo(List.of(4, 5));
+        assertThat(result.get("c")).isEqualTo(List.of(6, 7));
     }
 
     @ParameterizedTest
@@ -248,9 +248,9 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(2, result.size());
-        assertEquals(List.of(1, 2), result.get("a"));
-        assertEquals(List.of(3, 4), result.get("b"));
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.get("a")).isEqualTo(List.of(1, 2));
+        assertThat(result.get("b")).isEqualTo(List.of(3, 4));
     }
 
     @ParameterizedTest
@@ -272,12 +272,12 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(5, result.size());
-        assertEquals(42, result.get("num"));
-        assertEquals("hello", result.get("str"));
-        assertEquals(List.of(1, 2, 3), result.get("arr"));
-        assertEquals(Map.of("inner", List.of(4, 5)), result.get("nested"));
-        assertEquals(true, result.get("bool"));
+        assertThat(result.size()).isEqualTo(5);
+        assertThat(result.get("num")).isEqualTo(42);
+        assertThat(result.get("str")).isEqualTo("hello");
+        assertThat(result.get("arr")).isEqualTo(List.of(1, 2, 3));
+        assertThat(result.get("nested")).isEqualTo(Map.of("inner", List.of(4, 5)));
+        assertThat((Boolean) result.get("bool")).isTrue();
     }
 
     @ParameterizedTest
@@ -294,8 +294,8 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         var arr = (ArrayList<?>) result.get("arr");
-        assertNotNull(arr);
-        assertEquals(List.of(1, 2, 3), arr);
+        assertThat(arr).isNotNull();
+        assertThat(arr).isEqualTo(List.of(1, 2, 3));
     }
 
     @ParameterizedTest
@@ -311,7 +311,7 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("class", "value", "for", "loop", "if", "condition"), result);
+        assertThat(result).isEqualTo(Map.of("class", "value", "for", "loop", "if", "condition"));
     }
 
     @ParameterizedTest
@@ -327,7 +327,7 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1, "b", "hello", "c", true), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", "hello", "c", true));
     }
 
     @ParameterizedTest
@@ -343,7 +343,7 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("string-key", 1, "key with spaces", 2), result);
+        assertThat(result).isEqualTo(Map.of("string-key", 1, "key with spaces", 2));
     }
 
 }

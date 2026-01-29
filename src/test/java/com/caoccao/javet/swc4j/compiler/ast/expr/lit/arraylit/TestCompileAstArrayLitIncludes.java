@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for the Array.includes() method.
@@ -41,7 +41,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
 
@@ -59,7 +59,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
 
@@ -75,7 +75,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
 
@@ -91,7 +91,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
 
@@ -107,7 +107,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
 
@@ -123,7 +123,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
 
@@ -139,7 +139,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
 
@@ -155,7 +155,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
 
@@ -171,7 +171,7 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
 
@@ -187,6 +187,6 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 }

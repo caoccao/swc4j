@@ -20,9 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Test suite for edge cases and special scenarios in conditional expressions.
@@ -44,7 +43,7 @@ public class TestCompileAstCondExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -60,7 +59,7 @@ public class TestCompileAstCondExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -75,7 +74,7 @@ public class TestCompileAstCondExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -91,7 +90,7 @@ public class TestCompileAstCondExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -106,7 +105,7 @@ public class TestCompileAstCondExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -121,7 +120,7 @@ public class TestCompileAstCondExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
     }
 
     @ParameterizedTest
@@ -136,7 +135,7 @@ public class TestCompileAstCondExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
     }
 
     @ParameterizedTest
@@ -154,7 +153,7 @@ public class TestCompileAstCondExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -170,6 +169,6 @@ public class TestCompileAstCondExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(200, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(200);
     }
 }

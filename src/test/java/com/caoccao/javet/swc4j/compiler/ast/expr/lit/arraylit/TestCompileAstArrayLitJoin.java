@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for the Array.join() method.
@@ -41,7 +41,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,2,3,4,5", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3,4,5");
     }
 
 
@@ -59,7 +59,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("0-1-2-3", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("0-1-2-3");
     }
 
 
@@ -75,7 +75,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("apple - banana - cherry", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("apple - banana - cherry");
     }
 
 
@@ -91,7 +91,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,2,3", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
 
 
@@ -110,7 +110,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("");
     }
 
 
@@ -126,7 +126,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("abc", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("abc");
     }
 
 
@@ -142,7 +142,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1|hello|true|3.14", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1|hello|true|3.14");
     }
 
 
@@ -158,7 +158,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("one and two and three", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("one and two and three");
     }
 
 
@@ -174,7 +174,7 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("10 20 30 40 50", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("10 20 30 40 50");
     }
 
 
@@ -190,6 +190,6 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("42", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("42");
     }
 }

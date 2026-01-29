@@ -42,7 +42,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(-123.456, within(0.001));
+        assertThat((double) runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(-123.456, within(0.001));
     }
 
     @ParameterizedTest
@@ -56,7 +56,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(1.0, within(0.0));
+        assertThat((double) runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(1.0, within(0.0));
     }
 
     @ParameterizedTest
@@ -70,7 +70,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(123.456, within(0.001));
+        assertThat((double) runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(123.456, within(0.001));
     }
 
     @ParameterizedTest
@@ -84,7 +84,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(0.000001, within(0.0000001));
+        assertThat((double) runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(0.000001, within(0.0000001));
     }
 
     @ParameterizedTest
@@ -98,7 +98,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(0.0, within(0.0));
+        assertThat((double) runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(0.0, within(0.0));
     }
 
     @ParameterizedTest
@@ -113,7 +113,7 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(123.456D, within(0.00001D));
+        assertThat((double) runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(123.456D, within(0.00001D));
     }
 
     @ParameterizedTest
@@ -127,6 +127,6 @@ public class TestCompileAstNumberDouble extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(123.456D, within(0.00001D));
+        assertThat((double) runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(123.456D, within(0.00001D));
     }
 }

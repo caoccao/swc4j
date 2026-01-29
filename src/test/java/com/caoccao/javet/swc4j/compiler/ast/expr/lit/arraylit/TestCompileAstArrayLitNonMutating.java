@@ -22,8 +22,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for non-mutating array methods (toReversed, toSorted, toSpliced, with).
@@ -45,7 +45,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(4, 3, 2, 1, 0), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(4, 3, 2, 1, 0));
     }
 
 
@@ -61,7 +61,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(5, 4, 3, 2, 1), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(5, 4, 3, 2, 1));
     }
 
 
@@ -78,7 +78,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
 
@@ -94,7 +94,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of());
     }
 
 
@@ -110,7 +110,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
 
@@ -126,7 +126,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(true, "hello", 1), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(true, "hello", 1));
     }
 
 
@@ -142,7 +142,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(30, 20, 10), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(30, 20, 10));
     }
 
 
@@ -158,7 +158,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(42), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(42));
     }
 
 
@@ -174,7 +174,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of("test", "world", "hello"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of("test", "world", "hello"));
     }
 
 
@@ -190,7 +190,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3, 4, 5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
 
 
@@ -206,7 +206,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3, 4, 5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
 
 
@@ -223,7 +223,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(3, 1, 2), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(3, 1, 2));
     }
 
 
@@ -239,7 +239,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of());
     }
 
 
@@ -255,7 +255,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(3, 2, 1), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(3, 2, 1));
     }
 
 
@@ -271,7 +271,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3, 4, 5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
 
 
@@ -287,7 +287,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3, 4, 5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
 
 
@@ -303,7 +303,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(42), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(42));
     }
 
 
@@ -319,7 +319,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of("apple", "banana", "cherry"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of("apple", "banana", "cherry"));
     }
 
 
@@ -335,7 +335,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 1, 2, 3, 4, 5, 5, 6, 9), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 1, 2, 3, 4, 5, 5, 6, 9));
     }
 
 
@@ -351,7 +351,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 5));
     }
 
 
@@ -368,7 +368,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3, 4, 5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
 
 
@@ -384,7 +384,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of());
     }
 
 
@@ -400,7 +400,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3, 4, 5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
 
 
@@ -416,7 +416,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 99, 100, 5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 99, 100, 5));
     }
 
 
@@ -432,7 +432,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(2, 3, 5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(2, 3, 5));
     }
 
 
@@ -448,7 +448,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3, 5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 5));
     }
 
 
@@ -464,7 +464,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
 
@@ -480,7 +480,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2));
     }
 
 
@@ -496,7 +496,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
 
@@ -512,7 +512,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(10, 99, 40), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(10, 99, 40));
     }
 
 
@@ -528,7 +528,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(99), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(99));
     }
 
 
@@ -544,7 +544,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of("hello", "beautiful", "test"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of("hello", "beautiful", "test"));
     }
 
 
@@ -560,7 +560,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 99, 4, 5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 99, 4, 5));
     }
 
 
@@ -577,7 +577,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
 
@@ -593,7 +593,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of());
     }
 
 
@@ -609,7 +609,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(99, 20, 30), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(99, 20, 30));
     }
 
 
@@ -625,7 +625,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(10, 20, 30, 99), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(10, 20, 30, 99));
     }
 
 
@@ -641,7 +641,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 10), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 10));
     }
 
 
@@ -657,7 +657,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, "world", true), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, "world", true));
     }
 
 
@@ -673,7 +673,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3, 99, 5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 99, 5));
     }
 
 
@@ -689,7 +689,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(10, 20, 99), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(10, 20, 99));
     }
 
 
@@ -705,7 +705,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
 
@@ -721,7 +721,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(10, 99, 30), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(10, 99, 30));
     }
 
 
@@ -737,7 +737,7 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(99), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(99));
     }
 
 
@@ -753,6 +753,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of("hello", "universe", "test"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of("hello", "universe", "test"));
     }
 }

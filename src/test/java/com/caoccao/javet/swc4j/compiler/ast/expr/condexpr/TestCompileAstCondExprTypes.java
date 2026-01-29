@@ -20,8 +20,9 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for type-specific branches and type widening in conditional expressions.
@@ -41,7 +42,7 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1.5, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertThat(runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(1.5, within(0.001));
     }
 
     @ParameterizedTest
@@ -58,7 +59,7 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10.0, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertThat(runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(10.0, within(0.001));
     }
 
     @ParameterizedTest
@@ -73,7 +74,7 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10.0, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertThat(runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(10.0, within(0.001));
     }
 
     @ParameterizedTest
@@ -89,7 +90,7 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(20L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20L);
     }
 
     @ParameterizedTest
@@ -106,7 +107,7 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(200L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(200L);
     }
 
     @ParameterizedTest
@@ -121,6 +122,6 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("yes", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("yes");
     }
 }

@@ -23,8 +23,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for basic array creation and type operations.
@@ -44,7 +45,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new int[]{1, 2, 3}, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int[]) runner.createInstanceRunner("com.A").<Object>invoke("test")).containsExactly(1, 2, 3);
     }
 
 
@@ -60,7 +61,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1.5, 2.5, 3.5), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1.5, 2.5, 3.5));
     }
 
 
@@ -76,7 +77,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of("foo", "bar", "baz"), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of("foo", "bar", "baz"));
     }
 
 
@@ -92,7 +93,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new boolean[]{true, false, true}, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean[]) runner.createInstanceRunner("com.A").<Object>invoke("test")).containsExactly(true, false, true);
     }
 
 
@@ -108,7 +109,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new double[]{1.5, 2.5, 3.5}, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((double[]) runner.createInstanceRunner("com.A").<Object>invoke("test")).containsExactly(1.5, 2.5, 3.5);
     }
 
 
@@ -125,7 +126,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10.5, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertThat(runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(10.5, within(0.001));
     }
 
 
@@ -141,7 +142,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new int[]{}, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(new int[]{});
     }
 
 
@@ -157,7 +158,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new float[]{1.0f, 2.0f, 3.0f}, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((float[]) runner.createInstanceRunner("com.A").<Object>invoke("test")).containsExactly(1.0f, 2.0f, 3.0f);
     }
 
 
@@ -173,7 +174,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(List.of(1, 2, 3), runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
 
@@ -189,7 +190,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new long[]{100L, 200L, 300L}, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long[]) runner.createInstanceRunner("com.A").<Object>invoke("test")).containsExactly(100L, 200L, 300L);
     }
 
 
@@ -206,10 +207,10 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                 }""");
         Object result = runner.createInstanceRunner("com.A").invoke("test");
         ArrayList<?> list = (ArrayList<?>) result;
-        assertEquals(3, list.size());
-        assertEquals(1, list.get(0));
-        assertEquals(2, list.get(1));
-        assertEquals(3, list.get(2));
+        assertThat(list.size()).isEqualTo(3);
+        assertThat(list.get(0)).isEqualTo(1);
+        assertThat(list.get(1)).isEqualTo(2);
+        assertThat(list.get(2)).isEqualTo(3);
     }
 
 
@@ -225,9 +226,9 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                   }
                 }""");
         Object result = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(result);
-        assertEquals(ArrayList.class, result.getClass());
-        assertEquals(0, ((ArrayList<?>) result).size());
+        assertThat(result).isNotNull();
+        assertThat(result.getClass()).isEqualTo(ArrayList.class);
+        assertThat(((ArrayList<?>) result).size()).isEqualTo(0);
     }
 
 
@@ -243,7 +244,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertArrayEquals(new String[]{"hello", "world"}, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((String[]) runner.createInstanceRunner("com.A").<Object>invoke("test")).containsExactly("hello", "world");
     }
 
 
@@ -260,6 +261,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("goodbye", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("goodbye");
     }
 }

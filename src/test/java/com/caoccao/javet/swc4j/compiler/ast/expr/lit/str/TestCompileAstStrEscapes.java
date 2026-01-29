@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for string escape sequences.
@@ -40,7 +40,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals('\n', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('\n');
     }
 
     @ParameterizedTest
@@ -54,7 +54,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals('\t', (char) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('\t');
     }
 
     @ParameterizedTest
@@ -68,7 +68,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("path\\to\\file", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("path\\to\\file");
     }
 
     @ParameterizedTest
@@ -82,7 +82,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("text\bmore", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("text\bmore");
     }
 
     @ParameterizedTest
@@ -96,7 +96,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("text\rmore", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("text\rmore");
     }
 
     @ParameterizedTest
@@ -110,7 +110,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("He said \"hello\"", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("He said \"hello\"");
     }
 
     @ParameterizedTest
@@ -124,7 +124,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello\n", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello\n");
     }
 
     @ParameterizedTest
@@ -138,7 +138,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("\nhello", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("\nhello");
     }
 
     @ParameterizedTest
@@ -152,7 +152,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("page1\fpage2", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("page1\fpage2");
     }
 
     @ParameterizedTest
@@ -166,7 +166,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("line1\nline2\tcolumn", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("line1\nline2\tcolumn");
     }
 
     @ParameterizedTest
@@ -180,7 +180,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("line1\nline2", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("line1\nline2");
     }
 
     @ParameterizedTest
@@ -194,7 +194,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("text\0end", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("text\0end");
     }
 
     @ParameterizedTest
@@ -208,7 +208,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("\n\t\r", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("\n\t\r");
     }
 
     @ParameterizedTest
@@ -222,7 +222,7 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("don't", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("don't");
     }
 
     @ParameterizedTest
@@ -236,6 +236,6 @@ public class TestCompileAstStrEscapes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("col1\tcol2", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("col1\tcol2");
     }
 }

@@ -25,8 +25,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for null value handling in object literals.
@@ -52,9 +52,13 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(SimpleMap.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                SimpleMap.of(
                 "outer", SimpleMap.of("inner1", null, "inner2", 42),
-                "value", null), result);
+                "value", null)
+        );;
     }
 
     @ParameterizedTest
@@ -74,7 +78,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(SimpleMap.of("a", null, "b", 2), result);
+        assertThat(result).isEqualTo(SimpleMap.of("a", null, "b", 2));
     }
 
     @ParameterizedTest
@@ -95,7 +99,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(SimpleMap.of("computed", null, "regular", null, "value", 42), result);
+        assertThat(result).isEqualTo(SimpleMap.of("computed", null, "regular", null, "value", 42));
     }
 
     // Phase 5: Shorthand Type Validation
@@ -119,7 +123,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(SimpleMap.of("a", null, "b", 42, "c", null), result);
+        assertThat(result).isEqualTo(SimpleMap.of("a", null, "b", 42, "c", null));
     }
 
     @ParameterizedTest
@@ -140,7 +144,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(SimpleMap.of("a", null, "b", 2, "c", null, "d", 4), result);
+        assertThat(result).isEqualTo(SimpleMap.of("a", null, "b", 2, "c", null, "d", 4));
     }
 
     @ParameterizedTest
@@ -160,10 +164,10 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(3, result.size());
-        assertEquals(List.of(1, 2, 3), result.get("a"));
-        assertEquals(List.of(4, 5), result.get("b"));
-        assertEquals(List.of(), result.get("c"));
+        assertThat(result.size()).isEqualTo(3);
+        assertThat(result.get("a")).isEqualTo(List.of(1, 2, 3));
+        assertThat(result.get("b")).isEqualTo(List.of(4, 5));
+        assertThat(result.get("c")).isEqualTo(List.of());
     }
 
     @ParameterizedTest
@@ -183,12 +187,12 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(3, result.size());
+        assertThat(result.size()).isEqualTo(3);
         var aValue = (ArrayList<?>) result.get("a");
-        assertEquals(List.of(List.of(1, 2), List.of(3, 4)), aValue);
+        assertThat(aValue).isEqualTo(List.of(List.of(1, 2), List.of(3, 4)));
         var bValue = (ArrayList<?>) result.get("b");
-        assertEquals(List.of(List.of(5)), bValue);
-        assertEquals(List.of(), result.get("c"));
+        assertThat(bValue).isEqualTo(List.of(List.of(5)));
+        assertThat(result.get("c")).isEqualTo(List.of());
     }
 
     @ParameterizedTest
@@ -208,7 +212,7 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(SimpleMap.of("a", null, "b", 42, "c", null), result);
+        assertThat(result).isEqualTo(SimpleMap.of("a", null, "b", 42, "c", null));
     }
 
     // Phase 1: Basic Properties

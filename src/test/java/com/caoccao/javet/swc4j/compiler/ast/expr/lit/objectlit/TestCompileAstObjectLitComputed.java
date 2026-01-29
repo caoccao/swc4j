@@ -23,8 +23,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for computed property names in object literals.
@@ -44,7 +44,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("true", "yes", "false", "no"), result);
+        assertThat(result).isEqualTo(Map.of("true", "yes", "false", "no"));
     }
 
     @ParameterizedTest
@@ -60,7 +60,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 3), result); // Last value wins
+        assertThat(result).isEqualTo(Map.of("a", 3)); // Last value wins
     }
 
     @ParameterizedTest
@@ -77,7 +77,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("nested", Map.of("inner", 42)), result);
+        assertThat(result).isEqualTo(Map.of("nested", Map.of("inner", 42)));
     }
 
     @ParameterizedTest
@@ -93,7 +93,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("2", "two", "10", "ten"), result);
+        assertThat(result).isEqualTo(Map.of("2", "two", "10", "ten"));
     }
 
     @ParameterizedTest
@@ -109,7 +109,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("42", "answer", "0", "zero"), result);
+        assertThat(result).isEqualTo(Map.of("42", "answer", "0", "zero"));
     }
 
     @ParameterizedTest
@@ -125,7 +125,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("key1", "value1", "key2", "value2"), result);
+        assertThat(result).isEqualTo(Map.of("key1", "value1", "key2", "value2"));
     }
 
     @ParameterizedTest
@@ -141,7 +141,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("computed", "value"), result);
+        assertThat(result).isEqualTo(Map.of("computed", "value"));
     }
 
     @ParameterizedTest
@@ -158,7 +158,7 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("dynamic", "value"), result);
+        assertThat(result).isEqualTo(Map.of("dynamic", "value"));
     }
 
 }

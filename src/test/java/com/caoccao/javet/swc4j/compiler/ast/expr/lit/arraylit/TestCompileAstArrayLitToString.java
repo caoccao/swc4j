@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for Array.toString() and Array.toLocaleString() methods.
@@ -43,7 +43,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("5,10,20,30,40", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("5,10,20,30,40");
     }
 
 
@@ -59,7 +59,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,2,3", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
 
 
@@ -75,7 +75,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("");
     }
 
 
@@ -91,7 +91,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,2,3", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
 
 
@@ -107,7 +107,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,hello,true", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,hello,true");
     }
 
 
@@ -125,7 +125,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,2,3", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
 
 
@@ -141,7 +141,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("42", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("42");
     }
 
 
@@ -157,7 +157,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello,world", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello,world");
     }
 
 
@@ -175,7 +175,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("0,1,2,3,4", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("0,1,2,3,4");
     }
 
 
@@ -191,7 +191,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,2,3", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
 
 
@@ -207,7 +207,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("");
     }
 
 
@@ -223,7 +223,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,2,3", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
 
 
@@ -239,7 +239,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,hello,true", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,hello,true");
     }
 
 
@@ -257,7 +257,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,2,3", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
 
 
@@ -273,7 +273,7 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("42", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("42");
     }
 
 
@@ -289,6 +289,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello,world", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello,world");
     }
 }

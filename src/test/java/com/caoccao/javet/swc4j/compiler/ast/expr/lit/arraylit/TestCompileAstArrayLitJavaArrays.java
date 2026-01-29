@@ -20,8 +20,9 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for Java native arrays and unsupported operations on Java arrays.
@@ -39,7 +40,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -55,7 +56,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1.41, runner.createInstanceRunner("com.A").invoke("test"), 0.001);
+        assertThat(runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(1.41, within(0.001));
     }
 
     @ParameterizedTest
@@ -71,7 +72,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -87,7 +88,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("x", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("x");
     }
 
     @ParameterizedTest
@@ -102,7 +103,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -117,7 +118,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -132,7 +133,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -147,7 +148,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -162,7 +163,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-1);
     }
 
     @ParameterizedTest
@@ -177,7 +178,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -193,7 +194,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(99, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(99);
     }
 
     @ParameterizedTest
@@ -208,7 +209,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("123", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("123");
     }
 
     @ParameterizedTest
@@ -223,7 +224,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,2,3,4,5", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3,4,5");
     }
 
     @ParameterizedTest
@@ -238,7 +239,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("apple - banana - cherry", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("apple - banana - cherry");
     }
 
     @ParameterizedTest
@@ -253,7 +254,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -268,7 +269,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-1);
     }
 
     @ParameterizedTest
@@ -283,7 +284,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -299,7 +300,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -315,7 +316,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("c", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("c");
     }
 
     @ParameterizedTest
@@ -331,7 +332,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -347,7 +348,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("apple", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("apple");
     }
 
     @ParameterizedTest
@@ -363,7 +364,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test")); // reversed[0] is 5, arr[0] is still 1
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6); // reversed[0] is 5, arr[0] is still 1
     }
 
     @ParameterizedTest
@@ -379,7 +380,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(4, (int) runner.createInstanceRunner("com.A").invoke("test")); // sorted[0] is 1, arr[0] is still 3
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(4); // sorted[0] is 1, arr[0] is still 3
     }
 
     @ParameterizedTest
@@ -394,7 +395,7 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("true,false,true", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("true,false,true");
     }
 
     @ParameterizedTest
@@ -409,6 +410,6 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,2,3", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
 }

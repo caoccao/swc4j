@@ -25,8 +25,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for edge cases and special scenarios in object literal compilation.
@@ -48,7 +49,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Later value should win (Map.put overwrites)
-        assertEquals(Map.of("a", 3), result);
+        assertThat(result).isEqualTo(Map.of("a", 3));
     }
 
     // Phase 2: Computed Property Names
@@ -72,7 +73,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Primitive keys are converted to strings
-        assertEquals(Map.of("true", "yes", "false", "no", "null", "none"), result);
+        assertThat(result).isEqualTo(Map.of("true", "yes", "false", "no", "null", "none"));
     }
 
     @ParameterizedTest
@@ -96,13 +97,17 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Reserved keywords are just strings in Map keys
-        assertEquals(Map.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                Map.of(
                 "class", "className",
                 "for", "loop",
                 "if", "condition",
                 "while", "iteration",
                 "return", "exit"
-        ), result);
+        )
+        );;
     }
 
     @ParameterizedTest
@@ -125,11 +130,11 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Whitespace is preserved exactly
-        assertEquals("value1", result.get("key with spaces"));
-        assertEquals("value2", result.get("  trim  "));
-        assertEquals("value3", result.get("\ttab\t"));
-        assertEquals("value4", result.get("\nnewline\n"));
-        assertEquals(4, result.size());
+        assertThat(result.get("key with spaces")).isEqualTo("value1");
+        assertThat(result.get("  trim  ")).isEqualTo("value2");
+        assertThat(result.get("\ttab\t")).isEqualTo("value3");
+        assertThat(result.get("\nnewline\n")).isEqualTo("value4");
+        assertThat(result.size()).isEqualTo(4);
     }
 
     @ParameterizedTest
@@ -153,13 +158,17 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Unicode is fully supported
-        assertEquals(Map.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                Map.of(
                 "你好", "hello",
                 "🔥", "fire",
                 "café", "coffee",
                 "Москва", "Moscow",
                 "東京", "Tokyo"
-        ), result);
+        )
+        );;
     }
 
     @ParameterizedTest
@@ -177,7 +186,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Object type annotation doesn't prevent LinkedHashMap generation
-        assertEquals(Map.of("a", 1, "b", "hello", "c", true), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", "hello", "c", true));
     }
 
     @ParameterizedTest
@@ -196,7 +205,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // All keys coerced to String
-        assertEquals(Map.of("str", 1, "42", 2, "computed", 3, "true", 4), result);
+        assertThat(result).isEqualTo(Map.of("str", 1, "42", 2, "computed", 3, "true", 4));
     }
 
     @ParameterizedTest
@@ -218,7 +227,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Trailing comma doesn't affect object creation
-        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 2, "c", 3));
     }
 
     @ParameterizedTest
@@ -240,7 +249,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Computed keys with string concat expressions - insertion order preserved
-        assertEquals(Map.of("key1", "first", "key2", "second", "key3", "third"), result);
+        assertThat(result).isEqualTo(Map.of("key1", "first", "key2", "second", "key3", "third"));
     }
 
     @ParameterizedTest
@@ -263,7 +272,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Expressions evaluated: keys are Integer 10, 11, 12
-        assertEquals(Map.of(10, "ten", 11, "eleven", 12, "twelve"), result);
+        assertThat(result).isEqualTo(Map.of(10, "ten", 11, "eleven", 12, "twelve"));
     }
 
     // Phase 2.1: Record<number, V> - Numeric keys
@@ -290,7 +299,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Keys are "0", "1", "2" (numeric keys coerced to string by default)
-        assertEquals(Map.of("0", "first", "1", "second", "2", "third"), result);
+        assertThat(result).isEqualTo(Map.of("0", "first", "1", "second", "2", "third"));
     }
 
     @ParameterizedTest
@@ -311,7 +320,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Both keys coerce to "1", later value wins
-        assertEquals(Map.of("1", "string"), result);
+        assertThat(result).isEqualTo(Map.of("1", "string"));
     }
 
     @ParameterizedTest
@@ -337,7 +346,10 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // All expressions evaluated correctly
-        assertEquals(Map.of(
+        assertThat(
+                result
+        ).isEqualTo(
+                Map.of(
                 "arithmetic", 6,
                 "multiplication", 20,
                 "division", 5,
@@ -345,7 +357,8 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 "stringConcat", "hello world",
                 "booleanTrue", true,
                 "booleanFalse", false
-        ), result);
+        )
+        );;
     }
 
     @ParameterizedTest
@@ -362,9 +375,9 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("getObject");
         // Verify result is LinkedHashMap even with Object return type
-        assertInstanceOf(LinkedHashMap.class, result);
+        assertThat(result).isInstanceOf(LinkedHashMap.class);
         var linkedHashMap = (LinkedHashMap<?, ?>) result;
-        assertEquals(Map.of("a", 1, "b", "hello", "c", true), linkedHashMap);
+        assertThat(linkedHashMap).isEqualTo(Map.of("a", 1, "b", "hello", "c", true));
     }
 
     @ParameterizedTest
@@ -372,7 +385,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
     public void testEdgeCase23MixedNumericStringKeys(JdkVersion jdkVersion) {
         // Edge case 23: Mixed numeric literal and string literal keys with Record<number, V>
         // Should reject string keys for strict type safety
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -386,10 +399,10 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key") && causeMessage.contains("String"),
-                "Expected key type mismatch for string key '2', got: " + causeMessage);
+        assertThat(causeMessage).as("Expected key type mismatch for string key '2', got: " + causeMessage).contains("Key").contains("String");
     }
 
     @ParameterizedTest
@@ -412,13 +425,12 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }""");
             var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
             // Null should be allowed in Java Maps
-            assertEquals(SimpleMap.of("a", "hello", "b", null), result);
+            assertThat(result).isEqualTo(SimpleMap.of("a", "hello", "b", null));
         } catch (Exception e) {
             // If compilation fails, it means null validation is strict
-            assertNotNull(e.getCause(), "Expected wrapped exception");
+            assertThat(e.getCause()).as("Expected wrapped exception").isNotNull();
             String causeMessage = e.getCause().getMessage();
-            assertTrue(causeMessage.contains("null") || causeMessage.contains("Property 'b'"),
-                    "Expected null-related error, got: " + causeMessage);
+            assertThat(causeMessage.contains("null") || causeMessage.contains("Property 'b'")).as("Expected null-related error, got: " + causeMessage).isTrue();
         }
     }
 
@@ -443,7 +455,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // int literals are stored as Integer when they fit in int range
-        assertEquals(Map.of("a", 42, "b", 100), result);
+        assertThat(result).isEqualTo(Map.of("a", 42, "b", 100));
     }
 
     @ParameterizedTest
@@ -465,7 +477,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1, "b", 42), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 42));
     }
 
     @ParameterizedTest
@@ -489,14 +501,14 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Verify primitive values
-        assertEquals(1, result.get("a"));
-        assertEquals("hello", result.get("b"));
-        assertEquals(true, result.get("c"));
+        assertThat(result.get("a")).isEqualTo(1);
+        assertThat(result.get("b")).isEqualTo("hello");
+        assertThat((Boolean) result.get("c")).isTrue();
         // Verify nested object
         var nested = (LinkedHashMap<?, ?>) result.get("d");
-        assertEquals(Map.of("nested", "object"), nested);
+        assertThat(nested).isEqualTo(Map.of("nested", "object"));
         // Verify array
-        assertEquals(List.of(1, 2, 3), result.get("e"));
+        assertThat(result.get("e")).isEqualTo(List.of(1, 2, 3));
     }
 
     @ParameterizedTest
@@ -519,7 +531,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Union types are treated permissively - mixed types allowed
-        assertEquals(Map.of("a", 1, "b", "hello", "c", 3.14), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", "hello", "c", 3.14));
     }
 
     @ParameterizedTest
@@ -540,11 +552,11 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Verify arrays are stored correctly
-        assertEquals(2, result.size());
-        assertInstanceOf(List.class, result.get("a"));
-        assertInstanceOf(List.class, result.get("b"));
-        assertEquals(List.of(1, 2, 3), result.get("a"));
-        assertEquals(List.of(4, 5, 6), result.get("b"));
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.get("a")).isInstanceOf(List.class);
+        assertThat(result.get("b")).isInstanceOf(List.class);
+        assertThat(result.get("a")).isEqualTo(List.of(1, 2, 3));
+        assertThat(result.get("b")).isEqualTo(List.of(4, 5, 6));
     }
 
     @ParameterizedTest
@@ -562,8 +574,8 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Empty map is valid for any Record type
-        assertEquals(Map.of(), result);
-        assertTrue(result.isEmpty());
+        assertThat(result).isEqualTo(Map.of());
+        assertThat(result.isEmpty()).isTrue();
     }
 
     @ParameterizedTest
@@ -587,7 +599,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Mix of computed and regular keys
-        assertEquals(Map.of("first", 1, "second", 2, "third", 3), result);
+        assertThat(result).isEqualTo(Map.of("first", 1, "second", 2, "third", 3));
     }
 
     // Phase 2.3: Nested Record types
@@ -608,7 +620,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Computed key with number type - TypeScript number maps to Double
-        assertEquals(Map.of(123.0, "value"), result);
+        assertThat(result).isEqualTo(Map.of(123.0, "value"));
     }
 
     @ParameterizedTest
@@ -627,14 +639,14 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Computed key with string type matches Record<string, number>
-        assertEquals(Map.of("dynamic", 42), result);
+        assertThat(result).isEqualTo(Map.of("dynamic", 42));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEdgeCase34ComputedPropertyStringInNumberRecord(JdkVersion jdkVersion) {
         // Edge case 34: String computed key in Record<number, V> - should reject
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -646,16 +658,16 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                       }
                     }""");
         });
+        assertThat(exception).isInstanceOf(Exception.class);
         // Should fail - compiler rejects type mismatch during bytecode generation
-        assertTrue(exception.getMessage().contains("Failed to generate method"),
-                "Error message should indicate generation failure: " + exception.getMessage());
+        assertThat(exception.getMessage()).as("Error message should indicate generation failure: " + exception.getMessage()).contains("Failed to generate method");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEdgeCase34ComputedPropertyWithWrongKeyType(JdkVersion jdkVersion) {
         // Edge case 34: Computed property with wrong key type - should reject
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -667,9 +679,9 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                       }
                     }""");
         });
+        assertThat(exception).isInstanceOf(Exception.class);
         // Should fail - compiler rejects type mismatch during bytecode generation
-        assertTrue(exception.getMessage().contains("Failed to generate method"),
-                "Error message should indicate generation failure: " + exception.getMessage());
+        assertThat(exception.getMessage()).as("Error message should indicate generation failure: " + exception.getMessage()).contains("Failed to generate method");
     }
 
 }

@@ -23,8 +23,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for spread operator usage in object literals.
@@ -47,7 +47,7 @@ public class TestCompileAstObjectLitSpread extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5));
     }
 
     @ParameterizedTest
@@ -67,7 +67,7 @@ public class TestCompileAstObjectLitSpread extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // obj2.b overwrites obj1.b, obj3.c overwrites obj2.c
-        assertEquals(Map.of("a", 1, "b", 20, "c", 30, "d", 4), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 20, "c", 30, "d", 4));
     }
 
     // Phase 2.2: Record Type Validation (Continued)
@@ -87,7 +87,7 @@ public class TestCompileAstObjectLitSpread extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("nested", Map.of("x", 1), "a", 2, "b", 3), result);
+        assertThat(result).isEqualTo(Map.of("nested", Map.of("x", 1), "a", 2, "b", 3));
     }
 
     @ParameterizedTest
@@ -105,7 +105,7 @@ public class TestCompileAstObjectLitSpread extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // base.a overwrites initial a
-        assertEquals(Map.of("a", 10, "b", 20, "c", 3), result);
+        assertThat(result).isEqualTo(Map.of("a", 10, "b", 20, "c", 3));
     }
 
     @ParameterizedTest
@@ -123,7 +123,7 @@ public class TestCompileAstObjectLitSpread extends BaseTestCompileSuite {
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Later a overwrites base.a
-        assertEquals(Map.of("a", 1, "b", 20, "c", 3), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 20, "c", 3));
     }
 
     @ParameterizedTest
@@ -140,7 +140,7 @@ public class TestCompileAstObjectLitSpread extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1, "b", 2), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 2));
     }
 
     @ParameterizedTest
@@ -157,7 +157,7 @@ public class TestCompileAstObjectLitSpread extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("a", 1, "b", 2, "c", 3, "d", 4), result);
+        assertThat(result).isEqualTo(Map.of("a", 1, "b", 2, "c", 3, "d", 4));
     }
 
     @ParameterizedTest
@@ -175,7 +175,7 @@ public class TestCompileAstObjectLitSpread extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("dynamic", 100, "a", 1, "b", 2, "c", 3), result);
+        assertThat(result).isEqualTo(Map.of("dynamic", 100, "a", 1, "b", 2, "c", 3));
     }
 
     @ParameterizedTest
@@ -193,7 +193,7 @@ public class TestCompileAstObjectLitSpread extends BaseTestCompileSuite {
                   }
                 }""");
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(Map.of("x", 10, "a", 1, "b", 2, "y", 20), result);
+        assertThat(result).isEqualTo(Map.of("x", 10, "a", 1, "b", 2, "y", 20));
     }
 
 }

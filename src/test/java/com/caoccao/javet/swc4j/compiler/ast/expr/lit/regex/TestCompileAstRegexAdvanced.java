@@ -22,8 +22,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.regex.Pattern;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for advanced regex features.
@@ -43,8 +43,8 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("(?>abc)", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("(?>abc)");
     }
 
     @ParameterizedTest
@@ -59,8 +59,8 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("(a)\\1", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("(a)\\1");
     }
 
     @ParameterizedTest
@@ -75,9 +75,9 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertTrue(pattern.matcher("test@example.com").matches());
-        assertFalse(pattern.matcher("invalid@").matches());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.matcher("test@example.com").matches()).isTrue();
+        assertThat(pattern.matcher("invalid@").matches()).isFalse();
     }
 
     @ParameterizedTest
@@ -93,10 +93,10 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         Pattern startPattern = instanceRunner.invoke("testStart");
         Pattern endPattern = instanceRunner.invoke("testEnd");
-        assertEquals("^", startPattern.pattern());
-        assertEquals("$", endPattern.pattern());
-        assertEquals(Pattern.MULTILINE, startPattern.flags());
-        assertEquals(Pattern.MULTILINE, endPattern.flags());
+        assertThat(startPattern.pattern()).isEqualTo("^");
+        assertThat(endPattern.pattern()).isEqualTo("$");
+        assertThat(startPattern.flags()).isEqualTo(Pattern.MULTILINE);
+        assertThat(endPattern.flags()).isEqualTo(Pattern.MULTILINE);
     }
 
     @ParameterizedTest
@@ -111,8 +111,8 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("(?=pattern)", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("(?=pattern)");
     }
 
     @ParameterizedTest
@@ -127,8 +127,8 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("(?<=pattern)", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("(?<=pattern)");
     }
 
     @ParameterizedTest
@@ -143,8 +143,8 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("(?<name>a)\\k<name>", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("(?<name>a)\\k<name>");
     }
 
     @ParameterizedTest
@@ -159,8 +159,8 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("(?<name>\\d+)", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("(?<name>\\d+)");
     }
 
     @ParameterizedTest
@@ -175,8 +175,8 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("(?!pattern)", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("(?!pattern)");
     }
 
     @ParameterizedTest
@@ -191,8 +191,8 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("(?<!pattern)", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("(?<!pattern)");
     }
 
     @ParameterizedTest
@@ -207,8 +207,8 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\B", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\B");
     }
 
     @ParameterizedTest
@@ -223,8 +223,8 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("a++", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("a++");
     }
 
     @ParameterizedTest
@@ -239,8 +239,8 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\p{L}", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\p{L}");
     }
 
     @ParameterizedTest
@@ -255,7 +255,7 @@ public class TestCompileAstRegexAdvanced extends BaseTestCompileSuite {
                   }
                 }""");
         Pattern pattern = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(pattern);
-        assertEquals("\\b", pattern.pattern());
+        assertThat(pattern).isNotNull();
+        assertThat(pattern.pattern()).isEqualTo("\\b");
     }
 }

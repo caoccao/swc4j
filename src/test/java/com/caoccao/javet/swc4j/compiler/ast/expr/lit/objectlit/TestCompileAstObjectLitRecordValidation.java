@@ -20,8 +20,9 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for Record type validation error cases and type mismatches.
@@ -31,7 +32,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNestedRecordInvalidNestedKey(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -44,17 +45,16 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key 'a'") &&
-                        causeMessage.contains("String"),
-                "Expected nested key type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected nested key type mismatch error, got: " + causeMessage).contains("Key 'a'").contains("String");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNestedRecordInvalidNestedValue(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -67,17 +67,16 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Property 'inner'") &&
-                        causeMessage.contains("String"),
-                "Expected nested type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected nested type mismatch error, got: " + causeMessage).contains("Property 'inner'").contains("String");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordComputedKeyNumberMismatch(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -91,10 +90,10 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key") && causeMessage.contains("String"),
-                "Expected computed key type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected computed key type mismatch error, got: " + causeMessage).contains("Key").contains("String");
     }
 
     // Phase 7: Mixed Scenarios (Spread + Shorthand + Computed)
@@ -102,7 +101,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordComputedKeyStringMismatch(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -116,16 +115,16 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key") && causeMessage.contains("double"),
-                "Expected computed key type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected computed key type mismatch error, got: " + causeMessage).contains("Key").contains("double");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordIntegerKeyTypeMismatch(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -138,17 +137,16 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key 'a'") &&
-                        causeMessage.contains("String"),
-                "Expected key type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected key type mismatch error, got: " + causeMessage).contains("Key 'a'").contains("String");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordLongKeyTypeMismatch(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -161,17 +159,16 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key 'a'") &&
-                        causeMessage.contains("String"),
-                "Expected key type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected key type mismatch error, got: " + causeMessage).contains("Key 'a'").contains("String");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordMixedValidAndInvalid(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -186,18 +183,17 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
+        assertThat(exception).isInstanceOf(Exception.class);
         // Check the cause contains the validation error
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Property 'c'") &&
-                        causeMessage.contains("String"),
-                "Expected type mismatch error for property 'c', got: " + causeMessage);
+        assertThat(causeMessage).as("Expected type mismatch error for property 'c', got: " + causeMessage).contains("Property 'c'").contains("String");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordNumberKeyTypeMismatch(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -210,12 +206,11 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
+        assertThat(exception).isInstanceOf(Exception.class);
         // Check the cause contains the validation error
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key 'a'") &&
-                        causeMessage.contains("String"),
-                "Expected key type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected key type mismatch error, got: " + causeMessage).contains("Key 'a'").contains("String");
     }
 
     // Phase 7: 3-Level Nested Record Types
@@ -223,7 +218,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordNumberValueTypeMismatch(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -236,19 +231,18 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
+        assertThat(exception).isInstanceOf(Exception.class);
         // Check the cause contains the validation error
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Property '1'") &&
-                        causeMessage.contains("String"),
-                "Expected value type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected value type mismatch error, got: " + causeMessage).contains("Property '1'").contains("String");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordShorthandKeyTypeMismatch(JdkVersion jdkVersion) {
         // Shorthand keys are always strings, so Record<number, V> should fail
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -260,16 +254,16 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key 'a'") && causeMessage.contains("String"),
-                "Expected shorthand key type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected shorthand key type mismatch error, got: " + causeMessage).contains("Key 'a'").contains("String");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordShorthandValueTypeMismatch(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -281,16 +275,16 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Property 'a'") && causeMessage.contains("String"),
-                "Expected shorthand value type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected shorthand value type mismatch error, got: " + causeMessage).contains("Property 'a'").contains("String");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordSpreadKeyTypeMismatch(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -302,16 +296,16 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("incompatible key type"),
-                "Expected spread key type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected spread key type mismatch error, got: " + causeMessage).contains("incompatible key type");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordSpreadNestedTypeMismatch(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -327,16 +321,16 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("incompatible value type"),
-                "Expected nested spread value type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected nested spread value type mismatch error, got: " + causeMessage).contains("incompatible value type");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordSpreadValueTypeMismatch(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -348,16 +342,16 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("incompatible value type"),
-                "Expected spread value type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected spread value type mismatch error, got: " + causeMessage).contains("incompatible value type");
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordStringKeyNumericMismatch(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -370,11 +364,10 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception).isInstanceOf(Exception.class);
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key '1'") &&
-                        causeMessage.contains("Integer"),
-                "Expected key type mismatch error, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected key type mismatch error, got: " + causeMessage).contains("Key '1'").contains("Integer");
     }
 
     // Phase 6: Integration - Return Type Context
@@ -382,7 +375,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordValueTypeMismatchBoolean(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -395,13 +388,15 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
+        assertThat(exception).isInstanceOf(Exception.class);
         // Check the cause contains the validation error
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Property 'flag'") &&
-                        causeMessage.contains("has type") &&
-                        causeMessage.contains("but Record requires"),
-                "Expected type mismatch error for boolean value, got: " + causeMessage);
+        assertThat(causeMessage)
+                .as("Expected type mismatch error for boolean value, got: " + causeMessage)
+                .contains("Property 'flag'")
+                .contains("has type")
+                .contains("but Record requires");
     }
 
     // Phase 7: Edge Cases 33-34 (Computed Property Type Validation)
@@ -409,7 +404,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordValueTypeMismatchString(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
+        Throwable exception = catchThrowable(() -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
@@ -422,12 +417,11 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                       }
                     }""");
         });
+        assertThat(exception).isInstanceOf(Exception.class);
         // Check the cause contains the validation error
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Property 'a' has type String") &&
-                        causeMessage.contains("but Record requires"),
-                "Expected type mismatch error for value type, got: " + causeMessage);
+        assertThat(causeMessage).as("Expected type mismatch error for value type, got: " + causeMessage).contains("Property 'a' has type String").contains("but Record requires");
     }
 
 }

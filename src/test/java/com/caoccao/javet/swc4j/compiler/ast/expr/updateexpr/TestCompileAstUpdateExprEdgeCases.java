@@ -45,7 +45,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) -128);
+        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) -128);
     }
 
     @ParameterizedTest
@@ -61,7 +61,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) 127);
+        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) 127);
     }
 
     @ParameterizedTest
@@ -129,7 +129,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(7);
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(7);
     }
 
     @ParameterizedTest
@@ -146,7 +146,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(2.1, within(0.0001));
+        assertThat((double) runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(2.1, within(0.0001));
     }
 
     @ParameterizedTest
@@ -162,7 +162,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(Integer.MIN_VALUE);
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(Integer.MIN_VALUE);
     }
 
     @ParameterizedTest
@@ -178,7 +178,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(Long.MIN_VALUE);
+        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(Long.MIN_VALUE);
     }
 
     @ParameterizedTest
@@ -196,7 +196,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(11);
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(11);
     }
 
     @ParameterizedTest
@@ -213,7 +213,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(16);
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(16);
     }
 
     @ParameterizedTest
@@ -229,7 +229,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-4);
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-4);
     }
 
     @ParameterizedTest
