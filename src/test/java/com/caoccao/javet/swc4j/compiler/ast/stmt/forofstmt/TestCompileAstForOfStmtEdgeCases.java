@@ -45,10 +45,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // 1, 12, 123, 1234, 12345
-        assertEquals(12345, classA.getMethod("test").invoke(instance));
+        assertEquals(12345, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -65,9 +62,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("done", classA.getMethod("test").invoke(instance));
+        assertEquals("done", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -86,10 +81,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Sum of 1 to 10 = 55
-        assertEquals(55, classA.getMethod("test").invoke(instance));
+        assertEquals(55, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -111,9 +103,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(100, classA.getMethod("test").invoke(instance));
+        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -134,10 +124,9 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(6, classA.getMethod("test", boolean.class).invoke(instance, true));
-        assertEquals(0, classA.getMethod("test", boolean.class).invoke(instance, false));
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(6, (int) instanceRunner.invoke("test", true));
+        assertEquals(0, (int) instanceRunner.invoke("test", false));
     }
 
     @ParameterizedTest
@@ -165,10 +154,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Skip 1, 3, 5
-        assertEquals("24", classA.getMethod("test").invoke(instance));
+        assertEquals("24", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -191,10 +177,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Last value 5 > 3, so x = 10
-        assertEquals(10, classA.getMethod("test").invoke(instance));
+        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -217,10 +200,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // 3 and 4 match (2 < value < 5)
-        assertEquals(2, classA.getMethod("test").invoke(instance));
+        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -241,9 +221,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(3, classA.getMethod("test").invoke(instance));
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -263,9 +241,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(3, classA.getMethod("test").invoke(instance));
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -282,9 +258,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -305,10 +279,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // "!" is not executed
-        assertEquals("a", classA.getMethod("test").invoke(instance));
+        assertEquals("a", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -329,10 +300,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // "!" is never executed
-        assertEquals("abc", classA.getMethod("test").invoke(instance));
+        assertEquals("abc", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -351,9 +319,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("a", classA.getMethod("test").invoke(instance));
+        assertEquals("a", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -373,9 +339,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("42,hello,true,", classA.getMethod("test").invoke(instance));
+        assertEquals("42,hello,true,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -395,10 +359,7 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Outer is still "outer" after loop
-        assertEquals("outer", classA.getMethod("test").invoke(instance));
+        assertEquals("outer", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -418,9 +379,6 @@ public class TestCompileAstForOfStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // (1*2) + (2*2) + (3*2) = 12
-        assertEquals(12, classA.getMethod("test").invoke(instance));
+        assertEquals(12, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

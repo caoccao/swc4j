@@ -47,9 +47,7 @@ public class TestCompileAstDoWhileStmtBreakContinue extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(5, classA.getMethod("test").invoke(instance));
+        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -72,10 +70,7 @@ public class TestCompileAstDoWhileStmtBreakContinue extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // sum = 1 + 3 + 5 + 7 + 9 = 25
-        assertEquals(25, classA.getMethod("test").invoke(instance));
+        assertEquals(25, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -101,10 +96,7 @@ public class TestCompileAstDoWhileStmtBreakContinue extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // sum = 1 + 3 + 5 + 7 = 16, then i=9 triggers break
-        assertEquals(16, classA.getMethod("test").invoke(instance));
+        assertEquals(16, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -129,10 +121,7 @@ public class TestCompileAstDoWhileStmtBreakContinue extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // sum = 0 + 1 + 2 + 3 + 4 + 5 + 6 = 21 (breaks before adding 7)
-        assertEquals(21, classA.getMethod("test").invoke(instance));
+        assertEquals(21, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -157,10 +146,7 @@ public class TestCompileAstDoWhileStmtBreakContinue extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // sum = 1 + 2 + 3 + 8 + 9 + 10 = 33
-        assertEquals(33, classA.getMethod("test").invoke(instance));
+        assertEquals(33, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -184,10 +170,7 @@ public class TestCompileAstDoWhileStmtBreakContinue extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // sum = 1 + 2 + 3 + 4 + (skip when i=5, i becomes 7) + 8 + 9 + 10 = 37
-        assertEquals(37, classA.getMethod("test").invoke(instance));
+        assertEquals(37, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -206,10 +189,7 @@ public class TestCompileAstDoWhileStmtBreakContinue extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Executes once, then breaks
-        assertEquals(1, classA.getMethod("test").invoke(instance));
+        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -233,9 +213,7 @@ public class TestCompileAstDoWhileStmtBreakContinue extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(3, classA.getMethod("test").invoke(instance));
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -261,9 +239,6 @@ public class TestCompileAstDoWhileStmtBreakContinue extends BaseTestCompileSuite
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // sum = 1 + 3 + 5 = 9
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

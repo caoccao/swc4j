@@ -48,9 +48,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("Alice:30,Bob:25,", classA.getMethod("test").invoke(instance));
+        assertEquals("Alice:30,Bob:25,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -69,9 +67,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("12", classA.getMethod("test").invoke(instance));
+        assertEquals("12", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -93,9 +89,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("Alice:User,Bob:Admin,", classA.getMethod("test").invoke(instance));
+        assertEquals("Alice:User,Bob:Admin,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -114,9 +108,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance));
+        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -135,9 +127,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("ab", classA.getMethod("test").invoke(instance));
+        assertEquals("ab", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -160,9 +150,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("hello:42:true", classA.getMethod("test").invoke(instance));
+        assertEquals("hello:42:true", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -185,9 +173,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("ABCD", classA.getMethod("test").invoke(instance));
+        assertEquals("ABCD", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -206,9 +192,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(100, classA.getMethod("test").invoke(instance));
+        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -234,9 +218,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("AliceX,AliceY,BobX,BobY,", classA.getMethod("test").invoke(instance));
+        assertEquals("AliceX,AliceY,BobX,BobY,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -260,9 +242,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("a:?,b:Y,", classA.getMethod("test").invoke(instance));
+        assertEquals("a:?,b:Y,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -282,9 +262,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("Alice,Bob,", classA.getMethod("test").invoke(instance));
+        assertEquals("Alice,Bob,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -305,9 +283,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("Smith, Alice", classA.getMethod("test").invoke(instance));
+        assertEquals("Smith, Alice", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -326,9 +302,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("value", classA.getMethod("test").invoke(instance));
+        assertEquals("value", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -348,9 +322,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("Alice,Bob,Charlie,", classA.getMethod("test").invoke(instance));
+        assertEquals("Alice,Bob,Charlie,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -372,9 +344,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("a", classA.getMethod("test").invoke(instance));
+        assertEquals("a", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -396,9 +366,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("ac", classA.getMethod("test").invoke(instance));
+        assertEquals("ac", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -417,10 +385,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // 1*2 + 3*4 + 5*6 = 2 + 12 + 30 = 44
-        assertEquals(44, classA.getMethod("test").invoke(instance));
+        assertEquals(44, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -438,8 +403,6 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("first", classA.getMethod("test").invoke(instance));
+        assertEquals("first", runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

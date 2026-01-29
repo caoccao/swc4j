@@ -46,10 +46,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Stops when j reaches 3 (i=3, j=3)
-        assertEquals(33, classA.getMethod("test").invoke(instance));
+        assertEquals(33, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -69,11 +66,9 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // (i < 5 && j > 5) || i < 3
         // Stops when i=5, j=5
-        assertEquals(55, classA.getMethod("test").invoke(instance));
+        assertEquals(55, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -92,9 +87,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(7, classA.getMethod("test").invoke(instance));
+        assertEquals(7, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -112,10 +105,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Stops when i < 5, so i = 4
-        assertEquals(4, classA.getMethod("test").invoke(instance));
+        assertEquals(4, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -136,10 +126,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Stops when a=5, b=5 (both equal to c)
-        assertEquals(505, classA.getMethod("test").invoke(instance));
+        assertEquals(505, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -157,10 +144,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Stops when i <= 5, so i = 5
-        assertEquals(5, classA.getMethod("test").invoke(instance));
+        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -180,10 +164,8 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Continues until both conditions false: i>=3 AND j>=10
         // Stops when i=5, j=10
-        assertEquals(60, classA.getMethod("test").invoke(instance));
+        assertEquals(60, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

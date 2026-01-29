@@ -44,10 +44,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Last key should be "c"
-        assertEquals("c", classA.getMethod("test").invoke(instance));
+        assertEquals("c", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -66,10 +63,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Variable should retain initial value
-        assertEquals("initial", classA.getMethod("test").invoke(instance));
+        assertEquals("initial", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -93,10 +87,8 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // First loop last key: "b", second loop last key: "y"
-        assertEquals("b,y", classA.getMethod("test").invoke(instance));
+        assertEquals("b,y", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -116,10 +108,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Last index should be "2" (string)
-        assertEquals("2", classA.getMethod("test").invoke(instance));
+        assertEquals("2", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -140,9 +129,6 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Loop breaks at "c", so key is "c"
-        assertEquals("c", classA.getMethod("test").invoke(instance));
+        assertEquals("c", runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

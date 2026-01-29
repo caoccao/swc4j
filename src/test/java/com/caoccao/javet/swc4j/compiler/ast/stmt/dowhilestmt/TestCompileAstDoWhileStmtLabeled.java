@@ -53,9 +53,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(5, classA.getMethod("test").invoke(instance));
+        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -83,11 +81,9 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Each outer iteration: j=1 increments sum, j=2 continues outer (skipping rest)
         // 3 iterations, each adds 1 = 3
-        assertEquals(3, classA.getMethod("test").invoke(instance));
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -114,13 +110,11 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // i=1: sum = 1+1 = 2
         // i=2: continue (skip inner)
         // i=3: sum = 2+3+3 = 8
         // i=4: sum = 8+4+4 = 16
-        assertEquals(16, classA.getMethod("test").invoke(instance));
+        assertEquals(16, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -150,11 +144,9 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // i=0: j=0,1,2 (break), result=3, i=1
         // i=1: j=0,1 (break outer), result=5
-        assertEquals(5, classA.getMethod("test").invoke(instance));
+        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -184,11 +176,9 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // First outer: sum=1,2,3 (break inner), i=1
         // Second outer: sum=4,5,6 (j=0,1,2), i=2
         // Third outer: sum=7 (break outer)
-        assertEquals(7, classA.getMethod("test").invoke(instance));
+        assertEquals(7, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

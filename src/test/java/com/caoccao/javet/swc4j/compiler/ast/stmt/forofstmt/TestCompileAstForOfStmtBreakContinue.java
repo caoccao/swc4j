@@ -51,10 +51,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Skip 2, break at 4 -> "13"
-        assertEquals("13", classA.getMethod("test").invoke(instance));
+        assertEquals("13", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -76,9 +73,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("ab", classA.getMethod("test").invoke(instance));
+        assertEquals("ab", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -103,10 +98,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // 1, 2, !3, break at 4
-        assertEquals("12!3", classA.getMethod("test").invoke(instance));
+        assertEquals("12!3", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -128,9 +120,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("ab", classA.getMethod("test").invoke(instance));
+        assertEquals("ab", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -150,9 +140,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance));
+        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -173,9 +161,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("abc", classA.getMethod("test").invoke(instance));
+        assertEquals("abc", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -197,9 +183,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("ad", classA.getMethod("test").invoke(instance));
+        assertEquals("ad", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -223,10 +207,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Skip b
-        assertEquals("acd", classA.getMethod("test").invoke(instance));
+        assertEquals("acd", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -248,9 +229,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("ad", classA.getMethod("test").invoke(instance));
+        assertEquals("ad", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -270,10 +249,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // All values processed, sum = 6
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -294,10 +270,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Skip e and o
-        assertEquals("aiu", classA.getMethod("test").invoke(instance));
+        assertEquals("aiu", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -322,10 +295,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Breaks at 3
-        assertEquals("12", classA.getMethod("test").invoke(instance));
+        assertEquals("12", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -350,9 +320,6 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Skips 2 and 4
-        assertEquals("135", classA.getMethod("test").invoke(instance));
+        assertEquals("135", runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

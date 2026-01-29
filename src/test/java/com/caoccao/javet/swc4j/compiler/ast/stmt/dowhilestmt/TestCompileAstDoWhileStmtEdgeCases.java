@@ -52,11 +52,9 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // i=1,2,4,5,7,8,10 (skip 3,6,9, break at 11)
         // sum = 1+2+4+5+7+8+10 = 37
-        assertEquals(37, classA.getMethod("test").invoke(instance));
+        assertEquals(37, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -75,15 +73,13 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // i starts at 0, each iteration: count++, then test i++ < 3
         // Iteration 1: count=1, test: 0<3 (true), i=1
         // Iteration 2: count=2, test: 1<3 (true), i=2
         // Iteration 3: count=3, test: 2<3 (true), i=3
         // Iteration 4: count=4, test: 3<3 (false), i=4
         // count=4, i=4
-        assertEquals(44, classA.getMethod("test").invoke(instance));
+        assertEquals(44, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -100,9 +96,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(5, classA.getMethod("test").invoke(instance));
+        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -123,10 +117,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Returns from first iteration when i==1
-        assertEquals(10, classA.getMethod("test").invoke(instance));
+        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -145,10 +136,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Executes once, then breaks (test is unreachable)
-        assertEquals(42, classA.getMethod("test").invoke(instance));
+        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -170,11 +158,9 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // i=0: y=1, i=1: y=3, i=2: y=5
         // sum = 1 + 3 + 5 = 9
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -199,10 +185,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Each iteration adds 3, 3 iterations = 9
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -226,12 +209,10 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // i=0,2,4 add 1 each = 3
         // i=1,3 add 2 each = 4
         // total = 7
-        assertEquals(7, classA.getMethod("test").invoke(instance));
+        assertEquals(7, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -255,10 +236,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Returns 100 when i=3
-        assertEquals(100, classA.getMethod("test").invoke(instance));
+        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -276,9 +254,6 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Unlike while, do-while ALWAYS executes at least once
-        assertEquals(1, classA.getMethod("test").invoke(instance));
+        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

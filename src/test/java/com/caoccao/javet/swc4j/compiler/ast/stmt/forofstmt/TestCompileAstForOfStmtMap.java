@@ -45,9 +45,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance));
+        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -67,9 +65,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("apple,banana,cherry,", classA.getMethod("test").invoke(instance));
+        assertEquals("apple,banana,cherry,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -88,9 +84,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(600, classA.getMethod("test").invoke(instance));
+        assertEquals(600, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -110,9 +104,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("a1b2", classA.getMethod("test").invoke(instance));
+        assertEquals("a1b2", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -131,9 +123,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("a=1,b=2,c=3,", classA.getMethod("test").invoke(instance));
+        assertEquals("a=1,b=2,c=3,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -153,9 +143,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("42,hello,true,", classA.getMethod("test").invoke(instance));
+        assertEquals("42,hello,true,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -174,9 +162,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("xy", classA.getMethod("test").invoke(instance));
+        assertEquals("xy", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -195,10 +181,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // LinkedHashMap maintains insertion order: c, a, b
-        assertEquals("cab", classA.getMethod("test").invoke(instance));
+        assertEquals("cab", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -217,9 +200,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("only:42", classA.getMethod("test").invoke(instance));
+        assertEquals("only:42", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -238,8 +219,6 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(60, classA.getMethod("test").invoke(instance));
+        assertEquals(60, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

@@ -48,10 +48,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // (10+1) + (10+2) + (20+1) + (20+2) = 11 + 12 + 21 + 22 = 66
-        assertEquals(66, classA.getMethod("test").invoke(instance));
+        assertEquals(66, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -78,10 +75,8 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Inner loop breaks at 2
-        assertEquals("a1,b1,", classA.getMethod("test").invoke(instance));
+        assertEquals("a1,b1,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -108,10 +103,8 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Inner loop continues (skips 2)
-        assertEquals("a1a3,b1b3,", classA.getMethod("test").invoke(instance));
+        assertEquals("a1a3,b1b3,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -133,9 +126,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("axaybxby", classA.getMethod("test").invoke(instance));
+        assertEquals("axaybxby", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -157,9 +148,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("axaybxby", classA.getMethod("test").invoke(instance));
+        assertEquals("axaybxby", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -186,10 +175,8 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Breaks outer loop when v2 == 2
-        assertEquals("a1,a2,", classA.getMethod("test").invoke(instance));
+        assertEquals("a1,a2,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -216,10 +203,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Continues outer when v2 == 2, skipping "!"
-        assertEquals("a1b1", classA.getMethod("test").invoke(instance));
+        assertEquals("a1b1", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -243,9 +227,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("ab-xy", classA.getMethod("test").invoke(instance));
+        assertEquals("ab-xy", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -267,9 +249,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("1a1b2a2b", classA.getMethod("test").invoke(instance));
+        assertEquals("1a1b2a2b", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -294,9 +274,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("1x1y-2x2y-", classA.getMethod("test").invoke(instance));
+        assertEquals("1x1y-2x2y-", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -321,10 +299,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // 2 * 2 * 2 = 8
-        assertEquals(8, classA.getMethod("test").invoke(instance));
+        assertEquals(8, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -348,8 +323,6 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("ax,ay,bx,by,", classA.getMethod("test").invoke(instance));
+        assertEquals("ax,ay,bx,by,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

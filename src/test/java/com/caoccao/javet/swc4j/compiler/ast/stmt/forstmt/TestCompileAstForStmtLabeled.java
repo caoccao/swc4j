@@ -45,9 +45,7 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(1 + 2 + 3 + 4, classA.getMethod("test").invoke(instance));
+        assertEquals(1 + 2 + 3 + 4, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -72,12 +70,10 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // i=0,1,2,3: each adds 10 = 40
         // i=4: adds 6 (j=0 through j=5), then breaks
         // Total = 40 + 6 = 46
-        assertEquals(46, classA.getMethod("test").invoke(instance));
+        assertEquals(46, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -100,14 +96,12 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Each i: j goes 0, k adds 2 (0,1 then breaks middle), then j loop ends
         // i=0,j=0: k=0,1 (2), break middle ends j loop -> next i
         // i=1,j=0: k=0,1 (2), break middle ends j loop -> next i
         // i=2,j=0: k=0,1 (2), break middle ends j loop -> done
         // Total = 6
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -130,15 +124,13 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Should break outer loop when i * j > 20
         // i=0: sum = 0+0 through 0+9 = 45
         // i=1: sum += 1+0 through 1+9 = 55
         // i=2: sum += 2+0 through 2+9 = 65
         // i=3: sum += 3+0 through 3+6 = 42 (breaks when 3*7=21>20)
         // Total = 45 + 55 + 65 + 42 = 207
-        assertEquals(207, classA.getMethod("test").invoke(instance));
+        assertEquals(207, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -163,12 +155,10 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // i=0,1,2: each adds 5 = 15
         // i=3,4: each adds 3 (j=0,1,2, then continues outer) = 6
         // Total = 15 + 6 = 21
-        assertEquals(21, classA.getMethod("test").invoke(instance));
+        assertEquals(21, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -191,8 +181,6 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // Each iteration of outer: j goes 0, 1, then continues outer
         // i=0: sum = 0+0, 0+1 = 1
         // i=1: sum += 1+0, 1+1 = 3
@@ -200,7 +188,7 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
         // i=3: sum += 3+0, 3+1 = 7
         // i=4: sum += 4+0, 4+1 = 9
         // Total = 1 + 3 + 5 + 7 + 9 = 25
-        assertEquals(25, classA.getMethod("test").invoke(instance));
+        assertEquals(25, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -222,9 +210,7 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(15, classA.getMethod("test").invoke(instance));
+        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -245,13 +231,11 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         // i=0: sum = 0, 1 = 1
         // i=1: sum += 10, 11 = 22
         // i=2: sum += 20, 21 = 63
         // Total = 63
-        assertEquals(63, classA.getMethod("test").invoke(instance));
+        assertEquals(63, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -275,9 +259,6 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Complex nested logic - breaks when i+j+k > 4
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 }
