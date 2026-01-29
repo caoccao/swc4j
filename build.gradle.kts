@@ -49,6 +49,21 @@ object Config {
     }
 
     object Projects {
+        // https://mvnrepository.com/artifact/org.assertj/assertj-core
+        const val ASSERTJ_CORE = "org.assertj:assertj-core:${Versions.ASSERTJ_CORE}"
+
+        // https://mvnrepository.com/artifact/net.javacrumbs.json-unit/json-unit-assertj
+        const val JSON_UNIT_ASSERTJ = "net.javacrumbs.json-unit:json-unit-assertj:${Versions.JSON_UNIT_ASSERTJ}"
+
+        const val JUNIT_BOM = "org.junit:junit-bom:${Versions.JUNIT}"
+        // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter
+        const val JUNIT_JUPITER = "org.junit.jupiter:junit-jupiter"
+        const val JUNIT_JUPITER_LAUNCHER = "org.junit.platform:junit-platform-launcher"
+
+        // https://mvnrepository.com/artifact/org.openjdk.jmh/jmh-core
+        const val JMH_CORE = "org.openjdk.jmh:jmh-core:${Versions.JMH}"
+        const val JMH_GENERATOR_ANNPROCESS = "org.openjdk.jmh:jmh-generator-annprocess:${Versions.JMH}"
+
         const val JAVET = "com.caoccao.javet:javet:${Versions.JAVET}"
         val JAVET_BINARY = {
             val os = OperatingSystem.current()
@@ -62,9 +77,12 @@ object Config {
     }
 
     object Versions {
+        const val ASSERTJ_CORE = "3.27.6"
         const val JAVA_VERSION = "1.8"
         const val JAVET = "4.1.0"
-        const val JUNIT = "5.11.3"
+        const val JMH = "1.37"
+        const val JSON_UNIT_ASSERTJ = "5.1.0"
+        const val JUNIT = "6.0.1"
         const val SWC4J = "2.0.0"
     }
 }
@@ -92,6 +110,19 @@ java {
 }
 
 dependencies {
+    // https://mvnrepository.com/artifact/org.assertj/assertj-core
+    testImplementation(Config.Projects.ASSERTJ_CORE)
+    testImplementation(Config.Projects.JSON_UNIT_ASSERTJ)
+
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter
+    testImplementation(platform(Config.Projects.JUNIT_BOM))
+    testImplementation(Config.Projects.JUNIT_JUPITER)
+    testRuntimeOnly(Config.Projects.JUNIT_JUPITER_LAUNCHER)
+
+    // https://mvnrepository.com/artifact/org.openjdk.jmh/jmh-core
+    testImplementation(Config.Projects.JMH_CORE)
+    testAnnotationProcessor(Config.Projects.JMH_GENERATOR_ANNPROCESS)
+
     testImplementation(Config.Projects.JAVET)
     testImplementation(Config.Projects.JAVET_BINARY())
 }
@@ -125,26 +156,20 @@ tasks.jar {
     }
 }
 
-testing {
-    suites {
-        // Configure the built-in test suite
-        val test by getting(JvmTestSuite::class) {
-            // Use JUnit Jupiter test framework
-            useJUnitJupiter(Config.Versions.JUNIT)
-        }
-    }
-}
-
 tasks.test {
     useJUnitPlatform {
         excludeTags("performance")
     }
 }
 
+// Create a separate task for performance tests
 tasks.register<Test>("performanceTest") {
     useJUnitPlatform {
         includeTags("performance")
     }
+    group = "verification"
+    description = "Runs performance tests using JMH"
+    shouldRunAfter(tasks.test)
 }
 
 tasks {
