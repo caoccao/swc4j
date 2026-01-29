@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for rest patterns in assignment expressions (Phase 7)
@@ -51,7 +51,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1:2345", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:2345");
     }
 
     @ParameterizedTest
@@ -75,7 +75,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -106,7 +106,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1:2,4:1,6:0,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:2,4:1,6:0,");
     }
 
     @ParameterizedTest
@@ -135,7 +135,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("ABC:DE", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ABC:DE");
     }
 
     @ParameterizedTest
@@ -158,7 +158,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -182,7 +182,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("42,true,end,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("42,true,end,");
     }
 
     @ParameterizedTest
@@ -224,7 +224,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1:2,4:4", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:2,4:4");
     }
 
     @ParameterizedTest
@@ -249,7 +249,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("A:BC", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("A:BC");
     }
 
     @ParameterizedTest
@@ -273,7 +273,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -308,7 +308,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1:2,4:1,6:0,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:2,4:1,6:0,");
     }
 
     @ParameterizedTest
@@ -337,7 +337,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("ABC:DE", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ABC:DE");
     }
 
     @ParameterizedTest
@@ -360,7 +360,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("zm", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("zm");
     }
 
     @ParameterizedTest
@@ -383,7 +383,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(60, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(60);
     }
 
     @ParameterizedTest
@@ -408,7 +408,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("default:BC", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("default:BC");
     }
 
     @ParameterizedTest
@@ -434,7 +434,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("test:42,true,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("test:42,true,");
     }
 
     @ParameterizedTest
@@ -459,7 +459,7 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("A:BC", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("A:BC");
     }
 
     @ParameterizedTest
@@ -501,6 +501,6 @@ public class TestCompileAstRestPatAssignment extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("X:2,Y:4", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("X:2,Y:4");
     }
 }

@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for nested rest patterns in destructuring (Phase 6)
@@ -68,7 +68,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("item1:value10:1:M", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("item1:value10:1:M");
     }
 
     @ParameterizedTest
@@ -108,7 +108,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("1:b2:extraX:topT", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:b2:extraX:topT");
     }
 
     @ParameterizedTest
@@ -129,7 +129,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -159,7 +159,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("1:b2:2", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:b2:2");
     }
 
     @ParameterizedTest
@@ -187,7 +187,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("ab:cd:KV", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ab:cd:KV");
     }
 
     @ParameterizedTest
@@ -216,7 +216,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("1:23:4:56", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:23:4:56");
     }
 
     @ParameterizedTest
@@ -241,7 +241,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("123:45", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("123:45");
     }
 
     @ParameterizedTest
@@ -268,7 +268,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("a1b2:x3y4", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a1b2:x3y4");
     }
 
     @ParameterizedTest
@@ -292,7 +292,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("1:b2c3", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:b2c3");
     }
 
     @ParameterizedTest
@@ -316,7 +316,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals(210, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(210);
     }
 
     @ParameterizedTest
@@ -347,7 +347,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("1:2:0:3", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:2:0:3");
     }
 
     // Note: testNestedArrayInForOfLoop and testNestedObjectInForOfLoop are not implemented yet
@@ -377,7 +377,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("1:23:XY", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:23:XY");
     }
 
     @ParameterizedTest
@@ -402,7 +402,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("1:2:345", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:2:345");
     }
 
     @ParameterizedTest
@@ -429,7 +429,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("1:2:2", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:2:2");
     }
 
     @ParameterizedTest
@@ -464,7 +464,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("1:23:1:1", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:23:1:1");
     }
 
     @ParameterizedTest
@@ -493,7 +493,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("1:2:34:56", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:2:34:56");
     }
 
     @ParameterizedTest
@@ -524,7 +524,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        assertEquals("1:2:z3w4:a5b6", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1:2:z3w4:a5b6");
     }
 }
 

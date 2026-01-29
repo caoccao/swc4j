@@ -20,8 +20,9 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for Java class imports and static method calls.
@@ -41,8 +42,8 @@ public class TestImport extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(5.0, instanceRunner.invoke("test", -5.0), 0.001);
-        assertEquals(3.7, instanceRunner.invoke("test", 3.7), 0.001);
+        assertThat(instanceRunner.<Double>invoke("test", -5.0)).isCloseTo(5.0, within(0.001));
+        assertThat(instanceRunner.<Double>invoke("test", 3.7)).isCloseTo(3.7, within(0.001));
     }
 
     @ParameterizedTest
@@ -58,8 +59,8 @@ public class TestImport extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(3.0, instanceRunner.invoke("test", 3.7), 0.001);
-        assertEquals(5.0, instanceRunner.invoke("test", 5.2), 0.001);
+        assertThat(instanceRunner.<Double>invoke("test", 3.7)).isCloseTo(3.0, within(0.001));
+        assertThat(instanceRunner.<Double>invoke("test", 5.2)).isCloseTo(5.0, within(0.001));
     }
 
     @ParameterizedTest
@@ -75,8 +76,8 @@ public class TestImport extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(5.0, instanceRunner.invoke("test", 3.0, 5.0), 0.001);
-        assertEquals(10.0, instanceRunner.invoke("test", 10.0, 2.0), 0.001);
+        assertThat(instanceRunner.<Double>invoke("test", 3.0, 5.0)).isCloseTo(5.0, within(0.001));
+        assertThat(instanceRunner.<Double>invoke("test", 10.0, 2.0)).isCloseTo(10.0, within(0.001));
     }
 
     @ParameterizedTest
@@ -92,8 +93,8 @@ public class TestImport extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(5, (int) instanceRunner.invoke("test", 3, 5));
-        assertEquals(10, (int) instanceRunner.invoke("test", 10, 2));
+        assertThat((int) instanceRunner.<Object>invoke("test", 3, 5)).isEqualTo(5);
+        assertThat((int) instanceRunner.<Object>invoke("test", 10, 2)).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -115,9 +116,9 @@ public class TestImport extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
 
         // Test that int args select min(int, int)
-        assertEquals(3, (int) instanceRunner.invoke("testInt", 3, 5));
+        assertThat((int) instanceRunner.<Object>invoke("testInt", 3, 5)).isEqualTo(3);
 
         // Test that double args select min(double, double)
-        assertEquals(3.5, instanceRunner.invoke("testDouble", 3.5, 5.2), 0.001);
+        assertThat(instanceRunner.<Double>invoke("testDouble", 3.5, 5.2)).isCloseTo(3.5, within(0.001));
     }
 }
