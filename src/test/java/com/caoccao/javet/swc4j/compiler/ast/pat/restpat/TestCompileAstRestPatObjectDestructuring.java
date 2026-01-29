@@ -53,9 +53,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("A:2", classA.getMethod("test").invoke(instance));
+        assertEquals("A:2", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -77,9 +75,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(3, classA.getMethod("test").invoke(instance));
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -102,9 +98,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("keyA,keyB,", classA.getMethod("test").invoke(instance));
+        assertEquals("keyA,keyB,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -126,9 +120,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(2, classA.getMethod("test").invoke(instance));
+        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -148,9 +140,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance));
+        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -172,9 +162,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance));
+        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -196,9 +184,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("ABC", classA.getMethod("test").invoke(instance));
+        assertEquals("ABC", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -220,9 +206,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(2, classA.getMethod("test").invoke(instance));
+        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -253,9 +237,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("1:2,2:1,3:0,", classA.getMethod("test").invoke(instance));
+        assertEquals("1:2,2:1,3:0,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -277,10 +259,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Should preserve order: c, a, d (b was extracted)
-        assertEquals("cad", classA.getMethod("test").invoke(instance));
+        assertEquals("cad", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -303,9 +282,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(2, classA.getMethod("test").invoke(instance));
+        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -330,10 +307,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Two iterations (a=1 and a=3), each has 1 property in rest
-        assertEquals(2, classA.getMethod("test").invoke(instance));
+        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -359,9 +333,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("default:2", classA.getMethod("test").invoke(instance));
+        assertEquals("default:2", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -383,9 +355,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance));
+        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -411,9 +381,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("null:2", classA.getMethod("test").invoke(instance));
+        assertEquals("null:2", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -436,9 +404,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("42,true,", classA.getMethod("test").invoke(instance));
+        assertEquals("42,true,", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -466,9 +432,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("ABC:2", classA.getMethod("test").invoke(instance));
+        assertEquals("ABC:2", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -494,9 +458,7 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("X:2", classA.getMethod("test").invoke(instance));
+        assertEquals("X:2", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -521,8 +483,6 @@ public class TestCompileAstRestPatObjectDestructuring extends BaseTestCompileSui
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("first", classA.getMethod("test").invoke(instance));
+        assertEquals("first", runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

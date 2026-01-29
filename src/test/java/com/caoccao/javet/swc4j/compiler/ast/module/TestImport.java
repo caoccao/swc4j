@@ -40,11 +40,9 @@ public class TestImport extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var method = classA.getMethod("test", double.class);
-        assertEquals(5.0, (double) method.invoke(instance, -5.0), 0.001);
-        assertEquals(3.7, (double) method.invoke(instance, 3.7), 0.001);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(5.0, (double) instanceRunner.invoke("test", -5.0), 0.001);
+        assertEquals(3.7, (double) instanceRunner.invoke("test", 3.7), 0.001);
     }
 
     @ParameterizedTest
@@ -59,11 +57,9 @@ public class TestImport extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var method = classA.getMethod("test", double.class);
-        assertEquals(3.0, (double) method.invoke(instance, 3.7), 0.001);
-        assertEquals(5.0, (double) method.invoke(instance, 5.2), 0.001);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(3.0, (double) instanceRunner.invoke("test", 3.7), 0.001);
+        assertEquals(5.0, (double) instanceRunner.invoke("test", 5.2), 0.001);
     }
 
     @ParameterizedTest
@@ -78,11 +74,9 @@ public class TestImport extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var method = classA.getMethod("test", double.class, double.class);
-        assertEquals(5.0, (double) method.invoke(instance, 3.0, 5.0), 0.001);
-        assertEquals(10.0, (double) method.invoke(instance, 10.0, 2.0), 0.001);
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(5.0, (double) instanceRunner.invoke("test", 3.0, 5.0), 0.001);
+        assertEquals(10.0, (double) instanceRunner.invoke("test", 10.0, 2.0), 0.001);
     }
 
     @ParameterizedTest
@@ -97,11 +91,9 @@ public class TestImport extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        var method = classA.getMethod("test", int.class, int.class);
-        assertEquals(5, (int) method.invoke(instance, 3, 5));
-        assertEquals(10, (int) method.invoke(instance, 10, 2));
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertEquals(5, (int) instanceRunner.invoke("test", 3, 5));
+        assertEquals(10, (int) instanceRunner.invoke("test", 10, 2));
     }
 
     @ParameterizedTest
@@ -114,21 +106,18 @@ public class TestImport extends BaseTestCompileSuite {
                     public testInt(a: int, b: int): int {
                       return Math.min(a, b)
                     }
-                
+
                     public testDouble(a: double, b: double): double {
                       return Math.min(a, b)
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
+        var instanceRunner = runner.createInstanceRunner("com.A");
 
         // Test that int args select min(int, int)
-        var methodInt = classA.getMethod("testInt", int.class, int.class);
-        assertEquals(3, (int) methodInt.invoke(instance, 3, 5));
+        assertEquals(3, (int) instanceRunner.invoke("testInt", 3, 5));
 
         // Test that double args select min(double, double)
-        var methodDouble = classA.getMethod("testDouble", double.class, double.class);
-        assertEquals(3.5, (double) methodDouble.invoke(instance, 3.5, 5.2), 0.001);
+        assertEquals(3.5, (double) instanceRunner.invoke("testDouble", 3.5, 5.2), 0.001);
     }
 }
