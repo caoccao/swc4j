@@ -4,9 +4,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Phase 4: Const Enums (7 tests)
@@ -30,8 +29,8 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
         var fromValueMethod = enumClass.getMethod("fromValue", int.class);
         Object notFound = fromValueMethod.invoke(null, 404);
 
-        assertEquals("NOTFOUND", ((Enum<?>) notFound).name());
-        assertEquals(404, enumClass.getMethod("getValue").invoke(notFound));
+        assertThat(((Enum<?>) notFound).name()).isEqualTo("NOTFOUND");
+        assertThat(enumClass.getMethod("getValue").<Object>invoke(notFound)).isEqualTo(404);
     }
 
     @ParameterizedTest
@@ -49,9 +48,9 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
 
         Object[] constants = enumClass.getEnumConstants();
 
-        assertEquals(0, ((Enum<?>) constants[0]).ordinal());
-        assertEquals(1, ((Enum<?>) constants[1]).ordinal());
-        assertEquals(2, ((Enum<?>) constants[2]).ordinal());
+        assertThat(((Enum<?>) constants[0]).ordinal()).isEqualTo(0);
+        assertThat(((Enum<?>) constants[1]).ordinal()).isEqualTo(1);
+        assertThat(((Enum<?>) constants[2]).ordinal()).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -66,9 +65,9 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
         Class<?> enumClass = runner.getClass("com.Single");
 
         Object[] constants = enumClass.getEnumConstants();
-        assertEquals(1, constants.length);
-        assertEquals("VALUE", ((Enum<?>) constants[0]).name());
-        assertEquals("value", enumClass.getMethod("getValue").invoke(constants[0]));
+        assertThat(constants.length).isEqualTo(1);
+        assertThat(((Enum<?>) constants[0]).name()).isEqualTo("VALUE");
+        assertThat(enumClass.getMethod("getValue").<Object>invoke(constants[0])).isEqualTo("value");
     }
 
     @ParameterizedTest
@@ -86,8 +85,8 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
         var valueOfMethod = enumClass.getMethod("valueOf", String.class);
         Object active = valueOfMethod.invoke(null, "ACTIVE");
 
-        assertEquals("ACTIVE", ((Enum<?>) active).name());
-        assertEquals(1, enumClass.getMethod("getValue").invoke(active));
+        assertThat(((Enum<?>) active).name()).isEqualTo("ACTIVE");
+        assertThat(enumClass.getMethod("getValue").<Object>invoke(active)).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -106,10 +105,10 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
         var valuesMethod = enumClass.getMethod("values");
         Object[] values = (Object[]) valuesMethod.invoke(null);
 
-        assertEquals(3, values.length);
-        assertEquals("LOW", ((Enum<?>) values[0]).name());
-        assertEquals("MEDIUM", ((Enum<?>) values[1]).name());
-        assertEquals("HIGH", ((Enum<?>) values[2]).name());
+        assertThat(values.length).isEqualTo(3);
+        assertThat(((Enum<?>) values[0]).name()).isEqualTo("LOW");
+        assertThat(((Enum<?>) values[1]).name()).isEqualTo("MEDIUM");
+        assertThat(((Enum<?>) values[2]).name()).isEqualTo("HIGH");
     }
 
     @ParameterizedTest
@@ -125,13 +124,13 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
                 }""");
         Class<?> enumClass = runner.getClass("com.Numbers");
 
-        assertTrue(Enum.class.isAssignableFrom(enumClass));
+        assertThat(Enum.class.isAssignableFrom(enumClass)).isTrue();
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertEquals(1, getValueMethod.invoke(constants[0]));
-        assertEquals(2, getValueMethod.invoke(constants[1]));
-        assertEquals(3, getValueMethod.invoke(constants[2]));
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(1);
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(2);
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -150,8 +149,8 @@ public class TestCompileAstTsEnumDeclConst extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertEquals("red", getValueMethod.invoke(constants[0]));
-        assertEquals("green", getValueMethod.invoke(constants[1]));
-        assertEquals("blue", getValueMethod.invoke(constants[2]));
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo("red");
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo("green");
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo("blue");
     }
 }

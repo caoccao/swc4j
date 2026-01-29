@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for default clause in switch statements (Phase 2)
@@ -54,9 +54,9 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, (int) instanceRunner.invoke("test", 1));
-        assertEquals(2, (int) instanceRunner.invoke("test", 2));
-        assertEquals(-1, (int) instanceRunner.invoke("test", 99)); // Default case
+        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(1);
+        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(2);
+        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(-1); // Default case
     }
 
     @ParameterizedTest
@@ -84,9 +84,9 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, (int) instanceRunner.invoke("test", 1));
-        assertEquals(2, (int) instanceRunner.invoke("test", 2));
-        assertEquals(-1, (int) instanceRunner.invoke("test", 99)); // Default case
+        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(1);
+        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(2);
+        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(-1); // Default case
     }
 
     @ParameterizedTest
@@ -114,9 +114,9 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, (int) instanceRunner.invoke("test", 1));
-        assertEquals(2, (int) instanceRunner.invoke("test", 2));
-        assertEquals(-1, (int) instanceRunner.invoke("test", 99)); // Default case
+        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(1);
+        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(2);
+        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(-1); // Default case
     }
 
     @ParameterizedTest
@@ -143,9 +143,9 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, (int) instanceRunner.invoke("test", 1));
-        assertEquals(10, (int) instanceRunner.invoke("test", 2));
-        assertEquals(9, (int) instanceRunner.invoke("test", 99)); // Default sets -1, falls to case 2 which adds 10
+        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(1);
+        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(10);
+        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(9); // Default sets -1, falls to case 2 which adds 10
     }
 
     @ParameterizedTest
@@ -167,9 +167,9 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(100, (int) instanceRunner.invoke("test", 1));
-        assertEquals(100, (int) instanceRunner.invoke("test", 99));
-        assertEquals(100, (int) instanceRunner.invoke("test", -5));
+        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(100);
+        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(100);
+        assertThat((int) instanceRunner.<Object>invoke("test", -5)).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -195,9 +195,9 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, (int) instanceRunner.invoke("test", 1));
-        assertEquals(30, (int) instanceRunner.invoke("test", 10)); // 10 * 2 + 10 = 30
-        assertEquals(18, (int) instanceRunner.invoke("test", 4));  // 4 * 2 + 10 = 18
+        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(1);
+        assertThat((int) instanceRunner.<Object>invoke("test", 10)).isEqualTo(30); // 10 * 2 + 10 = 30
+        assertThat((int) instanceRunner.<Object>invoke("test", 4)).isEqualTo(18);  // 4 * 2 + 10 = 18
     }
 
     @ParameterizedTest
@@ -218,9 +218,9 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, (int) instanceRunner.invoke("test", 1));
-        assertEquals(-1, (int) instanceRunner.invoke("test", 99));
-        assertEquals(-1, (int) instanceRunner.invoke("test", 5));
+        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(1);
+        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(-1);
+        assertThat((int) instanceRunner.<Object>invoke("test", 5)).isEqualTo(-1);
     }
 
     @ParameterizedTest
@@ -243,7 +243,7 @@ public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(1, (int) instanceRunner.invoke("test", 1));
-        assertEquals(-1, (int) instanceRunner.invoke("test", 99)); // Empty default does nothing
+        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(1);
+        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(-1); // Empty default does nothing
     }
 }

@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for basic do-while loops (Phase 1)
@@ -45,7 +45,7 @@ public class TestCompileAstDoWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -67,7 +67,7 @@ public class TestCompileAstDoWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1620, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1620);
     }
 
     @ParameterizedTest
@@ -87,7 +87,7 @@ public class TestCompileAstDoWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -107,7 +107,7 @@ public class TestCompileAstDoWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(55, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(55);
     }
 
     @ParameterizedTest
@@ -127,7 +127,7 @@ public class TestCompileAstDoWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -145,7 +145,7 @@ public class TestCompileAstDoWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -163,7 +163,7 @@ public class TestCompileAstDoWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -184,7 +184,7 @@ public class TestCompileAstDoWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -204,7 +204,7 @@ public class TestCompileAstDoWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(45, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(45);
     }
 
     @ParameterizedTest
@@ -225,6 +225,6 @@ public class TestCompileAstDoWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
     }
 }

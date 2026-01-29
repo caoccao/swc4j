@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for while loops with complex conditions (Phase 4)
@@ -48,7 +48,7 @@ public class TestCompileAstWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(45, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(45);
     }
 
     @ParameterizedTest
@@ -76,7 +76,7 @@ public class TestCompileAstWhileStmtComplex extends BaseTestCompileSuite {
         // i=3,j=14: (3<10 && 14>10) || 3<5 = true || true -> sum=6, i=4, j=12
         // i=4,j=12: (4<10 && 12>10) || 4<5 = true || true -> sum=10, i=5, j=10
         // i=5,j=10: (5<10 && 10>10) || 5<5 = false || false -> stop
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -102,7 +102,7 @@ public class TestCompileAstWhileStmtComplex extends BaseTestCompileSuite {
         // i=7,j=3: 7>=5 && 3<=3 -> i=6,j=4
         // i=6,j=4: 6>=5 && 4<=3 -> false, stop
         // Result: 6*10 + 4 = 64
-        assertEquals(64, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(64);
     }
 
     @ParameterizedTest
@@ -130,7 +130,7 @@ public class TestCompileAstWhileStmtComplex extends BaseTestCompileSuite {
         // a=3,c=13: 3<20 && 13<15 -> a=4,c=14
         // a=4,c=14: 4<20 && 14<15 -> a=5,c=15
         // a=5,c=15: 5<20 && 15<15 -> false, stop
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -148,7 +148,7 @@ public class TestCompileAstWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -175,7 +175,7 @@ public class TestCompileAstWhileStmtComplex extends BaseTestCompileSuite {
         // i=4,j=6: 4!=5 && 6!=5 -> i=5,j=5
         // i=5,j=5: 5!=5 && 5!=5 -> false, stop
         // Result: 5*10 + 5 = 55
-        assertEquals(55, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(55);
     }
 
     @ParameterizedTest
@@ -203,6 +203,6 @@ public class TestCompileAstWhileStmtComplex extends BaseTestCompileSuite {
         // i=1,j=6: true||true -> i=2,j=7
         // i=2,j=7: true||true -> i=3,j=8
         // i=3,j=8: false||false -> stop
-        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
     }
 }

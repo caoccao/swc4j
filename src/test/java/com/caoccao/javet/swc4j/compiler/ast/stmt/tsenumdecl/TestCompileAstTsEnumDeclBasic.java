@@ -20,9 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Phase 1: Basic Numeric Enums (10 test cases)
@@ -47,9 +46,9 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
 
-        assertEquals(10, getValueMethod.invoke(constants[0]));  // Low
-        assertEquals(20, getValueMethod.invoke(constants[1]));  // Medium
-        assertEquals(30, getValueMethod.invoke(constants[2]));  // High
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(10);  // Low
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(20);  // Medium
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(30);  // High
     }
 
     @ParameterizedTest
@@ -66,23 +65,23 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> enumClass = runner.getClass("com.Direction");
-        assertTrue(Enum.class.isAssignableFrom(enumClass));
+        assertThat(Enum.class.isAssignableFrom(enumClass)).isTrue();
 
         Object[] constants = enumClass.getEnumConstants();
-        assertEquals(4, constants.length);
+        assertThat(constants.length).isEqualTo(4);
 
         // Check getValue() method returns correct values
         var getValueMethod = enumClass.getMethod("getValue");
-        assertEquals(0, getValueMethod.invoke(constants[0]));
-        assertEquals(1, getValueMethod.invoke(constants[1]));
-        assertEquals(2, getValueMethod.invoke(constants[2]));
-        assertEquals(3, getValueMethod.invoke(constants[3]));
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(0);
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(1);
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(2);
+        assertThat(getValueMethod.<Object>invoke(constants[3])).isEqualTo(3);
 
         // Check name() method
-        assertEquals("UP", ((Enum<?>) constants[0]).name());
-        assertEquals("DOWN", ((Enum<?>) constants[1]).name());
-        assertEquals("LEFT", ((Enum<?>) constants[2]).name());
-        assertEquals("RIGHT", ((Enum<?>) constants[3]).name());
+        assertThat(((Enum<?>) constants[0]).name()).isEqualTo("UP");
+        assertThat(((Enum<?>) constants[1]).name()).isEqualTo("DOWN");
+        assertThat(((Enum<?>) constants[2]).name()).isEqualTo("LEFT");
+        assertThat(((Enum<?>) constants[3]).name()).isEqualTo("RIGHT");
     }
 
     @ParameterizedTest
@@ -102,9 +101,9 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
 
-        assertEquals(1, getValueMethod.invoke(constants[0]));  // Pending
-        assertEquals(2, getValueMethod.invoke(constants[1]));  // Active
-        assertEquals(3, getValueMethod.invoke(constants[2]));  // Done
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(1);  // Pending
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(2);  // Active
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(3);  // Done
     }
 
     @ParameterizedTest
@@ -122,8 +121,8 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         var fromValueMethod = enumClass.getMethod("fromValue", int.class);
         Object left = fromValueMethod.invoke(null, 2);
 
-        assertEquals("LEFT", ((Enum<?>) left).name());
-        assertEquals(2, enumClass.getMethod("getValue").invoke(left));
+        assertThat(((Enum<?>) left).name()).isEqualTo("LEFT");
+        assertThat(enumClass.getMethod("getValue").<Object>invoke(left)).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -143,9 +142,9 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
 
-        assertEquals(-10, getValueMethod.invoke(constants[0]));  // Cold
-        assertEquals(0, getValueMethod.invoke(constants[1]));    // Warm
-        assertEquals(10, getValueMethod.invoke(constants[2]));   // Hot
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(-10);  // Cold
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(0);    // Warm
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(10);   // Hot
     }
 
     @ParameterizedTest
@@ -165,9 +164,9 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
 
-        assertEquals(1, getValueMethod.invoke(constants[0]));
-        assertEquals(5, getValueMethod.invoke(constants[1]));
-        assertEquals(100, getValueMethod.invoke(constants[2]));
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(1);
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(5);
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -187,11 +186,11 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
 
         // ordinal() is declaration order (0-indexed)
-        assertEquals(0, ((Enum<?>) constants[0]).ordinal());
-        assertEquals(10, getValueMethod.invoke(constants[0]));  // getValue() is the custom value
+        assertThat(((Enum<?>) constants[0]).ordinal()).isEqualTo(0);
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(10); //getValue() is the custom value
 
-        assertEquals(1, ((Enum<?>) constants[1]).ordinal());
-        assertEquals(20, getValueMethod.invoke(constants[1]));
+        assertThat(((Enum<?>) constants[1]).ordinal()).isEqualTo(1);
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -207,11 +206,11 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         Class<?> enumClass = runner.getClass("com.Single");
 
         Object[] constants = enumClass.getEnumConstants();
-        assertEquals(1, constants.length);
+        assertThat(constants.length).isEqualTo(1);
 
         var getValueMethod = enumClass.getMethod("getValue");
-        assertEquals(0, getValueMethod.invoke(constants[0]));
-        assertEquals(0, ((Enum<?>) constants[0]).ordinal());
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(0);
+        assertThat(((Enum<?>) constants[0]).ordinal()).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -229,8 +228,8 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         var valueOfMethod = enumClass.getMethod("valueOf", String.class);
         Object down = valueOfMethod.invoke(null, "DOWN");
 
-        assertEquals("DOWN", ((Enum<?>) down).name());
-        assertEquals(1, enumClass.getMethod("getValue").invoke(down));
+        assertThat(((Enum<?>) down).name()).isEqualTo("DOWN");
+        assertThat(enumClass.getMethod("getValue").<Object>invoke(down)).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -248,8 +247,8 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         var valuesMethod = enumClass.getMethod("values");
         Object[] values = (Object[]) valuesMethod.invoke(null);
 
-        assertEquals(2, values.length);
-        assertEquals("UP", ((Enum<?>) values[0]).name());
-        assertEquals("DOWN", ((Enum<?>) values[1]).name());
+        assertThat(values.length).isEqualTo(2);
+        assertThat(((Enum<?>) values[0]).name()).isEqualTo("UP");
+        assertThat(((Enum<?>) values[1]).name()).isEqualTo("DOWN");
     }
 }

@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for infinite while loops (Phase 2)
@@ -56,7 +56,7 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
         // Iteration: i=3 sum=6+3=9, i=4, sum=9+1=10
         // Iteration: i=4 sum=10+4=14, i=5, sum=14+1=15
         // Iteration: i=5 sum=15+5=20, i=6, break (no +1)
-        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -79,7 +79,7 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(45, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(45);
     }
 
     @ParameterizedTest
@@ -99,7 +99,7 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -123,7 +123,7 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(101, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(101);
     }
 
     @ParameterizedTest
@@ -144,7 +144,7 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(101, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(101);
     }
 
     @ParameterizedTest
@@ -165,7 +165,7 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -185,6 +185,6 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(50, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(50);
     }
 }

@@ -23,8 +23,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Phase 1: Basic Interface Declaration Tests.
@@ -45,7 +46,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                 }""");
 
         // Ambient declarations should not generate bytecode
-        assertThrows(ClassNotFoundException.class, () -> runner.getClass("com.External"));
+        assertThatThrownBy(() -> runner.getClass("com.External")).isInstanceOf(ClassNotFoundException.class);
     }
 
     @ParameterizedTest
@@ -71,30 +72,30 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Class<?> implClass = runner.getClass("com.PersonImpl");
 
         // Verify it's an interface
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Verify getter and setter methods exist on interface
         Method getName = interfaceClass.getMethod("getName");
-        assertNotNull(getName);
-        assertTrue(Modifier.isAbstract(getName.getModifiers()));
-        assertEquals(String.class, getName.getReturnType());
+        assertThat(getName).isNotNull();
+        assertThat(Modifier.isAbstract(getName.getModifiers())).isTrue();
+        assertThat(getName.getReturnType()).isEqualTo(String.class);
 
         Method setName = interfaceClass.getMethod("setName", String.class);
-        assertNotNull(setName);
-        assertTrue(Modifier.isAbstract(setName.getModifiers()));
-        assertEquals(void.class, setName.getReturnType());
+        assertThat(setName).isNotNull();
+        assertThat(Modifier.isAbstract(setName.getModifiers())).isTrue();
+        assertThat(setName.getReturnType()).isEqualTo(void.class);
 
         // Test the implementation - create instance and verify getter/setter
         Object instance = implClass.getConstructor().newInstance();
 
         // Initial value should be empty string
-        assertEquals("", implClass.getMethod("getName").invoke(instance));
+        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("");
 
         // Set a new value
         implClass.getMethod("setName", String.class).invoke(instance, "John");
 
         // Get the value back
-        assertEquals("John", implClass.getMethod("getName").invoke(instance));
+        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("John");
     }
 
     @ParameterizedTest
@@ -108,9 +109,9 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Marker");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
         // Only inherited methods from Object
-        assertEquals(0, interfaceClass.getDeclaredMethods().length);
+        assertThat(interfaceClass.getDeclaredMethods().length).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -132,27 +133,27 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
                 }""");
         Class<?> interfaceClass = runner.getClass("com.AllPrimitives");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Verify all getter return types
-        assertEquals(byte.class, interfaceClass.getMethod("getByteVal").getReturnType());
-        assertEquals(short.class, interfaceClass.getMethod("getShortVal").getReturnType());
-        assertEquals(int.class, interfaceClass.getMethod("getIntVal").getReturnType());
-        assertEquals(long.class, interfaceClass.getMethod("getLongVal").getReturnType());
-        assertEquals(float.class, interfaceClass.getMethod("getFloatVal").getReturnType());
-        assertEquals(double.class, interfaceClass.getMethod("getDoubleVal").getReturnType());
-        assertEquals(char.class, interfaceClass.getMethod("getCharVal").getReturnType());
-        assertEquals(boolean.class, interfaceClass.getMethod("isBoolVal").getReturnType());
+        assertThat(interfaceClass.getMethod("getByteVal").getReturnType()).isEqualTo(byte.class);
+        assertThat(interfaceClass.getMethod("getShortVal").getReturnType()).isEqualTo(short.class);
+        assertThat(interfaceClass.getMethod("getIntVal").getReturnType()).isEqualTo(int.class);
+        assertThat(interfaceClass.getMethod("getLongVal").getReturnType()).isEqualTo(long.class);
+        assertThat(interfaceClass.getMethod("getFloatVal").getReturnType()).isEqualTo(float.class);
+        assertThat(interfaceClass.getMethod("getDoubleVal").getReturnType()).isEqualTo(double.class);
+        assertThat(interfaceClass.getMethod("getCharVal").getReturnType()).isEqualTo(char.class);
+        assertThat(interfaceClass.getMethod("isBoolVal").getReturnType()).isEqualTo(boolean.class);
 
         // Verify all setters exist
-        assertNotNull(interfaceClass.getMethod("setByteVal", byte.class));
-        assertNotNull(interfaceClass.getMethod("setShortVal", short.class));
-        assertNotNull(interfaceClass.getMethod("setIntVal", int.class));
-        assertNotNull(interfaceClass.getMethod("setLongVal", long.class));
-        assertNotNull(interfaceClass.getMethod("setFloatVal", float.class));
-        assertNotNull(interfaceClass.getMethod("setDoubleVal", double.class));
-        assertNotNull(interfaceClass.getMethod("setCharVal", char.class));
-        assertNotNull(interfaceClass.getMethod("setBoolVal", boolean.class));
+        assertThat(interfaceClass.getMethod("setByteVal", byte.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setShortVal", short.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setIntVal", int.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setLongVal", long.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setFloatVal", float.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setDoubleVal", double.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setCharVal", char.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setBoolVal", boolean.class)).isNotNull();
     }
 
     @ParameterizedTest
@@ -177,28 +178,28 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Class<?> interfaceClass = runner.getClass("com.Toggleable");
         Class<?> implClass = runner.getClass("com.Switch");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Boolean getter should use 'is' prefix
         Method isEnabled = interfaceClass.getMethod("isEnabled");
-        assertNotNull(isEnabled);
-        assertEquals(boolean.class, isEnabled.getReturnType());
+        assertThat(isEnabled).isNotNull();
+        assertThat(isEnabled.getReturnType()).isEqualTo(boolean.class);
 
         // Setter should still use 'set' prefix
         Method setEnabled = interfaceClass.getMethod("setEnabled", boolean.class);
-        assertNotNull(setEnabled);
+        assertThat(setEnabled).isNotNull();
 
         // Test implementation
         Object instance = implClass.getConstructor().newInstance();
 
         // Initial value should be false
-        assertEquals(false, implClass.getMethod("isEnabled").invoke(instance));
+        assertThat((Boolean) implClass.getMethod("isEnabled").invoke(instance)).isFalse();
 
         // Set to true
         implClass.getMethod("setEnabled", boolean.class).invoke(instance, true);
 
         // Verify change
-        assertEquals(true, implClass.getMethod("isEnabled").invoke(instance));
+        assertThat((Boolean) implClass.getMethod("isEnabled").invoke(instance)).isTrue();
     }
 
     @ParameterizedTest
@@ -227,25 +228,25 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Class<?> interfaceClass = runner.getClass("com.User");
         Class<?> implClass = runner.getClass("com.UserImpl");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Check all getters on interface
-        assertEquals(int.class, interfaceClass.getMethod("getId").getReturnType());
-        assertEquals(String.class, interfaceClass.getMethod("getName").getReturnType());
-        assertEquals(boolean.class, interfaceClass.getMethod("isActive").getReturnType());
+        assertThat(interfaceClass.getMethod("getId").getReturnType()).isEqualTo(int.class);
+        assertThat(interfaceClass.getMethod("getName").getReturnType()).isEqualTo(String.class);
+        assertThat(interfaceClass.getMethod("isActive").getReturnType()).isEqualTo(boolean.class);
 
         // Check all setters on interface
-        assertNotNull(interfaceClass.getMethod("setId", int.class));
-        assertNotNull(interfaceClass.getMethod("setName", String.class));
-        assertNotNull(interfaceClass.getMethod("setActive", boolean.class));
+        assertThat(interfaceClass.getMethod("setId", int.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setName", String.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setActive", boolean.class)).isNotNull();
 
         // Test implementation
         Object instance = implClass.getConstructor().newInstance();
 
         // Verify initial values
-        assertEquals(0, implClass.getMethod("getId").invoke(instance));
-        assertEquals("", implClass.getMethod("getName").invoke(instance));
-        assertEquals(false, implClass.getMethod("isActive").invoke(instance));
+        assertThat(implClass.getMethod("getId").<Object>invoke(instance)).isEqualTo(0);
+        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("");
+        assertThat((Boolean) implClass.getMethod("isActive").invoke(instance)).isFalse();
 
         // Set new values
         implClass.getMethod("setId", int.class).invoke(instance, 42);
@@ -253,9 +254,9 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         implClass.getMethod("setActive", boolean.class).invoke(instance, true);
 
         // Verify changes
-        assertEquals(42, implClass.getMethod("getId").invoke(instance));
-        assertEquals("Alice", implClass.getMethod("getName").invoke(instance));
-        assertEquals(true, implClass.getMethod("isActive").invoke(instance));
+        assertThat(implClass.getMethod("getId").<Object>invoke(instance)).isEqualTo(42);
+        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("Alice");
+        assertThat((Boolean) implClass.getMethod("isActive").invoke(instance)).isTrue();
     }
 
     @ParameterizedTest
@@ -280,15 +281,15 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Class<?> interfaceClass = runner.getClass("com.PrimitiveHolder");
         Class<?> implClass = runner.getClass("com.PrimitiveImpl");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Check interface method return types
-        assertEquals(int.class, interfaceClass.getMethod("getIntVal").getReturnType());
-        assertEquals(boolean.class, interfaceClass.getMethod("isBoolVal").getReturnType());
+        assertThat(interfaceClass.getMethod("getIntVal").getReturnType()).isEqualTo(int.class);
+        assertThat(interfaceClass.getMethod("isBoolVal").getReturnType()).isEqualTo(boolean.class);
 
         // Check interface setters exist
-        assertNotNull(interfaceClass.getMethod("setIntVal", int.class));
-        assertNotNull(interfaceClass.getMethod("setBoolVal", boolean.class));
+        assertThat(interfaceClass.getMethod("setIntVal", int.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setBoolVal", boolean.class)).isNotNull();
 
         // Test implementation
         Object instance = implClass.getConstructor().newInstance();
@@ -298,8 +299,8 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         implClass.getMethod("setBoolVal", boolean.class).invoke(instance, true);
 
         // Verify values
-        assertEquals(1000, implClass.getMethod("getIntVal").invoke(instance));
-        assertEquals(true, implClass.getMethod("isBoolVal").invoke(instance));
+        assertThat(implClass.getMethod("getIntVal").<Object>invoke(instance)).isEqualTo(1000);
+        assertThat((Boolean) implClass.getMethod("isBoolVal").invoke(instance)).isTrue();
     }
 
     @ParameterizedTest
@@ -326,30 +327,30 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Class<?> interfaceClass = runner.getClass("com.Immutable");
         Class<?> implClass = runner.getClass("com.ImmutableImpl");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // readonly property should only have getter on interface
         Method getId = interfaceClass.getMethod("getId");
-        assertNotNull(getId);
-        assertEquals(int.class, getId.getReturnType());
+        assertThat(getId).isNotNull();
+        assertThat(getId.getReturnType()).isEqualTo(int.class);
 
         // readonly property should NOT have setter on interface
-        assertThrows(NoSuchMethodException.class, () ->
-                interfaceClass.getMethod("setId", int.class));
+        assertThatThrownBy(() ->
+                interfaceClass.getMethod("setId", int.class)).isInstanceOf(NoSuchMethodException.class);;
 
         // Non-readonly property should have both getter and setter
-        assertNotNull(interfaceClass.getMethod("getName"));
-        assertNotNull(interfaceClass.getMethod("setName", String.class));
+        assertThat(interfaceClass.getMethod("getName")).isNotNull();
+        assertThat(interfaceClass.getMethod("setName", String.class)).isNotNull();
 
         // Test implementation
         Object instance = implClass.getConstructor(int.class).newInstance(42);
 
         // Readonly value should be set from constructor
-        assertEquals(42, implClass.getMethod("getId").invoke(instance));
+        assertThat(implClass.getMethod("getId").<Object>invoke(instance)).isEqualTo(42);
 
         // Mutable property can be changed
         implClass.getMethod("setName", String.class).invoke(instance, "Test");
-        assertEquals("Test", implClass.getMethod("getName").invoke(instance));
+        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("Test");
     }
 
     @ParameterizedTest
@@ -370,21 +371,21 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Class<?> interfaceClass = runner.getClass("com.Calculator");
         Class<?> implClass = runner.getClass("com.SimpleCalculator");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Check method exists on interface
         Method add = interfaceClass.getMethod("add", int.class, int.class);
-        assertNotNull(add);
-        assertTrue(Modifier.isAbstract(add.getModifiers()));
-        assertEquals(int.class, add.getReturnType());
+        assertThat(add).isNotNull();
+        assertThat(Modifier.isAbstract(add.getModifiers())).isTrue();
+        assertThat(add.getReturnType()).isEqualTo(int.class);
 
         // Test implementation
         Object instance = implClass.getConstructor().newInstance();
 
         // Test method
-        assertEquals(5, implClass.getMethod("add", int.class, int.class).invoke(instance, 2, 3));
-        assertEquals(100, implClass.getMethod("add", int.class, int.class).invoke(instance, 40, 60));
-        assertEquals(-5, implClass.getMethod("add", int.class, int.class).invoke(instance, -10, 5));
+        assertThat(implClass.getMethod("add", int.class, int.class).<Object>invoke(instance, 2, 3)).isEqualTo(5);
+        assertThat(implClass.getMethod("add", int.class, int.class).<Object>invoke(instance, 40, 60)).isEqualTo(100);
+        assertThat(implClass.getMethod("add", int.class, int.class).<Object>invoke(instance, -10, 5)).isEqualTo(-5);
     }
 
     @ParameterizedTest
@@ -422,37 +423,37 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Class<?> interfaceClass = runner.getClass("com.Entity");
         Class<?> implClass = runner.getClass("com.EntityImpl");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Property getters/setters on interface
-        assertNotNull(interfaceClass.getMethod("getId"));
-        assertNotNull(interfaceClass.getMethod("setId", int.class));
-        assertNotNull(interfaceClass.getMethod("getVersion"));
-        assertThrows(NoSuchMethodException.class, () ->
-                interfaceClass.getMethod("setVersion", int.class)); // readonly
+        assertThat(interfaceClass.getMethod("getId")).isNotNull();
+        assertThat(interfaceClass.getMethod("setId", int.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("getVersion")).isNotNull();
+        assertThatThrownBy(() ->
+                interfaceClass.getMethod("setVersion", int.class)).isInstanceOf(NoSuchMethodException.class);; // readonly
 
         // Methods on interface
-        assertNotNull(interfaceClass.getMethod("save"));
+        assertThat(interfaceClass.getMethod("save")).isNotNull();
         Method update = interfaceClass.getMethod("update", String.class);
-        assertEquals(boolean.class, update.getReturnType());
+        assertThat(update.getReturnType()).isEqualTo(boolean.class);
 
         // Test implementation
         Object instance = implClass.getConstructor(int.class).newInstance(1);
 
         // Test properties
-        assertEquals(0, implClass.getMethod("getId").invoke(instance));
-        assertEquals(1, implClass.getMethod("getVersion").invoke(instance));
+        assertThat(implClass.getMethod("getId").<Object>invoke(instance)).isEqualTo(0);
+        assertThat(implClass.getMethod("getVersion").<Object>invoke(instance)).isEqualTo(1);
 
         implClass.getMethod("setId", int.class).invoke(instance, 42);
-        assertEquals(42, implClass.getMethod("getId").invoke(instance));
+        assertThat(implClass.getMethod("getId").<Object>invoke(instance)).isEqualTo(42);
 
         // Test methods
-        assertEquals(false, implClass.getMethod("isSaved").invoke(instance));
+        assertThat((Boolean) implClass.getMethod("isSaved").invoke(instance)).isFalse();
         implClass.getMethod("save").invoke(instance);
-        assertEquals(true, implClass.getMethod("isSaved").invoke(instance));
+        assertThat((Boolean) implClass.getMethod("isSaved").invoke(instance)).isTrue();
 
-        assertEquals(true, implClass.getMethod("update", String.class).invoke(instance, "test data"));
-        assertEquals("test data", implClass.getMethod("getLastData").invoke(instance));
+        assertThat((Boolean) implClass.getMethod("update", String.class).invoke(instance, "test data")).isTrue();
+        assertThat(implClass.getMethod("getLastData").<Object>invoke(instance)).isEqualTo("test data");
     }
 
     @ParameterizedTest
@@ -477,22 +478,22 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Class<?> interfaceClass = runner.getClass("com.Logger");
         Class<?> implClass = runner.getClass("com.SimpleLogger");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         Method log = interfaceClass.getMethod("log", String.class);
-        assertNotNull(log);
-        assertEquals(void.class, log.getReturnType());
+        assertThat(log).isNotNull();
+        assertThat(log.getReturnType()).isEqualTo(void.class);
 
         // Test implementation
         Object instance = implClass.getConstructor().newInstance();
 
         // Initial state
-        assertEquals("", implClass.getMethod("getLastMessage").invoke(instance));
+        assertThat(implClass.getMethod("getLastMessage").<Object>invoke(instance)).isEqualTo("");
 
         // Call log method
         implClass.getMethod("log", String.class).invoke(instance, "Hello World");
 
         // Verify the message was logged
-        assertEquals("Hello World", implClass.getMethod("getLastMessage").invoke(instance));
+        assertThat(implClass.getMethod("getLastMessage").<Object>invoke(instance)).isEqualTo("Hello World");
     }
 }

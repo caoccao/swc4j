@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for for-of loops with break and continue (Phase 5)
@@ -51,7 +51,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("13", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("13");
     }
 
     @ParameterizedTest
@@ -73,7 +73,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("ab", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ab");
     }
 
     @ParameterizedTest
@@ -98,7 +98,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("12!3", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("12!3");
     }
 
     @ParameterizedTest
@@ -120,7 +120,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("ab", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ab");
     }
 
     @ParameterizedTest
@@ -140,7 +140,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -161,7 +161,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("abc", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("abc");
     }
 
     @ParameterizedTest
@@ -183,7 +183,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("ad", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ad");
     }
 
     @ParameterizedTest
@@ -207,7 +207,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("acd", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("acd");
     }
 
     @ParameterizedTest
@@ -229,7 +229,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("ad", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ad");
     }
 
     @ParameterizedTest
@@ -249,7 +249,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -270,7 +270,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("aiu", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("aiu");
     }
 
     @ParameterizedTest
@@ -295,7 +295,7 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("12", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("12");
     }
 
     @ParameterizedTest
@@ -320,6 +320,6 @@ public class TestCompileAstForOfStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("135", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("135");
     }
 }

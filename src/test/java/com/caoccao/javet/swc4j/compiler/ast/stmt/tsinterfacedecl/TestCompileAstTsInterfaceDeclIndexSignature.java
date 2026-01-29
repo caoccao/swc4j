@@ -23,8 +23,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Phase 7: Index Signature Tests.
@@ -46,19 +47,19 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                 }""");
         Class<?> interfaceClass = runner.getClass("com.StringDictionary");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have get(String key): String
         Method get = interfaceClass.getMethod("get", String.class);
-        assertNotNull(get);
-        assertTrue(Modifier.isAbstract(get.getModifiers()));
-        assertEquals(String.class, get.getReturnType());
+        assertThat(get).isNotNull();
+        assertThat(Modifier.isAbstract(get.getModifiers())).isTrue();
+        assertThat(get.getReturnType()).isEqualTo(String.class);
 
         // Should have set(String key, String value): void
         Method set = interfaceClass.getMethod("set", String.class, String.class);
-        assertNotNull(set);
-        assertTrue(Modifier.isAbstract(set.getModifiers()));
-        assertEquals(void.class, set.getReturnType());
+        assertThat(set).isNotNull();
+        assertThat(Modifier.isAbstract(set.getModifiers())).isTrue();
+        assertThat(set.getReturnType()).isEqualTo(void.class);
     }
 
     @ParameterizedTest
@@ -73,17 +74,17 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                 }""");
         Class<?> interfaceClass = runner.getClass("com.BooleanDict");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have get(String key): boolean
         Method get = interfaceClass.getMethod("get", String.class);
-        assertNotNull(get);
-        assertEquals(boolean.class, get.getReturnType());
+        assertThat(get).isNotNull();
+        assertThat(get.getReturnType()).isEqualTo(boolean.class);
 
         // Should have set(String key, boolean value): void
         Method set = interfaceClass.getMethod("set", String.class, boolean.class);
-        assertNotNull(set);
-        assertEquals(void.class, set.getReturnType());
+        assertThat(set).isNotNull();
+        assertThat(set.getReturnType()).isEqualTo(void.class);
     }
 
     @ParameterizedTest
@@ -98,17 +99,17 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                 }""");
         Class<?> interfaceClass = runner.getClass("com.DoubleDict");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have get(String key): double
         Method get = interfaceClass.getMethod("get", String.class);
-        assertNotNull(get);
-        assertEquals(double.class, get.getReturnType());
+        assertThat(get).isNotNull();
+        assertThat(get.getReturnType()).isEqualTo(double.class);
 
         // Should have set(String key, double value): void
         Method set = interfaceClass.getMethod("set", String.class, double.class);
-        assertNotNull(set);
-        assertEquals(void.class, set.getReturnType());
+        assertThat(set).isNotNull();
+        assertThat(set.getReturnType()).isEqualTo(void.class);
     }
 
     @ParameterizedTest
@@ -123,17 +124,17 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                 }""");
         Class<?> interfaceClass = runner.getClass("com.NumberKeyDict");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have get(int index): String
         Method get = interfaceClass.getMethod("get", int.class);
-        assertNotNull(get);
-        assertEquals(String.class, get.getReturnType());
+        assertThat(get).isNotNull();
+        assertThat(get.getReturnType()).isEqualTo(String.class);
 
         // Should have set(int index, String value): void
         Method set = interfaceClass.getMethod("set", int.class, String.class);
-        assertNotNull(set);
-        assertEquals(void.class, set.getReturnType());
+        assertThat(set).isNotNull();
+        assertThat(set.getReturnType()).isEqualTo(void.class);
     }
 
     @ParameterizedTest
@@ -148,17 +149,17 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                 }""");
         Class<?> interfaceClass = runner.getClass("com.SparseBooleanArray");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have get(int index): boolean
         Method get = interfaceClass.getMethod("get", int.class);
-        assertNotNull(get);
-        assertEquals(boolean.class, get.getReturnType());
+        assertThat(get).isNotNull();
+        assertThat(get.getReturnType()).isEqualTo(boolean.class);
 
         // Should have set(int index, boolean value): void
         Method set = interfaceClass.getMethod("set", int.class, boolean.class);
-        assertNotNull(set);
-        assertEquals(void.class, set.getReturnType());
+        assertThat(set).isNotNull();
+        assertThat(set.getReturnType()).isEqualTo(void.class);
     }
 
     @ParameterizedTest
@@ -173,17 +174,17 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                 }""");
         Class<?> interfaceClass = runner.getClass("com.LongDict");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have get(String key): long
         Method get = interfaceClass.getMethod("get", String.class);
-        assertNotNull(get);
-        assertEquals(long.class, get.getReturnType());
+        assertThat(get).isNotNull();
+        assertThat(get.getReturnType()).isEqualTo(long.class);
 
         // Should have set(String key, long value): void
         Method set = interfaceClass.getMethod("set", String.class, long.class);
-        assertNotNull(set);
-        assertEquals(void.class, set.getReturnType());
+        assertThat(set).isNotNull();
+        assertThat(set.getReturnType()).isEqualTo(void.class);
     }
 
     @ParameterizedTest
@@ -198,17 +199,17 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                 }""");
         Class<?> interfaceClass = runner.getClass("com.IntValueDict");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have get(String key): int
         Method get = interfaceClass.getMethod("get", String.class);
-        assertNotNull(get);
-        assertEquals(int.class, get.getReturnType());
+        assertThat(get).isNotNull();
+        assertThat(get.getReturnType()).isEqualTo(int.class);
 
         // Should have set(String key, int value): void
         Method set = interfaceClass.getMethod("set", String.class, int.class);
-        assertNotNull(set);
-        assertEquals(void.class, set.getReturnType());
+        assertThat(set).isNotNull();
+        assertThat(set.getReturnType()).isEqualTo(void.class);
     }
 
     @ParameterizedTest
@@ -223,16 +224,16 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                 }""");
         Class<?> interfaceClass = runner.getClass("com.ReadonlyDict");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have get(String key): String
         Method get = interfaceClass.getMethod("get", String.class);
-        assertNotNull(get);
-        assertEquals(String.class, get.getReturnType());
+        assertThat(get).isNotNull();
+        assertThat(get.getReturnType()).isEqualTo(String.class);
 
         // Should NOT have set method
-        assertThrows(NoSuchMethodException.class, () ->
-                interfaceClass.getMethod("set", String.class, String.class));
+        assertThatThrownBy(() ->
+                interfaceClass.getMethod("set", String.class, String.class)).isInstanceOf(NoSuchMethodException.class);;
     }
 
     @ParameterizedTest
@@ -247,16 +248,16 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                 }""");
         Class<?> interfaceClass = runner.getClass("com.ReadonlyIntDict");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have get(String key): int
         Method get = interfaceClass.getMethod("get", String.class);
-        assertNotNull(get);
-        assertEquals(int.class, get.getReturnType());
+        assertThat(get).isNotNull();
+        assertThat(get.getReturnType()).isEqualTo(int.class);
 
         // Should NOT have set method
-        assertThrows(NoSuchMethodException.class, () ->
-                interfaceClass.getMethod("set", String.class, int.class));
+        assertThatThrownBy(() ->
+                interfaceClass.getMethod("set", String.class, int.class)).isInstanceOf(NoSuchMethodException.class);;
     }
 
     @ParameterizedTest
@@ -273,25 +274,25 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                 }""");
         Class<?> interfaceClass = runner.getClass("com.DictWithMethods");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Index signature methods
         Method get = interfaceClass.getMethod("get", String.class);
-        assertNotNull(get);
-        assertEquals(int.class, get.getReturnType());
+        assertThat(get).isNotNull();
+        assertThat(get.getReturnType()).isEqualTo(int.class);
 
         Method set = interfaceClass.getMethod("set", String.class, int.class);
-        assertNotNull(set);
-        assertEquals(void.class, set.getReturnType());
+        assertThat(set).isNotNull();
+        assertThat(set.getReturnType()).isEqualTo(void.class);
 
         // Additional methods
         Method clear = interfaceClass.getMethod("clear");
-        assertNotNull(clear);
-        assertEquals(void.class, clear.getReturnType());
+        assertThat(clear).isNotNull();
+        assertThat(clear.getReturnType()).isEqualTo(void.class);
 
         Method size = interfaceClass.getMethod("size");
-        assertNotNull(size);
-        assertEquals(int.class, size.getReturnType());
+        assertThat(size).isNotNull();
+        assertThat(size.getReturnType()).isEqualTo(int.class);
     }
 
     @ParameterizedTest
@@ -307,25 +308,25 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                 }""");
         Class<?> interfaceClass = runner.getClass("com.MixedDict");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have getName() and setName()
         Method getName = interfaceClass.getMethod("getName");
-        assertNotNull(getName);
-        assertEquals(String.class, getName.getReturnType());
+        assertThat(getName).isNotNull();
+        assertThat(getName.getReturnType()).isEqualTo(String.class);
 
         Method setName = interfaceClass.getMethod("setName", String.class);
-        assertNotNull(setName);
-        assertEquals(void.class, setName.getReturnType());
+        assertThat(setName).isNotNull();
+        assertThat(setName.getReturnType()).isEqualTo(void.class);
 
         // Should also have get(String key) and set(String key, String value)
         Method get = interfaceClass.getMethod("get", String.class);
-        assertNotNull(get);
-        assertEquals(String.class, get.getReturnType());
+        assertThat(get).isNotNull();
+        assertThat(get.getReturnType()).isEqualTo(String.class);
 
         Method set = interfaceClass.getMethod("set", String.class, String.class);
-        assertNotNull(set);
-        assertEquals(void.class, set.getReturnType());
+        assertThat(set).isNotNull();
+        assertThat(set.getReturnType()).isEqualTo(void.class);
     }
 
     @ParameterizedTest
@@ -341,23 +342,23 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
                 }""");
         Class<?> interfaceClass = runner.getClass("com.MixedWithReadonly");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Readonly property should only have getter
         Method getId = interfaceClass.getMethod("getId");
-        assertNotNull(getId);
-        assertEquals(int.class, getId.getReturnType());
+        assertThat(getId).isNotNull();
+        assertThat(getId.getReturnType()).isEqualTo(int.class);
 
-        assertThrows(NoSuchMethodException.class, () ->
-                interfaceClass.getMethod("setId", int.class));
+        assertThatThrownBy(() ->
+                interfaceClass.getMethod("setId", int.class)).isInstanceOf(NoSuchMethodException.class);;
 
         // Index signature should have both get and set
         Method get = interfaceClass.getMethod("get", String.class);
-        assertNotNull(get);
-        assertEquals(int.class, get.getReturnType());
+        assertThat(get).isNotNull();
+        assertThat(get.getReturnType()).isEqualTo(int.class);
 
         Method set = interfaceClass.getMethod("set", String.class, int.class);
-        assertNotNull(set);
-        assertEquals(void.class, set.getReturnType());
+        assertThat(set).isNotNull();
+        assertThat(set.getReturnType()).isEqualTo(void.class);
     }
 }

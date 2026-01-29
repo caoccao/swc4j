@@ -4,8 +4,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Phase 5: Enum Usage Patterns (10 tests)
@@ -30,8 +30,8 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
         Enum<?> high = (Enum<?>) enumClass.getEnumConstants()[2];
 
         // Compare ordinals instead of using compareTo with wildcards
-        assertTrue(low.ordinal() < high.ordinal());
-        assertTrue(high.ordinal() > low.ordinal());
+        assertThat(low.ordinal() < high.ordinal()).isTrue();
+        assertThat(high.ordinal() > low.ordinal()).isTrue();
     }
 
     @ParameterizedTest
@@ -50,7 +50,7 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
         Object red1 = enumClass.getEnumConstants()[0];
         Object red2 = enumClass.getMethod("valueOf", String.class).invoke(null, "RED");
 
-        assertSame(red1, red2);
+        assertThat(red2).isSameAs(red1);
     }
 
     @ParameterizedTest
@@ -66,7 +66,7 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
         Class<?> enumClass = runner.getClass("com.Type");
 
         Enum<?> first = (Enum<?>) enumClass.getEnumConstants()[0];
-        assertEquals(enumClass, first.getDeclaringClass());
+        assertThat(first.getDeclaringClass()).isEqualTo(enumClass);
     }
 
     @ParameterizedTest
@@ -85,7 +85,7 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
         Object a1 = enumClass.getEnumConstants()[0];
         Object a2 = enumClass.getMethod("valueOf", String.class).invoke(null, "A");
 
-        assertEquals(a1.hashCode(), a2.hashCode());
+        assertThat(a2.hashCode()).isEqualTo(a1.hashCode());
     }
 
     @ParameterizedTest
@@ -105,10 +105,11 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
         Object tuesday = enumClass.getEnumConstants()[1];
 
         // Verify ordinals are different (used in switch statements)
-        assertNotEquals(
-                ((Enum<?>) monday).ordinal(),
+        assertThat(
                 ((Enum<?>) tuesday).ordinal()
-        );
+        ).isNotEqualTo(
+                ((Enum<?>) monday).ordinal()
+        );;
     }
 
     @ParameterizedTest
@@ -127,8 +128,8 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
         var fromValueMethod = enumClass.getMethod("fromValue", int.class);
         Object b = fromValueMethod.invoke(null, 66);
 
-        assertEquals("B", ((Enum<?>) b).name());
-        assertEquals(66, enumClass.getMethod("getValue").invoke(b));
+        assertThat(((Enum<?>) b).name()).isEqualTo("B");
+        assertThat(enumClass.getMethod("getValue").<Object>invoke(b)).isEqualTo(66);
     }
 
     @ParameterizedTest
@@ -144,7 +145,7 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
         Class<?> enumClass = runner.getClass("com.Status");
 
         Object active = enumClass.getEnumConstants()[0];
-        assertEquals("ACTIVE", active.toString());
+        assertThat(active.toString()).isEqualTo("ACTIVE");
     }
 
     @ParameterizedTest
@@ -165,9 +166,9 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
         Object[] values2 = (Object[]) valuesMethod.invoke(null);
 
         // values() should return a new array each time
-        assertNotSame(values1, values2);
+        assertThat(values2).isNotSameAs(values1);
         // but contain same elements
-        assertSame(values1[0], values2[0]);
+        assertThat(values2[0]).isSameAs(values1[0]);
     }
 
     @ParameterizedTest
@@ -193,9 +194,9 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
         Class<?> enumClass = runner.getClass("com.Month");
 
         Object[] constants = enumClass.getEnumConstants();
-        assertEquals(12, constants.length);
-        assertEquals("JANUARY", ((Enum<?>) constants[0]).name());
-        assertEquals("DECEMBER", ((Enum<?>) constants[11]).name());
+        assertThat(constants.length).isEqualTo(12);
+        assertThat(((Enum<?>) constants[0]).name()).isEqualTo("JANUARY");
+        assertThat(((Enum<?>) constants[11]).name()).isEqualTo("DECEMBER");
     }
 
     @ParameterizedTest
@@ -216,8 +217,8 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
         Class<?> colorClass = runner.getClass("com.Color");
         Class<?> sizeClass = runner.getClass("com.Size");
 
-        assertNotEquals(colorClass, sizeClass);
-        assertEquals(2, colorClass.getEnumConstants().length);
-        assertEquals(2, sizeClass.getEnumConstants().length);
+        assertThat(sizeClass).isNotEqualTo(colorClass);
+        assertThat(colorClass.getEnumConstants().length).isEqualTo(2);
+        assertThat(sizeClass.getEnumConstants().length).isEqualTo(2);
     }
 }

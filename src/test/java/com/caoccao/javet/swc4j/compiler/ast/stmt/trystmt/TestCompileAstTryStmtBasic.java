@@ -23,8 +23,9 @@ import com.caoccao.javet.swc4j.exceptions.JsReferenceError;
 import com.caoccao.javet.swc4j.exceptions.JsTypeError;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for basic try-catch statements (Phase 1).
@@ -56,7 +57,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -83,9 +84,9 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
         var result = runner.createInstanceRunner("com.A").invoke("test");
 
         // Validate the error is JsError type
-        assertInstanceOf(JsError.class, result);
+        assertThat(result).isInstanceOf(JsError.class);
         JsError error = (JsError) result;
-        assertEquals("Error", error.getName());
+        assertThat(error.getName()).isEqualTo("Error");
     }
 
     @ParameterizedTest
@@ -106,9 +107,9 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
 
-        assertInstanceOf(JsReferenceError.class, result);
+        assertThat(result).isInstanceOf(JsReferenceError.class);
         JsReferenceError error = (JsReferenceError) result;
-        assertEquals("ReferenceError", error.getName());
+        assertThat(error.getName()).isEqualTo("ReferenceError");
     }
 
     @ParameterizedTest
@@ -129,9 +130,9 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
 
-        assertInstanceOf(JsTypeError.class, result);
+        assertThat(result).isInstanceOf(JsTypeError.class);
         JsTypeError error = (JsTypeError) result;
-        assertEquals("TypeError", error.getName());
+        assertThat(error.getName()).isEqualTo("TypeError");
     }
 
     @ParameterizedTest
@@ -154,7 +155,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
 
-        assertInstanceOf(JsError.class, result);
+        assertThat(result).isInstanceOf(JsError.class);
     }
 
     @ParameterizedTest
@@ -176,7 +177,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
 
-        assertInstanceOf(JsError.class, result);
+        assertThat(result).isInstanceOf(JsError.class);
     }
 
     @ParameterizedTest
@@ -201,7 +202,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
 
-        assertInstanceOf(JsError.class, result);
+        assertThat(result).isInstanceOf(JsError.class);
     }
 
     @ParameterizedTest
@@ -225,7 +226,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
 
-        assertInstanceOf(JsError.class, result);
+        assertThat(result).isInstanceOf(JsError.class);
     }
 
     @ParameterizedTest
@@ -247,7 +248,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("test message", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("test message");
     }
 
     @ParameterizedTest
@@ -269,7 +270,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -291,9 +292,9 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThrows(Exception.class, () -> {
+        assertThatThrownBy(() -> {
             instanceRunner.invoke("test");
-        });
+        }).isInstanceOf(Exception.class);
     }
 
     @ParameterizedTest
@@ -319,7 +320,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(33, (int) runner.createInstanceRunner("com.A").invoke("test"));  // (10+1) + (20+2) = 33
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(33); //(10+1) + (20+2) = 33
     }
 
     @ParameterizedTest
@@ -341,7 +342,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(13, (int) runner.createInstanceRunner("com.A").invoke("test"));  // 5 * 2 + 3 = 13
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(13);  // 5 * 2 + 3 = 13
     }
 
     @ParameterizedTest
@@ -363,7 +364,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(77, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(77);
     }
 
     @ParameterizedTest
@@ -383,7 +384,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(99, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(99);
     }
 
     @ParameterizedTest
@@ -405,7 +406,7 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -424,6 +425,6 @@ public class TestCompileAstTryStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(42);
     }
 }

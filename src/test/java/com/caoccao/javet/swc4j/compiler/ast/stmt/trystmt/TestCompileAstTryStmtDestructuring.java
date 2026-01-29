@@ -20,9 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for catch with destructuring parameters (Phase 4).
@@ -55,7 +54,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("TypeError|type mismatch|true|false", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("TypeError|type mismatch|true|false");
     }
 
     @ParameterizedTest
@@ -79,7 +78,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                   }
                 }""");
         // Error without explicit cause should have null cause
-        assertEquals("no cause", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("no cause");
     }
 
     @ParameterizedTest
@@ -99,7 +98,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("default message", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("default message");
     }
 
     @ParameterizedTest
@@ -118,7 +117,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("actual message", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("actual message");
     }
 
     @ParameterizedTest
@@ -138,7 +137,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("java exception", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("java exception");
     }
 
     @ParameterizedTest
@@ -157,7 +156,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("test error message", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("test error message");
     }
 
     @ParameterizedTest
@@ -178,7 +177,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("test message:no", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("test message:no");
     }
 
     @ParameterizedTest
@@ -201,7 +200,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("combined test", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("combined test");
     }
 
     @ParameterizedTest
@@ -220,7 +219,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("TypeError", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("TypeError");
     }
 
     @ParameterizedTest
@@ -239,7 +238,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("RangeError: out of range", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("RangeError: out of range");
     }
 
     @ParameterizedTest
@@ -261,7 +260,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("no cause found", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("no cause found");
     }
 
     @ParameterizedTest
@@ -280,7 +279,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("renamed message", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("renamed message");
     }
 
     @ParameterizedTest
@@ -299,7 +298,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("RangeError-error msg", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("RangeError-error msg");
     }
 
     @ParameterizedTest
@@ -319,7 +318,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -345,7 +344,7 @@ public class TestCompileAstTryStmtDestructuring extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals("test", instanceRunner.invoke("test"));
-        assertTrue((boolean) instanceRunner.invoke("wasCleaned"));
+        assertThat(instanceRunner.<Object>invoke("test")).isEqualTo("test");
+        assertThat((boolean) instanceRunner.<Boolean>invoke("wasCleaned")).isTrue();
     }
 }

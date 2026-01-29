@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for basic for-of loops over arrays (Phase 1)
@@ -45,7 +45,7 @@ public class TestCompileAstForOfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -64,7 +64,7 @@ public class TestCompileAstForOfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("abc", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("abc");
     }
 
     @ParameterizedTest
@@ -83,7 +83,7 @@ public class TestCompileAstForOfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1,two,3,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,two,3,");
     }
 
     @ParameterizedTest
@@ -102,7 +102,7 @@ public class TestCompileAstForOfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("102030", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("102030");
     }
 
     @ParameterizedTest
@@ -121,7 +121,7 @@ public class TestCompileAstForOfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("xyz", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("xyz");
     }
 
     @ParameterizedTest
@@ -140,7 +140,7 @@ public class TestCompileAstForOfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -163,7 +163,7 @@ public class TestCompileAstForOfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(63, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(63);
     }
 
     @ParameterizedTest
@@ -182,7 +182,7 @@ public class TestCompileAstForOfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -200,7 +200,7 @@ public class TestCompileAstForOfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("first", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("first");
     }
 
     @ParameterizedTest
@@ -219,6 +219,6 @@ public class TestCompileAstForOfStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("42", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("42");
     }
 }

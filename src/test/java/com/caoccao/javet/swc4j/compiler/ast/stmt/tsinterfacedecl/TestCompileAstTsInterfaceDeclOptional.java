@@ -23,8 +23,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Phase 3: Optional Properties Tests.
@@ -46,17 +47,17 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Options");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // All optional properties should have getters
-        assertNotNull(interfaceClass.getMethod("getTimeout"));
-        assertNotNull(interfaceClass.getMethod("getRetries"));
-        assertNotNull(interfaceClass.getMethod("isVerbose"));
+        assertThat(interfaceClass.getMethod("getTimeout")).isNotNull();
+        assertThat(interfaceClass.getMethod("getRetries")).isNotNull();
+        assertThat(interfaceClass.getMethod("isVerbose")).isNotNull();
 
         // All optional properties should have setters
-        assertNotNull(interfaceClass.getMethod("setTimeout", int.class));
-        assertNotNull(interfaceClass.getMethod("setRetries", int.class));
-        assertNotNull(interfaceClass.getMethod("setVerbose", boolean.class));
+        assertThat(interfaceClass.getMethod("setTimeout", int.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setRetries", int.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setVerbose", boolean.class)).isNotNull();
     }
 
     @ParameterizedTest
@@ -74,19 +75,19 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
                 }""");
         Class<?> interfaceClass = runner.getClass("com.User");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Required properties
-        assertNotNull(interfaceClass.getMethod("getId"));
-        assertNotNull(interfaceClass.getMethod("setId", int.class));
-        assertNotNull(interfaceClass.getMethod("getName"));
-        assertNotNull(interfaceClass.getMethod("setName", String.class));
+        assertThat(interfaceClass.getMethod("getId")).isNotNull();
+        assertThat(interfaceClass.getMethod("setId", int.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("getName")).isNotNull();
+        assertThat(interfaceClass.getMethod("setName", String.class)).isNotNull();
 
         // Optional properties (generate same methods as required)
-        assertNotNull(interfaceClass.getMethod("getEmail"));
-        assertNotNull(interfaceClass.getMethod("setEmail", String.class));
-        assertNotNull(interfaceClass.getMethod("getPhone"));
-        assertNotNull(interfaceClass.getMethod("setPhone", String.class));
+        assertThat(interfaceClass.getMethod("getEmail")).isNotNull();
+        assertThat(interfaceClass.getMethod("setEmail", String.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("getPhone")).isNotNull();
+        assertThat(interfaceClass.getMethod("setPhone", String.class)).isNotNull();
     }
 
     @ParameterizedTest
@@ -111,24 +112,24 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
         Class<?> interfaceClass = runner.getClass("com.Contact");
         Class<?> implClass = runner.getClass("com.ContactImpl");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Test implementation
         Object instance = implClass.getConstructor().newInstance();
 
         // Required property has default value
-        assertEquals("", implClass.getMethod("getName").invoke(instance));
+        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("");
 
         // Optional property can be null
-        assertNull(implClass.getMethod("getEmail").invoke(instance));
+        assertThat(implClass.getMethod("getEmail").<Object>invoke(instance)).isNull();
 
         // Set values
         implClass.getMethod("setName", String.class).invoke(instance, "John");
         implClass.getMethod("setEmail", String.class).invoke(instance, "john@example.com");
 
         // Verify values
-        assertEquals("John", implClass.getMethod("getName").invoke(instance));
-        assertEquals("john@example.com", implClass.getMethod("getEmail").invoke(instance));
+        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("John");
+        assertThat(implClass.getMethod("getEmail").<Object>invoke(instance)).isEqualTo("john@example.com");
     }
 
     @ParameterizedTest
@@ -144,19 +145,19 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Entity");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Optional readonly property should have getter but no setter
         Method getId = interfaceClass.getMethod("getId");
-        assertNotNull(getId);
-        assertTrue(Modifier.isAbstract(getId.getModifiers()));
+        assertThat(getId).isNotNull();
+        assertThat(Modifier.isAbstract(getId.getModifiers())).isTrue();
 
-        assertThrows(NoSuchMethodException.class, () ->
-                interfaceClass.getMethod("setId", int.class));
+        assertThatThrownBy(() ->
+                interfaceClass.getMethod("setId", int.class)).isInstanceOf(NoSuchMethodException.class);;
 
         // Non-readonly property should have both
-        assertNotNull(interfaceClass.getMethod("getName"));
-        assertNotNull(interfaceClass.getMethod("setName", String.class));
+        assertThat(interfaceClass.getMethod("getName")).isNotNull();
+        assertThat(interfaceClass.getMethod("setName", String.class)).isNotNull();
     }
 
     @ParameterizedTest
@@ -171,18 +172,18 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Named");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Optional property should have getter
         Method getName = interfaceClass.getMethod("getName");
-        assertNotNull(getName);
-        assertTrue(Modifier.isAbstract(getName.getModifiers()));
-        assertEquals(String.class, getName.getReturnType());
+        assertThat(getName).isNotNull();
+        assertThat(Modifier.isAbstract(getName.getModifiers())).isTrue();
+        assertThat(getName.getReturnType()).isEqualTo(String.class);
 
         // Optional property should have setter
         Method setName = interfaceClass.getMethod("setName", String.class);
-        assertNotNull(setName);
-        assertTrue(Modifier.isAbstract(setName.getModifiers()));
-        assertEquals(void.class, setName.getReturnType());
+        assertThat(setName).isNotNull();
+        assertThat(Modifier.isAbstract(setName.getModifiers())).isTrue();
+        assertThat(setName.getReturnType()).isEqualTo(void.class);
     }
 }

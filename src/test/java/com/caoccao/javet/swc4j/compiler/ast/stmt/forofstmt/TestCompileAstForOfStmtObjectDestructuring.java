@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for for-of loops with object destructuring (Phase 11)
@@ -48,7 +48,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("Alice:30,Bob:25,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("Alice:30,Bob:25,");
     }
 
     @ParameterizedTest
@@ -67,7 +67,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("12", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("12");
     }
 
     @ParameterizedTest
@@ -89,7 +89,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("Alice:User,Bob:Admin,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("Alice:User,Bob:Admin,");
     }
 
     @ParameterizedTest
@@ -108,7 +108,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -127,7 +127,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("ab", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ab");
     }
 
     @ParameterizedTest
@@ -150,7 +150,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("hello:42:true", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello:42:true");
     }
 
     @ParameterizedTest
@@ -173,7 +173,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("ABCD", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ABCD");
     }
 
     @ParameterizedTest
@@ -192,7 +192,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -218,7 +218,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("AliceX,AliceY,BobX,BobY,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("AliceX,AliceY,BobX,BobY,");
     }
 
     @ParameterizedTest
@@ -242,7 +242,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("a:?,b:Y,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a:?,b:Y,");
     }
 
     @ParameterizedTest
@@ -262,7 +262,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("Alice,Bob,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("Alice,Bob,");
     }
 
     @ParameterizedTest
@@ -283,7 +283,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("Smith, Alice", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("Smith, Alice");
     }
 
     @ParameterizedTest
@@ -302,7 +302,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("value", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("value");
     }
 
     @ParameterizedTest
@@ -322,7 +322,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("Alice,Bob,Charlie,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("Alice,Bob,Charlie,");
     }
 
     @ParameterizedTest
@@ -344,7 +344,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("a", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a");
     }
 
     @ParameterizedTest
@@ -366,7 +366,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("ac", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ac");
     }
 
     @ParameterizedTest
@@ -385,7 +385,7 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals(44, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(44);
     }
 
     @ParameterizedTest
@@ -403,6 +403,6 @@ public class TestCompileAstForOfStmtObjectDestructuring extends BaseTestCompileS
                     }
                   }
                 }""");
-        assertEquals("first", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("first");
     }
 }

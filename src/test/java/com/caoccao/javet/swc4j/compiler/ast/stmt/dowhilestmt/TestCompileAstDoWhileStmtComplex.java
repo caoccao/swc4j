@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for do-while loops with complex conditions (Phase 4)
@@ -46,7 +46,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(33, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(33);
     }
 
     @ParameterizedTest
@@ -68,7 +68,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                 }""");
         // (i < 5 && j > 5) || i < 3
         // Stops when i=5, j=5
-        assertEquals(55, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(55);
     }
 
     @ParameterizedTest
@@ -87,7 +87,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(7, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(7);
     }
 
     @ParameterizedTest
@@ -105,7 +105,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(4, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(4);
     }
 
     @ParameterizedTest
@@ -126,7 +126,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(505, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(505);
     }
 
     @ParameterizedTest
@@ -144,7 +144,7 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -166,6 +166,6 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
                 }""");
         // Continues until both conditions false: i>=3 AND j>=10
         // Stops when i=5, j=10
-        assertEquals(60, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(60);
     }
 }

@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for for loops with break and continue (Phase 3)
@@ -50,7 +50,7 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(16, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(16);
     }
 
     @ParameterizedTest
@@ -69,7 +69,7 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -91,7 +91,7 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -114,7 +114,7 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -135,7 +135,7 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(21, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(21);
     }
 
     @ParameterizedTest
@@ -154,7 +154,7 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -177,7 +177,7 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -202,7 +202,7 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                 }""");
         // Sum of i for i in 0..9 where !(i > 2 && i % 2 == 0)
         // = 0+1+2+3+5+7+9 = 27
-        assertEquals(27, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(27);
     }
 
     @ParameterizedTest
@@ -223,7 +223,7 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(35, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(35);
     }
 
     @ParameterizedTest
@@ -244,7 +244,7 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -265,7 +265,7 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(25, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(25);
     }
 
     @ParameterizedTest
@@ -289,7 +289,7 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -315,6 +315,6 @@ public class TestCompileAstForStmtBreakContinue extends BaseTestCompileSuite {
                 }""");
         // Sum of odd numbers in 0..14 that are not divisible by 3
         // = 1+5+7+11+13 = 37
-        assertEquals(37, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(37);
     }
 }

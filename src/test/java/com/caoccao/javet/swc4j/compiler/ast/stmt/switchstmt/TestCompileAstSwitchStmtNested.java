@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for nested switch statements (Phase 5)
@@ -53,8 +53,8 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(3, (int) instanceRunner.invoke("test", 1)); // 0+1+2 = 3
-        assertEquals(100, (int) instanceRunner.invoke("test", 2));
+        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(3); // 0+1+2 = 3
+        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -86,8 +86,8 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
 
         // i=0,1,2,3,4 sum=10, then +100 = 110
-        assertEquals(110, (int) instanceRunner.invoke("test", 1));
-        assertEquals(200, (int) instanceRunner.invoke("test", 2));
+        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(110);
+        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(200);
     }
 
     @ParameterizedTest
@@ -118,7 +118,7 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // i=0: +1, i=1: +1, i=2: +2, i=3: +2, i=4: +5 = 11
-        assertEquals(11, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(11);
     }
 
     @ParameterizedTest
@@ -149,7 +149,7 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // i=0: +1, i=1: +10, i=2: +100 = 111
-        assertEquals(111, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(111);
     }
 
     @ParameterizedTest
@@ -187,9 +187,9 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(10, (int) instanceRunner.invoke("test", 1, 10));   // Simulates breaking outer
-        assertEquals(120, (int) instanceRunner.invoke("test", 1, 20));  // Breaks inner, continues: 20+100
-        assertEquals(200, (int) instanceRunner.invoke("test", 2, 10));
+        assertThat((int) instanceRunner.<Object>invoke("test", 1, 10)).isEqualTo(10);   // Simulates breaking outer
+        assertThat((int) instanceRunner.<Object>invoke("test", 1, 20)).isEqualTo(120);  // Breaks inner, continues: 20+100
+        assertThat((int) instanceRunner.<Object>invoke("test", 2, 10)).isEqualTo(200);
     }
 
     @ParameterizedTest
@@ -221,10 +221,10 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(110, (int) instanceRunner.invoke("test", 1, 10));
-        assertEquals(120, (int) instanceRunner.invoke("test", 1, 20));
-        assertEquals(0, (int) instanceRunner.invoke("test", 1, 30)); // Inner switch no match
-        assertEquals(2, (int) instanceRunner.invoke("test", 2, 10));
+        assertThat((int) instanceRunner.<Object>invoke("test", 1, 10)).isEqualTo(110);
+        assertThat((int) instanceRunner.<Object>invoke("test", 1, 20)).isEqualTo(120);
+        assertThat((int) instanceRunner.<Object>invoke("test", 1, 30)).isEqualTo(0); // Inner switch no match
+        assertThat((int) instanceRunner.<Object>invoke("test", 2, 10)).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -257,10 +257,10 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(111, (int) instanceRunner.invoke("test", 1, 10, 100));
-        assertEquals(112, (int) instanceRunner.invoke("test", 1, 10, 200));
-        assertEquals(0, (int) instanceRunner.invoke("test", 1, 10, 300));
-        assertEquals(0, (int) instanceRunner.invoke("test", 1, 20, 100));
+        assertThat((int) instanceRunner.<Object>invoke("test", 1, 10, 100)).isEqualTo(111);
+        assertThat((int) instanceRunner.<Object>invoke("test", 1, 10, 200)).isEqualTo(112);
+        assertThat((int) instanceRunner.<Object>invoke("test", 1, 10, 300)).isEqualTo(0);
+        assertThat((int) instanceRunner.<Object>invoke("test", 1, 20, 100)).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -290,9 +290,9 @@ public class TestCompileAstSwitchStmtNested extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertEquals(32, (int) instanceRunner.invoke("test", 1, 10)); // Inner: 10+20, outer falls: +2 = 32
-        assertEquals(22, (int) instanceRunner.invoke("test", 1, 20)); // Inner: 20, outer falls: +2 = 22
-        assertEquals(2, (int) instanceRunner.invoke("test", 1, 30));  // Inner no match, outer falls: +2 = 2
-        assertEquals(2, (int) instanceRunner.invoke("test", 2, 10));  // Outer case 2: 2
+        assertThat((int) instanceRunner.<Object>invoke("test", 1, 10)).isEqualTo(32); // Inner: 10+20, outer falls: +2 = 32
+        assertThat((int) instanceRunner.<Object>invoke("test", 1, 20)).isEqualTo(22); // Inner: 20, outer falls: +2 = 22
+        assertThat((int) instanceRunner.<Object>invoke("test", 1, 30)).isEqualTo(2);  // Inner no match, outer falls: +2 = 2
+        assertThat((int) instanceRunner.<Object>invoke("test", 2, 10)).isEqualTo(2);  // Outer case 2: 2
     }
 }

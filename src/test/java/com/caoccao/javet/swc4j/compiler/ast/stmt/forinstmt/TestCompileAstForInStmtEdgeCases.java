@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for for-in edge cases and advanced scenarios (Phase 8)
@@ -46,7 +46,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("0,1,2,3,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("0,1,2,3,");
     }
 
     @ParameterizedTest
@@ -66,7 +66,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -86,7 +86,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -103,7 +103,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -123,7 +123,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -145,7 +145,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -164,7 +164,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("cab", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("cab");
     }
 
     @ParameterizedTest
@@ -191,7 +191,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                 }""");
         // First outer iteration: k2="x" -> continue outer (count=1)
         // Second outer iteration: k2="x" -> continue outer (count=2)
-        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -211,7 +211,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(20, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -233,7 +233,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("bd", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("bd");
     }
 
     @ParameterizedTest
@@ -254,7 +254,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(2, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -273,7 +273,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("a,b,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a,b,");
     }
 
     @ParameterizedTest
@@ -292,7 +292,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("key1,key2,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("key1,key2,");
     }
 
     @ParameterizedTest
@@ -310,7 +310,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("a", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a");
     }
 
     @ParameterizedTest
@@ -329,7 +329,7 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("0", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("0");
     }
 
     @ParameterizedTest
@@ -348,6 +348,6 @@ public class TestCompileAstForInStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("only", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("only");
     }
 }

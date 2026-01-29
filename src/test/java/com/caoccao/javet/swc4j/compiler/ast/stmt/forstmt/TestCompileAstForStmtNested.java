@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for nested for loops (Phase 5)
@@ -49,7 +49,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(45, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(45);
     }
 
     @ParameterizedTest
@@ -72,7 +72,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(18, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(18);
     }
 
     @ParameterizedTest
@@ -95,7 +95,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(18, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(18);
     }
 
     @ParameterizedTest
@@ -118,7 +118,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -138,7 +138,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -164,7 +164,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(32, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(32);
     }
 
     @ParameterizedTest
@@ -188,7 +188,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(16, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(16);
     }
 
     @ParameterizedTest
@@ -209,7 +209,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(9);
     }
 
     @ParameterizedTest
@@ -235,7 +235,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(28, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(28);
     }
 
     @ParameterizedTest
@@ -261,7 +261,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(63, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(63);
     }
 
     @ParameterizedTest
@@ -281,7 +281,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(25, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(25);
     }
 
     @ParameterizedTest
@@ -302,7 +302,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(23, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(23);
     }
 
     @ParameterizedTest
@@ -322,7 +322,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(4, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(4);
     }
 
     @ParameterizedTest
@@ -344,7 +344,7 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(12, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(12);
     }
 
     @ParameterizedTest
@@ -364,6 +364,6 @@ public class TestCompileAstForStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(9);
     }
 }

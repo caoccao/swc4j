@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for instanceof checks on different JS error types.
@@ -47,7 +47,7 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertFalse((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -65,7 +65,7 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -83,7 +83,7 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -101,7 +101,7 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -119,7 +119,7 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -137,7 +137,7 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -155,7 +155,7 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -173,7 +173,7 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -213,13 +213,13 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
 
         // Error: only Error instanceof passes
-        assertEquals(1, (int) instanceRunner.invoke("test", 0));
+        assertThat((int) instanceRunner.<Object>invoke("test", 0)).isEqualTo(1);
         // TypeError: both Error and TypeError pass (TypeError extends Error)
-        assertEquals(11, (int) instanceRunner.invoke("test", 1));
+        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(11);
         // RangeError: both Error and RangeError pass
-        assertEquals(101, (int) instanceRunner.invoke("test", 2));
+        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(101);
         // ReferenceError: both Error and ReferenceError pass
-        assertEquals(1001, (int) instanceRunner.invoke("test", 3));
+        assertThat((int) instanceRunner.<Object>invoke("test", 3)).isEqualTo(1001);
     }
 
     @ParameterizedTest
@@ -245,9 +245,9 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
 
         // Error (not TypeError) -> true
-        assertTrue((boolean) instanceRunner.invoke("test", 0));
+        assertThat((boolean) instanceRunner.<Boolean>invoke("test", 0)).isTrue();
         // TypeError -> false (negated)
-        assertFalse((boolean) instanceRunner.invoke("test", 1));
+        assertThat((boolean) instanceRunner.<Boolean>invoke("test", 1)).isFalse();
     }
 
     @ParameterizedTest
@@ -273,8 +273,8 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertTrue((boolean) instanceRunner.invoke("test", 1));
-        assertFalse((boolean) instanceRunner.invoke("test", 0));
+        assertThat((boolean) instanceRunner.<Boolean>invoke("test", 1)).isTrue();
+        assertThat((boolean) instanceRunner.<Boolean>invoke("test", 0)).isFalse();
     }
 
     @ParameterizedTest
@@ -300,8 +300,8 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertTrue((boolean) instanceRunner.invoke("test", 1));
-        assertFalse((boolean) instanceRunner.invoke("test", 0));
+        assertThat((boolean) instanceRunner.<Boolean>invoke("test", 1)).isTrue();
+        assertThat((boolean) instanceRunner.<Boolean>invoke("test", 0)).isFalse();
     }
 
     @ParameterizedTest
@@ -327,8 +327,8 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertTrue((boolean) instanceRunner.invoke("test", 1));
-        assertFalse((boolean) instanceRunner.invoke("test", 0));
+        assertThat((boolean) instanceRunner.<Boolean>invoke("test", 1)).isTrue();
+        assertThat((boolean) instanceRunner.<Boolean>invoke("test", 0)).isFalse();
     }
 
     @ParameterizedTest
@@ -347,6 +347,6 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertTrue((boolean) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 }

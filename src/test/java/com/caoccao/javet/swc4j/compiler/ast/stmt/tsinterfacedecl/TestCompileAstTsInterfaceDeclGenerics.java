@@ -24,8 +24,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.TypeVariable;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Phase 6: Generic Interfaces Tests.
@@ -46,17 +46,17 @@ public class TestCompileAstTsInterfaceDeclGenerics extends BaseTestCompileSuite 
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Pair");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have two type parameters
         TypeVariable<?>[] typeParams = interfaceClass.getTypeParameters();
-        assertEquals(2, typeParams.length);
-        assertEquals("K", typeParams[0].getName());
-        assertEquals("V", typeParams[1].getName());
+        assertThat(typeParams.length).isEqualTo(2);
+        assertThat(typeParams[0].getName()).isEqualTo("K");
+        assertThat(typeParams[1].getName()).isEqualTo("V");
 
         // Property getters should exist (returning Object due to type erasure)
-        assertNotNull(interfaceClass.getMethod("getKey"));
-        assertNotNull(interfaceClass.getMethod("getValue"));
+        assertThat(interfaceClass.getMethod("getKey")).isNotNull();
+        assertThat(interfaceClass.getMethod("getValue")).isNotNull();
     }
 
     @ParameterizedTest
@@ -71,22 +71,22 @@ public class TestCompileAstTsInterfaceDeclGenerics extends BaseTestCompileSuite 
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Container");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have one type parameter named "T"
         TypeVariable<?>[] typeParams = interfaceClass.getTypeParameters();
-        assertEquals(1, typeParams.length);
-        assertEquals("T", typeParams[0].getName());
+        assertThat(typeParams.length).isEqualTo(1);
+        assertThat(typeParams[0].getName()).isEqualTo("T");
 
         // Methods should exist (returning Object due to type erasure)
         Method getContent = interfaceClass.getMethod("getContent");
-        assertNotNull(getContent);
-        assertTrue(Modifier.isAbstract(getContent.getModifiers()));
+        assertThat(getContent).isNotNull();
+        assertThat(Modifier.isAbstract(getContent.getModifiers())).isTrue();
         // Return type is Object due to erasure
-        assertEquals(Object.class, getContent.getReturnType());
+        assertThat(getContent.getReturnType()).isEqualTo(Object.class);
 
         Method setContent = interfaceClass.getMethod("setContent", Object.class);
-        assertNotNull(setContent);
+        assertThat(setContent).isNotNull();
     }
 
     @ParameterizedTest
@@ -102,21 +102,21 @@ public class TestCompileAstTsInterfaceDeclGenerics extends BaseTestCompileSuite 
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Processor");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have type parameter T
         TypeVariable<?>[] typeParams = interfaceClass.getTypeParameters();
-        assertEquals(1, typeParams.length);
-        assertEquals("T", typeParams[0].getName());
+        assertThat(typeParams.length).isEqualTo(1);
+        assertThat(typeParams[0].getName()).isEqualTo("T");
 
         // Method with generic parameter and return type (erased to Object)
         Method process = interfaceClass.getMethod("process", Object.class);
-        assertNotNull(process);
-        assertEquals(Object.class, process.getReturnType());
+        assertThat(process).isNotNull();
+        assertThat(process.getReturnType()).isEqualTo(Object.class);
 
         // Method with mixed parameter types
         Method transform = interfaceClass.getMethod("transform", Object.class, String.class);
-        assertNotNull(transform);
+        assertThat(transform).isNotNull();
     }
 
     @ParameterizedTest
@@ -131,20 +131,20 @@ public class TestCompileAstTsInterfaceDeclGenerics extends BaseTestCompileSuite 
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Box");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have type parameter T
         TypeVariable<?>[] typeParams = interfaceClass.getTypeParameters();
-        assertEquals(1, typeParams.length);
-        assertEquals("T", typeParams[0].getName());
+        assertThat(typeParams.length).isEqualTo(1);
+        assertThat(typeParams[0].getName()).isEqualTo("T");
 
         // Property should have getter and setter (erased to Object)
         Method getContent = interfaceClass.getMethod("getContent");
-        assertNotNull(getContent);
-        assertEquals(Object.class, getContent.getReturnType());
+        assertThat(getContent).isNotNull();
+        assertThat(getContent.getReturnType()).isEqualTo(Object.class);
 
         Method setContent = interfaceClass.getMethod("setContent", Object.class);
-        assertNotNull(setContent);
+        assertThat(setContent).isNotNull();
     }
 
     @ParameterizedTest
@@ -159,20 +159,20 @@ public class TestCompileAstTsInterfaceDeclGenerics extends BaseTestCompileSuite 
                 }""");
         Class<?> interfaceClass = runner.getClass("com.NumericContainer");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have type parameter T with bound
         TypeVariable<?>[] typeParams = interfaceClass.getTypeParameters();
-        assertEquals(1, typeParams.length);
-        assertEquals("T", typeParams[0].getName());
+        assertThat(typeParams.length).isEqualTo(1);
+        assertThat(typeParams[0].getName()).isEqualTo("T");
 
         // The bound should be Number
         var bounds = typeParams[0].getBounds();
-        assertEquals(1, bounds.length);
-        assertEquals(Number.class, bounds[0]);
+        assertThat(bounds.length).isEqualTo(1);
+        assertThat(bounds[0]).isEqualTo(Number.class);
 
         // Property getter should exist (returning Object due to type erasure)
-        assertNotNull(interfaceClass.getMethod("getContent"));
+        assertThat(interfaceClass.getMethod("getContent")).isNotNull();
     }
 
     @ParameterizedTest
@@ -188,27 +188,27 @@ public class TestCompileAstTsInterfaceDeclGenerics extends BaseTestCompileSuite 
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Repository");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Should have type parameter T
         TypeVariable<?>[] typeParams = interfaceClass.getTypeParameters();
-        assertEquals(1, typeParams.length);
-        assertEquals("T", typeParams[0].getName());
+        assertThat(typeParams.length).isEqualTo(1);
+        assertThat(typeParams[0].getName()).isEqualTo("T");
 
         // Concrete type methods (from property)
         Method getId = interfaceClass.getMethod("getId");
-        assertNotNull(getId);
-        assertEquals(int.class, getId.getReturnType());
+        assertThat(getId).isNotNull();
+        assertThat(getId.getReturnType()).isEqualTo(int.class);
 
         Method setId = interfaceClass.getMethod("setId", int.class);
-        assertNotNull(setId);
+        assertThat(setId).isNotNull();
 
         // Generic type methods (erased to Object, from property)
         Method getData = interfaceClass.getMethod("getData");
-        assertNotNull(getData);
-        assertEquals(Object.class, getData.getReturnType());
+        assertThat(getData).isNotNull();
+        assertThat(getData.getReturnType()).isEqualTo(Object.class);
 
         Method setData = interfaceClass.getMethod("setData", Object.class);
-        assertNotNull(setData);
+        assertThat(setData).isNotNull();
     }
 }

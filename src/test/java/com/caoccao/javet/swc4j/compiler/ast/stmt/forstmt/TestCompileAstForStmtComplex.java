@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for for loops with complex init/update expressions (Phase 4)
@@ -44,7 +44,7 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(57, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(57);
     }
 
     @ParameterizedTest
@@ -63,7 +63,7 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(145, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(145);
     }
 
     @ParameterizedTest
@@ -81,7 +81,7 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -99,7 +99,7 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(127, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(127);
     }
 
     @ParameterizedTest
@@ -117,7 +117,7 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(30, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -135,7 +135,7 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(88, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(88);
     }
 
     @ParameterizedTest
@@ -153,7 +153,7 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -171,7 +171,7 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(14, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(14);
     }
 
     @ParameterizedTest
@@ -189,7 +189,7 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(80, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(80);
     }
 
     @ParameterizedTest
@@ -207,7 +207,7 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(50, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(50);
     }
 
     @ParameterizedTest
@@ -225,7 +225,7 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(595, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(595);
     }
 
     @ParameterizedTest
@@ -243,7 +243,7 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(560, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(560);
     }
 
     @ParameterizedTest
@@ -261,6 +261,6 @@ public class TestCompileAstForStmtComplex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
     }
 }

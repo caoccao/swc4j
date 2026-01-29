@@ -6,8 +6,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.InvocationTargetException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Phase 2: String Enums (8 tests)
@@ -31,8 +32,8 @@ public class TestCompileAstTsEnumDeclStringEnum extends BaseTestCompileSuite {
         Object single = enumClass.getEnumConstants()[0];
         Object doubleQuote = enumClass.getEnumConstants()[1];
 
-        assertEquals("single", getValueMethod.invoke(single));
-        assertEquals("double", getValueMethod.invoke(doubleQuote));
+        assertThat(getValueMethod.<Object>invoke(single)).isEqualTo("single");
+        assertThat(getValueMethod.<Object>invoke(doubleQuote)).isEqualTo("double");
     }
 
     @ParameterizedTest
@@ -48,13 +49,13 @@ public class TestCompileAstTsEnumDeclStringEnum extends BaseTestCompileSuite {
                 }""");
         Class<?> enumClass = runner.getClass("com.Status");
 
-        assertTrue(Enum.class.isAssignableFrom(enumClass));
+        assertThat(Enum.class.isAssignableFrom(enumClass)).isTrue();
         Object[] constants = enumClass.getEnumConstants();
-        assertEquals(3, constants.length);
+        assertThat(constants.length).isEqualTo(3);
 
-        assertEquals("ACTIVE", ((Enum<?>) constants[0]).name());
-        assertEquals("INACTIVE", ((Enum<?>) constants[1]).name());
-        assertEquals("PENDING", ((Enum<?>) constants[2]).name());
+        assertThat(((Enum<?>) constants[0]).name()).isEqualTo("ACTIVE");
+        assertThat(((Enum<?>) constants[1]).name()).isEqualTo("INACTIVE");
+        assertThat(((Enum<?>) constants[2]).name()).isEqualTo("PENDING");
     }
 
     @ParameterizedTest
@@ -74,17 +75,17 @@ public class TestCompileAstTsEnumDeclStringEnum extends BaseTestCompileSuite {
         var fromValueMethod = enumClass.getMethod("fromValue", String.class);
         Object warn = fromValueMethod.invoke(null, "WARN");
 
-        assertEquals("WARN", ((Enum<?>) warn).name());
-        assertEquals("WARN", enumClass.getMethod("getValue").invoke(warn));
+        assertThat(((Enum<?>) warn).name()).isEqualTo("WARN");
+        assertThat(enumClass.getMethod("getValue").<Object>invoke(warn)).isEqualTo("WARN");
 
         // Test exception for invalid value
-        assertThrows(Exception.class, () -> {
+        assertThatThrownBy(() -> {
             try {
                 fromValueMethod.invoke(null, "INVALID");
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
-        });
+        }).isInstanceOf(Exception.class);;
     }
 
     @ParameterizedTest
@@ -105,8 +106,8 @@ public class TestCompileAstTsEnumDeclStringEnum extends BaseTestCompileSuite {
         Object get = enumClass.getEnumConstants()[0];
         Object post = enumClass.getEnumConstants()[1];
 
-        assertEquals("GET", getValueMethod.invoke(get));
-        assertEquals("POST", getValueMethod.invoke(post));
+        assertThat(getValueMethod.<Object>invoke(get)).isEqualTo("GET");
+        assertThat(getValueMethod.<Object>invoke(post)).isEqualTo("POST");
     }
 
     @ParameterizedTest
@@ -125,10 +126,10 @@ public class TestCompileAstTsEnumDeclStringEnum extends BaseTestCompileSuite {
         var valuesMethod = enumClass.getMethod("values");
         Object[] values = (Object[]) valuesMethod.invoke(null);
 
-        assertEquals(3, values.length);
-        assertEquals("SMALL", ((Enum<?>) values[0]).name());
-        assertEquals("MEDIUM", ((Enum<?>) values[1]).name());
-        assertEquals("LARGE", ((Enum<?>) values[2]).name());
+        assertThat(values.length).isEqualTo(3);
+        assertThat(((Enum<?>) values[0]).name()).isEqualTo("SMALL");
+        assertThat(((Enum<?>) values[1]).name()).isEqualTo("MEDIUM");
+        assertThat(((Enum<?>) values[2]).name()).isEqualTo("LARGE");
     }
 
     @ParameterizedTest
@@ -147,8 +148,8 @@ public class TestCompileAstTsEnumDeclStringEnum extends BaseTestCompileSuite {
         var valueOfMethod = enumClass.getMethod("valueOf", String.class);
         Object admin = valueOfMethod.invoke(null, "ADMIN");
 
-        assertEquals("ADMIN", ((Enum<?>) admin).name());
-        assertEquals("admin", enumClass.getMethod("getValue").invoke(admin));
+        assertThat(((Enum<?>) admin).name()).isEqualTo("ADMIN");
+        assertThat(enumClass.getMethod("getValue").<Object>invoke(admin)).isEqualTo("admin");
     }
 
     @ParameterizedTest
@@ -168,13 +169,13 @@ public class TestCompileAstTsEnumDeclStringEnum extends BaseTestCompileSuite {
         Object green = enumClass.getEnumConstants()[1];
         Object blue = enumClass.getEnumConstants()[2];
 
-        assertEquals("RED", ((Enum<?>) red).name());
-        assertEquals("GREEN", ((Enum<?>) green).name());
-        assertEquals("BLUE", ((Enum<?>) blue).name());
+        assertThat(((Enum<?>) red).name()).isEqualTo("RED");
+        assertThat(((Enum<?>) green).name()).isEqualTo("GREEN");
+        assertThat(((Enum<?>) blue).name()).isEqualTo("BLUE");
 
-        assertEquals(0, ((Enum<?>) red).ordinal());
-        assertEquals(1, ((Enum<?>) green).ordinal());
-        assertEquals(2, ((Enum<?>) blue).ordinal());
+        assertThat(((Enum<?>) red).ordinal()).isEqualTo(0);
+        assertThat(((Enum<?>) green).ordinal()).isEqualTo(1);
+        assertThat(((Enum<?>) blue).ordinal()).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -193,6 +194,6 @@ public class TestCompileAstTsEnumDeclStringEnum extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object happy = enumClass.getEnumConstants()[0];
 
-        assertEquals("😊", getValueMethod.invoke(happy));
+        assertThat(getValueMethod.<Object>invoke(happy)).isEqualTo("😊");
     }
 }

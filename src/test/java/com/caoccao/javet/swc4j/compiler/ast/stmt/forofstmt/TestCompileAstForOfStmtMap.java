@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for for-of loops over maps with destructuring (Phase 4)
@@ -45,7 +45,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -65,7 +65,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("apple,banana,cherry,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("apple,banana,cherry,");
     }
 
     @ParameterizedTest
@@ -84,7 +84,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(600, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(600);
     }
 
     @ParameterizedTest
@@ -104,7 +104,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("a1b2", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a1b2");
     }
 
     @ParameterizedTest
@@ -123,7 +123,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("a=1,b=2,c=3,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a=1,b=2,c=3,");
     }
 
     @ParameterizedTest
@@ -143,7 +143,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("42,hello,true,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("42,hello,true,");
     }
 
     @ParameterizedTest
@@ -162,7 +162,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("xy", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("xy");
     }
 
     @ParameterizedTest
@@ -181,7 +181,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("cab", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("cab");
     }
 
     @ParameterizedTest
@@ -200,7 +200,7 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("only:42", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("only:42");
     }
 
     @ParameterizedTest
@@ -219,6 +219,6 @@ public class TestCompileAstForOfStmtMap extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(60, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(60);
     }
 }

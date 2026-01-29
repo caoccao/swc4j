@@ -24,9 +24,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Phase 2: Interface Extension Tests.
@@ -60,11 +59,11 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
 
         // D should extend both B and C
         Set<Class<?>> interfaces = Arrays.stream(d.getInterfaces()).collect(Collectors.toSet());
-        assertTrue(interfaces.contains(b));
-        assertTrue(interfaces.contains(c));
+        assertThat(interfaces.contains(b)).isTrue();
+        assertThat(interfaces.contains(c)).isTrue();
 
         // D should have getValue method
-        assertNotNull(d.getMethod("getValue"));
+        assertThat(d.getMethod("getValue")).isNotNull();
     }
 
     @ParameterizedTest
@@ -87,18 +86,18 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
         Class<?> middle = runner.getClass("com.Middle");
         Class<?> derived = runner.getClass("com.Derived");
 
-        assertTrue(base.isInterface());
-        assertTrue(middle.isInterface());
-        assertTrue(derived.isInterface());
+        assertThat(base.isInterface()).isTrue();
+        assertThat(middle.isInterface()).isTrue();
+        assertThat(derived.isInterface()).isTrue();
 
         // Middle extends Base
-        assertTrue(Arrays.asList(middle.getInterfaces()).contains(base));
+        assertThat(Arrays.asList(middle.getInterfaces()).contains(base)).isTrue();
 
         // Derived extends Middle (but not directly Base)
-        assertTrue(Arrays.asList(derived.getInterfaces()).contains(middle));
+        assertThat(Arrays.asList(derived.getInterfaces()).contains(middle)).isTrue();
 
         // Derived should have isActive method
-        assertNotNull(derived.getMethod("isActive"));
+        assertThat(derived.getMethod("isActive")).isNotNull();
     }
 
     @ParameterizedTest
@@ -121,18 +120,18 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
         Class<?> aged = runner.getClass("com.Aged");
         Class<?> person = runner.getClass("com.Person");
 
-        assertTrue(named.isInterface());
-        assertTrue(aged.isInterface());
-        assertTrue(person.isInterface());
+        assertThat(named.isInterface()).isTrue();
+        assertThat(aged.isInterface()).isTrue();
+        assertThat(person.isInterface()).isTrue();
 
         // Person should extend both Named and Aged
         Set<Class<?>> interfaces = Arrays.stream(person.getInterfaces()).collect(Collectors.toSet());
-        assertTrue(interfaces.contains(named));
-        assertTrue(interfaces.contains(aged));
+        assertThat(interfaces.contains(named)).isTrue();
+        assertThat(interfaces.contains(aged)).isTrue();
 
         // Person should have getId/setId
-        assertNotNull(person.getMethod("getId"));
-        assertNotNull(person.getMethod("setId", int.class));
+        assertThat(person.getMethod("getId")).isNotNull();
+        assertThat(person.getMethod("setId", int.class)).isNotNull();
     }
 
     @ParameterizedTest
@@ -151,19 +150,19 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
         Class<?> named = runner.getClass("com.Named");
         Class<?> person = runner.getClass("com.Person");
 
-        assertTrue(named.isInterface());
-        assertTrue(person.isInterface());
+        assertThat(named.isInterface()).isTrue();
+        assertThat(person.isInterface()).isTrue();
 
         // Person should extend Named
-        assertTrue(Arrays.asList(person.getInterfaces()).contains(named));
+        assertThat(Arrays.asList(person.getInterfaces()).contains(named)).isTrue();
 
         // Named should have getName/setName
-        assertNotNull(named.getMethod("getName"));
-        assertNotNull(named.getMethod("setName", String.class));
+        assertThat(named.getMethod("getName")).isNotNull();
+        assertThat(named.getMethod("setName", String.class)).isNotNull();
 
         // Person should have getAge/setAge
-        assertNotNull(person.getMethod("getAge"));
-        assertNotNull(person.getMethod("setAge", int.class));
+        assertThat(person.getMethod("getAge")).isNotNull();
+        assertThat(person.getMethod("setAge", int.class)).isNotNull();
     }
 
     @ParameterizedTest
@@ -183,17 +182,17 @@ public class TestCompileAstTsInterfaceDeclExtends extends BaseTestCompileSuite {
         Class<?> comparable = runner.getClass("com.Comparable");
         Class<?> sortableItem = runner.getClass("com.SortableItem");
 
-        assertTrue(comparable.isInterface());
-        assertTrue(sortableItem.isInterface());
+        assertThat(comparable.isInterface()).isTrue();
+        assertThat(sortableItem.isInterface()).isTrue();
 
         // Comparable should have compareTo
-        assertNotNull(comparable.getMethod("compareTo", Object.class));
+        assertThat(comparable.getMethod("compareTo", Object.class)).isNotNull();
 
         // SortableItem should extend Comparable
-        assertTrue(Arrays.asList(sortableItem.getInterfaces()).contains(comparable));
+        assertThat(Arrays.asList(sortableItem.getInterfaces()).contains(comparable)).isTrue();
 
         // SortableItem should have its own methods
-        assertNotNull(sortableItem.getMethod("getSortKey"));
-        assertNotNull(sortableItem.getMethod("getPriority"));
+        assertThat(sortableItem.getMethod("getSortKey")).isNotNull();
+        assertThat(sortableItem.getMethod("getPriority")).isNotNull();
     }
 }

@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for do-while loop edge cases (Phase 7)
@@ -54,7 +54,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                 }""");
         // i=1,2,4,5,7,8,10 (skip 3,6,9, break at 11)
         // sum = 1+2+4+5+7+8+10 = 37
-        assertEquals(37, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(37);
     }
 
     @ParameterizedTest
@@ -79,7 +79,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
         // Iteration 3: count=3, test: 2<3 (true), i=3
         // Iteration 4: count=4, test: 3<3 (false), i=4
         // count=4, i=4
-        assertEquals(44, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(44);
     }
 
     @ParameterizedTest
@@ -96,7 +96,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -117,7 +117,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -136,7 +136,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -160,7 +160,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                 }""");
         // i=0: y=1, i=1: y=3, i=2: y=5
         // sum = 1 + 3 + 5 = 9
-        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(9);
     }
 
     @ParameterizedTest
@@ -185,7 +185,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(9);
     }
 
     @ParameterizedTest
@@ -212,7 +212,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
         // i=0,2,4 add 1 each = 3
         // i=1,3 add 2 each = 4
         // total = 7
-        assertEquals(7, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(7);
     }
 
     @ParameterizedTest
@@ -236,7 +236,7 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(100, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -254,6 +254,6 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
     }
 }

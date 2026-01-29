@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for labeled for loops with labeled break and continue.
@@ -45,7 +45,7 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1 + 2 + 3 + 4, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1 + 2 + 3 + 4);
     }
 
     @ParameterizedTest
@@ -73,7 +73,7 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
         // i=0,1,2,3: each adds 10 = 40
         // i=4: adds 6 (j=0 through j=5), then breaks
         // Total = 40 + 6 = 46
-        assertEquals(46, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(46);
     }
 
     @ParameterizedTest
@@ -101,7 +101,7 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
         // i=1,j=0: k=0,1 (2), break middle ends j loop -> next i
         // i=2,j=0: k=0,1 (2), break middle ends j loop -> done
         // Total = 6
-        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -130,7 +130,7 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
         // i=2: sum += 2+0 through 2+9 = 65
         // i=3: sum += 3+0 through 3+6 = 42 (breaks when 3*7=21>20)
         // Total = 45 + 55 + 65 + 42 = 207
-        assertEquals(207, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(207);
     }
 
     @ParameterizedTest
@@ -158,7 +158,7 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
         // i=0,1,2: each adds 5 = 15
         // i=3,4: each adds 3 (j=0,1,2, then continues outer) = 6
         // Total = 15 + 6 = 21
-        assertEquals(21, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(21);
     }
 
     @ParameterizedTest
@@ -188,7 +188,7 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
         // i=3: sum += 3+0, 3+1 = 7
         // i=4: sum += 4+0, 4+1 = 9
         // Total = 1 + 3 + 5 + 7 + 9 = 25
-        assertEquals(25, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(25);
     }
 
     @ParameterizedTest
@@ -210,7 +210,7 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -235,7 +235,7 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
         // i=1: sum += 10, 11 = 22
         // i=2: sum += 20, 21 = 63
         // Total = 63
-        assertEquals(63, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(63);
     }
 
     @ParameterizedTest
@@ -259,6 +259,6 @@ public class TestCompileAstForStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(9, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(9);
     }
 }

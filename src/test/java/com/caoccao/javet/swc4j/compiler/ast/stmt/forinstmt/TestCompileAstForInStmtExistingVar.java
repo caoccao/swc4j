@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for for-in loops with existing variables (Phase 4)
@@ -44,7 +44,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("c", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("c");
     }
 
     @ParameterizedTest
@@ -63,7 +63,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("initial", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("initial");
     }
 
     @ParameterizedTest
@@ -88,7 +88,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                   }
                 }""");
         // First loop last key: "b", second loop last key: "y"
-        assertEquals("b,y", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("b,y");
     }
 
     @ParameterizedTest
@@ -108,7 +108,7 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("2", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("2");
     }
 
     @ParameterizedTest
@@ -129,6 +129,6 @@ public class TestCompileAstForInStmtExistingVar extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("c", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("c");
     }
 }

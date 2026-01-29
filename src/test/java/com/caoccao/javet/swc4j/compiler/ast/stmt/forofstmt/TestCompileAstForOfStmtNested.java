@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for nested for-of loops (Phase 8)
@@ -48,7 +48,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(66, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(66);
     }
 
     @ParameterizedTest
@@ -76,7 +76,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // Inner loop breaks at 2
-        assertEquals("a1,b1,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a1,b1,");
     }
 
     @ParameterizedTest
@@ -104,7 +104,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // Inner loop continues (skips 2)
-        assertEquals("a1a3,b1b3,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a1a3,b1b3,");
     }
 
     @ParameterizedTest
@@ -126,7 +126,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("axaybxby", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("axaybxby");
     }
 
     @ParameterizedTest
@@ -148,7 +148,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("axaybxby", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("axaybxby");
     }
 
     @ParameterizedTest
@@ -176,7 +176,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // Breaks outer loop when v2 == 2
-        assertEquals("a1,a2,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a1,a2,");
     }
 
     @ParameterizedTest
@@ -203,7 +203,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("a1b1", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("a1b1");
     }
 
     @ParameterizedTest
@@ -227,7 +227,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("ab-xy", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ab-xy");
     }
 
     @ParameterizedTest
@@ -249,7 +249,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1a1b2a2b", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1a1b2a2b");
     }
 
     @ParameterizedTest
@@ -274,7 +274,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("1x1y-2x2y-", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1x1y-2x2y-");
     }
 
     @ParameterizedTest
@@ -299,7 +299,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(8, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(8);
     }
 
     @ParameterizedTest
@@ -323,6 +323,6 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("ax,ay,bx,by,", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("ax,ay,bx,by,");
     }
 }

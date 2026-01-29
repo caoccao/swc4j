@@ -23,8 +23,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Phase 9: Explicit Getter/Setter Signatures Tests.
@@ -44,13 +45,13 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Toggle");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Boolean getter should use 'is' prefix
         Method isEnabled = interfaceClass.getMethod("isEnabled");
-        assertNotNull(isEnabled);
-        assertTrue(Modifier.isAbstract(isEnabled.getModifiers()));
-        assertEquals(boolean.class, isEnabled.getReturnType());
+        assertThat(isEnabled).isNotNull();
+        assertThat(Modifier.isAbstract(isEnabled.getModifiers())).isTrue();
+        assertThat(isEnabled.getReturnType()).isEqualTo(boolean.class);
     }
 
     @ParameterizedTest
@@ -65,17 +66,17 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Valued");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Explicit getter should generate abstract getter method
         Method getValue = interfaceClass.getMethod("getValue");
-        assertNotNull(getValue);
-        assertTrue(Modifier.isAbstract(getValue.getModifiers()));
-        assertEquals(int.class, getValue.getReturnType());
+        assertThat(getValue).isNotNull();
+        assertThat(Modifier.isAbstract(getValue.getModifiers())).isTrue();
+        assertThat(getValue.getReturnType()).isEqualTo(int.class);
 
         // No setter should be generated
-        assertThrows(NoSuchMethodException.class, () ->
-                interfaceClass.getMethod("setValue", int.class));
+        assertThatThrownBy(() ->
+                interfaceClass.getMethod("setValue", int.class)).isInstanceOf(NoSuchMethodException.class);;
     }
 
     @ParameterizedTest
@@ -91,19 +92,19 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Counter");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Getter should exist
         Method getCount = interfaceClass.getMethod("getCount");
-        assertNotNull(getCount);
-        assertTrue(Modifier.isAbstract(getCount.getModifiers()));
-        assertEquals(int.class, getCount.getReturnType());
+        assertThat(getCount).isNotNull();
+        assertThat(Modifier.isAbstract(getCount.getModifiers())).isTrue();
+        assertThat(getCount.getReturnType()).isEqualTo(int.class);
 
         // Setter should exist
         Method setCount = interfaceClass.getMethod("setCount", int.class);
-        assertNotNull(setCount);
-        assertTrue(Modifier.isAbstract(setCount.getModifiers()));
-        assertEquals(void.class, setCount.getReturnType());
+        assertThat(setCount).isNotNull();
+        assertThat(Modifier.isAbstract(setCount.getModifiers())).isTrue();
+        assertThat(setCount.getReturnType()).isEqualTo(void.class);
     }
 
     @ParameterizedTest
@@ -125,19 +126,19 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
         Class<?> interfaceClass = runner.getClass("com.Counter");
         Class<?> implClass = runner.getClass("com.SimpleCounter");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Test implementation
         Object instance = implClass.getConstructor().newInstance();
 
         // Initial value
-        assertEquals(0, implClass.getMethod("getValue").invoke(instance));
+        assertThat(implClass.getMethod("getValue").<Object>invoke(instance)).isEqualTo(0);
 
         // Set value
         implClass.getMethod("setValue", int.class).invoke(instance, 42);
 
         // Get value
-        assertEquals(42, implClass.getMethod("getValue").invoke(instance));
+        assertThat(implClass.getMethod("getValue").<Object>invoke(instance)).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -152,17 +153,17 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Writer");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Explicit setter should generate abstract setter method
         Method setOutput = interfaceClass.getMethod("setOutput", String.class);
-        assertNotNull(setOutput);
-        assertTrue(Modifier.isAbstract(setOutput.getModifiers()));
-        assertEquals(void.class, setOutput.getReturnType());
+        assertThat(setOutput).isNotNull();
+        assertThat(Modifier.isAbstract(setOutput.getModifiers())).isTrue();
+        assertThat(setOutput.getReturnType()).isEqualTo(void.class);
 
         // No getter should be generated
-        assertThrows(NoSuchMethodException.class, () ->
-                interfaceClass.getMethod("getOutput"));
+        assertThatThrownBy(() ->
+                interfaceClass.getMethod("getOutput")).isInstanceOf(NoSuchMethodException.class);;
     }
 
     @ParameterizedTest
@@ -180,26 +181,26 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Config");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // Property 'name' should have getter and setter
-        assertNotNull(interfaceClass.getMethod("getName"));
-        assertNotNull(interfaceClass.getMethod("setName", String.class));
+        assertThat(interfaceClass.getMethod("getName")).isNotNull();
+        assertThat(interfaceClass.getMethod("setName", String.class)).isNotNull();
 
         // Explicit getter 'version' should only have getter
-        assertNotNull(interfaceClass.getMethod("getVersion"));
-        assertThrows(NoSuchMethodException.class, () ->
-                interfaceClass.getMethod("setVersion", int.class));
+        assertThat(interfaceClass.getMethod("getVersion")).isNotNull();
+        assertThatThrownBy(() ->
+                interfaceClass.getMethod("setVersion", int.class)).isInstanceOf(NoSuchMethodException.class);;
 
         // Explicit setter 'debug' should only have setter
-        assertNotNull(interfaceClass.getMethod("setDebug", boolean.class));
-        assertThrows(NoSuchMethodException.class, () ->
-                interfaceClass.getMethod("isDebug"));
+        assertThat(interfaceClass.getMethod("setDebug", boolean.class)).isNotNull();
+        assertThatThrownBy(() ->
+                interfaceClass.getMethod("isDebug")).isInstanceOf(NoSuchMethodException.class);;
 
         // Readonly 'id' should only have getter
-        assertNotNull(interfaceClass.getMethod("getId"));
-        assertThrows(NoSuchMethodException.class, () ->
-                interfaceClass.getMethod("setId", int.class));
+        assertThat(interfaceClass.getMethod("getId")).isNotNull();
+        assertThatThrownBy(() ->
+                interfaceClass.getMethod("setId", int.class)).isInstanceOf(NoSuchMethodException.class);;
     }
 
     @ParameterizedTest
@@ -217,12 +218,12 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
                 }""");
         Class<?> interfaceClass = runner.getClass("com.Point");
 
-        assertTrue(interfaceClass.isInterface());
+        assertThat(interfaceClass.isInterface()).isTrue();
 
         // All getters and setters should exist
-        assertNotNull(interfaceClass.getMethod("getX"));
-        assertNotNull(interfaceClass.getMethod("getY"));
-        assertNotNull(interfaceClass.getMethod("setX", int.class));
-        assertNotNull(interfaceClass.getMethod("setY", int.class));
+        assertThat(interfaceClass.getMethod("getX")).isNotNull();
+        assertThat(interfaceClass.getMethod("getY")).isNotNull();
+        assertThat(interfaceClass.getMethod("setX", int.class)).isNotNull();
+        assertThat(interfaceClass.getMethod("setY", int.class)).isNotNull();
     }
 }

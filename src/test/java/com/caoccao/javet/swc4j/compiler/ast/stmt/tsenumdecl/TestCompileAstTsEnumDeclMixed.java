@@ -4,8 +4,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Phase 3: Mixed Explicit/Implicit Values (10 tests)
@@ -29,9 +29,9 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertEquals(0, getValueMethod.invoke(constants[0]));
-        assertEquals(1, getValueMethod.invoke(constants[1]));
-        assertEquals(2, getValueMethod.invoke(constants[2]));
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(0);
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(1);
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -50,9 +50,9 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertEquals(0, getValueMethod.invoke(constants[0]));  // 0b0 = 0
-        assertEquals(2, getValueMethod.invoke(constants[1]));  // 0b10 = 2
-        assertEquals(3, getValueMethod.invoke(constants[2]));
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(0);  // 0b0 = 0
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(2);  // 0b10 = 2
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -71,9 +71,9 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertEquals(0, getValueMethod.invoke(constants[0]));
-        assertEquals(1, getValueMethod.invoke(constants[1]));
-        assertEquals(2, getValueMethod.invoke(constants[2]));
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(0);
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(1);
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -92,9 +92,9 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertEquals(0xFF0000, getValueMethod.invoke(constants[0]));
-        assertEquals(0x00FF00, getValueMethod.invoke(constants[1]));
-        assertEquals(0x00FF00 + 1, getValueMethod.invoke(constants[2]));
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(0xFF0000);
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(0x00FF00);
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(0x00FF00 + 1);
     }
 
     @ParameterizedTest
@@ -114,10 +114,10 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertEquals(1, getValueMethod.invoke(constants[0]));
-        assertEquals(1000, getValueMethod.invoke(constants[1]));
-        assertEquals(1000000, getValueMethod.invoke(constants[2]));
-        assertEquals(1000001, getValueMethod.invoke(constants[3]));
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(1);
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(1000);
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(1000000);
+        assertThat(getValueMethod.<Object>invoke(constants[3])).isEqualTo(1000001);
     }
 
     @ParameterizedTest
@@ -137,10 +137,10 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertEquals(1, getValueMethod.invoke(constants[0]));
-        assertEquals(2, getValueMethod.invoke(constants[1]));
-        assertEquals(10, getValueMethod.invoke(constants[2]));
-        assertEquals(11, getValueMethod.invoke(constants[3]));
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(1);
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(2);
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(10);
+        assertThat(getValueMethod.<Object>invoke(constants[3])).isEqualTo(11);
     }
 
     @ParameterizedTest
@@ -160,10 +160,10 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertEquals(-10, getValueMethod.invoke(constants[0]));
-        assertEquals(-9, getValueMethod.invoke(constants[1]));
-        assertEquals(20, getValueMethod.invoke(constants[2]));
-        assertEquals(21, getValueMethod.invoke(constants[3]));
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(-10);
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(-9);
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(20);
+        assertThat(getValueMethod.<Object>invoke(constants[3])).isEqualTo(21);
     }
 
     @ParameterizedTest
@@ -182,9 +182,9 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertEquals(8, getValueMethod.invoke(constants[0]));  // 0o10 = 8
-        assertEquals(9, getValueMethod.invoke(constants[1]));
-        assertEquals(16, getValueMethod.invoke(constants[2])); // 0o20 = 16
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(8);  // 0o10 = 8
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(9);
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(16); // 0o20 = 16
     }
 
     @ParameterizedTest
@@ -201,7 +201,7 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object only = enumClass.getEnumConstants()[0];
 
-        assertEquals(42, getValueMethod.invoke(only));
+        assertThat(getValueMethod.<Object>invoke(only)).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -220,8 +220,8 @@ public class TestCompileAstTsEnumDeclMixed extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertEquals(1, getValueMethod.invoke(constants[0]));
-        assertEquals(100, getValueMethod.invoke(constants[1]));
-        assertEquals(1000, getValueMethod.invoke(constants[2]));
+        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(1);
+        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(100);
+        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(1000);
     }
 }
