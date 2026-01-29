@@ -59,3 +59,11 @@ rust/src/jni
 # Claude Code
 
 .claude
+
+# ------------------------------------------------------------------------------
+# Miscellaneous
+
+.settings/
+bin/
+.classpath
+.project

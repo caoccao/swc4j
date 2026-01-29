@@ -21,7 +21,9 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 
 public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
 
@@ -40,9 +42,9 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                   return a * b
                 }""");
         var staticRunner = runner.createStaticRunner("$");
-        assertEquals(15, (int) staticRunner.invoke("add", 10, 5));
-        assertEquals(5, (int) staticRunner.invoke("sub", 10, 5));
-        assertEquals(50, (int) staticRunner.invoke("mul", 10, 5));
+        assertThat((int) staticRunner.invoke("add", 10, 5)).isEqualTo(15);
+        assertThat((int) staticRunner.invoke("sub", 10, 5)).isEqualTo(5);
+        assertThat((int) staticRunner.invoke("mul", 10, 5)).isEqualTo(50);
     }
 
     @ParameterizedTest
@@ -54,7 +56,7 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                   return a + b
                 }""");
         var staticRunner = runner.createStaticRunner("$");
-        assertEquals(30, (int) staticRunner.invoke("add", 10, 20));
+        assertThat((int) staticRunner.invoke("add", 10, 20)).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -68,7 +70,7 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                   }
                 }""");
         var staticRunner = runner.createStaticRunner("com.$");
-        assertEquals(50, (int) staticRunner.invoke("multiply", 5, 10));
+        assertThat((int) staticRunner.invoke("multiply", 5, 10)).isEqualTo(50);
     }
 
     @ParameterizedTest
@@ -84,10 +86,10 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                 }""");
         // Class $ should exist with its own method
         var instanceRunner = runner.createInstanceRunner("$");
-        assertEquals(100, (int) instanceRunner.invoke("getValue"));
+        assertThat((int) instanceRunner.invoke("getValue")).isEqualTo(100);
         // Function should be in $1
         var staticRunner = runner.createStaticRunner("$1");
-        assertEquals(42, (int) staticRunner.invoke("helper"));
+        assertThat((int) staticRunner.invoke("helper")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -105,10 +107,10 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                 }""");
         // Class com.$ should exist
         var instanceRunner = runner.createInstanceRunner("com.$");
-        assertEquals(200, (int) instanceRunner.invoke("getValue"));
+        assertThat((int) instanceRunner.invoke("getValue")).isEqualTo(200);
         // Function should be in com.$1
         var staticRunner = runner.createStaticRunner("com.$1");
-        assertEquals(84, (int) staticRunner.invoke("helper"));
+        assertThat((int) staticRunner.invoke("helper")).isEqualTo(84);
     }
 
     @ParameterizedTest
@@ -126,11 +128,11 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                   return 3
                 }""");
         var instanceRunner = runner.createInstanceRunner("$");
-        assertEquals(1, (int) instanceRunner.invoke("getValue"));
+        assertThat((int) instanceRunner.invoke("getValue")).isEqualTo(1);
         var instanceRunner1 = runner.createInstanceRunner("$1");
-        assertEquals(2, (int) instanceRunner1.invoke("getValue"));
+        assertThat((int) instanceRunner1.invoke("getValue")).isEqualTo(2);
         var staticRunner = runner.createStaticRunner("$2");
-        assertEquals(3, (int) staticRunner.invoke("helper"));
+        assertThat((int) staticRunner.invoke("helper")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -148,9 +150,9 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
                 }""");
         // Regular class
         var instanceRunner = runner.createInstanceRunner("Calculator");
-        assertEquals(30, (int) instanceRunner.invoke("add", 10, 20));
+        assertThat((int) instanceRunner.invoke("add", 10, 20)).isEqualTo(30);
         // Standalone function in $
         var staticRunner = runner.createStaticRunner("$");
-        assertEquals(20, (int) staticRunner.invoke("helper", 10));
+        assertThat((int) staticRunner.invoke("helper", 10)).isEqualTo(20);
     }
 }

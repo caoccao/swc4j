@@ -21,8 +21,10 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
 
@@ -65,7 +67,7 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1.5, runner.createInstanceRunner("com.A").invoke("test", new double[]{1.5, 2.5}), 0.001);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test", new double[]{1.5, 2.5})).isCloseTo(1.5, within(0.001));
     }
 
     @ParameterizedTest
@@ -79,7 +81,7 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test", new int[]{}));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test", new int[]{})).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -97,8 +99,8 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(1, (int) instanceRunner.invoke("getFirst", new int[]{1, 2, 3}));
-        assertEquals(3, (int) instanceRunner.invoke("getLast", new int[]{1, 2, 3}));
+        assertThat((int) instanceRunner.invoke("getFirst", new int[]{1, 2, 3})).isEqualTo(1);
+        assertThat((int) instanceRunner.invoke("getLast", new int[]{1, 2, 3})).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -116,7 +118,7 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(15, (int) runner.createInstanceRunner("com.A").invoke("sum", new int[]{1, 2, 3, 4, 5}));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("sum", new int[]{1, 2, 3, 4, 5})).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -130,7 +132,7 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(5, (int) runner.createInstanceRunner("com.A").invoke("count", new int[]{1, 2, 3, 4, 5}));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("count", new int[]{1, 2, 3, 4, 5})).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -144,7 +146,7 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(10, (int) runner.createInstanceRunner("com.A").invoke("test", new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test", new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -158,7 +160,7 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(1, (int) runner.createInstanceRunner("com.A").invoke("test", new int[]{42}));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test", new int[]{42})).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -172,6 +174,6 @@ public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello", runner.createInstanceRunner("com.A").invoke("test", "test", new String[]{"hello", "world"}));
+        assertThat((String) runner.createInstanceRunner("com.A").invoke("test", "test", new String[]{"hello", "world"})).isEqualTo("hello");
     }
 }

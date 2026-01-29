@@ -21,10 +21,11 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.function.IntUnaryOperator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Tests for recursive arrow expressions.
@@ -51,7 +52,7 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(120, result);  // 5! = 120
+        assertThat((int) result).isEqualTo(120);  // 5! = 120
     }
 
     @ParameterizedTest
@@ -71,14 +72,14 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("getFactorial");
-        assertNotNull(result);
+        assertThat(result).isNotNull();
         IntUnaryOperator factorial = (IntUnaryOperator) result;
-        assertEquals(1, factorial.applyAsInt(0));
-        assertEquals(1, factorial.applyAsInt(1));
-        assertEquals(2, factorial.applyAsInt(2));
-        assertEquals(6, factorial.applyAsInt(3));
-        assertEquals(24, factorial.applyAsInt(4));
-        assertEquals(120, factorial.applyAsInt(5));
+        assertThat(factorial.applyAsInt(0)).isEqualTo(1);
+        assertThat(factorial.applyAsInt(1)).isEqualTo(1);
+        assertThat(factorial.applyAsInt(2)).isEqualTo(2);
+        assertThat(factorial.applyAsInt(3)).isEqualTo(6);
+        assertThat(factorial.applyAsInt(4)).isEqualTo(24);
+        assertThat(factorial.applyAsInt(5)).isEqualTo(120);
     }
 
     @ParameterizedTest
@@ -104,7 +105,7 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(55, result);  // fib(10) = 55
+        assertThat((int) result).isEqualTo(55);  // fib(10) = 55
     }
 
     @ParameterizedTest
@@ -130,19 +131,19 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("getFibonacci");
-        assertNotNull(result);
+        assertThat(result).isNotNull();
         IntUnaryOperator fib = (IntUnaryOperator) result;
-        assertEquals(0, fib.applyAsInt(0));
-        assertEquals(1, fib.applyAsInt(1));
-        assertEquals(1, fib.applyAsInt(2));
-        assertEquals(2, fib.applyAsInt(3));
-        assertEquals(3, fib.applyAsInt(4));
-        assertEquals(5, fib.applyAsInt(5));
-        assertEquals(8, fib.applyAsInt(6));
-        assertEquals(13, fib.applyAsInt(7));
-        assertEquals(21, fib.applyAsInt(8));
-        assertEquals(34, fib.applyAsInt(9));
-        assertEquals(55, fib.applyAsInt(10));
+        assertThat(fib.applyAsInt(0)).isEqualTo(0);
+        assertThat(fib.applyAsInt(1)).isEqualTo(1);
+        assertThat(fib.applyAsInt(2)).isEqualTo(1);
+        assertThat(fib.applyAsInt(3)).isEqualTo(2);
+        assertThat(fib.applyAsInt(4)).isEqualTo(3);
+        assertThat(fib.applyAsInt(5)).isEqualTo(5);
+        assertThat(fib.applyAsInt(6)).isEqualTo(8);
+        assertThat(fib.applyAsInt(7)).isEqualTo(13);
+        assertThat(fib.applyAsInt(8)).isEqualTo(21);
+        assertThat(fib.applyAsInt(9)).isEqualTo(34);
+        assertThat(fib.applyAsInt(10)).isEqualTo(55);
     }
 
     @ParameterizedTest
@@ -166,7 +167,7 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(55, result);  // 1+2+3+...+10 = 55
+        assertThat((int) result).isEqualTo(55);  // 1+2+3+...+10 = 55
     }
 
     @ParameterizedTest
@@ -191,7 +192,7 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(10, result);  // 2+2+2+2+2 = 10
+        assertThat((int) result).isEqualTo(10);  // 2+2+2+2+2 = 10
     }
 
     @ParameterizedTest
@@ -216,6 +217,6 @@ public class TestCompileAstArrowRecursive extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(16, result);  // 5+4+3+2+1+1(base) = 16
+        assertThat((int) result).isEqualTo(16);  // 5+4+3+2+1+1(base) = 16
     }
 }

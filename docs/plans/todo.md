@@ -1,0 +1,295 @@
+# TypeScript -> JVM Bytecode: Missing Feature Plan
+
+This report consolidates gaps found in `docs/plans/**` and cross-checked against existing Java compiler code and tests. Each missing feature below has its own plan section.
+
+## Feature: Async/Await (Functions, Arrows, Try/Catch)
+- Evidence: `docs/plans/ast/class/function.md`, `docs/plans/ast/expr/arrow.md`, `docs/plans/ast/stmt/try-stmt.md`.
+- Status: Not supported by design; no state machine generation.
+- Confidence: 25%.
+- Plan: Define async lowering strategy (promise-like runtime or coroutine), add async AST handling, generate state machine, update StackMap logic.
+- Tests: Add async function/arrow/try-catch cases with await, promise chains, and error propagation.
+
+## Feature: Generators (Functions, Arrows)
+- Evidence: `docs/plans/ast/class/function.md`, `docs/plans/ast/expr/arrow.md`.
+- Status: Not supported; requires resumable execution state.
+- Confidence: 20%.
+- Plan: Design generator runtime, yield state machine, iterator protocol mapping, and integration with expression/statement generators.
+- Tests: Basic yield, yield*, nested generators, and generator-in-loop cases.
+
+## Feature: Decorators (Class/Method/Parameter)
+- Evidence: `docs/plans/ast/class/class.md`, `docs/plans/ast/class/function.md`.
+- Status: Not supported (intentionally excluded).
+- Confidence: 30%.
+- Plan: Decide on annotation or bytecode weaving strategy, define metadata model, wire decorator evaluation order.
+- Tests: Class, method, and parameter decorator ordering and metadata visibility.
+
+## Feature: Arrow Return Union Types
+- Evidence: `docs/plans/ast/expr/arrow.md`.
+- Status: Not supported; JVM requires single return type.
+- Confidence: 45%.
+- Plan: Add union coercion strategy (Object return + tagging), update TypeResolver, and ensure boxing rules.
+- Tests: Union returns with numeric/object/string branches and nested arrows.
+
+## Feature: Arrow Parameter Destructuring
+- Evidence: `docs/plans/ast/expr/arrow.md` (known limitation despite other param features).
+- Status: Not supported for arrow params.
+- Confidence: 60%.
+- Plan: Reuse rest/destructuring generators for arrow parameters, map destructured variables into closure scope.
+- Tests: Array/object destructuring params with defaults and nested patterns.
+
+## Feature: Arrow Default/Rest/Optional Params on Standard Functional Interfaces
+- Evidence: `docs/plans/ast/expr/arrow.md`.
+- Status: Limited to custom interfaces; standard interfaces not fully supported.
+- Confidence: 50%.
+- Plan: Generate adapter methods or synthetic overloads, update functional interface resolution.
+- Tests: `Consumer`, `Function`, `BiFunction` with defaults/rest/optional params.
+
+## Feature: Arrow Custom Interface Type Inference
+- Evidence: `docs/plans/ast/expr/arrow.md`.
+- Status: Limited inference for custom interfaces.
+- Confidence: 55%.
+- Plan: Improve inference by resolving single-abstract-method signatures from interface type metadata.
+- Tests: Custom interfaces with generics, overload-like erasure, and captures.
+
+## Feature: Arrow Capture Leak Audit
+- Evidence: `docs/plans/ast/expr/arrow.md` quality gate unchecked.
+- Status: Not verified.
+- Confidence: 40%.
+- Plan: Track capture holder lifetime, ensure no retained references beyond scope; add cleanup if needed.
+- Tests: Stress tests for nested closures and large capture sets.
+
+## Feature: Complex Function Return Type Inference
+- Evidence: `docs/plans/ast/class/function.md` (Phase 5 partial).
+- Status: Complex expressions partially inferred.
+- Confidence: 60%.
+- Plan: Extend TypeResolver for nested expressions, conditional returns, and member calls in return positions.
+- Tests: Mixed arithmetic, conditional returns, nested calls, and object/array returns.
+
+## Feature: Function Rest Parameters (Varargs) Fully Working
+- Evidence: `docs/plans/ast/pat/rest-pat.md` (Phase 1 unchecked, checklist TODOs).
+- Status: Varargs handling incomplete (type resolution, analyzer integration).
+- Confidence: 70%.
+- Plan: Create `RestPatternGenerator`, resolve varargs types, update VariableAnalyzer, add param rest tests.
+- Tests: `TestCompileAstRestPatFunctionParam` plus nested and typed varargs.
+
+## Feature: TS Interface Call/Construct Signatures
+- Evidence: `docs/plans/ast/stmt/ts-interface-decl.md`.
+- Status: Not supported.
+- Confidence: 45%.
+- Plan: Map call signatures to functional interfaces, construct signatures to factory patterns, add type mapping rules.
+- Tests: Callable and constructable interfaces used in function/constructor contexts.
+
+## Feature: Module Import Limitations (Instance Methods, Constructors, Varargs)
+- Evidence: `docs/plans/ast/module/import.md`.
+- Status: Static methods only; varargs bytecode not implemented; java/javax only.
+- Confidence: 55%.
+- Plan: Support instance method resolution, constructor calls, varargs argument packing, and custom package imports.
+- Tests: Instance method calls, `new` calls, varargs overload selection.
+
+## Feature: Binary Expressions - Nullish Coalescing / InstanceOf / In
+- Evidence: `docs/plans/ast/expr/binary-expr.md` (next steps).
+- Status: Not implemented.
+- Confidence: 70%.
+- Plan: Add AST handling for `??`, `instanceof`, and `in`, with type rules and StackMap integration.
+- Tests: Truthy/falsy nullish, type checks, and property existence checks.
+
+## Feature: Unary Operators (~, typeof, void, delete for Map)
+- Evidence: `docs/plans/ast/expr/unary-expr.md`.
+- Status: Missing operators and some error cases.
+- Confidence: 65%.
+- Plan: Implement bitwise NOT, typeof, void; extend delete to LinkedHashMap; fix MIN_VALUE bug and boolean rejection path.
+- Tests: Operator semantics across primitives, wrappers, and object/map targets.
+
+## Feature: Update Expressions - Long/Double Postfix, Class Fields, Multi-D Arrays
+- Evidence: `docs/plans/ast/expr/update-expr.md`.
+- Status: Postfix for long/double arrays deferred; class field access missing; multidim arrays unsupported.
+- Confidence: 50%.
+- Plan: Add category-2 postfix stack patterns, integrate getfield/putfield updates, and extend array access to multidim.
+- Tests: Postfix on long/double arrays, `this.field++`, and `arr[i][j]++`.
+
+## Feature: Object Literal Gaps (Methods, Accessors, Symbols, Prototypes)
+- Evidence: `docs/plans/ast/expr/lit/object-lit.md`.
+- Status: Method properties deferred; getters/setters, symbols, descriptors, prototypes unsupported.
+- Confidence: 40%.
+- Plan: Decide representation for methods/accessors (class generation or wrapper), add symbol key handling, and document prototype limits.
+- Tests: Method properties in literals, getter/setter usage, and symbol key rejection.
+
+## Feature: Object Literal Type Parsing for Array<T>
+- Evidence: `docs/plans/ast/expr/lit/object-lit.md` limitation (Array<T> parsing not implemented).
+- Status: TypeResolver lacks Array<T> in object literal contexts.
+- Confidence: 75%.
+- Plan: Extend TypeResolver to parse `Array<T>` and propagate into Record value validation.
+- Tests: Record values that are typed arrays and nested arrays.
+
+## Feature: Array Literal Semantics (Holes, Bounds, Length Growth)
+- Evidence: `docs/plans/ast/expr/lit/array-lit.md`.
+- Status: Holes untested, out-of-bounds behavior JS-incompatible, length grow not verified.
+- Confidence: 65%.
+- Plan: Define JS-compatible semantics for holes and bounds, implement auto-expand for ArrayList mode, add large-array init path.
+- Tests: Sparse arrays, out-of-bounds reads/writes, `arr.length` grow/shrink/clear.
+
+## Feature: Array APIs Missing (keys/values/entries, Array.isArray/from/of)
+- Evidence: `docs/plans/ast/expr/lit/array-lit.md`.
+- Status: Not implemented.
+- Confidence: 70%.
+- Plan: Add helper utilities and dispatch support for these APIs in ArrayList mode.
+- Tests: Iterators, factory methods, and type checks.
+
+## Feature: Array Functional Methods (forEach/map/filter/etc.)
+- Evidence: `docs/plans/ast/expr/lit/array-lit.md`.
+- Status: Deferred pending function support integration for callbacks.
+- Confidence: 50%.
+- Plan: Map to Java Streams or loop expansion, connect to lambda/arrow compilation.
+- Tests: Each method with arrow callbacks and side effects.
+
+## Feature: Switch Statement Limitations
+- Evidence: `docs/plans/ast/stmt/switch-stmt.md`.
+- Status: Labeled break to switch unsupported; long/boolean/float/double switch unsupported.
+- Confidence: 55%.
+- Plan: Add labeled switch targets and extend switch lowering for additional primitive types.
+- Tests: Labeled breaks, long/boolean/float/double switch cases.
+
+## Feature: If Statement Limitations
+- Evidence: `docs/plans/ast/stmt/if-stmt.md`.
+- Status: String comparison stackmap issue; assignment type handling; block scope; single-statement bodies.
+- Confidence: 60%.
+- Plan: Fix BinaryExpression string stackmap, enforce assignment coercion, add block scope tracking, handle non-block bodies.
+- Tests: String comparisons, mixed-type assignments, scope shadowing, and single-line ifs.
+
+## Feature: While Loop Wide Jump Support
+- Evidence: `docs/plans/ast/stmt/while-stmt.md`.
+- Status: Large loop bodies may need `goto_w`.
+- Confidence: 75%.
+- Plan: Add wide jump emission when offset exceeds 16-bit range.
+- Tests: Synthetic large loop body to exceed 32KB jump range.
+
+## Feature: Try/Catch Multi-Type Guard Lowering
+- Evidence: `docs/plans/ast/stmt/try-stmt.md`.
+- Status: Multiple catch-type branching not implemented.
+- Confidence: 55%.
+- Plan: Generate catch-all then branch on `instanceof`, or emit multi-catch table entries with type guards.
+- Tests: Multiple type guards inside a single catch block.
+
+## Feature: Regex Limitations (Flags, Lookbehind, Unicode)
+- Evidence: `docs/plans/ast/expr/lit/regex.md`.
+- Status: Sticky `y`, indices `d`, and pre-Java11 lookbehind unsupported; unicode property gaps.
+- Confidence: 60%.
+- Plan: Add compile-time errors or conversion for unsupported flags; map unicode property names; gate lookbehind by runtime.
+- Tests: Unsupported flags, unicode properties, and Java version gated lookbehind.
+
+## Feature: String Literal Escape \v
+- Evidence: `docs/plans/ast/expr/lit/str.md`.
+- Status: Vertical tab not supported in Java string parsing.
+- Confidence: 90%.
+- Plan: Translate `\v` to `\u000B` at compile time.
+- Tests: String literal with `\v` in different contexts.
+
+## Feature: TypeScript Enums - Computed and Heterogeneous
+- Evidence: `docs/plans/ast/stmt/ts-enum-decl.md`.
+- Status: Computed values and mixed string/number enums unsupported.
+- Confidence: 50%.
+- Plan: Decide on compile-time evaluation rules for computed values and either support or reject heterogeneous enums with clear errors.
+- Tests: Computed with constants, forward/circular references, mixed enum values.
+
+## Feature: TypeScript Project -> Jar Entry Point
+- Evidence: New requirement for `java -jar swc4j-<version>.jar <main-entry> -i <root-to-ts-project> -o <output-jar-file-path>`.
+- Status: Not implemented.
+- Confidence: 55%.
+- Plan:
+  - Add a CLI main entry that resolves project root, finds TS sources, parses, compiles to class files, and packages a runnable jar.
+  - Define module/class naming rules from file paths and namespaces; map `<main-entry>` to the entry class and method.
+  - Implement jar manifest generation (Main-Class) and resource copying policy.
+  - Add deterministic output ordering and error aggregation for multi-file builds.
+- Tests: CLI end-to-end build from sample TS project, jar executes entry, error formatting for compile failures.
+
+### Error Reporting Gaps (Swc4jByteCodeCompilerException)
+These need to be addressed so errors always include source snippet, line, column, and reason.
+- No built-in formatting for span -> line/column/source snippet in `Swc4jByteCodeCompilerException`.
+- Some exceptions are constructed with `ast` set to null (e.g., default error branches), losing span context.
+- No source file path stored alongside AST/exception, so multi-file project errors cannot report filename.
+- Compiler pathways pass only code strings; there is no centralized source map to resolve span offsets to line/column and snippet.
+- Error propagation does not standardize a single formatter for all thrown `Swc4jByteCodeCompilerException` cases.
+
+## Feature: Optional Chaining and Optional Calls
+- Evidence: `ExpressionGenerator` lacks `Swc4jAstOptChainExpr` and `Swc4jAstOptCall` handling.
+- Status: Not implemented.
+- Confidence: 60%.
+- Plan: Add nullish checks around member/call chains, preserve short-circuit semantics, and ensure return type inference for optional results.
+- Tests: Optional chain on fields, calls, nested chains, and mixed with updates/assignments.
+
+## Feature: Template Literals and Tagged Templates
+- Evidence: `ExpressionGenerator` lacks `Swc4jAstTpl`, `Swc4jAstTaggedTpl`, `Swc4jAstTplElement` handling.
+- Status: Not implemented.
+- Confidence: 45%.
+- Plan: Implement string concatenation lowering for plain templates and provide runtime support for tagged templates (cooked/raw array + substitutions).
+- Tests: Basic template literals, expression interpolation, multiline, and tagged template calls.
+
+## Feature: Function Expressions and Class Expressions
+- Evidence: `ExpressionGenerator` lacks `Swc4jAstFnExpr` and `Swc4jAstClassExpr` handling.
+- Status: Not implemented.
+- Confidence: 55%.
+- Plan: Emit synthetic classes/methods for anonymous functions/classes with deterministic naming and capture handling.
+- Tests: Inline function/class expressions assigned to variables and passed as arguments.
+
+## Feature: Debugger and Empty Statements
+- Evidence: `StatementGenerator` lacks `Swc4jAstDebuggerStmt` and `Swc4jAstEmptyStmt` handling.
+- Status: Not implemented.
+- Confidence: 85%.
+- Plan: Treat both as no-ops and ensure they do not affect control flow or line mapping.
+- Tests: Debugger/empty statements within blocks and loops.
+
+## Feature: With Statement
+- Evidence: `StatementGenerator` lacks `Swc4jAstWithStmt` handling.
+- Status: Not supported (dynamic scope cannot be safely compiled to JVM bytecode).
+- Confidence: 10%.
+- Plan: Reject with clear compile-time error explaining unsupported dynamic scope.
+- Tests: with-statement rejection diagnostics.
+
+## Feature: Using Declaration
+- Evidence: `StatementGenerator` lacks `Swc4jAstUsingDecl` handling.
+- Status: Not supported; JS `using` relies on `Symbol.dispose` semantics not available on JVM.
+- Confidence: 15%.
+- Plan: Reject with clear compile-time error; document that try-with-resources is not auto-mapped.
+- Tests: using-decl rejection diagnostics.
+
+## Feature: JSX AST Nodes
+- Evidence: `ExpressionGenerator` lacks `Swc4jAstJsx*` handling; AST includes JSX nodes.
+- Status: Not supported in bytecode compiler; requires prior JSX transform.
+- Confidence: 20%.
+- Plan: Require JSX-to-JS transform (e.g., via swc transform) before bytecode compilation; add guardrail error if JSX nodes appear.
+- Tests: JSX input triggers clear error with location.
+
+## Feature: Module Exports and TS Namespaces
+- Evidence: No generator handles `Swc4jAstExport*`, `Swc4jAstNamedExport`, `Swc4jAstTsModuleDecl`, `Swc4jAstTsNamespaceDecl`, `Swc4jAstTsNamespaceExportDecl`.
+- Status: Not implemented.
+- Confidence: 45%.
+- Plan: Define module system mapping to Java packages/classes; decide export semantics (public classes/methods), and integrate with jar entry point.
+- Tests: Exported functions/classes referenced across files and namespaces.
+
+## Feature: Meta Property Expressions
+- Evidence: `ExpressionGenerator` lacks `Swc4jAstMetaPropExpr` handling.
+- Status: Not supported; `import.meta` and `new.target` have no direct JVM equivalent.
+- Confidence: 20%.
+- Plan: Reject with clear errors; optionally support `new.target` only inside constructors with synthetic metadata.
+- Tests: `import.meta` and `new.target` diagnostics.
+
+## Feature: Super Property Expressions
+- Evidence: `ExpressionGenerator` lacks `Swc4jAstSuperPropExpr` handling.
+- Status: Not implemented.
+- Confidence: 40%.
+- Plan: Resolve super field/method access in class hierarchy, emit invokespecial/getfield/putfield as needed.
+- Tests: Super property access in overridden methods and constructors.
+
+## Feature: TS-Specific Expressions (Type/Assertion Variants)
+- Evidence: `ExpressionGenerator` lacks `Swc4jAstTsNonNullExpr`, `Swc4jAstTsTypeAssertion`, `Swc4jAstTsConstAssertion`, `Swc4jAstTsSatisfiesExpr`, `Swc4jAstTsInstantiation` handling.
+- Status: Not implemented.
+- Confidence: 70%.
+- Plan: Treat as compile-time only (erase to inner expression) while enforcing type constraints where possible.
+- Tests: Non-null and type assertions erased with correct runtime behavior.
+
+## Feature: TS Type System Coverage in TypeResolver
+- Evidence: `TypeResolver.mapTsTypeToDescriptor()` only handles `TsArrayType`, `TsKeywordType`, `TsTypeRef`, `TsFnType`.
+- Status: Partial; many TS type nodes are not mapped.
+- Confidence: 50%.
+- Plan: Add mapping rules or explicit rejections for `TsUnionType`, `TsIntersectionType`, `TsConditionalType`, `TsMappedType`, `TsIndexedAccessType`, `TsTypeOperator`, `TsTypeQuery`, `TsImportType`, `TsInferType`, `TsTupleType`, `TsOptionalType`, `TsRestType`, `TsLitType`, `TsTplLitType`, `TsTypePredicate`.
+- Tests: Type annotation parsing with each TS type feature and clear diagnostics.

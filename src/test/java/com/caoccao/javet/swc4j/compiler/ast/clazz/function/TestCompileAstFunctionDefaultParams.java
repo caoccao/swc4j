@@ -21,9 +21,11 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
 
@@ -44,12 +46,13 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
         Class<?> classFormatter = runner.getClass("com.Formatter");
         var instance = classFormatter.getConstructor().newInstance();
 
-        assertEquals(
-                List.of("VALUE: 42", "value: 42"),
+        assertThat(
                 List.of(
                         classFormatter.getMethod("format", int.class, boolean.class).invoke(instance, 42, true),
                         classFormatter.getMethod("format", int.class).invoke(instance, 42)
                 )
+        ).isEqualTo(
+                List.of("VALUE: 42", "value: 42")
         );
     }
 
@@ -67,12 +70,13 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
         Class<?> classMath = runner.getClass("com.Math");
         var instance = classMath.getConstructor().newInstance();
 
-        assertEquals(
-                List.of(15.0, 10.0),
+        assertThat(
                 List.of(
                         classMath.getMethod("multiply", double.class, double.class).invoke(instance, 5.0, 3.0),
                         classMath.getMethod("multiply", double.class).invoke(instance, 5.0)
                 )
+        ).isEqualTo(
+                List.of(15.0, 10.0)
         );
     }
 
@@ -90,12 +94,13 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
         Class<?> classCalc = runner.getClass("com.Calculator");
         var instance = classCalc.getConstructor().newInstance();
 
-        assertEquals(
-                List.of(15, 15),
+        assertThat(
                 List.of(
                         classCalc.getMethod("add", int.class, int.class).invoke(instance, 5, 10),
                         classCalc.getMethod("add", int.class).invoke(instance, 5)
                 )
+        ).isEqualTo(
+                List.of(15, 15)
         );
     }
 
@@ -113,12 +118,13 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
         Class<?> classGreeter = runner.getClass("com.Greeter");
         var instance = classGreeter.getConstructor().newInstance();
 
-        assertEquals(
-                List.of("Hello, Alice!", "Hello, World!"),
+        assertThat(
                 List.of(
                         classGreeter.getMethod("greet", String.class).invoke(instance, "Alice"),
                         classGreeter.getMethod("greet").invoke(instance)
                 )
+        ).isEqualTo(
+                List.of("Hello, Alice!", "Hello, World!")
         );
     }
 
@@ -136,13 +142,14 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
         Class<?> classCalc = runner.getClass("com.Calculator");
         var instance = classCalc.getConstructor().newInstance();
 
-        assertEquals(
-                List.of(36, 35, 31),
+        assertThat(
                 List.of(
                         classCalc.getMethod("compute", int.class, int.class, int.class).invoke(instance, 1, 15, 20),
                         classCalc.getMethod("compute", int.class, int.class).invoke(instance, 5, 10),
                         classCalc.getMethod("compute", int.class).invoke(instance, 1)
                 )
+        ).isEqualTo(
+                List.of(36, 35, 31)
         );
     }
 
@@ -161,13 +168,14 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
                   }
                 }""");
         var staticRunner = runner.createStaticRunner("com.Utils");
-        assertEquals(
-                List.of(10, 5, 0),
+        assertThat(
                 List.of(
                         staticRunner.invoke("max", 5, 10),
                         staticRunner.invoke("max", 5),
                         (int) staticRunner.invoke("max", -5) // max(-5, 0) = 0
                 )
+        ).isEqualTo(
+                List.of(10, 5, 0)
         );
     }
 }

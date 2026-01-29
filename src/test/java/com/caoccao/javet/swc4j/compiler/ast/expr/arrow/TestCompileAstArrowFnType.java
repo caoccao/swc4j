@@ -21,7 +21,9 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 
 /**
  * Tests for function type syntax in arrow expressions.
@@ -49,7 +51,7 @@ public class TestCompileAstArrowFnType extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(19, result);  // (3+4) + (3*4) = 7 + 12 = 19
+        assertThat((int) result).isEqualTo(19);  // (3+4) + (3*4) = 7 + 12 = 19
     }
 
     @ParameterizedTest
@@ -67,7 +69,7 @@ public class TestCompileAstArrowFnType extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(true, result);
+        assertThat((boolean) result).isTrue();
     }
 
     @ParameterizedTest
@@ -85,7 +87,7 @@ public class TestCompileAstArrowFnType extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(4.0, result);
+        assertThat((double) result).isEqualTo(4.0);
     }
 
     @ParameterizedTest
@@ -104,7 +106,7 @@ public class TestCompileAstArrowFnType extends BaseTestCompileSuite {
         Class<?> classA = runner.getClass("com.A");
         var instance = classA.getConstructor().newInstance();
         var result = classA.getMethod("test").invoke(instance);
-        assertEquals(300L, result);
+        assertThat((long) result).isEqualTo(300L);
     }
 
     @ParameterizedTest
@@ -122,7 +124,7 @@ public class TestCompileAstArrowFnType extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(42, result);
+        assertThat((int) result).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -140,7 +142,7 @@ public class TestCompileAstArrowFnType extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(42, result);
+        assertThat((int) result).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -158,7 +160,7 @@ public class TestCompileAstArrowFnType extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(6, result);
+        assertThat((int) result).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -176,7 +178,7 @@ public class TestCompileAstArrowFnType extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(3, result);
+        assertThat((int) result).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -196,7 +198,7 @@ public class TestCompileAstArrowFnType extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(42, result);
+        assertThat((int) result).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -215,7 +217,7 @@ public class TestCompileAstArrowFnType extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(50, result);
+        assertThat((int) result).isEqualTo(50);
     }
 
     @ParameterizedTest
@@ -233,7 +235,7 @@ public class TestCompileAstArrowFnType extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals("Hello, World!", result);
+        assertThat(result).isEqualTo("Hello, World!");
     }
 
     @ParameterizedTest
@@ -252,6 +254,6 @@ public class TestCompileAstArrowFnType extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(25, result);  // (2+3) + (4*5) = 5 + 20 = 25
+        assertThat((int) result).isEqualTo(25);  // (2+3) + (4*5) = 5 + 20 = 25
     }
 }

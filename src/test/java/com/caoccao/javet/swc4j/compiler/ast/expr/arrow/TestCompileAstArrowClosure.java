@@ -21,11 +21,12 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Tests for arrow expression closures (variable capture).
@@ -47,8 +48,8 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("compute", 5);
-        assertNotNull(result);
-        assertEquals(50, ((IntSupplier) result).getAsInt());  // 5 * 10 = 50
+        assertThat(result).isNotNull();
+        assertThat(((IntSupplier) result).getAsInt()).isEqualTo(50);  // 5 * 10 = 50
     }
 
     @ParameterizedTest
@@ -66,8 +67,8 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(result);
-        assertEquals(42, ((IntSupplier) result).getAsInt());
+        assertThat(result).isNotNull();
+        assertThat(((IntSupplier) result).getAsInt()).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -83,9 +84,9 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("createAdder", 100);
-        assertNotNull(result);
-        assertEquals(105, ((IntUnaryOperator) result).applyAsInt(5));   // 5 + 100 = 105
-        assertEquals(110, ((IntUnaryOperator) result).applyAsInt(10));  // 10 + 100 = 110
+        assertThat(result).isNotNull();
+        assertThat(((IntUnaryOperator) result).applyAsInt(5)).isEqualTo(105);   // 5 + 100 = 105
+        assertThat(((IntUnaryOperator) result).applyAsInt(10)).isEqualTo(110);  // 10 + 100 = 110
     }
 
     @ParameterizedTest
@@ -105,8 +106,8 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(result);
-        assertEquals(60, ((IntSupplier) result).getAsInt());  // 10 + 20 + 30 = 60
+        assertThat(result).isNotNull();
+        assertThat(((IntSupplier) result).getAsInt()).isEqualTo(60);  // 10 + 20 + 30 = 60
     }
 
     @ParameterizedTest
@@ -124,8 +125,8 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("compute", 5);
-        assertNotNull(result);
-        assertEquals(20, ((IntSupplier) result).getAsInt());  // 5 * 2 + 10 = 20
+        assertThat(result).isNotNull();
+        assertThat(((IntSupplier) result).getAsInt()).isEqualTo(20);  // 5 * 2 + 10 = 20
     }
 
     @ParameterizedTest
@@ -142,8 +143,8 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("getValueFn");
-        assertNotNull(result);
-        assertEquals(42, ((IntSupplier) result).getAsInt());
+        assertThat(result).isNotNull();
+        assertThat(((IntSupplier) result).getAsInt()).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -164,9 +165,9 @@ public class TestCompileAstArrowClosure extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         var addOne = instanceRunner.invoke("getAddOne");
         var dbl = instanceRunner.invoke("getDouble");
-        assertNotNull(addOne);
-        assertNotNull(dbl);
-        assertEquals(6, ((IntUnaryOperator) addOne).applyAsInt(5));   // 5 + 1 = 6
-        assertEquals(10, ((IntUnaryOperator) dbl).applyAsInt(5));     // 5 * 2 = 10
+        assertThat(addOne).isNotNull();
+        assertThat(dbl).isNotNull();
+        assertThat(((IntUnaryOperator) addOne).applyAsInt(5)).isEqualTo(6);   // 5 + 1 = 6
+        assertThat(((IntUnaryOperator) dbl).applyAsInt(5)).isEqualTo(10);     // 5 * 2 = 10
     }
 }

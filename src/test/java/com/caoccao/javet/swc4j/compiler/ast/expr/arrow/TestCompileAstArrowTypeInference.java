@@ -21,11 +21,12 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.List;
 import java.util.function.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for arrow expression type inference (Phase 5).
@@ -51,9 +52,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(
-                List.of(3, 11, 21),
-                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(3, 11, 21)
+        );
     }
 
     @ParameterizedTest
@@ -71,7 +76,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (DoubleBinaryOperator) instanceRunner.invoke("get");
-        assertEquals(2.0, fn.applyAsDouble(10.0, 5.0), 0.0001);
+        assertThat(fn.applyAsDouble(10.0, 5.0)).isCloseTo(2.0, within(0.0001));
     }
 
     @ParameterizedTest
@@ -89,8 +94,8 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (DoubleUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(2.5, fn.applyAsDouble(1.0), 0.0001);
-        assertEquals(12.5, fn.applyAsDouble(5.0), 0.0001);
+        assertThat(fn.applyAsDouble(1.0)).isCloseTo(2.5, within(0.0001));
+        assertThat(fn.applyAsDouble(5.0)).isCloseTo(12.5, within(0.0001));
     }
 
     @ParameterizedTest
@@ -112,9 +117,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         var adder = (IntBinaryOperator) instanceRunner.invoke("getAdder");
         var multiplier = (IntBinaryOperator) instanceRunner.invoke("getMultiplier");
-        assertEquals(
-                List.of(8, 15),
-                List.of(adder.applyAsInt(3, 5), multiplier.applyAsInt(3, 5)));
+        assertThat(
+                List.of(
+                        adder.applyAsInt(3, 5), multiplier.applyAsInt(3, 5)
+                )
+        ).isEqualTo(
+                List.of(8, 15)
+        );
     }
 
     @ParameterizedTest
@@ -150,9 +159,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntPredicate) instanceRunner.invoke("isPositive");
-        assertEquals(
-                List.of(true, false, false),
-                List.of(fn.test(5), fn.test(-5), fn.test(0)));
+        assertThat(
+                List.of(
+                        fn.test(5), fn.test(-5), fn.test(0)
+                )
+        ).isEqualTo(
+                List.of(true, false, false)
+        );
     }
 
     @ParameterizedTest
@@ -170,9 +183,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(
-                List.of(2, 10, 20),
-                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(2, 10, 20)
+        );
     }
 
     @ParameterizedTest
@@ -190,7 +207,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (LongBinaryOperator) instanceRunner.invoke("get");
-        assertEquals(7L, fn.applyAsLong(10L, 3L));
+        assertThat(fn.applyAsLong(10L, 3L)).isEqualTo(7L);
     }
 
     @ParameterizedTest
@@ -208,9 +225,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (LongUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(
-                List.of(3L, 15L, 30L),
-                List.of(fn.applyAsLong(1L), fn.applyAsLong(5L), fn.applyAsLong(10L)));
+        assertThat(
+                List.of(
+                        fn.applyAsLong(1L), fn.applyAsLong(5L), fn.applyAsLong(10L)
+                )
+        ).isEqualTo(
+                List.of(3L, 15L, 30L)
+        );
     }
 
     @ParameterizedTest
@@ -230,7 +251,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(10, fn.applyAsInt(5));
+        assertThat(fn.applyAsInt(5)).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -249,9 +270,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(
-                List.of(3, 15, 30),
-                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(3, 15, 30)
+        );
     }
 
     @ParameterizedTest
@@ -279,9 +304,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
         var multiplier = (IntBinaryOperator) instanceRunner.invoke("getMultiplier");
         var modulo = (IntBinaryOperator) instanceRunner.invoke("getModulo");
 
-        assertEquals(
-                List.of(8, 15, 2),
-                List.of(adder.applyAsInt(3, 5), multiplier.applyAsInt(3, 5), modulo.applyAsInt(17, 5)));
+        assertThat(
+                List.of(
+                        adder.applyAsInt(3, 5), multiplier.applyAsInt(3, 5), modulo.applyAsInt(17, 5)
+                )
+        ).isEqualTo(
+                List.of(8, 15, 2)
+        );
     }
 
     @ParameterizedTest
@@ -312,9 +341,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
         // 0b1010 & 0b1100 = 0b1000 = 8
         // 0b1010 | 0b1100 = 0b1110 = 14
         // 0b1010 ^ 0b1100 = 0b0110 = 6
-        assertEquals(
-                List.of(8, 14, 6),
-                List.of(andOp.applyAsInt(10, 12), orOp.applyAsInt(10, 12), xorOp.applyAsInt(10, 12)));
+        assertThat(
+                List.of(
+                        andOp.applyAsInt(10, 12), orOp.applyAsInt(10, 12), xorOp.applyAsInt(10, 12)
+                )
+        ).isEqualTo(
+                List.of(8, 14, 6)
+        );
     }
 
     @ParameterizedTest
@@ -337,12 +370,20 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
         var positiveFn = (IntPredicate) instanceRunner.invoke("getPositive");
         var evenFn = (IntPredicate) instanceRunner.invoke("getEven");
 
-        assertEquals(
-                List.of(true, false, false),
-                List.of(positiveFn.test(5), positiveFn.test(-5), positiveFn.test(0)));
-        assertEquals(
-                List.of(true, false, true),
-                List.of(evenFn.test(4), evenFn.test(5), evenFn.test(0)));
+        assertThat(
+                List.of(
+                        positiveFn.test(5), positiveFn.test(-5), positiveFn.test(0)
+                )
+        ).isEqualTo(
+                List.of(true, false, false)
+        );
+        assertThat(
+                List.of(
+                        evenFn.test(4), evenFn.test(5), evenFn.test(0)
+                )
+        ).isEqualTo(
+                List.of(true, false, true)
+        );
     }
 
     @ParameterizedTest
@@ -361,9 +402,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("get");
         // f(x) = x^2 + x - 1
-        assertEquals(
-                List.of(1, 5, 29),
-                List.of(fn.applyAsInt(1), fn.applyAsInt(2), fn.applyAsInt(5)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(1), fn.applyAsInt(2), fn.applyAsInt(5)
+                )
+        ).isEqualTo(
+                List.of(1, 5, 29)
+        );
     }
 
     @ParameterizedTest
@@ -385,10 +430,14 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(
-                List.of(0, 0, 50, 100, 100),
-                List.of(fn.applyAsInt(-10), fn.applyAsInt(0), fn.applyAsInt(50),
-                        fn.applyAsInt(100), fn.applyAsInt(150)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(-10), fn.applyAsInt(0), fn.applyAsInt(50),
+                        fn.applyAsInt(100), fn.applyAsInt(150)
+                )
+        ).isEqualTo(
+                List.of(0, 0, 50, 100, 100)
+        );
     }
 
     @ParameterizedTest
@@ -406,8 +455,8 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (DoubleUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(2.0, fn.applyAsDouble(1.0), 0.0001);
-        assertEquals(10.0, fn.applyAsDouble(5.0), 0.0001);
+        assertThat(fn.applyAsDouble(1.0)).isCloseTo(2.0, within(0.0001));
+        assertThat(fn.applyAsDouble(5.0)).isCloseTo(10.0, within(0.0001));
     }
 
     @ParameterizedTest
@@ -431,8 +480,8 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
         var adder = (DoubleBinaryOperator) instanceRunner.invoke("getAdder");
         var divider = (DoubleBinaryOperator) instanceRunner.invoke("getDivider");
 
-        assertEquals(8.5, adder.applyAsDouble(3.5, 5.0), 0.0001);
-        assertEquals(2.0, divider.applyAsDouble(10.0, 5.0), 0.0001);
+        assertThat(adder.applyAsDouble(3.5, 5.0)).isCloseTo(8.5, within(0.0001));
+        assertThat(divider.applyAsDouble(10.0, 5.0)).isCloseTo(2.0, within(0.0001));
     }
 
     @ParameterizedTest
@@ -450,7 +499,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntSupplier) instanceRunner.invoke("getValue", 5);
-        assertEquals(10, fn.getAsInt());
+        assertThat(fn.getAsInt()).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -471,9 +520,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (LongUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(
-                List.of(2L, 200L, 2000L),
-                List.of(fn.applyAsLong(1L), fn.applyAsLong(100L), fn.applyAsLong(1000L)));
+        assertThat(
+                List.of(
+                        fn.applyAsLong(1L), fn.applyAsLong(100L), fn.applyAsLong(1000L)
+                )
+        ).isEqualTo(
+                List.of(2L, 200L, 2000L)
+        );
     }
 
     @ParameterizedTest
@@ -491,9 +544,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(
-                List.of(2, 10, 20),
-                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(2, 10, 20)
+        );
     }
 
     // --- Phase 5: Parameter Type Inference from Context Tests ---
@@ -516,9 +573,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(
-                List.of(2, 10, 20),
-                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(2, 10, 20)
+        );
     }
 
     @ParameterizedTest
@@ -536,9 +597,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(
-                List.of(2, 10, 20),
-                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(2, 10, 20)
+        );
     }
 
     @ParameterizedTest
@@ -556,9 +621,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (LongUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(
-                List.of(2L, 200L, 2000L),
-                List.of(fn.applyAsLong(1L), fn.applyAsLong(100L), fn.applyAsLong(1000L)));
+        assertThat(
+                List.of(
+                        fn.applyAsLong(1L), fn.applyAsLong(100L), fn.applyAsLong(1000L)
+                )
+        ).isEqualTo(
+                List.of(2L, 200L, 2000L)
+        );
     }
 
     @ParameterizedTest
@@ -582,9 +651,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
         var adder = (LongBinaryOperator) instanceRunner.invoke("getAdder");
         var multiplier = (LongBinaryOperator) instanceRunner.invoke("getMultiplier");
 
-        assertEquals(
-                List.of(30L, 200L),
-                List.of(adder.applyAsLong(10L, 20L), multiplier.applyAsLong(10L, 20L)));
+        assertThat(
+                List.of(
+                        adder.applyAsLong(10L, 20L), multiplier.applyAsLong(10L, 20L)
+                )
+        ).isEqualTo(
+                List.of(30L, 200L)
+        );
     }
 
     @ParameterizedTest
@@ -607,9 +680,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("get");
         // f(x) = x * 2 + 1
-        assertEquals(
-                List.of(3, 11, 21),
-                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(3, 11, 21)
+        );
     }
 
     @ParameterizedTest
@@ -627,9 +704,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("getSign");
-        assertEquals(
-                List.of(1, -1, 0),
-                List.of(fn.applyAsInt(5), fn.applyAsInt(-5), fn.applyAsInt(0)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(5), fn.applyAsInt(-5), fn.applyAsInt(0)
+                )
+        ).isEqualTo(
+                List.of(1, -1, 0)
+        );
     }
 
     @ParameterizedTest
@@ -665,10 +746,10 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
         var doubleSupplier = (DoubleSupplier) instanceRunner.invoke("getDoubleSupplier");
         var booleanSupplier = (BooleanSupplier) instanceRunner.invoke("getBooleanSupplier");
 
-        assertEquals(42, intSupplier.getAsInt());
-        assertEquals(42L, longSupplier.getAsLong());
-        assertEquals(3.14, doubleSupplier.getAsDouble(), 0.001);
-        assertTrue(booleanSupplier.getAsBoolean());
+        assertThat(intSupplier.getAsInt()).isEqualTo(42);
+        assertThat(longSupplier.getAsLong()).isEqualTo(42L);
+        assertThat(doubleSupplier.getAsDouble()).isCloseTo(3.14, within(0.001));
+        assertThat(booleanSupplier.getAsBoolean()).isTrue();
     }
 
     @ParameterizedTest
@@ -686,9 +767,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(
-                List.of(5, 5, 0),
-                List.of(fn.applyAsInt(5), fn.applyAsInt(-5), fn.applyAsInt(0)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(5), fn.applyAsInt(-5), fn.applyAsInt(0)
+                )
+        ).isEqualTo(
+                List.of(5, 5, 0)
+        );
     }
 
     @ParameterizedTest
@@ -706,9 +791,13 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("getNegator");
-        assertEquals(
-                List.of(-5, 5, 0),
-                List.of(fn.applyAsInt(5), fn.applyAsInt(-5), fn.applyAsInt(0)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(5), fn.applyAsInt(-5), fn.applyAsInt(0)
+                )
+        ).isEqualTo(
+                List.of(-5, 5, 0)
+        );
     }
 
     @ParameterizedTest
@@ -726,7 +815,7 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntSupplier) instanceRunner.invoke("createSupplier", 10, 20, 30);
-        assertEquals(60, fn.getAsInt());
+        assertThat(fn.getAsInt()).isEqualTo(60);
     }
 
     @ParameterizedTest
@@ -744,8 +833,12 @@ public class TestCompileAstArrowTypeInference extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (LongUnaryOperator) instanceRunner.invoke("get");
-        assertEquals(
-                List.of(2L, 101L, 1001L),
-                List.of(fn.applyAsLong(1L), fn.applyAsLong(100L), fn.applyAsLong(1000L)));
+        assertThat(
+                List.of(
+                        fn.applyAsLong(1L), fn.applyAsLong(100L), fn.applyAsLong(1000L)
+                )
+        ).isEqualTo(
+                List.of(2L, 101L, 1001L)
+        );
     }
 }

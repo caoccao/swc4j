@@ -21,7 +21,9 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 
 /**
  * Tests for generic type parameters in arrow expressions.
@@ -46,7 +48,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals("nested", result);
+        assertThat(result).isEqualTo("nested");
     }
 
     @ParameterizedTest
@@ -67,7 +69,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals("test", result);
+        assertThat(result).isEqualTo("test");
     }
 
     @ParameterizedTest
@@ -86,7 +88,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals("Value: 42", result);
+        assertThat(result).isEqualTo("Value: 42");
     }
 
     @ParameterizedTest
@@ -104,7 +106,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals("value123", result);
+        assertThat(result).isEqualTo("value123");
     }
 
     @ParameterizedTest
@@ -123,7 +125,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals("hello", result);
+        assertThat(result).isEqualTo("hello");
     }
 
     @ParameterizedTest
@@ -141,7 +143,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals("value42", result);
+        assertThat(result).isEqualTo("value42");
     }
 
     @ParameterizedTest
@@ -162,7 +164,7 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals("block", result);
+        assertThat(result).isEqualTo("block");
     }
 
     @ParameterizedTest
@@ -181,6 +183,6 @@ public class TestCompileAstArrowGeneric extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals("first", result);
+        assertThat(result).isEqualTo("first");
     }
 }

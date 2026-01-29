@@ -21,6 +21,9 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.function.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,8 +47,8 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("get");
-        assertNotNull(fn);
-        assertTrue(((BooleanSupplier) fn).getAsBoolean());
+        assertThat(fn).isNotNull();
+        assertThat(((BooleanSupplier) fn).getAsBoolean()).isTrue();
     }
 
     @ParameterizedTest
@@ -61,8 +64,8 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("get");
-        assertNotNull(fn);
-        assertEquals(3.14159, ((DoubleSupplier) fn).getAsDouble(), 0.00001);
+        assertThat(fn).isNotNull();
+        assertThat(((DoubleSupplier) fn).getAsDouble()).isCloseTo(3.14159, within(0.00001));
     }
 
     @ParameterizedTest
@@ -78,8 +81,8 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("get");
-        assertNotNull(fn);
-        assertEquals(42, ((IntSupplier) fn).getAsInt());
+        assertThat(fn).isNotNull();
+        assertThat(((IntSupplier) fn).getAsInt()).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -95,8 +98,8 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("get");
-        assertNotNull(fn);
-        assertEquals(10, ((IntUnaryOperator) fn).applyAsInt(5));
+        assertThat(fn).isNotNull();
+        assertThat(((IntUnaryOperator) fn).applyAsInt(5)).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -113,8 +116,8 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("get");
-        assertNotNull(fn);
-        assertEquals(123456789012345L, ((LongSupplier) fn).getAsLong());
+        assertThat(fn).isNotNull();
+        assertThat(((LongSupplier) fn).getAsLong()).isEqualTo(123456789012345L);
     }
 
     @ParameterizedTest
@@ -130,8 +133,8 @@ public class TestCompileAstArrowFunctionalInterface extends BaseTestCompileSuite
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("get");
-        assertNotNull(fn);
-        assertEquals("hello", ((Supplier<?>) fn).get());
+        assertThat(fn).isNotNull();
+        assertThat(((Supplier<?>) fn).get()).isEqualTo("hello");
     }
 
 }

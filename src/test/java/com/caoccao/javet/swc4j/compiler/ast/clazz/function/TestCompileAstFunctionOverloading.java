@@ -21,9 +21,11 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for method and constructor overloading.
@@ -49,24 +51,36 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
 
         // Test no-arg constructor
         var instance1 = classA.getConstructor().newInstance();
-        assertEquals(List.of(0, 0), List.of(
-                classA.getMethod("getX").invoke(instance1),
+        assertThat(
+                List.of(
+                        classA.getMethod("getX").invoke(instance1),
                 classA.getMethod("getY").invoke(instance1)
-        ));
+                )
+        ).isEqualTo(
+                List.of(0, 0)
+        );
 
         // Test single-arg constructor
         var instance2 = classA.getConstructor(int.class).newInstance(10);
-        assertEquals(List.of(10, 0), List.of(
-                classA.getMethod("getX").invoke(instance2),
+        assertThat(
+                List.of(
+                        classA.getMethod("getX").invoke(instance2),
                 classA.getMethod("getY").invoke(instance2)
-        ));
+                )
+        ).isEqualTo(
+                List.of(10, 0)
+        );
 
         // Test two-arg constructor
         var instance3 = classA.getConstructor(int.class, int.class).newInstance(10, 20);
-        assertEquals(List.of(10, 20), List.of(
-                classA.getMethod("getX").invoke(instance3),
+        assertThat(
+                List.of(
+                        classA.getMethod("getX").invoke(instance3),
                 classA.getMethod("getY").invoke(instance3)
-        ));
+                )
+        ).isEqualTo(
+                List.of(10, 20)
+        );
     }
 
     @ParameterizedTest
@@ -88,20 +102,22 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
         var instance1 = classA.getConstructor(int.class).newInstance(42);
         var instance2 = classA.getConstructor(double.class).newInstance(3.14);
 
-        assertEquals(
-                List.of(42, 0.0),
+        assertThat(
                 List.of(
                         classA.getMethod("getInt").invoke(instance1),
                         classA.getMethod("getDouble").invoke(instance1)
                 )
+        ).isEqualTo(
+                List.of(42, 0.0)
         );
 
-        assertEquals(
-                List.of(0, 3.14),
+        assertThat(
                 List.of(
                         classA.getMethod("getInt").invoke(instance2),
                         classA.getMethod("getDouble").invoke(instance2)
                 )
+        ).isEqualTo(
+                List.of(0, 3.14)
         );
     }
 
@@ -119,13 +135,14 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
         Class<?> classA = runner.getClass("com.Math");
         var instance = classA.getConstructor().newInstance();
 
-        assertEquals(
-                List.of(5, 15, 60),
+        assertThat(
                 List.of(
                         classA.getMethod("sum", int.class).invoke(instance, 5),
                         classA.getMethod("sum", int.class, int.class).invoke(instance, 5, 10),
                         classA.getMethod("sum", int.class, int.class, int.class).invoke(instance, 10, 20, 30)
                 )
+        ).isEqualTo(
+                List.of(5, 15, 60)
         );
     }
 
@@ -143,13 +160,14 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
         Class<?> classA = runner.getClass("com.Calculator");
         var instance = classA.getConstructor().newInstance();
 
-        assertEquals(
-                List.of(30, 5.5, "HelloWorld"),
+        assertThat(
                 List.of(
                         classA.getMethod("add", int.class, int.class).invoke(instance, 10, 20),
                         classA.getMethod("add", double.class, double.class).invoke(instance, 2.5, 3.0),
                         classA.getMethod("add", String.class, String.class).invoke(instance, "Hello", "World")
                 )
+        ).isEqualTo(
+                List.of(30, 5.5, "HelloWorld")
         );
     }
 
@@ -168,14 +186,15 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
         Class<?> classA = runner.getClass("com.Formatter");
         var instance = classA.getConstructor().newInstance();
 
-        assertEquals(
-                List.of("int:42", "double:3.14", "num:100", "pi:3.14"),
+        assertThat(
                 List.of(
                         classA.getMethod("format", int.class).invoke(instance, 42),
                         classA.getMethod("format", double.class).invoke(instance, 3.14),
                         classA.getMethod("format", String.class, int.class).invoke(instance, "num:", 100),
                         classA.getMethod("format", String.class, double.class).invoke(instance, "pi:", 3.14)
                 )
+        ).isEqualTo(
+                List.of("int:42", "double:3.14", "num:100", "pi:3.14")
         );
     }
 
@@ -192,12 +211,13 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
         Class<?> classA = runner.getClass("com.ArrayUtils");
         var instance = classA.getConstructor().newInstance();
 
-        assertEquals(
-                List.of(5, 3),
+        assertThat(
                 List.of(
                         classA.getMethod("getLength", int[].class).invoke(instance, new int[]{1, 2, 3, 4, 5}),
                         classA.getMethod("getLength", String[].class).invoke(instance, (Object) new String[]{"a", "b", "c"})
                 )
+        ).isEqualTo(
+                List.of(5, 3)
         );
     }
 
@@ -214,12 +234,13 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
         Class<?> classA = runner.getClass("com.Converter");
         var instance = classA.getConstructor().newInstance();
 
-        assertEquals(
-                List.of("42", 0),
+        assertThat(
                 List.of(
                         classA.getMethod("convert", int.class).invoke(instance, 42),
                         classA.getMethod("convert", String.class).invoke(instance, "hello")
                 )
+        ).isEqualTo(
+                List.of("42", 0)
         );
     }
 
@@ -235,13 +256,14 @@ public class TestCompileAstFunctionOverloading extends BaseTestCompileSuite {
                   }
                 }""");
         var staticRunner = runner.createStaticRunner("com.Utils");
-        assertEquals(
-                List.of("int:42", "double:3.14", "string:hello"),
+        assertThat(
                 List.of(
                         staticRunner.invoke("format", 42),
                         staticRunner.invoke("format", 3.14),
                         (String) staticRunner.invoke("format", "hello")
                 )
+        ).isEqualTo(
+                List.of("int:42", "double:3.14", "string:hello")
         );
     }
 }

@@ -21,6 +21,9 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.List;
 import java.util.function.*;
 
@@ -53,13 +56,13 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
         var positiveFn = (IntPredicate) instanceRunner.invoke("getPositive");
         var evenFn = (IntPredicate) instanceRunner.invoke("getEven");
 
-        assertTrue(positiveFn.test(5));
-        assertFalse(positiveFn.test(-5));
-        assertFalse(positiveFn.test(0));
+        assertThat(positiveFn.test(5)).isTrue();
+        assertThat(positiveFn.test(-5)).isFalse();
+        assertThat(positiveFn.test(0)).isFalse();
 
-        assertTrue(evenFn.test(4));
-        assertFalse(evenFn.test(5));
-        assertTrue(evenFn.test(0));
+        assertThat(evenFn.test(4)).isTrue();
+        assertThat(evenFn.test(5)).isFalse();
+        assertThat(evenFn.test(0)).isTrue();
     }
 
     @ParameterizedTest
@@ -76,8 +79,8 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("get");
-        assertNotNull(fn);
-        assertEquals(12.5, ((DoubleUnaryOperator) fn).applyAsDouble(5.0), 0.0001);
+        assertThat(fn).isNotNull();
+        assertThat(((DoubleUnaryOperator) fn).applyAsDouble(5.0)).isCloseTo(12.5, within(0.0001));
     }
 
     @ParameterizedTest
@@ -99,10 +102,14 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                 }""");
         var fn = (IntUnaryOperator) runner.createInstanceRunner("com.A").invoke("getClamp");
 
-        assertEquals(
-                List.of(0, 0, 50, 100, 100),
-                List.of(fn.applyAsInt(-10), fn.applyAsInt(0), fn.applyAsInt(50),
-                        fn.applyAsInt(100), fn.applyAsInt(150)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(-10), fn.applyAsInt(0), fn.applyAsInt(50),
+                        fn.applyAsInt(100), fn.applyAsInt(150)
+                )
+        ).isEqualTo(
+                List.of(0, 0, 50, 100, 100)
+        );
     }
 
     @ParameterizedTest
@@ -119,7 +126,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("get");
-        assertNotNull(fn);
+        assertThat(fn).isNotNull();
         // Just verify it doesn't throw
         ((Runnable) fn).run();
     }
@@ -145,10 +152,14 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                 }""");
         var fn = (IntUnaryOperator) runner.createInstanceRunner("com.A").invoke("getSum");
 
-        assertEquals(
-                List.of(0, 1, 3, 6, 10, 55),
-                List.of(fn.applyAsInt(0), fn.applyAsInt(1), fn.applyAsInt(2),
-                        fn.applyAsInt(3), fn.applyAsInt(4), fn.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(0), fn.applyAsInt(1), fn.applyAsInt(2),
+                        fn.applyAsInt(3), fn.applyAsInt(4), fn.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(0, 1, 3, 6, 10, 55)
+        );
     }
 
     @ParameterizedTest
@@ -172,9 +183,13 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
         var fn = (IntUnaryOperator) runner.createInstanceRunner("com.A").invoke("getComplex");
 
         // x=5: doubled=10, incremented=11, result=33
-        assertEquals(
-                List.of(3, 33, 63),
-                List.of(fn.applyAsInt(0), fn.applyAsInt(5), fn.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(0), fn.applyAsInt(5), fn.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(3, 33, 63)
+        );
     }
 
     @ParameterizedTest
@@ -212,8 +227,8 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("get");
-        assertNotNull(fn);
-        assertEquals(10, ((IntUnaryOperator) fn).applyAsInt(5));
+        assertThat(fn).isNotNull();
+        assertThat(((IntUnaryOperator) fn).applyAsInt(5)).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -238,11 +253,11 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("getFactorial");
-        assertNotNull(fn);
-        assertEquals(1, ((IntUnaryOperator) fn).applyAsInt(0));
-        assertEquals(1, ((IntUnaryOperator) fn).applyAsInt(1));
-        assertEquals(6, ((IntUnaryOperator) fn).applyAsInt(3));
-        assertEquals(120, ((IntUnaryOperator) fn).applyAsInt(5));
+        assertThat(fn).isNotNull();
+        assertThat(((IntUnaryOperator) fn).applyAsInt(0)).isEqualTo(1);
+        assertThat(((IntUnaryOperator) fn).applyAsInt(1)).isEqualTo(1);
+        assertThat(((IntUnaryOperator) fn).applyAsInt(3)).isEqualTo(6);
+        assertThat(((IntUnaryOperator) fn).applyAsInt(5)).isEqualTo(120);
     }
 
     @ParameterizedTest
@@ -260,9 +275,13 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                 }""");
         var fn = (IntUnaryOperator) runner.createInstanceRunner("com.A").invoke("getCompute");
 
-        assertEquals(
-                List.of(3, 15, 30),
-                List.of(fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(1), fn.applyAsInt(5), fn.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(3, 15, 30)
+        );
     }
 
     @ParameterizedTest
@@ -281,7 +300,7 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                 }""");
         var fn = (Supplier<?>) runner.createInstanceRunner("com.A").invoke("getValue");
 
-        assertEquals("hello", fn.get());
+        assertThat(fn.get()).isEqualTo("hello");
     }
 
     @ParameterizedTest
@@ -298,8 +317,8 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("get");
-        assertNotNull(fn);
-        assertEquals(10, ((IntUnaryOperator) fn).applyAsInt(5));
+        assertThat(fn).isNotNull();
+        assertThat(((IntUnaryOperator) fn).applyAsInt(5)).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -323,11 +342,19 @@ public class TestCompileAstArrowBody extends BaseTestCompileSuite {
         var absFn = (IntUnaryOperator) instanceRunner.invoke("getAbs");
         var maxFn = (IntUnaryOperator) instanceRunner.invoke("getMax");
 
-        assertEquals(
-                List.of(5, 5, 0),
-                List.of(absFn.applyAsInt(5), absFn.applyAsInt(-5), absFn.applyAsInt(0)));
-        assertEquals(
-                List.of(50, 100, 100),
-                List.of(maxFn.applyAsInt(50), maxFn.applyAsInt(100), maxFn.applyAsInt(150)));
+        assertThat(
+                List.of(
+                        absFn.applyAsInt(5), absFn.applyAsInt(-5), absFn.applyAsInt(0)
+                )
+        ).isEqualTo(
+                List.of(5, 5, 0)
+        );
+        assertThat(
+                List.of(
+                        maxFn.applyAsInt(50), maxFn.applyAsInt(100), maxFn.applyAsInt(150)
+                )
+        ).isEqualTo(
+                List.of(50, 100, 100)
+        );
     }
 }

@@ -21,12 +21,13 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Basic tests for arrow expressions.
@@ -52,9 +53,9 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(result);
-        assertEquals(20, ((IntUnaryOperator) result).applyAsInt(5));  // 5 * 2 + 10 = 20
-        assertEquals(10, ((IntUnaryOperator) result).applyAsInt(0));  // 0 * 2 + 10 = 10
+        assertThat(result).isNotNull();
+        assertThat(((IntUnaryOperator) result).applyAsInt(5)).isEqualTo(20);  // 5 * 2 + 10 = 20
+        assertThat(((IntUnaryOperator) result).applyAsInt(0)).isEqualTo(10);  // 0 * 2 + 10 = 10
     }
 
     @ParameterizedTest
@@ -73,8 +74,8 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(result);
-        assertEquals(100, ((IntSupplier) result).getAsInt());
+        assertThat(result).isNotNull();
+        assertThat(((IntSupplier) result).getAsInt()).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -91,10 +92,10 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(result);
-        assertEquals(10, ((IntUnaryOperator) result).applyAsInt(5));
-        assertEquals(0, ((IntUnaryOperator) result).applyAsInt(0));
-        assertEquals(-6, ((IntUnaryOperator) result).applyAsInt(-3));
+        assertThat(result).isNotNull();
+        assertThat(((IntUnaryOperator) result).applyAsInt(5)).isEqualTo(10);
+        assertThat(((IntUnaryOperator) result).applyAsInt(0)).isEqualTo(0);
+        assertThat(((IntUnaryOperator) result).applyAsInt(-3)).isEqualTo(-6);
     }
 
     @ParameterizedTest
@@ -111,8 +112,8 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(result);
-        assertEquals(42, ((IntSupplier) result).getAsInt());
+        assertThat(result).isNotNull();
+        assertThat(((IntSupplier) result).getAsInt()).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -129,7 +130,7 @@ public class TestCompileAstArrowBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertNotNull(result);
-        assertEquals("hello", ((Supplier<?>) result).get());
+        assertThat(result).isNotNull();
+        assertThat(((Supplier<?>) result).get()).isEqualTo("hello");
     }
 }

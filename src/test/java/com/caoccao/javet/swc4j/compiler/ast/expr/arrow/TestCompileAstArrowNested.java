@@ -21,11 +21,12 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.List;
 import java.util.function.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Tests for nested arrow expressions.
@@ -55,8 +56,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
         var doubler = (IntUnaryOperator) instanceRunner.invoke("getDoubler");
         var incrementer = (IntUnaryOperator) instanceRunner.invoke("getIncrementer");
 
-        assertEquals(10, doubler.applyAsInt(5));   // 5 * 2 = 10
-        assertEquals(6, incrementer.applyAsInt(5)); // 5 + 1 = 6
+        assertThat(doubler.applyAsInt(5)).isEqualTo(10);   // 5 * 2 = 10
+        assertThat(incrementer.applyAsInt(5)).isEqualTo(6); // 5 + 1 = 6
     }
 
     @ParameterizedTest
@@ -75,9 +76,13 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
         var staticRunner = runner.createStaticRunner("com.A");
         var multiplier2 = (IntUnaryOperator) staticRunner.invoke("createMultiplier", 2);
         var multiplier5 = (IntUnaryOperator) staticRunner.invoke("createMultiplier", 5);
-        assertEquals(
-                List.of(6, 10, 15, 25),
-                List.of(multiplier2.applyAsInt(3), multiplier2.applyAsInt(5), multiplier5.applyAsInt(3), multiplier5.applyAsInt(5)));
+        assertThat(
+                List.of(
+                        multiplier2.applyAsInt(3), multiplier2.applyAsInt(5), multiplier5.applyAsInt(3), multiplier5.applyAsInt(5)
+                )
+        ).isEqualTo(
+                List.of(6, 10, 15, 25)
+        );
     }
 
     @ParameterizedTest
@@ -96,9 +101,13 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         var adder5 = (IntUnaryOperator) instanceRunner.invoke("createAdder", 5);
         var adder10 = (IntUnaryOperator) instanceRunner.invoke("createAdder", 10);
-        assertEquals(
-                List.of(8, 13, 12, 17),
-                List.of(adder5.applyAsInt(3), adder5.applyAsInt(8), adder10.applyAsInt(2), adder10.applyAsInt(7)));
+        assertThat(
+                List.of(
+                        adder5.applyAsInt(3), adder5.applyAsInt(8), adder10.applyAsInt(2), adder10.applyAsInt(7)
+                )
+        ).isEqualTo(
+                List.of(8, 13, 12, 17)
+        );
     }
 
     @ParameterizedTest
@@ -116,7 +125,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var supplier = (Supplier<?>) instanceRunner.invoke("createFormatter", "Value: ", 42);
-        assertEquals("Value: 42", supplier.get());
+        assertThat(supplier.get()).isEqualTo("Value: 42");
     }
 
     @ParameterizedTest
@@ -134,7 +143,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var supplier = (DoubleSupplier) instanceRunner.invoke("createProduct", 2.5, 4.0);
-        assertEquals(10.0, supplier.getAsDouble(), 0.0001);
+        assertThat(supplier.getAsDouble()).isCloseTo(10.0, within(0.0001));
     }
 
     @ParameterizedTest
@@ -152,7 +161,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var supplier = (LongSupplier) instanceRunner.invoke("createSum", 1000000000L, 2000000000L);
-        assertEquals(3000000000L, supplier.getAsLong());
+        assertThat(supplier.getAsLong()).isEqualTo(3000000000L);
     }
 
     @ParameterizedTest
@@ -171,7 +180,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         var supplier = (DoubleSupplier) instanceRunner.invoke("createComplex", 10, 20L, 30.5);
         // 10 + 20 + 30.5 = 60.5
-        assertEquals(60.5, supplier.getAsDouble(), 0.0001);
+        assertThat(supplier.getAsDouble()).isCloseTo(60.5, within(0.0001));
     }
 
     @ParameterizedTest
@@ -190,7 +199,7 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         var supplier = (IntSupplier) instanceRunner.invoke("createComputer", 2, 3, 4, 5);
         // 2 * 3 + 4 * 5 = 6 + 20 = 26
-        assertEquals(26, supplier.getAsInt());
+        assertThat(supplier.getAsInt()).isEqualTo(26);
     }
 
     @ParameterizedTest
@@ -207,8 +216,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = instanceRunner.invoke("createAdder", 5);
-        assertNotNull(fn);
-        assertEquals(15, ((IntUnaryOperator) fn).applyAsInt(10));  // 10 + 5 = 15
+        assertThat(fn).isNotNull();
+        assertThat(((IntUnaryOperator) fn).applyAsInt(10)).isEqualTo(15);  // 10 + 5 = 15
     }
 
     @ParameterizedTest
@@ -226,8 +235,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = instanceRunner.invoke("createGreeter", "World");
-        assertNotNull(fn);
-        assertEquals("Hello, World", ((java.util.function.Supplier<?>) fn).get());
+        assertThat(fn).isNotNull();
+        assertThat(((java.util.function.Supplier<?>) fn).get()).isEqualTo("Hello, World");
     }
 
     @ParameterizedTest
@@ -245,8 +254,8 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = instanceRunner.invoke("createValueGetter");
-        assertNotNull(fn);
-        assertEquals(100, ((IntSupplier) fn).getAsInt());
+        assertThat(fn).isNotNull();
+        assertThat(((IntSupplier) fn).getAsInt()).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -266,9 +275,13 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
         var fn = (IntUnaryOperator) instanceRunner.invoke("createAdder", 1, 2, 3);
 
         // x + 1 + 2 + 3 = x + 6
-        assertEquals(
-                List.of(6, 16, 106),
-                List.of(fn.applyAsInt(0), fn.applyAsInt(10), fn.applyAsInt(100)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(0), fn.applyAsInt(10), fn.applyAsInt(100)
+                )
+        ).isEqualTo(
+                List.of(6, 16, 106)
+        );
     }
 
     @ParameterizedTest
@@ -287,9 +300,13 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         var combiner = (IntUnaryOperator) instanceRunner.invoke("createCombiner", 10, 20);
         // x + a + b = x + 10 + 20 = x + 30
-        assertEquals(
-                List.of(30, 35, 40),
-                List.of(combiner.applyAsInt(0), combiner.applyAsInt(5), combiner.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        combiner.applyAsInt(0), combiner.applyAsInt(5), combiner.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(30, 35, 40)
+        );
     }
 
     @ParameterizedTest
@@ -311,8 +328,12 @@ public class TestCompileAstArrowNested extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         var doubler = (IntUnaryOperator) instanceRunner.invoke("getDoubler");
         var adder = (IntUnaryOperator) instanceRunner.invoke("getAdder", 10);
-        assertEquals(
-                List.of(10, 20, 15, 20),
-                List.of(doubler.applyAsInt(5), doubler.applyAsInt(10), adder.applyAsInt(5), adder.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        doubler.applyAsInt(5), doubler.applyAsInt(10), adder.applyAsInt(5), adder.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(10, 20, 15, 20)
+        );
     }
 }

@@ -21,9 +21,11 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for IIFE (Immediately Invoked Function Expression) arrow expressions.
@@ -44,7 +46,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(21, result);
+        assertThat((int) result).isEqualTo(21);
     }
 
     @ParameterizedTest
@@ -61,7 +63,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(10, result);
+        assertThat((int) result).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -81,7 +83,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(20, result);
+        assertThat((int) result).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -98,7 +100,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(true, result);
+        assertThat((boolean) result).isTrue();
     }
 
     @ParameterizedTest
@@ -115,7 +117,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(10.0, result);
+        assertThat((double) result).isEqualTo(10.0);
     }
 
     @ParameterizedTest
@@ -134,12 +136,13 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(
-                List.of(10, 15),
+        assertThat(
                 List.of(
                         instanceRunner.invoke("test1"),
                         instanceRunner.invoke("test2")
                 )
+        ).isEqualTo(
+                List.of(10, 15)
         );
     }
 
@@ -157,7 +160,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(10000000000L, result);
+        assertThat((long) result).isEqualTo(10000000000L);
     }
 
     @ParameterizedTest
@@ -176,7 +179,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(12, result);
+        assertThat((int) result).isEqualTo(12);
     }
 
     @ParameterizedTest
@@ -194,7 +197,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(20, result);
+        assertThat((int) result).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -211,7 +214,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(10, result);
+        assertThat((int) result).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -228,7 +231,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(20, result);
+        assertThat((int) result).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -245,7 +248,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(42, result);
+        assertThat((int) result).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -262,7 +265,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals("Hello World", result);
+        assertThat(result).isEqualTo("Hello World");
     }
 
     @ParameterizedTest
@@ -280,7 +283,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(15, result);
+        assertThat((int) result).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -298,7 +301,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(25, result);
+        assertThat((int) result).isEqualTo(25);
     }
 
     @ParameterizedTest
@@ -316,7 +319,7 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(50, result);
+        assertThat((int) result).isEqualTo(50);
     }
 
     @ParameterizedTest
@@ -333,6 +336,6 @@ public class TestCompileAstArrowIIFE extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(11, result);
+        assertThat((int) result).isEqualTo(11);
     }
 }

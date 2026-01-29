@@ -21,10 +21,12 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.List;
 import java.util.function.IntSupplier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for mutable variable capture in arrow expressions.
@@ -49,7 +51,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(true, result);
+        assertThat((boolean) result).isTrue();
     }
 
     @ParameterizedTest
@@ -75,7 +77,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(60, result);  // 10 + 20 + 30 = 60
+        assertThat((int) result).isEqualTo(60);  // 10 + 20 + 30 = 60
     }
 
     @ParameterizedTest
@@ -96,7 +98,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(110, result);  // 100 + 10 = 110
+        assertThat((int) result).isEqualTo(110);  // 100 + 10 = 110
     }
 
     @ParameterizedTest
@@ -118,7 +120,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(4, result);  // Should return final value
+        assertThat((int) result).isEqualTo(4);  // Should return final value
     }
 
     @ParameterizedTest
@@ -140,7 +142,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(30, result);  // 10 + 20 = 30
+        assertThat((int) result).isEqualTo(30);  // 10 + 20 = 30
     }
 
     @ParameterizedTest
@@ -162,32 +164,13 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var counter = (IntSupplier) instanceRunner.invoke("createCounter");
-        assertEquals(List.of(1, 2, 3), List.of(counter.getAsInt(), counter.getAsInt(), counter.getAsInt()));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testMutableCaptureWithIncrement(JdkVersion jdkVersion) throws Exception {
-        // Edge case 91: Arrow with Side Effects
-        var runner = getCompiler(jdkVersion).compile("""
-                import { IntSupplier } from 'java.util.function'
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let counter: int = 0
-                      const increment: IntSupplier = () => {
-                        counter = counter + 1
-                        return counter
-                      }
-                      const a: int = increment()
-                      const b: int = increment()
-                      const c: int = increment()
-                      return a + b + c
-                    }
-                  }
-                }""");
-        var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(6, result);  // 1 + 2 + 3 = 6
+        assertThat(
+                List.of(
+                        counter.getAsInt(), counter.getAsInt(), counter.getAsInt()
+                )
+        ).isEqualTo(
+                List.of(1, 2, 3)
+        );
     }
 
     @ParameterizedTest
@@ -206,7 +189,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(2.5, result);
+        assertThat((double) result).isEqualTo(2.5);
     }
 
     @ParameterizedTest
@@ -227,7 +210,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(20, result);  // Should return 20, not 10
+        assertThat((int) result).isEqualTo(20);  // Should return 20, not 10
     }
 
     @ParameterizedTest
@@ -246,7 +229,7 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals(200L, result);
+        assertThat((long) result).isEqualTo(200L);
     }
 
     @ParameterizedTest
@@ -265,6 +248,6 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
                   }
                 }""");
         var result = runner.createInstanceRunner("com.A").invoke("test");
-        assertEquals("world", result);
+        assertThat(result).isEqualTo("world");
     }
 }

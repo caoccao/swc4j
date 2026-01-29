@@ -21,11 +21,12 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.List;
 import java.util.function.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Tests for arrow expression parameter handling.
@@ -47,7 +48,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                   }
                 }""");
         var consumer = (DoubleConsumer) runner.createInstanceRunner("com.A").invoke("getConsumer");
-        assertNotNull(consumer);
+        assertThat(consumer).isNotNull();
         // Verify it doesn't throw
         consumer.accept(3.14);
     }
@@ -66,7 +67,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                   }
                 }""");
         var consumer = (IntConsumer) runner.createInstanceRunner("com.A").invoke("getConsumer");
-        assertNotNull(consumer);
+        assertThat(consumer).isNotNull();
         // Verify it doesn't throw
         consumer.accept(42);
     }
@@ -92,13 +93,21 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
         var positiveFn = (IntPredicate) instanceRunner.invoke("getPositive");
         var evenFn = (IntPredicate) instanceRunner.invoke("getEven");
 
-        assertEquals(
-                List.of(true, false, false),
-                List.of(positiveFn.test(5), positiveFn.test(-5), positiveFn.test(0)));
+        assertThat(
+                List.of(
+                        positiveFn.test(5), positiveFn.test(-5), positiveFn.test(0)
+                )
+        ).isEqualTo(
+                List.of(true, false, false)
+        );
 
-        assertEquals(
-                List.of(true, false, true),
-                List.of(evenFn.test(4), evenFn.test(5), evenFn.test(0)));
+        assertThat(
+                List.of(
+                        evenFn.test(4), evenFn.test(5), evenFn.test(0)
+                )
+        ).isEqualTo(
+                List.of(true, false, true)
+        );
     }
 
     @ParameterizedTest
@@ -115,7 +124,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                   }
                 }""");
         var consumer = (LongConsumer) runner.createInstanceRunner("com.A").invoke("getConsumer");
-        assertNotNull(consumer);
+        assertThat(consumer).isNotNull();
         // Verify it doesn't throw
         consumer.accept(42L);
     }
@@ -136,9 +145,13 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         var fn = (IntUnaryOperator) instanceRunner.invoke("createComputer", 1, 2, 3, 4);
 
-        assertEquals(
-                List.of(10, 15, 20, 110),
-                List.of(fn.applyAsInt(0), fn.applyAsInt(5), fn.applyAsInt(10), fn.applyAsInt(100)));
+        assertThat(
+                List.of(
+                        fn.applyAsInt(0), fn.applyAsInt(5), fn.applyAsInt(10), fn.applyAsInt(100)
+                )
+        ).isEqualTo(
+                List.of(10, 15, 20, 110)
+        );
     }
 
     @ParameterizedTest
@@ -155,8 +168,8 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("get");
-        assertNotNull(fn);
-        assertEquals(42, ((IntSupplier) fn).getAsInt());
+        assertThat(fn).isNotNull();
+        assertThat(((IntSupplier) fn).getAsInt()).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -173,7 +186,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                   }
                 }""");
         var fn = (DoubleUnaryOperator) runner.createInstanceRunner("com.A").invoke("get");
-        assertEquals(10.0, fn.applyAsDouble(5.0), 0.0001);
+        assertThat(fn.applyAsDouble(5.0)).isCloseTo(10.0, within(0.0001));
     }
 
     @ParameterizedTest
@@ -190,8 +203,8 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                   }
                 }""");
         var fn = runner.createInstanceRunner("com.A").invoke("get");
-        assertNotNull(fn);
-        assertEquals(10, ((IntUnaryOperator) fn).applyAsInt(5));
+        assertThat(fn).isNotNull();
+        assertThat(((IntUnaryOperator) fn).applyAsInt(5)).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -208,7 +221,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                   }
                 }""");
         var fn = (LongUnaryOperator) runner.createInstanceRunner("com.A").invoke("get");
-        assertEquals(200L, fn.applyAsLong(100L));
+        assertThat(fn.applyAsLong(100L)).isEqualTo(200L);
     }
 
     @ParameterizedTest
@@ -225,7 +238,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                   }
                 }""");
         var fn = (DoubleBinaryOperator) runner.createInstanceRunner("com.A").invoke("get");
-        assertEquals(8.5, fn.applyAsDouble(3.5, 5.0), 0.0001);
+        assertThat(fn.applyAsDouble(3.5, 5.0)).isCloseTo(8.5, within(0.0001));
     }
 
     @ParameterizedTest
@@ -249,9 +262,13 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
         var adder = (IntBinaryOperator) instanceRunner.invoke("getAdder");
         var multiplier = (IntBinaryOperator) instanceRunner.invoke("getMultiplier");
 
-        assertEquals(
-                List.of(8, 15),
-                List.of(adder.applyAsInt(3, 5), multiplier.applyAsInt(3, 5)));
+        assertThat(
+                List.of(
+                        adder.applyAsInt(3, 5), multiplier.applyAsInt(3, 5)
+                )
+        ).isEqualTo(
+                List.of(8, 15)
+        );
     }
 
     @ParameterizedTest
@@ -268,7 +285,7 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
                   }
                 }""");
         var fn = (LongBinaryOperator) runner.createInstanceRunner("com.A").invoke("get");
-        assertEquals(30L, fn.applyAsLong(10L, 20L));
+        assertThat(fn.applyAsLong(10L, 20L)).isEqualTo(30L);
     }
 
     @ParameterizedTest
@@ -292,8 +309,12 @@ public class TestCompileAstArrowParams extends BaseTestCompileSuite {
         // fn3.applyAsInt(5) = 5*3 = 15
         // fn2.applyAsInt(15) = 15*2 = 30
         // fn3.applyAsInt(10) = 10*3 = 30
-        assertEquals(
-                List.of(10, 15, 30, 30),
-                List.of(fn2.applyAsInt(5), fn3.applyAsInt(5), fn2.applyAsInt(15), fn3.applyAsInt(10)));
+        assertThat(
+                List.of(
+                        fn2.applyAsInt(5), fn3.applyAsInt(5), fn2.applyAsInt(15), fn3.applyAsInt(10)
+                )
+        ).isEqualTo(
+                List.of(10, 15, 30, 30)
+        );
     }
 }

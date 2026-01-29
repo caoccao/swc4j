@@ -21,7 +21,9 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 
 /**
  * Tests for arrow expressions with destructuring parameters.
@@ -49,7 +51,7 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(30, result);
+        assertThat((int) result).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -73,7 +75,7 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(6, result);
+        assertThat((int) result).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -97,7 +99,7 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(60, result);
+        assertThat((int) result).isEqualTo(60);
     }
 
     @ParameterizedTest
@@ -118,7 +120,7 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals("John Doe", result);
+        assertThat(result).isEqualTo("John Doe");
     }
 
     @ParameterizedTest
@@ -139,7 +141,7 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals("Hello World", result);
+        assertThat(result).isEqualTo("Hello World");
     }
 
     @ParameterizedTest
@@ -162,7 +164,7 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(36, result);
+        assertThat((int) result).isEqualTo(36);
     }
 
     @ParameterizedTest
@@ -185,7 +187,7 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(30, result);
+        assertThat((int) result).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -209,6 +211,6 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
-        assertEquals(130, result);
+        assertThat((int) result).isEqualTo(130);
     }
 }

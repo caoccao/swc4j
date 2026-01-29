@@ -21,8 +21,9 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 
 public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
 
@@ -39,8 +40,8 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(0, (int) instanceRunner.invoke("test", -5));
-        assertEquals(10, (int) instanceRunner.invoke("test", 5));
+        assertThat((int) instanceRunner.invoke("test", -5)).isEqualTo(0);
+        assertThat((int) instanceRunner.invoke("test", 5)).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -57,9 +58,9 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(-1, (int) instanceRunner.invoke("sign", -10));
-        assertEquals(0, (int) instanceRunner.invoke("sign", 0));
-        assertEquals(1, (int) instanceRunner.invoke("sign", 10));
+        assertThat((int) instanceRunner.invoke("sign", -10)).isEqualTo(-1);
+        assertThat((int) instanceRunner.invoke("sign", 0)).isEqualTo(0);
+        assertThat((int) instanceRunner.invoke("sign", 10)).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -77,8 +78,8 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(true, instanceRunner.invoke("isTrue"));
-        assertEquals(false, instanceRunner.invoke("isFalse"));
+        assertThat((boolean) instanceRunner.invoke("isTrue")).isTrue();
+        assertThat((boolean) instanceRunner.invoke("isFalse")).isFalse();
     }
 
     @ParameterizedTest
@@ -92,7 +93,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(3.14159, runner.createInstanceRunner("com.A").invoke("test"), 0.00001);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isCloseTo(3.14159, within(0.00001));
     }
 
     @ParameterizedTest
@@ -110,8 +111,8 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertEquals(2, (int) instanceRunner.invoke("findFirst", new int[]{1, 2, 3, 4, 5}, 3));
-        assertEquals(-1, (int) instanceRunner.invoke("findFirst", new int[]{1, 2, 3, 4, 5}, 10));
+        assertThat((int) instanceRunner.invoke("findFirst", new int[]{1, 2, 3, 4, 5}, 3)).isEqualTo(2);
+        assertThat((int) instanceRunner.invoke("findFirst", new int[]{1, 2, 3, 4, 5}, 10)).isEqualTo(-1);
     }
 
     @ParameterizedTest
@@ -125,7 +126,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(42, (int) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -139,7 +140,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals(9999999999L, (long) runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(9999999999L);
     }
 
     @ParameterizedTest
@@ -153,7 +154,7 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertEquals("hello world", runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((String) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo("hello world");
     }
 
     @ParameterizedTest
@@ -167,6 +168,6 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
+        assertThat((Object) runner.createInstanceRunner("com.A").invoke("test")).isNull();
     }
 }
