@@ -43,9 +43,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals('\uFFFF', classA.getMethod("test").invoke(instance));
+        assertEquals((char) '\uFFFF', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -59,9 +57,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("0123456789", classA.getMethod("test").invoke(instance));
+        assertEquals("0123456789", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -75,9 +71,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("          ", classA.getMethod("test").invoke(instance));
+        assertEquals("          ", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -91,9 +85,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("line1\nline2\rline3\r\nline4", classA.getMethod("test").invoke(instance));
+        assertEquals("line1\nline2\rline3\r\nline4", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -107,9 +99,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("\uFFFF", classA.getMethod("test").invoke(instance));
+        assertEquals("\uFFFF", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -123,9 +113,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("\u0000", classA.getMethod("test").invoke(instance));
+        assertEquals("\u0000", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -139,9 +127,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("     ", classA.getMethod("test").invoke(instance));
+        assertEquals("     ", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -155,9 +141,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("aaaaaaaaaa", classA.getMethod("test").invoke(instance));
+        assertEquals("aaaaaaaaaa", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -171,9 +155,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("!@#$%^&*()_+-=[]{}|;:,.<>?/", classA.getMethod("test").invoke(instance));
+        assertEquals("!@#$%^&*()_+-=[]{}|;:,.<>?/", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -187,9 +169,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("TextA中🚀End", classA.getMethod("test").invoke(instance));
+        assertEquals("TextA中🚀End", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -210,9 +190,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""".formatted(expected));
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(expected, classA.getMethod("test").invoke(instance));
+        assertEquals(expected, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -226,9 +204,7 @@ public class TestCompileAstStrEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("a\nb\tc\rd\\e'f\"g\bh\fi", classA.getMethod("test").invoke(instance));
+        assertEquals("a\nb\tc\rd\\e'f\"g\bh\fi", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // NOTE: testStringEmojiLength removed - .length property access is out of scope

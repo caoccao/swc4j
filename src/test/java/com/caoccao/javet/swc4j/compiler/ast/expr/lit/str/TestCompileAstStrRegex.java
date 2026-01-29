@@ -43,11 +43,9 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         assertEquals(
                 List.of(List.of("cat"), List.of("bat"), List.of("rat")),
-                classA.getMethod("test").invoke(instance)
+                runner.createInstanceRunner("com.A").invoke("test")
         );
     }
 
@@ -62,9 +60,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -78,15 +74,13 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
         assertEquals(
                 List.of(
                         List.of("a1", "a", "1"),
                         List.of("b2", "b", "2"),
                         List.of("c3", "c", "3")
                 ),
-                classA.getMethod("test").invoke(instance)
+                runner.createInstanceRunner("com.A").invoke("test")
         );
     }
 
@@ -101,9 +95,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -117,10 +109,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        // Should match "aaa" once, not three separate "a"s
-        assertEquals(List.of(List.of("aaa")), classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(List.of("aaa")), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // match() tests
@@ -135,9 +124,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of("world"), classA.getMethod("test").invoke(instance));
+        assertEquals(List.of("world"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -151,9 +138,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of("Hello"), classA.getMethod("test").invoke(instance));
+        assertEquals(List.of("Hello"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -167,9 +152,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of("123"), classA.getMethod("test").invoke(instance));
+        assertEquals(List.of("123"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -183,9 +166,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -199,9 +180,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of("hello world", "hello", "world"), classA.getMethod("test").invoke(instance));
+        assertEquals(List.of("hello world", "hello", "world"), runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -215,9 +194,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertNull(classA.getMethod("test").invoke(instance));
+        assertNull(runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // search() tests
@@ -232,9 +209,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -248,9 +223,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance));
+        assertEquals(0, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -264,9 +237,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(3, classA.getMethod("test").invoke(instance));
+        assertEquals(3, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -280,9 +251,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(-1, classA.getMethod("test").invoke(instance));
+        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -296,9 +265,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals(6, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -312,9 +279,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(-1, classA.getMethod("test").invoke(instance));
+        assertEquals(-1, (int) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     // test() tests
@@ -329,9 +294,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance));
+        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -345,9 +308,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance));
+        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -361,9 +322,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance));
+        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -377,9 +336,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance));
+        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -393,9 +350,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance));
+        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -409,9 +364,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance));
+        assertEquals(false, runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -425,8 +378,6 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance));
+        assertEquals(true, runner.createInstanceRunner("com.A").invoke("test"));
     }
 }

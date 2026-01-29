@@ -40,9 +40,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals('A', classA.getMethod("test").invoke(instance));
+        assertEquals((char) 'A', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -56,9 +54,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals('中', classA.getMethod("test").invoke(instance));
+        assertEquals((char) '中', (char) runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -72,9 +68,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("Hello 🌍 World 🚀", classA.getMethod("test").invoke(instance));
+        assertEquals("Hello 🌍 World 🚀", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -88,9 +82,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("😀😁😂🤣😃", classA.getMethod("test").invoke(instance));
+        assertEquals("😀😁😂🤣😃", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -104,9 +96,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("Hello 世界 🌍", classA.getMethod("test").invoke(instance));
+        assertEquals("Hello 世界 🌍", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -120,9 +110,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("مرحبا", classA.getMethod("test").invoke(instance));
+        assertEquals("مرحبا", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -136,9 +124,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("A", classA.getMethod("test").invoke(instance));
+        assertEquals("A", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -152,9 +138,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("你好世界", classA.getMethod("test").invoke(instance));
+        assertEquals("你好世界", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -168,9 +152,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("你好", classA.getMethod("test").invoke(instance));
+        assertEquals("你好", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -184,9 +166,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("こんにちは", classA.getMethod("test").invoke(instance));
+        assertEquals("こんにちは", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -200,9 +180,7 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("안녕하세요", classA.getMethod("test").invoke(instance));
+        assertEquals("안녕하세요", runner.createInstanceRunner("com.A").invoke("test"));
     }
 
     @ParameterizedTest
@@ -216,8 +194,6 @@ public class TestCompileAstStrUnicode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Class<?> classA = runner.getClass("com.A");
-        var instance = classA.getConstructor().newInstance();
-        assertEquals("Hello", classA.getMethod("test").invoke(instance));
+        assertEquals("Hello", runner.createInstanceRunner("com.A").invoke("test"));
     }
 }
