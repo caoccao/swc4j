@@ -31,8 +31,8 @@ import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4jAstMemberExpr extends BaseTestSuiteSwc4jAst {
     @Test
@@ -66,12 +66,12 @@ public class TestSwc4jAstMemberExpr extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr().as(Swc4jAstMemberExpr.class), Swc4jAstType.MemberExpr, 0, 6);
         Swc4jAstIdent ident = assertAst(
                 memberExpr, memberExpr.getObj().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 0, 1);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstComputedPropName computedPropName = assertAst(
                 memberExpr, memberExpr.getProp().as(Swc4jAstComputedPropName.class), Swc4jAstType.ComputedPropName, 1, 6);
         Swc4jAstStr str = assertAst(
                 computedPropName, computedPropName.getExpr().as(Swc4jAstStr.class), Swc4jAstType.Str, 2, 5);
-        assertEquals("b", str.getValue());
+        assertThat(str.getValue()).isEqualTo("b");
         assertSpan(code, script);
     }
 
@@ -86,10 +86,10 @@ public class TestSwc4jAstMemberExpr extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr().as(Swc4jAstMemberExpr.class), Swc4jAstType.MemberExpr, 0, 3);
         Swc4jAstIdent ident = assertAst(
                 memberExpr, memberExpr.getObj().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 0, 1);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstIdentName identName = assertAst(
                 memberExpr, memberExpr.getProp().as(Swc4jAstIdentName.class), Swc4jAstType.IdentName, 2, 3);
-        assertEquals("b", identName.getSym());
+        assertThat(identName.getSym()).isEqualTo("b");
         assertSpan(code, script);
     }
 }

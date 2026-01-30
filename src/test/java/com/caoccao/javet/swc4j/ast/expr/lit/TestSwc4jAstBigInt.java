@@ -30,9 +30,8 @@ import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
     @Test
@@ -44,9 +43,9 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 41);
         Swc4jAstBigInt bigInt = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstBigInt.class), Swc4jAstType.BigInt, 0, 41);
-        assertEquals("1234567890123456789012345678901234567890n", bigInt.getRaw().get());
-        assertEquals("1234567890123456789012345678901234567890", bigInt.getValue().toString());
-        assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
+        assertThat(bigInt.getRaw().get()).isEqualTo("1234567890123456789012345678901234567890n");
+        assertThat(bigInt.getValue().toString()).isEqualTo("1234567890123456789012345678901234567890");
+        assertThat(bigInt.getSign()).isEqualTo(Swc4jAstBigIntSign.Plus);
         assertSpan(code, script);
     }
 
@@ -59,12 +58,12 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 3);
         Swc4jAstUnaryExpr unaryExpr = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstUnaryExpr.class), Swc4jAstType.UnaryExpr, 0, 3);
-        assertEquals(Swc4jAstUnaryOp.Minus, unaryExpr.getOp());
+        assertThat(unaryExpr.getOp()).isEqualTo(Swc4jAstUnaryOp.Minus);
         Swc4jAstBigInt bigInt = assertAst(
                 unaryExpr, unaryExpr.getArg().as(Swc4jAstBigInt.class), Swc4jAstType.BigInt, 1, 3);
-        assertEquals("1n", bigInt.getRaw().get());
-        assertEquals(BigInteger.ONE, bigInt.getValue());
-        assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
+        assertThat(bigInt.getRaw().get()).isEqualTo("1n");
+        assertThat(bigInt.getValue()).isEqualTo(BigInteger.ONE);
+        assertThat(bigInt.getSign()).isEqualTo(Swc4jAstBigIntSign.Plus);
         assertSpan(code, script);
     }
 
@@ -77,12 +76,12 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 3);
         Swc4jAstUnaryExpr unaryExpr = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstUnaryExpr.class), Swc4jAstType.UnaryExpr, 0, 3);
-        assertEquals(Swc4jAstUnaryOp.Plus, unaryExpr.getOp());
+        assertThat(unaryExpr.getOp()).isEqualTo(Swc4jAstUnaryOp.Plus);
         Swc4jAstBigInt bigInt = assertAst(
                 unaryExpr, unaryExpr.getArg().as(Swc4jAstBigInt.class), Swc4jAstType.BigInt, 1, 3);
-        assertEquals("1n", bigInt.getRaw().get());
-        assertEquals(BigInteger.ONE, bigInt.getValue());
-        assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
+        assertThat(bigInt.getRaw().get()).isEqualTo("1n");
+        assertThat(bigInt.getValue()).isEqualTo(BigInteger.ONE);
+        assertThat(bigInt.getSign()).isEqualTo(Swc4jAstBigIntSign.Plus);
         assertSpan(code, script);
     }
 
@@ -114,10 +113,10 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 2);
         Swc4jAstBigInt bigInt = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstBigInt.class), Swc4jAstType.BigInt, 0, 2);
-        assertTrue(bigInt.getRaw().isPresent());
-        assertEquals("0n", bigInt.getRaw().get());
-        assertEquals(BigInteger.ZERO, bigInt.getValue());
-        assertEquals(Swc4jAstBigIntSign.NoSign, bigInt.getSign());
+        assertThat(bigInt.getRaw().isPresent()).isTrue();
+        assertThat(bigInt.getRaw().get()).isEqualTo("0n");
+        assertThat(bigInt.getValue()).isEqualTo(BigInteger.ZERO);
+        assertThat(bigInt.getSign()).isEqualTo(Swc4jAstBigIntSign.NoSign);
         assertSpan(code, script);
     }
 }

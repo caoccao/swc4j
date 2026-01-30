@@ -23,8 +23,8 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4jAstVarDecl extends BaseTestSuiteSwc4jAst {
     @Test
@@ -34,22 +34,22 @@ public class TestSwc4jAstVarDecl extends BaseTestSuiteSwc4jAst {
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstVarDecl varDecl = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstVarDecl.class), Swc4jAstType.VarDecl, 0, 14);
-        assertEquals(3, varDecl.getDecls().size());
+        assertThat(varDecl.getDecls().size()).isEqualTo(3);
         Swc4jAstVarDeclarator varDeclarator = assertAst(
                 varDecl, varDecl.getDecls().get(0).as(Swc4jAstVarDeclarator.class), Swc4jAstType.VarDeclarator, 6, 7);
         Swc4jAstBindingIdent bindingIdent = assertAst(
                 varDeclarator, varDeclarator.getName().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 6, 7);
-        assertEquals("a", bindingIdent.getId().getSym());
+        assertThat(bindingIdent.getId().getSym()).isEqualTo("a");
         varDeclarator = assertAst(
                 varDecl, varDecl.getDecls().get(1).as(Swc4jAstVarDeclarator.class), Swc4jAstType.VarDeclarator, 9, 10);
         bindingIdent = assertAst(
                 varDeclarator, varDeclarator.getName().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 9, 10);
-        assertEquals("b", bindingIdent.getId().getSym());
+        assertThat(bindingIdent.getId().getSym()).isEqualTo("b");
         varDeclarator = assertAst(
                 varDecl, varDecl.getDecls().get(2).as(Swc4jAstVarDeclarator.class), Swc4jAstType.VarDeclarator, 12, 13);
         bindingIdent = assertAst(
                 varDeclarator, varDeclarator.getName().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 12, 13);
-        assertEquals("c", bindingIdent.getId().getSym());
+        assertThat(bindingIdent.getId().getSym()).isEqualTo("c");
         assertSpan(code, script);
     }
 }

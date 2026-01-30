@@ -25,9 +25,8 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSwc4jAstReturnExpr extends BaseTestSuiteSwc4jAst {
     @Test
@@ -37,16 +36,16 @@ public class TestSwc4jAstReturnExpr extends BaseTestSuiteSwc4jAst {
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstReturnStmt returnStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstReturnStmt.class), Swc4jAstType.ReturnStmt, 0, 10);
-        assertTrue(returnStmt.getArg().isPresent());
+        assertThat(returnStmt.getArg().isPresent()).isTrue();
         Swc4jAstBinExpr binExpr = assertAst(
                 returnStmt, returnStmt.getArg().get().as(Swc4jAstBinExpr.class), Swc4jAstType.BinExpr, 7, 10);
         Swc4jAstIdent ident = assertAst(
                 binExpr, binExpr.getLeft().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 7, 8);
-        assertEquals("a", ident.getSym());
-        assertEquals(Swc4jAstBinaryOp.Add, binExpr.getOp());
+        assertThat(ident.getSym()).isEqualTo("a");
+        assertThat(binExpr.getOp()).isEqualTo(Swc4jAstBinaryOp.Add);
         ident = assertAst(
                 binExpr, binExpr.getRight().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 9, 10);
-        assertEquals("b", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("b");
         assertSpan(code, script);
     }
 }

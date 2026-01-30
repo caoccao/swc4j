@@ -27,38 +27,39 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
     @Test
     public void testCoercion() {
-        assertEquals("0", Swc4jAstNumber.create(0).getRaw().get());
-        assertEquals("1", Swc4jAstNumber.create(1).getRaw().get());
-        assertEquals("-1", Swc4jAstNumber.create(-1).getRaw().get());
-        assertEquals("-1", Swc4jAstNumber.create(-1, "-1.0").toString());
-        assertEquals("1", Swc4jAstNumber.create(1, "+1.0").toString());
-        assertEquals("1.1", Swc4jAstNumber.create(1.1D).toString());
-        assertEquals("-1.1", Swc4jAstNumber.create(-1.1D).toString());
-        assertEquals("1.1e+20", Swc4jAstNumber.create(1.1e20D).toString());
-        assertEquals("1.23e+21", Swc4jAstNumber.create(12.30e20D).toString());
-        assertEquals("1.234e+21", Swc4jAstNumber.create(12.340e20D, "12.340e20").toString());
-        assertEquals("-1.234e+21", Swc4jAstNumber.create(12.340e20D, "-12.340e20").toString());
-        assertEquals("1.234e+21", Swc4jAstNumber.create(12.340e20D, "12.34000e20").toString());
-        assertEquals("Infinity", Swc4jAstNumber.create(Double.POSITIVE_INFINITY).toString());
-        assertEquals("Infinity", Swc4jAstNumber.create(Double.POSITIVE_INFINITY, "1e309").toString());
-        assertEquals("Infinity", Swc4jAstNumber.create(Double.POSITIVE_INFINITY, "+1e309").toString());
-        assertEquals("Infinity", Swc4jAstNumber.create(Double.POSITIVE_INFINITY, "1.23e309").toString());
-        assertEquals("Infinity", Swc4jAstNumber.create(Double.POSITIVE_INFINITY, "+1.23e309").toString());
-        assertEquals("-Infinity", Swc4jAstNumber.create(Double.NEGATIVE_INFINITY).toString());
-        assertEquals("-Infinity", Swc4jAstNumber.create(Double.NEGATIVE_INFINITY, "-1e309").toString());
-        assertEquals("-Infinity", Swc4jAstNumber.create(Double.NEGATIVE_INFINITY, "-1.23e309").toString());
-        assertEquals("1.1e-20", Swc4jAstNumber.create(1.1e-20D).toString());
-        assertEquals("-1.1e-20", Swc4jAstNumber.create(-1.1e-20D).toString());
-        assertEquals(1, Swc4jAstNumber.create(1.1D).asInt());
-        assertEquals(-1, Swc4jAstNumber.create(-1.1D).asInt());
-        assertEquals("NaN", Swc4jAstNumber.create(Double.NaN).toString());
-        assertEquals(0, Swc4jAstNumber.create(Double.NaN).asInt());
+        assertThat(Swc4jAstNumber.create(0).getRaw().get()).isEqualTo("0");
+        assertThat(Swc4jAstNumber.create(1).getRaw().get()).isEqualTo("1");
+        assertThat(Swc4jAstNumber.create(-1).getRaw().get()).isEqualTo("-1");
+        assertThat(Swc4jAstNumber.create(-1, "-1.0").toString()).isEqualTo("-1");
+        assertThat(Swc4jAstNumber.create(1, "+1.0").toString()).isEqualTo("1");
+        assertThat(Swc4jAstNumber.create(1.1D).toString()).isEqualTo("1.1");
+        assertThat(Swc4jAstNumber.create(-1.1D).toString()).isEqualTo("-1.1");
+        assertThat(Swc4jAstNumber.create(1.1e20D).toString()).isEqualTo("1.1e+20");
+        assertThat(Swc4jAstNumber.create(12.30e20D).toString()).isEqualTo("1.23e+21");
+        assertThat(Swc4jAstNumber.create(12.340e20D, "12.340e20").toString()).isEqualTo("1.234e+21");
+        assertThat(Swc4jAstNumber.create(12.340e20D, "-12.340e20").toString()).isEqualTo("-1.234e+21");
+        assertThat(Swc4jAstNumber.create(12.340e20D, "12.34000e20").toString()).isEqualTo("1.234e+21");
+        assertThat(Swc4jAstNumber.create(Double.POSITIVE_INFINITY).toString()).isEqualTo("Infinity");
+        assertThat(Swc4jAstNumber.create(Double.POSITIVE_INFINITY, "1e309").toString()).isEqualTo("Infinity");
+        assertThat(Swc4jAstNumber.create(Double.POSITIVE_INFINITY, "+1e309").toString()).isEqualTo("Infinity");
+        assertThat(Swc4jAstNumber.create(Double.POSITIVE_INFINITY, "1.23e309").toString()).isEqualTo("Infinity");
+        assertThat(Swc4jAstNumber.create(Double.POSITIVE_INFINITY, "+1.23e309").toString()).isEqualTo("Infinity");
+        assertThat(Swc4jAstNumber.create(Double.NEGATIVE_INFINITY).toString()).isEqualTo("-Infinity");
+        assertThat(Swc4jAstNumber.create(Double.NEGATIVE_INFINITY, "-1e309").toString()).isEqualTo("-Infinity");
+        assertThat(Swc4jAstNumber.create(Double.NEGATIVE_INFINITY, "-1.23e309").toString()).isEqualTo("-Infinity");
+        assertThat(Swc4jAstNumber.create(1.1e-20D).toString()).isEqualTo("1.1e-20");
+        assertThat(Swc4jAstNumber.create(-1.1e-20D).toString()).isEqualTo("-1.1e-20");
+        assertThat(Swc4jAstNumber.create(1.1D).asInt()).isEqualTo(1);
+        assertThat(Swc4jAstNumber.create(-1.1D).asInt()).isEqualTo(-1);
+        assertThat(Swc4jAstNumber.create(Double.NaN).toString()).isEqualTo("NaN");
+        assertThat(Swc4jAstNumber.create(Double.NaN).asInt()).isEqualTo(0);
     }
 
     @Test
@@ -70,8 +71,8 @@ public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 5);
         Swc4jAstNumber number = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstNumber.class), Swc4jAstType.Number, 0, 5);
-        assertEquals(12.34D, number.getValue(), 0.0001D);
-        assertEquals("12.34", number.getRaw().get());
+        assertThat(number.getValue()).isCloseTo(12.34D, within(0.0001D));
+        assertThat(number.getRaw().get()).isEqualTo("12.34");
         assertSpan(code, script);
     }
 
@@ -88,11 +89,11 @@ public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
             int minusCount = entry.getValue();
             Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
             List<Swc4jAstNumber> nodes = output.getProgram().find(Swc4jAstNumber.class);
-            assertEquals(1, nodes.size());
+            assertThat(nodes.size()).isEqualTo(1);
             Swc4jAstNumber number = nodes.get(0);
-            assertEquals(12345, number.asInt());
-            assertEquals("12345", number.getRaw().get());
-            assertEquals(minusCount, number.getMinusCount());
+            assertThat(number.asInt()).isEqualTo(12345);
+            assertThat(number.getRaw().get()).isEqualTo("12345");
+            assertThat(number.getMinusCount()).isEqualTo(minusCount);
         }
     }
 
@@ -105,8 +106,8 @@ public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 5);
         Swc4jAstNumber number = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstNumber.class), Swc4jAstType.Number, 0, 5);
-        assertEquals(12345, number.asInt());
-        assertEquals("12345", number.getRaw().get());
+        assertThat(number.asInt()).isEqualTo(12345);
+        assertThat(number.getRaw().get()).isEqualTo("12345");
         assertSpan(code, script);
     }
 }

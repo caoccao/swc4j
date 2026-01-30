@@ -23,8 +23,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4jAstAwaitExpr extends BaseTestSuiteSwc4jAst {
     @Test
@@ -38,6 +38,6 @@ public class TestSwc4jAstAwaitExpr extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr().as(Swc4jAstAwaitExpr.class), Swc4jAstType.AwaitExpr, 0, 7);
         Swc4jAstIdent ident = assertAst(
                 awaitExpr, awaitExpr.getArg().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 6, 7);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
     }
 }

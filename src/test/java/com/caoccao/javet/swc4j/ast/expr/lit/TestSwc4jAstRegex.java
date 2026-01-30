@@ -23,8 +23,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4jAstRegex extends BaseTestSuiteSwc4jAst {
     @Test
@@ -36,9 +36,9 @@ public class TestSwc4jAstRegex extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 7);
         Swc4jAstRegex regex = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstRegex.class), Swc4jAstType.Regex, 0, 7);
-        assertEquals("abc", regex.getExp());
-        assertEquals("ig", regex.getFlags());
-        assertEquals(code, regex.toString());
+        assertThat(regex.getExp()).isEqualTo("abc");
+        assertThat(regex.getFlags()).isEqualTo("ig");
+        assertThat(regex.toString()).isEqualTo(code);
         assertSpan(code, script);
     }
 
@@ -51,9 +51,9 @@ public class TestSwc4jAstRegex extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 5);
         Swc4jAstRegex regex = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstRegex.class), Swc4jAstType.Regex, 0, 5);
-        assertEquals("abc", regex.getExp());
-        assertEquals("", regex.getFlags());
-        assertEquals(code, regex.toString());
+        assertThat(regex.getExp()).isEqualTo("abc");
+        assertThat(regex.getFlags()).isEqualTo("");
+        assertThat(regex.toString()).isEqualTo(code);
         assertSpan(code, script);
     }
 }

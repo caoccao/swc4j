@@ -23,26 +23,26 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstIdent extends BaseTestSuiteSwc4jAst {
     @Test
     public void testValidNonOptional() {
         SimpleList.of("a", "x0", "_a", "$abc").forEach(code -> {
-            Swc4jParseOutput output = null;
+            Swc4jParseOutput output;
             try {
                 output = swc4j.parse(code, jsScriptParseOptions);
             } catch (Throwable t) {
-                fail(t);
+                throw new AssertionError(t);
             }
             Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
             Swc4jAstExprStmt exprStmt = assertAst(
                     script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, code.length());
             Swc4jAstIdent ident = assertAst(
                     exprStmt, exprStmt.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 0, code.length());
-            assertEquals(code, ident.getSym());
-            assertFalse(ident.isOptional());
+            assertThat(ident.getSym()).isEqualTo(code);
+            assertThat(ident.isOptional()).isFalse();
             assertSpan(code, script);
         });
     }

@@ -31,8 +31,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestAstToSvg {
     @SuppressWarnings("unchecked")
@@ -48,7 +48,7 @@ public class TestAstToSvg {
                 .map(Map.Entry::getValue)
                 .filter(Class::isInterface)
                 .forEach(type -> {
-                    assertTrue(ISwc4jAst.class.isAssignableFrom(type));
+                    assertThat(ISwc4jAst.class.isAssignableFrom(type)).isTrue();
                     astToSvg.process((Class<ISwc4jAst>) type);
                 });
         File file = new File(OSUtils.WORKING_DIRECTORY, "docs/features/ast.dot");
@@ -87,7 +87,7 @@ public class TestAstToSvg {
                 Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(type);
                 String name = jni2RustClassUtils.getName();
                 if (type.isInterface()) {
-                    assertTrue(type.isAnnotationPresent(Jni2RustClass.class));
+                    assertThat(type.isAnnotationPresent(Jni2RustClass.class)).isTrue();
                     String targets = Arrays.stream(jni2RustClassUtils.getMappings())
                             .map(Jni2RustEnumMapping::type)
                             .map(Jni2RustClassUtils::new)

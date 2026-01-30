@@ -22,8 +22,8 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSwc4jAstBlockStmt extends BaseTestSuiteSwc4jAst {
     @Test
@@ -33,7 +33,7 @@ public class TestSwc4jAstBlockStmt extends BaseTestSuiteSwc4jAst {
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstBlockStmt blockStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstBlockStmt.class), Swc4jAstType.BlockStmt, 0, 2);
-        assertTrue(blockStmt.getStmts().isEmpty());
+        assertThat(blockStmt.getStmts().isEmpty()).isTrue();
         assertSpan(code, script);
     }
 }

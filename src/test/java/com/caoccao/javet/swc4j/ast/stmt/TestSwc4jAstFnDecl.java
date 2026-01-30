@@ -24,9 +24,8 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class TestSwc4jAstFnDecl extends BaseTestSuiteSwc4jAst {
     @Test
@@ -36,16 +35,16 @@ public class TestSwc4jAstFnDecl extends BaseTestSuiteSwc4jAst {
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstFnDecl fnDecl = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstFnDecl.class), Swc4jAstType.FnDecl, 0, 15);
-        assertFalse(fnDecl.isDeclare());
+        assertThat(fnDecl.isDeclare()).isFalse();
         Swc4jAstFunction function = assertAst(
                 fnDecl, fnDecl.getFunction(), Swc4jAstType.Function, 0, 15);
-        assertFalse(function.isAsync());
-        assertFalse(function.isGenerator());
-        assertFalse(function.getReturnType().isPresent());
-        assertFalse(function.getTypeParams().isPresent());
+        assertThat(function.isAsync()).isFalse();
+        assertThat(function.isGenerator()).isFalse();
+        assertThat(function.getReturnType().isPresent()).isFalse();
+        assertThat(function.getTypeParams().isPresent()).isFalse();
         Swc4jAstIdent ident = assertAst(
                 fnDecl, fnDecl.getIdent(), Swc4jAstType.Ident, 9, 10);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         assertSpan(code, script);
     }
 }

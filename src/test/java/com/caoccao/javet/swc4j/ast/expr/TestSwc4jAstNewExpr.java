@@ -23,8 +23,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstNewExpr extends BaseTestSuiteSwc4jAst {
     @Test
@@ -36,12 +36,12 @@ public class TestSwc4jAstNewExpr extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 7);
         Swc4jAstNewExpr newExpr = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstNewExpr.class), Swc4jAstType.NewExpr, 0, 7);
-        assertTrue(newExpr.getArgs().isPresent());
-        assertTrue(newExpr.getArgs().get().isEmpty());
-        assertFalse(newExpr.getTypeArgs().isPresent());
+        assertThat(newExpr.getArgs().isPresent()).isTrue();
+        assertThat(newExpr.getArgs().get().isEmpty()).isTrue();
+        assertThat(newExpr.getTypeArgs().isPresent()).isFalse();
         Swc4jAstIdent ident = assertAst(
                 newExpr, newExpr.getCallee().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 4, 5);
-        assertEquals("A", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("A");
         assertSpan(code, script);
     }
 
@@ -54,11 +54,11 @@ public class TestSwc4jAstNewExpr extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 5);
         Swc4jAstNewExpr newExpr = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstNewExpr.class), Swc4jAstType.NewExpr, 0, 5);
-        assertFalse(newExpr.getArgs().isPresent());
-        assertFalse(newExpr.getTypeArgs().isPresent());
+        assertThat(newExpr.getArgs().isPresent()).isFalse();
+        assertThat(newExpr.getTypeArgs().isPresent()).isFalse();
         Swc4jAstIdent ident = assertAst(
                 newExpr, newExpr.getCallee().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 4, 5);
-        assertEquals("A", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("A");
         assertSpan(code, script);
     }
 }

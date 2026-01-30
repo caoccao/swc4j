@@ -28,8 +28,8 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstClassDecl extends BaseTestSuiteSwc4jAst {
     @Test
@@ -41,27 +41,27 @@ public class TestSwc4jAstClassDecl extends BaseTestSuiteSwc4jAst {
                 module, module.getBody().get(0).as(Swc4jAstExportDecl.class), Swc4jAstType.ExportDecl, 5, 22);
         Swc4jAstClassDecl classDecl = assertAst(
                 exportDecl, exportDecl.getDecl().as(Swc4jAstClassDecl.class), Swc4jAstType.ClassDecl, 12, 22);
-        assertFalse(classDecl.isDeclare());
+        assertThat(classDecl.isDeclare()).isFalse();
         Swc4jAstClass clazz = assertAst(
                 classDecl, classDecl.getClazz(), Swc4jAstType.Class, 12, 22);
-        assertTrue(clazz.getBody().isEmpty());
-        assertFalse(clazz.isAbstract());
-        assertFalse(clazz.getSuperClass().isPresent());
-        assertFalse(clazz.getSuperTypeParams().isPresent());
-        assertFalse(clazz.getTypeParams().isPresent());
-        assertEquals(1, clazz.getDecorators().size());
+        assertThat(clazz.getBody().isEmpty()).isTrue();
+        assertThat(clazz.isAbstract()).isFalse();
+        assertThat(clazz.getSuperClass().isPresent()).isFalse();
+        assertThat(clazz.getSuperTypeParams().isPresent()).isFalse();
+        assertThat(clazz.getTypeParams().isPresent()).isFalse();
+        assertThat(clazz.getDecorators().size()).isEqualTo(1);
         Swc4jAstDecorator decorator = assertAst(
                 clazz, clazz.getDecorators().get(0), Swc4jAstType.Decorator, 0, 4);
         Swc4jAstCallExpr callExpr = assertAst(
                 decorator, decorator.getExpr().as(Swc4jAstCallExpr.class), Swc4jAstType.CallExpr, 1, 4);
-        assertTrue(callExpr.getArgs().isEmpty());
-        assertFalse(callExpr.getTypeArgs().isPresent());
+        assertThat(callExpr.getArgs().isEmpty()).isTrue();
+        assertThat(callExpr.getTypeArgs().isPresent()).isFalse();
         Swc4jAstIdent ident = assertAst(
                 callExpr, callExpr.getCallee().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 1, 2);
-        assertEquals("x", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("x");
         ident = assertAst(
                 classDecl, classDecl.getIdent(), Swc4jAstType.Ident, 18, 19);
-        assertEquals("A", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("A");
         assertSpan(code, module);
     }
 
@@ -74,12 +74,12 @@ public class TestSwc4jAstClassDecl extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstClassDecl.class), Swc4jAstType.ClassDecl, 0, 10);
         Swc4jAstClass clazz = assertAst(
                 classDecl, classDecl.getClazz(), Swc4jAstType.Class, 0, 10);
-        assertTrue(clazz.getBody().isEmpty());
-        assertTrue(clazz.getDecorators().isEmpty());
-        assertTrue(clazz.getImplements().isEmpty());
+        assertThat(clazz.getBody().isEmpty()).isTrue();
+        assertThat(clazz.getDecorators().isEmpty()).isTrue();
+        assertThat(clazz.getImplements().isEmpty()).isTrue();
         Swc4jAstIdent ident = assertAst(
                 classDecl, classDecl.getIdent(), Swc4jAstType.Ident, 6, 7);
-        assertEquals("A", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("A");
         assertSpan(code, script);
     }
 
@@ -92,27 +92,27 @@ public class TestSwc4jAstClassDecl extends BaseTestSuiteSwc4jAst {
                 module, module.getBody().get(0).as(Swc4jAstExportDecl.class), Swc4jAstType.ExportDecl, 0, 22);
         Swc4jAstClassDecl classDecl = assertAst(
                 exportDecl, exportDecl.getDecl().as(Swc4jAstClassDecl.class), Swc4jAstType.ClassDecl, 12, 22);
-        assertFalse(classDecl.isDeclare());
+        assertThat(classDecl.isDeclare()).isFalse();
         Swc4jAstClass clazz = assertAst(
                 classDecl, classDecl.getClazz(), Swc4jAstType.Class, 12, 22);
-        assertTrue(clazz.getBody().isEmpty());
-        assertFalse(clazz.isAbstract());
-        assertFalse(clazz.getSuperClass().isPresent());
-        assertFalse(clazz.getSuperTypeParams().isPresent());
-        assertFalse(clazz.getTypeParams().isPresent());
-        assertEquals(1, clazz.getDecorators().size());
+        assertThat(clazz.getBody().isEmpty()).isTrue();
+        assertThat(clazz.isAbstract()).isFalse();
+        assertThat(clazz.getSuperClass().isPresent()).isFalse();
+        assertThat(clazz.getSuperTypeParams().isPresent()).isFalse();
+        assertThat(clazz.getTypeParams().isPresent()).isFalse();
+        assertThat(clazz.getDecorators().size()).isEqualTo(1);
         Swc4jAstDecorator decorator = assertAst(
                 clazz, clazz.getDecorators().get(0), Swc4jAstType.Decorator, 7, 11);
         Swc4jAstCallExpr callExpr = assertAst(
                 decorator, decorator.getExpr().as(Swc4jAstCallExpr.class), Swc4jAstType.CallExpr, 8, 11);
-        assertTrue(callExpr.getArgs().isEmpty());
-        assertFalse(callExpr.getTypeArgs().isPresent());
+        assertThat(callExpr.getArgs().isEmpty()).isTrue();
+        assertThat(callExpr.getTypeArgs().isPresent()).isFalse();
         Swc4jAstIdent ident = assertAst(
                 callExpr, callExpr.getCallee().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 8, 9);
-        assertEquals("x", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("x");
         ident = assertAst(
                 classDecl, classDecl.getIdent(), Swc4jAstType.Ident, 18, 19);
-        assertEquals("A", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("A");
         assertSpan(code, module);
     }
 }

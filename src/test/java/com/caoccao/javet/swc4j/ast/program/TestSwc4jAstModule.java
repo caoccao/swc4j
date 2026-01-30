@@ -29,9 +29,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.atomic.AtomicInteger;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSwc4jAstModule extends BaseTestSuiteSwc4jAst {
     @Test
@@ -43,7 +42,7 @@ public class TestSwc4jAstModule extends BaseTestSuiteSwc4jAst {
         Swc4jAstCounterVisitor visitor = new Swc4jAstCounterVisitor();
         module.visit(visitor);
         int totalNodeCount = visitor.getCounterMap().values().stream().mapToInt(AtomicInteger::get).sum();
-        assertTrue(totalNodeCount > 500);
+        assertThat(totalNodeCount).isGreaterThan(500);
         SimpleList.of(Swc4jAstType.ImportDecl,
                         Swc4jAstType.ImportStarAsSpecifier,
                         Swc4jAstType.ClassMethod,
@@ -60,10 +59,14 @@ public class TestSwc4jAstModule extends BaseTestSuiteSwc4jAst {
                         Swc4jAstType.ArrayLit,
                         Swc4jAstType.VarDecl,
                         Swc4jAstType.VarDeclarator)
-                .forEach(type -> assertTrue(visitor.get(type) > 1, type.name() + " should appear more than once"));
+                .forEach(type -> assertThat(visitor.get(type))
+                        .as(type.name() + " should appear more than once")
+                        .isGreaterThan(1));
         SimpleList.of(Swc4jAstType.ClassDecl,
                         Swc4jAstType.Constructor)
-                .forEach(type -> assertEquals(1, visitor.get(type), type.name() + " should appear once"));
+                .forEach(type -> assertThat(visitor.get(type))
+                        .as(type.name() + " should appear once")
+                        .isEqualTo(1));
         assertSpan(code, module);
     }
 
@@ -76,7 +79,7 @@ public class TestSwc4jAstModule extends BaseTestSuiteSwc4jAst {
         Swc4jAstCounterVisitor visitor = new Swc4jAstCounterVisitor();
         module.visit(visitor);
         int totalNodeCount = visitor.getCounterMap().values().stream().mapToInt(AtomicInteger::get).sum();
-        assertTrue(totalNodeCount > 500);
+        assertThat(totalNodeCount).isGreaterThan(500);
         SimpleList.of(Swc4jAstType.ImportDecl,
                         Swc4jAstType.ImportStarAsSpecifier,
                         Swc4jAstType.KeyValueProp,
@@ -92,7 +95,9 @@ public class TestSwc4jAstModule extends BaseTestSuiteSwc4jAst {
                         Swc4jAstType.BlockStmt,
                         Swc4jAstType.VarDecl,
                         Swc4jAstType.VarDeclarator)
-                .forEach(type -> assertTrue(visitor.get(type) > 1, type.name() + " should appear more than once"));
+                .forEach(type -> assertThat(visitor.get(type))
+                        .as(type.name() + " should appear more than once")
+                        .isGreaterThan(1));
         assertSpan(code, module);
     }
 }

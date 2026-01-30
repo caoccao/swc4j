@@ -29,9 +29,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSwc4jAstObjectLit extends BaseTestSuiteSwc4jAst {
     @Test
@@ -43,15 +42,15 @@ public class TestSwc4jAstObjectLit extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 4);
         Swc4jAstAssignExpr assignExpr = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstAssignExpr.class), Swc4jAstType.AssignExpr, 0, 4);
-        assertEquals(Swc4jAstAssignOp.Assign, assignExpr.getOp());
+        assertThat(assignExpr.getOp()).isEqualTo(Swc4jAstAssignOp.Assign);
         Swc4jAstBindingIdent bindingIdent = assertAst(
                 assignExpr, assignExpr.getLeft().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 0, 1);
         Swc4jAstIdent ident = assertAst(
                 bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 0, 1);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstObjectLit objectLit = assertAst(
                 assignExpr, assignExpr.getRight().as(Swc4jAstObjectLit.class), Swc4jAstType.ObjectLit, 2, 4);
-        assertTrue(objectLit.getProps().isEmpty());
+        assertThat(objectLit.getProps().isEmpty()).isTrue();
         assertSpan(code, script);
     }
 
@@ -64,12 +63,12 @@ public class TestSwc4jAstObjectLit extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 20);
         Swc4jAstAssignExpr assignExpr = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstAssignExpr.class), Swc4jAstType.AssignExpr, 0, 20);
-        assertEquals(Swc4jAstAssignOp.Assign, assignExpr.getOp());
+        assertThat(assignExpr.getOp()).isEqualTo(Swc4jAstAssignOp.Assign);
         Swc4jAstBindingIdent bindingIdent = assertAst(
                 assignExpr, assignExpr.getLeft().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 0, 1);
         Swc4jAstIdent ident = assertAst(
                 bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 0, 1);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstObjectLit objectLit = assertAst(
                 assignExpr, assignExpr.getRight().as(Swc4jAstObjectLit.class), Swc4jAstType.ObjectLit, 2, 20);
         // Number
@@ -77,32 +76,32 @@ public class TestSwc4jAstObjectLit extends BaseTestSuiteSwc4jAst {
                 objectLit, objectLit.getProps().get(0).as(Swc4jAstKeyValueProp.class), Swc4jAstType.KeyValueProp, 3, 6);
         Swc4jAstIdentName identName = assertAst(
                 keyValueProp, keyValueProp.getKey().as(Swc4jAstIdentName.class), Swc4jAstType.IdentName, 3, 4);
-        assertEquals("a", identName.getSym());
+        assertThat(identName.getSym()).isEqualTo("a");
         Swc4jAstNumber number = assertAst(
                 keyValueProp, keyValueProp.getValue().as(Swc4jAstNumber.class), Swc4jAstType.Number, 5, 6);
-        assertEquals(1, number.getValue());
-        assertTrue(number.getRaw().isPresent());
-        assertEquals("1", number.getRaw().get());
+        assertThat(number.getValue()).isEqualTo(1);
+        assertThat(number.getRaw().isPresent()).isTrue();
+        assertThat(number.getRaw().get()).isEqualTo("1");
         // Str
         keyValueProp = assertAst(
                 objectLit, objectLit.getProps().get(1).as(Swc4jAstKeyValueProp.class), Swc4jAstType.KeyValueProp, 7, 12);
         identName = assertAst(
                 keyValueProp, keyValueProp.getKey().as(Swc4jAstIdentName.class), Swc4jAstType.IdentName, 7, 8);
-        assertEquals("b", identName.getSym());
+        assertThat(identName.getSym()).isEqualTo("b");
         Swc4jAstStr str = assertAst(
                 keyValueProp, keyValueProp.getValue().as(Swc4jAstStr.class), Swc4jAstType.Str, 9, 12);
-        assertTrue(str.getRaw().isPresent());
-        assertEquals("x", str.getValue());
-        assertEquals("'x'", str.getRaw().get());
+        assertThat(str.getRaw().isPresent()).isTrue();
+        assertThat(str.getValue()).isEqualTo("x");
+        assertThat(str.getRaw().get()).isEqualTo("'x'");
         // Bool
         keyValueProp = assertAst(
                 objectLit, objectLit.getProps().get(2).as(Swc4jAstKeyValueProp.class), Swc4jAstType.KeyValueProp, 13, 19);
         identName = assertAst(
                 keyValueProp, keyValueProp.getKey().as(Swc4jAstIdentName.class), Swc4jAstType.IdentName, 13, 14);
-        assertEquals("c", identName.getSym());
+        assertThat(identName.getSym()).isEqualTo("c");
         Swc4jAstBool b = assertAst(
                 keyValueProp, keyValueProp.getValue().as(Swc4jAstBool.class), Swc4jAstType.Bool, 15, 19);
-        assertTrue(b.isValue());
+        assertThat(b.isValue()).isTrue();
         assertSpan(code, script);
     }
 }

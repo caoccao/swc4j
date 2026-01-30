@@ -25,8 +25,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstJsxOpening extends BaseTestSuiteSwc4jAst {
     @Test
@@ -40,11 +40,11 @@ public class TestSwc4jAstJsxOpening extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr().as(Swc4jAstJsxElement.class), Swc4jAstType.JsxElement, 0, 13);
         Swc4jAstJsxOpeningElement jsxOpeningElement = assertAst(
                 jsxElement, jsxElement.getOpening(), Swc4jAstType.JsxOpeningElement, 0, 4);
-        assertFalse(jsxOpeningElement.isSelfClosing());
+        assertThat(jsxOpeningElement.isSelfClosing()).isFalse();
         Swc4jAstIdent ident = assertAst(
                 jsxOpeningElement, jsxOpeningElement.getName().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 1, 3);
-        assertEquals("h1", ident.getSym());
-        assertFalse(ident.isOptional());
+        assertThat(ident.getSym()).isEqualTo("h1");
+        assertThat(ident.isOptional()).isFalse();
         assertSpan(code, script);
     }
 
@@ -59,7 +59,7 @@ public class TestSwc4jAstJsxOpening extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr().as(Swc4jAstJsxElement.class), Swc4jAstType.JsxElement, 0, 5);
         Swc4jAstJsxOpeningElement jsxOpeningElement = assertAst(
                 jsxElement, jsxElement.getOpening(), Swc4jAstType.JsxOpeningElement, 0, 5);
-        assertTrue(jsxOpeningElement.isSelfClosing());
+        assertThat(jsxOpeningElement.isSelfClosing()).isTrue();
         assertSpan(code, script);
     }
 }

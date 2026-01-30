@@ -40,8 +40,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public final class Swc4jAstStore {
     public static final String JAVA_FILE_EXT = ".java";
@@ -85,8 +85,7 @@ public final class Swc4jAstStore {
                         try {
                             return Class.forName(n);
                         } catch (ClassNotFoundException e) {
-                            fail(e);
-                            return null;
+                            throw new AssertionError(e);
                         }
                     })
                     .filter(clazz -> clazz.isInterface() || !Modifier.isAbstract(clazz.getModifiers()))
@@ -107,20 +106,20 @@ public final class Swc4jAstStore {
                             }
                         } else if (Swc4jAst.class.isAssignableFrom(clazz) && Swc4jAst.class != clazz) {
                             Matcher matcherFileName = PATTERN_FOR_CLASS_NAME.matcher(clazz.getSimpleName());
-                            assertTrue(
-                                    matcherFileName.matches(),
-                                    "Class " + clazz + " violates the naming convention");
+                            assertThat(matcherFileName.matches())
+                                    .as("Class " + clazz + " violates the naming convention")
+                                    .isTrue();
                             String className = matcherFileName.group(1);
                             structMap.put(className, clazz);
-                            assertTrue(
-                                    AnnotationUtils.isAnnotationPresent(clazz, Jni2RustClass.class),
-                                    "Class " + clazz.getSimpleName() + " is not annotated by Jni2RustClass");
-                            assertTrue(
-                                    Stream.of(clazz.getConstructors())
-                                            .findFirst()
-                                            .map(c -> c.isAnnotationPresent(Jni2RustMethod.class))
-                                            .orElse(false),
-                                    "Class " + clazz.getSimpleName() + " constructor is not annotated by Jni2RustMethod");
+                            assertThat(AnnotationUtils.isAnnotationPresent(clazz, Jni2RustClass.class))
+                                    .as("Class " + clazz.getSimpleName() + " is not annotated by Jni2RustClass")
+                                    .isTrue();
+                            assertThat(Stream.of(clazz.getConstructors())
+                                    .findFirst()
+                                    .map(c -> c.isAnnotationPresent(Jni2RustMethod.class))
+                                    .orElse(false))
+                                    .as("Class " + clazz.getSimpleName() + " constructor is not annotated by Jni2RustMethod")
+                                    .isTrue();
                             Map<String, Method> methodMap = Stream.of(clazz.getDeclaredMethods())
                                     .filter(method -> !Modifier.isStatic(method.getModifiers()))
                                     .filter(method -> !Modifier.isAbstract(method.getModifiers()))
@@ -139,29 +138,29 @@ public final class Swc4jAstStore {
                                                 fieldName.substring(0, 1).toUpperCase() +
                                                 fieldName.substring(1);
                                         Method getterMethod = methodMap.get(getterMethodName);
-                                        assertNotNull(
-                                                getterMethod,
-                                                getterMethodName + " is not found from " + clazz.getSimpleName());
-                                        assertTrue(
-                                                getterMethod.isAnnotationPresent(Jni2RustMethod.class),
-                                                getterMethodName + " is not exported from " + clazz.getSimpleName());
+                                        assertThat(getterMethod)
+                                                .as(getterMethodName + " is not found from " + clazz.getSimpleName())
+                                                .isNotNull();
+                                        assertThat(getterMethod.isAnnotationPresent(Jni2RustMethod.class))
+                                                .as(getterMethodName + " is not exported from " + clazz.getSimpleName())
+                                                .isTrue();
                                         String setterMethodName = "set" +
                                                 fieldName.substring(0, 1).toUpperCase() +
                                                 fieldName.substring(1);
                                         if (field.getType() != List.class) {
                                             Method setterMethod = methodMap.get(setterMethodName);
-                                            assertNotNull(
-                                                    setterMethod,
-                                                    setterMethodName + " is not found from " + clazz.getSimpleName());
-                                            assertEquals(clazz, setterMethod.getReturnType());
+                                            assertThat(setterMethod)
+                                                    .as(setterMethodName + " is not found from " + clazz.getSimpleName())
+                                                    .isNotNull();
+                                            assertThat(setterMethod.getReturnType()).isEqualTo(clazz);
                                         }
                                     });
                         }
                     });
         } catch (Exception e) {
-            fail(e);
+            throw new AssertionError(e);
         }
-        assertFalse(enumMap.isEmpty());
-        assertFalse(structMap.isEmpty());
+        assertThat(enumMap.isEmpty()).isFalse();
+        assertThat(structMap.isEmpty()).isFalse();
     }
 }

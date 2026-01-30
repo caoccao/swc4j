@@ -24,8 +24,8 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstType {
     @Test
@@ -40,16 +40,15 @@ public class TestSwc4jAstType {
                 Matcher matcherReturnType = patternReturnType.matcher(content);
                 if (matcherReturnType.find()) {
                     String returnType = matcherReturnType.group(1);
-                    assertEquals(
-                            expectedReturnType,
-                            returnType,
-                            "Type of " + filePath.toFile().getName() + " should match");
+                    assertThat(returnType)
+                            .as("Type of " + filePath.toFile().getName() + " should match")
+                            .isEqualTo(expectedReturnType);
                     counter.incrementAndGet();
                 }
             } catch (Exception e) {
-                fail(e);
+                throw new AssertionError(e);
             }
         });
-        assertTrue(counter.get() > 0);
+        assertThat(counter.get() ).isPositive();
     }
 }

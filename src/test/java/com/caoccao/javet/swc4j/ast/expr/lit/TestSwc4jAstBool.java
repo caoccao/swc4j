@@ -23,8 +23,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSwc4jAstBool extends BaseTestSuiteSwc4jAst {
     @Test
@@ -36,7 +36,7 @@ public class TestSwc4jAstBool extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 4);
         Swc4jAstBool bool = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstBool.class), Swc4jAstType.Bool, 0, 4);
-        assertTrue(bool.isValue());
+        assertThat(bool.isValue()).isTrue();
         assertSpan(code, script);
     }
 }

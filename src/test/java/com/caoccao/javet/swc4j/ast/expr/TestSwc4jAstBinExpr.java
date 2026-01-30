@@ -33,8 +33,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
     @Test
@@ -91,11 +91,11 @@ public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
             int bangCount = entry.getValue();
             Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
             List<Swc4jAstBinExpr> nodes = output.getProgram().find(Swc4jAstBinExpr.class);
-            assertEquals(1, nodes.size());
+            assertThat(nodes.size()).isEqualTo(1);
             Swc4jAstBinExpr binExpr = nodes.get(0);
-            assertEquals("a", binExpr.getLeft().as(Swc4jAstIdent.class).getSym());
-            assertEquals("b", binExpr.getRight().as(Swc4jAstIdent.class).getSym());
-            assertEquals(bangCount, binExpr.getBangCount());
+            assertThat(binExpr.getLeft().as(Swc4jAstIdent.class).getSym()).isEqualTo("a");
+            assertThat(binExpr.getRight().as(Swc4jAstIdent.class).getSym()).isEqualTo("b");
+            assertThat(binExpr.getBangCount()).isEqualTo(bangCount);
         }
     }
 
@@ -124,12 +124,12 @@ public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
             int size = entry.getValue().size() >> 1;
             Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
             List<Swc4jAstBinExpr> nodes = output.getProgram().find(Swc4jAstBinExpr.class);
-            assertEquals(size, nodes.size());
+            assertThat(nodes.size()).isEqualTo(size);
             for (int i = 0; i < size; i++) {
                 Swc4jAstBinExpr binExpr = nodes.get(i);
                 int index = i << 1;
-                assertEquals(entry.getValue().get(index + 1), binExpr.getOp());
-                assertEquals(entry.getValue().get(index), binExpr.getLogicalOperatorCount());
+                assertThat(binExpr.getOp()).isEqualTo(entry.getValue().get(index + 1));
+                assertThat(binExpr.getLogicalOperatorCount()).isEqualTo(entry.getValue().get(index));
             }
         }
     }
@@ -138,10 +138,10 @@ public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
     public void testGetParentBinExpr() throws Swc4jCoreException {
         Swc4jParseOutput output = swc4j.parse("a==b&&(c==d)", tsScriptParseOptions);
         List<Swc4jAstBinExpr> nodes = output.getProgram().find(Swc4jAstBinExpr.class);
-        assertEquals(3, nodes.size());
-        assertNull(nodes.get(0).getParentBinExpr());
-        assertEquals(nodes.get(0), nodes.get(1).getParentBinExpr());
-        assertEquals(nodes.get(0), nodes.get(2).getParentBinExpr());
+        assertThat(nodes.size()).isEqualTo(3);
+        assertThat(nodes.get(0).getParentBinExpr()).isNull();
+        assertThat(nodes.get(1).getParentBinExpr()).isEqualTo(nodes.get(0));
+        assertThat(nodes.get(2).getParentBinExpr()).isEqualTo(nodes.get(0));
     }
 
     @Test
@@ -159,14 +159,14 @@ public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
                                 exprStmt, exprStmt.getExpr().as(Swc4jAstBinExpr.class), Swc4jAstType.BinExpr, 0, 4 + op.getName().length());
                         Swc4jAstIdent ident = assertAst(
                                 binExpr, binExpr.getLeft().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 0, 1);
-                        assertEquals("a", ident.getSym());
-                        assertEquals(op, binExpr.getOp());
+                        assertThat(ident.getSym()).isEqualTo("a");
+                        assertThat(binExpr.getOp()).isEqualTo(op);
                         ident = assertAst(
                                 binExpr, binExpr.getRight().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 3 + op.getName().length(), 4 + op.getName().length());
-                        assertEquals("b", ident.getSym());
+                        assertThat(ident.getSym()).isEqualTo("b");
                         assertSpan(code, script);
                     } catch (Throwable e) {
-                        fail(e);
+                        throw new AssertionError(e);
                     }
                 });
     }
@@ -186,14 +186,14 @@ public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
                                 exprStmt, exprStmt.getExpr().as(Swc4jAstBinExpr.class), Swc4jAstType.BinExpr, 0, 2 + op.getName().length());
                         Swc4jAstIdent ident = assertAst(
                                 binExpr, binExpr.getLeft().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 0, 1);
-                        assertEquals("a", ident.getSym());
-                        assertEquals(op, binExpr.getOp());
+                        assertThat(ident.getSym()).isEqualTo("a");
+                        assertThat(binExpr.getOp()).isEqualTo(op);
                         ident = assertAst(
                                 binExpr, binExpr.getRight().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 1 + op.getName().length(), 2 + op.getName().length());
-                        assertEquals("b", ident.getSym());
+                        assertThat(ident.getSym()).isEqualTo("b");
                         assertSpan(code, script);
                     } catch (Throwable e) {
-                        fail(e);
+                        throw new AssertionError(e);
                     }
                 });
     }

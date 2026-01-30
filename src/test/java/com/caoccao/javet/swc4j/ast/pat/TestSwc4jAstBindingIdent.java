@@ -29,8 +29,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstBindingIdent extends BaseTestSuiteSwc4jAst {
     @Test
@@ -40,16 +40,16 @@ public class TestSwc4jAstBindingIdent extends BaseTestSuiteSwc4jAst {
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstVarDecl varDecl = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstVarDecl.class), Swc4jAstType.VarDecl, 0, 15);
-        assertFalse(varDecl.isDeclare());
-        assertEquals(Swc4jAstVarDeclKind.Const, varDecl.getKind());
-        assertEquals(1, varDecl.getDecls().size());
+        assertThat(varDecl.isDeclare()).isFalse();
+        assertThat(varDecl.getKind()).isEqualTo(Swc4jAstVarDeclKind.Const);
+        assertThat(varDecl.getDecls().size()).isEqualTo(1);
         Swc4jAstVarDeclarator varDeclarator = assertAst(
                 varDecl, varDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 6, 15);
         Swc4jAstBindingIdent bindingIdent = assertAst(
                 varDeclarator, varDeclarator.getName().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 6, 15);
         Swc4jAstIdent ident = assertAst(
                 bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 6, 7);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         assertSpan(code, script);
     }
 
@@ -60,13 +60,13 @@ public class TestSwc4jAstBindingIdent extends BaseTestSuiteSwc4jAst {
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstFnDecl fnDecl = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstFnDecl.class), Swc4jAstType.FnDecl, 0, 28);
-        assertFalse(fnDecl.isDeclare());
+        assertThat(fnDecl.isDeclare()).isFalse();
         Swc4jAstIdent ident = assertAst(
                 fnDecl, fnDecl.getIdent(), Swc4jAstType.Ident, 9, 10);
-        assertEquals("b", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("b");
         Swc4jAstFunction function = assertAst(
                 fnDecl, fnDecl.getFunction(), Swc4jAstType.Function, 0, 28);
-        assertEquals(1, function.getParams().size());
+        assertThat(function.getParams().size()).isEqualTo(1);
         Swc4jAstParam param = assertAst(
                 function, function.getParams().get(0), Swc4jAstType.Param, 11, 24);
         Swc4jAstAssignPat assignPat = assertAst(
@@ -75,8 +75,8 @@ public class TestSwc4jAstBindingIdent extends BaseTestSuiteSwc4jAst {
                 assignPat, assignPat.getLeft().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 11, 20);
         ident = assertAst(
                 bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 11, 12);
-        assertEquals("a", ident.getSym());
-        assertTrue(bindingIdent.getTypeAnn().isPresent());
+        assertThat(ident.getSym()).isEqualTo("a");
+        assertThat(bindingIdent.getTypeAnn().isPresent()).isTrue();
         assertAst(bindingIdent, bindingIdent.getTypeAnn().get(), Swc4jAstType.TsTypeAnn, 12, 20);
         assertSpan(code, script);
     }

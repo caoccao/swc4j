@@ -25,9 +25,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSwc4jAstSeqExpr extends BaseTestSuiteSwc4jAst {
     @Test
@@ -41,16 +40,16 @@ public class TestSwc4jAstSeqExpr extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr().as(Swc4jAstArrowExpr.class), Swc4jAstType.ArrowExpr, 0, 23);
         Swc4jAstBlockStmt blockStmt = assertAst(
                 arrowExpr, arrowExpr.getBody().as(Swc4jAstBlockStmt.class), Swc4jAstType.BlockStmt, 6, 23);
-        assertEquals(1, blockStmt.getStmts().size());
+        assertThat(blockStmt.getStmts().size()).isEqualTo(1);
         Swc4jAstReturnStmt returnStmt = assertAst(
                 blockStmt, blockStmt.getStmts().get(0).as(Swc4jAstReturnStmt.class), Swc4jAstType.ReturnStmt, 8, 21);
-        assertTrue(returnStmt.getArg().isPresent());
+        assertThat(returnStmt.getArg().isPresent()).isTrue();
         Swc4jAstSeqExpr seqExpr = assertAst(
                 returnStmt, returnStmt.getArg().get().as(Swc4jAstSeqExpr.class), Swc4jAstType.SeqExpr, 15, 20);
-        assertEquals(3, seqExpr.getExprs().size());
-        assertEquals("a", seqExpr.getExprs().get(0).as(Swc4jAstIdent.class).getSym());
-        assertEquals("b", seqExpr.getExprs().get(1).as(Swc4jAstIdent.class).getSym());
-        assertEquals("c", seqExpr.getExprs().get(2).as(Swc4jAstIdent.class).getSym());
+        assertThat(seqExpr.getExprs().size()).isEqualTo(3);
+        assertThat(seqExpr.getExprs().get(0).as(Swc4jAstIdent.class).getSym()).isEqualTo("a");
+        assertThat(seqExpr.getExprs().get(1).as(Swc4jAstIdent.class).getSym()).isEqualTo("b");
+        assertThat(seqExpr.getExprs().get(2).as(Swc4jAstIdent.class).getSym()).isEqualTo("c");
         assertSpan(code, script);
     }
 }

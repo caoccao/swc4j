@@ -24,8 +24,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstOptCall extends BaseTestSuiteSwc4jAst {
     @Test
@@ -37,32 +37,32 @@ public class TestSwc4jAstOptCall extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 9);
         Swc4jAstOptChainExpr optChainExpr = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstOptChainExpr.class), Swc4jAstType.OptChainExpr, 0, 9);
-        assertFalse(optChainExpr.isOptional());
+        assertThat(optChainExpr.isOptional()).isFalse();
         Swc4jAstOptCall optCall = assertAst(
                 optChainExpr, optChainExpr.getBase().as(Swc4jAstOptCall.class), Swc4jAstType.OptCall, 0, 9);
-        assertFalse(optCall.getTypeArgs().isPresent());
-        assertEquals(2, optCall.getArgs().size());
+        assertThat(optCall.getTypeArgs().isPresent()).isFalse();
+        assertThat(optCall.getArgs().size()).isEqualTo(2);
         Swc4jAstExprOrSpread exprOrSpread = assertAst(
                 optCall, optCall.getArgs().get(0), Swc4jAstType.ExprOrSpread, 5, 6);
         Swc4jAstIdent ident = assertAst(
                 exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 5, 6);
-        assertEquals("c", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("c");
         exprOrSpread = assertAst(
                 optCall, optCall.getArgs().get(1), Swc4jAstType.ExprOrSpread, 7, 8);
         ident = assertAst(
                 exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 7, 8);
-        assertEquals("d", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("d");
         Swc4jAstOptChainExpr childOptChainExpr = assertAst(
                 optCall, optCall.getCallee().as(Swc4jAstOptChainExpr.class), Swc4jAstType.OptChainExpr, 0, 4);
-        assertTrue(childOptChainExpr.isOptional());
+        assertThat(childOptChainExpr.isOptional()).isTrue();
         Swc4jAstMemberExpr memberExpr = assertAst(
                 childOptChainExpr, childOptChainExpr.getBase().as(Swc4jAstMemberExpr.class), Swc4jAstType.MemberExpr, 0, 4);
         ident = assertAst(
                 memberExpr, memberExpr.getObj().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 0, 1);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstIdentName identName = assertAst(
                 memberExpr, memberExpr.getProp().as(Swc4jAstIdentName.class), Swc4jAstType.IdentName, 3, 4);
-        assertEquals("b", identName.getSym());
+        assertThat(identName.getSym()).isEqualTo("b");
         assertSpan(code, script);
     }
 }

@@ -29,8 +29,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstFunction extends BaseTestSuiteSwc4jAst {
     @Test
@@ -42,16 +42,16 @@ public class TestSwc4jAstFunction extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstVarDecl.class), Swc4jAstType.VarDecl, 0, 23);
         Swc4jAstVarDeclarator varDeclarator = assertAst(
                 varDecl, varDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 6, 23);
-        assertTrue(varDeclarator.getInit().isPresent());
+        assertThat(varDeclarator.getInit().isPresent()).isTrue();
         Swc4jAstFnExpr fnExpr = assertAst(
                 varDeclarator, varDeclarator.getInit().get().as(Swc4jAstFnExpr.class), Swc4jAstType.FnExpr, 10, 23);
-        assertFalse(fnExpr.getIdent().isPresent());
+        assertThat(fnExpr.getIdent().isPresent()).isFalse();
         Swc4jAstFunction function = assertAst(
                 fnExpr, fnExpr.getFunction(), Swc4jAstType.Function, 10, 23);
-        assertFalse(function.isAsync());
-        assertFalse(function.isGenerator());
-        assertFalse(function.getReturnType().isPresent());
-        assertFalse(function.getTypeParams().isPresent());
+        assertThat(function.isAsync()).isFalse();
+        assertThat(function.isGenerator()).isFalse();
+        assertThat(function.getReturnType().isPresent()).isFalse();
+        assertThat(function.getTypeParams().isPresent()).isFalse();
         assertSpan(code, script);
     }
 
@@ -62,20 +62,20 @@ public class TestSwc4jAstFunction extends BaseTestSuiteSwc4jAst {
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstFnDecl fnDecl = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstFnDecl.class), Swc4jAstType.FnDecl, 0, 15);
-        assertFalse(fnDecl.isDeclare());
+        assertThat(fnDecl.isDeclare()).isFalse();
         Swc4jAstIdent ident = assertAst(
                 fnDecl, fnDecl.getIdent().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 9, 10);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstFunction function = assertAst(
                 fnDecl, fnDecl.getFunction(), Swc4jAstType.Function, 0, 15);
-        assertFalse(function.isAsync());
-        assertFalse(function.isGenerator());
-        assertFalse(function.getReturnType().isPresent());
-        assertFalse(function.getTypeParams().isPresent());
-        assertTrue(function.getBody().isPresent());
+        assertThat(function.isAsync()).isFalse();
+        assertThat(function.isGenerator()).isFalse();
+        assertThat(function.getReturnType().isPresent()).isFalse();
+        assertThat(function.getTypeParams().isPresent()).isFalse();
+        assertThat(function.getBody().isPresent()).isTrue();
         Swc4jAstBlockStmt blockStmt = assertAst(
                 function, function.getBody().get(), Swc4jAstType.BlockStmt, 13, 15);
-        assertTrue(blockStmt.getStmts().isEmpty());
+        assertThat(blockStmt.getStmts().isEmpty()).isTrue();
         assertSpan(code, script);
     }
 
@@ -86,58 +86,58 @@ public class TestSwc4jAstFunction extends BaseTestSuiteSwc4jAst {
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstFnDecl fnDecl = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstFnDecl.class), Swc4jAstType.FnDecl, 0, 37);
-        assertFalse(fnDecl.isDeclare());
+        assertThat(fnDecl.isDeclare()).isFalse();
         Swc4jAstIdent ident = assertAst(
                 fnDecl, fnDecl.getIdent().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 9, 10);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstFunction function = assertAst(
                 fnDecl, fnDecl.getFunction(), Swc4jAstType.Function, 0, 37);
-        assertFalse(function.isAsync());
-        assertFalse(function.isGenerator());
-        assertFalse(function.getReturnType().isPresent());
-        assertFalse(function.getTypeParams().isPresent());
-        assertTrue(function.getBody().isPresent());
-        assertEquals(2, function.getParams().size());
+        assertThat(function.isAsync()).isFalse();
+        assertThat(function.isGenerator()).isFalse();
+        assertThat(function.getReturnType().isPresent()).isFalse();
+        assertThat(function.getTypeParams().isPresent()).isFalse();
+        assertThat(function.getBody().isPresent()).isTrue();
+        assertThat(function.getParams().size()).isEqualTo(2);
         Swc4jAstParam param = assertAst(
                 function, function.getParams().get(0).as(Swc4jAstParam.class), Swc4jAstType.Param, 11, 12);
-        assertTrue(param.getDecorators().isEmpty());
+        assertThat(param.getDecorators().isEmpty()).isTrue();
         Swc4jAstBindingIdent bindingIdent = assertAst(
                 param, param.getPat().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 11, 12);
         ident = assertAst(
                 bindingIdent, bindingIdent.getId().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 11, 12);
-        assertEquals("x", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("x");
         param = assertAst(
                 function, function.getParams().get(1).as(Swc4jAstParam.class), Swc4jAstType.Param, 14, 15);
-        assertTrue(param.getDecorators().isEmpty());
+        assertThat(param.getDecorators().isEmpty()).isTrue();
         bindingIdent = assertAst(
                 param, param.getPat().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 14, 15);
         ident = assertAst(
                 bindingIdent, bindingIdent.getId().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 14, 15);
-        assertEquals("y", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("y");
         Swc4jAstBlockStmt blockStmt = assertAst(
                 function, function.getBody().get(), Swc4jAstType.BlockStmt, 17, 37);
         fnDecl = assertAst(
                 blockStmt, blockStmt.getStmts().get(0).as(Swc4jAstFnDecl.class), Swc4jAstType.FnDecl, 19, 35);
-        assertFalse(fnDecl.isDeclare());
+        assertThat(fnDecl.isDeclare()).isFalse();
         ident = assertAst(
                 fnDecl, fnDecl.getIdent().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 28, 29);
-        assertEquals("b", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("b");
         function = assertAst(
                 fnDecl, fnDecl.getFunction(), Swc4jAstType.Function, 19, 35);
-        assertFalse(function.isAsync());
-        assertFalse(function.isGenerator());
-        assertFalse(function.getReturnType().isPresent());
-        assertFalse(function.getTypeParams().isPresent());
-        assertTrue(function.getBody().isPresent());
-        assertEquals(1, function.getParams().size());
+        assertThat(function.isAsync()).isFalse();
+        assertThat(function.isGenerator()).isFalse();
+        assertThat(function.getReturnType().isPresent()).isFalse();
+        assertThat(function.getTypeParams().isPresent()).isFalse();
+        assertThat(function.getBody().isPresent()).isTrue();
+        assertThat(function.getParams().size()).isEqualTo(1);
         param = assertAst(
                 function, function.getParams().get(0).as(Swc4jAstParam.class), Swc4jAstType.Param, 30, 31);
-        assertTrue(param.getDecorators().isEmpty());
+        assertThat(param.getDecorators().isEmpty()).isTrue();
         bindingIdent = assertAst(
                 param, param.getPat().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 30, 31);
         ident = assertAst(
                 bindingIdent, bindingIdent.getId().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 30, 31);
-        assertEquals("z", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("z");
         assertSpan(code, script);
     }
 }

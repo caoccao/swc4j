@@ -27,8 +27,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstArrowExpr extends BaseTestSuiteSwc4jAst {
     @Test
@@ -40,13 +40,13 @@ public class TestSwc4jAstArrowExpr extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 6);
         Swc4jAstArrowExpr arrowExpr = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstArrowExpr.class), Swc4jAstType.ArrowExpr, 0, 6);
-        assertFalse(arrowExpr.isAsync());
-        assertFalse(arrowExpr.isGenerator());
-        assertFalse(arrowExpr.getReturnType().isPresent());
-        assertFalse(arrowExpr.getTypeParams().isPresent());
+        assertThat(arrowExpr.isAsync()).isFalse();
+        assertThat(arrowExpr.isGenerator()).isFalse();
+        assertThat(arrowExpr.getReturnType().isPresent()).isFalse();
+        assertThat(arrowExpr.getTypeParams().isPresent()).isFalse();
         Swc4jAstBlockStmt blockStmt = assertAst(
                 arrowExpr, arrowExpr.getBody().as(Swc4jAstBlockStmt.class), Swc4jAstType.BlockStmt, 4, 6);
-        assertTrue(blockStmt.getStmts().isEmpty());
+        assertThat(blockStmt.getStmts().isEmpty()).isTrue();
         assertSpan(code, script);
     }
 
@@ -59,34 +59,34 @@ public class TestSwc4jAstArrowExpr extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 22);
         Swc4jAstArrowExpr arrowExpr = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstArrowExpr.class), Swc4jAstType.ArrowExpr, 0, 22);
-        assertFalse(arrowExpr.isAsync());
-        assertFalse(arrowExpr.isGenerator());
-        assertFalse(arrowExpr.getReturnType().isPresent());
-        assertFalse(arrowExpr.getTypeParams().isPresent());
+        assertThat(arrowExpr.isAsync()).isFalse();
+        assertThat(arrowExpr.isGenerator()).isFalse();
+        assertThat(arrowExpr.getReturnType().isPresent()).isFalse();
+        assertThat(arrowExpr.getTypeParams().isPresent()).isFalse();
         Swc4jAstBlockStmt blockStmt = assertAst(
                 arrowExpr, arrowExpr.getBody().as(Swc4jAstBlockStmt.class), Swc4jAstType.BlockStmt, 7, 22);
-        assertEquals(1, blockStmt.getStmts().size());
+        assertThat(blockStmt.getStmts().size()).isEqualTo(1);
         Swc4jAstReturnStmt returnStmt = assertAst(
                 blockStmt, blockStmt.getStmts().get(0).as(Swc4jAstReturnStmt.class), Swc4jAstType.ReturnStmt, 9, 20);
-        assertTrue(returnStmt.getArg().isPresent());
+        assertThat(returnStmt.getArg().isPresent()).isTrue();
         Swc4jAstBinExpr binExpr = assertAst(
                 returnStmt, returnStmt.getArg().get().as(Swc4jAstBinExpr.class), Swc4jAstType.BinExpr, 16, 19);
         Swc4jAstIdent ident = assertAst(
                 binExpr, binExpr.getLeft().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 16, 17);
-        assertEquals("a", ident.getSym());
-        assertEquals(Swc4jAstBinaryOp.Add, binExpr.getOp());
+        assertThat(ident.getSym()).isEqualTo("a");
+        assertThat(binExpr.getOp()).isEqualTo(Swc4jAstBinaryOp.Add);
         ident = assertAst(
                 binExpr, binExpr.getRight().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 18, 19);
-        assertEquals("b", ident.getSym());
-        assertEquals(2, arrowExpr.getParams().size());
+        assertThat(ident.getSym()).isEqualTo("b");
+        assertThat(arrowExpr.getParams().size()).isEqualTo(2);
         Swc4jAstBindingIdent bindingIdent = assertAst(
                 arrowExpr, arrowExpr.getParams().get(0).as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 1, 2);
         ident = assertAst(bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 1, 2);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         bindingIdent = assertAst(
                 arrowExpr, arrowExpr.getParams().get(1).as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 3, 4);
         ident = assertAst(bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 3, 4);
-        assertEquals("b", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("b");
         assertSpan(code, script);
     }
 }

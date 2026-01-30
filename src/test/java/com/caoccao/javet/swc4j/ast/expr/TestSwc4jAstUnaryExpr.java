@@ -32,8 +32,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4jAstUnaryExpr extends BaseTestSuiteSwc4jAst {
     @Test
@@ -48,10 +48,10 @@ public class TestSwc4jAstUnaryExpr extends BaseTestSuiteSwc4jAst {
                     script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, code.length());
             Swc4jAstUnaryExpr unaryExpr = assertAst(
                     exprStmt, exprStmt.getExpr().as(Swc4jAstUnaryExpr.class), Swc4jAstType.UnaryExpr, 0, code.length());
-            assertEquals(op, unaryExpr.getOp());
+            assertThat(unaryExpr.getOp()).isEqualTo(op);
             Swc4jAstIdent ident = assertAst(
                     unaryExpr, unaryExpr.getArg().as(Swc4jAstIdent.class), Swc4jAstType.Ident, code.length() - 1, code.length());
-            assertEquals("a", ident.getSym());
+            assertThat(ident.getSym()).isEqualTo("a");
             assertSpan(code, script);
         }
     }
@@ -68,10 +68,10 @@ public class TestSwc4jAstUnaryExpr extends BaseTestSuiteSwc4jAst {
                     script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, code.length());
             Swc4jAstUnaryExpr unaryExpr = assertAst(
                     exprStmt, exprStmt.getExpr().as(Swc4jAstUnaryExpr.class), Swc4jAstType.UnaryExpr, 0, code.length());
-            assertEquals(op, unaryExpr.getOp());
+            assertThat(unaryExpr.getOp()).isEqualTo(op);
             Swc4jAstIdent ident = assertAst(
                     unaryExpr, unaryExpr.getArg().as(Swc4jAstIdent.class), Swc4jAstType.Ident, code.length() - 1, code.length());
-            assertEquals("a", ident.getSym());
+            assertThat(ident.getSym()).isEqualTo("a");
             assertSpan(code, script);
         }
     }

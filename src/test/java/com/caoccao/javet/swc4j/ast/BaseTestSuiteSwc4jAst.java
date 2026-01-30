@@ -35,8 +35,8 @@ import org.junit.jupiter.api.BeforeEach;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
 
@@ -57,21 +57,21 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
             int end,
             int line,
             int column) {
-        assertEquals(parentNode, node.getParent(), "Parent node mismatches");
-        assertEquals(type, node.getType(), "Type mismatches");
-        assertEquals(start, node.getSpan().getStart(), "Start mismatches");
-        assertEquals(end, node.getSpan().getEnd(), "End mismatches");
-        assertEquals(line, node.getSpan().getLine(), "Line mismatches");
-        assertEquals(column, node.getSpan().getColumn(), "Column mismatches");
+        assertThat(node.getParent()).as("Parent node mismatches").isEqualTo(parentNode);
+        assertThat(node.getType()).as("Type mismatches").isEqualTo(type);
+        assertThat(node.getSpan().getStart()).as("Start mismatches").isEqualTo(start);
+        assertThat(node.getSpan().getEnd()).as("End mismatches").isEqualTo(end);
+        assertThat(node.getSpan().getLine()).as("Line mismatches").isEqualTo(line);
+        assertThat(node.getSpan().getColumn()).as("Column mismatches").isEqualTo(column);
         return node;
     }
 
     protected void assertSpan(String code, ISwc4jAst node) {
         if (node != null) {
             if (node instanceof ISwc4jAstProgram) {
-                assertNull(node.getParent(), node.getClass().getSimpleName() + "'s parent shouldn be null");
+                assertThat(node.getParent()).as(node.getClass().getSimpleName() + "'s parent shouldn be null").isNull();
             } else {
-                assertNotNull(node.getParent(), node.getClass().getSimpleName() + "'s parent shouldn't be null");
+                assertThat(node.getParent()).as(node.getClass().getSimpleName() + "'s parent shouldn't be null").isNotNull();
             }
             String text = null;
             switch (node.getType()) {
@@ -102,7 +102,7 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
                 Swc4jSpan span = node.getSpan();
                 String expectedText = code.substring(span.getStart(), span.getEnd());
                 String errorMessage = "Text mismatches at " + span;
-                assertEquals(expectedText, text, errorMessage);
+                assertThat(text).as(errorMessage).isEqualTo(expectedText);
             }
             node.getChildNodes().forEach(childNode -> assertSpan(code, childNode));
         }
@@ -115,7 +115,7 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
                     .setSourceMap(Swc4jSourceMapOption.None)
                     .setPluginHost(pluginHost);
             Swc4jTransformOutput output = swc4j.transform(entry.getKey(), jsScriptTransformOptions);
-            assertEquals(entry.getValue(), output.getCode(), "Failed to evaluate " + entry.getKey());
+            assertThat(output.getCode()).as("Failed to evaluate " + entry.getKey()).isEqualTo(entry.getValue());
         }
     }
 
@@ -127,15 +127,13 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
                     logger.info(output.getProgram().toDebugString());
                 }
                 final Swc4jAstCounterVisitor visitor = new Swc4jAstCounterVisitor();
-                assertEquals(Swc4jAstVisitorResponse.OkAndContinue, output.getProgram().visit(visitor));
-                visitorCase.getVisitorMap().forEach((type, count) ->
-                        assertEquals(
-                                count,
-                                visitor.get(type),
-                                type.name() + " count mismatches with code: " + visitorCase.getCode()));
+                assertThat(output.getProgram().visit(visitor)).isEqualTo(Swc4jAstVisitorResponse.OkAndContinue);
+                visitorCase.getVisitorMap().forEach((type, count) -> assertThat(visitor.get(type))
+                        .as(type.name() + " count mismatches with code: " + visitorCase.getCode())
+                        .isEqualTo(count));
             }
         } catch (Throwable t) {
-            fail(t);
+            throw new AssertionError(t);
         }
     }
 

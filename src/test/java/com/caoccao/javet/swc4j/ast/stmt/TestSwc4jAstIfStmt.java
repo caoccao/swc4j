@@ -23,8 +23,8 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstIfStmt extends BaseTestSuiteSwc4jAst {
     @Test
@@ -36,15 +36,15 @@ public class TestSwc4jAstIfStmt extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstIfStmt.class), Swc4jAstType.IfStmt, 0, 13);
         Swc4jAstIdent ident = assertAst(
                 ifStmt, ifStmt.getTest().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 4, 5);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstBlockStmt blockStmt = assertAst(
                 ifStmt, ifStmt.getCons().as(Swc4jAstBlockStmt.class), Swc4jAstType.BlockStmt, 7, 13);
         Swc4jAstExprStmt exprStmt = assertAst(
                 blockStmt, blockStmt.getStmts().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 9, 11);
         ident = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 9, 10);
-        assertEquals("b", ident.getSym());
-        assertFalse(ifStmt.getAlt().isPresent());
+        assertThat(ident.getSym()).isEqualTo("b");
+        assertThat(ifStmt.getAlt().isPresent()).isFalse();
         assertSpan(code, script);
     }
 
@@ -57,13 +57,13 @@ public class TestSwc4jAstIfStmt extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstIfStmt.class), Swc4jAstType.IfStmt, 0, 9);
         Swc4jAstIdent ident = assertAst(
                 ifStmt, ifStmt.getTest().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 4, 5);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstExprStmt exprStmt = assertAst(
                 ifStmt, ifStmt.getCons().as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 7, 9);
         ident = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 7, 8);
-        assertEquals("b", ident.getSym());
-        assertFalse(ifStmt.getAlt().isPresent());
+        assertThat(ident.getSym()).isEqualTo("b");
+        assertThat(ifStmt.getAlt().isPresent()).isFalse();
         assertSpan(code, script);
     }
 
@@ -76,22 +76,22 @@ public class TestSwc4jAstIfStmt extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstIfStmt.class), Swc4jAstType.IfStmt, 0, 25);
         Swc4jAstIdent ident = assertAst(
                 ifStmt, ifStmt.getTest().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 4, 5);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstBlockStmt blockStmt = assertAst(
                 ifStmt, ifStmt.getCons().as(Swc4jAstBlockStmt.class), Swc4jAstType.BlockStmt, 7, 13);
         Swc4jAstExprStmt exprStmt = assertAst(
                 blockStmt, blockStmt.getStmts().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 9, 11);
         ident = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 9, 10);
-        assertEquals("b", ident.getSym());
-        assertTrue(ifStmt.getAlt().isPresent());
+        assertThat(ident.getSym()).isEqualTo("b");
+        assertThat(ifStmt.getAlt().isPresent()).isTrue();
         blockStmt = assertAst(
                 ifStmt, ifStmt.getAlt().get().as(Swc4jAstBlockStmt.class), Swc4jAstType.BlockStmt, 19, 25);
         exprStmt = assertAst(
                 blockStmt, blockStmt.getStmts().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 21, 23);
         ident = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 21, 22);
-        assertEquals("c", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("c");
         assertSpan(code, script);
     }
 
@@ -104,18 +104,18 @@ public class TestSwc4jAstIfStmt extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstIfStmt.class), Swc4jAstType.IfStmt, 0, 17);
         Swc4jAstIdent ident = assertAst(
                 ifStmt, ifStmt.getTest().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 4, 5);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstExprStmt exprStmt = assertAst(
                 ifStmt, ifStmt.getCons().as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 7, 9);
         ident = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 7, 8);
-        assertEquals("b", ident.getSym());
-        assertTrue(ifStmt.getAlt().isPresent());
+        assertThat(ident.getSym()).isEqualTo("b");
+        assertThat(ifStmt.getAlt().isPresent()).isTrue();
         exprStmt = assertAst(
                 ifStmt, ifStmt.getAlt().get().as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 15, 17);
         ident = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 15, 16);
-        assertEquals("c", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("c");
         assertSpan(code, script);
     }
 }

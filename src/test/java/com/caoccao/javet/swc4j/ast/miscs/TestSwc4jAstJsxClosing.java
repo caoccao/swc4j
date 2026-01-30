@@ -25,8 +25,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstJsxClosing extends BaseTestSuiteSwc4jAst {
     @Test
@@ -38,13 +38,13 @@ public class TestSwc4jAstJsxClosing extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 13);
         Swc4jAstJsxElement jsxElement = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstJsxElement.class), Swc4jAstType.JsxElement, 0, 13);
-        assertTrue(jsxElement.getClosing().isPresent());
+        assertThat(jsxElement.getClosing().isPresent()).isTrue();
         Swc4jAstJsxClosingElement jsxClosingElement = assertAst(
                 jsxElement, jsxElement.getClosing().get(), Swc4jAstType.JsxClosingElement, 8, 13);
         Swc4jAstIdent ident = assertAst(
                 jsxClosingElement, jsxClosingElement.getName().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 10, 12);
-        assertEquals("h1", ident.getSym());
-        assertFalse(ident.isOptional());
+        assertThat(ident.getSym()).isEqualTo("h1");
+        assertThat(ident.isOptional()).isFalse();
         assertSpan(code, script);
     }
 }

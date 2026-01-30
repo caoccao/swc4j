@@ -29,8 +29,8 @@ import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4jAstCallExpr extends BaseTestSuiteSwc4jAst {
     @Test
@@ -42,25 +42,25 @@ public class TestSwc4jAstCallExpr extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 8);
         Swc4jAstCallExpr callExpr = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstCallExpr.class), Swc4jAstType.CallExpr, 0, 8);
-        assertEquals(2, callExpr.getArgs().size());
+        assertThat(callExpr.getArgs().size()).isEqualTo(2);
         Swc4jAstExprOrSpread exprOrSpread = assertAst(
                 callExpr, callExpr.getArgs().get(0).as(Swc4jAstExprOrSpread.class), Swc4jAstType.ExprOrSpread, 4, 5);
         Swc4jAstIdent ident = assertAst(
                 exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 4, 5);
-        assertEquals("c", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("c");
         exprOrSpread = assertAst(
                 callExpr, callExpr.getArgs().get(1).as(Swc4jAstExprOrSpread.class), Swc4jAstType.ExprOrSpread, 6, 7);
         ident = assertAst(
                 exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 6, 7);
-        assertEquals("d", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("d");
         Swc4jAstMemberExpr memberExpr = assertAst(
                 callExpr, callExpr.getCallee().as(Swc4jAstMemberExpr.class), Swc4jAstType.MemberExpr, 0, 3);
         ident = assertAst(
                 memberExpr, memberExpr.getObj().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 0, 1);
-        assertEquals("a", ident.getSym());
+        assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstIdentName identName = assertAst(
                 memberExpr, memberExpr.getProp().as(Swc4jAstIdentName.class), Swc4jAstType.IdentName, 2, 3);
-        assertEquals("b", identName.getSym());
+        assertThat(identName.getSym()).isEqualTo("b");
         assertSpan(code, script);
     }
 

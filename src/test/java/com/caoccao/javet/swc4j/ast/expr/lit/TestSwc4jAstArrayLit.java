@@ -26,9 +26,8 @@ import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
     @Test
@@ -40,7 +39,7 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 2);
         Swc4jAstArrayLit arrayLit = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstArrayLit.class), Swc4jAstType.ArrayLit, 0, 2);
-        assertTrue(arrayLit.getElems().isEmpty());
+        assertThat(arrayLit.getElems().isEmpty()).isTrue();
         assertSpan(code, script);
     }
 
@@ -53,29 +52,29 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 12);
         Swc4jAstArrayLit arrayLit = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstArrayLit.class), Swc4jAstType.ArrayLit, 0, 12);
-        assertEquals(3, arrayLit.getElems().size());
+        assertThat(arrayLit.getElems().size()).isEqualTo(3);
         Swc4jAstExprOrSpread exprOrSpread = assertAst(
                 arrayLit, arrayLit.getElems().get(0).get(), Swc4jAstType.ExprOrSpread, 1, 2);
         // Number
         Swc4jAstNumber number = assertAst(
                 exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstNumber.class), Swc4jAstType.Number, 1, 2);
-        assertEquals(1, number.getValue());
-        assertTrue(number.getRaw().isPresent());
-        assertEquals("1", number.getRaw().get());
+        assertThat(number.getValue()).isEqualTo(1);
+        assertThat(number.getRaw().isPresent()).isTrue();
+        assertThat(number.getRaw().get()).isEqualTo("1");
         // Str
         exprOrSpread = assertAst(
                 arrayLit, arrayLit.getElems().get(1).get(), Swc4jAstType.ExprOrSpread, 3, 6);
         Swc4jAstStr str = assertAst(
                 exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstStr.class), Swc4jAstType.Str, 3, 6);
-        assertTrue(str.getRaw().isPresent());
-        assertEquals("a", str.getValue());
-        assertEquals("'a'", str.getRaw().get());
+        assertThat(str.getRaw().isPresent()).isTrue();
+        assertThat(str.getValue()).isEqualTo("a");
+        assertThat(str.getRaw().get()).isEqualTo("'a'");
         // Bool
         exprOrSpread = assertAst(
                 arrayLit, arrayLit.getElems().get(2).get(), Swc4jAstType.ExprOrSpread, 7, 11);
         Swc4jAstBool b = assertAst(
                 exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstBool.class), Swc4jAstType.Bool, 7, 11);
-        assertTrue(b.isValue());
+        assertThat(b.isValue()).isTrue();
         assertSpan(code, script);
     }
 

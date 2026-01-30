@@ -23,8 +23,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4jAstStr extends BaseTestSuiteSwc4jAst {
     @Test
@@ -36,8 +36,8 @@ public class TestSwc4jAstStr extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 2);
         Swc4jAstStr str = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstStr.class), Swc4jAstType.Str, 0, 2);
-        assertEquals("", str.getValue());
-        assertEquals("''", str.getRaw().get());
+        assertThat(str.getValue()).isEqualTo("");
+        assertThat(str.getRaw().get()).isEqualTo("''");
         assertSpan(code, script);
     }
 
@@ -50,8 +50,8 @@ public class TestSwc4jAstStr extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 5);
         Swc4jAstStr str = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstStr.class), Swc4jAstType.Str, 0, 5);
-        assertEquals("abc", str.getValue());
-        assertEquals("'abc'", str.getRaw().get());
+        assertThat(str.getValue()).isEqualTo("abc");
+        assertThat(str.getRaw().get()).isEqualTo("'abc'");
         assertSpan(code, script);
     }
 }

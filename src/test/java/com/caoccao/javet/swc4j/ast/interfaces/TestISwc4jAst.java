@@ -23,19 +23,18 @@ import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.IntStream;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestISwc4jAst extends BaseTestSuiteSwc4jAst {
     @Test
     public void testFind() throws Swc4jCoreException {
         String code = "+(-(+(-1)))";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
-        IntStream.range(0, 7).forEach(i ->
-                assertTrue(output.getProgram().find(Swc4jAstNumber.class, i).isEmpty()));
-        IntStream.of(-2, -1, 8).forEach(i ->
-                assertEquals(1, output.getProgram().find(Swc4jAstNumber.class, i).size()));
-        assertEquals(1, output.getProgram().find(Swc4jAstNumber.class).size());
+        IntStream.range(0, 7).forEach(i -> assertThat(output.getProgram().find(Swc4jAstNumber.class, i))
+                .isEmpty());
+        IntStream.of(-2, -1, 8).forEach(i -> assertThat(output.getProgram().find(Swc4jAstNumber.class, i))
+                .hasSize(1));
+        assertThat(output.getProgram().find(Swc4jAstNumber.class).size()).isEqualTo(1);
     }
 }
