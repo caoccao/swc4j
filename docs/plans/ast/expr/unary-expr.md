@@ -4,14 +4,14 @@
 
 This document outlines the implementation plan for supporting all 7 unary operations defined in `Swc4jAstUnaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 4 of 7 operations implemented (57% complete)
+**Current Status:** 7 of 7 operations implemented (100% complete)
 - ✅ **Bang (`!`)** - Fully implemented with boolean inversion
-- 🔶 **Delete (`delete`)** - Partially implemented (only ArrayList element removal)
+- ✅ **Delete (`delete`)** - Implemented for ArrayList and Map/LinkedHashMap removals
 - ✅ **Minus (`-`)** - Fully implemented with type widening and literal optimization
 - ✅ **Plus (`+`)** - Fully implemented with wrapper type support and proper error handling
-- ❌ **Tilde (`~`)** - NOT implemented (bitwise NOT)
-- ❌ **TypeOf (`typeof`)** - NOT implemented (runtime type checking)
-- ❌ **Void (`void`)** - NOT implemented (evaluates expression and returns undefined)
+- ✅ **Tilde (`~`)** - Implemented with integer-only semantics and wrapper support
+- ✅ **TypeOf (`typeof`)** - Implemented with primitive/wrapper/object handling
+- ✅ **Void (`void`)** - Implemented with side-effect evaluation and null return
 
 **Implementation File:** [UnaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/UnaryExpressionGenerator.java)
 **Test Files:**
@@ -28,12 +28,12 @@ This document outlines the implementation plan for supporting all 7 unary operat
 | # | Operation | Symbol | Category | Status | Complexity | Priority |
 |---|-----------|--------|----------|--------|------------|----------|
 | 1 | Bang | `!` | Logical | ✅ Implemented | Low | - |
-| 2 | Delete | `delete` | Special | 🔶 Partial | Very High | Medium |
+| 2 | Delete | `delete` | Special | ✅ Implemented | Very High | Medium |
 | 3 | Minus | `-` | Arithmetic | ✅ Implemented | Low | - |
 | 4 | Plus | `+` | Arithmetic | ✅ Implemented | Low | - |
-| 5 | Tilde | `~` | Bitwise | ❌ Not Implemented | Low | Medium |
-| 6 | TypeOf | `typeof` | Special | ❌ Not Implemented | High | Low |
-| 0 | Void | `void` | Special | ❌ Not Implemented | Low | Low |
+| 5 | Tilde | `~` | Bitwise | ✅ Implemented | Low | Medium |
+| 6 | TypeOf | `typeof` | Special | ✅ Implemented | High | Low |
+| 0 | Void | `void` | Special | ✅ Implemented | Low | Low |
 
 ---
 
@@ -179,10 +179,10 @@ const b: boolean = false
 
 ### 2. Delete (`delete`) - Property/Element Deletion
 
-**Current Implementation Status:** 🔶 Partial
+**Current Implementation Status:** ✅ Implemented
 - ✅ ArrayList element removal: `delete arr[index]`
-- ❌ Object property deletion: `delete obj.prop`
-- ❌ Map entry removal: `delete map.get(key)`
+- ✅ Map entry removal: `delete map[key]` (Map/HashMap/LinkedHashMap)
+- ❌ Object property deletion: `delete obj.prop` (not supported in Java)
 - ❌ Array element deletion (Java arrays): throws error (correct)
 
 **JavaScript Behavior:**
@@ -222,8 +222,10 @@ case Delete -> {
             }
         }
 
-        // HashMap entry removal
-        if ("Ljava/util/HashMap;".equals(objType)) {
+        // Map entry removal
+        if ("Ljava/util/Map;".equals(objType)
+                || "Ljava/util/HashMap;".equals(objType)
+                || "Ljava/util/LinkedHashMap;".equals(objType)) {
             // delete map[key] → map.remove(key)
             ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options);
 
@@ -232,13 +234,13 @@ case Delete -> {
                 // Box primitive keys if needed
                 // ... type checking and boxing logic ...
 
-                int removeMethod = cp.addMethodRef("java/util/HashMap", "remove",
-                    "(Ljava/lang/Object;)Ljava/lang/Object;");
-                code.invokevirtual(removeMethod);
-                code.pop(); // Discard removed value
-                code.iconst(1); // Push true
-                return;
-            }
+            int removeMethod = cp.addMethodRef("java/util/Map", "remove",
+                "(Ljava/lang/Object;)Ljava/lang/Object;");
+            code.invokeinterface(removeMethod, 2);
+            code.pop(); // Discard removed value
+            code.iconst(1); // Push true
+            return;
+        }
         }
 
         // Object field deletion - Not supported in Java
@@ -268,7 +270,7 @@ const map: HashMap<String, int> = {"a": 1}
 delete map["a"]          // true, map becomes empty
 ```
 
-**Priority:** Medium (already partially working)
+**Priority:** Medium (implemented for collections)
 
 ---
 
@@ -753,47 +755,9 @@ Each operation should have tests for:
 
 ---
 
-## Known Issues to Fix
+## Known Issues
 
-### 1. Minus Operation MIN_VALUE Bug ✅ Verified
-**Issue:** `-2147483648` literal is loaded as `-2147483647`
-
-**Root Cause:** Integer literal parsing or constant generation issue (likely in AST parsing phase before bytecode generation)
-
-**Test:** `testMinusLiteralIntMinValue` in TestCompileUnaryExprMinus.java verifies this bug
-
-**Fix Required:** Investigate NumberLiteralGenerator or constant pool generation
-
-**Note:** When negating the variable containing MIN_VALUE (not the literal), the behavior is correct: -(-2147483648) = 2147483647 (overflow to MAX_VALUE)
-
-### 2. Missing Boolean Type Rejection
-**Issue:** Minus operation doesn't reject boolean operands
-
-**Fix Required:** Add type check to throw error for boolean in Minus case
-
-**Status:** Not yet tested, needs verification
-
-### 3. Wrapper Type Variable Negation Bug ✅ FIXED
-**Issue:** Negating wrapper type variables (Integer, Long, Float, Double) was causing VerifyError (bytecode verification failure)
-
-**Root Cause:** Missing unboxing before negation and missing boxing after negation in the expression path
-
-**Fix Applied:**
-1. Added `TypeConversionHelper.unboxWrapperType(code, cp, argType)` before negation instructions (line 247)
-2. Added `TypeConversionHelper.boxPrimitiveType(code, cp, primitiveType, argType)` after negation to box back to wrapper type (line 261)
-3. Added Integer wrapper literal support in the literal optimization path (lines 148-159)
-
-**Tests:** All wrapper type tests now passing:
-- testMinusIntegerWrapper ✅
-- testMinusLongWrapper ✅
-- testMinusFloatWrapper ✅
-- testMinusDoubleWrapper ✅
-- testMinusLiteralInteger ✅
-
-### 4. Delete Operation Limited Support
-**Issue:** Only supports ArrayList.remove(int), not HashMap or other collections
-
-**Fix Required:** Extend to HashMap.remove(key) and other collection types
+- All previously tracked unary operator issues (MIN_VALUE literals, boolean rejection, delete support) are resolved.
 
 ---
 
@@ -862,16 +826,16 @@ Test interactions with binary operators:
 - [x] Verify and document MIN_VALUE bug
 - [x] Fix wrapper type variable negation bug (unboxing + boxing) ✅
 - [x] Fix Integer wrapper literal support ✅
-- [ ] Fix Minus operation MIN_VALUE literal bug
-- [ ] Test and fix boolean type rejection in Minus operator
+- [x] Fix Minus operation MIN_VALUE literal bug
+- [x] Test and fix boolean type rejection in Minus operator
 - [x] Implement Plus (`+`) operator ✅
 - [x] Create comprehensive test suite for Plus operator (21 tests) ✅
 - [x] Add wrapper type support for Plus operator ✅
 - [x] Add proper error handling for non-numeric types (boolean, string) ✅
-- [ ] Implement Tilde (`~`) operator
-- [ ] Extend Delete operator for HashMap
-- [ ] Implement TypeOf operator (or document as not supported)
-- [ ] Implement Void operator
+- [x] Implement Tilde (`~`) operator
+- [x] Extend Delete operator for HashMap
+- [x] Implement TypeOf operator
+- [x] Implement Void operator
 
 ---
 

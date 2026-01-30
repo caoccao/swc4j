@@ -81,12 +81,12 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test(): long {
-                      const val: long = -9223372036854775807
+                      const val: long = -9223372036854775808
                       return val
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(Long.MIN_VALUE + 1);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(Long.MIN_VALUE);
     }
 
     @ParameterizedTest

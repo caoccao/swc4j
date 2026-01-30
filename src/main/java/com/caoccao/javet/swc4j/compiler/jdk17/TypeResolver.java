@@ -1116,8 +1116,21 @@ public final class TypeResolver {
                 }
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
-            // For unary expressions, infer type from the argument
-            return inferTypeFromExpr(unaryExpr.getArg());
+            switch (unaryExpr.getOp()) {
+                case Bang, Delete -> {
+                    return "Z";
+                }
+                case TypeOf -> {
+                    return "Ljava/lang/String;";
+                }
+                case Void -> {
+                    return "Ljava/lang/Object;";
+                }
+                default -> {
+                    // For unary expressions, infer type from the argument
+                    return inferTypeFromExpr(unaryExpr.getArg());
+                }
+            }
         } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
             // For parenthesized expressions, infer type from the inner expression
             return inferTypeFromExpr(parenExpr.getExpr());

@@ -115,6 +115,28 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                             code.iconst(1); // Push true (1)
                             return;
                         }
+                    } else if ("Ljava/util/Map;".equals(objType)
+                            || "Ljava/util/HashMap;".equals(objType)
+                            || "Ljava/util/LinkedHashMap;".equals(objType)) {
+                        if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [Map]
+                            compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [Map, key]
+
+                            String keyType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
+                            if (keyType != null) {
+                                String primitiveType = TypeConversionUtils.getPrimitiveType(keyType);
+                                if (TypeConversionUtils.isPrimitiveType(primitiveType)) {
+                                    String wrapperType = TypeConversionUtils.getWrapperType(primitiveType);
+                                    TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, wrapperType);
+                                }
+                            }
+
+                            int removeMethod = cp.addInterfaceMethodRef("java/util/Map", "remove", "(Ljava/lang/Object;)Ljava/lang/Object;");
+                            code.invokeinterface(removeMethod, 2); // Stack: [removedObject]
+                            code.pop(); // Pop the removed object
+                            code.iconst(1); // Push true (1)
+                            return;
+                        }
                     }
                 }
                 throw new Swc4jByteCodeCompilerException(unaryExpr, "Delete operator not yet supported for: " + arg);
@@ -129,7 +151,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
 
                     // Check if we're dealing with a long type
                     if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.LONG) {
-                        long longValue = -(long) value;
+                        long longValue = value == 9223372036854775808.0 ? Long.MIN_VALUE : -(long) value;
                         if (longValue == 0L || longValue == 1L) {
                             code.lconst(longValue);
                         } else {
@@ -139,7 +161,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && "Ljava/lang/Long;".equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with a Long wrapper
-                        long longValue = -(long) value;
+                        long longValue = value == 9223372036854775808.0 ? Long.MIN_VALUE : -(long) value;
                         if (longValue == 0L || longValue == 1L) {
                             code.lconst(longValue);
                         } else {
@@ -151,7 +173,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && "Ljava/lang/Integer;".equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with an Integer wrapper
-                        int intValue = -(int) value;
+                        int intValue = value == 2147483648.0 ? Integer.MIN_VALUE : -(int) value;
                         if (intValue >= Short.MIN_VALUE && intValue <= Short.MAX_VALUE) {
                             code.iconst(intValue);
                         } else {
@@ -200,7 +222,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                         code.invokestatic(valueOfRef);
                     } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
                         // Integer value
-                        int intValue = -(int) value;
+                        int intValue = value == 2147483648.0 ? Integer.MIN_VALUE : -(int) value;
                         // Check if value fits in the range supported by iconst/bipush/sipush
                         if (intValue >= Short.MIN_VALUE && intValue <= Short.MAX_VALUE) {
                             code.iconst(intValue);
@@ -271,6 +293,12 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                     // Handle null type - should not happen for negation, default to int
                     if (argType == null) argType = "I";
 
+                    String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
+                    if ("Z".equals(primitiveType)) {
+                        throw new Swc4jByteCodeCompilerException(unaryExpr,
+                                "Unary minus (-) not supported on boolean types");
+                    }
+
                     // Handle BigInteger negation
                     if ("Ljava/math/BigInteger;".equals(argType)) {
                         // Call BigInteger.negate() method
@@ -278,14 +306,12 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                         code.invokevirtual(negateRef);
                     } else {
                         // Check if argType is a wrapper before unboxing
-                        boolean isWrapper = !argType.equals(TypeConversionUtils.getPrimitiveType(argType));
+                        boolean isWrapper = !argType.equals(primitiveType);
 
                         // Unbox wrapper types before negation
                         TypeConversionUtils.unboxWrapperType(code, cp, argType);
 
                         // Get the primitive type for determining which negation instruction to use
-                        String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
-
                         switch (primitiveType) {
                             case "D" -> code.dneg();
                             case "F" -> code.fneg();
@@ -353,6 +379,221 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                     TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, argType);
                 }
                 // For primitive types, nothing more to do (no-op)
+            }
+            case Tilde -> {
+                ISwc4jAstExpr arg = unaryExpr.getArg();
+
+                if (arg instanceof Swc4jAstBigInt bigInt) {
+                    BigInteger value = bigInt.getValue();
+                    if (bigInt.getSign() == Swc4jAstBigIntSign.Minus) {
+                        value = value.negate();
+                    }
+                    value = value.not();
+
+                    Swc4jAstBigInt notBigInt = Swc4jAstBigInt.create();
+                    notBigInt.setValue(value);
+                    notBigInt.setSign(Swc4jAstBigIntSign.NoSign);
+                    compiler.getBigIntLiteralGenerator().generate(code, cp, notBigInt, returnTypeInfo);
+                    return;
+                }
+
+                String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
+                if (argType == null) {
+                    argType = "I";
+                }
+
+                if ("Ljava/math/BigInteger;".equals(argType)) {
+                    compiler.getExpressionGenerator().generate(code, cp, arg, null);
+                    int notRef = cp.addMethodRef("java/math/BigInteger", "not", "()Ljava/math/BigInteger;");
+                    code.invokevirtual(notRef);
+                    return;
+                }
+                String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
+
+                boolean isIntegerType = "I".equals(primitiveType) || "J".equals(primitiveType)
+                        || "B".equals(primitiveType) || "S".equals(primitiveType) || "C".equals(primitiveType);
+                if (!isIntegerType) {
+                    throw new Swc4jByteCodeCompilerException(unaryExpr,
+                            "Bitwise NOT (~) requires integer type, got: " + argType);
+                }
+
+                compiler.getExpressionGenerator().generate(code, cp, arg, null);
+
+                boolean isWrapper = !argType.equals(primitiveType);
+                TypeConversionUtils.unboxWrapperType(code, cp, argType);
+
+                if ("J".equals(primitiveType)) {
+                    int longIndex = cp.addLong(-1L);
+                    code.ldc2_w(longIndex);
+                    code.lxor();
+                } else {
+                    code.iconst(-1);
+                    code.ixor();
+                    TypeConversionUtils.convertPrimitiveType(code, "I", primitiveType);
+                }
+
+                if (isWrapper) {
+                    TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, argType);
+                }
+            }
+            case TypeOf -> {
+                ISwc4jAstExpr arg = unaryExpr.getArg();
+                String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
+
+                compiler.getExpressionGenerator().generate(code, cp, arg, null);
+
+                if (argType == null) {
+                    argType = "Ljava/lang/Object;";
+                }
+
+                if ("V".equals(argType)) {
+                    int undefinedIndex = cp.addString("undefined");
+                    code.ldc(undefinedIndex);
+                    return;
+                }
+
+                String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
+                boolean isPrimitive = argType.equals(primitiveType);
+                if (("Z".equals(primitiveType) && isPrimitive) || "Ljava/lang/Boolean;".equals(argType)) {
+                    code.pop();
+                    int booleanIndex = cp.addString("boolean");
+                    code.ldc(booleanIndex);
+                    return;
+                }
+                if (isPrimitive && ("I".equals(primitiveType) || "J".equals(primitiveType) || "F".equals(primitiveType)
+                        || "D".equals(primitiveType) || "B".equals(primitiveType) || "S".equals(primitiveType)
+                        || "C".equals(primitiveType))) {
+                    if ("J".equals(primitiveType) || "D".equals(primitiveType)) {
+                        code.pop2();
+                    } else {
+                        code.pop();
+                    }
+                    int numberIndex = cp.addString("number");
+                    code.ldc(numberIndex);
+                    return;
+                }
+
+                if ("Ljava/lang/String;".equals(argType)) {
+                    code.pop();
+                    int stringIndex = cp.addString("string");
+                    code.ldc(stringIndex);
+                    return;
+                }
+
+                if ("Ljava/lang/Byte;".equals(argType) || "Ljava/lang/Short;".equals(argType)
+                        || "Ljava/lang/Integer;".equals(argType) || "Ljava/lang/Long;".equals(argType)
+                        || "Ljava/lang/Float;".equals(argType) || "Ljava/lang/Double;".equals(argType)
+                        || "Ljava/lang/Character;".equals(argType)) {
+                    code.pop();
+                    int numberIndex = cp.addString("number");
+                    code.ldc(numberIndex);
+                    return;
+                }
+
+                if (argType.startsWith("L") && argType.endsWith(";")) {
+                    String internalName = argType.substring(1, argType.length() - 1);
+                    if (compiler.getMemory().getScopedFunctionalInterfaceRegistry().isFunctionalInterface(internalName)) {
+                        code.pop();
+                        int functionIndex = cp.addString("function");
+                        code.ldc(functionIndex);
+                        return;
+                    }
+                }
+
+                code.dup();
+                code.ifnull(0);
+                int ifNullOffsetPos = code.getCurrentOffset() - 2;
+                int ifNullOpcodePos = code.getCurrentOffset() - 3;
+
+                code.dup();
+                int stringClass = cp.addClass("java/lang/String");
+                code.instanceof_(stringClass);
+                code.ifne(0);
+                int ifStringOffsetPos = code.getCurrentOffset() - 2;
+                int ifStringOpcodePos = code.getCurrentOffset() - 3;
+
+                code.dup();
+                int numberClass = cp.addClass("java/lang/Number");
+                code.instanceof_(numberClass);
+                code.ifne(0);
+                int ifNumberOffsetPos = code.getCurrentOffset() - 2;
+                int ifNumberOpcodePos = code.getCurrentOffset() - 3;
+
+                code.dup();
+                int booleanClass = cp.addClass("java/lang/Boolean");
+                code.instanceof_(booleanClass);
+                code.ifne(0);
+                int ifBooleanOffsetPos = code.getCurrentOffset() - 2;
+                int ifBooleanOpcodePos = code.getCurrentOffset() - 3;
+
+                int defaultLabel = code.getCurrentOffset();
+                code.pop();
+                int objectIndex = cp.addString("object");
+                code.ldc(objectIndex);
+                code.gotoLabel(0);
+                int gotoEndOffsetPos = code.getCurrentOffset() - 2;
+                int gotoEndOpcodePos = code.getCurrentOffset() - 3;
+
+                int nullLabel = code.getCurrentOffset();
+                code.pop();
+                code.ldc(objectIndex);
+                code.gotoLabel(0);
+                int gotoEndFromNullOffsetPos = code.getCurrentOffset() - 2;
+                int gotoEndFromNullOpcodePos = code.getCurrentOffset() - 3;
+
+                int stringLabel = code.getCurrentOffset();
+                code.pop();
+                int stringIndex = cp.addString("string");
+                code.ldc(stringIndex);
+                code.gotoLabel(0);
+                int gotoEndFromStringOffsetPos = code.getCurrentOffset() - 2;
+                int gotoEndFromStringOpcodePos = code.getCurrentOffset() - 3;
+
+                int numberLabel = code.getCurrentOffset();
+                code.pop();
+                int numberIndex = cp.addString("number");
+                code.ldc(numberIndex);
+                code.gotoLabel(0);
+                int gotoEndFromNumberOffsetPos = code.getCurrentOffset() - 2;
+                int gotoEndFromNumberOpcodePos = code.getCurrentOffset() - 3;
+
+                int booleanLabel = code.getCurrentOffset();
+                code.pop();
+                int booleanIndex = cp.addString("boolean");
+                code.ldc(booleanIndex);
+
+                int endLabel = code.getCurrentOffset();
+
+                code.patchShort(ifNullOffsetPos, nullLabel - ifNullOpcodePos);
+                code.patchShort(ifStringOffsetPos, stringLabel - ifStringOpcodePos);
+                code.patchShort(ifNumberOffsetPos, numberLabel - ifNumberOpcodePos);
+                code.patchShort(ifBooleanOffsetPos, booleanLabel - ifBooleanOpcodePos);
+
+                code.patchShort(gotoEndOffsetPos, endLabel - gotoEndOpcodePos);
+                code.patchShort(gotoEndFromNullOffsetPos, endLabel - gotoEndFromNullOpcodePos);
+                code.patchShort(gotoEndFromStringOffsetPos, endLabel - gotoEndFromStringOpcodePos);
+                code.patchShort(gotoEndFromNumberOffsetPos, endLabel - gotoEndFromNumberOpcodePos);
+            }
+            case Void -> {
+                ISwc4jAstExpr arg = unaryExpr.getArg();
+                compiler.getExpressionGenerator().generate(code, cp, arg, null);
+
+                String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
+                if (argType == null) {
+                    argType = "Ljava/lang/Object;";
+                }
+
+                if (!"V".equals(argType)) {
+                    if ("J".equals(argType) || "D".equals(argType)) {
+                        code.pop2();
+                    } else {
+                        code.pop();
+                    }
+                }
+
+                if (returnTypeInfo != null && returnTypeInfo.type() != ReturnType.VOID) {
+                    code.aconst_null();
+                }
             }
         }
     }

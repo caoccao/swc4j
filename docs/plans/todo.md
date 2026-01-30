@@ -93,13 +93,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Add AST handling for `??`, `instanceof`, and `in`, with type rules and StackMap integration.
 - Tests: Truthy/falsy nullish, type checks, and property existence checks.
 
-## Feature: Unary Operators (~, typeof, void, delete for Map)
-- Evidence: `docs/plans/ast/expr/unary-expr.md`.
-- Status: Missing operators and some error cases.
-- Confidence: 65%.
-- Plan: Implement bitwise NOT, typeof, void; extend delete to LinkedHashMap; fix MIN_VALUE bug and boolean rejection path.
-- Tests: Operator semantics across primitives, wrappers, and object/map targets.
-
 ## Feature: Update Expressions - Long/Double Postfix, Class Fields, Multi-D Arrays
 - Evidence: `docs/plans/ast/expr/update-expr.md`.
 - Status: Postfix for long/double arrays deferred; class field access missing; multidim arrays unsupported.

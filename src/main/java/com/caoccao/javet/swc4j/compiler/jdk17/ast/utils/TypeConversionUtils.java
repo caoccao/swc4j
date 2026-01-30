@@ -100,6 +100,9 @@ public final class TypeConversionUtils {
         switch (stackFromType) {
             case "I" -> {
                 switch (toType) {
+                    case "B" -> code.i2b();
+                    case "C" -> code.i2c();
+                    case "S" -> code.i2s();
                     case "J" -> code.i2l();
                     case "F" -> code.i2f();
                     case "D" -> code.i2d();
@@ -162,6 +165,10 @@ public final class TypeConversionUtils {
 
     public static void unboxWrapperType(CodeBuilder code, ClassWriter.ConstantPool cp, String type) {
         switch (type) {
+            case "Ljava/lang/Boolean;" -> {
+                int booleanValueRef = cp.addMethodRef("java/lang/Boolean", "booleanValue", "()Z");
+                code.invokevirtual(booleanValueRef);
+            }
             case "Ljava/lang/Integer;" -> {
                 int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueRef);

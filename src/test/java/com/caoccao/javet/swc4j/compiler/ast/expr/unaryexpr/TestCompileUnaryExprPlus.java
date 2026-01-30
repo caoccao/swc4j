@@ -153,7 +153,7 @@ public class TestCompileUnaryExprPlus extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-2147483647);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-2147483648);
     }
 
     @ParameterizedTest
@@ -262,7 +262,7 @@ public class TestCompileUnaryExprPlus extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-9223372036854775807L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-9223372036854775808L);
     }
 
     @ParameterizedTest
