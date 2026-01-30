@@ -31,6 +31,7 @@ import java.util.*;
 public class CompilationContext {
     private final Stack<LoopLabelInfo> breakLabels;
     private final Map<String, CapturedVariable> capturedVariables;
+    private final Map<String, String> arrayElementTypes;
     private final Stack<String> classStack;
     private final Stack<LoopLabelInfo> continueLabels;
     private final Map<String, GenericTypeInfo> genericTypeInfoMap;
@@ -44,6 +45,7 @@ public class CompilationContext {
     public CompilationContext() {
         breakLabels = new Stack<>();
         capturedVariables = new HashMap<>();
+        arrayElementTypes = new HashMap<>();
         classStack = new Stack<>();
         continueLabels = new Stack<>();
         inlineExecutingFinallyBlocks = new HashSet<>();
@@ -73,6 +75,15 @@ public class CompilationContext {
      */
     public Map<String, CapturedVariable> getCapturedVariables() {
         return capturedVariables;
+    }
+
+    /**
+     * Get the inferred array element types by variable name.
+     *
+     * @return map of variable name to array element type descriptor
+     */
+    public Map<String, String> getArrayElementTypes() {
+        return arrayElementTypes;
     }
 
     public LoopLabelInfo getCurrentBreakLabel() {
@@ -365,6 +376,7 @@ public class CompilationContext {
     public void reset(boolean isStatic) {
         breakLabels.clear();
         capturedVariables.clear();
+        arrayElementTypes.clear();
         continueLabels.clear();
         genericTypeInfoMap.clear();
         pendingFinallyBlocks.clear();

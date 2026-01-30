@@ -17,12 +17,18 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -52,13 +58,24 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
                 case "concat" -> generateConcat(code, cp, callExpr);
                 case "copyWithin" -> generateCopyWithin(code, cp, callExpr);
                 case "fill" -> generateFill(code, cp, callExpr);
+                case "filter" -> generateFilter(code, cp, callExpr);
+                case "find" -> generateFind(code, cp, callExpr);
+                case "findIndex" -> generateFindIndex(code, cp, callExpr);
+                case "flat" -> generateFlat(code, cp, callExpr);
+                case "flatMap" -> generateFlatMap(code, cp, callExpr);
+                case "forEach" -> generateForEach(code, cp, callExpr);
                 case "includes" -> generateIncludes(code, cp, callExpr);
                 case "indexOf" -> generateIndexOf(code, cp, callExpr);
                 case "join" -> generateJoin(code, cp, callExpr);
                 case "lastIndexOf" -> generateLastIndexOf(code, cp, callExpr);
+                case "map" -> generateMap(code, cp, callExpr);
                 case "pop" -> generatePop(code, cp);
                 case "push" -> generatePush(code, cp, callExpr);
+                case "reduce" -> generateReduce(code, cp, callExpr);
+                case "reduceRight" -> generateReduceRight(code, cp, callExpr);
                 case "reverse" -> generateReverse(code, cp);
+                case "some" -> generateSome(code, cp, callExpr);
+                case "every" -> generateEvery(code, cp, callExpr);
                 case "shift" -> generateShift(code, cp);
                 case "slice" -> generateSlice(code, cp, callExpr);
                 case "sort" -> generateSort(code, cp);
@@ -227,6 +244,336 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
                     "(Ljava/util/ArrayList;Ljava/lang/Object;II)Ljava/util/ArrayList;");
             code.invokestatic(fillMethod);
         }
+    }
+
+    private void generateFilter(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        if (callExpr.getArgs().isEmpty()) {
+            throw new Swc4jByteCodeCompilerException(callExpr, "filter() requires a callback");
+        }
+        String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
+        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        int filterMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "filter",
+                "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Ljava/util/ArrayList;");
+        code.invokestatic(filterMethod);
+    }
+
+    private void generateFind(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        if (callExpr.getArgs().isEmpty()) {
+            throw new Swc4jByteCodeCompilerException(callExpr, "find() requires a callback");
+        }
+        String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
+        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        int findMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "find",
+                "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Ljava/lang/Object;");
+        code.invokestatic(findMethod);
+    }
+
+    private void generateFindIndex(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        if (callExpr.getArgs().isEmpty()) {
+            throw new Swc4jByteCodeCompilerException(callExpr, "findIndex() requires a callback");
+        }
+        String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
+        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        int findIndexMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "findIndex",
+                "(Ljava/util/ArrayList;" + interfaceDescriptor + ")I");
+        code.invokestatic(findIndexMethod);
+    }
+
+    private void generateFlat(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        int argCount = callExpr.getArgs().size();
+        if (argCount == 0) {
+            int flatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "flat",
+                    "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
+            code.invokestatic(flatMethod);
+            return;
+        }
+        var depthArg = callExpr.getArgs().get(0);
+        compiler.getExpressionGenerator().generate(code, cp, depthArg.getExpr(), null);
+        String depthType = compiler.getTypeResolver().inferTypeFromExpr(depthArg.getExpr());
+        if ("Ljava/lang/Integer;".equals(depthType)) {
+            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+            code.invokevirtual(intValueMethod);
+        } else if (depthType != null && TypeConversionUtils.isPrimitiveType(depthType) && !"I".equals(depthType)) {
+            TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(depthType), "I");
+        }
+        int flatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "flat",
+                "(Ljava/util/ArrayList;I)Ljava/util/ArrayList;");
+        code.invokestatic(flatMethod);
+    }
+
+    private void generateFlatMap(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        if (callExpr.getArgs().isEmpty()) {
+            throw new Swc4jByteCodeCompilerException(callExpr, "flatMap() requires a callback");
+        }
+        String interfaceDescriptor = resolveMapInterfaceDescriptor(callExpr, 0);
+        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        int flatMapMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "flatMap",
+                "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Ljava/util/ArrayList;");
+        code.invokestatic(flatMapMethod);
+    }
+
+    private void generateForEach(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        if (callExpr.getArgs().isEmpty()) {
+            throw new Swc4jByteCodeCompilerException(callExpr, "forEach() requires a callback");
+        }
+        String interfaceDescriptor = selectConsumerInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
+        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        int forEachMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "forEach",
+                "(Ljava/util/ArrayList;" + interfaceDescriptor + ")V");
+        code.invokestatic(forEachMethod);
+    }
+
+    private void generateMap(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        if (callExpr.getArgs().isEmpty()) {
+            throw new Swc4jByteCodeCompilerException(callExpr, "map() requires a callback");
+        }
+        String interfaceDescriptor = resolveMapInterfaceDescriptor(callExpr, 0);
+        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        int mapMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "map",
+                "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Ljava/util/ArrayList;");
+        code.invokestatic(mapMethod);
+    }
+
+    private void generateReduce(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        int argCount = callExpr.getArgs().size();
+        if (argCount == 0) {
+            throw new Swc4jByteCodeCompilerException(callExpr, "reduce() requires a callback");
+        }
+        String initType = null;
+        if (argCount > 1) {
+            initType = compiler.getTypeResolver().inferTypeFromExpr(callExpr.getArgs().get(1).getExpr());
+        }
+        String primitiveType = resolveReductionPrimitiveType(callExpr, initType);
+        String interfaceDescriptor = selectBinaryOperatorInterfaceDescriptor(primitiveType);
+        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        if (argCount == 1) {
+            int reduceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "reduce",
+                    "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Ljava/lang/Object;");
+            code.invokestatic(reduceMethod);
+            return;
+        }
+        var initArg = callExpr.getArgs().get(1);
+        if (primitiveType != null) {
+            ReturnTypeInfo initTypeInfo = ReturnTypeInfo.of(initArg.getExpr(), primitiveType);
+            compiler.getExpressionGenerator().generate(code, cp, initArg.getExpr(), initTypeInfo);
+        } else {
+            compiler.getExpressionGenerator().generate(code, cp, initArg.getExpr(), null);
+            if (initType != null && TypeConversionUtils.isPrimitiveType(initType)) {
+                TypeConversionUtils.boxPrimitiveType(code, cp, initType, TypeConversionUtils.getWrapperType(initType));
+            }
+        }
+        String initDescriptor = primitiveType != null ? primitiveType : "Ljava/lang/Object;";
+        int reduceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "reduce",
+                "(Ljava/util/ArrayList;" + interfaceDescriptor + initDescriptor + ")Ljava/lang/Object;");
+        code.invokestatic(reduceMethod);
+    }
+
+    private void generateReduceRight(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        int argCount = callExpr.getArgs().size();
+        if (argCount == 0) {
+            throw new Swc4jByteCodeCompilerException(callExpr, "reduceRight() requires a callback");
+        }
+        String initType = null;
+        if (argCount > 1) {
+            initType = compiler.getTypeResolver().inferTypeFromExpr(callExpr.getArgs().get(1).getExpr());
+        }
+        String primitiveType = resolveReductionPrimitiveType(callExpr, initType);
+        String interfaceDescriptor = selectBinaryOperatorInterfaceDescriptor(primitiveType);
+        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        if (argCount == 1) {
+            int reduceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "reduceRight",
+                    "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Ljava/lang/Object;");
+            code.invokestatic(reduceMethod);
+            return;
+        }
+        var initArg = callExpr.getArgs().get(1);
+        if (primitiveType != null) {
+            ReturnTypeInfo initTypeInfo = ReturnTypeInfo.of(initArg.getExpr(), primitiveType);
+            compiler.getExpressionGenerator().generate(code, cp, initArg.getExpr(), initTypeInfo);
+        } else {
+            compiler.getExpressionGenerator().generate(code, cp, initArg.getExpr(), null);
+            if (initType != null && TypeConversionUtils.isPrimitiveType(initType)) {
+                TypeConversionUtils.boxPrimitiveType(code, cp, initType, TypeConversionUtils.getWrapperType(initType));
+            }
+        }
+        String initDescriptor = primitiveType != null ? primitiveType : "Ljava/lang/Object;";
+        int reduceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "reduceRight",
+                "(Ljava/util/ArrayList;" + interfaceDescriptor + initDescriptor + ")Ljava/lang/Object;");
+        code.invokestatic(reduceMethod);
+    }
+
+    private void generateSome(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        if (callExpr.getArgs().isEmpty()) {
+            throw new Swc4jByteCodeCompilerException(callExpr, "some() requires a callback");
+        }
+        String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
+        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        int someMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "some",
+                "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Z");
+        code.invokestatic(someMethod);
+    }
+
+    private void generateEvery(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        if (callExpr.getArgs().isEmpty()) {
+            throw new Swc4jByteCodeCompilerException(callExpr, "every() requires a callback");
+        }
+        String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
+        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        int everyMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "every",
+                "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Z");
+        code.invokestatic(everyMethod);
+    }
+
+    private void generateFunctionalArg(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstCallExpr callExpr,
+            int index,
+            String interfaceDescriptor) throws Swc4jByteCodeCompilerException {
+        var arg = callExpr.getArgs().get(index);
+        ReturnTypeInfo targetTypeInfo = ReturnTypeInfo.of(callExpr, interfaceDescriptor);
+        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), targetTypeInfo);
+    }
+
+    private String resolveArrayElementType(Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        if (!(callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr)) {
+            return null;
+        }
+        ISwc4jAstExpr objExpr = memberExpr.getObj().unParenExpr();
+        if (objExpr instanceof Swc4jAstArrayLit arrayLit) {
+            return compiler.getTypeResolver().inferArrayElementType(arrayLit);
+        }
+        if (objExpr instanceof Swc4jAstIdent ident) {
+            return compiler.getMemory().getCompilationContext().getArrayElementTypes().get(ident.getSym());
+        }
+        return null;
+    }
+
+    private String resolvePrimitiveElementType(Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        String elementType = resolveArrayElementType(callExpr);
+        if (elementType == null) {
+            return null;
+        }
+        String primitiveType = TypeConversionUtils.getPrimitiveType(elementType);
+        return switch (primitiveType) {
+            case "I", "J", "D" -> primitiveType;
+            default -> null;
+        };
+    }
+
+    private String resolveReductionPrimitiveType(Swc4jAstCallExpr callExpr, String initType) throws Swc4jByteCodeCompilerException {
+        String elementType = resolvePrimitiveElementType(callExpr);
+        String initPrimitive = initType == null ? null : TypeConversionUtils.getPrimitiveType(initType);
+        if (!isNumericPrimitive(initPrimitive)) {
+            initPrimitive = null;
+        }
+        if (elementType != null && initPrimitive != null) {
+            return TypeResolver.getWidenedType(elementType, initPrimitive);
+        }
+        if (initPrimitive != null) {
+            return initPrimitive;
+        }
+        return elementType;
+    }
+
+    private String resolveMapInterfaceDescriptor(Swc4jAstCallExpr callExpr, int index) throws Swc4jByteCodeCompilerException {
+        String primitiveType = resolvePrimitiveElementType(callExpr);
+        if (primitiveType == null) {
+            return "Ljava/util/function/Function;";
+        }
+        String returnType = inferArrowReturnType(callExpr, index, primitiveType);
+        String returnPrimitive = returnType == null ? null : TypeConversionUtils.getPrimitiveType(returnType);
+        if (primitiveType.equals(returnPrimitive)) {
+            return selectUnaryOperatorInterfaceDescriptor(primitiveType);
+        }
+        return selectFunctionInterfaceDescriptor(primitiveType);
+    }
+
+    private String inferArrowReturnType(Swc4jAstCallExpr callExpr, int index, String paramType) throws Swc4jByteCodeCompilerException {
+        var arg = callExpr.getArgs().get(index);
+        ISwc4jAstExpr expr = arg.getExpr().unParenExpr();
+        if (!(expr instanceof Swc4jAstArrowExpr arrowExpr)) {
+            return null;
+        }
+        if (!(arrowExpr.getBody() instanceof ISwc4jAstExpr bodyExpr)) {
+            return null;
+        }
+        var context = compiler.getMemory().getCompilationContext();
+        var scope = context.pushInferredTypesScope();
+        try {
+            if (paramType != null) {
+                for (ISwc4jAstPat param : arrowExpr.getParams()) {
+                    String paramName = compiler.getTypeResolver().extractParameterName(param);
+                    if (paramName != null) {
+                        scope.put(paramName, paramType);
+                    }
+                }
+            }
+            return compiler.getTypeResolver().inferTypeFromExpr(bodyExpr);
+        } finally {
+            context.popInferredTypesScope();
+        }
+    }
+
+    private boolean isNumericPrimitive(String type) {
+        return "I".equals(type) || "J".equals(type) || "D".equals(type);
+    }
+
+    private String selectPredicateInterfaceDescriptor(String primitiveType) {
+        if (primitiveType == null) {
+            return "Ljava/util/function/Predicate;";
+        }
+        return switch (primitiveType) {
+            case "I" -> "Ljava/util/function/IntPredicate;";
+            case "J" -> "Ljava/util/function/LongPredicate;";
+            case "D" -> "Ljava/util/function/DoublePredicate;";
+            default -> "Ljava/util/function/Predicate;";
+        };
+    }
+
+    private String selectConsumerInterfaceDescriptor(String primitiveType) {
+        if (primitiveType == null) {
+            return "Ljava/util/function/Consumer;";
+        }
+        return switch (primitiveType) {
+            case "I" -> "Ljava/util/function/IntConsumer;";
+            case "J" -> "Ljava/util/function/LongConsumer;";
+            case "D" -> "Ljava/util/function/DoubleConsumer;";
+            default -> "Ljava/util/function/Consumer;";
+        };
+    }
+
+    private String selectFunctionInterfaceDescriptor(String primitiveType) {
+        if (primitiveType == null) {
+            return "Ljava/util/function/Function;";
+        }
+        return switch (primitiveType) {
+            case "I" -> "Ljava/util/function/IntFunction;";
+            case "J" -> "Ljava/util/function/LongFunction;";
+            case "D" -> "Ljava/util/function/DoubleFunction;";
+            default -> "Ljava/util/function/Function;";
+        };
+    }
+
+    private String selectUnaryOperatorInterfaceDescriptor(String primitiveType) {
+        return switch (primitiveType) {
+            case "I" -> "Ljava/util/function/IntUnaryOperator;";
+            case "J" -> "Ljava/util/function/LongUnaryOperator;";
+            case "D" -> "Ljava/util/function/DoubleUnaryOperator;";
+            default -> "Ljava/util/function/Function;";
+        };
+    }
+
+    private String selectBinaryOperatorInterfaceDescriptor(String primitiveType) {
+        if (primitiveType == null) {
+            return "Ljava/util/function/BiFunction;";
+        }
+        return switch (primitiveType) {
+            case "I" -> "Ljava/util/function/IntBinaryOperator;";
+            case "J" -> "Ljava/util/function/LongBinaryOperator;";
+            case "D" -> "Ljava/util/function/DoubleBinaryOperator;";
+            default -> "Ljava/util/function/BiFunction;";
+        };
     }
 
     private void generateIncludes(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {

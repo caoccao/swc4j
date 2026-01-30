@@ -332,17 +332,17 @@ private static String getCauseMessage(Swc4jByteCodeCompilerException exception) 
 
 | JavaScript Method | Java Equivalent | Notes | Status |
 |------------------|----------------|-------|---------|
-| `forEach(fn)` | `forEach(Consumer)` | Requires lambda support | ⏸️ Deferred |
-| `map(fn)` | `stream().map()` | Returns new array | ⏸️ Deferred |
-| `filter(fn)` | `stream().filter()` | Returns new array | ⏸️ Deferred |
-| `find(fn)` | `stream().filter().findFirst()` | Returns element | ⏸️ Deferred |
-| `findIndex(fn)` | Manual loop | Returns index | ⏸️ Deferred |
-| `some(fn)` | `stream().anyMatch()` | Returns boolean | ⏸️ Deferred |
-| `every(fn)` | `stream().allMatch()` | Returns boolean | ⏸️ Deferred |
-| `reduce(fn, init)` | `stream().reduce()` | Accumulator | ⏸️ Deferred |
-| `reduceRight(fn, init)` | Reverse + reduce | Right-to-left | ⏸️ Deferred |
-| `flat(depth)` | Recursive flattening | Flatten nested arrays | ⏸️ Deferred |
-| `flatMap(fn)` | `stream().flatMap()` | Map then flatten | ⏸️ Deferred |
+| `forEach(fn)` | `forEach(Consumer)` | Callback supports 1 param | ✅ Implemented |
+| `map(fn)` | Manual loop | Returns new array | ✅ Implemented |
+| `filter(fn)` | Manual loop | Returns new array | ✅ Implemented |
+| `find(fn)` | Manual loop | Returns element or null | ✅ Implemented |
+| `findIndex(fn)` | Manual loop | Returns index | ✅ Implemented |
+| `some(fn)` | Manual loop | Returns boolean | ✅ Implemented |
+| `every(fn)` | Manual loop | Returns boolean | ✅ Implemented |
+| `reduce(fn, init)` | Manual loop | Accumulator | ✅ Implemented |
+| `reduceRight(fn, init)` | Manual loop | Right-to-left | ✅ Implemented |
+| `flat(depth)` | Recursive flattening | Flatten nested arrays | ✅ Implemented |
+| `flatMap(fn)` | Manual loop | Map then flatten | ✅ Implemented |
 
 ### ES2023 Non-Mutating Alternatives
 
@@ -1271,13 +1271,13 @@ arr.customProperty = "hello"  // JS allows this
 - [ ] Array methods with return values
 
 ### Phase 6: Functional Methods (Priority: LOW - Requires Functions)
-- [ ] `forEach(callback)`
-- [ ] `map(callback)`
-- [ ] `filter(callback)`
-- [ ] `find(callback)` / `findIndex(callback)`
-- [ ] `some(callback)` / `every(callback)`
-- [ ] `reduce(callback, initial)`
-- [ ] `flat(depth)` / `flatMap(callback)`
+- [x] `forEach(callback)`
+- [x] `map(callback)`
+- [x] `filter(callback)`
+- [x] `find(callback)` / `findIndex(callback)`
+- [x] `some(callback)` / `every(callback)`
+- [x] `reduce(callback, initial)`
+- [x] `flat(depth)` / `flatMap(callback)`
 
 ### Phase 7: Static Methods (Priority: LOW)
 - [ ] `Array.isArray(obj)`

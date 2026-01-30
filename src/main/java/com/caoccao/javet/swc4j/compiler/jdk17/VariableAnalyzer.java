@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstSwitchCase;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
@@ -218,6 +219,14 @@ public final class VariableAnalyzer {
                 GenericTypeInfo genericTypeInfo = compiler.getTypeResolver().extractGenericTypeInfo(bindingIdent);
                 if (genericTypeInfo != null) {
                     context.getGenericTypeInfoMap().put(varName, genericTypeInfo);
+                }
+
+                if (declarator.getInit().isPresent() && "Ljava/util/ArrayList;".equals(varType)) {
+                    var initExpr = declarator.getInit().get().unParenExpr();
+                    if (initExpr instanceof Swc4jAstArrayLit arrayLit) {
+                        String elementType = compiler.getTypeResolver().inferArrayElementType(arrayLit);
+                        context.getArrayElementTypes().put(varName, elementType);
+                    }
                 }
             }
         }

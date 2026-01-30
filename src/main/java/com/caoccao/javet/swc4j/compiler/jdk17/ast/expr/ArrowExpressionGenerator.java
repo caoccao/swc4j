@@ -240,7 +240,11 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             // (T) => R -> Function<T, R> or primitive specialization
             interfaceName = getFunctionInterface(paramTypes.get(0), returnInfo);
             methodName = getFunctionMethodName(paramTypes.get(0), returnInfo);
-            methodDescriptor = "(" + paramTypes.get(0) + ")" + getReturnDescriptor(returnInfo);
+            if (isErasedFunctionInterface(interfaceName)) {
+                methodDescriptor = getErasedFunctionDescriptor(interfaceName);
+            } else {
+                methodDescriptor = "(" + paramTypes.get(0) + ")" + getReturnDescriptor(returnInfo);
+            }
         } else if (params.size() == 2) {
             // Check for primitive binary operators first
             String binaryOperatorInfo = getBinaryOperatorInfo(paramTypes.get(0), paramTypes.get(1), returnInfo);
@@ -1326,6 +1330,23 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             case DOUBLE -> "D";
             case BOOLEAN -> "Z";
             default -> "Ljava/lang/Object;";
+        };
+    }
+
+    private boolean isErasedFunctionInterface(String interfaceName) {
+        return interfaceName.equals("java/util/function/Function")
+                || interfaceName.equals("java/util/function/UnaryOperator")
+                || interfaceName.equals("java/util/function/IntFunction")
+                || interfaceName.equals("java/util/function/LongFunction")
+                || interfaceName.equals("java/util/function/DoubleFunction");
+    }
+
+    private String getErasedFunctionDescriptor(String interfaceName) {
+        return switch (interfaceName) {
+            case "java/util/function/IntFunction" -> "(I)Ljava/lang/Object;";
+            case "java/util/function/LongFunction" -> "(J)Ljava/lang/Object;";
+            case "java/util/function/DoubleFunction" -> "(D)Ljava/lang/Object;";
+            default -> "(Ljava/lang/Object;)Ljava/lang/Object;";
         };
     }
 

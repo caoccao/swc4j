@@ -19,6 +19,25 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleFunction;
+import java.util.function.DoublePredicate;
+import java.util.function.DoubleUnaryOperator;
+import java.util.function.Function;
+import java.util.function.IntBinaryOperator;
+import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
+import java.util.function.IntPredicate;
+import java.util.function.IntUnaryOperator;
+import java.util.function.LongBinaryOperator;
+import java.util.function.LongConsumer;
+import java.util.function.LongFunction;
+import java.util.function.LongPredicate;
+import java.util.function.LongUnaryOperator;
+import java.util.function.Predicate;
 
 /**
  * Utility class for ArrayList operations similar to JavaScript Array methods.
@@ -94,6 +113,825 @@ public final class ArrayListApiUtils {
         }
 
         return result;
+    }
+
+    /**
+     * Execute a callback for each element.
+     * JavaScript equivalent: arr.forEach(callback)
+     *
+     * @param list     the ArrayList to iterate
+     * @param callback the callback to invoke
+     */
+    public static void forEach(ArrayList<?> list, Consumer<Object> callback) {
+        if (list == null || callback == null) {
+            return;
+        }
+        for (Object element : list) {
+            callback.accept(element);
+        }
+    }
+
+    public static void forEach(ArrayList<?> list, IntConsumer callback) {
+        if (list == null || callback == null) {
+            return;
+        }
+        for (Object element : list) {
+            callback.accept(toInt(element));
+        }
+    }
+
+    public static void forEach(ArrayList<?> list, LongConsumer callback) {
+        if (list == null || callback == null) {
+            return;
+        }
+        for (Object element : list) {
+            callback.accept(toLong(element));
+        }
+    }
+
+    public static void forEach(ArrayList<?> list, DoubleConsumer callback) {
+        if (list == null || callback == null) {
+            return;
+        }
+        for (Object element : list) {
+            callback.accept(toDouble(element));
+        }
+    }
+
+    /**
+     * Map elements to a new array.
+     * JavaScript equivalent: arr.map(callback)
+     */
+    public static ArrayList<Object> map(ArrayList<?> list, Function<Object, Object> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.apply(element));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> map(ArrayList<?> list, IntFunction<?> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.apply(toInt(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> map(ArrayList<?> list, IntUnaryOperator callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.applyAsInt(toInt(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> map(ArrayList<?> list, LongFunction<?> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.apply(toLong(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> map(ArrayList<?> list, LongUnaryOperator callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.applyAsLong(toLong(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> map(ArrayList<?> list, DoubleFunction<?> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.apply(toDouble(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> map(ArrayList<?> list, DoubleUnaryOperator callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.applyAsDouble(toDouble(element)));
+        }
+        return result;
+    }
+
+    /**
+     * Filter elements based on a predicate.
+     * JavaScript equivalent: arr.filter(callback)
+     */
+    public static ArrayList<Object> filter(ArrayList<?> list, Predicate<Object> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            if (callback.test(element)) {
+                result.add(element);
+            }
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> filter(ArrayList<?> list, IntPredicate callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            if (callback.test(toInt(element))) {
+                result.add(element);
+            }
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> filter(ArrayList<?> list, LongPredicate callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            if (callback.test(toLong(element))) {
+                result.add(element);
+            }
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> filter(ArrayList<?> list, DoublePredicate callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            if (callback.test(toDouble(element))) {
+                result.add(element);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Find the first element matching a predicate.
+     * JavaScript equivalent: arr.find(callback)
+     */
+    public static Object find(ArrayList<?> list, Predicate<Object> callback) {
+        if (list == null || callback == null) {
+            return null;
+        }
+        for (Object element : list) {
+            if (callback.test(element)) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    public static Object find(ArrayList<?> list, IntPredicate callback) {
+        if (list == null || callback == null) {
+            return null;
+        }
+        for (Object element : list) {
+            if (callback.test(toInt(element))) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    public static Object find(ArrayList<?> list, LongPredicate callback) {
+        if (list == null || callback == null) {
+            return null;
+        }
+        for (Object element : list) {
+            if (callback.test(toLong(element))) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    public static Object find(ArrayList<?> list, DoublePredicate callback) {
+        if (list == null || callback == null) {
+            return null;
+        }
+        for (Object element : list) {
+            if (callback.test(toDouble(element))) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find the index of the first element matching a predicate.
+     * JavaScript equivalent: arr.findIndex(callback)
+     */
+    public static int findIndex(ArrayList<?> list, Predicate<Object> callback) {
+        if (list == null || callback == null) {
+            return -1;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            if (callback.test(list.get(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int findIndex(ArrayList<?> list, IntPredicate callback) {
+        if (list == null || callback == null) {
+            return -1;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            if (callback.test(toInt(list.get(i)))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int findIndex(ArrayList<?> list, LongPredicate callback) {
+        if (list == null || callback == null) {
+            return -1;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            if (callback.test(toLong(list.get(i)))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int findIndex(ArrayList<?> list, DoublePredicate callback) {
+        if (list == null || callback == null) {
+            return -1;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            if (callback.test(toDouble(list.get(i)))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Determine if any element matches a predicate.
+     * JavaScript equivalent: arr.some(callback)
+     */
+    public static boolean some(ArrayList<?> list, Predicate<Object> callback) {
+        if (list == null || callback == null) {
+            return false;
+        }
+        for (Object element : list) {
+            if (callback.test(element)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean some(ArrayList<?> list, IntPredicate callback) {
+        if (list == null || callback == null) {
+            return false;
+        }
+        for (Object element : list) {
+            if (callback.test(toInt(element))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean some(ArrayList<?> list, LongPredicate callback) {
+        if (list == null || callback == null) {
+            return false;
+        }
+        for (Object element : list) {
+            if (callback.test(toLong(element))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean some(ArrayList<?> list, DoublePredicate callback) {
+        if (list == null || callback == null) {
+            return false;
+        }
+        for (Object element : list) {
+            if (callback.test(toDouble(element))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determine if every element matches a predicate.
+     * JavaScript equivalent: arr.every(callback)
+     */
+    public static boolean every(ArrayList<?> list, Predicate<Object> callback) {
+        if (callback == null) {
+            return false;
+        }
+        if (list == null || list.isEmpty()) {
+            return true;
+        }
+        for (Object element : list) {
+            if (!callback.test(element)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean every(ArrayList<?> list, IntPredicate callback) {
+        if (callback == null) {
+            return false;
+        }
+        if (list == null || list.isEmpty()) {
+            return true;
+        }
+        for (Object element : list) {
+            if (!callback.test(toInt(element))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean every(ArrayList<?> list, LongPredicate callback) {
+        if (callback == null) {
+            return false;
+        }
+        if (list == null || list.isEmpty()) {
+            return true;
+        }
+        for (Object element : list) {
+            if (!callback.test(toLong(element))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean every(ArrayList<?> list, DoublePredicate callback) {
+        if (callback == null) {
+            return false;
+        }
+        if (list == null || list.isEmpty()) {
+            return true;
+        }
+        for (Object element : list) {
+            if (!callback.test(toDouble(element))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Reduce elements with an accumulator.
+     * JavaScript equivalent: arr.reduce(callback)
+     */
+    public static Object reduce(ArrayList<?> list, BiFunction<Object, Object, Object> callback) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("reduce() requires a non-empty array when no initial value is provided");
+        }
+        if (callback == null) {
+            return null;
+        }
+        Object accumulator = list.get(0);
+        for (int i = 1; i < list.size(); i++) {
+            accumulator = callback.apply(accumulator, list.get(i));
+        }
+        return accumulator;
+    }
+
+    public static Object reduce(ArrayList<?> list, IntBinaryOperator callback) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("reduce() requires a non-empty array when no initial value is provided");
+        }
+        if (callback == null) {
+            return null;
+        }
+        int accumulator = toInt(list.get(0));
+        for (int i = 1; i < list.size(); i++) {
+            accumulator = callback.applyAsInt(accumulator, toInt(list.get(i)));
+        }
+        return accumulator;
+    }
+
+    public static Object reduce(ArrayList<?> list, LongBinaryOperator callback) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("reduce() requires a non-empty array when no initial value is provided");
+        }
+        if (callback == null) {
+            return null;
+        }
+        long accumulator = toLong(list.get(0));
+        for (int i = 1; i < list.size(); i++) {
+            accumulator = callback.applyAsLong(accumulator, toLong(list.get(i)));
+        }
+        return accumulator;
+    }
+
+    public static Object reduce(ArrayList<?> list, DoubleBinaryOperator callback) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("reduce() requires a non-empty array when no initial value is provided");
+        }
+        if (callback == null) {
+            return null;
+        }
+        double accumulator = toDouble(list.get(0));
+        for (int i = 1; i < list.size(); i++) {
+            accumulator = callback.applyAsDouble(accumulator, toDouble(list.get(i)));
+        }
+        return accumulator;
+    }
+
+    /**
+     * Reduce elements with an accumulator and initial value.
+     * JavaScript equivalent: arr.reduce(callback, initialValue)
+     */
+    public static Object reduce(ArrayList<?> list, BiFunction<Object, Object, Object> callback, Object initial) {
+        if (callback == null) {
+            return null;
+        }
+        Object accumulator = initial;
+        if (list != null) {
+            for (Object element : list) {
+                accumulator = callback.apply(accumulator, element);
+            }
+        }
+        return accumulator;
+    }
+
+    public static Object reduce(ArrayList<?> list, IntBinaryOperator callback, int initial) {
+        if (callback == null) {
+            return null;
+        }
+        int accumulator = initial;
+        if (list != null) {
+            for (Object element : list) {
+                accumulator = callback.applyAsInt(accumulator, toInt(element));
+            }
+        }
+        return accumulator;
+    }
+
+    public static Object reduce(ArrayList<?> list, LongBinaryOperator callback, long initial) {
+        if (callback == null) {
+            return null;
+        }
+        long accumulator = initial;
+        if (list != null) {
+            for (Object element : list) {
+                accumulator = callback.applyAsLong(accumulator, toLong(element));
+            }
+        }
+        return accumulator;
+    }
+
+    public static Object reduce(ArrayList<?> list, DoubleBinaryOperator callback, double initial) {
+        if (callback == null) {
+            return null;
+        }
+        double accumulator = initial;
+        if (list != null) {
+            for (Object element : list) {
+                accumulator = callback.applyAsDouble(accumulator, toDouble(element));
+            }
+        }
+        return accumulator;
+    }
+
+    /**
+     * Reduce elements from right to left.
+     * JavaScript equivalent: arr.reduceRight(callback)
+     */
+    public static Object reduceRight(ArrayList<?> list, BiFunction<Object, Object, Object> callback) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("reduceRight() requires a non-empty array when no initial value is provided");
+        }
+        if (callback == null) {
+            return null;
+        }
+        int index = list.size() - 1;
+        Object accumulator = list.get(index);
+        for (int i = index - 1; i >= 0; i--) {
+            accumulator = callback.apply(accumulator, list.get(i));
+        }
+        return accumulator;
+    }
+
+    public static Object reduceRight(ArrayList<?> list, IntBinaryOperator callback) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("reduceRight() requires a non-empty array when no initial value is provided");
+        }
+        if (callback == null) {
+            return null;
+        }
+        int index = list.size() - 1;
+        int accumulator = toInt(list.get(index));
+        for (int i = index - 1; i >= 0; i--) {
+            accumulator = callback.applyAsInt(accumulator, toInt(list.get(i)));
+        }
+        return accumulator;
+    }
+
+    public static Object reduceRight(ArrayList<?> list, LongBinaryOperator callback) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("reduceRight() requires a non-empty array when no initial value is provided");
+        }
+        if (callback == null) {
+            return null;
+        }
+        int index = list.size() - 1;
+        long accumulator = toLong(list.get(index));
+        for (int i = index - 1; i >= 0; i--) {
+            accumulator = callback.applyAsLong(accumulator, toLong(list.get(i)));
+        }
+        return accumulator;
+    }
+
+    public static Object reduceRight(ArrayList<?> list, DoubleBinaryOperator callback) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("reduceRight() requires a non-empty array when no initial value is provided");
+        }
+        if (callback == null) {
+            return null;
+        }
+        int index = list.size() - 1;
+        double accumulator = toDouble(list.get(index));
+        for (int i = index - 1; i >= 0; i--) {
+            accumulator = callback.applyAsDouble(accumulator, toDouble(list.get(i)));
+        }
+        return accumulator;
+    }
+
+    /**
+     * Reduce elements from right to left with an initial value.
+     * JavaScript equivalent: arr.reduceRight(callback, initialValue)
+     */
+    public static Object reduceRight(ArrayList<?> list, BiFunction<Object, Object, Object> callback, Object initial) {
+        if (callback == null) {
+            return null;
+        }
+        Object accumulator = initial;
+        if (list != null) {
+            for (int i = list.size() - 1; i >= 0; i--) {
+                accumulator = callback.apply(accumulator, list.get(i));
+            }
+        }
+        return accumulator;
+    }
+
+    public static Object reduceRight(ArrayList<?> list, IntBinaryOperator callback, int initial) {
+        if (callback == null) {
+            return null;
+        }
+        int accumulator = initial;
+        if (list != null) {
+            for (int i = list.size() - 1; i >= 0; i--) {
+                accumulator = callback.applyAsInt(accumulator, toInt(list.get(i)));
+            }
+        }
+        return accumulator;
+    }
+
+    public static Object reduceRight(ArrayList<?> list, LongBinaryOperator callback, long initial) {
+        if (callback == null) {
+            return null;
+        }
+        long accumulator = initial;
+        if (list != null) {
+            for (int i = list.size() - 1; i >= 0; i--) {
+                accumulator = callback.applyAsLong(accumulator, toLong(list.get(i)));
+            }
+        }
+        return accumulator;
+    }
+
+    public static Object reduceRight(ArrayList<?> list, DoubleBinaryOperator callback, double initial) {
+        if (callback == null) {
+            return null;
+        }
+        double accumulator = initial;
+        if (list != null) {
+            for (int i = list.size() - 1; i >= 0; i--) {
+                accumulator = callback.applyAsDouble(accumulator, toDouble(list.get(i)));
+            }
+        }
+        return accumulator;
+    }
+
+    /**
+     * Flatten nested arrays by a given depth.
+     * JavaScript equivalent: arr.flat(depth)
+     */
+    public static ArrayList<Object> flat(ArrayList<?> list, int depth) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || depth < 0) {
+            return result;
+        }
+        flattenInto(list, depth, result);
+        return result;
+    }
+
+    /**
+     * Flatten nested arrays by one level.
+     * JavaScript equivalent: arr.flat()
+     */
+    public static ArrayList<Object> flat(ArrayList<?> list) {
+        return flat(list, 1);
+    }
+
+    /**
+     * Map and flatten one level.
+     * JavaScript equivalent: arr.flatMap(callback)
+     */
+    public static ArrayList<Object> flatMap(ArrayList<?> list, Function<Object, Object> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            Object mapped = callback.apply(element);
+            if (mapped instanceof List) {
+                result.addAll((List<?>) mapped);
+            } else {
+                result.add(mapped);
+            }
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> flatMap(ArrayList<?> list, IntFunction<?> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            Object mapped = callback.apply(toInt(element));
+            if (mapped instanceof List) {
+                result.addAll((List<?>) mapped);
+            } else {
+                result.add(mapped);
+            }
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> flatMap(ArrayList<?> list, IntUnaryOperator callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.applyAsInt(toInt(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> flatMap(ArrayList<?> list, LongFunction<?> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            Object mapped = callback.apply(toLong(element));
+            if (mapped instanceof List) {
+                result.addAll((List<?>) mapped);
+            } else {
+                result.add(mapped);
+            }
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> flatMap(ArrayList<?> list, LongUnaryOperator callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.applyAsLong(toLong(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> flatMap(ArrayList<?> list, DoubleFunction<?> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            Object mapped = callback.apply(toDouble(element));
+            if (mapped instanceof List) {
+                result.addAll((List<?>) mapped);
+            } else {
+                result.add(mapped);
+            }
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> flatMap(ArrayList<?> list, DoubleUnaryOperator callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.applyAsDouble(toDouble(element)));
+        }
+        return result;
+    }
+
+    private static void flattenInto(List<?> source, int depth, List<Object> target) {
+        if (source == null) {
+            return;
+        }
+        for (Object element : source) {
+            if (depth > 0 && element instanceof List) {
+                flattenInto((List<?>) element, depth - 1, target);
+            } else {
+                target.add(element);
+            }
+        }
+    }
+
+    private static int toInt(Object value) {
+        if (value == null) {
+            return 0;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        if (value instanceof Character) {
+            return (int) ((Character) value).charValue();
+        }
+        if (value instanceof Boolean) {
+            return (Boolean) value ? 1 : 0;
+        }
+        return 0;
+    }
+
+    private static long toLong(Object value) {
+        if (value == null) {
+            return 0L;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        if (value instanceof Character) {
+            return (long) ((Character) value).charValue();
+        }
+        if (value instanceof Boolean) {
+            return (Boolean) value ? 1L : 0L;
+        }
+        return 0L;
+    }
+
+    private static double toDouble(Object value) {
+        if (value == null) {
+            return 0.0d;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        if (value instanceof Character) {
+            return (double) ((Character) value).charValue();
+        }
+        if (value instanceof Boolean) {
+            return (Boolean) value ? 1.0d : 0.0d;
+        }
+        return 0.0d;
     }
 
     /**

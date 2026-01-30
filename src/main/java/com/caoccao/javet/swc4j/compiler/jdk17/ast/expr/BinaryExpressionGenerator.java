@@ -847,9 +847,15 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         // Object comparison: use Objects.equals() for null-safe comparison
                         // Generate left operand
                         compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                        if (TypeConversionUtils.isPrimitiveType(leftType)) {
+                            TypeConversionUtils.boxPrimitiveType(code, cp, leftType, TypeConversionUtils.getWrapperType(leftType));
+                        }
 
                         // Generate right operand
                         compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                        if (TypeConversionUtils.isPrimitiveType(rightType)) {
+                            TypeConversionUtils.boxPrimitiveType(code, cp, rightType, TypeConversionUtils.getWrapperType(rightType));
+                        }
 
                         // Objects.equals returns boolean (Z) which is represented as 0 or 1
                         int equalsRef = cp.addMethodRef("java/util/Objects", "equals", "(Ljava/lang/Object;Ljava/lang/Object;)Z");
@@ -964,9 +970,15 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         // Object comparison: use Objects.equals() then invert the result
                         // Generate left operand
                         compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                        if (TypeConversionUtils.isPrimitiveType(leftType)) {
+                            TypeConversionUtils.boxPrimitiveType(code, cp, leftType, TypeConversionUtils.getWrapperType(leftType));
+                        }
 
                         // Generate right operand
                         compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                        if (TypeConversionUtils.isPrimitiveType(rightType)) {
+                            TypeConversionUtils.boxPrimitiveType(code, cp, rightType, TypeConversionUtils.getWrapperType(rightType));
+                        }
 
                         // Objects.equals returns boolean (Z) which is represented as 0 or 1
                         int equalsRef = cp.addMethodRef("java/util/Objects", "equals", "(Ljava/lang/Object;Ljava/lang/Object;)Z");

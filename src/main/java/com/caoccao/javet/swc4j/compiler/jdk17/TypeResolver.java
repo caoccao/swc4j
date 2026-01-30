@@ -512,6 +512,42 @@ public final class TypeResolver {
     }
 
     /**
+     * Infer the element type of an array literal.
+     *
+     * @param arrayLit array literal
+     * @return element type descriptor, or Object if unknown
+     */
+    public String inferArrayElementType(Swc4jAstArrayLit arrayLit) throws Swc4jByteCodeCompilerException {
+        if (arrayLit == null) {
+            return "Ljava/lang/Object;";
+        }
+        String elementType = null;
+        for (var elemOpt : arrayLit.getElems()) {
+            if (!elemOpt.isPresent()) {
+                continue;
+            }
+            var elem = elemOpt.get();
+            if (elem.getSpread().isPresent()) {
+                return "Ljava/lang/Object;";
+            }
+            ISwc4jAstExpr elemExpr = elem.getExpr();
+            String exprType = inferTypeFromExpr(elemExpr);
+            if (exprType == null) {
+                continue;
+            }
+            if (elementType == null) {
+                elementType = exprType;
+            } else {
+                elementType = findCommonType(elementType, exprType);
+            }
+            if ("Ljava/lang/Object;".equals(elementType)) {
+                return elementType;
+            }
+        }
+        return elementType != null ? elementType : "Ljava/lang/Object;";
+    }
+
+    /**
      * Recursively finds return type in a statement.
      *
      * @param stmt the statement to analyze
@@ -1170,16 +1206,22 @@ public final class TypeResolver {
                         // Methods that return ArrayList
                         switch (methodName) {
                             case "concat", "reverse", "sort", "slice", "splice", "fill", "copyWithin", "toReversed",
-                                 "toSorted", "with", "toSpliced" -> {
+                                 "toSorted", "with", "toSpliced", "map", "filter", "flat", "flatMap" -> {
                                 return "Ljava/util/ArrayList;";
+                            }
+                            case "forEach" -> {
+                                return "V";
+                            }
+                            case "find", "reduce", "reduceRight" -> {
+                                return "Ljava/lang/Object;";
                             }
                             case "join", "toString", "toLocaleString" -> {
                                 return "Ljava/lang/String;";
                             }
-                            case "indexOf", "lastIndexOf" -> {
+                            case "indexOf", "lastIndexOf", "findIndex" -> {
                                 return "I";
                             }
-                            case "includes" -> {
+                            case "includes", "some", "every" -> {
                                 return "Z";
                             }
                             case "pop", "shift" -> {

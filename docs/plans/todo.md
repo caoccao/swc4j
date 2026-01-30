@@ -135,13 +135,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Add helper utilities and dispatch support for these APIs in ArrayList mode.
 - Tests: Iterators, factory methods, and type checks.
 
-## Feature: Array Functional Methods (forEach/map/filter/etc.)
-- Evidence: `docs/plans/ast/expr/lit/array-lit.md`.
-- Status: Deferred pending function support integration for callbacks.
-- Confidence: 50%.
-- Plan: Map to Java Streams or loop expansion, connect to lambda/arrow compilation.
-- Tests: Each method with arrow callbacks and side effects.
-
 ## Feature: Try/Catch Multi-Type Guard Lowering
 - Evidence: `docs/plans/ast/stmt/try-stmt.md`.
 - Status: Multiple catch-type branching not implemented.
