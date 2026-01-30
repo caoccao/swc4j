@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -83,6 +84,106 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                 seenValues.add(caseValue);
 
                 cases.add(new CaseInfo(caseValue, switchCase.getCons(), false));
+            }
+        }
+
+        return cases;
+    }
+
+    private List<LongCaseInfo> analyzeLongCases(Swc4jAstSwitchStmt switchStmt) throws Swc4jByteCodeCompilerException {
+        List<LongCaseInfo> cases = new ArrayList<>();
+        Set<Long> seenValues = new HashSet<>();
+        boolean hasDefault = false;
+
+        for (Swc4jAstSwitchCase switchCase : switchStmt.getCases()) {
+            if (switchCase.getTest().isEmpty()) {
+                if (hasDefault) {
+                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate default case in switch statement");
+                }
+                hasDefault = true;
+                cases.add(new LongCaseInfo(null, switchCase.getCons(), true));
+            } else {
+                ISwc4jAstExpr testExpr = switchCase.getTest().get();
+                Long caseValue = extractConstantLongValue(testExpr);
+                if (caseValue == null) {
+                    throw new Swc4jByteCodeCompilerException(testExpr,
+                            "Switch case value must be a constant long: " + testExpr.getClass().getSimpleName());
+                }
+                if (seenValues.contains(caseValue)) {
+                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate case value: " + caseValue);
+                }
+                seenValues.add(caseValue);
+                cases.add(new LongCaseInfo(caseValue, switchCase.getCons(), false));
+            }
+        }
+
+        return cases;
+    }
+
+    private List<FloatCaseInfo> analyzeFloatCases(Swc4jAstSwitchStmt switchStmt) throws Swc4jByteCodeCompilerException {
+        List<FloatCaseInfo> cases = new ArrayList<>();
+        Set<Integer> seenValues = new HashSet<>();
+        boolean hasDefault = false;
+
+        for (Swc4jAstSwitchCase switchCase : switchStmt.getCases()) {
+            if (switchCase.getTest().isEmpty()) {
+                if (hasDefault) {
+                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate default case in switch statement");
+                }
+                hasDefault = true;
+                cases.add(new FloatCaseInfo(null, switchCase.getCons(), true));
+            } else {
+                ISwc4jAstExpr testExpr = switchCase.getTest().get();
+                Float caseValue = extractConstantFloatValue(testExpr);
+                if (caseValue == null) {
+                    throw new Swc4jByteCodeCompilerException(testExpr,
+                            "Switch case value must be a constant float: " + testExpr.getClass().getSimpleName());
+                }
+                float normalized = caseValue == 0.0f ? 0.0f : caseValue;
+                if (Float.isNaN(normalized)) {
+                    normalized = Float.NaN;
+                }
+                int key = Float.floatToIntBits(normalized);
+                if (seenValues.contains(key)) {
+                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate case value: " + caseValue);
+                }
+                seenValues.add(key);
+                cases.add(new FloatCaseInfo(caseValue, switchCase.getCons(), false));
+            }
+        }
+
+        return cases;
+    }
+
+    private List<DoubleCaseInfo> analyzeDoubleCases(Swc4jAstSwitchStmt switchStmt) throws Swc4jByteCodeCompilerException {
+        List<DoubleCaseInfo> cases = new ArrayList<>();
+        Set<Long> seenValues = new HashSet<>();
+        boolean hasDefault = false;
+
+        for (Swc4jAstSwitchCase switchCase : switchStmt.getCases()) {
+            if (switchCase.getTest().isEmpty()) {
+                if (hasDefault) {
+                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate default case in switch statement");
+                }
+                hasDefault = true;
+                cases.add(new DoubleCaseInfo(null, switchCase.getCons(), true));
+            } else {
+                ISwc4jAstExpr testExpr = switchCase.getTest().get();
+                Double caseValue = extractConstantDoubleValue(testExpr);
+                if (caseValue == null) {
+                    throw new Swc4jByteCodeCompilerException(testExpr,
+                            "Switch case value must be a constant double: " + testExpr.getClass().getSimpleName());
+                }
+                double normalized = caseValue == 0.0d ? 0.0d : caseValue;
+                if (Double.isNaN(normalized)) {
+                    normalized = Double.NaN;
+                }
+                long key = Double.doubleToLongBits(normalized);
+                if (seenValues.contains(key)) {
+                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate case value: " + caseValue);
+                }
+                seenValues.add(key);
+                cases.add(new DoubleCaseInfo(caseValue, switchCase.getCons(), false));
             }
         }
 
@@ -277,6 +378,10 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             }
         }
 
+        if (expr instanceof Swc4jAstBool boolExpr) {
+            return boolExpr.isValue() ? 1 : 0;
+        }
+
         // Handle character literals (represented as Swc4jAstStr with single character)
         if (expr instanceof Swc4jAstStr strExpr) {
             String value = strExpr.getValue();
@@ -289,6 +394,74 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         // Handle enum member expressions (e.g., Color.RED)
         if (expr instanceof Swc4jAstMemberExpr memberExpr) {
             return extractEnumMemberOrdinal(memberExpr);
+        }
+
+        return null;
+    }
+
+    private Long extractConstantLongValue(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
+            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Minus) {
+                Long value = extractConstantLongValue(unaryExpr.getArg());
+                return value != null ? -value : null;
+            }
+            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Plus) {
+                return extractConstantLongValue(unaryExpr.getArg());
+            }
+            return null;
+        }
+
+        if (expr instanceof Swc4jAstNumber number) {
+            String raw = number.getRaw().orElse("0");
+            try {
+                if (raw.startsWith("0x") || raw.startsWith("0X")) {
+                    return Long.parseLong(raw.substring(2), 16);
+                } else if (raw.startsWith("0o") || raw.startsWith("0O")) {
+                    return Long.parseLong(raw.substring(2), 8);
+                } else if (raw.startsWith("0b") || raw.startsWith("0B")) {
+                    return Long.parseLong(raw.substring(2), 2);
+                }
+            } catch (NumberFormatException ignored) {
+            }
+            return (long) number.getValue();
+        }
+
+        return null;
+    }
+
+    private Float extractConstantFloatValue(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
+            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Minus) {
+                Float value = extractConstantFloatValue(unaryExpr.getArg());
+                return value != null ? -value : null;
+            }
+            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Plus) {
+                return extractConstantFloatValue(unaryExpr.getArg());
+            }
+            return null;
+        }
+
+        if (expr instanceof Swc4jAstNumber number) {
+            return (float) number.getValue();
+        }
+
+        return null;
+    }
+
+    private Double extractConstantDoubleValue(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
+            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Minus) {
+                Double value = extractConstantDoubleValue(unaryExpr.getArg());
+                return value != null ? -value : null;
+            }
+            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Plus) {
+                return extractConstantDoubleValue(unaryExpr.getArg());
+            }
+            return null;
+        }
+
+        if (expr instanceof Swc4jAstNumber number) {
+            return number.getValue();
         }
 
         return null;
@@ -351,6 +524,15 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        generate(code, cp, switchStmt, null, returnTypeInfo);
+    }
+
+    public void generate(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         // 1. Determine discriminant type
         String discriminantType = compiler.getTypeResolver().inferTypeFromExpr(switchStmt.getDiscriminant());
@@ -359,25 +541,54 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
 
         // String switches use 2-phase hash approach
         if ("Ljava/lang/String;".equals(discriminantType)) {
-            generateStringSwitch(code, cp, switchStmt, returnTypeInfo);
+            generateStringSwitch(code, cp, switchStmt, labelName, returnTypeInfo);
             return;
         }
 
         // Boxed type switches: unbox then use integer switch
         if ("Ljava/lang/Integer;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Integer", "intValue", "()I", returnTypeInfo);
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Integer", "intValue", "()I", labelName, returnTypeInfo);
             return;
         }
         if ("Ljava/lang/Byte;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Byte", "byteValue", "()B", returnTypeInfo);
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Byte", "byteValue", "()B", labelName, returnTypeInfo);
             return;
         }
         if ("Ljava/lang/Short;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Short", "shortValue", "()S", returnTypeInfo);
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Short", "shortValue", "()S", labelName, returnTypeInfo);
             return;
         }
         if ("Ljava/lang/Character;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Character", "charValue", "()C", returnTypeInfo);
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Character", "charValue", "()C", labelName, returnTypeInfo);
+            return;
+        }
+        if ("Ljava/lang/Boolean;".equals(discriminantType)) {
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Boolean", "booleanValue", "()Z", labelName, returnTypeInfo);
+            return;
+        }
+        if ("Ljava/lang/Long;".equals(discriminantType)) {
+            generateBoxedLongSwitch(code, cp, switchStmt, "java/lang/Long", "longValue", "()J", labelName, returnTypeInfo);
+            return;
+        }
+        if ("Ljava/lang/Float;".equals(discriminantType)) {
+            generateBoxedFloatSwitch(code, cp, switchStmt, "java/lang/Float", "floatValue", "()F", labelName, returnTypeInfo);
+            return;
+        }
+        if ("Ljava/lang/Double;".equals(discriminantType)) {
+            generateBoxedDoubleSwitch(code, cp, switchStmt, "java/lang/Double", "doubleValue", "()D", labelName, returnTypeInfo);
+            return;
+        }
+
+        if ("J".equals(discriminantType)) {
+            generateLongSwitch(code, cp, switchStmt, labelName, returnTypeInfo);
+            return;
+        }
+        if ("F".equals(discriminantType)) {
+            generateFloatSwitch(code, cp, switchStmt, labelName, returnTypeInfo);
+            return;
+        }
+        if ("D".equals(discriminantType)) {
+            generateDoubleSwitch(code, cp, switchStmt, labelName, returnTypeInfo);
             return;
         }
 
@@ -385,12 +596,12 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         // Check if it's an object type (starts with L) but not a known type
         if (discriminantType != null && discriminantType.startsWith("L") && discriminantType.endsWith(";")) {
             // Likely an enum type - call ordinal()
-            generateEnumSwitch(code, cp, switchStmt, discriminantType, returnTypeInfo);
+            generateEnumSwitch(code, cp, switchStmt, discriminantType, labelName, returnTypeInfo);
             return;
         }
 
-        // 3. Integer switch (int, byte, short, char - primitives are auto-promoted to int)
-        generateIntegerSwitch(code, cp, switchStmt, returnTypeInfo);
+        // 3. Integer switch (int, byte, short, char, boolean - primitives are auto-promoted to int)
+        generateIntegerSwitch(code, cp, switchStmt, labelName, returnTypeInfo);
     }
 
     /**
@@ -404,6 +615,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             String className,
             String unboxMethod,
             String methodDescriptor,
+            String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         // Generate discriminant expression (boxed value on stack)
@@ -415,7 +627,52 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
 
         // For byte, short, char, the value is already promoted to int on the stack by JVM
         // Now use integer switch with the unboxed value on stack
-        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, returnTypeInfo);
+        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+    }
+
+    private void generateBoxedLongSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String className,
+            String unboxMethod,
+            String methodDescriptor,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
+        code.invokevirtual(unboxRef);
+        generateLongSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+    }
+
+    private void generateBoxedFloatSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String className,
+            String unboxMethod,
+            String methodDescriptor,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
+        code.invokevirtual(unboxRef);
+        generateFloatSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+    }
+
+    private void generateBoxedDoubleSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String className,
+            String unboxMethod,
+            String methodDescriptor,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
+        code.invokevirtual(unboxRef);
+        generateDoubleSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
     }
 
     /**
@@ -427,6 +684,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
             String enumType,
+            String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         // Generate discriminant expression
@@ -438,7 +696,274 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         code.invokevirtual(ordinalRef);
 
         // Now use integer switch with the ordinal value on stack
-        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, returnTypeInfo);
+        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+    }
+
+    private void generateLongSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        generateLongSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+    }
+
+    private void generateFloatSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        generateFloatSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+    }
+
+    private void generateDoubleSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        generateDoubleSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+    }
+
+    private void generateLongSwitchWithDiscriminantOnStack(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        List<LongCaseInfo> cases = analyzeLongCases(switchStmt);
+        if (cases.isEmpty()) {
+            code.pop2();
+            return;
+        }
+
+        int tempIndex = context.getLocalVariableTable().allocateVariable(
+                "$switch$long$" + context.getNextTempId(), "J");
+        code.lstore(tempIndex);
+
+        List<CaseJumpInfo<LongCaseInfo>> caseJumps = new ArrayList<>();
+        for (LongCaseInfo caseInfo : cases) {
+            if (caseInfo.isDefault) {
+                continue;
+            }
+            code.lload(tempIndex);
+            emitLongConstant(code, cp, caseInfo.caseValue);
+            code.lcmp();
+
+            code.ifne(0);
+            int ifneOffsetPos = code.getCurrentOffset() - 2;
+            int ifneOpcodePos = code.getCurrentOffset() - 3;
+
+            code.goto_w(0);
+            int gotoOffsetPos = code.getCurrentOffset() - 4;
+            int gotoOpcodePos = code.getCurrentOffset() - 5;
+            caseJumps.add(new CaseJumpInfo<>(caseInfo, gotoOffsetPos, gotoOpcodePos));
+
+            int afterStub = code.getCurrentOffset();
+            code.patchShort(ifneOffsetPos, afterStub - ifneOpcodePos);
+        }
+
+        code.goto_w(0);
+        int defaultGotoOffsetPos = code.getCurrentOffset() - 4;
+        int defaultGotoOpcodePos = code.getCurrentOffset() - 5;
+
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
+        context.pushBreakLabel(breakLabel);
+
+        for (LongCaseInfo caseInfo : cases) {
+            caseInfo.labelOffset = code.getCurrentOffset();
+            for (ISwc4jAstStmt stmt : caseInfo.statements) {
+                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+            }
+        }
+
+        int endLabel = code.getCurrentOffset();
+
+        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchInt(patchInfo.offsetPos(), offset);
+        }
+
+        context.popBreakLabel();
+
+        int defaultOffset = endLabel;
+        for (LongCaseInfo caseInfo : cases) {
+            if (caseInfo.isDefault) {
+                defaultOffset = caseInfo.labelOffset;
+                break;
+            }
+        }
+
+        for (CaseJumpInfo<LongCaseInfo> jumpInfo : caseJumps) {
+            int offset = jumpInfo.caseInfo.labelOffset - jumpInfo.gotoOpcodePos;
+            code.patchInt(jumpInfo.gotoOffsetPos, offset);
+        }
+
+        code.patchInt(defaultGotoOffsetPos, defaultOffset - defaultGotoOpcodePos);
+    }
+
+    private void generateFloatSwitchWithDiscriminantOnStack(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        List<FloatCaseInfo> cases = analyzeFloatCases(switchStmt);
+        if (cases.isEmpty()) {
+            code.pop();
+            return;
+        }
+
+        int tempIndex = context.getLocalVariableTable().allocateVariable(
+                "$switch$float$" + context.getNextTempId(), "F");
+        code.fstore(tempIndex);
+
+        List<CaseJumpInfo<FloatCaseInfo>> caseJumps = new ArrayList<>();
+        for (FloatCaseInfo caseInfo : cases) {
+            if (caseInfo.isDefault) {
+                continue;
+            }
+            code.fload(tempIndex);
+            emitFloatConstant(code, cp, caseInfo.caseValue);
+            code.fcmpl();
+
+            code.ifne(0);
+            int ifneOffsetPos = code.getCurrentOffset() - 2;
+            int ifneOpcodePos = code.getCurrentOffset() - 3;
+
+            code.goto_w(0);
+            int gotoOffsetPos = code.getCurrentOffset() - 4;
+            int gotoOpcodePos = code.getCurrentOffset() - 5;
+            caseJumps.add(new CaseJumpInfo<>(caseInfo, gotoOffsetPos, gotoOpcodePos));
+
+            int afterStub = code.getCurrentOffset();
+            code.patchShort(ifneOffsetPos, afterStub - ifneOpcodePos);
+        }
+
+        code.goto_w(0);
+        int defaultGotoOffsetPos = code.getCurrentOffset() - 4;
+        int defaultGotoOpcodePos = code.getCurrentOffset() - 5;
+
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
+        context.pushBreakLabel(breakLabel);
+
+        for (FloatCaseInfo caseInfo : cases) {
+            caseInfo.labelOffset = code.getCurrentOffset();
+            for (ISwc4jAstStmt stmt : caseInfo.statements) {
+                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+            }
+        }
+
+        int endLabel = code.getCurrentOffset();
+
+        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchInt(patchInfo.offsetPos(), offset);
+        }
+
+        context.popBreakLabel();
+
+        int defaultOffset = endLabel;
+        for (FloatCaseInfo caseInfo : cases) {
+            if (caseInfo.isDefault) {
+                defaultOffset = caseInfo.labelOffset;
+                break;
+            }
+        }
+
+        for (CaseJumpInfo<FloatCaseInfo> jumpInfo : caseJumps) {
+            int offset = jumpInfo.caseInfo.labelOffset - jumpInfo.gotoOpcodePos;
+            code.patchInt(jumpInfo.gotoOffsetPos, offset);
+        }
+
+        code.patchInt(defaultGotoOffsetPos, defaultOffset - defaultGotoOpcodePos);
+    }
+
+    private void generateDoubleSwitchWithDiscriminantOnStack(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        List<DoubleCaseInfo> cases = analyzeDoubleCases(switchStmt);
+        if (cases.isEmpty()) {
+            code.pop2();
+            return;
+        }
+
+        int tempIndex = context.getLocalVariableTable().allocateVariable(
+                "$switch$double$" + context.getNextTempId(), "D");
+        code.dstore(tempIndex);
+
+        List<CaseJumpInfo<DoubleCaseInfo>> caseJumps = new ArrayList<>();
+        for (DoubleCaseInfo caseInfo : cases) {
+            if (caseInfo.isDefault) {
+                continue;
+            }
+            code.dload(tempIndex);
+            emitDoubleConstant(code, cp, caseInfo.caseValue);
+            code.dcmpl();
+
+            code.ifne(0);
+            int ifneOffsetPos = code.getCurrentOffset() - 2;
+            int ifneOpcodePos = code.getCurrentOffset() - 3;
+
+            code.goto_w(0);
+            int gotoOffsetPos = code.getCurrentOffset() - 4;
+            int gotoOpcodePos = code.getCurrentOffset() - 5;
+            caseJumps.add(new CaseJumpInfo<>(caseInfo, gotoOffsetPos, gotoOpcodePos));
+
+            int afterStub = code.getCurrentOffset();
+            code.patchShort(ifneOffsetPos, afterStub - ifneOpcodePos);
+        }
+
+        code.goto_w(0);
+        int defaultGotoOffsetPos = code.getCurrentOffset() - 4;
+        int defaultGotoOpcodePos = code.getCurrentOffset() - 5;
+
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
+        context.pushBreakLabel(breakLabel);
+
+        for (DoubleCaseInfo caseInfo : cases) {
+            caseInfo.labelOffset = code.getCurrentOffset();
+            for (ISwc4jAstStmt stmt : caseInfo.statements) {
+                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+            }
+        }
+
+        int endLabel = code.getCurrentOffset();
+
+        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchInt(patchInfo.offsetPos(), offset);
+        }
+
+        context.popBreakLabel();
+
+        int defaultOffset = endLabel;
+        for (DoubleCaseInfo caseInfo : cases) {
+            if (caseInfo.isDefault) {
+                defaultOffset = caseInfo.labelOffset;
+                break;
+            }
+        }
+
+        for (CaseJumpInfo<DoubleCaseInfo> jumpInfo : caseJumps) {
+            int offset = jumpInfo.caseInfo.labelOffset - jumpInfo.gotoOpcodePos;
+            code.patchInt(jumpInfo.gotoOffsetPos, offset);
+        }
+
+        code.patchInt(defaultGotoOffsetPos, defaultOffset - defaultGotoOpcodePos);
     }
 
     /**
@@ -448,6 +973,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
+            String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
@@ -476,7 +1002,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         }
 
         // 5. Push break label and generate case bodies directly to main builder
-        LoopLabelInfo breakLabel = new LoopLabelInfo(null);
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
         context.pushBreakLabel(breakLabel);
 
         // Generate case bodies and record their offsets
@@ -520,6 +1046,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
+            String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
@@ -536,7 +1063,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         }
 
         // Set up break label
-        LoopLabelInfo breakLabel = new LoopLabelInfo(null);
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
         context.pushBreakLabel(breakLabel);
 
         // Determine switch type
@@ -716,11 +1243,12 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             int posLocal,
             List<StringCaseInfo> stringCases,
             int defaultCasePosition,
+            String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // Set up break label for the switch
-        LoopLabelInfo breakLabel = new LoopLabelInfo(null);
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
         context.pushBreakLabel(breakLabel);
 
         // Load position variable
@@ -806,6 +1334,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
+            String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
@@ -860,7 +1389,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
 
         // 6. Phase 2: Switch on position with original case bodies
         generatePhase2PositionSwitch(code, cp, posLocal, stringCases, defaultCasePosition,
-                returnTypeInfo);
+                labelName, returnTypeInfo);
     }
 
     /**
@@ -1131,6 +1660,25 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         bytes.add((byte) (value & 0xFF));
     }
 
+    private void emitLongConstant(CodeBuilder code, ClassWriter.ConstantPool cp, long value) {
+        if (value == 0L || value == 1L) {
+            code.lconst(value);
+        } else {
+            int constantIndex = cp.addLong(value);
+            code.ldc2_w(constantIndex);
+        }
+    }
+
+    private void emitFloatConstant(CodeBuilder code, ClassWriter.ConstantPool cp, float value) {
+        int constantIndex = cp.addFloat(value);
+        code.ldc(constantIndex);
+    }
+
+    private void emitDoubleConstant(CodeBuilder code, ClassWriter.ConstantPool cp, double value) {
+        int constantIndex = cp.addDouble(value);
+        code.ldc2_w(constantIndex);
+    }
+
     /**
      * Case information for integer switch generation.
      */
@@ -1162,6 +1710,60 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             this.statements = statements;
             this.gotoPosition = -1;
             this.bodyOffset = -1;
+        }
+    }
+
+    private static class CaseJumpInfo<T> {
+        final T caseInfo;
+        final int gotoOffsetPos;
+        final int gotoOpcodePos;
+
+        CaseJumpInfo(T caseInfo, int gotoOffsetPos, int gotoOpcodePos) {
+            this.caseInfo = caseInfo;
+            this.gotoOffsetPos = gotoOffsetPos;
+            this.gotoOpcodePos = gotoOpcodePos;
+        }
+    }
+
+    private static class LongCaseInfo {
+        Long caseValue;
+        boolean isDefault;
+        int labelOffset;
+        List<ISwc4jAstStmt> statements;
+
+        LongCaseInfo(Long caseValue, List<ISwc4jAstStmt> statements, boolean isDefault) {
+            this.caseValue = caseValue;
+            this.statements = statements;
+            this.isDefault = isDefault;
+            this.labelOffset = -1;
+        }
+    }
+
+    private static class FloatCaseInfo {
+        Float caseValue;
+        boolean isDefault;
+        int labelOffset;
+        List<ISwc4jAstStmt> statements;
+
+        FloatCaseInfo(Float caseValue, List<ISwc4jAstStmt> statements, boolean isDefault) {
+            this.caseValue = caseValue;
+            this.statements = statements;
+            this.isDefault = isDefault;
+            this.labelOffset = -1;
+        }
+    }
+
+    private static class DoubleCaseInfo {
+        Double caseValue;
+        boolean isDefault;
+        int labelOffset;
+        List<ISwc4jAstStmt> statements;
+
+        DoubleCaseInfo(Double caseValue, List<ISwc4jAstStmt> statements, boolean isDefault) {
+            this.caseValue = caseValue;
+            this.statements = statements;
+            this.isDefault = isDefault;
+            this.labelOffset = -1;
         }
     }
 

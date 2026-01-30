@@ -142,13 +142,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Map to Java Streams or loop expansion, connect to lambda/arrow compilation.
 - Tests: Each method with arrow callbacks and side effects.
 
-## Feature: Switch Statement Limitations
-- Evidence: `docs/plans/ast/stmt/switch-stmt.md`.
-- Status: Labeled break to switch unsupported; long/boolean/float/double switch unsupported.
-- Confidence: 55%.
-- Plan: Add labeled switch targets and extend switch lowering for additional primitive types.
-- Tests: Labeled breaks, long/boolean/float/double switch cases.
-
 ## Feature: Try/Catch Multi-Type Guard Lowering
 - Evidence: `docs/plans/ast/stmt/try-stmt.md`.
 - Status: Multiple catch-type branching not implemented.

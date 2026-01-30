@@ -79,6 +79,9 @@ public final class LabeledStatementGenerator extends BaseAstProcessor<Swc4jAstLa
         } else if (body instanceof Swc4jAstDoWhileStmt doWhileStmt) {
             // Generate labeled do-while loop
             compiler.getDoWhileStatementGenerator().generate(code, cp, doWhileStmt, labelName, returnTypeInfo);
+        } else if (body instanceof Swc4jAstSwitchStmt switchStmt) {
+            // Generate labeled switch statement
+            compiler.getSwitchStatementGenerator().generate(code, cp, switchStmt, labelName, returnTypeInfo);
         } else {
             // For other statement types, just generate the body
             // (labels on non-loop statements are allowed but don't affect code generation)

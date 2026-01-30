@@ -37,10 +37,13 @@ Integer switches use optimal tableswitch/lookupswitch selection based on case de
 1. ✅ **int** - Direct tableswitch/lookupswitch (FULLY IMPLEMENTED - 59/59 tests)
 2. ✅ **String** - JDK 2-phase approach: hashCode() switch + position switch (FULLY IMPLEMENTED - 10/10 tests)
 3. ✅ **byte, short, char** - Promoted to int (FULLY IMPLEMENTED - 10/10 tests)
-4. ✅ **Integer, Byte, Short, Character** - Unboxed then promoted to int (FULLY IMPLEMENTED - 9/9 tests)
-5. ✅ **enum** - Uses ordinal() values (FULLY IMPLEMENTED - supports enum member expression case labels)
+4. ✅ **boolean** - Mapped to int (0/1) for switch lowering
+5. ✅ **long, float, double** - Lowered to comparison chains with per-case jumps
+6. ✅ **Integer, Byte, Short, Character, Boolean** - Unboxed then lowered
+7. ✅ **Long, Float, Double** - Unboxed then lowered
+8. ✅ **enum** - Uses ordinal() values (FULLY IMPLEMENTED - supports enum member expression case labels)
 
-**Unsupported types:** long, float, double, boolean, Object, or any other reference types
+**Unsupported types:** Object or any other reference types
 
 **Syntax:**
 ```typescript
@@ -155,10 +158,10 @@ All tests are parameterized with `JdkVersion.class` to ensure compatibility acro
 ### What's Not Yet Implemented
 
 **Limitations:**
-- 🔴 **Labeled break from switch** - Not supported. Unlabeled break works, but labeled break targeting the switch itself (e.g., `break mySwitch;`) is not implemented.
+- None for switch statement handling.
 
 **Not Yet Tested:**
-- 🔴 Complex edge cases (very large switches, integer overflow, etc.)
+- Complex edge cases (very large switches, integer overflow, etc.)
 
 ---
 
