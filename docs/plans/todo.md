@@ -128,13 +128,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Define JS-compatible semantics for holes and bounds, implement auto-expand for ArrayList mode, add large-array init path.
 - Tests: Sparse arrays, out-of-bounds reads/writes, `arr.length` grow/shrink/clear.
 
-## Feature: Array APIs Missing (keys/values/entries, Array.isArray/from/of)
-- Evidence: `docs/plans/ast/expr/lit/array-lit.md`.
-- Status: Not implemented.
-- Confidence: 70%.
-- Plan: Add helper utilities and dispatch support for these APIs in ArrayList mode.
-- Tests: Iterators, factory methods, and type checks.
-
 ## Feature: Try/Catch Multi-Type Guard Lowering
 - Evidence: `docs/plans/ast/stmt/try-stmt.md`.
 - Status: Multiple catch-type branching not implemented.

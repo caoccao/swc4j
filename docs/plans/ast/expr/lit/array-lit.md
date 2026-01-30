@@ -357,17 +357,17 @@ private static String getCauseMessage(Swc4jByteCodeCompilerException exception) 
 
 | JavaScript Method | Java Equivalent | Notes | Status |
 |------------------|----------------|-------|---------|
-| `keys()` | `IntStream.range(0, size())` | Index iterator | ❌ Not implemented |
-| `values()` | `iterator()` | Value iterator | ❌ Not implemented |
-| `entries()` | Custom iterator | [index, value] pairs | ❌ Not implemented |
+| `keys()` | `ArrayListApiUtils.keys()` | Index list | ✅ Implemented |
+| `values()` | `ArrayListApiUtils.values()` | Value list | ✅ Implemented |
+| `entries()` | `ArrayListApiUtils.entries()` | [index, value] pairs | ✅ Implemented |
 
 ### Static Methods
 
 | JavaScript Method | Java Equivalent | Notes | Status |
 |------------------|----------------|-------|---------|
-| `Array.isArray(obj)` | `obj instanceof ArrayList` | Type check | ❌ Not implemented |
-| `Array.from(iterable)` | Various conversions | Create from iterable | ❌ Not implemented |
-| `Array.of(...elems)` | `Arrays.asList()` | Create from elements | ❌ Not implemented |
+| `Array.isArray(obj)` | `ArrayStaticApiUtils.isArray()` | List or Java array | ✅ Implemented |
+| `Array.from(iterable)` | `ArrayStaticApiUtils.from()` | Create from iterable/array/map/string | ✅ Implemented |
+| `Array.of(...elems)` | ArrayList builder | Create from elements | ✅ Implemented |
 
 ---
 

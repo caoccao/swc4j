@@ -50,7 +50,7 @@ public class TestSwc4jAstObjectLit extends BaseTestSuiteSwc4jAst {
         assertThat(ident.getSym()).isEqualTo("a");
         Swc4jAstObjectLit objectLit = assertAst(
                 assignExpr, assignExpr.getRight().as(Swc4jAstObjectLit.class), Swc4jAstType.ObjectLit, 2, 4);
-        assertThat(objectLit.getProps().isEmpty()).isTrue();
+        assertThat(objectLit.getProps()).isEmpty();
         assertSpan(code, script);
     }
 

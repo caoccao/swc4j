@@ -90,8 +90,8 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         return cases;
     }
 
-    private List<LongCaseInfo> analyzeLongCases(Swc4jAstSwitchStmt switchStmt) throws Swc4jByteCodeCompilerException {
-        List<LongCaseInfo> cases = new ArrayList<>();
+    private List<DoubleCaseInfo> analyzeDoubleCases(Swc4jAstSwitchStmt switchStmt) throws Swc4jByteCodeCompilerException {
+        List<DoubleCaseInfo> cases = new ArrayList<>();
         Set<Long> seenValues = new HashSet<>();
         boolean hasDefault = false;
 
@@ -101,19 +101,24 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                     throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate default case in switch statement");
                 }
                 hasDefault = true;
-                cases.add(new LongCaseInfo(null, switchCase.getCons(), true));
+                cases.add(new DoubleCaseInfo(null, switchCase.getCons(), true));
             } else {
                 ISwc4jAstExpr testExpr = switchCase.getTest().get();
-                Long caseValue = extractConstantLongValue(testExpr);
+                Double caseValue = extractConstantDoubleValue(testExpr);
                 if (caseValue == null) {
                     throw new Swc4jByteCodeCompilerException(testExpr,
-                            "Switch case value must be a constant long: " + testExpr.getClass().getSimpleName());
+                            "Switch case value must be a constant double: " + testExpr.getClass().getSimpleName());
                 }
-                if (seenValues.contains(caseValue)) {
+                double normalized = caseValue == 0.0d ? 0.0d : caseValue;
+                if (Double.isNaN(normalized)) {
+                    normalized = Double.NaN;
+                }
+                long key = Double.doubleToLongBits(normalized);
+                if (seenValues.contains(key)) {
                     throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate case value: " + caseValue);
                 }
-                seenValues.add(caseValue);
-                cases.add(new LongCaseInfo(caseValue, switchCase.getCons(), false));
+                seenValues.add(key);
+                cases.add(new DoubleCaseInfo(caseValue, switchCase.getCons(), false));
             }
         }
 
@@ -155,8 +160,8 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         return cases;
     }
 
-    private List<DoubleCaseInfo> analyzeDoubleCases(Swc4jAstSwitchStmt switchStmt) throws Swc4jByteCodeCompilerException {
-        List<DoubleCaseInfo> cases = new ArrayList<>();
+    private List<LongCaseInfo> analyzeLongCases(Swc4jAstSwitchStmt switchStmt) throws Swc4jByteCodeCompilerException {
+        List<LongCaseInfo> cases = new ArrayList<>();
         Set<Long> seenValues = new HashSet<>();
         boolean hasDefault = false;
 
@@ -166,24 +171,19 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                     throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate default case in switch statement");
                 }
                 hasDefault = true;
-                cases.add(new DoubleCaseInfo(null, switchCase.getCons(), true));
+                cases.add(new LongCaseInfo(null, switchCase.getCons(), true));
             } else {
                 ISwc4jAstExpr testExpr = switchCase.getTest().get();
-                Double caseValue = extractConstantDoubleValue(testExpr);
+                Long caseValue = extractConstantLongValue(testExpr);
                 if (caseValue == null) {
                     throw new Swc4jByteCodeCompilerException(testExpr,
-                            "Switch case value must be a constant double: " + testExpr.getClass().getSimpleName());
+                            "Switch case value must be a constant long: " + testExpr.getClass().getSimpleName());
                 }
-                double normalized = caseValue == 0.0d ? 0.0d : caseValue;
-                if (Double.isNaN(normalized)) {
-                    normalized = Double.NaN;
-                }
-                long key = Double.doubleToLongBits(normalized);
-                if (seenValues.contains(key)) {
+                if (seenValues.contains(caseValue)) {
                     throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate case value: " + caseValue);
                 }
-                seenValues.add(key);
-                cases.add(new DoubleCaseInfo(caseValue, switchCase.getCons(), false));
+                seenValues.add(caseValue);
+                cases.add(new LongCaseInfo(caseValue, switchCase.getCons(), false));
             }
         }
 
@@ -343,6 +343,63 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         return 1 + padding + 12 + (numEntries * 4);
     }
 
+    private void emitDoubleConstant(CodeBuilder code, ClassWriter.ConstantPool cp, double value) {
+        int constantIndex = cp.addDouble(value);
+        code.ldc2_w(constantIndex);
+    }
+
+    private void emitFloatConstant(CodeBuilder code, ClassWriter.ConstantPool cp, float value) {
+        int constantIndex = cp.addFloat(value);
+        code.ldc(constantIndex);
+    }
+
+    private void emitLongConstant(CodeBuilder code, ClassWriter.ConstantPool cp, long value) {
+        if (value == 0L || value == 1L) {
+            code.lconst(value);
+        } else {
+            int constantIndex = cp.addLong(value);
+            code.ldc2_w(constantIndex);
+        }
+    }
+
+    private Double extractConstantDoubleValue(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
+            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Minus) {
+                Double value = extractConstantDoubleValue(unaryExpr.getArg());
+                return value != null ? -value : null;
+            }
+            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Plus) {
+                return extractConstantDoubleValue(unaryExpr.getArg());
+            }
+            return null;
+        }
+
+        if (expr instanceof Swc4jAstNumber number) {
+            return number.getValue();
+        }
+
+        return null;
+    }
+
+    private Float extractConstantFloatValue(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
+            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Minus) {
+                Float value = extractConstantFloatValue(unaryExpr.getArg());
+                return value != null ? -value : null;
+            }
+            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Plus) {
+                return extractConstantFloatValue(unaryExpr.getArg());
+            }
+            return null;
+        }
+
+        if (expr instanceof Swc4jAstNumber number) {
+            return (float) number.getValue();
+        }
+
+        return null;
+    }
+
     /**
      * Extract constant integer value from expression.
      * Returns null if not a constant integer.
@@ -424,44 +481,6 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             } catch (NumberFormatException ignored) {
             }
             return (long) number.getValue();
-        }
-
-        return null;
-    }
-
-    private Float extractConstantFloatValue(ISwc4jAstExpr expr) {
-        if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
-            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Minus) {
-                Float value = extractConstantFloatValue(unaryExpr.getArg());
-                return value != null ? -value : null;
-            }
-            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Plus) {
-                return extractConstantFloatValue(unaryExpr.getArg());
-            }
-            return null;
-        }
-
-        if (expr instanceof Swc4jAstNumber number) {
-            return (float) number.getValue();
-        }
-
-        return null;
-    }
-
-    private Double extractConstantDoubleValue(ISwc4jAstExpr expr) {
-        if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
-            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Minus) {
-                Double value = extractConstantDoubleValue(unaryExpr.getArg());
-                return value != null ? -value : null;
-            }
-            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Plus) {
-                return extractConstantDoubleValue(unaryExpr.getArg());
-            }
-            return null;
-        }
-
-        if (expr instanceof Swc4jAstNumber number) {
-            return number.getValue();
         }
 
         return null;
@@ -604,6 +623,36 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         generateIntegerSwitch(code, cp, switchStmt, labelName, returnTypeInfo);
     }
 
+    private void generateBoxedDoubleSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String className,
+            String unboxMethod,
+            String methodDescriptor,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
+        code.invokevirtual(unboxRef);
+        generateDoubleSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+    }
+
+    private void generateBoxedFloatSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String className,
+            String unboxMethod,
+            String methodDescriptor,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
+        code.invokevirtual(unboxRef);
+        generateFloatSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+    }
+
     /**
      * Generate bytecode for a boxed type switch.
      * Unboxes the value using the appropriate *Value() method, then uses integer switch.
@@ -645,80 +694,6 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         generateLongSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
     }
 
-    private void generateBoxedFloatSwitch(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstSwitchStmt switchStmt,
-            String className,
-            String unboxMethod,
-            String methodDescriptor,
-            String labelName,
-            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
-        int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
-        code.invokevirtual(unboxRef);
-        generateFloatSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
-    }
-
-    private void generateBoxedDoubleSwitch(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstSwitchStmt switchStmt,
-            String className,
-            String unboxMethod,
-            String methodDescriptor,
-            String labelName,
-            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
-        int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
-        code.invokevirtual(unboxRef);
-        generateDoubleSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
-    }
-
-    /**
-     * Generate bytecode for an enum switch.
-     * Calls ordinal() on the enum value, then uses integer switch.
-     */
-    private void generateEnumSwitch(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstSwitchStmt switchStmt,
-            String enumType,
-            String labelName,
-            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-
-        // Generate discriminant expression
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
-
-        // Call ordinal() method to get int value
-        // ordinal() is defined in java.lang.Enum and returns int
-        int ordinalRef = cp.addMethodRef("java/lang/Enum", "ordinal", "()I");
-        code.invokevirtual(ordinalRef);
-
-        // Now use integer switch with the ordinal value on stack
-        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
-    }
-
-    private void generateLongSwitch(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstSwitchStmt switchStmt,
-            String labelName,
-            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
-        generateLongSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
-    }
-
-    private void generateFloatSwitch(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstSwitchStmt switchStmt,
-            String labelName,
-            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
-        generateFloatSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
-    }
-
     private void generateDoubleSwitch(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
@@ -727,164 +702,6 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
         generateDoubleSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
-    }
-
-    private void generateLongSwitchWithDiscriminantOnStack(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstSwitchStmt switchStmt,
-            String labelName,
-            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        CompilationContext context = compiler.getMemory().getCompilationContext();
-
-        List<LongCaseInfo> cases = analyzeLongCases(switchStmt);
-        if (cases.isEmpty()) {
-            code.pop2();
-            return;
-        }
-
-        int tempIndex = context.getLocalVariableTable().allocateVariable(
-                "$switch$long$" + context.getNextTempId(), "J");
-        code.lstore(tempIndex);
-
-        List<CaseJumpInfo<LongCaseInfo>> caseJumps = new ArrayList<>();
-        for (LongCaseInfo caseInfo : cases) {
-            if (caseInfo.isDefault) {
-                continue;
-            }
-            code.lload(tempIndex);
-            emitLongConstant(code, cp, caseInfo.caseValue);
-            code.lcmp();
-
-            code.ifne(0);
-            int ifneOffsetPos = code.getCurrentOffset() - 2;
-            int ifneOpcodePos = code.getCurrentOffset() - 3;
-
-            code.goto_w(0);
-            int gotoOffsetPos = code.getCurrentOffset() - 4;
-            int gotoOpcodePos = code.getCurrentOffset() - 5;
-            caseJumps.add(new CaseJumpInfo<>(caseInfo, gotoOffsetPos, gotoOpcodePos));
-
-            int afterStub = code.getCurrentOffset();
-            code.patchShort(ifneOffsetPos, afterStub - ifneOpcodePos);
-        }
-
-        code.goto_w(0);
-        int defaultGotoOffsetPos = code.getCurrentOffset() - 4;
-        int defaultGotoOpcodePos = code.getCurrentOffset() - 5;
-
-        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
-        context.pushBreakLabel(breakLabel);
-
-        for (LongCaseInfo caseInfo : cases) {
-            caseInfo.labelOffset = code.getCurrentOffset();
-            for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
-            }
-        }
-
-        int endLabel = code.getCurrentOffset();
-
-        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
-
-        context.popBreakLabel();
-
-        int defaultOffset = endLabel;
-        for (LongCaseInfo caseInfo : cases) {
-            if (caseInfo.isDefault) {
-                defaultOffset = caseInfo.labelOffset;
-                break;
-            }
-        }
-
-        for (CaseJumpInfo<LongCaseInfo> jumpInfo : caseJumps) {
-            int offset = jumpInfo.caseInfo.labelOffset - jumpInfo.gotoOpcodePos;
-            code.patchInt(jumpInfo.gotoOffsetPos, offset);
-        }
-
-        code.patchInt(defaultGotoOffsetPos, defaultOffset - defaultGotoOpcodePos);
-    }
-
-    private void generateFloatSwitchWithDiscriminantOnStack(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstSwitchStmt switchStmt,
-            String labelName,
-            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        CompilationContext context = compiler.getMemory().getCompilationContext();
-
-        List<FloatCaseInfo> cases = analyzeFloatCases(switchStmt);
-        if (cases.isEmpty()) {
-            code.pop();
-            return;
-        }
-
-        int tempIndex = context.getLocalVariableTable().allocateVariable(
-                "$switch$float$" + context.getNextTempId(), "F");
-        code.fstore(tempIndex);
-
-        List<CaseJumpInfo<FloatCaseInfo>> caseJumps = new ArrayList<>();
-        for (FloatCaseInfo caseInfo : cases) {
-            if (caseInfo.isDefault) {
-                continue;
-            }
-            code.fload(tempIndex);
-            emitFloatConstant(code, cp, caseInfo.caseValue);
-            code.fcmpl();
-
-            code.ifne(0);
-            int ifneOffsetPos = code.getCurrentOffset() - 2;
-            int ifneOpcodePos = code.getCurrentOffset() - 3;
-
-            code.goto_w(0);
-            int gotoOffsetPos = code.getCurrentOffset() - 4;
-            int gotoOpcodePos = code.getCurrentOffset() - 5;
-            caseJumps.add(new CaseJumpInfo<>(caseInfo, gotoOffsetPos, gotoOpcodePos));
-
-            int afterStub = code.getCurrentOffset();
-            code.patchShort(ifneOffsetPos, afterStub - ifneOpcodePos);
-        }
-
-        code.goto_w(0);
-        int defaultGotoOffsetPos = code.getCurrentOffset() - 4;
-        int defaultGotoOpcodePos = code.getCurrentOffset() - 5;
-
-        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
-        context.pushBreakLabel(breakLabel);
-
-        for (FloatCaseInfo caseInfo : cases) {
-            caseInfo.labelOffset = code.getCurrentOffset();
-            for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
-            }
-        }
-
-        int endLabel = code.getCurrentOffset();
-
-        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
-
-        context.popBreakLabel();
-
-        int defaultOffset = endLabel;
-        for (FloatCaseInfo caseInfo : cases) {
-            if (caseInfo.isDefault) {
-                defaultOffset = caseInfo.labelOffset;
-                break;
-            }
-        }
-
-        for (CaseJumpInfo<FloatCaseInfo> jumpInfo : caseJumps) {
-            int offset = jumpInfo.caseInfo.labelOffset - jumpInfo.gotoOpcodePos;
-            code.patchInt(jumpInfo.gotoOffsetPos, offset);
-        }
-
-        code.patchInt(defaultGotoOffsetPos, defaultOffset - defaultGotoOpcodePos);
     }
 
     private void generateDoubleSwitchWithDiscriminantOnStack(
@@ -959,6 +776,119 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         }
 
         for (CaseJumpInfo<DoubleCaseInfo> jumpInfo : caseJumps) {
+            int offset = jumpInfo.caseInfo.labelOffset - jumpInfo.gotoOpcodePos;
+            code.patchInt(jumpInfo.gotoOffsetPos, offset);
+        }
+
+        code.patchInt(defaultGotoOffsetPos, defaultOffset - defaultGotoOpcodePos);
+    }
+
+    /**
+     * Generate bytecode for an enum switch.
+     * Calls ordinal() on the enum value, then uses integer switch.
+     */
+    private void generateEnumSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String enumType,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+
+        // Generate discriminant expression
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+
+        // Call ordinal() method to get int value
+        // ordinal() is defined in java.lang.Enum and returns int
+        int ordinalRef = cp.addMethodRef("java/lang/Enum", "ordinal", "()I");
+        code.invokevirtual(ordinalRef);
+
+        // Now use integer switch with the ordinal value on stack
+        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+    }
+
+    private void generateFloatSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        generateFloatSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+    }
+
+    private void generateFloatSwitchWithDiscriminantOnStack(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        List<FloatCaseInfo> cases = analyzeFloatCases(switchStmt);
+        if (cases.isEmpty()) {
+            code.pop();
+            return;
+        }
+
+        int tempIndex = context.getLocalVariableTable().allocateVariable(
+                "$switch$float$" + context.getNextTempId(), "F");
+        code.fstore(tempIndex);
+
+        List<CaseJumpInfo<FloatCaseInfo>> caseJumps = new ArrayList<>();
+        for (FloatCaseInfo caseInfo : cases) {
+            if (caseInfo.isDefault) {
+                continue;
+            }
+            code.fload(tempIndex);
+            emitFloatConstant(code, cp, caseInfo.caseValue);
+            code.fcmpl();
+
+            code.ifne(0);
+            int ifneOffsetPos = code.getCurrentOffset() - 2;
+            int ifneOpcodePos = code.getCurrentOffset() - 3;
+
+            code.goto_w(0);
+            int gotoOffsetPos = code.getCurrentOffset() - 4;
+            int gotoOpcodePos = code.getCurrentOffset() - 5;
+            caseJumps.add(new CaseJumpInfo<>(caseInfo, gotoOffsetPos, gotoOpcodePos));
+
+            int afterStub = code.getCurrentOffset();
+            code.patchShort(ifneOffsetPos, afterStub - ifneOpcodePos);
+        }
+
+        code.goto_w(0);
+        int defaultGotoOffsetPos = code.getCurrentOffset() - 4;
+        int defaultGotoOpcodePos = code.getCurrentOffset() - 5;
+
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
+        context.pushBreakLabel(breakLabel);
+
+        for (FloatCaseInfo caseInfo : cases) {
+            caseInfo.labelOffset = code.getCurrentOffset();
+            for (ISwc4jAstStmt stmt : caseInfo.statements) {
+                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+            }
+        }
+
+        int endLabel = code.getCurrentOffset();
+
+        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchInt(patchInfo.offsetPos(), offset);
+        }
+
+        context.popBreakLabel();
+
+        int defaultOffset = endLabel;
+        for (FloatCaseInfo caseInfo : cases) {
+            if (caseInfo.isDefault) {
+                defaultOffset = caseInfo.labelOffset;
+                break;
+            }
+        }
+
+        for (CaseJumpInfo<FloatCaseInfo> jumpInfo : caseJumps) {
             int offset = jumpInfo.caseInfo.labelOffset - jumpInfo.gotoOpcodePos;
             code.patchInt(jumpInfo.gotoOffsetPos, offset);
         }
@@ -1140,6 +1070,95 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         }
 
         context.popBreakLabel();
+    }
+
+    private void generateLongSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        generateLongSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+    }
+
+    private void generateLongSwitchWithDiscriminantOnStack(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        List<LongCaseInfo> cases = analyzeLongCases(switchStmt);
+        if (cases.isEmpty()) {
+            code.pop2();
+            return;
+        }
+
+        int tempIndex = context.getLocalVariableTable().allocateVariable(
+                "$switch$long$" + context.getNextTempId(), "J");
+        code.lstore(tempIndex);
+
+        List<CaseJumpInfo<LongCaseInfo>> caseJumps = new ArrayList<>();
+        for (LongCaseInfo caseInfo : cases) {
+            if (caseInfo.isDefault) {
+                continue;
+            }
+            code.lload(tempIndex);
+            emitLongConstant(code, cp, caseInfo.caseValue);
+            code.lcmp();
+
+            code.ifne(0);
+            int ifneOffsetPos = code.getCurrentOffset() - 2;
+            int ifneOpcodePos = code.getCurrentOffset() - 3;
+
+            code.goto_w(0);
+            int gotoOffsetPos = code.getCurrentOffset() - 4;
+            int gotoOpcodePos = code.getCurrentOffset() - 5;
+            caseJumps.add(new CaseJumpInfo<>(caseInfo, gotoOffsetPos, gotoOpcodePos));
+
+            int afterStub = code.getCurrentOffset();
+            code.patchShort(ifneOffsetPos, afterStub - ifneOpcodePos);
+        }
+
+        code.goto_w(0);
+        int defaultGotoOffsetPos = code.getCurrentOffset() - 4;
+        int defaultGotoOpcodePos = code.getCurrentOffset() - 5;
+
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
+        context.pushBreakLabel(breakLabel);
+
+        for (LongCaseInfo caseInfo : cases) {
+            caseInfo.labelOffset = code.getCurrentOffset();
+            for (ISwc4jAstStmt stmt : caseInfo.statements) {
+                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+            }
+        }
+
+        int endLabel = code.getCurrentOffset();
+
+        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchInt(patchInfo.offsetPos(), offset);
+        }
+
+        context.popBreakLabel();
+
+        int defaultOffset = endLabel;
+        for (LongCaseInfo caseInfo : cases) {
+            if (caseInfo.isDefault) {
+                defaultOffset = caseInfo.labelOffset;
+                break;
+            }
+        }
+
+        for (CaseJumpInfo<LongCaseInfo> jumpInfo : caseJumps) {
+            int offset = jumpInfo.caseInfo.labelOffset - jumpInfo.gotoOpcodePos;
+            code.patchInt(jumpInfo.gotoOffsetPos, offset);
+        }
+
+        code.patchInt(defaultGotoOffsetPos, defaultOffset - defaultGotoOpcodePos);
     }
 
     /**
@@ -1660,25 +1679,6 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         bytes.add((byte) (value & 0xFF));
     }
 
-    private void emitLongConstant(CodeBuilder code, ClassWriter.ConstantPool cp, long value) {
-        if (value == 0L || value == 1L) {
-            code.lconst(value);
-        } else {
-            int constantIndex = cp.addLong(value);
-            code.ldc2_w(constantIndex);
-        }
-    }
-
-    private void emitFloatConstant(CodeBuilder code, ClassWriter.ConstantPool cp, float value) {
-        int constantIndex = cp.addFloat(value);
-        code.ldc(constantIndex);
-    }
-
-    private void emitDoubleConstant(CodeBuilder code, ClassWriter.ConstantPool cp, double value) {
-        int constantIndex = cp.addDouble(value);
-        code.ldc2_w(constantIndex);
-    }
-
     /**
      * Case information for integer switch generation.
      */
@@ -1696,42 +1696,16 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         }
     }
 
-    /**
-     * Information about a string case.
-     */
-    private static class StringCaseInfo {
-        int bodyOffset;          // offset of the case body
-        String caseValue;        // null for default case
-        int gotoPosition;        // position of the conditional jump instruction
-        List<ISwc4jAstStmt> statements;
-
-        StringCaseInfo(String caseValue, List<ISwc4jAstStmt> statements) {
-            this.caseValue = caseValue;
-            this.statements = statements;
-            this.gotoPosition = -1;
-            this.bodyOffset = -1;
-        }
+    private record CaseJumpInfo<T>(T caseInfo, int gotoOffsetPos, int gotoOpcodePos) {
     }
 
-    private static class CaseJumpInfo<T> {
-        final T caseInfo;
-        final int gotoOffsetPos;
-        final int gotoOpcodePos;
-
-        CaseJumpInfo(T caseInfo, int gotoOffsetPos, int gotoOpcodePos) {
-            this.caseInfo = caseInfo;
-            this.gotoOffsetPos = gotoOffsetPos;
-            this.gotoOpcodePos = gotoOpcodePos;
-        }
-    }
-
-    private static class LongCaseInfo {
-        Long caseValue;
+    private static class DoubleCaseInfo {
+        Double caseValue;
         boolean isDefault;
         int labelOffset;
         List<ISwc4jAstStmt> statements;
 
-        LongCaseInfo(Long caseValue, List<ISwc4jAstStmt> statements, boolean isDefault) {
+        DoubleCaseInfo(Double caseValue, List<ISwc4jAstStmt> statements, boolean isDefault) {
             this.caseValue = caseValue;
             this.statements = statements;
             this.isDefault = isDefault;
@@ -1753,17 +1727,34 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         }
     }
 
-    private static class DoubleCaseInfo {
-        Double caseValue;
+    private static class LongCaseInfo {
+        Long caseValue;
         boolean isDefault;
         int labelOffset;
         List<ISwc4jAstStmt> statements;
 
-        DoubleCaseInfo(Double caseValue, List<ISwc4jAstStmt> statements, boolean isDefault) {
+        LongCaseInfo(Long caseValue, List<ISwc4jAstStmt> statements, boolean isDefault) {
             this.caseValue = caseValue;
             this.statements = statements;
             this.isDefault = isDefault;
             this.labelOffset = -1;
+        }
+    }
+
+    /**
+     * Information about a string case.
+     */
+    private static class StringCaseInfo {
+        int bodyOffset;          // offset of the case body
+        String caseValue;        // null for default case
+        int gotoPosition;        // position of the conditional jump instruction
+        List<ISwc4jAstStmt> statements;
+
+        StringCaseInfo(String caseValue, List<ISwc4jAstStmt> statements) {
+            this.caseValue = caseValue;
+            this.statements = statements;
+            this.gotoPosition = -1;
+            this.bodyOffset = -1;
         }
     }
 

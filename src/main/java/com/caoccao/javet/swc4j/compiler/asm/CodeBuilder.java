@@ -489,16 +489,16 @@ public class CodeBuilder {
         return this;
     }
 
-    public CodeBuilder goto_w(int offset) {
-        code.add((byte) (0xC8)); // goto_w
-        writeInt(offset);
-        return this;
-    }
-
     public CodeBuilder goto_(int targetOffset) {
         int gotoOffset = getOffset(); // save offset before adding opcode
         code.add((byte) (0xA7)); // goto
         writeShort(targetOffset - gotoOffset); // calculate offset from goto opcode position
+        return this;
+    }
+
+    public CodeBuilder goto_w(int offset) {
+        code.add((byte) (0xC8)); // goto_w
+        writeInt(offset);
         return this;
     }
 

@@ -46,30 +46,6 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
         super(compiler);
     }
 
-    private boolean isWrapperType(String type) {
-        if (type == null) {
-            return false;
-        }
-        String primitive = TypeConversionUtils.getPrimitiveType(type);
-        return !type.equals(primitive) && TypeConversionUtils.isPrimitiveType(primitive);
-    }
-
-    private void generateStringValueOf(CodeBuilder code, ClassWriter.ConstantPool cp, String valueType) {
-        String descriptor = switch (valueType) {
-            case "I" -> "(I)Ljava/lang/String;";
-            case "J" -> "(J)Ljava/lang/String;";
-            case "F" -> "(F)Ljava/lang/String;";
-            case "D" -> "(D)Ljava/lang/String;";
-            case "Z" -> "(Z)Ljava/lang/String;";
-            case "C" -> "(C)Ljava/lang/String;";
-            case "B" -> "(B)Ljava/lang/String;";
-            case "S" -> "(S)Ljava/lang/String;";
-            default -> "(Ljava/lang/Object;)Ljava/lang/String;";
-        };
-        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", descriptor);
-        code.invokestatic(valueOfRef);
-    }
-
     private void coerceAssignmentValue(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
@@ -124,7 +100,6 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 TypeConversionUtils.convertPrimitiveType(code, fromPrimitive, toPrimitive);
             }
             TypeConversionUtils.boxPrimitiveType(code, cp, toPrimitive, targetType);
-            return;
         }
     }
 
@@ -1106,6 +1081,22 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
         code.aload(tempMapSlot);
     }
 
+    private void generateStringValueOf(CodeBuilder code, ClassWriter.ConstantPool cp, String valueType) {
+        String descriptor = switch (valueType) {
+            case "I" -> "(I)Ljava/lang/String;";
+            case "J" -> "(J)Ljava/lang/String;";
+            case "F" -> "(F)Ljava/lang/String;";
+            case "D" -> "(D)Ljava/lang/String;";
+            case "Z" -> "(Z)Ljava/lang/String;";
+            case "C" -> "(C)Ljava/lang/String;";
+            case "B" -> "(B)Ljava/lang/String;";
+            case "S" -> "(S)Ljava/lang/String;";
+            default -> "(Ljava/lang/Object;)Ljava/lang/String;";
+        };
+        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", descriptor);
+        code.invokestatic(valueOfRef);
+    }
+
     /**
      * Get or allocate a temp variable slot.
      */
@@ -1115,5 +1106,13 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
             return existing.index();
         }
         return context.getLocalVariableTable().allocateVariable(name, type);
+    }
+
+    private boolean isWrapperType(String type) {
+        if (type == null) {
+            return false;
+        }
+        String primitive = TypeConversionUtils.getPrimitiveType(type);
+        return !type.equals(primitive) && TypeConversionUtils.isPrimitiveType(primitive);
     }
 }

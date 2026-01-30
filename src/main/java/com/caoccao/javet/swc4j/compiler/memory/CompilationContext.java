@@ -29,9 +29,9 @@ import java.util.*;
  * Holds local variable table, label stacks, and type information.
  */
 public class CompilationContext {
+    private final Map<String, String> arrayElementTypes;
     private final Stack<LoopLabelInfo> breakLabels;
     private final Map<String, CapturedVariable> capturedVariables;
-    private final Map<String, String> arrayElementTypes;
     private final Stack<String> classStack;
     private final Stack<LoopLabelInfo> continueLabels;
     private final Map<String, GenericTypeInfo> genericTypeInfoMap;
@@ -59,6 +59,15 @@ public class CompilationContext {
     }
 
     /**
+     * Get the inferred array element types by variable name.
+     *
+     * @return map of variable name to array element type descriptor
+     */
+    public Map<String, String> getArrayElementTypes() {
+        return arrayElementTypes;
+    }
+
+    /**
      * Get a captured variable by name.
      *
      * @param name the variable name
@@ -75,15 +84,6 @@ public class CompilationContext {
      */
     public Map<String, CapturedVariable> getCapturedVariables() {
         return capturedVariables;
-    }
-
-    /**
-     * Get the inferred array element types by variable name.
-     *
-     * @return map of variable name to array element type descriptor
-     */
-    public Map<String, String> getArrayElementTypes() {
-        return arrayElementTypes;
     }
 
     public LoopLabelInfo getCurrentBreakLabel() {

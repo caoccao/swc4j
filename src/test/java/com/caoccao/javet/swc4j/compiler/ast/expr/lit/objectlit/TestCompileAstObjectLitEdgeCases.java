@@ -576,7 +576,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
         var result = (LinkedHashMap<?, ?>) runner.createInstanceRunner("com.A").invoke("test");
         // Empty map is valid for any Record type
         assertThat(result).isEqualTo(Map.of());
-        assertThat(result.isEmpty()).isTrue();
+        assertThat(result).isEmpty();
     }
 
     @ParameterizedTest

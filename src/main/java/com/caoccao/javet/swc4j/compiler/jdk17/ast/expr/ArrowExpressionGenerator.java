@@ -1321,6 +1321,15 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         return "accept";
     }
 
+    private String getErasedFunctionDescriptor(String interfaceName) {
+        return switch (interfaceName) {
+            case "java/util/function/IntFunction" -> "(I)Ljava/lang/Object;";
+            case "java/util/function/LongFunction" -> "(J)Ljava/lang/Object;";
+            case "java/util/function/DoubleFunction" -> "(D)Ljava/lang/Object;";
+            default -> "(Ljava/lang/Object;)Ljava/lang/Object;";
+        };
+    }
+
     private String getErasedSupplierReturnDescriptor(ReturnTypeInfo returnInfo) {
         // For primitive supplier interfaces, return the primitive descriptor
         // For generic Supplier<T>, return Object due to type erasure
@@ -1330,23 +1339,6 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             case DOUBLE -> "D";
             case BOOLEAN -> "Z";
             default -> "Ljava/lang/Object;";
-        };
-    }
-
-    private boolean isErasedFunctionInterface(String interfaceName) {
-        return interfaceName.equals("java/util/function/Function")
-                || interfaceName.equals("java/util/function/UnaryOperator")
-                || interfaceName.equals("java/util/function/IntFunction")
-                || interfaceName.equals("java/util/function/LongFunction")
-                || interfaceName.equals("java/util/function/DoubleFunction");
-    }
-
-    private String getErasedFunctionDescriptor(String interfaceName) {
-        return switch (interfaceName) {
-            case "java/util/function/IntFunction" -> "(I)Ljava/lang/Object;";
-            case "java/util/function/LongFunction" -> "(J)Ljava/lang/Object;";
-            case "java/util/function/DoubleFunction" -> "(D)Ljava/lang/Object;";
-            default -> "(Ljava/lang/Object;)Ljava/lang/Object;";
         };
     }
 
@@ -1522,6 +1514,14 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
      */
     private List<String> getTargetInterfaceParamTypes(String interfaceDescriptor) {
         return compiler.getMemory().getScopedFunctionalInterfaceRegistry().getParamTypes(interfaceDescriptor);
+    }
+
+    private boolean isErasedFunctionInterface(String interfaceName) {
+        return interfaceName.equals("java/util/function/Function")
+                || interfaceName.equals("java/util/function/UnaryOperator")
+                || interfaceName.equals("java/util/function/IntFunction")
+                || interfaceName.equals("java/util/function/LongFunction")
+                || interfaceName.equals("java/util/function/DoubleFunction");
     }
 
     private void loadVariable(CodeBuilder code, int slot, String type) {

@@ -37,7 +37,7 @@ public class TestSwc4jAstNewExpr extends BaseTestSuiteSwc4jAst {
         Swc4jAstNewExpr newExpr = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstNewExpr.class), Swc4jAstType.NewExpr, 0, 7);
         assertThat(newExpr.getArgs().isPresent()).isTrue();
-        assertThat(newExpr.getArgs().get().isEmpty()).isTrue();
+        assertThat(newExpr.getArgs().get()).isEmpty();
         assertThat(newExpr.getTypeArgs().isPresent()).isFalse();
         Swc4jAstIdent ident = assertAst(
                 newExpr, newExpr.getCallee().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 4, 5);

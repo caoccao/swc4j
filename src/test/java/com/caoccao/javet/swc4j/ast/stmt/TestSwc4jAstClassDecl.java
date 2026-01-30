@@ -44,7 +44,7 @@ public class TestSwc4jAstClassDecl extends BaseTestSuiteSwc4jAst {
         assertThat(classDecl.isDeclare()).isFalse();
         Swc4jAstClass clazz = assertAst(
                 classDecl, classDecl.getClazz(), Swc4jAstType.Class, 12, 22);
-        assertThat(clazz.getBody().isEmpty()).isTrue();
+        assertThat(clazz.getBody()).isEmpty();
         assertThat(clazz.isAbstract()).isFalse();
         assertThat(clazz.getSuperClass().isPresent()).isFalse();
         assertThat(clazz.getSuperTypeParams().isPresent()).isFalse();
@@ -54,7 +54,7 @@ public class TestSwc4jAstClassDecl extends BaseTestSuiteSwc4jAst {
                 clazz, clazz.getDecorators().get(0), Swc4jAstType.Decorator, 0, 4);
         Swc4jAstCallExpr callExpr = assertAst(
                 decorator, decorator.getExpr().as(Swc4jAstCallExpr.class), Swc4jAstType.CallExpr, 1, 4);
-        assertThat(callExpr.getArgs().isEmpty()).isTrue();
+        assertThat(callExpr.getArgs()).isEmpty();
         assertThat(callExpr.getTypeArgs().isPresent()).isFalse();
         Swc4jAstIdent ident = assertAst(
                 callExpr, callExpr.getCallee().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 1, 2);
@@ -74,9 +74,9 @@ public class TestSwc4jAstClassDecl extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstClassDecl.class), Swc4jAstType.ClassDecl, 0, 10);
         Swc4jAstClass clazz = assertAst(
                 classDecl, classDecl.getClazz(), Swc4jAstType.Class, 0, 10);
-        assertThat(clazz.getBody().isEmpty()).isTrue();
-        assertThat(clazz.getDecorators().isEmpty()).isTrue();
-        assertThat(clazz.getImplements().isEmpty()).isTrue();
+        assertThat(clazz.getBody()).isEmpty();
+        assertThat(clazz.getDecorators()).isEmpty();
+        assertThat(clazz.getImplements()).isEmpty();
         Swc4jAstIdent ident = assertAst(
                 classDecl, classDecl.getIdent(), Swc4jAstType.Ident, 6, 7);
         assertThat(ident.getSym()).isEqualTo("A");
@@ -95,7 +95,7 @@ public class TestSwc4jAstClassDecl extends BaseTestSuiteSwc4jAst {
         assertThat(classDecl.isDeclare()).isFalse();
         Swc4jAstClass clazz = assertAst(
                 classDecl, classDecl.getClazz(), Swc4jAstType.Class, 12, 22);
-        assertThat(clazz.getBody().isEmpty()).isTrue();
+        assertThat(clazz.getBody()).isEmpty();
         assertThat(clazz.isAbstract()).isFalse();
         assertThat(clazz.getSuperClass().isPresent()).isFalse();
         assertThat(clazz.getSuperTypeParams().isPresent()).isFalse();
@@ -105,7 +105,7 @@ public class TestSwc4jAstClassDecl extends BaseTestSuiteSwc4jAst {
                 clazz, clazz.getDecorators().get(0), Swc4jAstType.Decorator, 7, 11);
         Swc4jAstCallExpr callExpr = assertAst(
                 decorator, decorator.getExpr().as(Swc4jAstCallExpr.class), Swc4jAstType.CallExpr, 8, 11);
-        assertThat(callExpr.getArgs().isEmpty()).isTrue();
+        assertThat(callExpr.getArgs()).isEmpty();
         assertThat(callExpr.getTypeArgs().isPresent()).isFalse();
         Swc4jAstIdent ident = assertAst(
                 callExpr, callExpr.getCallee().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 8, 9);

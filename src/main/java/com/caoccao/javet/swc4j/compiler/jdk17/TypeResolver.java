@@ -512,42 +512,6 @@ public final class TypeResolver {
     }
 
     /**
-     * Infer the element type of an array literal.
-     *
-     * @param arrayLit array literal
-     * @return element type descriptor, or Object if unknown
-     */
-    public String inferArrayElementType(Swc4jAstArrayLit arrayLit) throws Swc4jByteCodeCompilerException {
-        if (arrayLit == null) {
-            return "Ljava/lang/Object;";
-        }
-        String elementType = null;
-        for (var elemOpt : arrayLit.getElems()) {
-            if (!elemOpt.isPresent()) {
-                continue;
-            }
-            var elem = elemOpt.get();
-            if (elem.getSpread().isPresent()) {
-                return "Ljava/lang/Object;";
-            }
-            ISwc4jAstExpr elemExpr = elem.getExpr();
-            String exprType = inferTypeFromExpr(elemExpr);
-            if (exprType == null) {
-                continue;
-            }
-            if (elementType == null) {
-                elementType = exprType;
-            } else {
-                elementType = findCommonType(elementType, exprType);
-            }
-            if ("Ljava/lang/Object;".equals(elementType)) {
-                return elementType;
-            }
-        }
-        return elementType != null ? elementType : "Ljava/lang/Object;";
-    }
-
-    /**
      * Recursively finds return type in a statement.
      *
      * @param stmt the statement to analyze
@@ -648,6 +612,42 @@ public final class TypeResolver {
      */
     public boolean hasDefaultValue(ISwc4jAstPat pat) {
         return pat instanceof Swc4jAstAssignPat;
+    }
+
+    /**
+     * Infer the element type of an array literal.
+     *
+     * @param arrayLit array literal
+     * @return element type descriptor, or Object if unknown
+     */
+    public String inferArrayElementType(Swc4jAstArrayLit arrayLit) throws Swc4jByteCodeCompilerException {
+        if (arrayLit == null) {
+            return "Ljava/lang/Object;";
+        }
+        String elementType = null;
+        for (var elemOpt : arrayLit.getElems()) {
+            if (!elemOpt.isPresent()) {
+                continue;
+            }
+            var elem = elemOpt.get();
+            if (elem.getSpread().isPresent()) {
+                return "Ljava/lang/Object;";
+            }
+            ISwc4jAstExpr elemExpr = elem.getExpr();
+            String exprType = inferTypeFromExpr(elemExpr);
+            if (exprType == null) {
+                continue;
+            }
+            if (elementType == null) {
+                elementType = exprType;
+            } else {
+                elementType = findCommonType(elementType, exprType);
+            }
+            if ("Ljava/lang/Object;".equals(elementType)) {
+                return elementType;
+            }
+        }
+        return elementType != null ? elementType : "Ljava/lang/Object;";
     }
 
     /**
@@ -1184,6 +1184,19 @@ public final class TypeResolver {
             }
 
             if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
+                if (memberExpr.getObj() instanceof Swc4jAstIdent objIdent
+                        && "Array".equals(objIdent.getSym())
+                        && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String methodName = propIdent.getSym();
+                    switch (methodName) {
+                        case "isArray" -> {
+                            return "Z";
+                        }
+                        case "from", "of" -> {
+                            return "Ljava/util/ArrayList;";
+                        }
+                    }
+                }
                 String objType = inferTypeFromExpr(memberExpr.getObj());
 
                 // Check if the object is a Java class identifier
@@ -1206,7 +1219,8 @@ public final class TypeResolver {
                         // Methods that return ArrayList
                         switch (methodName) {
                             case "concat", "reverse", "sort", "slice", "splice", "fill", "copyWithin", "toReversed",
-                                 "toSorted", "with", "toSpliced", "map", "filter", "flat", "flatMap" -> {
+                                 "toSorted", "with", "toSpliced", "map", "filter", "flat", "flatMap",
+                                 "keys", "values", "entries" -> {
                                 return "Ljava/util/ArrayList;";
                             }
                             case "forEach" -> {

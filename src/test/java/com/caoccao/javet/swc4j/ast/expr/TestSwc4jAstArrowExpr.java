@@ -46,7 +46,7 @@ public class TestSwc4jAstArrowExpr extends BaseTestSuiteSwc4jAst {
         assertThat(arrowExpr.getTypeParams().isPresent()).isFalse();
         Swc4jAstBlockStmt blockStmt = assertAst(
                 arrowExpr, arrowExpr.getBody().as(Swc4jAstBlockStmt.class), Swc4jAstType.BlockStmt, 4, 6);
-        assertThat(blockStmt.getStmts().isEmpty()).isTrue();
+        assertThat(blockStmt.getStmts()).isEmpty();
         assertSpan(code, script);
     }
 

@@ -29,6 +29,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCallExpr> {
     private final CallExpressionForArrayGenerator arrayGenerator;
     private final CallExpressionForArrayListGenerator arrayListGenerator;
+    private final CallExpressionForArrayStaticGenerator arrayStaticGenerator;
     private final CallExpressionForClassGenerator classGenerator;
     private final CallExpressionForFunctionalInterfaceGenerator functionalInterfaceGenerator;
     private final CallExpressionForIIFEGenerator iifeGenerator;
@@ -41,6 +42,7 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
         super(compiler);
         arrayGenerator = new CallExpressionForArrayGenerator(compiler);
         arrayListGenerator = new CallExpressionForArrayListGenerator(compiler);
+        arrayStaticGenerator = new CallExpressionForArrayStaticGenerator(compiler);
         classGenerator = new CallExpressionForClassGenerator(compiler);
         functionalInterfaceGenerator = new CallExpressionForFunctionalInterfaceGenerator(compiler);
         iifeGenerator = new CallExpressionForIIFEGenerator(compiler);
@@ -85,6 +87,11 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
         // Handle direct calls to functional interface variables (e.g., factorial(n - 1))
         if (functionalInterfaceGenerator.isCalleeSupported(callee)) {
             functionalInterfaceGenerator.generate(code, cp, callExpr, returnTypeInfo);
+            return;
+        }
+
+        if (arrayStaticGenerator.isCalleeSupported(callee)) {
+            arrayStaticGenerator.generate(code, cp, callExpr, returnTypeInfo);
             return;
         }
 

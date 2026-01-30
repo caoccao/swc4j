@@ -27,26 +27,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestCompileAstArrayLitFunctionalMethods extends BaseTestCompileSuite {
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testArrayForEachMapFilter(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const arr = [1, 2, 3]
-                      let sum = 0
-                      arr.forEach(x => {
-                        sum = sum + x
-                      })
-                      const mapped = arr.map(x => x * 2)
-                      const filtered = arr.filter(x => x % 2 == 1)
-                      return [sum, mapped, filtered]
-                    }
-                  }
-                }""");
-        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
-                .isEqualTo(List.of(6, List.of(2, 4, 6), List.of(1, 3)));
+    private List<Object> buildExpectedFindList() {
+        List<Object> expected = new ArrayList<>(List.of(3, 0, 1, -1, true, true, false, true));
+        expected.set(1, null);
+        return expected;
     }
 
     @ParameterizedTest
@@ -74,31 +58,6 @@ public class TestCompileAstArrayLitFunctionalMethods extends BaseTestCompileSuit
                 .isEqualTo(buildExpectedFindList());
     }
 
-    private List<Object> buildExpectedFindList() {
-        List<Object> expected = new ArrayList<>(List.of(3, 0, 1, -1, true, true, false, true));
-        expected.set(1, null);
-        return expected;
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testArrayReduceReduceRight(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const arr = [1, 2, 3]
-                      const sum = arr.reduce((acc, x) => acc + x, 0)
-                      const sumNoInit = arr.reduce((acc, x) => acc + x)
-                      const right = arr.reduceRight((acc, x) => acc - x, 0)
-                      return [sum, sumNoInit, right]
-                    }
-                  }
-                }""");
-        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
-                .isEqualTo(List.of(6, 6, -6));
-    }
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFlatFlatMap(JdkVersion jdkVersion) throws Exception {
@@ -119,5 +78,46 @@ public class TestCompileAstArrayLitFunctionalMethods extends BaseTestCompileSuit
                         List.of(1, 2, List.of(3), 4),
                         List.of(1, 2, 3, 4),
                         List.of(1, 11, 2, 12)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayForEachMapFilter(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3]
+                      let sum = 0
+                      arr.forEach(x => {
+                        sum = sum + x
+                      })
+                      const mapped = arr.map(x => x * 2)
+                      const filtered = arr.filter(x => x % 2 == 1)
+                      return [sum, mapped, filtered]
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo(List.of(6, List.of(2, 4, 6), List.of(1, 3)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayReduceReduceRight(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3]
+                      const sum = arr.reduce((acc, x) => acc + x, 0)
+                      const sumNoInit = arr.reduce((acc, x) => acc + x)
+                      const right = arr.reduceRight((acc, x) => acc - x, 0)
+                      return [sum, sumNoInit, right]
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo(List.of(6, 6, -6));
     }
 }

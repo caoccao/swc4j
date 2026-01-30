@@ -75,7 +75,7 @@ public class TestSwc4jAstFunction extends BaseTestSuiteSwc4jAst {
         assertThat(function.getBody().isPresent()).isTrue();
         Swc4jAstBlockStmt blockStmt = assertAst(
                 function, function.getBody().get(), Swc4jAstType.BlockStmt, 13, 15);
-        assertThat(blockStmt.getStmts().isEmpty()).isTrue();
+        assertThat(blockStmt.getStmts()).isEmpty();
         assertSpan(code, script);
     }
 
@@ -100,7 +100,7 @@ public class TestSwc4jAstFunction extends BaseTestSuiteSwc4jAst {
         assertThat(function.getParams().size()).isEqualTo(2);
         Swc4jAstParam param = assertAst(
                 function, function.getParams().get(0).as(Swc4jAstParam.class), Swc4jAstType.Param, 11, 12);
-        assertThat(param.getDecorators().isEmpty()).isTrue();
+        assertThat(param.getDecorators()).isEmpty();
         Swc4jAstBindingIdent bindingIdent = assertAst(
                 param, param.getPat().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 11, 12);
         ident = assertAst(
@@ -108,7 +108,7 @@ public class TestSwc4jAstFunction extends BaseTestSuiteSwc4jAst {
         assertThat(ident.getSym()).isEqualTo("x");
         param = assertAst(
                 function, function.getParams().get(1).as(Swc4jAstParam.class), Swc4jAstType.Param, 14, 15);
-        assertThat(param.getDecorators().isEmpty()).isTrue();
+        assertThat(param.getDecorators()).isEmpty();
         bindingIdent = assertAst(
                 param, param.getPat().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 14, 15);
         ident = assertAst(
@@ -132,7 +132,7 @@ public class TestSwc4jAstFunction extends BaseTestSuiteSwc4jAst {
         assertThat(function.getParams().size()).isEqualTo(1);
         param = assertAst(
                 function, function.getParams().get(0).as(Swc4jAstParam.class), Swc4jAstType.Param, 30, 31);
-        assertThat(param.getDecorators().isEmpty()).isTrue();
+        assertThat(param.getDecorators()).isEmpty();
         bindingIdent = assertAst(
                 param, param.getPat().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 30, 31);
         ident = assertAst(

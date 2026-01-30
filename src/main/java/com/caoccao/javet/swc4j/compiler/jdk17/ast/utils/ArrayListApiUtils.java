@@ -19,25 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.DoubleBinaryOperator;
-import java.util.function.DoubleConsumer;
-import java.util.function.DoubleFunction;
-import java.util.function.DoublePredicate;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
-import java.util.function.IntBinaryOperator;
-import java.util.function.IntConsumer;
-import java.util.function.IntFunction;
-import java.util.function.IntPredicate;
-import java.util.function.IntUnaryOperator;
-import java.util.function.LongBinaryOperator;
-import java.util.function.LongConsumer;
-import java.util.function.LongFunction;
-import java.util.function.LongPredicate;
-import java.util.function.LongUnaryOperator;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 /**
  * Utility class for ArrayList operations similar to JavaScript Array methods.
@@ -116,127 +98,193 @@ public final class ArrayListApiUtils {
     }
 
     /**
-     * Execute a callback for each element.
-     * JavaScript equivalent: arr.forEach(callback)
+     * Copy part of ArrayList to another location within the same ArrayList.
+     * JavaScript equivalent: arr.copyWithin(target, start)
      *
-     * @param list     the ArrayList to iterate
-     * @param callback the callback to invoke
+     * @param list   the ArrayList to modify (mutated in place)
+     * @param target the index at which to copy the sequence to (negative values count from end)
+     * @param start  the beginning index to start copying from (negative values count from end)
+     * @return the modified ArrayList (same reference as input)
      */
-    public static void forEach(ArrayList<?> list, Consumer<Object> callback) {
-        if (list == null || callback == null) {
-            return;
-        }
-        for (Object element : list) {
-            callback.accept(element);
-        }
-    }
-
-    public static void forEach(ArrayList<?> list, IntConsumer callback) {
-        if (list == null || callback == null) {
-            return;
-        }
-        for (Object element : list) {
-            callback.accept(toInt(element));
-        }
-    }
-
-    public static void forEach(ArrayList<?> list, LongConsumer callback) {
-        if (list == null || callback == null) {
-            return;
-        }
-        for (Object element : list) {
-            callback.accept(toLong(element));
-        }
-    }
-
-    public static void forEach(ArrayList<?> list, DoubleConsumer callback) {
-        if (list == null || callback == null) {
-            return;
-        }
-        for (Object element : list) {
-            callback.accept(toDouble(element));
-        }
+    public static ArrayList<Object> copyWithin(ArrayList<Object> list, int target, int start) {
+        return copyWithin(list, target, start, list == null ? 0 : list.size());
     }
 
     /**
-     * Map elements to a new array.
-     * JavaScript equivalent: arr.map(callback)
+     * Copy part of ArrayList to another location within the same ArrayList.
+     * JavaScript equivalent: arr.copyWithin(target, start, end)
+     *
+     * @param list   the ArrayList to modify (mutated in place)
+     * @param target the index at which to copy the sequence to (negative values count from end)
+     * @param start  the beginning index to start copying from (negative values count from end)
+     * @param end    the ending index to stop copying from (exclusive, negative values count from end)
+     * @return the modified ArrayList (same reference as input)
      */
-    public static ArrayList<Object> map(ArrayList<?> list, Function<Object, Object> callback) {
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Object> copyWithin(ArrayList<Object> list, int target, int start, int end) {
+        if (list == null || list.isEmpty()) {
+            return list;
+        }
+
+        int length = list.size();
+
+        // Handle negative indices
+        int actualTarget = target < 0 ? Math.max(0, length + target) : Math.min(target, length);
+        int actualStart = start < 0 ? Math.max(0, length + start) : Math.min(start, length);
+        int actualEnd = end < 0 ? Math.max(0, length + end) : Math.min(end, length);
+
+        // Calculate copy length
+        int copyLength = Math.min(actualEnd - actualStart, length - actualTarget);
+
+        if (copyLength <= 0) {
+            return list;
+        }
+
+        // Copy elements to temporary list to avoid overwriting during copy
+        ArrayList<Object> temp = new ArrayList<>();
+        for (int i = 0; i < copyLength; i++) {
+            temp.add(list.get(actualStart + i));
+        }
+
+        // Write elements to target position
+        for (int i = 0; i < copyLength; i++) {
+            list.set(actualTarget + i, temp.get(i));
+        }
+
+        return list;
+    }
+
+    public static ArrayList<Object> entries(ArrayList<?> list) {
         ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
+        if (list == null) {
             return result;
         }
-        for (Object element : list) {
-            result.add(callback.apply(element));
+        for (int i = 0; i < list.size(); i++) {
+            ArrayList<Object> entry = new ArrayList<>(2);
+            entry.add(i);
+            entry.add(list.get(i));
+            result.add(entry);
         }
         return result;
     }
 
-    public static ArrayList<Object> map(ArrayList<?> list, IntFunction<?> callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
+    /**
+     * Determine if every element matches a predicate.
+     * JavaScript equivalent: arr.every(callback)
+     */
+    public static boolean every(ArrayList<?> list, Predicate<Object> callback) {
+        if (callback == null) {
+            return false;
+        }
+        if (list == null || list.isEmpty()) {
+            return true;
         }
         for (Object element : list) {
-            result.add(callback.apply(toInt(element)));
+            if (!callback.test(element)) {
+                return false;
+            }
         }
-        return result;
+        return true;
     }
 
-    public static ArrayList<Object> map(ArrayList<?> list, IntUnaryOperator callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
+    public static boolean every(ArrayList<?> list, IntPredicate callback) {
+        if (callback == null) {
+            return false;
+        }
+        if (list == null || list.isEmpty()) {
+            return true;
         }
         for (Object element : list) {
-            result.add(callback.applyAsInt(toInt(element)));
+            if (!callback.test(toInt(element))) {
+                return false;
+            }
         }
-        return result;
+        return true;
     }
 
-    public static ArrayList<Object> map(ArrayList<?> list, LongFunction<?> callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
+    public static boolean every(ArrayList<?> list, LongPredicate callback) {
+        if (callback == null) {
+            return false;
+        }
+        if (list == null || list.isEmpty()) {
+            return true;
         }
         for (Object element : list) {
-            result.add(callback.apply(toLong(element)));
+            if (!callback.test(toLong(element))) {
+                return false;
+            }
         }
-        return result;
+        return true;
     }
 
-    public static ArrayList<Object> map(ArrayList<?> list, LongUnaryOperator callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
+    public static boolean every(ArrayList<?> list, DoublePredicate callback) {
+        if (callback == null) {
+            return false;
+        }
+        if (list == null || list.isEmpty()) {
+            return true;
         }
         for (Object element : list) {
-            result.add(callback.applyAsLong(toLong(element)));
+            if (!callback.test(toDouble(element))) {
+                return false;
+            }
         }
-        return result;
+        return true;
     }
 
-    public static ArrayList<Object> map(ArrayList<?> list, DoubleFunction<?> callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
+    /**
+     * Fill all or part of an ArrayList with a static value.
+     * JavaScript equivalent: arr.fill(value, start, end)
+     *
+     * @param list  the ArrayList to modify (mutated in place)
+     * @param value the value to fill
+     * @param start the beginning index (inclusive), negative values count from end
+     * @param end   the ending index (exclusive), negative values count from end
+     * @return the modified ArrayList (same reference as input)
+     */
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Object> fill(ArrayList<Object> list, Object value, int start, int end) {
+        if (list == null || list.isEmpty()) {
+            return list;
         }
-        for (Object element : list) {
-            result.add(callback.apply(toDouble(element)));
+
+        int length = list.size();
+
+        // Handle negative indices
+        int actualStart = start < 0 ? Math.max(0, length + start) : Math.min(start, length);
+        int actualEnd = end < 0 ? Math.max(0, length + end) : Math.min(end, length);
+
+        // Fill elements from start to end (exclusive)
+        for (int i = actualStart; i < actualEnd; i++) {
+            list.set(i, value);
         }
-        return result;
+
+        return list;
     }
 
-    public static ArrayList<Object> map(ArrayList<?> list, DoubleUnaryOperator callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
-        }
-        for (Object element : list) {
-            result.add(callback.applyAsDouble(toDouble(element)));
-        }
-        return result;
+    /**
+     * Fill entire ArrayList with a static value.
+     * JavaScript equivalent: arr.fill(value)
+     *
+     * @param list  the ArrayList to modify (mutated in place)
+     * @param value the value to fill
+     * @return the modified ArrayList (same reference as input)
+     */
+    public static ArrayList<Object> fill(ArrayList<Object> list, Object value) {
+        return fill(list, value, 0, list == null ? 0 : list.size());
+    }
+
+    /**
+     * Fill ArrayList from start index to end with a static value.
+     * JavaScript equivalent: arr.fill(value, start)
+     *
+     * @param list  the ArrayList to modify (mutated in place)
+     * @param value the value to fill
+     * @param start the beginning index (inclusive), negative values count from end
+     * @return the modified ArrayList (same reference as input)
+     */
+    public static ArrayList<Object> fill(ArrayList<Object> list, Object value, int start) {
+        return fill(list, value, start, list == null ? 0 : list.size());
     }
 
     /**
@@ -400,119 +448,301 @@ public final class ArrayListApiUtils {
     }
 
     /**
-     * Determine if any element matches a predicate.
-     * JavaScript equivalent: arr.some(callback)
+     * Flatten nested arrays by a given depth.
+     * JavaScript equivalent: arr.flat(depth)
      */
-    public static boolean some(ArrayList<?> list, Predicate<Object> callback) {
-        if (list == null || callback == null) {
-            return false;
+    public static ArrayList<Object> flat(ArrayList<?> list, int depth) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || depth < 0) {
+            return result;
         }
-        for (Object element : list) {
-            if (callback.test(element)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean some(ArrayList<?> list, IntPredicate callback) {
-        if (list == null || callback == null) {
-            return false;
-        }
-        for (Object element : list) {
-            if (callback.test(toInt(element))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean some(ArrayList<?> list, LongPredicate callback) {
-        if (list == null || callback == null) {
-            return false;
-        }
-        for (Object element : list) {
-            if (callback.test(toLong(element))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean some(ArrayList<?> list, DoublePredicate callback) {
-        if (list == null || callback == null) {
-            return false;
-        }
-        for (Object element : list) {
-            if (callback.test(toDouble(element))) {
-                return true;
-            }
-        }
-        return false;
+        flattenInto(list, depth, result);
+        return result;
     }
 
     /**
-     * Determine if every element matches a predicate.
-     * JavaScript equivalent: arr.every(callback)
+     * Flatten nested arrays by one level.
+     * JavaScript equivalent: arr.flat()
      */
-    public static boolean every(ArrayList<?> list, Predicate<Object> callback) {
-        if (callback == null) {
-            return false;
-        }
-        if (list == null || list.isEmpty()) {
-            return true;
-        }
-        for (Object element : list) {
-            if (!callback.test(element)) {
-                return false;
-            }
-        }
-        return true;
+    public static ArrayList<Object> flat(ArrayList<?> list) {
+        return flat(list, 1);
     }
 
-    public static boolean every(ArrayList<?> list, IntPredicate callback) {
-        if (callback == null) {
-            return false;
-        }
-        if (list == null || list.isEmpty()) {
-            return true;
+    /**
+     * Map and flatten one level.
+     * JavaScript equivalent: arr.flatMap(callback)
+     */
+    public static ArrayList<Object> flatMap(ArrayList<?> list, Function<Object, Object> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
         }
         for (Object element : list) {
-            if (!callback.test(toInt(element))) {
-                return false;
+            Object mapped = callback.apply(element);
+            if (mapped instanceof List) {
+                result.addAll((List<?>) mapped);
+            } else {
+                result.add(mapped);
             }
         }
-        return true;
+        return result;
     }
 
-    public static boolean every(ArrayList<?> list, LongPredicate callback) {
-        if (callback == null) {
-            return false;
-        }
-        if (list == null || list.isEmpty()) {
-            return true;
+    public static ArrayList<Object> flatMap(ArrayList<?> list, IntFunction<?> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
         }
         for (Object element : list) {
-            if (!callback.test(toLong(element))) {
-                return false;
+            Object mapped = callback.apply(toInt(element));
+            if (mapped instanceof List) {
+                result.addAll((List<?>) mapped);
+            } else {
+                result.add(mapped);
             }
         }
-        return true;
+        return result;
     }
 
-    public static boolean every(ArrayList<?> list, DoublePredicate callback) {
-        if (callback == null) {
-            return false;
-        }
-        if (list == null || list.isEmpty()) {
-            return true;
+    public static ArrayList<Object> flatMap(ArrayList<?> list, IntUnaryOperator callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
         }
         for (Object element : list) {
-            if (!callback.test(toDouble(element))) {
-                return false;
+            result.add(callback.applyAsInt(toInt(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> flatMap(ArrayList<?> list, LongFunction<?> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            Object mapped = callback.apply(toLong(element));
+            if (mapped instanceof List) {
+                result.addAll((List<?>) mapped);
+            } else {
+                result.add(mapped);
             }
         }
-        return true;
+        return result;
+    }
+
+    public static ArrayList<Object> flatMap(ArrayList<?> list, LongUnaryOperator callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.applyAsLong(toLong(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> flatMap(ArrayList<?> list, DoubleFunction<?> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            Object mapped = callback.apply(toDouble(element));
+            if (mapped instanceof List) {
+                result.addAll((List<?>) mapped);
+            } else {
+                result.add(mapped);
+            }
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> flatMap(ArrayList<?> list, DoubleUnaryOperator callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.applyAsDouble(toDouble(element)));
+        }
+        return result;
+    }
+
+    private static void flattenInto(List<?> source, int depth, List<Object> target) {
+        if (source == null) {
+            return;
+        }
+        for (Object element : source) {
+            if (depth > 0 && element instanceof List) {
+                flattenInto((List<?>) element, depth - 1, target);
+            } else {
+                target.add(element);
+            }
+        }
+    }
+
+    /**
+     * Execute a callback for each element.
+     * JavaScript equivalent: arr.forEach(callback)
+     *
+     * @param list     the ArrayList to iterate
+     * @param callback the callback to invoke
+     */
+    public static void forEach(ArrayList<?> list, Consumer<Object> callback) {
+        if (list == null || callback == null) {
+            return;
+        }
+        for (Object element : list) {
+            callback.accept(element);
+        }
+    }
+
+    public static void forEach(ArrayList<?> list, IntConsumer callback) {
+        if (list == null || callback == null) {
+            return;
+        }
+        for (Object element : list) {
+            callback.accept(toInt(element));
+        }
+    }
+
+    public static void forEach(ArrayList<?> list, LongConsumer callback) {
+        if (list == null || callback == null) {
+            return;
+        }
+        for (Object element : list) {
+            callback.accept(toLong(element));
+        }
+    }
+
+    public static void forEach(ArrayList<?> list, DoubleConsumer callback) {
+        if (list == null || callback == null) {
+            return;
+        }
+        for (Object element : list) {
+            callback.accept(toDouble(element));
+        }
+    }
+
+    /**
+     * Join ArrayList elements into a string with the specified separator.
+     * JavaScript equivalent: arr.join(separator)
+     *
+     * @param list      the ArrayList to join
+     * @param separator the separator string (default is "," if null)
+     * @return the joined string
+     */
+    public static String join(List<?> list, String separator) {
+        if (list == null || list.isEmpty()) {
+            return "";
+        }
+
+        // Use "," as default separator if not provided
+        String sep = (separator != null) ? separator : ",";
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < list.size(); i++) {
+            if (i > 0) {
+                sb.append(sep);
+            }
+            // Convert element to string (null becomes "null" in JavaScript)
+            sb.append(list.get(i));
+        }
+
+        return sb.toString();
+    }
+
+    public static ArrayList<Object> keys(ArrayList<?> list) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null) {
+            return result;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            result.add(i);
+        }
+        return result;
+    }
+
+    /**
+     * Map elements to a new array.
+     * JavaScript equivalent: arr.map(callback)
+     */
+    public static ArrayList<Object> map(ArrayList<?> list, Function<Object, Object> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.apply(element));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> map(ArrayList<?> list, IntFunction<?> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.apply(toInt(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> map(ArrayList<?> list, IntUnaryOperator callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.applyAsInt(toInt(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> map(ArrayList<?> list, LongFunction<?> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.apply(toLong(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> map(ArrayList<?> list, LongUnaryOperator callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.applyAsLong(toLong(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> map(ArrayList<?> list, DoubleFunction<?> callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.apply(toDouble(element)));
+        }
+        return result;
+    }
+
+    public static ArrayList<Object> map(ArrayList<?> list, DoubleUnaryOperator callback) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null || callback == null) {
+            return result;
+        }
+        for (Object element : list) {
+            result.add(callback.applyAsDouble(toDouble(element)));
+        }
+        return result;
     }
 
     /**
@@ -752,329 +982,6 @@ public final class ArrayListApiUtils {
     }
 
     /**
-     * Flatten nested arrays by a given depth.
-     * JavaScript equivalent: arr.flat(depth)
-     */
-    public static ArrayList<Object> flat(ArrayList<?> list, int depth) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || depth < 0) {
-            return result;
-        }
-        flattenInto(list, depth, result);
-        return result;
-    }
-
-    /**
-     * Flatten nested arrays by one level.
-     * JavaScript equivalent: arr.flat()
-     */
-    public static ArrayList<Object> flat(ArrayList<?> list) {
-        return flat(list, 1);
-    }
-
-    /**
-     * Map and flatten one level.
-     * JavaScript equivalent: arr.flatMap(callback)
-     */
-    public static ArrayList<Object> flatMap(ArrayList<?> list, Function<Object, Object> callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
-        }
-        for (Object element : list) {
-            Object mapped = callback.apply(element);
-            if (mapped instanceof List) {
-                result.addAll((List<?>) mapped);
-            } else {
-                result.add(mapped);
-            }
-        }
-        return result;
-    }
-
-    public static ArrayList<Object> flatMap(ArrayList<?> list, IntFunction<?> callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
-        }
-        for (Object element : list) {
-            Object mapped = callback.apply(toInt(element));
-            if (mapped instanceof List) {
-                result.addAll((List<?>) mapped);
-            } else {
-                result.add(mapped);
-            }
-        }
-        return result;
-    }
-
-    public static ArrayList<Object> flatMap(ArrayList<?> list, IntUnaryOperator callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
-        }
-        for (Object element : list) {
-            result.add(callback.applyAsInt(toInt(element)));
-        }
-        return result;
-    }
-
-    public static ArrayList<Object> flatMap(ArrayList<?> list, LongFunction<?> callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
-        }
-        for (Object element : list) {
-            Object mapped = callback.apply(toLong(element));
-            if (mapped instanceof List) {
-                result.addAll((List<?>) mapped);
-            } else {
-                result.add(mapped);
-            }
-        }
-        return result;
-    }
-
-    public static ArrayList<Object> flatMap(ArrayList<?> list, LongUnaryOperator callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
-        }
-        for (Object element : list) {
-            result.add(callback.applyAsLong(toLong(element)));
-        }
-        return result;
-    }
-
-    public static ArrayList<Object> flatMap(ArrayList<?> list, DoubleFunction<?> callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
-        }
-        for (Object element : list) {
-            Object mapped = callback.apply(toDouble(element));
-            if (mapped instanceof List) {
-                result.addAll((List<?>) mapped);
-            } else {
-                result.add(mapped);
-            }
-        }
-        return result;
-    }
-
-    public static ArrayList<Object> flatMap(ArrayList<?> list, DoubleUnaryOperator callback) {
-        ArrayList<Object> result = new ArrayList<>();
-        if (list == null || callback == null) {
-            return result;
-        }
-        for (Object element : list) {
-            result.add(callback.applyAsDouble(toDouble(element)));
-        }
-        return result;
-    }
-
-    private static void flattenInto(List<?> source, int depth, List<Object> target) {
-        if (source == null) {
-            return;
-        }
-        for (Object element : source) {
-            if (depth > 0 && element instanceof List) {
-                flattenInto((List<?>) element, depth - 1, target);
-            } else {
-                target.add(element);
-            }
-        }
-    }
-
-    private static int toInt(Object value) {
-        if (value == null) {
-            return 0;
-        }
-        if (value instanceof Number) {
-            return ((Number) value).intValue();
-        }
-        if (value instanceof Character) {
-            return (int) ((Character) value).charValue();
-        }
-        if (value instanceof Boolean) {
-            return (Boolean) value ? 1 : 0;
-        }
-        return 0;
-    }
-
-    private static long toLong(Object value) {
-        if (value == null) {
-            return 0L;
-        }
-        if (value instanceof Number) {
-            return ((Number) value).longValue();
-        }
-        if (value instanceof Character) {
-            return (long) ((Character) value).charValue();
-        }
-        if (value instanceof Boolean) {
-            return (Boolean) value ? 1L : 0L;
-        }
-        return 0L;
-    }
-
-    private static double toDouble(Object value) {
-        if (value == null) {
-            return 0.0d;
-        }
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-        if (value instanceof Character) {
-            return (double) ((Character) value).charValue();
-        }
-        if (value instanceof Boolean) {
-            return (Boolean) value ? 1.0d : 0.0d;
-        }
-        return 0.0d;
-    }
-
-    /**
-     * Copy part of ArrayList to another location within the same ArrayList.
-     * JavaScript equivalent: arr.copyWithin(target, start)
-     *
-     * @param list   the ArrayList to modify (mutated in place)
-     * @param target the index at which to copy the sequence to (negative values count from end)
-     * @param start  the beginning index to start copying from (negative values count from end)
-     * @return the modified ArrayList (same reference as input)
-     */
-    public static ArrayList<Object> copyWithin(ArrayList<Object> list, int target, int start) {
-        return copyWithin(list, target, start, list == null ? 0 : list.size());
-    }
-
-    /**
-     * Copy part of ArrayList to another location within the same ArrayList.
-     * JavaScript equivalent: arr.copyWithin(target, start, end)
-     *
-     * @param list   the ArrayList to modify (mutated in place)
-     * @param target the index at which to copy the sequence to (negative values count from end)
-     * @param start  the beginning index to start copying from (negative values count from end)
-     * @param end    the ending index to stop copying from (exclusive, negative values count from end)
-     * @return the modified ArrayList (same reference as input)
-     */
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Object> copyWithin(ArrayList<Object> list, int target, int start, int end) {
-        if (list == null || list.isEmpty()) {
-            return list;
-        }
-
-        int length = list.size();
-
-        // Handle negative indices
-        int actualTarget = target < 0 ? Math.max(0, length + target) : Math.min(target, length);
-        int actualStart = start < 0 ? Math.max(0, length + start) : Math.min(start, length);
-        int actualEnd = end < 0 ? Math.max(0, length + end) : Math.min(end, length);
-
-        // Calculate copy length
-        int copyLength = Math.min(actualEnd - actualStart, length - actualTarget);
-
-        if (copyLength <= 0) {
-            return list;
-        }
-
-        // Copy elements to temporary list to avoid overwriting during copy
-        ArrayList<Object> temp = new ArrayList<>();
-        for (int i = 0; i < copyLength; i++) {
-            temp.add(list.get(actualStart + i));
-        }
-
-        // Write elements to target position
-        for (int i = 0; i < copyLength; i++) {
-            list.set(actualTarget + i, temp.get(i));
-        }
-
-        return list;
-    }
-
-    /**
-     * Fill all or part of an ArrayList with a static value.
-     * JavaScript equivalent: arr.fill(value, start, end)
-     *
-     * @param list  the ArrayList to modify (mutated in place)
-     * @param value the value to fill
-     * @param start the beginning index (inclusive), negative values count from end
-     * @param end   the ending index (exclusive), negative values count from end
-     * @return the modified ArrayList (same reference as input)
-     */
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Object> fill(ArrayList<Object> list, Object value, int start, int end) {
-        if (list == null || list.isEmpty()) {
-            return list;
-        }
-
-        int length = list.size();
-
-        // Handle negative indices
-        int actualStart = start < 0 ? Math.max(0, length + start) : Math.min(start, length);
-        int actualEnd = end < 0 ? Math.max(0, length + end) : Math.min(end, length);
-
-        // Fill elements from start to end (exclusive)
-        for (int i = actualStart; i < actualEnd; i++) {
-            list.set(i, value);
-        }
-
-        return list;
-    }
-
-    /**
-     * Fill entire ArrayList with a static value.
-     * JavaScript equivalent: arr.fill(value)
-     *
-     * @param list  the ArrayList to modify (mutated in place)
-     * @param value the value to fill
-     * @return the modified ArrayList (same reference as input)
-     */
-    public static ArrayList<Object> fill(ArrayList<Object> list, Object value) {
-        return fill(list, value, 0, list == null ? 0 : list.size());
-    }
-
-    /**
-     * Fill ArrayList from start index to end with a static value.
-     * JavaScript equivalent: arr.fill(value, start)
-     *
-     * @param list  the ArrayList to modify (mutated in place)
-     * @param value the value to fill
-     * @param start the beginning index (inclusive), negative values count from end
-     * @return the modified ArrayList (same reference as input)
-     */
-    public static ArrayList<Object> fill(ArrayList<Object> list, Object value, int start) {
-        return fill(list, value, start, list == null ? 0 : list.size());
-    }
-
-    /**
-     * Join ArrayList elements into a string with the specified separator.
-     * JavaScript equivalent: arr.join(separator)
-     *
-     * @param list      the ArrayList to join
-     * @param separator the separator string (default is "," if null)
-     * @return the joined string
-     */
-    public static String join(List<?> list, String separator) {
-        if (list == null || list.isEmpty()) {
-            return "";
-        }
-
-        // Use "," as default separator if not provided
-        String sep = (separator != null) ? separator : ",";
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < list.size(); i++) {
-            if (i > 0) {
-                sb.append(sep);
-            }
-            // Convert element to string (null becomes "null" in JavaScript)
-            sb.append(list.get(i));
-        }
-
-        return sb.toString();
-    }
-
-    /**
      * Extract a section of an ArrayList and return it as a new ArrayList.
      * JavaScript equivalent: arr.slice(start, end)
      *
@@ -1102,6 +1009,58 @@ public final class ArrayListApiUtils {
 
         // Create new ArrayList from subList
         return new ArrayList<>(list.subList(actualStart, actualEnd));
+    }
+
+    /**
+     * Determine if any element matches a predicate.
+     * JavaScript equivalent: arr.some(callback)
+     */
+    public static boolean some(ArrayList<?> list, Predicate<Object> callback) {
+        if (list == null || callback == null) {
+            return false;
+        }
+        for (Object element : list) {
+            if (callback.test(element)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean some(ArrayList<?> list, IntPredicate callback) {
+        if (list == null || callback == null) {
+            return false;
+        }
+        for (Object element : list) {
+            if (callback.test(toInt(element))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean some(ArrayList<?> list, LongPredicate callback) {
+        if (list == null || callback == null) {
+            return false;
+        }
+        for (Object element : list) {
+            if (callback.test(toLong(element))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean some(ArrayList<?> list, DoublePredicate callback) {
+        if (list == null || callback == null) {
+            return false;
+        }
+        for (Object element : list) {
+            if (callback.test(toDouble(element))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1140,6 +1099,54 @@ public final class ArrayListApiUtils {
         }
 
         return removed;
+    }
+
+    private static double toDouble(Object value) {
+        if (value == null) {
+            return 0.0d;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        if (value instanceof Character) {
+            return ((Character) value).charValue();
+        }
+        if (value instanceof Boolean) {
+            return (Boolean) value ? 1.0d : 0.0d;
+        }
+        return 0.0d;
+    }
+
+    private static int toInt(Object value) {
+        if (value == null) {
+            return 0;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        if (value instanceof Character) {
+            return ((Character) value).charValue();
+        }
+        if (value instanceof Boolean) {
+            return (Boolean) value ? 1 : 0;
+        }
+        return 0;
+    }
+
+    private static long toLong(Object value) {
+        if (value == null) {
+            return 0L;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        if (value instanceof Character) {
+            return ((Character) value).charValue();
+        }
+        if (value instanceof Boolean) {
+            return (Boolean) value ? 1L : 0L;
+        }
+        return 0L;
     }
 
     /**
@@ -1211,6 +1218,15 @@ public final class ArrayListApiUtils {
         splice(result, start, deleteCount, items);
 
         // Return the modified copy (not the removed elements)
+        return result;
+    }
+
+    public static ArrayList<Object> values(ArrayList<?> list) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (list == null) {
+            return result;
+        }
+        result.addAll(list);
         return result;
     }
 

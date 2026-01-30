@@ -39,7 +39,7 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 2);
         Swc4jAstArrayLit arrayLit = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstArrayLit.class), Swc4jAstType.ArrayLit, 0, 2);
-        assertThat(arrayLit.getElems().isEmpty()).isTrue();
+        assertThat(arrayLit.getElems()).isEmpty();
         assertSpan(code, script);
     }
 
