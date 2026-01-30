@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4jPluginHostJsFuckDecoder extends BaseTestSuiteSwc4jPlugin {
     @Test
@@ -70,7 +70,7 @@ public class TestSwc4jPluginHostJsFuckDecoder extends BaseTestSuiteSwc4jPlugin {
                 .setOmitLastSemi(true);
         for (Map.Entry<String, String> entry : testCaseMap.entrySet()) {
             Swc4jTransformOutput output = swc4j.transform(entry.getKey(), jsScriptTransformOptions);
-            assertEquals(entry.getValue(), output.getCode(), entry.getKey());
+            assertThat(output.getCode()).isEqualTo(entry.getValue());
         }
     }
 }

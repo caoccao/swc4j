@@ -17,12 +17,12 @@
 package com.caoccao.javet.swc4j;
 
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4j extends BaseTestSuite {
     @Test
     public void testGetVersion() {
-        assertEquals("2.0.0", swc4j.getVersion());
+        assertThat(swc4j.getVersion()).isEqualTo("2.0.0");
     }
 }

@@ -17,17 +17,17 @@
 package com.caoccao.javet.swc4j.utils;
 
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestStringUtils {
     @Test
     public void testToSnakeCase() {
-        assertEquals("abc_abc_abc", StringUtils.toSnakeCase("abc abc  abc  "));
-        assertEquals("abc_abc_abc", StringUtils.toSnakeCase("AbcAbcAbc"));
-        assertEquals("abc_abc_abc", StringUtils.toSnakeCase("abcAbcAbc"));
-        assertEquals("abc_abc_abc", StringUtils.toSnakeCase("ABCAbcAbc"));
-        assertEquals("abc_abc_abc", StringUtils.toSnakeCase("abcABCAbc"));
-        assertEquals("abc_abc_abc", StringUtils.toSnakeCase("abc&abc$$abc"));
+        assertThat(StringUtils.toSnakeCase("abc abc  abc  ")).isEqualTo("abc_abc_abc");
+        assertThat(StringUtils.toSnakeCase("AbcAbcAbc")).isEqualTo("abc_abc_abc");
+        assertThat(StringUtils.toSnakeCase("abcAbcAbc")).isEqualTo("abc_abc_abc");
+        assertThat(StringUtils.toSnakeCase("ABCAbcAbc")).isEqualTo("abc_abc_abc");
+        assertThat(StringUtils.toSnakeCase("abcABCAbc")).isEqualTo("abc_abc_abc");
+        assertThat(StringUtils.toSnakeCase("abc&abc$$abc")).isEqualTo("abc_abc_abc");
     }
 }

@@ -19,9 +19,9 @@ package com.caoccao.javet.swc4j.plugins;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class Swc4jPluginCounter implements ISwc4jPlugin {
     protected int moduleCount;
@@ -42,7 +42,7 @@ public class Swc4jPluginCounter implements ISwc4jPlugin {
 
     @Override
     public Swc4jPluginResponse process(ISwc4jAstProgram<?> program) {
-        assertNotNull(program);
+        assertThat(program).isNotNull();
         if (program instanceof Swc4jAstModule) {
             ++moduleCount;
         } else if (program instanceof Swc4jAstScript) {

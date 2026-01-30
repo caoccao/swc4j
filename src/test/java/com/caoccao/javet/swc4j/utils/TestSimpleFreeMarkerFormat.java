@@ -19,60 +19,60 @@ package com.caoccao.javet.swc4j.utils;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSimpleFreeMarkerFormat {
     @Test
     public void testInvalid() {
-        assertEquals("abc",
-                SimpleFreeMarkerFormat.format("abc", null),
-                "Parameters being null should pass.");
-        assertEquals("abc",
-                SimpleFreeMarkerFormat.format("abc", new HashMap<>()),
-                "Parameters being empty should pass.");
-        assertEquals("abc${",
-                SimpleFreeMarkerFormat.format("abc${", SimpleMap.of("d", "x")),
-                "Open variable should pass.");
-        assertEquals("abc${def",
-                SimpleFreeMarkerFormat.format("abc${def", SimpleMap.of("d", "x")),
-                "Open variable should pass.");
-        assertEquals("abc$${d}",
-                SimpleFreeMarkerFormat.format("abc$${d}", SimpleMap.of("d", "x")),
-                "Double dollar should pass.");
-        assertEquals("abc<null>def",
-                SimpleFreeMarkerFormat.format("abc${e}def", SimpleMap.of("d", "x")),
-                "Unknown variable should pass.");
-        assertEquals("abc<null>def",
-                SimpleFreeMarkerFormat.format("abc${}def", SimpleMap.of("d", "x")),
-                "Empty variable should pass.");
-        assertEquals("ab{def.$ghi}c",
-                SimpleFreeMarkerFormat.format("ab{def.$ghi}c", SimpleMap.of("ghi", "x")),
-                "Dollar should pass.");
+        assertThat(SimpleFreeMarkerFormat.format("abc", null))
+                .as("Parameters being null should pass.")
+                .isEqualTo("abc");
+        assertThat(SimpleFreeMarkerFormat.format("abc", new HashMap<>()))
+                .as("Parameters being empty should pass.")
+                .isEqualTo("abc");
+        assertThat(SimpleFreeMarkerFormat.format("abc${", SimpleMap.of("d", "x")))
+                .as("Open variable should pass.")
+                .isEqualTo("abc${");
+        assertThat(SimpleFreeMarkerFormat.format("abc${def", SimpleMap.of("d", "x")))
+                .as("Open variable should pass.")
+                .isEqualTo("abc${def");
+        assertThat(SimpleFreeMarkerFormat.format("abc$${d}", SimpleMap.of("d", "x")))
+                .as("Double dollar should pass.")
+                .isEqualTo("abc$${d}");
+        assertThat(SimpleFreeMarkerFormat.format("abc${e}def", SimpleMap.of("d", "x")))
+                .as("Unknown variable should pass.")
+                .isEqualTo("abc<null>def");
+        assertThat(SimpleFreeMarkerFormat.format("abc${}def", SimpleMap.of("d", "x")))
+                .as("Empty variable should pass.")
+                .isEqualTo("abc<null>def");
+        assertThat(SimpleFreeMarkerFormat.format("ab{def.$ghi}c", SimpleMap.of("ghi", "x")))
+                .as("Dollar should pass.")
+                .isEqualTo("ab{def.$ghi}c");
     }
 
     @Test
     public void testValid() {
-        assertEquals("abcx",
-                SimpleFreeMarkerFormat.format("abc${d}", SimpleMap.of("d", "x")),
-                "Variable at the end should pass.");
-        assertEquals("xabc",
-                SimpleFreeMarkerFormat.format("${d}abc", SimpleMap.of("d", "x")),
-                "Variable at the beginning should pass.");
-        assertEquals("abxc",
-                SimpleFreeMarkerFormat.format("ab${d}c", SimpleMap.of("d", "x")),
-                "Variable in the middle should pass.");
-        assertEquals("abxc",
-                SimpleFreeMarkerFormat.format("ab${def.${ghi}c", SimpleMap.of("def.${ghi", "x")),
-                "Variable with dollar should pass.");
-        assertEquals("abxc",
-                SimpleFreeMarkerFormat.format("ab${{}c", SimpleMap.of("{", "x")),
-                "Single open should pass.");
-        assertEquals("ab12345678c",
-                SimpleFreeMarkerFormat.format("ab${x}c", SimpleMap.of("x", 12345678)),
-                "Integer should pass.");
-        assertEquals("ab1234567890c",
-                SimpleFreeMarkerFormat.format("ab${x}c", SimpleMap.of("x", 1234567890L)),
-                "Long should pass.");
+        assertThat(SimpleFreeMarkerFormat.format("abc${d}", SimpleMap.of("d", "x")))
+                .as("Variable at the end should pass.")
+                .isEqualTo("abcx");
+        assertThat(SimpleFreeMarkerFormat.format("${d}abc", SimpleMap.of("d", "x")))
+                .as("Variable at the beginning should pass.")
+                .isEqualTo("xabc");
+        assertThat(SimpleFreeMarkerFormat.format("ab${d}c", SimpleMap.of("d", "x")))
+                .as("Variable in the middle should pass.")
+                .isEqualTo("abxc");
+        assertThat(SimpleFreeMarkerFormat.format("ab${def.${ghi}c", SimpleMap.of("def.${ghi", "x")))
+                .as("Variable with dollar should pass.")
+                .isEqualTo("abxc");
+        assertThat(SimpleFreeMarkerFormat.format("ab${{}c", SimpleMap.of("{", "x")))
+                .as("Single open should pass.")
+                .isEqualTo("abxc");
+        assertThat(SimpleFreeMarkerFormat.format("ab${x}c", SimpleMap.of("x", 12345678)))
+                .as("Integer should pass.")
+                .isEqualTo("ab12345678c");
+        assertThat(SimpleFreeMarkerFormat.format("ab${x}c", SimpleMap.of("x", 1234567890L)))
+                .as("Long should pass.")
+                .isEqualTo("ab1234567890c");
     }
 }

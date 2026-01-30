@@ -24,21 +24,20 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class BaseTestSuiteSwc4jPlugin extends BaseTestSuite {
     protected void assertEvalAsString(String code, String expectedCode) {
-        assertEquals(
-                evalAsString(code),
-                evalAsString(expectedCode),
-                "Failed to evaluate.\nFrom:\n" + code + "\nTo:\n" + expectedCode);
+        assertThat(evalAsString(code))
+                .as("Failed to evaluate.\nFrom:\n" + code + "\nTo:\n" + expectedCode)
+                .isEqualTo(evalAsString(expectedCode));
     }
 
     protected void assertTransform(String code, String expectedCode) {
         try {
-            assertEquals(expectedCode, swc4j.transform(code, jsScriptTransformOptions).getCode());
+            assertThat(swc4j.transform(code, jsScriptTransformOptions).getCode()).isEqualTo(expectedCode);
         } catch (Throwable t) {
             fail("Failed to transform.\nFrom:\n" + code + "\nTo:\n" + expectedCode, t);
         }

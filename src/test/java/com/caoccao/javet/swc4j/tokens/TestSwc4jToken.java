@@ -26,15 +26,15 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("unchecked")
 public class TestSwc4jToken extends BaseTestSuite {
     protected <T> void assertTokenValue(T expectedValue, Swc4jToken token) {
-        assertInstanceOf(Swc4jTokenTextValue.class, token);
+        assertThat(token).isInstanceOf(Swc4jTokenTextValue.class);
         Swc4jTokenTextValue<T> tokenTextAndValue = (Swc4jTokenTextValue<T>) token;
-        assertEquals(expectedValue, tokenTextAndValue.getValue());
+        assertThat(tokenTextAndValue.getValue()).isEqualTo(expectedValue);
     }
 
     protected Swc4jToken parseAndAssert(
@@ -59,16 +59,20 @@ public class TestSwc4jToken extends BaseTestSuite {
             int tokenSize)
             throws Swc4jCoreException {
         Swc4jParseOutput output = swc4j.parse(code, options);
-        assertNotNull(output, code + " should be parsed successfully");
+        assertThat(output).as(code + " should be parsed successfully").isNotNull();
         List<Swc4jToken> tokens = output.getTokens();
-        assertNotNull(tokens, code + " tokens shouldn't be null");
-        assertEquals(tokenSize, tokens.size(), code + " token size should be " + tokenSize);
+        assertThat(tokens).as(code + " tokens shouldn't be null").isNotNull();
+        assertThat(tokens.size())
+                .as(code + " token size should be " + tokenSize)
+                .isEqualTo(tokenSize);
         Swc4jToken token = tokens.get(tokenIndex);
-        assertEquals(type, token.getType(), code + " type should match");
-        assertEquals(text, token.getText(), code + " text should match");
-        assertEquals(start, token.getSpan().getStart(), code + " start position should match");
-        assertEquals(end, token.getSpan().getEnd(), code + " end position should match");
-        assertEquals(code.substring(start, end), token.getText(), code + " text should match");
+        assertThat(token.getType()).as(code + " type should match").isEqualTo(type);
+        assertThat(token.getText()).as(code + " text should match").isEqualTo(text);
+        assertThat(token.getSpan().getStart()).as(code + " start position should match").isEqualTo(start);
+        assertThat(token.getSpan().getEnd()).as(code + " end position should match").isEqualTo(end);
+        assertThat(token.getText())
+                .as(code + " text should match")
+                .isEqualTo(code.substring(start, end));
         return token;
     }
 
@@ -79,20 +83,22 @@ public class TestSwc4jToken extends BaseTestSuite {
                 .setCaptureTokens(true);
         String code = "function add加法(a變量:number, b變量:number) { return a變量+b變量; }";
         Swc4jParseOutput output = swc4j.parse(code, options);
-        assertNotNull(output);
-        assertEquals(Swc4jParseMode.Script, output.getParseMode());
+        assertThat(output).isNotNull();
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Script);
         List<Swc4jToken> tokens = output.getTokens();
-        assertNotNull(tokens);
-        assertEquals(18, tokens.size());
-        assertEquals(Swc4jTokenType.Function, tokens.get(0).getType());
-        assertTrue(tokens.get(0).isLineBreakAhead());
-        assertEquals(Swc4jTokenType.Return, tokens.get(12).getType());
-        assertFalse(tokens.get(12).isLineBreakAhead());
+        assertThat(tokens).isNotNull();
+        assertThat(tokens.size()).isEqualTo(18);
+        assertThat(tokens.get(0).getType()).isEqualTo(Swc4jTokenType.Function);
+        assertThat(tokens.get(0).isLineBreakAhead()).isTrue();
+        assertThat(tokens.get(12).getType()).isEqualTo(Swc4jTokenType.Return);
+        assertThat(tokens.get(12).isLineBreakAhead()).isFalse();
         tokens.forEach(token -> {
-            assertNotEquals(Swc4jTokenType.Unknown, token.getType());
-            assertEquals(
-                    code.substring(token.getSpan().getStart(), token.getSpan().getEnd()),
-                    token.getText());
+            assertThat(token.getType()).isNotEqualTo(Swc4jTokenType.Unknown);
+            assertThat(
+                token.getText()
+        ).isEqualTo(
+                code.substring(token.getSpan().getStart(), token.getSpan().getEnd())
+        );;
         });
     }
 
@@ -214,8 +220,8 @@ public class TestSwc4jToken extends BaseTestSuite {
         assertTokenValue(new BigInteger("1234567890123456789012345678901234567890"), parseAndAssert("a = 1234567890123456789012345678901234567890n;", options, Swc4jTokenType.BigInt, "1234567890123456789012345678901234567890n", 4, 45, 2, 4));
         // TextValueFlags
         Swc4jTokenTextValueFlags<String> astTokenRegex = (Swc4jTokenTextValueFlags<String>) parseAndAssert("a = /x/ig;", options, Swc4jTokenType.Regex, "/x/ig", 4, 9, 2, 4);
-        assertEquals("x", astTokenRegex.getValue());
-        assertEquals("ig", astTokenRegex.getFlags());
+        assertThat(astTokenRegex.getValue()).isEqualTo("x");
+        assertThat(astTokenRegex.getFlags()).isEqualTo("ig");
         assertTokenValue("a ", parseAndAssert("`a ${b} c`", options, Swc4jTokenType.Template, "a ", 1, 3, 1, 7));
         parseAndAssert("`a ${b} c`", options, Swc4jTokenType.IdentOther, "b", 5, 6, 3, 7);
         assertTokenValue(" c", parseAndAssert("`a ${b} c`", options, Swc4jTokenType.Template, " c", 7, 9, 5, 7));

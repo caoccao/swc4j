@@ -17,12 +17,12 @@
 package com.caoccao.javet.swc4j;
 
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4jNative {
     @Test
     public void testGetVersion() {
-        assertEquals("2.0.0", Swc4jNative.coreGetVersion());
+        assertThat(Swc4jNative.coreGetVersion()).isEqualTo("2.0.0");
     }
 }

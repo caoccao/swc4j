@@ -23,8 +23,9 @@ import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jTransformOptions extends BaseTestSuite {
 
@@ -42,15 +43,17 @@ public class TestSwc4jTransformOptions extends BaseTestSuite {
         String expectedCode = "import React from\"react\";import\"./App.css\";function App(){return(<h1> Hello World! </h1>);}export default App;\n";
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTransformOutput output = swc4j.transform(code, jsxModuleTransformOptions);
-        assertNotNull(output);
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals(Swc4jMediaType.Jsx, output.getMediaType());
-        assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
-        assertEquals(
-                expectedSourceMapPrefix,
+        assertThat(output).isNotNull();
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
+        assertThat(output.getMediaType()).isEqualTo(Swc4jMediaType.Jsx);
+        assertThat(output.getCode().substring(0, expectedCode.length())).isEqualTo(expectedCode);
+        assertThat(
                 output.getCode().substring(
                         expectedCode.length(),
-                        expectedCode.length() + expectedSourceMapPrefix.length()));
+                        expectedCode.length() + expectedSourceMapPrefix.length())
+        ).isEqualTo(
+                expectedSourceMapPrefix
+        );;
     }
 
     @Test
@@ -59,15 +62,17 @@ public class TestSwc4jTransformOptions extends BaseTestSuite {
         String expectedCode = "function add(a:number,b:number){return a+b;}\n";
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTransformOutput output = swc4j.transform(code, tsModuleTransformOptions);
-        assertNotNull(output);
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals(Swc4jMediaType.TypeScript, output.getMediaType());
-        assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
-        assertEquals(
-                expectedSourceMapPrefix,
+        assertThat(output).isNotNull();
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
+        assertThat(output.getMediaType()).isEqualTo(Swc4jMediaType.TypeScript);
+        assertThat(output.getCode().substring(0, expectedCode.length())).isEqualTo(expectedCode);
+        assertThat(
                 output.getCode().substring(
                         expectedCode.length(),
-                        expectedCode.length() + expectedSourceMapPrefix.length()));
+                        expectedCode.length() + expectedSourceMapPrefix.length())
+        ).isEqualTo(
+                expectedSourceMapPrefix
+        );;
     }
 
     @Test
@@ -81,11 +86,11 @@ public class TestSwc4jTransformOptions extends BaseTestSuite {
         Swc4jTransformOutput output = swc4j.transform(code, tsModuleTransformOptions
                 .setMinify(false)
                 .setSourceMap(Swc4jSourceMapOption.None));
-        assertNotNull(output);
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals(Swc4jMediaType.TypeScript, output.getMediaType());
-        assertEquals(expectedCode, output.getCode());
-        assertNull(output.getSourceMap());
+        assertThat(output).isNotNull();
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
+        assertThat(output.getMediaType()).isEqualTo(Swc4jMediaType.TypeScript);
+        assertThat(output.getCode()).isEqualTo(expectedCode);
+        assertThat(output.getSourceMap()).isNull();
     }
 
     @Test
@@ -99,25 +104,20 @@ public class TestSwc4jTransformOptions extends BaseTestSuite {
         Swc4jTransformOutput output = swc4j.transform(code, tsModuleTransformOptions
                 .setMinify(false)
                 .setSourceMap(Swc4jSourceMapOption.Separate));
-        assertNotNull(output);
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals(Swc4jMediaType.TypeScript, output.getMediaType());
-        assertEquals(expectedCode, output.getCode());
-        assertNotNull(output.getSourceMap());
+        assertThat(output).isNotNull();
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
+        assertThat(output.getMediaType()).isEqualTo(Swc4jMediaType.TypeScript);
+        assertThat(output.getCode()).isEqualTo(expectedCode);
+        assertThat(output.getSourceMap()).isNotNull();
     }
 
     @Test
     public void testWrongMediaType() {
         String code = "function add(a:number, b:number) { return a+b; }";
-        assertEquals(
-                """
-                        Expected ',', got ':' at file:///main.js:1:15
-                        
-                          function add(a:number, b:number) { return a+b; }
-                                        ~""",
-                assertThrows(
-                        Swc4jCoreException.class,
-                        () -> swc4j.transform(code, jsModuleTransformOptions))
-                        .getMessage());
+        assertThatThrownBy(() -> swc4j.transform(code, jsModuleTransformOptions))
+                .isInstanceOf(Swc4jCoreException.class)
+                .hasMessageContaining("Expected ','")
+                .hasMessageContaining("file:///main.js:1:15")
+                .hasMessageContaining("function add(a:number, b:number) { return a+b; }");
     }
 }

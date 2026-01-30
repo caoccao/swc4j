@@ -35,8 +35,9 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.stream.Stream;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jTranspileOptions extends BaseTestSuite {
     @Test
@@ -61,15 +62,17 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTranspileOutput output = swc4j.transpile(code, jsxModuleTranspileOptions
                 .setJsx(Swc4jJsxRuntimeOption.Classic().setFactory("CustomJsxFactory.createElement")));
-        assertNotNull(output);
-        assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals(
-                expectedSourceMapPrefix,
+        assertThat(output).isNotNull();
+        assertThat(output.getCode().substring(0, expectedCode.length())).isEqualTo(expectedCode);
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
+        assertThat(
                 output.getCode().substring(
                         expectedCode.length(),
-                        expectedCode.length() + expectedSourceMapPrefix.length()));
-        assertNull(output.getSourceMap());
+                        expectedCode.length() + expectedSourceMapPrefix.length())
+        ).isEqualTo(
+                expectedSourceMapPrefix
+        );
+        assertThat(output.getSourceMap()).isNull();
     }
 
     @Test
@@ -94,18 +97,20 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTranspileOutput output = swc4j.transpile(code, jsxModuleTranspileOptions
                 .setJsx(Swc4jJsxRuntimeOption.Classic()));
-        assertNotNull(output);
-        assertEquals(code, output.getSourceText());
-        assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals(Swc4jMediaType.Jsx, output.getMediaType());
-        assertEquals(
-                expectedSourceMapPrefix,
+        assertThat(output).isNotNull();
+        assertThat(output.getSourceText()).isEqualTo(code);
+        assertThat(output.getCode().substring(0, expectedCode.length())).isEqualTo(expectedCode);
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
+        assertThat(output.getMediaType()).isEqualTo(Swc4jMediaType.Jsx);
+        assertThat(
                 output.getCode().substring(
                         expectedCode.length(),
-                        expectedCode.length() + expectedSourceMapPrefix.length()));
-        assertNull(output.getProgram());
-        assertNull(output.getSourceMap());
+                        expectedCode.length() + expectedSourceMapPrefix.length())
+        ).isEqualTo(
+                expectedSourceMapPrefix
+        );;
+        assertThat(output.getProgram()).isNull();
+        assertThat(output.getSourceMap()).isNull();
     }
 
     @Test
@@ -113,19 +118,17 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
         String code = "function add加法(a變量:number, b變量:number) { return a變量+b變量; }";
         Swc4jTranspileOutput output = swc4j.transpile(code, tsModuleTranspileOptions
                 .setCaptureTokens(true));
-        assertNotNull(output);
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
+        assertThat(output).isNotNull();
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
         List<Swc4jToken> tokens = output.getTokens();
-        assertNotNull(tokens);
-        assertEquals(18, tokens.size());
-        assertEquals(Swc4jTokenType.Function, tokens.get(0).getType());
-        assertTrue(tokens.get(0).isLineBreakAhead());
-        assertEquals(Swc4jTokenType.Return, tokens.get(12).getType());
-        assertFalse(tokens.get(12).isLineBreakAhead());
-        tokens.forEach(token ->
-                assertEquals(
-                        code.substring(token.getSpan().getStart(), token.getSpan().getEnd()),
-                        token.getText()));
+        assertThat(tokens).isNotNull();
+        assertThat(tokens.size()).isEqualTo(18);
+        assertThat(tokens.get(0).getType()).isEqualTo(Swc4jTokenType.Function);
+        assertThat(tokens.get(0).isLineBreakAhead()).isTrue();
+        assertThat(tokens.get(12).getType()).isEqualTo(Swc4jTokenType.Return);
+        assertThat(tokens.get(12).isLineBreakAhead()).isFalse();
+        tokens.forEach(token -> assertThat(token.getText())
+                .isEqualTo(code.substring(token.getSpan().getStart(), token.getSpan().getEnd())));
     }
 
     @Test
@@ -135,33 +138,33 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
                 .setCaptureComments(true)
                 .setKeepComments(true)
                 .setSourceMap(Swc4jSourceMapOption.None));
-        assertNotNull(output);
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals("let a = 1; // Comment 2\n", output.getCode());
-        assertEquals(1, output.getComments().getLeading().size());
-        assertEquals(1, output.getComments().getTrailing().size());
+        assertThat(output).isNotNull();
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
+        assertThat(output.getCode()).isEqualTo("let a = 1; // Comment 2\n");
+        assertThat(output.getComments().getLeading().size()).isEqualTo(1);
+        assertThat(output.getComments().getTrailing().size()).isEqualTo(1);
         List<Swc4jComment> comments = output.getComments().getLeading(23);
-        assertEquals(1, comments.size());
+        assertThat(comments.size()).isEqualTo(1);
         Swc4jComment comment = comments.get(0);
-        assertEquals(Swc4jCommentKind.Block, comment.getKind());
-        assertEquals(7, comment.getSpan().getStart());
-        assertEquals(22, comment.getSpan().getEnd());
-        assertEquals(1, comment.getSpan().getLine());
-        assertEquals(8, comment.getSpan().getColumn());
-        assertEquals(" Comment 1 ", comment.getText());
+        assertThat(comment.getKind()).isEqualTo(Swc4jCommentKind.Block);
+        assertThat(comment.getSpan().getStart()).isEqualTo(7);
+        assertThat(comment.getSpan().getEnd()).isEqualTo(22);
+        assertThat(comment.getSpan().getLine()).isEqualTo(1);
+        assertThat(comment.getSpan().getColumn()).isEqualTo(8);
+        assertThat(comment.getText()).isEqualTo(" Comment 1 ");
         comments = output.getComments().getTrailing(34);
-        assertEquals(1, comments.size());
+        assertThat(comments.size()).isEqualTo(1);
         comment = comments.get(0);
-        assertEquals(Swc4jCommentKind.Line, comment.getKind());
-        assertEquals(35, comment.getSpan().getStart());
-        assertEquals(47, comment.getSpan().getEnd());
-        assertEquals(1, comment.getSpan().getLine());
-        assertEquals(36, comment.getSpan().getColumn());
-        assertEquals(" Comment 2", comment.getText());
-        assertTrue(output.getComments().hasLeading(23));
-        assertTrue(output.getComments().hasTrailing(34));
+        assertThat(comment.getKind()).isEqualTo(Swc4jCommentKind.Line);
+        assertThat(comment.getSpan().getStart()).isEqualTo(35);
+        assertThat(comment.getSpan().getEnd()).isEqualTo(47);
+        assertThat(comment.getSpan().getLine()).isEqualTo(1);
+        assertThat(comment.getSpan().getColumn()).isEqualTo(36);
+        assertThat(comment.getText()).isEqualTo(" Comment 2");
+        assertThat(output.getComments().hasLeading(23)).isTrue();
+        assertThat(output.getComments().hasTrailing(34)).isTrue();
         comments = output.getComments().getComments();
-        assertEquals(2, comments.size());
+        assertThat(comments.size()).isEqualTo(2);
     }
 
     @Test
@@ -174,15 +177,17 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
                 """;
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTranspileOutput output = swc4j.transpile(code, tsModuleTranspileOptions);
-        assertNotNull(output);
-        assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals(
-                expectedSourceMapPrefix,
+        assertThat(output).isNotNull();
+        assertThat(output.getCode().substring(0, expectedCode.length())).isEqualTo(expectedCode);
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
+        assertThat(
                 output.getCode().substring(
                         expectedCode.length(),
-                        expectedCode.length() + expectedSourceMapPrefix.length()));
-        assertNull(output.getSourceMap());
+                        expectedCode.length() + expectedSourceMapPrefix.length())
+        ).isEqualTo(
+                expectedSourceMapPrefix
+        );;
+        assertThat(output.getSourceMap()).isNull();
     }
 
     @Test
@@ -191,10 +196,10 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
         Swc4jTranspileOutput output = swc4j.transpile(code, tsModuleTranspileOptions
                 .setKeepComments(false)
                 .setSourceMap(Swc4jSourceMapOption.None));
-        assertNotNull(output);
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals("let a = 1;\n", output.getCode());
-        assertNull(output.getComments());
+        assertThat(output).isNotNull();
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
+        assertThat(output.getCode()).isEqualTo("let a = 1;\n");
+        assertThat(output.getComments()).isNull();
     }
 
     @ParameterizedTest
@@ -216,32 +221,27 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
                 .setSpecifier(specifier)
                 .setMediaType(Swc4jMediaType.TypeScript)
                 .setSourceMap(Swc4jSourceMapOption.Separate));
-        assertNotNull(output);
-        assertEquals(expectedCode, output.getCode());
+        assertThat(output).isNotNull();
+        assertThat(output.getCode()).isEqualTo(expectedCode);
         Swc4jParseMode expectedParseMode = parseMode;
         if (expectedParseMode == Swc4jParseMode.Program) {
             expectedParseMode = Swc4jParseMode.Script;
         }
-        assertEquals(expectedParseMode, output.getParseMode());
-        assertNotNull(output.getSourceMap());
-        Stream.of(expectedProperties).forEach(p -> assertTrue(
-                output.getSourceMap().contains("\"" + p + "\""),
-                p + " should exist in the source map"));
-        assertNull(output.getComments());
+        assertThat(output.getParseMode()).isEqualTo(expectedParseMode);
+        assertThat(output.getSourceMap()).isNotNull();
+        Stream.of(expectedProperties).forEach(p -> assertThat(output.getSourceMap())
+                .as(p + " should exist in the source map")
+                .contains("\"" + p + "\""));
+        assertThat(output.getComments()).isNull();
     }
 
     @Test
     public void testWrongMediaType() {
         String code = "function add(a:number, b:number) { return a+b; }";
-        assertEquals(
-                """
-                        Expected ',', got ':' at file:///main.js:1:15
-                        
-                          function add(a:number, b:number) { return a+b; }
-                                        ~""",
-                assertThrows(
-                        Swc4jCoreException.class,
-                        () -> swc4j.transpile(code, jsModuleTranspileOptions))
-                        .getMessage());
+        assertThatThrownBy(() -> swc4j.transpile(code, jsModuleTranspileOptions))
+                .isInstanceOf(Swc4jCoreException.class)
+                .hasMessageContaining("Expected ','")
+                .hasMessageContaining("file:///main.js:1:15")
+                .hasMessageContaining("function add(a:number, b:number) { return a+b; }");
     }
 }

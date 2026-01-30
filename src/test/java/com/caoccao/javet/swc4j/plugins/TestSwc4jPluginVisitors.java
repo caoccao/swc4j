@@ -29,8 +29,8 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jPluginVisitors extends BaseTestSuite {
     @Test
@@ -43,8 +43,8 @@ public class TestSwc4jPluginVisitors extends BaseTestSuite {
                 .setInlineSources(false)
                 .setSourceMap(Swc4jSourceMapOption.None)
                 .setPluginHost(new Swc4jPluginHost().add(pluginVisitors)));
-        assertNotNull(output);
-        assertEquals(expectedCode, output.getCode());
+        assertThat(output).isNotNull();
+        assertThat(output.getCode()).isEqualTo(expectedCode);
     }
 
     @Test
@@ -57,8 +57,8 @@ public class TestSwc4jPluginVisitors extends BaseTestSuite {
                 .setInlineSources(false)
                 .setSourceMap(Swc4jSourceMapOption.None)
                 .setPluginHost(new Swc4jPluginHost().add(pluginVisitors)));
-        assertNotNull(output);
-        assertEquals(expectedCode, output.getCode());
+        assertThat(output).isNotNull();
+        assertThat(output.getCode()).isEqualTo(expectedCode);
     }
 
     @Test
@@ -74,8 +74,8 @@ public class TestSwc4jPluginVisitors extends BaseTestSuite {
                 .setInlineSources(false)
                 .setSourceMap(Swc4jSourceMapOption.None)
                 .setPluginHost(new Swc4jPluginHost().add(pluginVisitors)));
-        assertNotNull(output);
-        assertEquals(expectedCode, output.getCode());
+        assertThat(output).isNotNull();
+        assertThat(output.getCode()).isEqualTo(expectedCode);
     }
 
     @Test
@@ -94,8 +94,8 @@ public class TestSwc4jPluginVisitors extends BaseTestSuite {
                 .setInlineSources(false)
                 .setSourceMap(Swc4jSourceMapOption.None)
                 .setPluginHost(new Swc4jPluginHost().add(pluginVisitors)));
-        assertNotNull(output);
-        assertEquals(expectedCode, output.getCode());
+        assertThat(output).isNotNull();
+        assertThat(output.getCode()).isEqualTo(expectedCode);
     }
 
     /**
@@ -120,7 +120,7 @@ public class TestSwc4jPluginVisitors extends BaseTestSuite {
         @Override
         public Swc4jAstVisitorResponse visitIfStmt(Swc4jAstIfStmt node) {
             ISwc4jAstStmt cons = node.getCons().as(ISwc4jAstStmt.class);
-            assertTrue(node.getAlt().isPresent());
+            assertThat(node.getAlt().isPresent()).isTrue();
             ISwc4jAstStmt alt = node.getAlt().get().as(ISwc4jAstStmt.class);
             node.setCons(alt);
             node.setAlt(cons);

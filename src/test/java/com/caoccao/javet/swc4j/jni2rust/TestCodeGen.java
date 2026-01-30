@@ -41,7 +41,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class TestCodeGen {
     @Test
@@ -49,18 +51,18 @@ public class TestCodeGen {
         Path rustFilePath = new File(OSUtils.WORKING_DIRECTORY).toPath()
                 .resolve(Jni2RustFilePath.AstUtils.getFilePath());
         File rustFile = rustFilePath.toFile();
-        assertTrue(rustFile.exists());
-        assertTrue(rustFile.isFile());
-        assertTrue(rustFile.canRead());
-        assertTrue(rustFile.canWrite());
+        assertThat(rustFile.exists()).isTrue();
+        assertThat(rustFile.isFile()).isTrue();
+        assertThat(rustFile.canRead()).isTrue();
+        assertThat(rustFile.canWrite()).isTrue();
         String startSign = "\n/* Enum Begin */\n";
         String endSign = "/* Enum End */\n";
         byte[] originalBuffer = Files.readAllBytes(rustFilePath);
         String fileContent = new String(originalBuffer, StandardCharsets.UTF_8);
         final int startPosition = fileContent.indexOf(startSign) + startSign.length();
         final int endPosition = fileContent.indexOf(endSign);
-        assertTrue(startPosition > 0, "Start position is invalid");
-        assertTrue(endPosition > startPosition, "End position is invalid");
+        assertThat(startPosition).as("Start position is invalid").isPositive();
+        assertThat(endPosition).as("End position is invalid").isGreaterThan(startPosition);
         final AtomicInteger enumCounter = new AtomicInteger();
         final List<String> lines = new ArrayList<>();
         Swc4jAstStore.getInstance().getEnumMap().entrySet().stream()
@@ -92,9 +94,9 @@ public class TestCodeGen {
                     Stream.of(jni2RustClassUtils.getMappings())
                             .sorted(Comparator.comparing(Jni2RustEnumMapping::name))
                             .forEach(mapping -> {
-                                assertTrue(
-                                        clazz.isAssignableFrom(mapping.type()),
-                                        mapping.type().getSimpleName() + " should implement " + clazz.getSimpleName());
+                                assertThat(clazz.isAssignableFrom(mapping.type()))
+                                        .as(mapping.type().getSimpleName() + " should implement " + clazz.getSimpleName())
+                                        .isTrue();
                                 Jni2RustClassUtils<?> mappingJni2RustClassUtils = new Jni2RustClassUtils<>(mapping.type());
                                 registrationLines.add(String.format("      %s::%s(node) => node.register_with_map(map),",
                                         enumName,
@@ -143,7 +145,7 @@ public class TestCodeGen {
                     lines.addAll(fromJavaLines);
                     enumCounter.incrementAndGet();
                 });
-        assertTrue(enumCounter.get() > 0);
+        assertThat(enumCounter.get()).isPositive();
         StringBuilder sb = new StringBuilder(fileContent.length());
         sb.append(fileContent, 0, startPosition);
         String code = StringUtils.join("\n", lines);
@@ -161,18 +163,18 @@ public class TestCodeGen {
         Path rustFilePath = new File(OSUtils.WORKING_DIRECTORY).toPath()
                 .resolve(Jni2RustFilePath.AstUtils.getFilePath());
         File rustFile = rustFilePath.toFile();
-        assertTrue(rustFile.exists());
-        assertTrue(rustFile.isFile());
-        assertTrue(rustFile.canRead());
-        assertTrue(rustFile.canWrite());
+        assertThat(rustFile.exists()).isTrue();
+        assertThat(rustFile.isFile()).isTrue();
+        assertThat(rustFile.canRead()).isTrue();
+        assertThat(rustFile.canWrite()).isTrue();
         String startSign = "\n/* JNI Begin */\n";
         String endSign = "/* JNI End */\n";
         byte[] originalBuffer = Files.readAllBytes(rustFilePath);
         String fileContent = new String(originalBuffer, StandardCharsets.UTF_8);
         final int startPosition = fileContent.indexOf(startSign) + startSign.length();
         final int endPosition = fileContent.indexOf(endSign);
-        assertTrue(startPosition > 0, "Start position is invalid");
-        assertTrue(endPosition > startPosition, "End position is invalid");
+        assertThat(startPosition).as("Start position is invalid").isPositive();
+        assertThat(endPosition).as("End position is invalid").isGreaterThan(startPosition);
         final AtomicInteger enumCounter = new AtomicInteger();
         final AtomicInteger structCounter = new AtomicInteger();
         final List<String> lines = new ArrayList<>();
@@ -219,7 +221,7 @@ public class TestCodeGen {
                             className));
                     structCounter.incrementAndGet();
                 });
-        assertTrue(structCounter.get() > 0);
+        assertThat(structCounter.get()).isPositive();
         lines.addAll(declarationLines);
         lines.add("\npub fn init<'local>(env: &mut JNIEnv<'local>) {");
         lines.add("  log::debug!(\"init()\");");
@@ -244,18 +246,18 @@ public class TestCodeGen {
         Path rustFilePath = new File(OSUtils.WORKING_DIRECTORY).toPath()
                 .resolve(Jni2RustFilePath.AstUtils.getFilePath());
         File rustFile = rustFilePath.toFile();
-        assertTrue(rustFile.exists());
-        assertTrue(rustFile.isFile());
-        assertTrue(rustFile.canRead());
-        assertTrue(rustFile.canWrite());
+        assertThat(rustFile.exists()).isTrue();
+        assertThat(rustFile.isFile()).isTrue();
+        assertThat(rustFile.canRead()).isTrue();
+        assertThat(rustFile.canWrite()).isTrue();
         String startSign = "\n/* AST Begin */\n";
         String endSign = "/* AST End */\n";
         byte[] originalBuffer = Files.readAllBytes(rustFilePath);
         String fileContent = new String(originalBuffer, StandardCharsets.UTF_8);
         final int startPosition = fileContent.indexOf(startSign) + startSign.length();
         final int endPosition = fileContent.indexOf(endSign);
-        assertTrue(startPosition > 0, "Start position is invalid");
-        assertTrue(endPosition > startPosition, "End position is invalid");
+        assertThat(startPosition).as("Start position is invalid").isPositive();
+        assertThat(endPosition).as("End position is invalid").isGreaterThan(startPosition);
         final AtomicInteger structCounter = new AtomicInteger();
         List<String> lines = new ArrayList<>();
         Swc4jAstStore.getInstance().getStructMap().entrySet().stream()
@@ -263,7 +265,7 @@ public class TestCodeGen {
                 .map(Map.Entry::getValue)
                 .forEach(clazz -> {
                     Constructor<?>[] constructors = clazz.getConstructors();
-                    assertEquals(1, constructors.length);
+                    assertThat(constructors.length).isEqualTo(1);
                     Constructor<?> constructor = constructors[0];
                     final Map<String, Integer> fieldOrderMap = new HashMap<>(constructor.getParameterCount());
                     int fieldOrder = 0;
@@ -297,9 +299,9 @@ public class TestCodeGen {
                                                         arg));
                                             }
                                         } else if (innerType instanceof ParameterizedType) {
-                                            assertTrue(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
+                                            assertThat(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType())).isTrue();
                                             Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
-                                            assertInstanceOf(Class.class, innerType2);
+                                            assertThat(innerType2).isInstanceOf(Class.class);
                                             lines.add(String.format("    self.%s.as_ref().map(|nodes| nodes.iter().for_each(|node| node.register_with_map(map)));",
                                                     arg));
                                         } else {
@@ -315,9 +317,9 @@ public class TestCodeGen {
                                         if (innerType instanceof Class) {
                                             lines.add("      node.register_with_map(map);");
                                         } else if (innerType instanceof ParameterizedType) {
-                                            assertTrue(Optional.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
+                                            assertThat(Optional.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType())).isTrue();
                                             Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
-                                            assertInstanceOf(Class.class, innerType2);
+                                            assertThat(innerType2).isInstanceOf(Class.class);
                                             lines.add("      node.as_ref().map(|node| node.register_with_map(map));");
                                         } else {
                                             fail(innerType.getTypeName() + " is not expected");
@@ -398,9 +400,9 @@ public class TestCodeGen {
                                                     fail(field.getGenericType().getTypeName() + " is not expected");
                                                 }
                                             } else if (innerType instanceof ParameterizedType) {
-                                                assertTrue(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
+                                                assertThat(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType())).isTrue();
                                                 Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
-                                                assertInstanceOf(Class.class, innerType2);
+                                                assertThat(innerType2).isInstanceOf(Class.class);
                                                 String javaOptionalVar = String.format("java_optional_%s", arg);
                                                 args.add("&" + javaOptionalVar);
                                                 javaOptionalVars.add(javaOptionalVar);
@@ -446,9 +448,9 @@ public class TestCodeGen {
                                                     fail(innerClass.getName() + " is not expected");
                                                 }
                                             } else if (innerType instanceof ParameterizedType) {
-                                                assertTrue(Optional.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
+                                                assertThat(Optional.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType())).isTrue();
                                                 Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
-                                                assertInstanceOf(Class.class, innerType2);
+                                                assertThat(innerType2).isInstanceOf(Class.class);
                                                 lines.add("      let java_node = match node.as_ref() {");
                                                 lines.add("        Some(node) => node.to_java_with_map(env, map)?,");
                                                 lines.add("        None => Default::default(),");
@@ -576,9 +578,9 @@ public class TestCodeGen {
                                             fail(field.getGenericType().getTypeName() + " is not expected");
                                         }
                                     } else if (innerType instanceof ParameterizedType) {
-                                        assertTrue(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
+                                        assertThat(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType())).isTrue();
                                         Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
-                                        assertInstanceOf(Class.class, innerType2);
+                                        assertThat(innerType2).isInstanceOf(Class.class);
                                         Class<?> innerClass = (Class<?>) innerType2;
                                         Jni2RustClassUtils<?> innerJni2RustClassUtils = new Jni2RustClassUtils<>(innerClass);
                                         processLines.add(String.format("      let %s = optional_get(env, &%s)?;",
@@ -647,9 +649,9 @@ public class TestCodeGen {
                                             fail(innerClass.getName() + " is not expected");
                                         }
                                     } else if (innerType instanceof ParameterizedType) {
-                                        assertTrue(Optional.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
+                                        assertThat(Optional.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType())).isTrue();
                                         Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
-                                        assertInstanceOf(Class.class, innerType2);
+                                        assertThat(innerType2).isInstanceOf(Class.class);
                                         Class<?> innerClass = (Class<?>) innerType2;
                                         Jni2RustClassUtils<?> innerJni2RustClassUtils = new Jni2RustClassUtils<>(innerClass);
                                         processLines.add(String.format("    let mut %s: Vec<Option<%s>> = Vec::with_capacity(length);",
@@ -738,7 +740,7 @@ public class TestCodeGen {
                     }
                     structCounter.incrementAndGet();
                 });
-        assertTrue(structCounter.get() > 0);
+        assertThat(structCounter.get()).isPositive();
         StringBuilder sb = new StringBuilder(fileContent.length());
         sb.append(fileContent, 0, startPosition);
         String code = StringUtils.join("\n", lines);

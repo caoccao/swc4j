@@ -26,8 +26,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSourceMapUtils extends BaseTestSuite {
     @Test
@@ -44,7 +45,7 @@ public class TestSourceMapUtils extends BaseTestSuite {
                 """;
         SourceMapUtils sourceMapUtils = SourceMapUtils.of(sourceMapJson);
         SourceMapUtils.SourceNode node = sourceMapUtils.getNode(0, 0);
-        assertNotNull(node);
+        assertThat(node).isNotNull();
     }
 
     @Test
@@ -64,11 +65,11 @@ public class TestSourceMapUtils extends BaseTestSuite {
         SourceMapUtils sourceMapUtils = SourceMapUtils.of(sourceMapJson);
         SourceMapUtils.SourceNode node = sourceMapUtils.getNode(0, 0);
 
-        assertNotNull(node);
-        assertEquals(0, node.sourceFileIndex);
-        assertEquals(0, node.nameIndex);
-        assertEquals(0, node.originalPosition.line);
-        assertEquals(0, node.originalPosition.column);
+        assertThat(node).isNotNull();
+        assertThat(node.sourceFileIndex).isEqualTo(0);
+        assertThat(node.nameIndex).isEqualTo(0);
+        assertThat(node.originalPosition.line).isEqualTo(0);
+        assertThat(node.originalPosition.column).isEqualTo(0);
     }
 
     @Test
@@ -86,10 +87,10 @@ public class TestSourceMapUtils extends BaseTestSuite {
                 }
                 """;
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThatThrownBy(() -> {
             SourceMapUtils sourceMapUtils = SourceMapUtils.of(sourceMapJson);
             sourceMapUtils.getNode(0, 0); // This should trigger parsing and validation
-        });
+        }).isInstanceOf(IllegalArgumentException.class);;
     }
 
     @Test
@@ -107,20 +108,20 @@ public class TestSourceMapUtils extends BaseTestSuite {
         SourceMapUtils sourceMapUtils = SourceMapUtils.of(sourceMapJson);
 
         // Verify arrays preserve nulls and maintain correct indices
-        assertEquals(3, sourceMapUtils.getSourceFilePaths().size());
-        assertEquals("file1.js", sourceMapUtils.getSourceFilePaths().get(0));
-        assertNull(sourceMapUtils.getSourceFilePaths().get(1));
-        assertEquals("file3.js", sourceMapUtils.getSourceFilePaths().get(2));
+        assertThat(sourceMapUtils.getSourceFilePaths().size()).isEqualTo(3);
+        assertThat(sourceMapUtils.getSourceFilePaths().get(0)).isEqualTo("file1.js");
+        assertThat(sourceMapUtils.getSourceFilePaths().get(1)).isNull();
+        assertThat(sourceMapUtils.getSourceFilePaths().get(2)).isEqualTo("file3.js");
 
-        assertEquals(3, sourceMapUtils.getSourceContents().size());
-        assertEquals("content1", sourceMapUtils.getSourceContents().get(0));
-        assertNull(sourceMapUtils.getSourceContents().get(1));
-        assertEquals("content3", sourceMapUtils.getSourceContents().get(2));
+        assertThat(sourceMapUtils.getSourceContents().size()).isEqualTo(3);
+        assertThat(sourceMapUtils.getSourceContents().get(0)).isEqualTo("content1");
+        assertThat(sourceMapUtils.getSourceContents().get(1)).isNull();
+        assertThat(sourceMapUtils.getSourceContents().get(2)).isEqualTo("content3");
 
-        assertEquals(3, sourceMapUtils.getNames().size());
-        assertEquals("name1", sourceMapUtils.getNames().get(0));
-        assertNull(sourceMapUtils.getNames().get(1));
-        assertEquals("name3", sourceMapUtils.getNames().get(2));
+        assertThat(sourceMapUtils.getNames().size()).isEqualTo(3);
+        assertThat(sourceMapUtils.getNames().get(0)).isEqualTo("name1");
+        assertThat(sourceMapUtils.getNames().get(1)).isNull();
+        assertThat(sourceMapUtils.getNames().get(2)).isEqualTo("name3");
     }
 
     @Test
@@ -141,8 +142,8 @@ public class TestSourceMapUtils extends BaseTestSuite {
         // The 1-field segments should not create source nodes
         // Only the 4-field segment "AAAA" should create a node
         SourceMapUtils.SourceNode node = sourceMapUtils.getNode(0, 2);
-        assertNotNull(node);
-        assertEquals(0, node.sourceFileIndex);
+        assertThat(node).isNotNull();
+        assertThat(node.sourceFileIndex).isEqualTo(0);
     }
 
     @Test
@@ -162,9 +163,9 @@ public class TestSourceMapUtils extends BaseTestSuite {
 
         // Request line 2 - should parse up to that line
         SourceMapUtils.SourceNode node = sourceMapUtils.getNode(2, 0);
-        assertNotNull(node);
-        assertEquals(2, node.generatedPosition.line);
-        assertEquals(2, node.originalPosition.line);
+        assertThat(node).isNotNull();
+        assertThat(node.generatedPosition.line).isEqualTo(2);
+        assertThat(node.originalPosition.line).isEqualTo(2);
     }
 
     @Test
@@ -182,10 +183,10 @@ public class TestSourceMapUtils extends BaseTestSuite {
                 }
                 """;
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThatThrownBy(() -> {
             SourceMapUtils sourceMapUtils = SourceMapUtils.of(sourceMapJson);
             sourceMapUtils.getNode(0, 0); // This should trigger parsing and validation
-        });
+        }).isInstanceOf(IllegalArgumentException.class);;
     }
 
     @Test
@@ -199,25 +200,31 @@ public class TestSourceMapUtils extends BaseTestSuite {
         Swc4jTransformOutput output = swc4j.transform(code, tsModuleTransformOptions
                 .setMinify(false)
                 .setSourceMap(Swc4jSourceMapOption.Separate));
-        assertNotNull(output);
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals(Swc4jMediaType.TypeScript, output.getMediaType());
-        assertEquals(expectedCode, output.getCode());
-        assertNotNull(output.getSourceMap());
+        assertThat(output).isNotNull();
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
+        assertThat(output.getMediaType()).isEqualTo(Swc4jMediaType.TypeScript);
+        assertThat(output.getCode()).isEqualTo(expectedCode);
+        assertThat(output.getSourceMap()).isNotNull();
         SourceMapUtils sourceMapUtils = SourceMapUtils.of(output.getSourceMap());
-        assertNotNull(sourceMapUtils);
-        assertEquals(
-                SimpleList.of("file:///main.js"),
-                sourceMapUtils.getSourceFilePaths());
-        assertEquals(
-                SimpleList.of("function add(a:number, b:number)\n{ return a+b; }"),
-                sourceMapUtils.getSourceContents());
-        assertEquals(SimpleList.of(), sourceMapUtils.getNames());
-        assertEquals(
-                "AAAA,SAAS,IAAI,GAAE,MAAM,EAAE,GAAE,MAAM;EAC7B,OAAO,IAAE;AAAG",
-                sourceMapUtils.getMappings());
+        assertThat(sourceMapUtils).isNotNull();
+        assertThat(
+                sourceMapUtils.getSourceFilePaths()
+        ).isEqualTo(
+                SimpleList.of("file:///main.js")
+        );
+        assertThat(
+                sourceMapUtils.getSourceContents()
+        ).isEqualTo(
+                SimpleList.of("function add(a:number, b:number)\n{ return a+b; }")
+        );
+        assertThat(sourceMapUtils.getNames()).isEqualTo(SimpleList.of());
+        assertThat(
+                sourceMapUtils.getMappings()
+        ).isEqualTo(
+                "AAAA,SAAS,IAAI,GAAE,MAAM,EAAE,GAAE,MAAM;EAC7B,OAAO,IAAE;AAAG"
+        );
         SimpleMap.of(0, 0, -1, 0, 0, -1, -1, -1)
-                .forEach((line, column) -> assertNull(sourceMapUtils.getNode(line, column)));
+                .forEach((line, column) -> assertThat(sourceMapUtils.getNode(line, column)).isNull());
         Map<SourceMapUtils.SourceNode, SourceMapUtils.SourceNode> testCaseMap = new LinkedHashMap<>();
         testCaseMap.put(sourceMapUtils.getNode(SourceMapUtils.SourcePosition.of()), SourceMapUtils.SourceNode.of());
         testCaseMap.put(sourceMapUtils.getNode(SourceMapUtils.SourcePosition.of(0, 1)),
@@ -236,7 +243,8 @@ public class TestSourceMapUtils extends BaseTestSuite {
                 SourceMapUtils.SourceNode.of(
                         SourceMapUtils.SourcePosition.of(1, 2),
                         SourceMapUtils.SourcePosition.of(1, 2)));
-        testCaseMap.forEach((node, expectedNode) ->
-                assertEquals(expectedNode, node, "Expected " + expectedNode + " doesn't match " + node));
+        testCaseMap.forEach((node, expectedNode) -> assertThat(node)
+                .as("Expected " + expectedNode + " doesn't match " + node)
+                .isEqualTo(expectedNode));
     }
 }

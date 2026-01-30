@@ -26,8 +26,9 @@ import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jParseOptions extends BaseTestSuite {
 
@@ -43,12 +44,12 @@ public class TestSwc4jParseOptions extends BaseTestSuite {
                 }
                 export default App;""";
         Swc4jParseOutput output = swc4j.parse(code, jsxModuleParseOptions);
-        assertNotNull(output);
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals(code, output.getSourceText());
-        assertEquals(Swc4jMediaType.Jsx, output.getMediaType());
-        assertNull(output.getProgram());
-        assertNull(output.getTokens());
+        assertThat(output).isNotNull();
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
+        assertThat(output.getSourceText()).isEqualTo(code);
+        assertThat(output.getMediaType()).isEqualTo(Swc4jMediaType.Jsx);
+        assertThat(output.getProgram()).isNull();
+        assertThat(output.getTokens()).isNull();
     }
 
     @Test
@@ -57,46 +58,41 @@ public class TestSwc4jParseOptions extends BaseTestSuite {
         Swc4jParseOutput output = swc4j.parse(code, tsModuleParseOptions
                 .setCaptureAst(true)
                 .setCaptureComments(true));
-        assertNotNull(output);
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals(1, output.getComments().getLeading().size());
-        assertEquals(1, output.getComments().getTrailing().size());
+        assertThat(output).isNotNull();
+        assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
+        assertThat(output.getComments().getLeading().size()).isEqualTo(1);
+        assertThat(output.getComments().getTrailing().size()).isEqualTo(1);
         List<Swc4jComment> comments = output.getComments().getLeading(23);
-        assertEquals(1, comments.size());
+        assertThat(comments.size()).isEqualTo(1);
         Swc4jComment comment = comments.get(0);
-        assertEquals(Swc4jCommentKind.Block, comment.getKind());
-        assertEquals(7, comment.getSpan().getStart());
-        assertEquals(22, comment.getSpan().getEnd());
-        assertEquals(1, comment.getSpan().getLine());
-        assertEquals(8, comment.getSpan().getColumn());
-        assertEquals(" Comment 1 ", comment.getText());
+        assertThat(comment.getKind()).isEqualTo(Swc4jCommentKind.Block);
+        assertThat(comment.getSpan().getStart()).isEqualTo(7);
+        assertThat(comment.getSpan().getEnd()).isEqualTo(22);
+        assertThat(comment.getSpan().getLine()).isEqualTo(1);
+        assertThat(comment.getSpan().getColumn()).isEqualTo(8);
+        assertThat(comment.getText()).isEqualTo(" Comment 1 ");
         comments = output.getComments().getTrailing(34);
-        assertEquals(1, comments.size());
+        assertThat(comments.size()).isEqualTo(1);
         comment = comments.get(0);
-        assertEquals(Swc4jCommentKind.Line, comment.getKind());
-        assertEquals(35, comment.getSpan().getStart());
-        assertEquals(47, comment.getSpan().getEnd());
-        assertEquals(1, comment.getSpan().getLine());
-        assertEquals(36, comment.getSpan().getColumn());
-        assertEquals(" Comment 2", comment.getText());
-        assertTrue(output.getComments().hasLeading(23));
-        assertTrue(output.getComments().hasTrailing(34));
+        assertThat(comment.getKind()).isEqualTo(Swc4jCommentKind.Line);
+        assertThat(comment.getSpan().getStart()).isEqualTo(35);
+        assertThat(comment.getSpan().getEnd()).isEqualTo(47);
+        assertThat(comment.getSpan().getLine()).isEqualTo(1);
+        assertThat(comment.getSpan().getColumn()).isEqualTo(36);
+        assertThat(comment.getText()).isEqualTo(" Comment 2");
+        assertThat(output.getComments().hasLeading(23)).isTrue();
+        assertThat(output.getComments().hasTrailing(34)).isTrue();
         comments = output.getComments().getComments();
-        assertEquals(2, comments.size());
+        assertThat(comments.size()).isEqualTo(2);
     }
 
     @Test
     public void testWrongMediaType() {
         String code = "function add(a:number, b:number) { return a+b; }";
-        assertEquals(
-                """
-                        Expected ',', got ':' at file:///main.js:1:15
-                        
-                          function add(a:number, b:number) { return a+b; }
-                                        ~""",
-                assertThrows(
-                        Swc4jCoreException.class,
-                        () -> swc4j.parse(code, jsModuleParseOptions))
-                        .getMessage());
+        assertThatThrownBy(() -> swc4j.parse(code, jsModuleParseOptions))
+                .isInstanceOf(Swc4jCoreException.class)
+                .hasMessageContaining("Expected ','")
+                .hasMessageContaining("file:///main.js:1:15")
+                .hasMessageContaining("function add(a:number, b:number) { return a+b; }");
     }
 }

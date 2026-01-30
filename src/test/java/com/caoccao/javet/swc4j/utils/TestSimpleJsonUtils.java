@@ -22,8 +22,8 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSimpleJsonUtils {
     @Test
@@ -31,60 +31,60 @@ public class TestSimpleJsonUtils {
         SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonArrayNode.of(
                 SimpleJsonUtils.JsonBooleanNode.of(true),
                 SimpleJsonUtils.JsonBooleanNode.of(false));
-        assertEquals(expectedJsonNode, SimpleJsonUtils.parse("[true,false]"));
+        assertThat(SimpleJsonUtils.parse("[true,false]")).isEqualTo(expectedJsonNode);
     }
 
     @Test
     public void testBoolean() {
         Stream.of(true, false).forEach(b -> {
             SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonBooleanNode.of(b);
-            assertEquals(expectedJsonNode, SimpleJsonUtils.parse(Boolean.toString(b)));
-            assertEquals(expectedJsonNode, SimpleJsonUtils.parse("  " + b + "  "));
+            assertThat(SimpleJsonUtils.parse(Boolean.toString(b))).isEqualTo(expectedJsonNode);
+            assertThat(SimpleJsonUtils.parse("  " + b + "  ")).isEqualTo(expectedJsonNode);
         });
     }
 
     @Test
     public void testEmptyArray() {
         SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonArrayNode.of();
-        assertEquals(expectedJsonNode, SimpleJsonUtils.parse("[]"));
+        assertThat(SimpleJsonUtils.parse("[]")).isEqualTo(expectedJsonNode);
     }
 
     @Test
     public void testEmptyArrayWithWhiteSpaces() {
         SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonArrayNode.of();
-        assertEquals(expectedJsonNode, SimpleJsonUtils.parse(" \t [ \n\r ] "));
+        assertThat(SimpleJsonUtils.parse(" \t [ \n\r ] ")).isEqualTo(expectedJsonNode);
     }
 
     @Test
     public void testEmptyObject() {
         SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonObjectNode.of();
-        assertEquals(expectedJsonNode, SimpleJsonUtils.parse("{}"));
+        assertThat(SimpleJsonUtils.parse("{}")).isEqualTo(expectedJsonNode);
     }
 
     @Test
     public void testEmptyObjectWithWhiteSpaces() {
         SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonObjectNode.of();
-        assertEquals(expectedJsonNode, SimpleJsonUtils.parse(" \t { \n\r } "));
+        assertThat(SimpleJsonUtils.parse(" \t { \n\r } ")).isEqualTo(expectedJsonNode);
     }
 
     @Test
     public void testNull() {
         // Test null value
         SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonNullNode.of();
-        assertEquals(expectedJsonNode, SimpleJsonUtils.parse("null"));
-        assertEquals(expectedJsonNode, SimpleJsonUtils.parse("  null  "));
+        assertThat(SimpleJsonUtils.parse("null")).isEqualTo(expectedJsonNode);
+        assertThat(SimpleJsonUtils.parse("  null  ")).isEqualTo(expectedJsonNode);
 
         // Test null in object
         SimpleJsonUtils.JsonObjectNode expectedObjectNode = SimpleJsonUtils.JsonObjectNode.of();
         expectedObjectNode.getNodeMap().put("value", SimpleJsonUtils.JsonNullNode.of());
-        assertEquals(expectedObjectNode, SimpleJsonUtils.parse("{\"value\": null}"));
+        assertThat(SimpleJsonUtils.parse("{\"value\": null}")).isEqualTo(expectedObjectNode);
 
         // Test null in array
         SimpleJsonUtils.JsonArrayNode expectedArrayNode = SimpleJsonUtils.JsonArrayNode.of(
                 SimpleJsonUtils.JsonNumberNode.of(1),
                 SimpleJsonUtils.JsonNullNode.of(),
                 SimpleJsonUtils.JsonTextNode.of("test"));
-        assertEquals(expectedArrayNode, SimpleJsonUtils.parse("[1, null, \"test\"]"));
+        assertThat(SimpleJsonUtils.parse("[1, null, \"test\"]")).isEqualTo(expectedArrayNode);
 
         // Test mixed values
         SimpleJsonUtils.JsonObjectNode expectedMixedNode = SimpleJsonUtils.JsonObjectNode.of();
@@ -97,25 +97,25 @@ public class TestSimpleJsonUtils {
         SimpleJsonUtils.JsonObjectNode nestedObject = SimpleJsonUtils.JsonObjectNode.of();
         nestedObject.getNodeMap().put("d", SimpleJsonUtils.JsonNullNode.of());
         expectedMixedNode.getNodeMap().put("c", nestedObject);
-        assertEquals(expectedMixedNode, SimpleJsonUtils.parse("{\"a\": null, \"b\": [null, true, null], \"c\": {\"d\": null}}"));
+        assertThat(SimpleJsonUtils.parse("{\"a\": null, \"b\": [null, true, null], \"c\": {\"d\": null}}")).isEqualTo(expectedMixedNode);
     }
 
     @Test
     public void testNumber() {
         IntStream.of(123, -123, Integer.MAX_VALUE, Integer.MIN_VALUE, 0).forEach(i -> {
             SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonNumberNode.of(i);
-            assertEquals(expectedJsonNode, SimpleJsonUtils.parse(Integer.toString(i)));
-            assertEquals(expectedJsonNode, SimpleJsonUtils.parse("  " + i + "  "));
+            assertThat(SimpleJsonUtils.parse(Integer.toString(i))).isEqualTo(expectedJsonNode);
+            assertThat(SimpleJsonUtils.parse("  " + i + "  ")).isEqualTo(expectedJsonNode);
         });
         LongStream.of(Long.MAX_VALUE / 2, Long.MIN_VALUE / 2, Long.MAX_VALUE, Long.MIN_VALUE).forEach(l -> {
             SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonNumberNode.of(l);
-            assertEquals(expectedJsonNode, SimpleJsonUtils.parse(Long.toString(l)));
-            assertEquals(expectedJsonNode, SimpleJsonUtils.parse("  " + l + "  "));
+            assertThat(SimpleJsonUtils.parse(Long.toString(l))).isEqualTo(expectedJsonNode);
+            assertThat(SimpleJsonUtils.parse("  " + l + "  ")).isEqualTo(expectedJsonNode);
         });
         DoubleStream.of(Double.MAX_VALUE / 2, Double.MIN_VALUE / 2, Double.MAX_VALUE, Double.MIN_VALUE).forEach(d -> {
             SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonNumberNode.of(d);
-            assertEquals(expectedJsonNode, SimpleJsonUtils.parse(Double.toString(d)));
-            assertEquals(expectedJsonNode, SimpleJsonUtils.parse("  " + d + "  "));
+            assertThat(SimpleJsonUtils.parse(Double.toString(d))).isEqualTo(expectedJsonNode);
+            assertThat(SimpleJsonUtils.parse("  " + d + "  ")).isEqualTo(expectedJsonNode);
         });
     }
 
@@ -136,15 +136,15 @@ public class TestSimpleJsonUtils {
                   "names" : [ ],
                   "mappings" : "AAAA,SAAS,IAAI,GAAE,MAAM,EAAE,GAAE,MAAM;EAC7B,OAAO,IAAE;AAAG"
                 }""");
-        assertEquals(expectedJsonNode, jsonNode);
+        assertThat(jsonNode).isEqualTo(expectedJsonNode);
     }
 
     @Test
     public void testText() {
         Stream.of("abc", "abc def", "\b\f\\\r\n\t\"").forEach(s -> {
             SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonTextNode.of(s);
-            assertEquals(expectedJsonNode, SimpleJsonUtils.parse("\"" + SimpleJsonUtils.escape(s) + "\""));
-            assertEquals(expectedJsonNode, SimpleJsonUtils.parse("  \"" + SimpleJsonUtils.escape(s) + "\"  "));
+            assertThat(SimpleJsonUtils.parse("\"" + SimpleJsonUtils.escape(s) + "\"")).isEqualTo(expectedJsonNode);
+            assertThat(SimpleJsonUtils.parse("  \"" + SimpleJsonUtils.escape(s) + "\"  ")).isEqualTo(expectedJsonNode);
         });
     }
 }

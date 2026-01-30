@@ -28,8 +28,9 @@ import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jPluginHost extends BaseTestSuite {
     @Test
@@ -40,10 +41,10 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
                 Swc4jPluginCounter pluginCounter = new Swc4jPluginCounter();
                 Swc4jParseOutput output = swc4j.parse(code, options
                         .setPluginHost(new Swc4jPluginHost().add(pluginCounter)));
-                assertNotNull(output);
-                assertEquals(1, pluginCounter.getModuleCount());
-                assertEquals(0, pluginCounter.getScriptCount());
-                assertEquals(Swc4jParseMode.Module, output.getParseMode());
+                assertThat(output).isNotNull();
+                assertThat(pluginCounter.getModuleCount()).isEqualTo(1);
+                assertThat(pluginCounter.getScriptCount()).isEqualTo(0);
+                assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
             } catch (Swc4jCoreException e) {
                 fail(e);
             }
@@ -58,10 +59,10 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
                 Swc4jPluginCounter pluginCounter = new Swc4jPluginCounter();
                 Swc4jParseOutput output = swc4j.parse(code, options
                         .setPluginHost(new Swc4jPluginHost().add(pluginCounter)));
-                assertNotNull(output);
-                assertEquals(0, pluginCounter.getModuleCount());
-                assertEquals(1, pluginCounter.getScriptCount());
-                assertEquals(Swc4jParseMode.Script, output.getParseMode());
+                assertThat(output).isNotNull();
+                assertThat(pluginCounter.getModuleCount()).isEqualTo(0);
+                assertThat(pluginCounter.getScriptCount()).isEqualTo(1);
+                assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Script);
             } catch (Swc4jCoreException e) {
                 fail(e);
             }
@@ -82,9 +83,9 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
                     .setPluginHost(new Swc4jPluginHost().add(new Swc4jPluginVisitors(SimpleList.of(visitor)))));
             fail("Failed to throw exception.");
         } catch (Swc4jCoreException e) {
-            assertEquals("Couldn't call boolean process() because Java exception was thrown", e.getMessage());
-            assertInstanceOf(RuntimeException.class, e.getCause());
-            assertEquals("Test", e.getCause().getMessage());
+            assertThat(e.getMessage()).isEqualTo("Couldn't call boolean process() because Java exception was thrown");
+            assertThat(e.getCause()).isInstanceOf(RuntimeException.class);
+            assertThat(e.getCause().getMessage()).isEqualTo("Test");
         }
     }
 
@@ -99,11 +100,11 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
                         .setInlineSources(false)
                         .setSourceMap(Swc4jSourceMapOption.None)
                         .setPluginHost(new Swc4jPluginHost().add(pluginCounter)));
-                assertNotNull(output);
-                assertEquals(expectedCode, output.getCode());
-                assertEquals(1, pluginCounter.getModuleCount());
-                assertEquals(0, pluginCounter.getScriptCount());
-                assertEquals(Swc4jParseMode.Module, output.getParseMode());
+                assertThat(output).isNotNull();
+                assertThat(output.getCode()).isEqualTo(expectedCode);
+                assertThat(pluginCounter.getModuleCount()).isEqualTo(1);
+                assertThat(pluginCounter.getScriptCount()).isEqualTo(0);
+                assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
             } catch (Swc4jCoreException e) {
                 fail(e);
             }
@@ -121,11 +122,11 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
                         .setInlineSources(false)
                         .setSourceMap(Swc4jSourceMapOption.None)
                         .setPluginHost(new Swc4jPluginHost().add(pluginCounter)));
-                assertNotNull(output);
-                assertEquals(expectedCode, output.getCode());
-                assertEquals(0, pluginCounter.getModuleCount());
-                assertEquals(1, pluginCounter.getScriptCount());
-                assertEquals(Swc4jParseMode.Script, output.getParseMode());
+                assertThat(output).isNotNull();
+                assertThat(output.getCode()).isEqualTo(expectedCode);
+                assertThat(pluginCounter.getModuleCount()).isEqualTo(0);
+                assertThat(pluginCounter.getScriptCount()).isEqualTo(1);
+                assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Script);
             } catch (Swc4jCoreException e) {
                 fail(e);
             }
@@ -146,9 +147,9 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
                     .setPluginHost(new Swc4jPluginHost().add(new Swc4jPluginVisitors(SimpleList.of(visitor)))));
             fail("Failed to throw exception.");
         } catch (Swc4jCoreException e) {
-            assertEquals("Couldn't call boolean process() because Java exception was thrown", e.getMessage());
-            assertInstanceOf(RuntimeException.class, e.getCause());
-            assertEquals("Test", e.getCause().getMessage());
+            assertThat(e.getMessage()).isEqualTo("Couldn't call boolean process() because Java exception was thrown");
+            assertThat(e.getCause()).isInstanceOf(RuntimeException.class);
+            assertThat(e.getCause().getMessage()).isEqualTo("Test");
         }
     }
 
@@ -163,11 +164,11 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
                         .setInlineSources(false)
                         .setSourceMap(Swc4jSourceMapOption.None)
                         .setPluginHost(new Swc4jPluginHost().add(pluginCounter)));
-                assertNotNull(output);
-                assertEquals(expectedCode, output.getCode());
-                assertEquals(1, pluginCounter.getModuleCount());
-                assertEquals(0, pluginCounter.getScriptCount());
-                assertEquals(Swc4jParseMode.Module, output.getParseMode());
+                assertThat(output).isNotNull();
+                assertThat(output.getCode()).isEqualTo(expectedCode);
+                assertThat(pluginCounter.getModuleCount()).isEqualTo(1);
+                assertThat(pluginCounter.getScriptCount()).isEqualTo(0);
+                assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Module);
             } catch (Swc4jCoreException e) {
                 fail(e);
             }
@@ -185,11 +186,11 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
                         .setInlineSources(false)
                         .setSourceMap(Swc4jSourceMapOption.None)
                         .setPluginHost(new Swc4jPluginHost().add(pluginCounter)));
-                assertNotNull(output);
-                assertEquals(expectedCode, output.getCode());
-                assertEquals(0, pluginCounter.getModuleCount());
-                assertEquals(1, pluginCounter.getScriptCount());
-                assertEquals(Swc4jParseMode.Script, output.getParseMode());
+                assertThat(output).isNotNull();
+                assertThat(output.getCode()).isEqualTo(expectedCode);
+                assertThat(pluginCounter.getModuleCount()).isEqualTo(0);
+                assertThat(pluginCounter.getScriptCount()).isEqualTo(1);
+                assertThat(output.getParseMode()).isEqualTo(Swc4jParseMode.Script);
             } catch (Swc4jCoreException e) {
                 fail(e);
             }
@@ -210,9 +211,9 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
                     .setPluginHost(new Swc4jPluginHost().add(new Swc4jPluginVisitors(SimpleList.of(visitor)))));
             fail("Failed to throw exception.");
         } catch (Swc4jCoreException e) {
-            assertEquals("Couldn't call boolean process() because Java exception was thrown", e.getMessage());
-            assertInstanceOf(RuntimeException.class, e.getCause());
-            assertEquals("Test", e.getCause().getMessage());
+            assertThat(e.getMessage()).isEqualTo("Couldn't call boolean process() because Java exception was thrown");
+            assertThat(e.getCause()).isInstanceOf(RuntimeException.class);
+            assertThat(e.getCause().getMessage()).isEqualTo("Test");
         }
     }
 }
