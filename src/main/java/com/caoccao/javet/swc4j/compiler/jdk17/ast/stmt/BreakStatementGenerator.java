@@ -106,12 +106,12 @@ public final class BreakStatementGenerator extends BaseAstProcessor<Swc4jAstBrea
             }
         }
 
-        // Generate goto with placeholder (will be patched later)
-        code.gotoLabel(0);
+        // Generate goto_w with placeholder (will be patched later)
+        code.goto_w(0);
 
         // Store position for patching when target is determined
-        int gotoOffsetPos = code.getCurrentOffset() - 2;
-        int gotoOpcodePos = code.getCurrentOffset() - 3;
+        int gotoOffsetPos = code.getCurrentOffset() - 4;
+        int gotoOpcodePos = code.getCurrentOffset() - 5;
         breakLabel.addPatchPosition(gotoOffsetPos, gotoOpcodePos);
     }
 

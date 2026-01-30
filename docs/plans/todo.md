@@ -156,13 +156,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Fix BinaryExpression string stackmap, enforce assignment coercion, add block scope tracking, handle non-block bodies.
 - Tests: String comparisons, mixed-type assignments, scope shadowing, and single-line ifs.
 
-## Feature: While Loop Wide Jump Support
-- Evidence: `docs/plans/ast/stmt/while-stmt.md`.
-- Status: Large loop bodies may need `goto_w`.
-- Confidence: 75%.
-- Plan: Add wide jump emission when offset exceeds 16-bit range.
-- Tests: Synthetic large loop body to exceed 32KB jump range.
-
 ## Feature: Try/Catch Multi-Type Guard Lowering
 - Evidence: `docs/plans/ast/stmt/try-stmt.md`.
 - Status: Multiple catch-type branching not implemented.

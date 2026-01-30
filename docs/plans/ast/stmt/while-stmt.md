@@ -1347,7 +1347,7 @@ if (body instanceof Swc4jAstWhileStmt whileStmt) {
 
 1. **Do-While Loops:** This plan covers while loops only, not do-while (different AST node)
 2. **Optimization:** Initial implementation may not optimize infinite loops or constant conditions
-3. **Wide Jumps:** May not handle very large loop bodies (&gt;32KB) initially (need goto_w)
+3. **Wide Jumps:** Supported for long back edges and exit paths via `goto_w`
 4. **Iterator Protocol:** for-of/for-in loops are separate implementations
 5. **Complex Control Flow:** Switch statements inside while may need special handling
 

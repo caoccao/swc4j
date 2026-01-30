@@ -139,32 +139,39 @@ public final class WhileStatementGenerator extends BaseAstProcessor<Swc4jAstWhil
         ISwc4jAstExpr testExpr = whileStmt.getTest();
         boolean isInfiniteLoop = isConstantTrue(testExpr);
 
-        // Setup placeholder for conditional jump to end
         int condJumpOffsetPos = -1;
         int condJumpOpcodePos = -1;
+        int exitGotoOffsetPos = -1;
+        int exitGotoOpcodePos = -1;
 
         if (!isInfiniteLoop) {
-            // Generate conditional test for normal while loops
-            // Try to generate direct conditional jump (like javac does)
+            // Generate conditional test and jump to body if TRUE
             if (testExpr instanceof Swc4jAstBinExpr binExpr) {
-                boolean generated = generateDirectConditionalJump(code, cp, binExpr);
+                boolean generated = generateDirectConditionalJumpToBody(code, cp, binExpr);
                 if (generated) {
                     condJumpOffsetPos = code.getCurrentOffset() - 2;
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
                 } else {
-                    // Fallback: generate boolean expression and use ifeq
                     compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
-                    code.ifeq(0); // Placeholder
+                    code.ifne(0); // Placeholder - jump to body if TRUE
                     condJumpOffsetPos = code.getCurrentOffset() - 2;
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
                 }
             } else {
-                // Non-binary expression: generate as boolean and use ifeq
                 compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
-                code.ifeq(0); // Placeholder
+                code.ifne(0); // Placeholder - jump to body if TRUE
                 condJumpOffsetPos = code.getCurrentOffset() - 2;
                 condJumpOpcodePos = code.getCurrentOffset() - 3;
             }
+
+            // Emit wide jump to end for the false path
+            code.goto_w(0); // Placeholder
+            exitGotoOffsetPos = code.getCurrentOffset() - 4;
+            exitGotoOpcodePos = code.getCurrentOffset() - 5;
+
+            int bodyLabel = code.getCurrentOffset();
+            int condJumpOffset = bodyLabel - condJumpOpcodePos;
+            code.patchShort(condJumpOffsetPos, condJumpOffset);
         }
         // For while(true), no conditional test needed - just fall through to body
 
@@ -189,14 +196,8 @@ public final class WhileStatementGenerator extends BaseAstProcessor<Swc4jAstWhil
         // Note: Unlike for loops, continue jumps directly to test (no update section),
         // so we don't need a backward jump when body ends with continue
         if (bodyCanFallThrough) {
-            // Jump back to test (backward jump)
-            code.gotoLabel(0); // Placeholder
-            int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
-            int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
-
-            // Calculate and patch the backward jump offset
-            int backwardGotoOffset = testLabel - backwardGotoOpcodePos;
-            code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
+            int backwardGotoOffset = testLabel - code.getCurrentOffset();
+            code.goto_w(backwardGotoOffset);
         }
 
         // 7. Mark end label (break target)
@@ -206,19 +207,19 @@ public final class WhileStatementGenerator extends BaseAstProcessor<Swc4jAstWhil
         // 8. Patch all break statements to jump to end label
         for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
             int offset = endLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
 
         // 9. Patch all continue statements to jump to test label
         for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
             int offset = testLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
 
-        // 10. Patch conditional jump (only if we generated one)
+        // 10. Patch exit goto (only if we generated one)
         if (!isInfiniteLoop) {
-            int condJumpOffset = endLabel - condJumpOpcodePos;
-            code.patchShort(condJumpOffsetPos, condJumpOffset);
+            int exitGotoOffset = endLabel - exitGotoOpcodePos;
+            code.patchInt(exitGotoOffsetPos, exitGotoOffset);
         }
 
         // 11. Pop labels from stack
@@ -232,7 +233,7 @@ public final class WhileStatementGenerator extends BaseAstProcessor<Swc4jAstWhil
      *
      * @return true if direct jump was generated, false if caller should use fallback
      */
-    private boolean generateDirectConditionalJump(
+    private boolean generateDirectConditionalJumpToBody(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstBinExpr binExpr) throws Swc4jByteCodeCompilerException {
@@ -259,15 +260,15 @@ public final class WhileStatementGenerator extends BaseAstProcessor<Swc4jAstWhil
         // Generate right operand
         compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
 
-        // Generate inverted comparison (jump to end if condition is FALSE)
-        // For "i < 10", we want to exit if "i >= 10", so use if_icmpge
+        // Generate comparison - jump to body if condition is TRUE
+        // For "i < 10", we want to jump to body if "i < 10", so use if_icmplt
         switch (op) {
-            case Lt -> code.if_icmpge(0);      // i < 10  -> exit if i >= 10
-            case LtEq -> code.if_icmpgt(0);    // i <= 10 -> exit if i > 10
-            case Gt -> code.if_icmple(0);      // i > 10  -> exit if i <= 10
-            case GtEq -> code.if_icmplt(0);    // i >= 10 -> exit if i < 10
-            case EqEq, EqEqEq -> code.if_icmpne(0);  // i == 10 -> exit if i != 10
-            case NotEq, NotEqEq -> code.if_icmpeq(0); // i != 10 -> exit if i == 10
+            case Lt -> code.if_icmplt(0);      // i < 10  -> enter body if i < 10
+            case LtEq -> code.if_icmple(0);    // i <= 10 -> enter body if i <= 10
+            case Gt -> code.if_icmpgt(0);      // i > 10  -> enter body if i > 10
+            case GtEq -> code.if_icmpge(0);    // i >= 10 -> enter body if i >= 10
+            case EqEq, EqEqEq -> code.if_icmpeq(0);  // i == 10 -> enter body if i == 10
+            case NotEq, NotEqEq -> code.if_icmpne(0); // i != 10 -> enter body if i != 10
             default -> {
                 return false;
             }

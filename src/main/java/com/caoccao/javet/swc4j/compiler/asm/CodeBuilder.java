@@ -489,6 +489,12 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder goto_w(int offset) {
+        code.add((byte) (0xC8)); // goto_w
+        writeInt(offset);
+        return this;
+    }
+
     public CodeBuilder goto_(int targetOffset) {
         int gotoOffset = getOffset(); // save offset before adding opcode
         code.add((byte) (0xA7)); // goto
@@ -1035,6 +1041,23 @@ public class CodeBuilder {
         for (int i = 0; i < bytes.length; i++) {
             code.set(position + i, bytes[i]);
         }
+    }
+
+    /**
+     * Patches a 32-bit signed offset at the specified position.
+     * This is used for wide branching instructions like goto_w.
+     *
+     * @param position the byte position where the offset starts
+     * @param offset   the 32-bit signed offset value to write
+     */
+    public void patchInt(int position, int offset) {
+        if (position < 0 || position + 3 >= code.size()) {
+            throw new IllegalArgumentException("Invalid position: " + position);
+        }
+        code.set(position, (byte) ((offset >> 24) & 0xFF));
+        code.set(position + 1, (byte) ((offset >> 16) & 0xFF));
+        code.set(position + 2, (byte) ((offset >> 8) & 0xFF));
+        code.set(position + 3, (byte) (offset & 0xFF));
     }
 
     /**

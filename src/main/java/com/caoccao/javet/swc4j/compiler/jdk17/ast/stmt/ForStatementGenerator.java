@@ -219,13 +219,13 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
         // 9. Patch all break statements to jump to end label
         for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
             int offset = endLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
 
         // 10. Patch all continue statements to jump to update label
         for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
             int offset = updateLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
 
         // 11. Patch conditional jump if test exists

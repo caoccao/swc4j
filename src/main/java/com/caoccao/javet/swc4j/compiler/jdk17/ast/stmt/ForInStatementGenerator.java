@@ -273,13 +273,13 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
         // 18. Patch all break statements
         for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
             int offset = endLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
 
         // 19. Patch all continue statements
         for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
             int offset = updateLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
     }
 
@@ -369,13 +369,13 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
         // 17. Patch all break statements
         for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
             int offset = endLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
 
         // 18. Patch all continue statements
         for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
             int offset = testLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
     }
 
@@ -468,13 +468,13 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
         // 18. Patch all break statements
         for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
             int offset = endLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
 
         // 19. Patch all continue statements
         for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
             int offset = updateLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
     }
 

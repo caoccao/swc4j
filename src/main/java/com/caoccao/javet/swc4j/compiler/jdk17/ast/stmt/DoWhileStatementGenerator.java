@@ -205,13 +205,13 @@ public final class DoWhileStatementGenerator extends BaseAstProcessor<Swc4jAstDo
         // 7. Patch all break statements to jump to end label
         for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
             int offset = endLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
 
         // 8. Patch all continue statements to jump to test label
         for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
             int offset = testLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
 
         // 9. Pop labels from stack

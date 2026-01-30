@@ -493,7 +493,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         // Patch break statements
         for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
             int offset = endLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
 
         context.popBreakLabel();
@@ -609,7 +609,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         // Patch break statements
         for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
             int offset = endLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
 
         context.popBreakLabel();
@@ -789,7 +789,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         // Patch break statements
         for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
             int offset = endLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
+            code.patchInt(patchInfo.offsetPos(), offset);
         }
 
         context.popBreakLabel();

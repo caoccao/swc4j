@@ -302,6 +302,14 @@ public class StackMapGenerator {
                 if (nextInstructionOffset < bytecode.length) {
                     targets.add(nextInstructionOffset);
                 }
+            } else if (opcode == 0xC8) { // goto_w
+                if (i + 4 < bytecode.length) {
+                    int offset = readInt(i + 1);
+                    targets.add(i + offset);
+                }
+                if (nextInstructionOffset < bytecode.length) {
+                    targets.add(nextInstructionOffset);
+                }
             } else if (opcode == 0xC6 || opcode == 0xC7) { // ifnull, ifnonnull
                 if (i + 2 < bytecode.length) {
                     short offset = (short) (((bytecode[i + 1] & 0xFF) << 8) | (bytecode[i + 2] & 0xFF));
@@ -427,6 +435,7 @@ public class StackMapGenerator {
                  0xBC -> 2;
             case 0x11, 0x13, 0x14, 0x84, 0x99, 0x9A, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F, 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5,
                  0xA6, 0xA7, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, 0xBB, 0xBD, 0xC0, 0xC1, 0xC6, 0xC7 -> 3;
+            case 0xC8 -> 5;
             case 0xB9 -> 5;
             case 0xAA -> getTableSwitchSize(pc);
             case 0xAB -> getLookupSwitchSize(pc);
@@ -464,6 +473,11 @@ public class StackMapGenerator {
             if (pc + 2 < bytecode.length) {
                 short offset = (short) (((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF));
                 offsets.add(pc + offset); // Only branch target, no fall-through
+            }
+        } else if (opcode == 0xC8) { // goto_w
+            if (pc + 4 < bytecode.length) {
+                int offset = readInt(pc + 1);
+                offsets.add(pc + offset);
             }
         } else if (opcode == 0xC6 || opcode == 0xC7) { // ifnull, ifnonnull
             if (pc + 2 < bytecode.length) {

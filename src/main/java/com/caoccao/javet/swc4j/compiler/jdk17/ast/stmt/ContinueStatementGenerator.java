@@ -107,12 +107,12 @@ public final class ContinueStatementGenerator extends BaseAstProcessor<Swc4jAstC
             }
         }
 
-        // Generate goto with placeholder (will be patched later)
-        code.gotoLabel(0);
+        // Generate goto_w with placeholder (will be patched later)
+        code.goto_w(0);
 
         // Store position for patching when target is determined
-        int gotoOffsetPos = code.getCurrentOffset() - 2;
-        int gotoOpcodePos = code.getCurrentOffset() - 3;
+        int gotoOffsetPos = code.getCurrentOffset() - 4;
+        int gotoOpcodePos = code.getCurrentOffset() - 5;
         continueLabel.addPatchPosition(gotoOffsetPos, gotoOpcodePos);
     }
 
