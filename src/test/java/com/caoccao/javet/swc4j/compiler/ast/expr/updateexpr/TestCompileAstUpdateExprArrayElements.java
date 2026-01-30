@@ -44,7 +44,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(12);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(12);
     }
 
     @ParameterizedTest
@@ -60,7 +60,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -76,7 +76,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -92,7 +92,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(9);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(9);
     }
 
     @ParameterizedTest
@@ -108,7 +108,7 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -125,6 +125,6 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(4);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(4);
     }
 }

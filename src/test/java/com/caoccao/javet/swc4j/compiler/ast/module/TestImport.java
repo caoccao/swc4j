@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
@@ -93,8 +94,8 @@ public class TestImport extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((int) instanceRunner.<Object>invoke("test", 3, 5)).isEqualTo(5);
-        assertThat((int) instanceRunner.<Object>invoke("test", 10, 2)).isEqualTo(10);
+        assertThat((int) instanceRunner.invoke("test", 3, 5)).isEqualTo(5);
+        assertThat((int) instanceRunner.invoke("test", 10, 2)).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -116,7 +117,7 @@ public class TestImport extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
 
         // Test that int args select min(int, int)
-        assertThat((int) instanceRunner.<Object>invoke("testInt", 3, 5)).isEqualTo(3);
+        assertThat((int) instanceRunner.invoke("testInt", 3, 5)).isEqualTo(3);
 
         // Test that double args select min(double, double)
         assertThat(instanceRunner.<Double>invoke("testDouble", 3.5, 5.2)).isCloseTo(3.5, within(0.001));

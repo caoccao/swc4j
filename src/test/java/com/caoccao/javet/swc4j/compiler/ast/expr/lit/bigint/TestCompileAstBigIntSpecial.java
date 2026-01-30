@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.math.BigInteger;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -47,7 +48,7 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                 runner.createInstanceRunner("com.A").<Object>invoke("test")
         ).isEqualTo(
                 new BigInteger("93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000")
-        );;
+        );
     }
 
     @ParameterizedTest
@@ -136,7 +137,7 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                 runner.createInstanceRunner("com.A").<Object>invoke("test")
         ).isEqualTo(
                 new BigInteger("340282366920938463463374607431768211456")
-        );;
+        );
     }
 
     @ParameterizedTest
@@ -168,7 +169,7 @@ public class TestCompileAstBigIntSpecial extends BaseTestCompileSuite {
                 runner.createInstanceRunner("com.A").<Object>invoke("test")
         ).isEqualTo(
                 new BigInteger("-999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999")
-        );;
+        );
     }
 
     @ParameterizedTest

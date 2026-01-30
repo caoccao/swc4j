@@ -46,6 +46,88 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
         super(compiler);
     }
 
+    private boolean isWrapperType(String type) {
+        if (type == null) {
+            return false;
+        }
+        String primitive = TypeConversionUtils.getPrimitiveType(type);
+        return !type.equals(primitive) && TypeConversionUtils.isPrimitiveType(primitive);
+    }
+
+    private void generateStringValueOf(CodeBuilder code, ClassWriter.ConstantPool cp, String valueType) {
+        String descriptor = switch (valueType) {
+            case "I" -> "(I)Ljava/lang/String;";
+            case "J" -> "(J)Ljava/lang/String;";
+            case "F" -> "(F)Ljava/lang/String;";
+            case "D" -> "(D)Ljava/lang/String;";
+            case "Z" -> "(Z)Ljava/lang/String;";
+            case "C" -> "(C)Ljava/lang/String;";
+            case "B" -> "(B)Ljava/lang/String;";
+            case "S" -> "(S)Ljava/lang/String;";
+            default -> "(Ljava/lang/Object;)Ljava/lang/String;";
+        };
+        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", descriptor);
+        code.invokestatic(valueOfRef);
+    }
+
+    private void coerceAssignmentValue(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstAssignExpr assignExpr,
+            String valueType,
+            String targetType) throws Swc4jByteCodeCompilerException {
+        if (valueType == null || targetType == null || valueType.equals(targetType)) {
+            return;
+        }
+
+        if (TypeConversionUtils.isPrimitiveType(targetType)) {
+            String primitiveValueType = TypeConversionUtils.getPrimitiveType(valueType);
+            if (!TypeConversionUtils.isPrimitiveType(primitiveValueType)) {
+                throw new Swc4jByteCodeCompilerException(assignExpr,
+                        "Cannot assign non-primitive type " + valueType + " to primitive " + targetType);
+            }
+            TypeConversionUtils.unboxWrapperType(code, cp, valueType);
+            if (!primitiveValueType.equals(targetType)) {
+                TypeConversionUtils.convertPrimitiveType(code, primitiveValueType, targetType);
+            }
+            return;
+        }
+
+        String primitiveValueType = TypeConversionUtils.getPrimitiveType(valueType);
+        boolean valueIsPrimitive = TypeConversionUtils.isPrimitiveType(primitiveValueType) &&
+                TypeConversionUtils.isPrimitiveType(valueType);
+
+        if ("Ljava/lang/String;".equals(targetType)) {
+            if (valueIsPrimitive) {
+                generateStringValueOf(code, cp, primitiveValueType);
+            } else if (!"Ljava/lang/String;".equals(valueType)) {
+                generateStringValueOf(code, cp, "Ljava/lang/Object;");
+            }
+            return;
+        }
+
+        if (valueIsPrimitive) {
+            String wrapperType = TypeConversionUtils.getWrapperType(primitiveValueType);
+            if ("Ljava/lang/Object;".equals(targetType) || targetType.equals(wrapperType)) {
+                TypeConversionUtils.boxPrimitiveType(code, cp, primitiveValueType, wrapperType);
+                return;
+            }
+            throw new Swc4jByteCodeCompilerException(assignExpr,
+                    "Cannot assign primitive type " + primitiveValueType + " to " + targetType);
+        }
+
+        if (isWrapperType(targetType) && isWrapperType(valueType)) {
+            String fromPrimitive = TypeConversionUtils.getPrimitiveType(valueType);
+            String toPrimitive = TypeConversionUtils.getPrimitiveType(targetType);
+            TypeConversionUtils.unboxWrapperType(code, cp, valueType);
+            if (!fromPrimitive.equals(toPrimitive)) {
+                TypeConversionUtils.convertPrimitiveType(code, fromPrimitive, toPrimitive);
+            }
+            TypeConversionUtils.boxPrimitiveType(code, cp, toPrimitive, targetType);
+            return;
+        }
+    }
+
     /**
      * Extract property name from ISwc4jAstPropName.
      */
@@ -95,13 +177,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
                             // Convert value type if needed
                             String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                            if (valueType != null && !valueType.equals(fieldInfo.descriptor())) {
-                                TypeConversionUtils.unboxWrapperType(code, cp, valueType);
-                                String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
-                                if (valuePrimitive != null && !valuePrimitive.equals(fieldInfo.descriptor())) {
-                                    TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, fieldInfo.descriptor());
-                                }
-                            }
+                            coerceAssignmentValue(code, cp, assignExpr, valueType, fieldInfo.descriptor());
 
                             // Duplicate value for assignment expression result (assignment returns the assigned value)
                             String fieldDesc = fieldInfo.descriptor();
@@ -141,13 +217,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
                             // Convert value type if needed
                             String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                            if (valueType != null && !valueType.equals(fieldInfo.descriptor())) {
-                                TypeConversionUtils.unboxWrapperType(code, cp, valueType);
-                                String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
-                                if (valuePrimitive != null && !valuePrimitive.equals(fieldInfo.descriptor())) {
-                                    TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, fieldInfo.descriptor());
-                                }
-                            }
+                            coerceAssignmentValue(code, cp, assignExpr, valueType, fieldInfo.descriptor());
 
                             // Duplicate value for assignment expression result
                             String fieldDesc = fieldInfo.descriptor();
@@ -180,13 +250,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
                         // Convert value type if needed
                         String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                        if (valueType != null && !valueType.equals(fieldInfo.descriptor())) {
-                            TypeConversionUtils.unboxWrapperType(code, cp, valueType);
-                            String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
-                            if (valuePrimitive != null && !valuePrimitive.equals(fieldInfo.descriptor())) {
-                                TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, fieldInfo.descriptor());
-                            }
-                        }
+                        coerceAssignmentValue(code, cp, assignExpr, valueType, fieldInfo.descriptor());
 
                         // Duplicate value for assignment expression result
                         String fieldDesc = fieldInfo.descriptor();
@@ -218,13 +282,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
                         // Convert value type if needed
                         String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                        if (valueType != null && !valueType.equals(fieldInfo.descriptor())) {
-                            TypeConversionUtils.unboxWrapperType(code, cp, valueType);
-                            String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
-                            if (valuePrimitive != null && !valuePrimitive.equals(fieldInfo.descriptor())) {
-                                TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, fieldInfo.descriptor());
-                            }
-                        }
+                        coerceAssignmentValue(code, cp, assignExpr, valueType, fieldInfo.descriptor());
 
                         // Duplicate value for assignment expression result
                         String fieldDesc = fieldInfo.descriptor();
@@ -466,13 +524,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                     // Simple assignment
                     compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                    if (valueType != null && !valueType.equals(varType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, valueType);
-                        String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
-                        if (valuePrimitive != null && !valuePrimitive.equals(varType)) {
-                            TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, varType);
-                        }
-                    }
+                    coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
                 } else {
                     // Compound assignment - load current value first
                     code.aload(var.holderIndex());
@@ -490,13 +542,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
                     compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                    if (valueType != null && !valueType.equals(varType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, valueType);
-                        String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
-                        if (valuePrimitive != null && !valuePrimitive.equals(varType)) {
-                            TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, varType);
-                        }
-                    }
+                    coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
 
                     // Perform operation
                     generateCompoundOperation(code, cp, op, varType);
@@ -529,13 +575,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
                 // Convert to the variable's type if needed
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                if (valueType != null && !valueType.equals(varType)) {
-                    TypeConversionUtils.unboxWrapperType(code, cp, valueType);
-                    String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
-                    if (valuePrimitive != null && !valuePrimitive.equals(varType)) {
-                        TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, varType);
-                    }
-                }
+                coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
             } else {
                 // Compound assignment: x += value, x -= value, etc.
                 // Load current value of variable
@@ -570,11 +610,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         code.invokestatic(valueOfRef);
                     }
                 } else if (valueType != null && !valueType.equals(varType)) {
-                    TypeConversionUtils.unboxWrapperType(code, cp, valueType);
-                    String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
-                    if (valuePrimitive != null && !valuePrimitive.equals(varType)) {
-                        TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, varType);
-                    }
+                    coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
                 }
 
                 // Perform the operation based on the compound operator
@@ -767,13 +803,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 // Simple assignment
                 compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                if (valueType != null && !valueType.equals(varType)) {
-                    TypeConversionUtils.unboxWrapperType(code, cp, valueType);
-                    String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
-                    if (valuePrimitive != null && !valuePrimitive.equals(varType)) {
-                        TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, varType);
-                    }
-                }
+                coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
             } else {
                 // Compound assignment - load current value first
                 code.aload(0);
@@ -792,13 +822,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
                 compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                if (valueType != null && !valueType.equals(varType)) {
-                    TypeConversionUtils.unboxWrapperType(code, cp, valueType);
-                    String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
-                    if (valuePrimitive != null && !valuePrimitive.equals(varType)) {
-                        TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, varType);
-                    }
-                }
+                coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
 
                 // Perform operation
                 generateCompoundOperation(code, cp, op, varType);
@@ -830,13 +854,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
             if (op == Swc4jAstAssignOp.Assign) {
                 compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                if (valueType != null && !valueType.equals(varType)) {
-                    TypeConversionUtils.unboxWrapperType(code, cp, valueType);
-                    String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
-                    if (valuePrimitive != null && !valuePrimitive.equals(varType)) {
-                        TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, varType);
-                    }
-                }
+                coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
             } else {
                 // Compound assignment
                 code.dup();  // Keep 'this' for putfield

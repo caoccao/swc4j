@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -44,7 +45,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
 
 
@@ -61,7 +62,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
 
 
@@ -80,7 +81,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(15);
     }
 
 
@@ -113,7 +114,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(42);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(42);
     }
 
 
@@ -130,7 +131,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(0);
     }
 
 
@@ -148,7 +149,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1);
     }
 
 
@@ -165,7 +166,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
 
 
@@ -184,7 +185,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(4);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(4);
     }
 
 
@@ -203,7 +204,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1);
     }
 
 
@@ -359,7 +360,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1);
     }
 
 
@@ -393,7 +394,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
 
 
@@ -412,7 +413,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(15);
     }
 
 
@@ -445,7 +446,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(42);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(42);
     }
 
 
@@ -462,7 +463,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(0);
     }
 
 
@@ -926,7 +927,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1);
     }
 
 
@@ -943,7 +944,7 @@ public class TestCompileAstArrayLitMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(4);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(4);
     }
 
 

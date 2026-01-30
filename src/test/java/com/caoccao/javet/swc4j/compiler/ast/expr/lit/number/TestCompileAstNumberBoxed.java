@@ -44,7 +44,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) 100);
+        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) 100);
     }
 
     @ParameterizedTest
@@ -58,7 +58,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) 127);
+        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) 127);
     }
 
     // Long boxed tests
@@ -75,7 +75,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(123.5);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123.5);
     }
 
     @ParameterizedTest
@@ -89,7 +89,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(123.5);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123.5);
     }
 
     // Float boxed tests
@@ -106,7 +106,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(123.5f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123.5f);
     }
 
     @ParameterizedTest
@@ -120,7 +120,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(123.5f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123.5f);
     }
 
     // Double boxed tests
@@ -137,7 +137,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(123);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123);
     }
 
     @ParameterizedTest
@@ -151,7 +151,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(123);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123);
     }
 
     // Byte boxed tests
@@ -168,7 +168,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(123L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123L);
     }
 
     @ParameterizedTest
@@ -182,7 +182,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(123L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(123L);
     }
 
     // Short boxed tests
@@ -199,7 +199,7 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((short) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((short) 123);
+        assertThat((short) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((short) 123);
     }
 
     @ParameterizedTest
@@ -213,6 +213,6 @@ public class TestCompileAstNumberBoxed extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((short) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((short) 123);
+        assertThat((short) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((short) 123);
     }
 }

@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -101,13 +102,13 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 result
         ).isEqualTo(
                 Map.of(
-                "class", "className",
-                "for", "loop",
-                "if", "condition",
-                "while", "iteration",
-                "return", "exit"
-        )
-        );;
+                        "class", "className",
+                        "for", "loop",
+                        "if", "condition",
+                        "while", "iteration",
+                        "return", "exit"
+                )
+        );
     }
 
     @ParameterizedTest
@@ -162,13 +163,13 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 result
         ).isEqualTo(
                 Map.of(
-                "你好", "hello",
-                "🔥", "fire",
-                "café", "coffee",
-                "Москва", "Moscow",
-                "東京", "Tokyo"
-        )
-        );;
+                        "你好", "hello",
+                        "🔥", "fire",
+                        "café", "coffee",
+                        "Москва", "Moscow",
+                        "東京", "Tokyo"
+                )
+        );
     }
 
     @ParameterizedTest
@@ -350,15 +351,15 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                 result
         ).isEqualTo(
                 Map.of(
-                "arithmetic", 6,
-                "multiplication", 20,
-                "division", 5,
-                "subtraction", 7,
-                "stringConcat", "hello world",
-                "booleanTrue", true,
-                "booleanFalse", false
-        )
-        );;
+                        "arithmetic", 6,
+                        "multiplication", 20,
+                        "division", 5,
+                        "subtraction", 7,
+                        "stringConcat", "hello world",
+                        "booleanTrue", true,
+                        "booleanFalse", false
+                )
+        );
     }
 
     @ParameterizedTest

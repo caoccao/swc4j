@@ -149,13 +149,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Add labeled switch targets and extend switch lowering for additional primitive types.
 - Tests: Labeled breaks, long/boolean/float/double switch cases.
 
-## Feature: If Statement Limitations
-- Evidence: `docs/plans/ast/stmt/if-stmt.md`.
-- Status: String comparison stackmap issue; assignment type handling; block scope; single-statement bodies.
-- Confidence: 60%.
-- Plan: Fix BinaryExpression string stackmap, enforce assignment coercion, add block scope tracking, handle non-block bodies.
-- Tests: String comparisons, mixed-type assignments, scope shadowing, and single-line ifs.
-
 ## Feature: Try/Catch Multi-Type Guard Lowering
 - Evidence: `docs/plans/ast/stmt/try-stmt.md`.
 - Status: Multiple catch-type branching not implemented.

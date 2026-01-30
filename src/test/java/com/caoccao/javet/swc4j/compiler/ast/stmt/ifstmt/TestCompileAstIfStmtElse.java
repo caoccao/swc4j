@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -46,7 +47,7 @@ public class TestCompileAstIfStmtElse extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -66,7 +67,7 @@ public class TestCompileAstIfStmtElse extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -86,7 +87,7 @@ public class TestCompileAstIfStmtElse extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -104,7 +105,7 @@ public class TestCompileAstIfStmtElse extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(42);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -123,7 +124,7 @@ public class TestCompileAstIfStmtElse extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -142,7 +143,7 @@ public class TestCompileAstIfStmtElse extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(100);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -162,7 +163,7 @@ public class TestCompileAstIfStmtElse extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(50);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(50);
     }
 
     @ParameterizedTest
@@ -183,7 +184,7 @@ public class TestCompileAstIfStmtElse extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(200);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(200);
     }
 
     @ParameterizedTest
@@ -206,7 +207,7 @@ public class TestCompileAstIfStmtElse extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(70);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(70);
     }
 
     @ParameterizedTest
@@ -228,6 +229,6 @@ public class TestCompileAstIfStmtElse extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(10);
     }
 }

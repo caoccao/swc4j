@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -56,9 +57,9 @@ public class TestCompileAstObjectLitNullHandling extends BaseTestCompileSuite {
                 result
         ).isEqualTo(
                 SimpleMap.of(
-                "outer", SimpleMap.of("inner1", null, "inner2", 42),
-                "value", null)
-        );;
+                        "outer", SimpleMap.of("inner1", null, "inner2", 42),
+                        "value", null)
+        );
     }
 
     @ParameterizedTest

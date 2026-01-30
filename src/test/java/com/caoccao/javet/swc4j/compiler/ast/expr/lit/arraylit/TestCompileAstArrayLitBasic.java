@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
@@ -45,7 +46,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int[]) runner.createInstanceRunner("com.A").<Object>invoke("test")).containsExactly(1, 2, 3);
+        assertThat((int[]) runner.createInstanceRunner("com.A").invoke("test")).containsExactly(1, 2, 3);
     }
 
 
@@ -93,7 +94,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((boolean[]) runner.createInstanceRunner("com.A").<Object>invoke("test")).containsExactly(true, false, true);
+        assertThat((boolean[]) runner.createInstanceRunner("com.A").invoke("test")).containsExactly(true, false, true);
     }
 
 
@@ -109,7 +110,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double[]) runner.createInstanceRunner("com.A").<Object>invoke("test")).containsExactly(1.5, 2.5, 3.5);
+        assertThat((double[]) runner.createInstanceRunner("com.A").invoke("test")).containsExactly(1.5, 2.5, 3.5);
     }
 
 
@@ -158,7 +159,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float[]) runner.createInstanceRunner("com.A").<Object>invoke("test")).containsExactly(1.0f, 2.0f, 3.0f);
+        assertThat((float[]) runner.createInstanceRunner("com.A").invoke("test")).containsExactly(1.0f, 2.0f, 3.0f);
     }
 
 
@@ -190,7 +191,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long[]) runner.createInstanceRunner("com.A").<Object>invoke("test")).containsExactly(100L, 200L, 300L);
+        assertThat((long[]) runner.createInstanceRunner("com.A").invoke("test")).containsExactly(100L, 200L, 300L);
     }
 
 
@@ -244,7 +245,7 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((String[]) runner.createInstanceRunner("com.A").<Object>invoke("test")).containsExactly("hello", "world");
+        assertThat((String[]) runner.createInstanceRunner("com.A").invoke("test")).containsExactly("hello", "world");
     }
 
 

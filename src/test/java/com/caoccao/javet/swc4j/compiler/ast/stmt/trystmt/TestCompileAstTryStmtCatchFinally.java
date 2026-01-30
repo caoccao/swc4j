@@ -20,9 +20,8 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import static org.assertj.core.api.Assertions.*;
 
 
 /**
@@ -56,7 +55,7 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);  // 10 + 5
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(15);  // 10 + 5
     }
 
     @ParameterizedTest
@@ -87,7 +86,7 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);  // 10 + 5 + 3 + 2 = 20
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20);  // 10 + 5 + 3 + 2 = 20
     }
 
     @ParameterizedTest
@@ -106,7 +105,7 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(42);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -136,7 +135,7 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
         assertThatThrownBy(() -> {
             instanceRunner.invoke("test");
         }).isInstanceOf(Exception.class);
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("didFinallyRun")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("didFinallyRun")).isTrue();
     }
 
     @ParameterizedTest
@@ -189,8 +188,8 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((int) instanceRunner.<Object>invoke("test")).isEqualTo(99);
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("didFinallyRun")).isTrue();
+        assertThat((int) instanceRunner.invoke("test")).isEqualTo(99);
+        assertThat(instanceRunner.<Boolean>invoke("didFinallyRun")).isTrue();
     }
 
     @ParameterizedTest
@@ -212,7 +211,7 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);  // Finally return wins
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);  // Finally return wins
     }
 
     @ParameterizedTest
@@ -238,8 +237,8 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((int) instanceRunner.<Object>invoke("test")).isEqualTo(42);
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("didFinallyRun")).isTrue();
+        assertThat((int) instanceRunner.invoke("test")).isEqualTo(42);
+        assertThat(instanceRunner.<Boolean>invoke("didFinallyRun")).isTrue();
     }
 
     @ParameterizedTest
@@ -264,7 +263,7 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(35);  // 10 + 20 + 5 = 35
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(35);  // 10 + 20 + 5 = 35
     }
 
     @ParameterizedTest
@@ -288,6 +287,6 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(25);  // 20 + 5
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(25);  // 20 + 5
     }
 }

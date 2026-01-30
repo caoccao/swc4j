@@ -23,7 +23,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class TestCompileAstFunctionVarargs extends BaseTestCompileSuite {

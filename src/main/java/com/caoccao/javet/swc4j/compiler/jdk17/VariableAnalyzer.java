@@ -157,8 +157,13 @@ public final class VariableAnalyzer {
             }
         } else if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
             // Recursively analyze block statements
-            for (ISwc4jAstStmt childStmt : blockStmt.getStmts()) {
-                analyzeStatement(childStmt);
+            context.getLocalVariableTable().enterScope();
+            try {
+                for (ISwc4jAstStmt childStmt : blockStmt.getStmts()) {
+                    analyzeStatement(childStmt);
+                }
+            } finally {
+                context.getLocalVariableTable().exitScope();
             }
         } else if (stmt instanceof Swc4jAstTryStmt tryStmt) {
             // Analyze try block

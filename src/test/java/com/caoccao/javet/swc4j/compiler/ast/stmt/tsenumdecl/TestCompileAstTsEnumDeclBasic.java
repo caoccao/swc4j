@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -46,9 +47,9 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
 
-        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(10);  // Low
-        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(20);  // Medium
-        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(30);  // High
+        assertThat(getValueMethod.invoke(constants[0])).isEqualTo(10);  // Low
+        assertThat(getValueMethod.invoke(constants[1])).isEqualTo(20);  // Medium
+        assertThat(getValueMethod.invoke(constants[2])).isEqualTo(30);  // High
     }
 
     @ParameterizedTest
@@ -72,10 +73,10 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
 
         // Check getValue() method returns correct values
         var getValueMethod = enumClass.getMethod("getValue");
-        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(0);
-        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(1);
-        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(2);
-        assertThat(getValueMethod.<Object>invoke(constants[3])).isEqualTo(3);
+        assertThat(getValueMethod.invoke(constants[0])).isEqualTo(0);
+        assertThat(getValueMethod.invoke(constants[1])).isEqualTo(1);
+        assertThat(getValueMethod.invoke(constants[2])).isEqualTo(2);
+        assertThat(getValueMethod.invoke(constants[3])).isEqualTo(3);
 
         // Check name() method
         assertThat(((Enum<?>) constants[0]).name()).isEqualTo("UP");
@@ -101,9 +102,9 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
 
-        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(1);  // Pending
-        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(2);  // Active
-        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(3);  // Done
+        assertThat(getValueMethod.invoke(constants[0])).isEqualTo(1);  // Pending
+        assertThat(getValueMethod.invoke(constants[1])).isEqualTo(2);  // Active
+        assertThat(getValueMethod.invoke(constants[2])).isEqualTo(3);  // Done
     }
 
     @ParameterizedTest
@@ -122,7 +123,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         Object left = fromValueMethod.invoke(null, 2);
 
         assertThat(((Enum<?>) left).name()).isEqualTo("LEFT");
-        assertThat(enumClass.getMethod("getValue").<Object>invoke(left)).isEqualTo(2);
+        assertThat(enumClass.getMethod("getValue").invoke(left)).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -142,9 +143,9 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
 
-        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(-10);  // Cold
-        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(0);    // Warm
-        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(10);   // Hot
+        assertThat(getValueMethod.invoke(constants[0])).isEqualTo(-10);  // Cold
+        assertThat(getValueMethod.invoke(constants[1])).isEqualTo(0);    // Warm
+        assertThat(getValueMethod.invoke(constants[2])).isEqualTo(10);   // Hot
     }
 
     @ParameterizedTest
@@ -164,9 +165,9 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         Object[] constants = enumClass.getEnumConstants();
         var getValueMethod = enumClass.getMethod("getValue");
 
-        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(1);
-        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(5);
-        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(100);
+        assertThat(getValueMethod.invoke(constants[0])).isEqualTo(1);
+        assertThat(getValueMethod.invoke(constants[1])).isEqualTo(5);
+        assertThat(getValueMethod.invoke(constants[2])).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -187,10 +188,10 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
 
         // ordinal() is declaration order (0-indexed)
         assertThat(((Enum<?>) constants[0]).ordinal()).isEqualTo(0);
-        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(10); //getValue() is the custom value
+        assertThat(getValueMethod.invoke(constants[0])).isEqualTo(10); //getValue() is the custom value
 
         assertThat(((Enum<?>) constants[1]).ordinal()).isEqualTo(1);
-        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(20);
+        assertThat(getValueMethod.invoke(constants[1])).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -209,7 +210,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         assertThat(constants.length).isEqualTo(1);
 
         var getValueMethod = enumClass.getMethod("getValue");
-        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(0);
+        assertThat(getValueMethod.invoke(constants[0])).isEqualTo(0);
         assertThat(((Enum<?>) constants[0]).ordinal()).isEqualTo(0);
     }
 
@@ -229,7 +230,7 @@ public class TestCompileAstTsEnumDeclBasic extends BaseTestCompileSuite {
         Object down = valueOfMethod.invoke(null, "DOWN");
 
         assertThat(((Enum<?>) down).name()).isEqualTo("DOWN");
-        assertThat(enumClass.getMethod("getValue").<Object>invoke(down)).isEqualTo(1);
+        assertThat(enumClass.getMethod("getValue").invoke(down)).isEqualTo(1);
     }
 
     @ParameterizedTest

@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -218,12 +219,12 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                 result
         ).isEqualTo(
                 SimpleMap.of(
-                1, "v1", 2, "v2", 3, "v3", 4, "v4", 5, "v5",
-                6, "v6", 7, "v7", 8, "v8", 9, "v9", 10, "v10",
-                11, "v11", 12, "v12", 13, "v13", 14, "v14", 15, "v15",
-                16, "v16", 17, "v17", 18, "v18", 19, "v19", 20, "v20"
-        )
-        );;
+                        1, "v1", 2, "v2", 3, "v3", 4, "v4", 5, "v5",
+                        6, "v6", 7, "v7", 8, "v8", 9, "v9", 10, "v10",
+                        11, "v11", 12, "v12", 13, "v13", 14, "v14", 15, "v15",
+                        16, "v16", 17, "v17", 18, "v18", 19, "v19", 20, "v20"
+                )
+        );
     }
 
     @ParameterizedTest
@@ -405,14 +406,14 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                 result
         ).isEqualTo(
                 Map.of(
-                "addition", 8,
-                "subtraction", 8,
-                "multiplication", 8,
-                "division", 8,
-                "variable", 10,
-                "expression", 25
-        )
-        );;
+                        "addition", 8,
+                        "subtraction", 8,
+                        "multiplication", 8,
+                        "division", 8,
+                        "variable", 10,
+                        "expression", 25
+                )
+        );
     }
 
     @ParameterizedTest
@@ -438,12 +439,12 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                 result
         ).isEqualTo(
                 SimpleMap.of(
-                "p1", 1, "p2", 2, "p3", 3, "p4", 4, "p5", 5,
-                "p6", 6, "p7", 7, "p8", 8, "p9", 9, "p10", 10,
-                "p11", 11, "p12", 12, "p13", 13, "p14", 14, "p15", 15,
-                "p16", 16, "p17", 17, "p18", 18, "p19", 19, "p20", 20
-        )
-        );;
+                        "p1", 1, "p2", 2, "p3", 3, "p4", 4, "p5", 5,
+                        "p6", 6, "p7", 7, "p8", 8, "p9", 9, "p10", 10,
+                        "p11", 11, "p12", 12, "p13", 13, "p14", 14, "p15", 15,
+                        "p16", 16, "p17", 17, "p18", 18, "p19", 19, "p20", 20
+                )
+        );
     }
 
     @ParameterizedTest
@@ -511,13 +512,13 @@ public class TestCompileAstObjectLitRecord extends BaseTestCompileSuite {
                 result
         ).isEqualTo(
                 Map.of(
-                "integer", 42,
-                "decimal", 3.14,
-                "negative", -10,
-                "zero", 0,
-                "scientific", 100000  // 1e5 stored as Integer
-        )
-        );;
+                        "integer", 42,
+                        "decimal", 3.14,
+                        "negative", -10,
+                        "zero", 0,
+                        "scientific", 100000  // 1e5 stored as Integer
+                )
+        );
     }
 
     @ParameterizedTest

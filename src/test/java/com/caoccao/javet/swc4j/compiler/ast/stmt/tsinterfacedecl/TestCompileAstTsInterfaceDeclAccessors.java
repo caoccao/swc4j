@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -76,7 +77,7 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
 
         // No setter should be generated
         assertThatThrownBy(() ->
-                interfaceClass.getMethod("setValue", int.class)).isInstanceOf(NoSuchMethodException.class);;
+                interfaceClass.getMethod("setValue", int.class)).isInstanceOf(NoSuchMethodException.class);
     }
 
     @ParameterizedTest
@@ -132,13 +133,13 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
         Object instance = implClass.getConstructor().newInstance();
 
         // Initial value
-        assertThat(implClass.getMethod("getValue").<Object>invoke(instance)).isEqualTo(0);
+        assertThat(implClass.getMethod("getValue").invoke(instance)).isEqualTo(0);
 
         // Set value
         implClass.getMethod("setValue", int.class).invoke(instance, 42);
 
         // Get value
-        assertThat(implClass.getMethod("getValue").<Object>invoke(instance)).isEqualTo(42);
+        assertThat(implClass.getMethod("getValue").invoke(instance)).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -163,7 +164,7 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
 
         // No getter should be generated
         assertThatThrownBy(() ->
-                interfaceClass.getMethod("getOutput")).isInstanceOf(NoSuchMethodException.class);;
+                interfaceClass.getMethod("getOutput")).isInstanceOf(NoSuchMethodException.class);
     }
 
     @ParameterizedTest
@@ -190,17 +191,17 @@ public class TestCompileAstTsInterfaceDeclAccessors extends BaseTestCompileSuite
         // Explicit getter 'version' should only have getter
         assertThat(interfaceClass.getMethod("getVersion")).isNotNull();
         assertThatThrownBy(() ->
-                interfaceClass.getMethod("setVersion", int.class)).isInstanceOf(NoSuchMethodException.class);;
+                interfaceClass.getMethod("setVersion", int.class)).isInstanceOf(NoSuchMethodException.class);
 
         // Explicit setter 'debug' should only have setter
         assertThat(interfaceClass.getMethod("setDebug", boolean.class)).isNotNull();
         assertThatThrownBy(() ->
-                interfaceClass.getMethod("isDebug")).isInstanceOf(NoSuchMethodException.class);;
+                interfaceClass.getMethod("isDebug")).isInstanceOf(NoSuchMethodException.class);
 
         // Readonly 'id' should only have getter
         assertThat(interfaceClass.getMethod("getId")).isNotNull();
         assertThatThrownBy(() ->
-                interfaceClass.getMethod("setId", int.class)).isInstanceOf(NoSuchMethodException.class);;
+                interfaceClass.getMethod("setId", int.class)).isInstanceOf(NoSuchMethodException.class);
     }
 
     @ParameterizedTest

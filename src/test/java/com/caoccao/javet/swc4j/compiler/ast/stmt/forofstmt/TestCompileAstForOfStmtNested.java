@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -48,7 +49,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(66);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(66);
     }
 
     @ParameterizedTest
@@ -299,7 +300,7 @@ public class TestCompileAstForOfStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(8);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(8);
     }
 
     @ParameterizedTest

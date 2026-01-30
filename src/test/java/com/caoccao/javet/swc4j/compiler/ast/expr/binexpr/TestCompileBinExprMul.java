@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
@@ -42,7 +43,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(254); // byte promotes to int for operations
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(254); // byte promotes to int for operations
     }
 
     @ParameterizedTest
@@ -59,7 +60,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(30);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -76,7 +77,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20L);
     }
 
     @ParameterizedTest
@@ -94,7 +95,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(120);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(120);
     }
 
     @ParameterizedTest
@@ -111,7 +112,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(134); //'C' (67) * 2 = 134
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(134); //'C' (67) * 2 = 134
     }
 
     // Mixed primitive type tests
@@ -130,7 +131,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15); // 5 * 3 = 15
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(15); // 5 * 3 = 15
     }
 
     @ParameterizedTest
@@ -149,7 +150,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(60);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(60);
     }
 
     @ParameterizedTest
@@ -183,7 +184,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(26.25);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(26.25);
     }
 
     @ParameterizedTest
@@ -199,7 +200,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(35.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(35.0);
     }
 
     @ParameterizedTest
@@ -215,7 +216,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(24.0f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(24.0f);
     }
 
     // Wrapper type tests
@@ -233,7 +234,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(40);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(40);
     }
 
     @ParameterizedTest
@@ -249,7 +250,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(40);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(40);
     }
 
     @ParameterizedTest
@@ -265,7 +266,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(27L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(27L);
     }
 
     @ParameterizedTest
@@ -281,7 +282,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(36L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(36L);
     }
 
     @ParameterizedTest
@@ -297,7 +298,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(19.5f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(19.5f);
     }
 
     @ParameterizedTest
@@ -313,7 +314,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -329,7 +330,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20L);
     }
 
     // Mixed primitive and wrapper tests
@@ -347,7 +348,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(16.25f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(16.25f);
     }
 
     @ParameterizedTest
@@ -395,7 +396,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(12);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(12);
     }
 
     @ParameterizedTest
@@ -411,7 +412,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(24L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(24L);
     }
 
     @ParameterizedTest
@@ -443,7 +444,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(24.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(24.0);
     }
 
     @ParameterizedTest
@@ -459,7 +460,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15.0f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(15.0f);
     }
 
     @ParameterizedTest
@@ -475,7 +476,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(30L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(30L);
     }
 
     @ParameterizedTest
@@ -491,7 +492,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(75.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(75.0);
     }
 
     @ParameterizedTest
@@ -507,7 +508,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(65.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(65.0);
     }
 
     // Explicit type cast tests - Widening conversions
@@ -525,7 +526,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(200L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(200L);
     }
 
     @ParameterizedTest
@@ -541,7 +542,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(108L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(108L);
     }
 
     @ParameterizedTest
@@ -557,7 +558,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(700.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(700.0);
     }
 
     @ParameterizedTest
@@ -573,7 +574,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(220.0f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(220.0f);
     }
 
     @ParameterizedTest
@@ -589,7 +590,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(400);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(400);
     }
 
     @ParameterizedTest
@@ -605,7 +606,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3000.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3000.0);
     }
 
     @ParameterizedTest
@@ -621,7 +622,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(210.0f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(210.0f);
     }
 
     @ParameterizedTest
@@ -638,7 +639,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(60.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(60.0);
     }
 
     @ParameterizedTest
@@ -654,7 +655,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(120.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(120.0);
     }
 
     @ParameterizedTest
@@ -670,7 +671,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(90.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(90.0);
     }
 
     // Explicit cast tests - Narrowing conversions
@@ -688,7 +689,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(75.0f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(75.0f);
     }
 
     @ParameterizedTest
@@ -704,7 +705,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(300);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(300);
     }
 
     @ParameterizedTest
@@ -720,7 +721,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(300);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(300);
     }
 
     @ParameterizedTest
@@ -736,7 +737,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(250L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(250L);
     }
 
     @ParameterizedTest
@@ -770,7 +771,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(7.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(7.0);
     }
 
     // Explicit cast tests - Wrapper to primitive conversions
@@ -789,7 +790,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(9.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(9.0);
     }
 
     @ParameterizedTest
@@ -806,7 +807,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(7.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(7.0);
     }
 
     @ParameterizedTest
@@ -823,7 +824,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(16.5);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(16.5);
     }
 
     @ParameterizedTest
@@ -840,7 +841,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(26.25f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(26.25f);
     }
 
     @ParameterizedTest
@@ -857,7 +858,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(12.5);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(12.5);
     }
 
     @ParameterizedTest
@@ -874,7 +875,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(7.5f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(7.5f);
     }
 
     @ParameterizedTest
@@ -891,7 +892,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(30);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(30);
     }
 
     @ParameterizedTest
@@ -908,7 +909,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20L);
     }
 
     @ParameterizedTest
@@ -925,7 +926,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(24L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(24L);
     }
 
     @ParameterizedTest
@@ -942,7 +943,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(15.0);
     }
 
     @ParameterizedTest
@@ -959,7 +960,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(12.5f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(12.5f);
     }
 
     @ParameterizedTest
@@ -976,7 +977,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(40L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(40L);
     }
 
     @ParameterizedTest
@@ -993,7 +994,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(25);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(25);
     }
 
     @ParameterizedTest
@@ -1010,7 +1011,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(70L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(70L);
     }
 
     @ParameterizedTest
@@ -1027,7 +1028,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(25.0);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(25.0);
     }
 
     @ParameterizedTest
@@ -1044,7 +1045,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(25.0f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(25.0f);
     }
 
     @ParameterizedTest
@@ -1061,7 +1062,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((double) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(52.5);
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(52.5);
     }
 
     @ParameterizedTest
@@ -1078,7 +1079,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(37.5f);
+        assertThat((float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(37.5f);
     }
 
     // Edge case tests
@@ -1097,7 +1098,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(220L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(220L);
     }
 
     @ParameterizedTest
@@ -1114,7 +1115,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -1131,7 +1132,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(30000);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(30000);
     }
 
     @ParameterizedTest
@@ -1148,7 +1149,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(30); // -10 * -3 = 30
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(30); // -10 * -3 = 30
     }
 
     @ParameterizedTest
@@ -1165,7 +1166,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(60); //10 * (2 * 3) = 10 * 6 = 60
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(60); //10 * (2 * 3) = 10 * 6 = 60
     }
 
     @ParameterizedTest
@@ -1182,7 +1183,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-30000);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-30000);
     }
 
     @ParameterizedTest
@@ -1199,7 +1200,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -1216,7 +1217,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(48L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(48L);
     }
 
     @ParameterizedTest
@@ -1232,7 +1233,7 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((short) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((short) 50);
+        assertThat((short) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((short) 50);
     }
 
     @ParameterizedTest
@@ -1249,6 +1250,6 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(50);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(50);
     }
 }

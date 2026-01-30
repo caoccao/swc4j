@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -48,7 +49,7 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -72,7 +73,7 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -94,7 +95,7 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -118,7 +119,7 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(9);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(9);
     }
 
     @ParameterizedTest
@@ -149,7 +150,7 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
         // First outer: sum = 1, 2, 3 (j=0,1,2)
         // Second outer: sum = 4, 5 (break), then i=2
         // Continue with i=2,3,4: sum increments once each = 8 total
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(8);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(8);
     }
 
     @ParameterizedTest
@@ -173,7 +174,7 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(16);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(16);
     }
 
     @ParameterizedTest
@@ -200,7 +201,7 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -228,7 +229,7 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(8);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(8);
     }
 
     @ParameterizedTest
@@ -252,6 +253,6 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(6);
     }
 }

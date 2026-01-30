@@ -4,6 +4,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -109,7 +110,7 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
                 ((Enum<?>) tuesday).ordinal()
         ).isNotEqualTo(
                 ((Enum<?>) monday).ordinal()
-        );;
+        );
     }
 
     @ParameterizedTest
@@ -129,7 +130,7 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
         Object b = fromValueMethod.invoke(null, 66);
 
         assertThat(((Enum<?>) b).name()).isEqualTo("B");
-        assertThat(enumClass.getMethod("getValue").<Object>invoke(b)).isEqualTo(66);
+        assertThat(enumClass.getMethod("getValue").invoke(b)).isEqualTo(66);
     }
 
     @ParameterizedTest

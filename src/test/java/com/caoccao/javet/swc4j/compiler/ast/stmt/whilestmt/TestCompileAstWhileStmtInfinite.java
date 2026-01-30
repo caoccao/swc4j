@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -56,7 +57,7 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
         // Iteration: i=3 sum=6+3=9, i=4, sum=9+1=10
         // Iteration: i=4 sum=10+4=14, i=5, sum=14+1=15
         // Iteration: i=5 sum=15+5=20, i=6, break (no +1)
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -79,7 +80,7 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(45);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(45);
     }
 
     @ParameterizedTest
@@ -99,7 +100,7 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(42);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -123,7 +124,7 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(101);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(101);
     }
 
     @ParameterizedTest
@@ -144,7 +145,7 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(101);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(101);
     }
 
     @ParameterizedTest
@@ -165,7 +166,7 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20);
     }
 
     @ParameterizedTest
@@ -185,6 +186,6 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(50);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(50);
     }
 }

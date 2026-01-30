@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.math.BigInteger;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -195,7 +196,7 @@ public class TestCompileBinExprBigInt extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("test")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -210,7 +211,7 @@ public class TestCompileBinExprBigInt extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("test")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -225,7 +226,7 @@ public class TestCompileBinExprBigInt extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("test")).isFalse();
+        assertThat(instanceRunner.<Boolean>invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -291,9 +292,9 @@ public class TestCompileBinExprBigInt extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testTrue")).isTrue();
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testFalse")).isFalse();
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testEqual")).isFalse();
+        assertThat(instanceRunner.<Boolean>invoke("testTrue")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("testFalse")).isFalse();
+        assertThat(instanceRunner.<Boolean>invoke("testEqual")).isFalse();
     }
 
     @ParameterizedTest
@@ -314,9 +315,9 @@ public class TestCompileBinExprBigInt extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testGreater")).isTrue();
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testEqual")).isTrue();
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testLess")).isFalse();
+        assertThat(instanceRunner.<Boolean>invoke("testGreater")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("testEqual")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("testLess")).isFalse();
     }
 
     @ParameterizedTest
@@ -331,7 +332,7 @@ public class TestCompileBinExprBigInt extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testLarge")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("testLarge")).isTrue();
     }
 
     @ParameterizedTest
@@ -397,9 +398,9 @@ public class TestCompileBinExprBigInt extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testTrue")).isTrue();
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testFalse")).isFalse();
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testEqual")).isFalse();
+        assertThat(instanceRunner.<Boolean>invoke("testTrue")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("testFalse")).isFalse();
+        assertThat(instanceRunner.<Boolean>invoke("testEqual")).isFalse();
     }
 
     @ParameterizedTest
@@ -420,9 +421,9 @@ public class TestCompileBinExprBigInt extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testLess")).isTrue();
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testEqual")).isTrue();
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testGreater")).isFalse();
+        assertThat(instanceRunner.<Boolean>invoke("testLess")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("testEqual")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("testGreater")).isFalse();
     }
 
     @ParameterizedTest
@@ -442,8 +443,8 @@ public class TestCompileBinExprBigInt extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testBigIntLtInt")).isTrue();
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testIntLtBigInt")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("testBigIntLtInt")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("testIntLtBigInt")).isTrue();
     }
 
     @ParameterizedTest
@@ -587,8 +588,8 @@ public class TestCompileBinExprBigInt extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testNegativeLt")).isTrue();
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("testNegativeGt")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("testNegativeLt")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("testNegativeGt")).isTrue();
     }
 
     @ParameterizedTest
@@ -603,7 +604,7 @@ public class TestCompileBinExprBigInt extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("test")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -648,7 +649,7 @@ public class TestCompileBinExprBigInt extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((Boolean) instanceRunner.<Boolean>invoke("test")).isTrue();
+        assertThat(instanceRunner.<Boolean>invoke("test")).isTrue();
     }
 
     // Mixed type operations

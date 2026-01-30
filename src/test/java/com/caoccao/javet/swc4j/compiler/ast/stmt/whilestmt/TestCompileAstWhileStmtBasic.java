@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -44,7 +45,7 @@ public class TestCompileAstWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -66,7 +67,7 @@ public class TestCompileAstWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1620);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1620);
     }
 
     @ParameterizedTest
@@ -86,7 +87,7 @@ public class TestCompileAstWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(55);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(55);
     }
 
     @ParameterizedTest
@@ -106,7 +107,7 @@ public class TestCompileAstWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -126,7 +127,7 @@ public class TestCompileAstWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -144,7 +145,7 @@ public class TestCompileAstWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -162,7 +163,7 @@ public class TestCompileAstWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -183,7 +184,7 @@ public class TestCompileAstWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -203,7 +204,7 @@ public class TestCompileAstWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(45);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(45);
     }
 
     @ParameterizedTest
@@ -224,6 +225,6 @@ public class TestCompileAstWhileStmtBasic extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20);
     }
 }

@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -118,18 +119,18 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
         Object instance = implClass.getConstructor().newInstance();
 
         // Required property has default value
-        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("");
+        assertThat(implClass.getMethod("getName").invoke(instance)).isEqualTo("");
 
         // Optional property can be null
-        assertThat(implClass.getMethod("getEmail").<Object>invoke(instance)).isNull();
+        assertThat(implClass.getMethod("getEmail").invoke(instance)).isNull();
 
         // Set values
         implClass.getMethod("setName", String.class).invoke(instance, "John");
         implClass.getMethod("setEmail", String.class).invoke(instance, "john@example.com");
 
         // Verify values
-        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("John");
-        assertThat(implClass.getMethod("getEmail").<Object>invoke(instance)).isEqualTo("john@example.com");
+        assertThat(implClass.getMethod("getName").invoke(instance)).isEqualTo("John");
+        assertThat(implClass.getMethod("getEmail").invoke(instance)).isEqualTo("john@example.com");
     }
 
     @ParameterizedTest
@@ -153,7 +154,7 @@ public class TestCompileAstTsInterfaceDeclOptional extends BaseTestCompileSuite 
         assertThat(Modifier.isAbstract(getId.getModifiers())).isTrue();
 
         assertThatThrownBy(() ->
-                interfaceClass.getMethod("setId", int.class)).isInstanceOf(NoSuchMethodException.class);;
+                interfaceClass.getMethod("setId", int.class)).isInstanceOf(NoSuchMethodException.class);
 
         // Non-readonly property should have both
         assertThat(interfaceClass.getMethod("getName")).isNotNull();

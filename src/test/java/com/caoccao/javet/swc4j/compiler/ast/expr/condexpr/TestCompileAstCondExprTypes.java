@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
@@ -90,7 +91,7 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(20L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20L);
     }
 
     @ParameterizedTest
@@ -107,7 +108,7 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(200L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(200L);
     }
 
     @ParameterizedTest

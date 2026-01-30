@@ -21,13 +21,11 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
-
 import java.lang.reflect.Method;
 import java.util.function.IntUnaryOperator;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 /**
  * Tests for custom TypeScript interfaces combined with arrow expressions.
@@ -131,7 +129,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
 
         var doublerRunner = runner.createInstanceRunner("com.Doubler");
         Method transformMethod = interfaceClass.getMethod("transform", int.class);
-        assertThat((int) doublerRunner.<Object>invoke("transform", 5)).isEqualTo(10);
+        assertThat((int) doublerRunner.invoke("transform", 5)).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -181,7 +179,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
 
         var doublerRunner = runner.createInstanceRunner("com.LongDoubler");
         Method transformMethod = interfaceClass.getMethod("transform", long.class);
-        assertThat((long) doublerRunner.<Object>invoke("transform", 10000000000L)).isEqualTo(20000000000L);
+        assertThat((long) doublerRunner.invoke("transform", 10000000000L)).isEqualTo(20000000000L);
     }
 
     @ParameterizedTest
@@ -206,7 +204,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
 
         var adderRunner = runner.createInstanceRunner("com.Adder");
         Method computeMethod = interfaceClass.getMethod("compute", int.class, int.class);
-        assertThat((int) adderRunner.<Object>invoke("compute", 3, 5)).isEqualTo(8);
+        assertThat((int) adderRunner.invoke("compute", 3, 5)).isEqualTo(8);
     }
 
     @ParameterizedTest
@@ -231,7 +229,7 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
 
         var upperCaserRunner = runner.createInstanceRunner("com.UpperCaser");
         Method transformMethod = interfaceClass.getMethod("transform", String.class);
-        assertThat((String) upperCaserRunner.<Object>invoke("transform", "hello")).isEqualTo("HELLO");
+        assertThat((String) upperCaserRunner.invoke("transform", "hello")).isEqualTo("HELLO");
     }
 
     @ParameterizedTest
@@ -261,14 +259,14 @@ public class TestCompileAstArrowCustomInterface extends BaseTestCompileSuite {
         var setterRunner = runner.createInstanceRunner("com.ValueSetter");
 
         // Initially 0
-        assertThat((int) setterRunner.<Object>invoke("getLastValue")).isEqualTo(0);
+        assertThat((int) setterRunner.invoke("getLastValue")).isEqualTo(0);
 
         // Call perform
         Method performMethod = interfaceClass.getMethod("perform", int.class);
         setterRunner.invoke("perform", 42);
 
         // Value updated
-        assertThat((int) setterRunner.<Object>invoke("getLastValue")).isEqualTo(42);
+        assertThat((int) setterRunner.invoke("getLastValue")).isEqualTo(42);
     }
 
     @ParameterizedTest

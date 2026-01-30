@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -89,13 +90,13 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Object instance = implClass.getConstructor().newInstance();
 
         // Initial value should be empty string
-        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("");
+        assertThat(implClass.getMethod("getName").invoke(instance)).isEqualTo("");
 
         // Set a new value
         implClass.getMethod("setName", String.class).invoke(instance, "John");
 
         // Get the value back
-        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("John");
+        assertThat(implClass.getMethod("getName").invoke(instance)).isEqualTo("John");
     }
 
     @ParameterizedTest
@@ -244,8 +245,8 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Object instance = implClass.getConstructor().newInstance();
 
         // Verify initial values
-        assertThat(implClass.getMethod("getId").<Object>invoke(instance)).isEqualTo(0);
-        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("");
+        assertThat(implClass.getMethod("getId").invoke(instance)).isEqualTo(0);
+        assertThat(implClass.getMethod("getName").invoke(instance)).isEqualTo("");
         assertThat((Boolean) implClass.getMethod("isActive").invoke(instance)).isFalse();
 
         // Set new values
@@ -254,8 +255,8 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         implClass.getMethod("setActive", boolean.class).invoke(instance, true);
 
         // Verify changes
-        assertThat(implClass.getMethod("getId").<Object>invoke(instance)).isEqualTo(42);
-        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("Alice");
+        assertThat(implClass.getMethod("getId").invoke(instance)).isEqualTo(42);
+        assertThat(implClass.getMethod("getName").invoke(instance)).isEqualTo("Alice");
         assertThat((Boolean) implClass.getMethod("isActive").invoke(instance)).isTrue();
     }
 
@@ -299,7 +300,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         implClass.getMethod("setBoolVal", boolean.class).invoke(instance, true);
 
         // Verify values
-        assertThat(implClass.getMethod("getIntVal").<Object>invoke(instance)).isEqualTo(1000);
+        assertThat(implClass.getMethod("getIntVal").invoke(instance)).isEqualTo(1000);
         assertThat((Boolean) implClass.getMethod("isBoolVal").invoke(instance)).isTrue();
     }
 
@@ -336,7 +337,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
 
         // readonly property should NOT have setter on interface
         assertThatThrownBy(() ->
-                interfaceClass.getMethod("setId", int.class)).isInstanceOf(NoSuchMethodException.class);;
+                interfaceClass.getMethod("setId", int.class)).isInstanceOf(NoSuchMethodException.class);
 
         // Non-readonly property should have both getter and setter
         assertThat(interfaceClass.getMethod("getName")).isNotNull();
@@ -346,11 +347,11 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Object instance = implClass.getConstructor(int.class).newInstance(42);
 
         // Readonly value should be set from constructor
-        assertThat(implClass.getMethod("getId").<Object>invoke(instance)).isEqualTo(42);
+        assertThat(implClass.getMethod("getId").invoke(instance)).isEqualTo(42);
 
         // Mutable property can be changed
         implClass.getMethod("setName", String.class).invoke(instance, "Test");
-        assertThat(implClass.getMethod("getName").<Object>invoke(instance)).isEqualTo("Test");
+        assertThat(implClass.getMethod("getName").invoke(instance)).isEqualTo("Test");
     }
 
     @ParameterizedTest
@@ -383,9 +384,9 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Object instance = implClass.getConstructor().newInstance();
 
         // Test method
-        assertThat(implClass.getMethod("add", int.class, int.class).<Object>invoke(instance, 2, 3)).isEqualTo(5);
-        assertThat(implClass.getMethod("add", int.class, int.class).<Object>invoke(instance, 40, 60)).isEqualTo(100);
-        assertThat(implClass.getMethod("add", int.class, int.class).<Object>invoke(instance, -10, 5)).isEqualTo(-5);
+        assertThat(implClass.getMethod("add", int.class, int.class).invoke(instance, 2, 3)).isEqualTo(5);
+        assertThat(implClass.getMethod("add", int.class, int.class).invoke(instance, 40, 60)).isEqualTo(100);
+        assertThat(implClass.getMethod("add", int.class, int.class).invoke(instance, -10, 5)).isEqualTo(-5);
     }
 
     @ParameterizedTest
@@ -430,7 +431,8 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         assertThat(interfaceClass.getMethod("setId", int.class)).isNotNull();
         assertThat(interfaceClass.getMethod("getVersion")).isNotNull();
         assertThatThrownBy(() ->
-                interfaceClass.getMethod("setVersion", int.class)).isInstanceOf(NoSuchMethodException.class);; // readonly
+                interfaceClass.getMethod("setVersion", int.class)).isInstanceOf(NoSuchMethodException.class);
+        // readonly
 
         // Methods on interface
         assertThat(interfaceClass.getMethod("save")).isNotNull();
@@ -441,11 +443,11 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Object instance = implClass.getConstructor(int.class).newInstance(1);
 
         // Test properties
-        assertThat(implClass.getMethod("getId").<Object>invoke(instance)).isEqualTo(0);
-        assertThat(implClass.getMethod("getVersion").<Object>invoke(instance)).isEqualTo(1);
+        assertThat(implClass.getMethod("getId").invoke(instance)).isEqualTo(0);
+        assertThat(implClass.getMethod("getVersion").invoke(instance)).isEqualTo(1);
 
         implClass.getMethod("setId", int.class).invoke(instance, 42);
-        assertThat(implClass.getMethod("getId").<Object>invoke(instance)).isEqualTo(42);
+        assertThat(implClass.getMethod("getId").invoke(instance)).isEqualTo(42);
 
         // Test methods
         assertThat((Boolean) implClass.getMethod("isSaved").invoke(instance)).isFalse();
@@ -453,7 +455,7 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         assertThat((Boolean) implClass.getMethod("isSaved").invoke(instance)).isTrue();
 
         assertThat((Boolean) implClass.getMethod("update", String.class).invoke(instance, "test data")).isTrue();
-        assertThat(implClass.getMethod("getLastData").<Object>invoke(instance)).isEqualTo("test data");
+        assertThat(implClass.getMethod("getLastData").invoke(instance)).isEqualTo("test data");
     }
 
     @ParameterizedTest
@@ -488,12 +490,12 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
         Object instance = implClass.getConstructor().newInstance();
 
         // Initial state
-        assertThat(implClass.getMethod("getLastMessage").<Object>invoke(instance)).isEqualTo("");
+        assertThat(implClass.getMethod("getLastMessage").invoke(instance)).isEqualTo("");
 
         // Call log method
         implClass.getMethod("log", String.class).invoke(instance, "Hello World");
 
         // Verify the message was logged
-        assertThat(implClass.getMethod("getLastMessage").<Object>invoke(instance)).isEqualTo("Hello World");
+        assertThat(implClass.getMethod("getLastMessage").invoke(instance)).isEqualTo("Hello World");
     }
 }

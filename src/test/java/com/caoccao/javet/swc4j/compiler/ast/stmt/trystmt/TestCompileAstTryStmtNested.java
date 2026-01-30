@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -67,7 +68,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                 }""");
         // Return value (10) was stored before finally runs
         // Finally modifies result but the stored return value (10) is what gets returned
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -106,7 +107,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // No exception, just result = 1
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -136,7 +137,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                 }""");
         // The inner return 2 executes its pending finally blocks (result += 10, result += 100)
         // Then returns 2, which overrides the outer return 1
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -169,7 +170,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                 }""");
         // Return value (1) was stored before finally runs
         // Finally modifies result but the stored return value (1) is what gets returned
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1);
     }
 
     @ParameterizedTest
@@ -194,7 +195,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // The innermost finally's return (3) should win
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -231,7 +232,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // catch (1), inner finally (10), middle finally (1000), outer finally (100000) = 101011
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(101011);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(101011);
     }
 
     @ParameterizedTest
@@ -262,7 +263,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // result = 10, finally: result = 10+5+3+2 = 20, but we stored 10 before, return 10
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(10);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(10);
     }
 
     @ParameterizedTest
@@ -289,7 +290,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -316,7 +317,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(18);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(18);
     }
 
     @ParameterizedTest
@@ -344,7 +345,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(18);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(18);
     }
 
     @ParameterizedTest
@@ -376,7 +377,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // 10 + 5 + 2 + 1 = 18
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(18);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(18);
     }
 
     @ParameterizedTest
@@ -406,7 +407,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // 10 + 5 + 100 = 115
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(115);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(115);
     }
 
     @ParameterizedTest
@@ -436,7 +437,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // 10 + 1 + 100 + 2 = 113
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(113);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(113);
     }
 
     @ParameterizedTest
@@ -461,7 +462,7 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
                   }
                 }""");
         // The return in the nested try (return 100) should override the outer return (42)
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(100);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(100);
     }
 
     @ParameterizedTest
@@ -495,6 +496,6 @@ public class TestCompileAstTryStmtNested extends BaseTestCompileSuite {
         // First try-finally: result = 10 + 5 = 15
         // Second try-finally: stores return value 15, then finally adds 100
         // Returns 15 (the stored value before finally)
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(15);
     }
 }

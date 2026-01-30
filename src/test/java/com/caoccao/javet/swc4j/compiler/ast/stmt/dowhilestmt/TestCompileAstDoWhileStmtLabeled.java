@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -53,7 +54,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -83,7 +84,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                 }""");
         // Each outer iteration: j=1 increments sum, j=2 continues outer (skipping rest)
         // 3 iterations, each adds 1 = 3
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -114,7 +115,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
         // i=2: continue (skip inner)
         // i=3: sum = 2+3+3 = 8
         // i=4: sum = 8+4+4 = 16
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(16);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(16);
     }
 
     @ParameterizedTest
@@ -146,7 +147,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                 }""");
         // i=0: j=0,1,2 (break), result=3, i=1
         // i=1: j=0,1 (break outer), result=5
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -179,6 +180,6 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
         // First outer: sum=1,2,3 (break inner), i=1
         // Second outer: sum=4,5,6 (j=0,1,2), i=2
         // Third outer: sum=7 (break outer)
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(7);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(7);
     }
 }

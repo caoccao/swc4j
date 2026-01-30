@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.math.BigInteger;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
@@ -75,7 +76,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((byte) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((byte) 127);
+        assertThat((byte) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((byte) 127);
     }
 
     @ParameterizedTest
@@ -120,7 +121,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(54321);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(54321);
     }
 
     @ParameterizedTest
@@ -135,7 +136,7 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(9876543210L);
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(9876543210L);
     }
 
     @ParameterizedTest
@@ -179,6 +180,6 @@ public class TestCompileAstBigIntAnnotations extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((short) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo((short) 32767);
+        assertThat((short) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo((short) 32767);
     }
 }

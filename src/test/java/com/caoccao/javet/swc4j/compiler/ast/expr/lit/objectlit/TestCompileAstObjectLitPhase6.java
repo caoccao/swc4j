@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -250,10 +251,10 @@ public class TestCompileAstObjectLitPhase6 extends BaseTestCompileSuite {
                 result
         ).isEqualTo(
                 Map.of(
-                "outer1", Map.of("inner", 42),
-                "outer2", Map.of("value", 99)
-        )
-        );;
+                        "outer1", Map.of("inner", 42),
+                        "outer2", Map.of("value", 99)
+                )
+        );
     }
 
     @ParameterizedTest

@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -41,7 +42,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('Z');
+        assertThat((char) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo('Z');
     }
 
     @ParameterizedTest
@@ -55,7 +56,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('9');
+        assertThat((char) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo('9');
     }
 
     @ParameterizedTest
@@ -69,7 +70,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('\0');
+        assertThat((char) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo('\0');
     }
 
     @ParameterizedTest
@@ -83,7 +84,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('X');
+        assertThat((char) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo('X');
     }
 
     @ParameterizedTest
@@ -97,7 +98,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('\0');
+        assertThat((char) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo('\0');
     }
 
     @ParameterizedTest
@@ -111,7 +112,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('A');
+        assertThat((char) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo('A');
     }
 
     @ParameterizedTest
@@ -126,7 +127,7 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('a');
+        assertThat((char) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo('a');
     }
 
     @ParameterizedTest
@@ -140,6 +141,6 @@ public class TestCompileAstStrCharacter extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((char) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo('a');
+        assertThat((char) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo('a');
     }
 }

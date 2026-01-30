@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
@@ -51,28 +52,28 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
     /**
      * Allocate variables for nested patterns recursively.
      */
-    private void allocateNestedPatternVariables(CompilationContext context, ISwc4jAstPat pat) {
+    private void allocateNestedPatternVariables(CompilationContext context, ISwc4jAstPat pat, boolean allowShadow) {
         if (pat instanceof Swc4jAstBindingIdent bindingIdent) {
-            allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), "Ljava/lang/Object;");
+            allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), "Ljava/lang/Object;", allowShadow);
         } else if (pat instanceof Swc4jAstArrayPat arrayPat) {
             for (var optElem : arrayPat.getElems()) {
                 if (optElem.isPresent()) {
                     ISwc4jAstPat elem = optElem.get();
                     if (elem instanceof Swc4jAstRestPat restPat) {
-                        allocateRestPatternVariable(context, restPat, true);
+                        allocateRestPatternVariable(context, restPat, true, allowShadow);
                     } else {
-                        allocateNestedPatternVariables(context, elem);
+                        allocateNestedPatternVariables(context, elem, allowShadow);
                     }
                 }
             }
         } else if (pat instanceof Swc4jAstObjectPat objectPat) {
             for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
                 if (prop instanceof Swc4jAstAssignPatProp assignProp) {
-                    allocateVariableIfNeeded(context, assignProp.getKey().getId().getSym(), "Ljava/lang/Object;");
+                    allocateVariableIfNeeded(context, assignProp.getKey().getId().getSym(), "Ljava/lang/Object;", allowShadow);
                 } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
-                    allocateNestedPatternVariables(context, keyValueProp.getValue());
+                    allocateNestedPatternVariables(context, keyValueProp.getValue(), allowShadow);
                 } else if (prop instanceof Swc4jAstRestPat restPat) {
-                    allocateRestPatternVariable(context, restPat, false);
+                    allocateRestPatternVariable(context, restPat, false, allowShadow);
                 }
             }
         }
@@ -81,22 +82,29 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
     /**
      * Allocate variable for rest pattern.
      */
-    private void allocateRestPatternVariable(CompilationContext context, Swc4jAstRestPat restPat, boolean isArrayRest) {
+    private void allocateRestPatternVariable(
+            CompilationContext context,
+            Swc4jAstRestPat restPat,
+            boolean isArrayRest,
+            boolean allowShadow) {
         ISwc4jAstPat arg = restPat.getArg();
         if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
             String varName = bindingIdent.getId().getSym();
             String varType = isArrayRest ? "Ljava/util/ArrayList;" : "Ljava/util/LinkedHashMap;";
-            allocateVariableIfNeeded(context, varName, varType);
+            allocateVariableIfNeeded(context, varName, varType, allowShadow);
         }
     }
 
     /**
      * Allocate variable if it doesn't exist.
      */
-    private void allocateVariableIfNeeded(CompilationContext context, String varName, String varType) {
-        LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
-        if (localVar == null) {
-            localVar = context.getLocalVariableTable().addExistingVariableToCurrentScope(varName, varType);
+    private void allocateVariableIfNeeded(CompilationContext context, String varName, String varType, boolean allowShadow) {
+        LocalVariable localVar = context.getLocalVariableTable().getVariableInCurrentScope(varName);
+        if (localVar == null && !allowShadow) {
+            localVar = context.getLocalVariableTable().getVariable(varName);
+            if (localVar != null) {
+                context.getLocalVariableTable().addExistingVariableToCurrentScope(varName, varType);
+            }
         }
         if (localVar == null) {
             context.getLocalVariableTable().allocateVariable(varName, varType);
@@ -155,14 +163,15 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             Swc4jAstVarDecl varDecl,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
+        boolean allowShadow = varDecl.getKind() != Swc4jAstVarDeclKind.Var;
         for (Swc4jAstVarDeclarator declarator : varDecl.getDecls()) {
             ISwc4jAstPat name = declarator.getName();
             if (name instanceof Swc4jAstBindingIdent bindingIdent) {
-                generateBindingIdentDecl(code, cp, context, declarator, bindingIdent);
+                generateBindingIdentDecl(code, cp, context, declarator, bindingIdent, allowShadow);
             } else if (name instanceof Swc4jAstArrayPat arrayPat) {
-                generateArrayPatternDecl(code, cp, context, declarator, arrayPat);
+                generateArrayPatternDecl(code, cp, context, declarator, arrayPat, allowShadow);
             } else if (name instanceof Swc4jAstObjectPat objectPat) {
-                generateObjectPatternDecl(code, cp, context, declarator, objectPat);
+                generateObjectPatternDecl(code, cp, context, declarator, objectPat, allowShadow);
             } else {
                 throw new Swc4jByteCodeCompilerException(name,
                         "Unsupported pattern type in variable declaration: " + name.getClass().getName());
@@ -180,7 +189,8 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             ClassWriter.ConstantPool cp,
             CompilationContext context,
             Swc4jAstVarDeclarator declarator,
-            Swc4jAstArrayPat arrayPat) throws Swc4jByteCodeCompilerException {
+            Swc4jAstArrayPat arrayPat,
+            boolean allowShadow) throws Swc4jByteCodeCompilerException {
         if (declarator.getInit().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(declarator,
                     "Array destructuring requires an initializer");
@@ -188,7 +198,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
 
         // Generate the initializer expression and store in a temp variable
         compiler.getExpressionGenerator().generate(code, cp, declarator.getInit().get(), null);
-        generateArrayPatternExtraction(code, cp, context, arrayPat);
+        generateArrayPatternExtraction(code, cp, context, arrayPat, allowShadow);
     }
 
     /**
@@ -199,7 +209,8 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             CompilationContext context,
-            Swc4jAstArrayPat arrayPat) throws Swc4jByteCodeCompilerException {
+            Swc4jAstArrayPat arrayPat,
+            boolean allowShadow) throws Swc4jByteCodeCompilerException {
 
         int listClass = cp.addClass("java/util/List");
         code.checkcast(listClass);
@@ -221,14 +232,14 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             ISwc4jAstPat elem = optElem.get();
             if (elem instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
-                allocateVariableIfNeeded(context, varName, "Ljava/lang/Object;");
+                allocateVariableIfNeeded(context, varName, "Ljava/lang/Object;", allowShadow);
                 restStartIndex++;
             } else if (elem instanceof Swc4jAstArrayPat || elem instanceof Swc4jAstObjectPat) {
                 // Nested pattern - allocate variables recursively
-                allocateNestedPatternVariables(context, elem);
+                allocateNestedPatternVariables(context, elem, allowShadow);
                 restStartIndex++;
             } else if (elem instanceof Swc4jAstRestPat restPat) {
-                allocateRestPatternVariable(context, restPat, true);
+                allocateRestPatternVariable(context, restPat, true, allowShadow);
             }
         }
 
@@ -258,7 +269,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.iconst(currentIndex);
                 code.invokeinterface(listGetRef, 2);
                 // Recursively extract nested array pattern
-                generateArrayPatternExtraction(code, cp, context, nestedArrayPat);
+                generateArrayPatternExtraction(code, cp, context, nestedArrayPat, allowShadow);
                 currentIndex++;
 
             } else if (elem instanceof Swc4jAstObjectPat nestedObjectPat) {
@@ -267,7 +278,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.iconst(currentIndex);
                 code.invokeinterface(listGetRef, 2);
                 // Recursively extract nested object pattern
-                generateObjectPatternExtraction(code, cp, context, nestedObjectPat);
+                generateObjectPatternExtraction(code, cp, context, nestedObjectPat, allowShadow);
                 currentIndex++;
 
             } else if (elem instanceof Swc4jAstRestPat restPat) {
@@ -284,14 +295,22 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             ClassWriter.ConstantPool cp,
             CompilationContext context,
             Swc4jAstVarDeclarator declarator,
-            Swc4jAstBindingIdent bindingIdent) throws Swc4jByteCodeCompilerException {
+            Swc4jAstBindingIdent bindingIdent,
+            boolean allowShadow) throws Swc4jByteCodeCompilerException {
         String varName = bindingIdent.getId().getSym();
-        // First try to get the variable from the current scope chain
-        LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
-        // If not found in current scope, try to add it from the pre-allocated variables
+        LocalVariable localVar = allowShadow ?
+                context.getLocalVariableTable().getVariableInCurrentScope(varName) :
+                context.getLocalVariableTable().getVariable(varName);
         if (localVar == null) {
             String varType = compiler.getTypeResolver().extractType(bindingIdent, declarator.getInit());
-            localVar = context.getLocalVariableTable().addExistingVariableToCurrentScope(varName, varType);
+            if (!allowShadow) {
+                localVar = context.getLocalVariableTable().addExistingVariableToCurrentScope(varName, varType);
+            }
+            if (localVar == null) {
+                context.getLocalVariableTable().allocateVariable(varName, varType);
+                context.getInferredTypes().put(varName, varType);
+                localVar = context.getLocalVariableTable().getVariable(varName);
+            }
         }
 
         if (declarator.getInit().isPresent()) {
@@ -596,7 +615,8 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             ClassWriter.ConstantPool cp,
             CompilationContext context,
             Swc4jAstVarDeclarator declarator,
-            Swc4jAstObjectPat objectPat) throws Swc4jByteCodeCompilerException {
+            Swc4jAstObjectPat objectPat,
+            boolean allowShadow) throws Swc4jByteCodeCompilerException {
         if (declarator.getInit().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(declarator,
                     "Object destructuring requires an initializer");
@@ -604,7 +624,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
 
         // Generate the initializer expression and extract patterns
         compiler.getExpressionGenerator().generate(code, cp, declarator.getInit().get(), null);
-        generateObjectPatternExtraction(code, cp, context, objectPat);
+        generateObjectPatternExtraction(code, cp, context, objectPat, allowShadow);
     }
 
     /**
@@ -615,7 +635,8 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             CompilationContext context,
-            Swc4jAstObjectPat objectPat) throws Swc4jByteCodeCompilerException {
+            Swc4jAstObjectPat objectPat,
+            boolean allowShadow) throws Swc4jByteCodeCompilerException {
 
         int mapClass = cp.addClass("java/util/Map");
         code.checkcast(mapClass);
@@ -632,19 +653,19 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             if (prop instanceof Swc4jAstAssignPatProp assignProp) {
                 String varName = assignProp.getKey().getId().getSym();
                 extractedKeys.add(varName);
-                allocateVariableIfNeeded(context, varName, "Ljava/lang/Object;");
+                allocateVariableIfNeeded(context, varName, "Ljava/lang/Object;", allowShadow);
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
                 String keyName = extractPropertyName(keyValueProp.getKey());
                 extractedKeys.add(keyName);
                 ISwc4jAstPat valuePat = keyValueProp.getValue();
                 if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
-                    allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), "Ljava/lang/Object;");
+                    allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), "Ljava/lang/Object;", allowShadow);
                 } else if (valuePat instanceof Swc4jAstArrayPat || valuePat instanceof Swc4jAstObjectPat) {
                     // Nested pattern - allocate variables recursively
-                    allocateNestedPatternVariables(context, valuePat);
+                    allocateNestedPatternVariables(context, valuePat, allowShadow);
                 }
             } else if (prop instanceof Swc4jAstRestPat restPat) {
-                allocateRestPatternVariable(context, restPat, false);
+                allocateRestPatternVariable(context, restPat, false, allowShadow);
             }
         }
 
@@ -693,10 +714,10 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                     code.astore(localVar.index());
                 } else if (valuePat instanceof Swc4jAstArrayPat nestedArrayPat) {
                     // Nested array pattern: { arr: [a, ...rest] }
-                    generateArrayPatternExtraction(code, cp, context, nestedArrayPat);
+                    generateArrayPatternExtraction(code, cp, context, nestedArrayPat, allowShadow);
                 } else if (valuePat instanceof Swc4jAstObjectPat nestedObjectPat) {
                     // Nested object pattern: { nested: { y, ...rest } }
-                    generateObjectPatternExtraction(code, cp, context, nestedObjectPat);
+                    generateObjectPatternExtraction(code, cp, context, nestedObjectPat, allowShadow);
                 }
 
             } else if (prop instanceof Swc4jAstRestPat restPat) {

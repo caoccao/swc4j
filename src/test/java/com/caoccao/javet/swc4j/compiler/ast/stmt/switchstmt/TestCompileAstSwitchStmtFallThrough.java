@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -54,12 +55,12 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(123);
-        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(123);
-        assertThat((int) instanceRunner.<Object>invoke("test", 3)).isEqualTo(123);
-        assertThat((int) instanceRunner.<Object>invoke("test", 4)).isEqualTo(45);
-        assertThat((int) instanceRunner.<Object>invoke("test", 5)).isEqualTo(45);
-        assertThat((int) instanceRunner.<Object>invoke("test", 6)).isEqualTo(0);
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(123);
+        assertThat((int) instanceRunner.invoke("test", 2)).isEqualTo(123);
+        assertThat((int) instanceRunner.invoke("test", 3)).isEqualTo(123);
+        assertThat((int) instanceRunner.invoke("test", 4)).isEqualTo(45);
+        assertThat((int) instanceRunner.invoke("test", 5)).isEqualTo(45);
+        assertThat((int) instanceRunner.invoke("test", 6)).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -83,8 +84,8 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(1); // Case 1 only
-        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(11); //Default (10) + Case 1 (1) = 11
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(1); // Case 1 only
+        assertThat((int) instanceRunner.invoke("test", 99)).isEqualTo(11); //Default (10) + Case 1 (1) = 11
     }
 
     @ParameterizedTest
@@ -110,7 +111,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                   }
                 }""");
         // All cases execute: 1 + 2 + 3 + 10 = 16
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(16);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(16);
     }
 
     @ParameterizedTest
@@ -142,12 +143,12 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 0)).isEqualTo(0);     // Case 0, break
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(12);    // Cases 1-2, break
-        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(12);    // Cases 1-2, break
-        assertThat((int) instanceRunner.<Object>invoke("test", 3)).isEqualTo(107); //Case 3 (3) + Case 4 (4) + default (100) = 107
-        assertThat((int) instanceRunner.<Object>invoke("test", 4)).isEqualTo(104); //Case 4 (4) + default (100) = 104
-        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(100);  // Default only
+        assertThat((int) instanceRunner.invoke("test", 0)).isEqualTo(0);     // Case 0, break
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(12);    // Cases 1-2, break
+        assertThat((int) instanceRunner.invoke("test", 2)).isEqualTo(12);    // Cases 1-2, break
+        assertThat((int) instanceRunner.invoke("test", 3)).isEqualTo(107); //Case 3 (3) + Case 4 (4) + default (100) = 107
+        assertThat((int) instanceRunner.invoke("test", 4)).isEqualTo(104); //Case 4 (4) + default (100) = 104
+        assertThat((int) instanceRunner.invoke("test", 99)).isEqualTo(100);  // Default only
     }
 
     @ParameterizedTest
@@ -173,7 +174,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                   }
                 }""");
         // Last case without break still works
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -202,7 +203,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                   }
                 }""");
         // All 5 cases execute: 1 + 2 + 3 + 4 + 5 = 15
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(15);
     }
 
     @ParameterizedTest
@@ -226,7 +227,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                   }
                 }""");
         // Case 2 executes: result += 2, then falls through to case 3: result += 3
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5); // 2 + 3 = 5
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(5); // 2 + 3 = 5
     }
 
     @ParameterizedTest
@@ -250,7 +251,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                   }
                 }""");
         // Case 2 is empty, falls through to case 3
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -273,8 +274,8 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(11); //Case 1 (1) + default (10) = 11
-        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(10); // Default only
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(11); //Case 1 (1) + default (10) = 11
+        assertThat((int) instanceRunner.invoke("test", 99)).isEqualTo(10); // Default only
     }
 
     @ParameterizedTest
@@ -298,9 +299,9 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
 
         // Return stops execution, no fall-through
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(1);
-        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(2);
-        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(-1);
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(1);
+        assertThat((int) instanceRunner.invoke("test", 2)).isEqualTo(2);
+        assertThat((int) instanceRunner.invoke("test", 99)).isEqualTo(-1);
     }
 
     @ParameterizedTest
@@ -329,7 +330,7 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                   }
                 }""");
         // Case 2 (result=2, count=1) + Case 3 (result=5, count=2) = result=5, count=2 -> 52
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(52);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(52);
     }
 
     @ParameterizedTest
@@ -359,9 +360,9 @@ public class TestCompileAstSwitchStmtFallThrough extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(1);  // Case 1, break
-        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(5); //Case 2 (2) + Case 3 (3) = 5
-        assertThat((int) instanceRunner.<Object>invoke("test", 3)).isEqualTo(3);  // Case 3, break
-        assertThat((int) instanceRunner.<Object>invoke("test", 4)).isEqualTo(4);  // Case 4, break
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(1);  // Case 1, break
+        assertThat((int) instanceRunner.invoke("test", 2)).isEqualTo(5); //Case 2 (2) + Case 3 (3) = 5
+        assertThat((int) instanceRunner.invoke("test", 3)).isEqualTo(3);  // Case 3, break
+        assertThat((int) instanceRunner.invoke("test", 4)).isEqualTo(4);  // Case 4, break
     }
 }

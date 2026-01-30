@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -65,10 +66,10 @@ public class TestCompileBinExprInstanceOf extends BaseTestCompileSuite {
                   }
                 }""");
         // String instanceof String should be true, returns 1
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("testWithString")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("testWithString")).isEqualTo(1);
 
         // Integer instanceof String should be false, returns 0
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("testWithInteger")).isEqualTo(0);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("testWithInteger")).isEqualTo(0);
     }
 
     @ParameterizedTest

@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -53,10 +54,10 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 result
         ).isEqualTo(
                 Map.of(
-                "outer1", Map.of(),
-                "outer2", Map.of("inner", 42)
-        )
-        );;
+                        "outer1", Map.of(),
+                        "outer2", Map.of("inner", 42)
+                )
+        );
     }
 
     @ParameterizedTest
@@ -79,10 +80,10 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 result
         ).isEqualTo(
                 Map.of(
-                "a", Map.of("x", 1, "y", 2.5),
-                "b", Map.of("z", 100)
-        )
-        );;
+                        "a", Map.of("x", 1, "y", 2.5),
+                        "b", Map.of("z", 100)
+                )
+        );
     }
 
     @ParameterizedTest
@@ -105,10 +106,10 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 result
         ).isEqualTo(
                 Map.of(
-                "outer1", Map.of("inner1", 42, "inner2", 99),
-                "outer2", Map.of("inner3", 100)
-        )
-        );;
+                        "outer1", Map.of("inner1", 42, "inner2", 99),
+                        "outer2", Map.of("inner3", 100)
+                )
+        );
     }
 
     @ParameterizedTest
@@ -257,11 +258,11 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 result
         ).isEqualTo(
                 Map.of(
-                "outer1", Map.of("inner1", 1),
-                "outer2", Map.of("inner2", 2),
-                "outer3", Map.of("inner3", 3)
-        )
-        );;
+                        "outer1", Map.of("inner1", 1),
+                        "outer2", Map.of("inner2", 2),
+                        "outer3", Map.of("inner3", 3)
+                )
+        );
     }
 
     @ParameterizedTest
@@ -497,10 +498,10 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 result
         ).isEqualTo(
                 Map.of(
-                "outer1", Map.of("inner1", 1, "inner2", 2),
-                "outer2", Map.of("inner3", 3)
-        )
-        );;
+                        "outer1", Map.of("inner1", 1, "inner2", 2),
+                        "outer2", Map.of("inner3", 3)
+                )
+        );
     }
 
     // Phase 7: Edge Cases 14-16, 20 (Object Type Annotation, Mixed Keys, Trailing Commas, Return Context)
@@ -532,11 +533,11 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 result
         ).isEqualTo(
                 Map.of(
-                "a", Map.of("x", 1),
-                "b", Map.of("y", 2),
-                "c", Map.of("z", 3)
-        )
-        );;
+                        "a", Map.of("x", 1),
+                        "b", Map.of("y", 2),
+                        "c", Map.of("z", 3)
+                )
+        );
     }
 
     @ParameterizedTest
@@ -626,14 +627,14 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 result
         ).isEqualTo(
                 SimpleMap.of(
-                "regular", 10,
-                "x", 100.0,
-                "dynamic", 20,
-                "a", 1,
-                "b", 2,
-                "final", 30
-        )
-        );;
+                        "regular", 10,
+                        "x", 100.0,
+                        "dynamic", 20,
+                        "a", 1,
+                        "b", 2,
+                        "final", 30
+                )
+        );
     }
 
     @ParameterizedTest
@@ -701,13 +702,13 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 result
         ).isEqualTo(
                 Map.of(
-                "empty1", Map.of(),
-                "with2", Map.of(
-                        "empty2", Map.of(),
-                        "with3", Map.of("value", 42)
+                        "empty1", Map.of(),
+                        "with2", Map.of(
+                                "empty2", Map.of(),
+                                "with3", Map.of("value", 42)
+                        )
                 )
-        )
-        );;
+        );
     }
 
     @ParameterizedTest
@@ -813,12 +814,12 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 result
         ).isEqualTo(
                 Map.of(
-                "a", Map.of(
-                        "b", Map.of("c", 1, "d", 3),
-                        "e", Map.of("f", 100)
+                        "a", Map.of(
+                                "b", Map.of("c", 1, "d", 3),
+                                "e", Map.of("f", 100)
+                        )
                 )
-        )
-        );;
+        );
     }
 
     @ParameterizedTest
@@ -853,15 +854,15 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                 result
         ).isEqualTo(
                 Map.of(
-                "level1", Map.of(
-                        "level2a", Map.of("level3a", 100, "level3b", 200),
-                        "level2b", Map.of("level3c", 300)
-                ),
-                "another1", Map.of(
-                        "another2", Map.of("another3", 400)
+                        "level1", Map.of(
+                                "level2a", Map.of("level3a", 100, "level3b", 200),
+                                "level2b", Map.of("level3c", 300)
+                        ),
+                        "another1", Map.of(
+                                "another2", Map.of("another3", 400)
+                        )
                 )
-        )
-        );;
+        );
     }
 
 }

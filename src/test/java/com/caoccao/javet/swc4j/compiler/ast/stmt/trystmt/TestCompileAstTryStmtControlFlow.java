@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -58,7 +59,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                   }
                 }""");
         // i=0..4: result += (1+10) = 55, i=5: result += 10 = 65 (break + finally)
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(65);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(65);
     }
 
     @ParameterizedTest
@@ -84,7 +85,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(13);  // 10 + 3
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(13);  // 10 + 3
     }
 
     @ParameterizedTest
@@ -108,7 +109,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(15);  // 10 + 5
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(15);  // 10 + 5
     }
 
     @ParameterizedTest
@@ -137,7 +138,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((int) instanceRunner.<Object>invoke("test")).isEqualTo(3);
+        assertThat((int) instanceRunner.invoke("test")).isEqualTo(3);
         assertThat((boolean) instanceRunner.<Boolean>invoke("didFinallyRun")).isTrue();
     }
 
@@ -162,7 +163,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                   }
                 }""");
         // i=0: finally i=1, i=1: finally i=2, i=2: finally i=3, i=3: break, finally i=4
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(4);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(4);
     }
 
     @ParameterizedTest
@@ -194,7 +195,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1111);  // 1 + 10 + 100 + 1000
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1111);  // 1 + 10 + 100 + 1000
     }
 
     @ParameterizedTest
@@ -219,7 +220,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                   }
                 }""");
         // i=0: 0+10, i=1: 1+10, i=2: 10 (continue), i=3: 3+10, i=4: 4+10 = 10+11+10+13+14 = 58
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(58);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(58);
     }
 
     @ParameterizedTest
@@ -247,7 +248,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                 }""");
         // i=1: sum=0+1+10=11, i=2: sum=11+2+10=23, i=3: sum=23+10=33 (continue),
         // i=4: sum=33+4+10=47, i=5: sum=47+5+10=62
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(62);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(62);
     }
 
     @ParameterizedTest
@@ -272,7 +273,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(5);
     }
 
     @ParameterizedTest
@@ -307,7 +308,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                   }
                 }""");
         // Each iteration: 1 + 10 + 100 + 1000 = 1111, 2 iterations = 2222
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2222);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(2222);
     }
 
     @ParameterizedTest
@@ -329,7 +330,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(99);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(99);
     }
 
     @ParameterizedTest
@@ -353,7 +354,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(88);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(88);
     }
 
     @ParameterizedTest
@@ -382,7 +383,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                   }
                 }""");
         // i=1: result=0+1+10=11, i=2: result=11+1+10=22, i=3: result=22+10=32 (break outer + finally)
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(32);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(32);
     }
 
     @ParameterizedTest
@@ -415,7 +416,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
         // Outer iter 1: i=1: result=0+1+10=11, i=2: result=11+10=21 (continue outer)
         // Outer iter 2: i=1: result=21+1+10=32, i=2: result=32+10=42 (continue outer)
         // Outer iter 3: i=1: result=42+1+10=53, i=2: result=53+10=63 (continue outer)
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(63);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(63);
     }
 
     @ParameterizedTest
@@ -443,7 +444,7 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(18);  // 10 + 5 + 3
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(18);  // 10 + 5 + 3
     }
 
     @ParameterizedTest
@@ -474,6 +475,6 @@ public class TestCompileAstTryStmtControlFlow extends BaseTestCompileSuite {
                   }
                 }""");
         // Each iteration: 10 + 5 + 3 = 18, 2 iterations = 36
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(36);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(36);
     }
 }

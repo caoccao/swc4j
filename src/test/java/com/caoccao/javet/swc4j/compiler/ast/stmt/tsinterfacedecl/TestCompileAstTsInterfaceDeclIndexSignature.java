@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -233,7 +234,7 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
 
         // Should NOT have set method
         assertThatThrownBy(() ->
-                interfaceClass.getMethod("set", String.class, String.class)).isInstanceOf(NoSuchMethodException.class);;
+                interfaceClass.getMethod("set", String.class, String.class)).isInstanceOf(NoSuchMethodException.class);
     }
 
     @ParameterizedTest
@@ -257,7 +258,7 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
 
         // Should NOT have set method
         assertThatThrownBy(() ->
-                interfaceClass.getMethod("set", String.class, int.class)).isInstanceOf(NoSuchMethodException.class);;
+                interfaceClass.getMethod("set", String.class, int.class)).isInstanceOf(NoSuchMethodException.class);
     }
 
     @ParameterizedTest
@@ -350,7 +351,7 @@ public class TestCompileAstTsInterfaceDeclIndexSignature extends BaseTestCompile
         assertThat(getId.getReturnType()).isEqualTo(int.class);
 
         assertThatThrownBy(() ->
-                interfaceClass.getMethod("setId", int.class)).isInstanceOf(NoSuchMethodException.class);;
+                interfaceClass.getMethod("setId", int.class)).isInstanceOf(NoSuchMethodException.class);
 
         // Index signature should have both get and set
         Method get = interfaceClass.getMethod("get", String.class);

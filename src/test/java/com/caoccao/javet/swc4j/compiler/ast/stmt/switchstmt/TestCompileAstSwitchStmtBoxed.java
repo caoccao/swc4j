@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -54,10 +55,10 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", (byte) 1)).isEqualTo(10);
-        assertThat((int) instanceRunner.<Object>invoke("test", (byte) 2)).isEqualTo(20);
-        assertThat((int) instanceRunner.<Object>invoke("test", (byte) 3)).isEqualTo(30);
-        assertThat((int) instanceRunner.<Object>invoke("test", (byte) 4)).isEqualTo(0); // No match
+        assertThat((int) instanceRunner.invoke("test", (byte) 1)).isEqualTo(10);
+        assertThat((int) instanceRunner.invoke("test", (byte) 2)).isEqualTo(20);
+        assertThat((int) instanceRunner.invoke("test", (byte) 3)).isEqualTo(30);
+        assertThat((int) instanceRunner.invoke("test", (byte) 4)).isEqualTo(0); // No match
     }
 
     @ParameterizedTest
@@ -85,9 +86,9 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", (byte) -1)).isEqualTo(1);
-        assertThat((int) instanceRunner.<Object>invoke("test", (byte) 0)).isEqualTo(2);
-        assertThat((int) instanceRunner.<Object>invoke("test", (byte) 1)).isEqualTo(3);
+        assertThat((int) instanceRunner.invoke("test", (byte) -1)).isEqualTo(1);
+        assertThat((int) instanceRunner.invoke("test", (byte) 0)).isEqualTo(2);
+        assertThat((int) instanceRunner.invoke("test", (byte) 1)).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -115,10 +116,10 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 'a')).isEqualTo(1);
-        assertThat((int) instanceRunner.<Object>invoke("test", 'b')).isEqualTo(2);
-        assertThat((int) instanceRunner.<Object>invoke("test", 'c')).isEqualTo(3);
-        assertThat((int) instanceRunner.<Object>invoke("test", 'd')).isEqualTo(0); // No match
+        assertThat((int) instanceRunner.invoke("test", 'a')).isEqualTo(1);
+        assertThat((int) instanceRunner.invoke("test", 'b')).isEqualTo(2);
+        assertThat((int) instanceRunner.invoke("test", 'c')).isEqualTo(3);
+        assertThat((int) instanceRunner.invoke("test", 'd')).isEqualTo(0); // No match
     }
 
     @ParameterizedTest
@@ -149,11 +150,11 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", '0')).isEqualTo(0);
-        assertThat((int) instanceRunner.<Object>invoke("test", '1')).isEqualTo(1);
-        assertThat((int) instanceRunner.<Object>invoke("test", '2')).isEqualTo(2);
-        assertThat((int) instanceRunner.<Object>invoke("test", '3')).isEqualTo(-1); // Default
-        assertThat((int) instanceRunner.<Object>invoke("test", 'a')).isEqualTo(-1); // Default
+        assertThat((int) instanceRunner.invoke("test", '0')).isEqualTo(0);
+        assertThat((int) instanceRunner.invoke("test", '1')).isEqualTo(1);
+        assertThat((int) instanceRunner.invoke("test", '2')).isEqualTo(2);
+        assertThat((int) instanceRunner.invoke("test", '3')).isEqualTo(-1); // Default
+        assertThat((int) instanceRunner.invoke("test", 'a')).isEqualTo(-1); // Default
     }
 
     @ParameterizedTest
@@ -181,10 +182,10 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(10);
-        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(20);
-        assertThat((int) instanceRunner.<Object>invoke("test", 3)).isEqualTo(30);
-        assertThat((int) instanceRunner.<Object>invoke("test", 4)).isEqualTo(0); // No match
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(10);
+        assertThat((int) instanceRunner.invoke("test", 2)).isEqualTo(20);
+        assertThat((int) instanceRunner.invoke("test", 3)).isEqualTo(30);
+        assertThat((int) instanceRunner.invoke("test", 4)).isEqualTo(0); // No match
     }
 
     @ParameterizedTest
@@ -211,9 +212,9 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(11); // 1 + 10
-        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(10); // 10
-        assertThat((int) instanceRunner.<Object>invoke("test", 3)).isEqualTo(100); // 100
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(11); // 1 + 10
+        assertThat((int) instanceRunner.invoke("test", 2)).isEqualTo(10); // 10
+        assertThat((int) instanceRunner.invoke("test", 3)).isEqualTo(100); // 100
     }
 
     @ParameterizedTest
@@ -241,10 +242,10 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(10);
-        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(20);
-        assertThat((int) instanceRunner.<Object>invoke("test", 3)).isEqualTo(99); // Default
-        assertThat((int) instanceRunner.<Object>invoke("test", 100)).isEqualTo(99); // Default
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(10);
+        assertThat((int) instanceRunner.invoke("test", 2)).isEqualTo(20);
+        assertThat((int) instanceRunner.invoke("test", 3)).isEqualTo(99); // Default
+        assertThat((int) instanceRunner.invoke("test", 100)).isEqualTo(99); // Default
     }
 
     @ParameterizedTest
@@ -272,10 +273,10 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", (short) 100)).isEqualTo(1);
-        assertThat((int) instanceRunner.<Object>invoke("test", (short) 200)).isEqualTo(2);
-        assertThat((int) instanceRunner.<Object>invoke("test", (short) 300)).isEqualTo(3);
-        assertThat((int) instanceRunner.<Object>invoke("test", (short) 400)).isEqualTo(0); // No match
+        assertThat((int) instanceRunner.invoke("test", (short) 100)).isEqualTo(1);
+        assertThat((int) instanceRunner.invoke("test", (short) 200)).isEqualTo(2);
+        assertThat((int) instanceRunner.invoke("test", (short) 300)).isEqualTo(3);
+        assertThat((int) instanceRunner.invoke("test", (short) 400)).isEqualTo(0); // No match
     }
 
     @ParameterizedTest
@@ -302,10 +303,10 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", (short) 1)).isEqualTo(1);
-        assertThat((int) instanceRunner.<Object>invoke("test", (short) 100)).isEqualTo(2);
-        assertThat((int) instanceRunner.<Object>invoke("test", (short) 1000)).isEqualTo(3);
-        assertThat((int) instanceRunner.<Object>invoke("test", (short) 10000)).isEqualTo(4);
-        assertThat((int) instanceRunner.<Object>invoke("test", (short) 50)).isEqualTo(0);
+        assertThat((int) instanceRunner.invoke("test", (short) 1)).isEqualTo(1);
+        assertThat((int) instanceRunner.invoke("test", (short) 100)).isEqualTo(2);
+        assertThat((int) instanceRunner.invoke("test", (short) 1000)).isEqualTo(3);
+        assertThat((int) instanceRunner.invoke("test", (short) 10000)).isEqualTo(4);
+        assertThat((int) instanceRunner.invoke("test", (short) 50)).isEqualTo(0);
     }
 }

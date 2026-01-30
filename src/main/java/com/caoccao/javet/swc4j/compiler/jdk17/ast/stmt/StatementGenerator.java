@@ -27,6 +27,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -120,16 +121,21 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
             ClassWriter.ConstantPool cp,
             Swc4jAstBlockStmt blockStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+        context.getLocalVariableTable().enterScope();
+        try {
+            // Generate code for each statement in the block
+            // Stop generating code after a terminal control flow statement (break, continue, return)
+            for (ISwc4jAstStmt stmt : blockStmt.getStmts()) {
+                generate(code, cp, stmt, returnTypeInfo);
 
-        // Generate code for each statement in the block
-        // Stop generating code after a terminal control flow statement (break, continue, return)
-        for (ISwc4jAstStmt stmt : blockStmt.getStmts()) {
-            generate(code, cp, stmt, returnTypeInfo);
-
-            // Check if this was a terminal statement - subsequent statements are unreachable
-            if (isTerminalStatement(stmt)) {
-                break;
+                // Check if this was a terminal statement - subsequent statements are unreachable
+                if (isTerminalStatement(stmt)) {
+                    break;
+                }
             }
+        } finally {
+            context.getLocalVariableTable().exitScope();
         }
     }
 

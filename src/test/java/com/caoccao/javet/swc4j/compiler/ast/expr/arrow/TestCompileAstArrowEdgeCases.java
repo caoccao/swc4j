@@ -21,13 +21,10 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
-
 import java.util.List;
 import java.util.function.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for arrow expression edge cases.
@@ -543,7 +540,7 @@ public class TestCompileAstArrowEdgeCases extends BaseTestCompileSuite {
 
         // supplier5() = 50, doubler(50) = 100, adder5(100) = 105
         int result = adder5.applyAsInt(doubler.applyAsInt(supplier5.getAsInt()));
-        assertThat((int) result).isEqualTo(105);
+        assertThat(result).isEqualTo(105);
     }
 
     @ParameterizedTest

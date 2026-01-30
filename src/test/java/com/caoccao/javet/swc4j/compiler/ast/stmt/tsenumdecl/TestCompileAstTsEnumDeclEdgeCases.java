@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.InvocationTargetException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -42,7 +43,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                         B = A * 2
                       }
                     }""");
-        }).isInstanceOf(Swc4jByteCodeCompilerException.class);;
+        }).isInstanceOf(Swc4jByteCodeCompilerException.class);
     }
 
     @ParameterizedTest
@@ -54,7 +55,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                       export enum Empty {
                       }
                     }""");
-        }).isInstanceOf(Swc4jByteCodeCompilerException.class);;
+        }).isInstanceOf(Swc4jByteCodeCompilerException.class);
     }
 
     @ParameterizedTest
@@ -77,7 +78,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
-        }).isInstanceOf(Exception.class);;
+        }).isInstanceOf(Exception.class);
     }
 
     @ParameterizedTest
@@ -119,7 +120,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
-        }).isInstanceOf(Exception.class);;
+        }).isInstanceOf(Exception.class);
     }
 
     @ParameterizedTest
@@ -158,9 +159,9 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
         Object[] constants = enumClass.getEnumConstants();
 
         // Different enum members can have same value
-        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(1);
-        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(1);
-        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(2);
+        assertThat(getValueMethod.invoke(constants[0])).isEqualTo(1);
+        assertThat(getValueMethod.invoke(constants[1])).isEqualTo(1);
+        assertThat(getValueMethod.invoke(constants[2])).isEqualTo(2);
     }
 
     @ParameterizedTest
@@ -177,7 +178,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object value = enumClass.getEnumConstants()[0];
 
-        assertThat(getValueMethod.<Object>invoke(value)).isEqualTo("");
+        assertThat(getValueMethod.invoke(value)).isEqualTo("");
     }
 
     @ParameterizedTest
@@ -195,7 +196,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object value = enumClass.getEnumConstants()[0];
 
-        assertThat(getValueMethod.<Object>invoke(value)).isEqualTo(longValue);
+        assertThat(getValueMethod.invoke(value)).isEqualTo(longValue);
     }
 
     @ParameterizedTest
@@ -212,7 +213,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object max = enumClass.getEnumConstants()[0];
 
-        assertThat(getValueMethod.<Object>invoke(max)).isEqualTo(Integer.MAX_VALUE);
+        assertThat(getValueMethod.invoke(max)).isEqualTo(Integer.MAX_VALUE);
     }
 
     @ParameterizedTest
@@ -229,7 +230,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object min = enumClass.getEnumConstants()[0];
 
-        assertThat(getValueMethod.<Object>invoke(min)).isEqualTo(-2147483647);
+        assertThat(getValueMethod.invoke(min)).isEqualTo(-2147483647);
     }
 
     @ParameterizedTest
@@ -299,9 +300,9 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo("\t");
-        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo("\n");
-        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo("\"");
+        assertThat(getValueMethod.invoke(constants[0])).isEqualTo("\t");
+        assertThat(getValueMethod.invoke(constants[1])).isEqualTo("\n");
+        assertThat(getValueMethod.invoke(constants[2])).isEqualTo("\"");
     }
 
     @ParameterizedTest
@@ -355,9 +356,9 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
         var getValueMethod = enumClass.getMethod("getValue");
         Object[] constants = enumClass.getEnumConstants();
 
-        assertThat(getValueMethod.<Object>invoke(constants[0])).isEqualTo(0);
-        assertThat(getValueMethod.<Object>invoke(constants[1])).isEqualTo(-1);
-        assertThat(getValueMethod.<Object>invoke(constants[2])).isEqualTo(-100);
+        assertThat(getValueMethod.invoke(constants[0])).isEqualTo(0);
+        assertThat(getValueMethod.invoke(constants[1])).isEqualTo(-1);
+        assertThat(getValueMethod.invoke(constants[2])).isEqualTo(-100);
     }
 
     @ParameterizedTest
@@ -370,7 +371,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                         Pi = 3.14
                       }
                     }""");
-        }).isInstanceOf(Swc4jByteCodeCompilerException.class);;
+        }).isInstanceOf(Swc4jByteCodeCompilerException.class);
     }
 
     @ParameterizedTest
@@ -384,6 +385,6 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
                         Str = "string"
                       }
                     }""");
-        }).isInstanceOf(Swc4jByteCodeCompilerException.class);;
+        }).isInstanceOf(Swc4jByteCodeCompilerException.class);
     }
 }

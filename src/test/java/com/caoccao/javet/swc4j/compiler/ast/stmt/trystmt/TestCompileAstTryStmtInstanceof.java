@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -213,13 +214,13 @@ public class TestCompileAstTryStmtInstanceof extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
 
         // Error: only Error instanceof passes
-        assertThat((int) instanceRunner.<Object>invoke("test", 0)).isEqualTo(1);
+        assertThat((int) instanceRunner.invoke("test", 0)).isEqualTo(1);
         // TypeError: both Error and TypeError pass (TypeError extends Error)
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(11);
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(11);
         // RangeError: both Error and RangeError pass
-        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(101);
+        assertThat((int) instanceRunner.invoke("test", 2)).isEqualTo(101);
         // ReferenceError: both Error and ReferenceError pass
-        assertThat((int) instanceRunner.<Object>invoke("test", 3)).isEqualTo(1001);
+        assertThat((int) instanceRunner.invoke("test", 3)).isEqualTo(1001);
     }
 
     @ParameterizedTest

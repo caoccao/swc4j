@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
@@ -165,7 +166,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6); // 2.5 ** 2 = 6.25, truncated to 6
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(6); // 2.5 ** 2 = 6.25, truncated to 6
     }
 
     // Wrapper type tests
@@ -183,7 +184,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Float) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(8.0f);
+        assertThat((Float) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(8.0f);
     }
 
     @ParameterizedTest
@@ -199,7 +200,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(25);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(25);
     }
 
     @ParameterizedTest
@@ -215,7 +216,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(81L);
+        assertThat((Long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(81L);
     }
 
     @ParameterizedTest
@@ -231,7 +232,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Long) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(81L);
+        assertThat((Long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(81L);
     }
 
     @ParameterizedTest
@@ -370,7 +371,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(8);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(8);
     }
 
     @ParameterizedTest

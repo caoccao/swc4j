@@ -45,7 +45,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -63,7 +63,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -82,7 +82,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -101,7 +101,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -120,7 +120,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -136,7 +136,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -155,7 +155,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -172,7 +172,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
     @ParameterizedTest
@@ -186,7 +186,7 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
     @ParameterizedTest
@@ -200,6 +200,6 @@ public class TestCompileAstBoolEdgeCases extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((Boolean) runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
+        assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 }

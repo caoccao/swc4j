@@ -1321,13 +1321,7 @@ end:
 
 ### Known Limitations
 
-1. **String Comparison:** String equality comparison in if conditions generates incorrect stackmap frames (issue in BinaryExpressionGenerator).
-
-2. **Assignment Type Handling:** Assignments with different primitive types in if bodies cause verification errors (issue in type inference for assignment expressions).
-
-3. **Block Scope:** Variables declared in if blocks don't have proper block scope - they remain visible after the block ends.
-
-4. **Single-Statement Bodies:** The implementation requires block statements for if bodies. Single-statement bodies without braces would need AST-level handling.
+None for if-statement handling. Remaining compiler limitations are tracked in `docs/plans/todo.md`.
 
 ### Lessons Learned
 

@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.math.BigInteger;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -236,7 +237,7 @@ public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
                 runner.createInstanceRunner("com.A").<Object>invoke("test")
         ).isEqualTo(
                 new BigInteger("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789")
-        );;
+        );
     }
 
     @ParameterizedTest

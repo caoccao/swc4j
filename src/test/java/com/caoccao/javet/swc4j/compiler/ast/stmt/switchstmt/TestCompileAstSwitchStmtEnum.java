@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -63,13 +64,13 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
         Class<?> enumDay = runner.getClass("com.Day");
         Object[] enumConstants = enumDay.getEnumConstants();
 
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[0])).isEqualTo(1); // MON
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[1])).isEqualTo(2); // TUE
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[2])).isEqualTo(3); // WED
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[3])).isEqualTo(4); // THU
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[4])).isEqualTo(5); // FRI
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[5])).isEqualTo(6); // SAT
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[6])).isEqualTo(7); // SUN
+        assertThat((int) instanceRunner.invoke("test", enumConstants[0])).isEqualTo(1); // MON
+        assertThat((int) instanceRunner.invoke("test", enumConstants[1])).isEqualTo(2); // TUE
+        assertThat((int) instanceRunner.invoke("test", enumConstants[2])).isEqualTo(3); // WED
+        assertThat((int) instanceRunner.invoke("test", enumConstants[3])).isEqualTo(4); // THU
+        assertThat((int) instanceRunner.invoke("test", enumConstants[4])).isEqualTo(5); // FRI
+        assertThat((int) instanceRunner.invoke("test", enumConstants[5])).isEqualTo(6); // SAT
+        assertThat((int) instanceRunner.invoke("test", enumConstants[6])).isEqualTo(7); // SUN
     }
 
     @ParameterizedTest
@@ -105,9 +106,9 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
         Class<?> enumColor = runner.getClass("com.Color");
         Object[] enumConstants = enumColor.getEnumConstants();
 
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[0])).isEqualTo(1); // RED
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[1])).isEqualTo(2); // GREEN
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[2])).isEqualTo(3); // BLUE
+        assertThat((int) instanceRunner.invoke("test", enumConstants[0])).isEqualTo(1); // RED
+        assertThat((int) instanceRunner.invoke("test", enumConstants[1])).isEqualTo(2); // GREEN
+        assertThat((int) instanceRunner.invoke("test", enumConstants[2])).isEqualTo(3); // BLUE
     }
 
     @ParameterizedTest
@@ -179,10 +180,10 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
         Class<?> enumLevel = runner.getClass("com.Level");
         Object[] enumConstants = enumLevel.getEnumConstants();
 
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[0])).isEqualTo(11); // LOW: 1 + 10
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[1])).isEqualTo(10); // MEDIUM: 10
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[2])).isEqualTo(1100); // HIGH: 100 + 1000
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[3])).isEqualTo(1000); // CRITICAL: 1000
+        assertThat((int) instanceRunner.invoke("test", enumConstants[0])).isEqualTo(11); // LOW: 1 + 10
+        assertThat((int) instanceRunner.invoke("test", enumConstants[1])).isEqualTo(10); // MEDIUM: 10
+        assertThat((int) instanceRunner.invoke("test", enumConstants[2])).isEqualTo(1100); // HIGH: 100 + 1000
+        assertThat((int) instanceRunner.invoke("test", enumConstants[3])).isEqualTo(1000); // CRITICAL: 1000
     }
 
     @ParameterizedTest
@@ -222,11 +223,11 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
         Class<?> enumPriority = runner.getClass("com.Priority");
         Object[] enumConstants = enumPriority.getEnumConstants();
 
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[0])).isEqualTo(1); // LOWEST
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[1])).isEqualTo(1); // LOW
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[2])).isEqualTo(2); // NORMAL
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[3])).isEqualTo(3); // HIGH
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[4])).isEqualTo(3); // HIGHEST
+        assertThat((int) instanceRunner.invoke("test", enumConstants[0])).isEqualTo(1); // LOWEST
+        assertThat((int) instanceRunner.invoke("test", enumConstants[1])).isEqualTo(1); // LOW
+        assertThat((int) instanceRunner.invoke("test", enumConstants[2])).isEqualTo(2); // NORMAL
+        assertThat((int) instanceRunner.invoke("test", enumConstants[3])).isEqualTo(3); // HIGH
+        assertThat((int) instanceRunner.invoke("test", enumConstants[4])).isEqualTo(3); // HIGHEST
     }
 
     @ParameterizedTest
@@ -255,9 +256,9 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
         Class<?> enumDirection = runner.getClass("com.Direction");
         Object[] enumConstants = enumDirection.getEnumConstants();
 
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[0])).isEqualTo(-10); // BACK
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[1])).isEqualTo(0); // STAY
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[2])).isEqualTo(10); // FORWARD
+        assertThat((int) instanceRunner.invoke("test", enumConstants[0])).isEqualTo(-10); // BACK
+        assertThat((int) instanceRunner.invoke("test", enumConstants[1])).isEqualTo(0); // STAY
+        assertThat((int) instanceRunner.invoke("test", enumConstants[2])).isEqualTo(10); // FORWARD
     }
 
     @ParameterizedTest
@@ -333,9 +334,9 @@ public class TestCompileAstSwitchStmtEnum extends BaseTestCompileSuite {
         Class<?> enumStatus = runner.getClass("com.Status");
         Object[] enumConstants = enumStatus.getEnumConstants();
 
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[0])).isEqualTo(1); // PENDING
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[1])).isEqualTo(2); // ACTIVE
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[2])).isEqualTo(99); //COMPLETED (default)
-        assertThat((int) instanceRunner.<Object>invoke("test", enumConstants[3])).isEqualTo(99); //CANCELLED (default)
+        assertThat((int) instanceRunner.invoke("test", enumConstants[0])).isEqualTo(1); // PENDING
+        assertThat((int) instanceRunner.invoke("test", enumConstants[1])).isEqualTo(2); // ACTIVE
+        assertThat((int) instanceRunner.invoke("test", enumConstants[2])).isEqualTo(99); //COMPLETED (default)
+        assertThat((int) instanceRunner.invoke("test", enumConstants[3])).isEqualTo(99); //CANCELLED (default)
     }
 }

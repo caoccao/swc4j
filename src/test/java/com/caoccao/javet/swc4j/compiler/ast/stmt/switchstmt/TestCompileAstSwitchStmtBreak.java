@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -60,8 +61,8 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
 
         // 0+1+2+3+4 = 10, then +50 = 60
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(60);
-        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(200);
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(60);
+        assertThat((int) instanceRunner.invoke("test", 2)).isEqualTo(200);
     }
 
     @ParameterizedTest
@@ -89,8 +90,8 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 1, 10)).isEqualTo(100); // y>5, break in if
-        assertThat((int) instanceRunner.<Object>invoke("test", 1, 3)).isEqualTo(60);   // y<=5, else then +10
+        assertThat((int) instanceRunner.invoke("test", 1, 10)).isEqualTo(100); // y>5, break in if
+        assertThat((int) instanceRunner.invoke("test", 1, 3)).isEqualTo(60);   // y<=5, else then +10
     }
 
     @ParameterizedTest
@@ -119,7 +120,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
 
         // 0+1+2+3+4 = 10, then +100 = 110
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(110);
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(110);
     }
 
     @ParameterizedTest
@@ -149,7 +150,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
 
         // 1+2+4+5 = 12 (skips 3)
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(12);
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(12);
     }
 
     @ParameterizedTest
@@ -177,7 +178,7 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
 
         // 0+1+3+4 = 8 (skips 2)
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(8);
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(8);
     }
 
     @ParameterizedTest
@@ -207,9 +208,9 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 1, true, false)).isEqualTo(1);   // First break
-        assertThat((int) instanceRunner.<Object>invoke("test", 1, false, true)).isEqualTo(10);  // Second break
-        assertThat((int) instanceRunner.<Object>invoke("test", 1, false, false)).isEqualTo(100); // Third break
+        assertThat((int) instanceRunner.invoke("test", 1, true, false)).isEqualTo(1);   // First break
+        assertThat((int) instanceRunner.invoke("test", 1, false, true)).isEqualTo(10);  // Second break
+        assertThat((int) instanceRunner.invoke("test", 1, false, false)).isEqualTo(100); // Third break
     }
 
     @ParameterizedTest
@@ -236,9 +237,9 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(1);   // Break, return result
-        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(2);   // Return directly
-        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(-1); // Break, return result
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(1);   // Break, return result
+        assertThat((int) instanceRunner.invoke("test", 2)).isEqualTo(2);   // Return directly
+        assertThat((int) instanceRunner.invoke("test", 99)).isEqualTo(-1); // Break, return result
     }
 
     @ParameterizedTest
@@ -263,8 +264,8 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(11); // 1 + 10
-        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(12); //2 + 10 (no break but last case)
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(11); // 1 + 10
+        assertThat((int) instanceRunner.invoke("test", 2)).isEqualTo(12); //2 + 10 (no break but last case)
     }
 
     @ParameterizedTest
@@ -287,8 +288,8 @@ public class TestCompileAstSwitchStmtBreak extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
 
-        assertThat((int) instanceRunner.<Object>invoke("test", 1)).isEqualTo(100);
-        assertThat((int) instanceRunner.<Object>invoke("test", 2)).isEqualTo(200);
-        assertThat((int) instanceRunner.<Object>invoke("test", 99)).isEqualTo(-1);
+        assertThat((int) instanceRunner.invoke("test", 1)).isEqualTo(100);
+        assertThat((int) instanceRunner.invoke("test", 2)).isEqualTo(200);
+        assertThat((int) instanceRunner.invoke("test", 99)).isEqualTo(-1);
     }
 }

@@ -123,6 +123,10 @@ public class LocalVariableTable {
         return null;
     }
 
+    public LocalVariable getVariableInCurrentScope(String name) {
+        return scopes.get(scopes.size() - 1).get(name);
+    }
+
     public void reset() {
         reset(false);
     }

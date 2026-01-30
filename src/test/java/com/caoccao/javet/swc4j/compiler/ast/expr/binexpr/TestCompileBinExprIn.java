@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -482,8 +483,8 @@ public class TestCompileBinExprIn extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((int) instanceRunner.<Object>invoke("testTrue")).isEqualTo(1);
-        assertThat((int) instanceRunner.<Object>invoke("testFalse")).isEqualTo(0);
+        assertThat((int) instanceRunner.invoke("testTrue")).isEqualTo(1);
+        assertThat((int) instanceRunner.invoke("testFalse")).isEqualTo(0);
     }
 
     @ParameterizedTest

@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -46,7 +47,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                 runner.createInstanceRunner("com.A").<Object>invoke("test")
         ).isEqualTo(
                 List.of(List.of("cat"), List.of("bat"), List.of("rat"))
-        );;
+        );
     }
 
     @ParameterizedTest
@@ -82,7 +83,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                         List.of("b2", "b", "2"),
                         List.of("c3", "c", "3")
                 )
-        );;
+        );
     }
 
     @ParameterizedTest
@@ -210,7 +211,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -224,7 +225,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(0);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -238,7 +239,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(3);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
 
     @ParameterizedTest
@@ -252,7 +253,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-1);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-1);
     }
 
     @ParameterizedTest
@@ -266,7 +267,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(6);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(6);
     }
 
     @ParameterizedTest
@@ -280,7 +281,7 @@ public class TestCompileAstStrRegex extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(-1);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-1);
     }
 
     // test() tests

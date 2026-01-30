@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.regex.Pattern;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -191,11 +192,11 @@ public class TestCompileAstRegexBasic extends BaseTestCompileSuite {
                   }
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat(((Pattern) instanceRunner.<Object>invoke("testStar")).pattern()).isEqualTo("a*");
-        assertThat(((Pattern) instanceRunner.<Object>invoke("testPlus")).pattern()).isEqualTo("a+");
-        assertThat(((Pattern) instanceRunner.<Object>invoke("testQuestion")).pattern()).isEqualTo("a?");
-        assertThat(((Pattern) instanceRunner.<Object>invoke("testExact")).pattern()).isEqualTo("a{3}");
-        assertThat(((Pattern) instanceRunner.<Object>invoke("testRange")).pattern()).isEqualTo("a{2,5}");
+        assertThat(((Pattern) instanceRunner.invoke("testStar")).pattern()).isEqualTo("a*");
+        assertThat(((Pattern) instanceRunner.invoke("testPlus")).pattern()).isEqualTo("a+");
+        assertThat(((Pattern) instanceRunner.invoke("testQuestion")).pattern()).isEqualTo("a?");
+        assertThat(((Pattern) instanceRunner.invoke("testExact")).pattern()).isEqualTo("a{3}");
+        assertThat(((Pattern) instanceRunner.invoke("testRange")).pattern()).isEqualTo("a{2,5}");
     }
 
     @ParameterizedTest
