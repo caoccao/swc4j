@@ -1436,6 +1436,44 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     }
                 }
             }
+            case NullishCoalescing -> {
+                String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
+                String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
+
+                boolean leftPrimitive = TypeConversionUtils.isPrimitiveType(leftType);
+                boolean rightPrimitive = TypeConversionUtils.isPrimitiveType(rightType);
+
+                if (leftPrimitive && rightPrimitive) {
+                    resultType = TypeResolver.getWidenedType(leftType, rightType);
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
+                } else {
+                    resultType = "Ljava/lang/Object;";
+
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    if (leftPrimitive) {
+                        TypeConversionUtils.boxPrimitiveType(code, cp, leftType, TypeConversionUtils.getWrapperType(leftType));
+                    }
+
+                    code.dup();
+                    code.ifnonnull(0);
+                    int ifnonnullOffsetPos = code.getCurrentOffset() - 2;
+                    int ifnonnullOpcodePos = code.getCurrentOffset() - 3;
+
+                    code.pop();
+                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    if (rightPrimitive) {
+                        TypeConversionUtils.boxPrimitiveType(code, cp, rightType, TypeConversionUtils.getWrapperType(rightType));
+                    }
+
+                    int endLabel = code.getCurrentOffset();
+                    int ifnonnullOffset = endLabel - ifnonnullOpcodePos;
+                    code.patchShort(ifnonnullOffsetPos, ifnonnullOffset);
+                }
+            }
             case LogicalOr -> {
                 // LogicalOr (||) with short-circuit evaluation
                 // If left is true, skip evaluating right and return true

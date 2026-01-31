@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting all 25 binary operations defined in `Swc4jAstBinaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 24 of 25 operations implemented for primitives and BigInt (96% complete)
+**Current Status:** 25 of 25 operations implemented for primitives and BigInt (100% complete)
 
 **Primitive Support (Implemented):**
 - ✅ **Add (`+`)** - Fully implemented with numeric addition and string concatenation
@@ -32,7 +32,7 @@ This document outlines the implementation plan for supporting all 25 binary oper
 
 **BigInt Support (Implemented):**
 - ✅ All 22 operations above have BigInt support using BigInteger methods
-- ❌ **1 special operation remaining** (NullishCoalescing)
+- ✅ **All special operations complete**
 
 **Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
@@ -66,7 +66,7 @@ This document outlines the implementation plan for supporting all 25 binary oper
 | 9 | GtEq | `>=` | Comparison | ✅ Implemented | Medium |
 | 12 | LogicalAnd | `&&` | Logical | ✅ Implemented | High |
 | 13 | LogicalOr | `\|\|` | Logical | ✅ Implemented | High |
-| 21 | NullishCoalescing | `??` | Special | ❌ Not Implemented | High |
+| 21 | NullishCoalescing | `??` | Special | ✅ Implemented | High |
 | 11 | InstanceOf | `instanceof` | Special | ✅ Implemented | Very High |
 | 10 | In | `in` | Special | ✅ Implemented | Very High |
 
@@ -1037,8 +1037,8 @@ checkcast               - Cast to type (throws ClassCastException)
 ---
 
 *Last Updated: January 22, 2026*
-*Status: Primitive and BigInt operations complete*
-*Next Step: Implement remaining special operations (NullishCoalescing, InstanceOf, In)*
+*Status: All binary operations complete*
+*Next Step: Expand edge case coverage and performance tests*
 
 **BigInt Implementation Status:**
 - ✅ Arithmetic operations (+ - * / % **) - WORKING (20 tests)

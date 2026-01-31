@@ -86,13 +86,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Support instance method resolution, constructor calls, varargs argument packing, and custom package imports.
 - Tests: Instance method calls, `new` calls, varargs overload selection.
 
-## Feature: Binary Expressions - Nullish Coalescing / InstanceOf / In
-- Evidence: `docs/plans/ast/expr/binary-expr.md` (next steps).
-- Status: Not implemented.
-- Confidence: 70%.
-- Plan: Add AST handling for `??`, `instanceof`, and `in`, with type rules and StackMap integration.
-- Tests: Truthy/falsy nullish, type checks, and property existence checks.
-
 ## Feature: Object Literal Gaps (Methods, Accessors, Symbols, Prototypes)
 - Evidence: `docs/plans/ast/expr/lit/object-lit.md`.
 - Status: Method properties deferred; getters/setters, symbols, descriptors, prototypes unsupported.

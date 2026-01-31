@@ -1114,6 +1114,24 @@ public final class TypeResolver {
                     // Equality, inequality, relational comparisons, logical operations, instanceof, and in return boolean
                     return "Z";
                 }
+                case NullishCoalescing -> {
+                    String leftType = inferTypeFromExpr(binExpr.getLeft());
+                    String rightType = inferTypeFromExpr(binExpr.getRight());
+                    if (leftType == null) {
+                        return rightType;
+                    }
+                    if (rightType == null) {
+                        return leftType;
+                    }
+                    if (leftType.equals(rightType)) {
+                        return leftType;
+                    }
+                    if (TypeConversionUtils.isPrimitiveType(leftType)
+                            && TypeConversionUtils.isPrimitiveType(rightType)) {
+                        return getWidenedType(leftType, rightType);
+                    }
+                    return "Ljava/lang/Object;";
+                }
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             switch (unaryExpr.getOp()) {
