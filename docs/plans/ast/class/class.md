@@ -61,7 +61,7 @@ class Circle implements IShape {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassGenerics.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassEdgeCases.java`
 
-**AST Definition:** [Swc4jAstClass.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass.java)
+**AST Definition:** [Swc4jAstClass.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass.java)
 
 ---
 

@@ -32,7 +32,7 @@ const { a, b, ...rest } = { a: 1, b: 2, c: 3, d: 4 };  // rest = { c: 3, d: 4 }
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/pat/restpat/TestCompileAstRestPatAssignment.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/pat/restpat/TestCompileAstRestPatNestedDestructuring.java`
 
-**AST Definition:** [Swc4jAstRestPat.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/pat/Swc4jAstRestPat.java)
+**AST Definition:** [Swc4jAstRestPat.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/pat/Swc4jAstRestPat.java)
 
 ---
 

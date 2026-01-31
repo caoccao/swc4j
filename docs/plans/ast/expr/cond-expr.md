@@ -12,7 +12,7 @@ This document outlines the implementation plan for supporting conditional expres
 
 **Test File:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileAstCondExpr.java` ✅ CREATED
 
-**AST Definition:** [Swc4jAstCondExpr.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstCondExpr.java)
+**AST Definition:** [Swc4jAstCondExpr.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstCondExpr.java)
 
 ---
 

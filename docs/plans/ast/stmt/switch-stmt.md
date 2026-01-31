@@ -64,7 +64,7 @@ switch (expression) {
 
 **Test Files:** ✅ `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/switchstmt/TestCompileAstSwitchStmt*.java` (8 files created)
 
-**AST Definition:** [Swc4jAstSwitchStmt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstSwitchStmt.java)
+**AST Definition:** [Swc4jAstSwitchStmt.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstSwitchStmt.java)
 
 ---
 

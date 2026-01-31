@@ -57,7 +57,7 @@ enum Computed {
 
 **Test Files:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/decl/tsenumtest/TestCompileTsEnumDecl*.java` (to be created)
 
-**AST Definition:** [Swc4jAstTsEnumDecl.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsEnumDecl.java)
+**AST Definition:** [Swc4jAstTsEnumDecl.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsEnumDecl.java)
 
 ---
 
@@ -1731,8 +1731,8 @@ public static Direction fromValue(int value) {
 - **TypeScript Specification:** Section 9 - Enums
 - **Java Enum Guide:** [Oracle Tutorial](https://docs.oracle.com/javase/tutorial/java/javaOO/enum.html)
 - **Effective Java (Joshua Bloch):** Item 34 - Use enums instead of int constants
-- **SWC AST:** [Swc4jAstTsEnumDecl.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsEnumDecl.java)
-- **SWC AST:** [Swc4jAstTsEnumMember.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/ts/Swc4jAstTsEnumMember.java)
+- **SWC AST:** [Swc4jAstTsEnumDecl.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsEnumDecl.java)
+- **SWC AST:** [Swc4jAstTsEnumMember.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/ts/Swc4jAstTsEnumMember.java)
 
 ---
 

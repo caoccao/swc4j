@@ -17,7 +17,7 @@ while (true) { /* infinite loop */ }
 
 **Test File:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/whilestmt/TestCompileAstWhileStmt*.java` (to be created)
 
-**AST Definition:** [Swc4jAstWhileStmt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstWhileStmt.java)
+**AST Definition:** [Swc4jAstWhileStmt.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstWhileStmt.java)
 
 ---
 

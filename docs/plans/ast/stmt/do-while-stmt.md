@@ -17,7 +17,7 @@ do { /* at least once */ } while (false)
 
 **Test File:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/dowhilestmt/TestCompileAstDoWhileStmt*.java` (to be created)
 
-**AST Definition:** [Swc4jAstDoWhileStmt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstDoWhileStmt.java)
+**AST Definition:** [Swc4jAstDoWhileStmt.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstDoWhileStmt.java)
 
 ---
 

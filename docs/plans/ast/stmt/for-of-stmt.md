@@ -39,7 +39,7 @@ for (const [key, value] of map) { console.log(key, value); }
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/forofstmt/TestCompileAstForOfStmtEdgeCases.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/forofstmt/TestCompileAstForOfStmtObjectDestructuring.java`
 
-**AST Definition:** [Swc4jAstForOfStmt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstForOfStmt.java)
+**AST Definition:** [Swc4jAstForOfStmt.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstForOfStmt.java)
 
 ---
 

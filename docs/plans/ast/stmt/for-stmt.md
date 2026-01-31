@@ -18,7 +18,7 @@ for (;;) { /* infinite loop */ }          // all parts optional
 
 **Test File:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/forstmt/TestCompileAstForStmt*.java` (to be created)
 
-**AST Definition:** [Swc4jAstForStmt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstForStmt.java)
+**AST Definition:** [Swc4jAstForStmt.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstForStmt.java)
 
 ---
 

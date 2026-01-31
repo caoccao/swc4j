@@ -23,7 +23,7 @@ for (let index in array) { console.log(index); }
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/forinstmt/TestCompileAstForInStmtNested.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/forinstmt/TestCompileAstForInStmtEdgeCases.java`
 
-**AST Definition:** [Swc4jAstForInStmt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstForInStmt.java)
+**AST Definition:** [Swc4jAstForInStmt.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstForInStmt.java)
 
 ---
 

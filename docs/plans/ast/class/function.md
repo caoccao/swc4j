@@ -57,7 +57,7 @@ class A {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionDecorators.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionEdgeCases.java`
 
-**AST Definition:** [Swc4jAstFunction.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction.java)
+**AST Definition:** [Swc4jAstFunction.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction.java)
 
 ---
 

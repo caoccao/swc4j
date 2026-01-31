@@ -92,7 +92,7 @@ try {
 **Test Files:**
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/TestCompileAstTryStmt.java`
 
-**AST Definition:** [Swc4jAstTryStmt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstTryStmt.java)
+**AST Definition:** [Swc4jAstTryStmt.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstTryStmt.java)
 
 ---
 
@@ -1841,8 +1841,8 @@ exception_table {
 - **JVM Specification:** Section 4.7.3 - The Code Attribute (exception_table)
 - **ECMAScript Specification:** Section 13.15 - The try Statement
 - **TypeScript Specification:** Error handling and try-catch
-- **AST Definition:** [Swc4jAstTryStmt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstTryStmt.java)
-- **AST Definition:** [Swc4jAstCatchClause.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause.java)
+- **AST Definition:** [Swc4jAstTryStmt.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstTryStmt.java)
+- **AST Definition:** [Swc4jAstCatchClause.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause.java)
 
 ---
 

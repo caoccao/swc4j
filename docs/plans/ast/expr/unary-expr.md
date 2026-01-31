@@ -13,13 +13,13 @@ This document outlines the implementation plan for supporting all 7 unary operat
 - ✅ **TypeOf (`typeof`)** - Implemented with primitive/wrapper/object handling
 - ✅ **Void (`void`)** - Implemented with side-effect evaluation and null return
 
-**Implementation File:** [UnaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/UnaryExpressionGenerator.java)
+**Implementation File:** [UnaryExpressionGenerator.java](../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/UnaryExpressionGenerator.java)
 **Test Files:**
-- [TestCompileUnaryExprBang.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileUnaryExprBang.java) (Bang operator - 15 tests, all passing ✅)
-- [TestCompileUnaryExprMinus.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileUnaryExprMinus.java) (Minus operator - 30 tests, all passing ✅)
-- [TestCompileUnaryExprPlus.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileUnaryExprPlus.java) (Plus operator - 21 tests, all passing ✅)
+- [TestCompileUnaryExprBang.java](../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileUnaryExprBang.java) (Bang operator - 15 tests, all passing ✅)
+- [TestCompileUnaryExprMinus.java](../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileUnaryExprMinus.java) (Minus operator - 30 tests, all passing ✅)
+- [TestCompileUnaryExprPlus.java](../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileUnaryExprPlus.java) (Plus operator - 21 tests, all passing ✅)
 - Additional test files to be created for other operators
-**Enum Definition:** [Swc4jAstUnaryOp.java](../../src/main/java/com/caoccao/javet/swc4j/ast/enums/Swc4jAstUnaryOp.java)
+**Enum Definition:** [Swc4jAstUnaryOp.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/enums/Swc4jAstUnaryOp.java)
 
 ---
 

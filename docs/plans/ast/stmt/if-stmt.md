@@ -17,7 +17,7 @@ if (c1) { b1 } else if (c2) { b2 } else { b3 }
 
 **Test File:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/TestCompileAstIfStmt.java` ✅
 
-**AST Definition:** [Swc4jAstIfStmt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstIfStmt.java)
+**AST Definition:** [Swc4jAstIfStmt.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstIfStmt.java)
 
 ---
 

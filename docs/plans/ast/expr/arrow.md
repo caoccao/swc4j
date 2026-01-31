@@ -52,7 +52,7 @@ class Calculator {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowGeneric.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowFnType.java` ✓
 
-**AST Definition:** [Swc4jAstArrowExpr.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr.java)
+**AST Definition:** [Swc4jAstArrowExpr.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr.java)
 
 ---
 
@@ -1358,7 +1358,7 @@ Use primitive specializations to avoid boxing:
 
 ## References
 
-- **AST Definition:** [Swc4jAstArrowExpr.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr.java)
+- **AST Definition:** [Swc4jAstArrowExpr.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr.java)
 - **JVM Specification:** Chapter 4.7.6 - Inner Classes
 - **Java Lambda Specification:** JSR 335
 - **TypeScript Specification:** Arrow Functions

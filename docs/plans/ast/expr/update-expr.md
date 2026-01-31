@@ -26,9 +26,9 @@ This document outlines the implementation plan for supporting update expressions
 
 **Tests Passing:** 86/86 tests ✅ (81 positive + 5 error cases)
 
-**AST Definition:** [Swc4jAstUpdateExpr.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstUpdateExpr.java)
+**AST Definition:** [Swc4jAstUpdateExpr.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstUpdateExpr.java)
 
-**Enum Definition:** [Swc4jAstUpdateOp.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/enums/Swc4jAstUpdateOp.java)
+**Enum Definition:** [Swc4jAstUpdateOp.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/enums/Swc4jAstUpdateOp.java)
 
 ---
 
