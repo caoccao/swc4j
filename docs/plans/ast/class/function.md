@@ -50,6 +50,7 @@ class A {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionVarargs.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionReturnTypes.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionTypeInference.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionComplexInference.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionOverloading.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionDefaultParams.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionAsync.java`
@@ -260,13 +261,22 @@ Existing tests in `TestCompileAstFunction.java`:
 
 ### Phase 5: Type Inference - Priority: HIGH
 
-**Status:** PARTIAL
+**Status:** IMPLEMENTED
 
 - Return type inference from simple expressions - IMPLEMENTED
 - Return type inference from variable types - IMPLEMENTED
 - Return type inference from literals - IMPLEMENTED
 - Return type inference from 'this' method calls - IMPLEMENTED
-- Complex expression type inference - PARTIAL
+- Complex expression type inference - IMPLEMENTED
+  - Nested arithmetic expressions with type widening
+  - Conditional returns (if/else) with common type finding
+  - Chained member access (e.g., `this.b.value`)
+  - Chained method calls (e.g., `this.helper().property`)
+  - Object and array literal returns
+  - Nested conditionals and function calls
+  - String concatenation
+  - Parenthesized expressions
+  - Null literal handling (defaults to Object type)
 
 ### Phase 6: Default Parameters - Priority: MEDIUM
 
@@ -1227,14 +1237,14 @@ return   // void
 - [x] Phase 2: All parameter types working
 - [x] Phase 3: All return types working
 - [x] Phase 4: Varargs fully working (including iteration over primitive arrays)
-- [x] Phase 5: Type inference partial (basic + 'this' method calls)
+- [x] Phase 5: Type inference fully working (basic, 'this' method calls, complex expressions, conditional returns, chained member access)
 - [x] Phase 6: Default parameters working
 - [x] Phase 7: Overloading working
 - [x] Phase 8: Async functions - NOT SUPPORTED (intentionally excluded)
 - [x] Phase 9: Generator functions - NOT SUPPORTED (intentionally excluded)
 - [x] Phase 10: Decorators - NOT SUPPORTED (intentionally excluded)
 - [x] Phase 11: Standalone functions working (compiled into dummy class `$`, `$1`, etc.)
-- [x] All current tests passing
+- [x] All current tests passing (3403 tests)
 - [x] Javadoc builds successfully
 
 ### Implementation Notes (2026-01-25)
@@ -1272,6 +1282,34 @@ return   // void
   - Naming is determined after all classes are collected to avoid conflicts
 - **Bytecode Generation**: Dummy class extends `java/lang/Object`, has default constructor, and all functions are `ACC_PUBLIC | ACC_STATIC`
 - Test coverage in `TestCompileAstFunctionBasic.java`: 7 tests covering basic functions, namespaces, class conflicts, and coexistence with classes
+
+**Complex Return Type Inference (Phase 5) Implementation (2026-01-31):**
+- Extended `TypeResolver.analyzeReturnType()` to perform comprehensive recursive block analysis instead of analyzing only the first return statement
+- **Key Changes**:
+  - `analyzeReturnType()`: Now falls back to `inferReturnTypeFromBlock()` when no explicit return type annotation is present
+  - `inferReturnTypeFromBlock()`: Recursively analyzes all statements in a block to find return statements
+  - `findReturnTypeInStmt()`: Handles different statement types:
+    - Return statements: Infers type from the return expression
+    - Block statements: Recursively analyzes nested blocks
+    - If statements: Analyzes both consequent and alternate branches, finding common type when both return
+  - `inferTypeFromExpr()`: Extended to support chained member access by resolving object types through the type registry and looking up field types in class hierarchies
+  - Null literal handling: Returns `null` from `inferTypeFromExpr` for null literals, which is then defaulted to `Object` type since null is compatible with any reference type
+- **MemberExpressionGenerator Enhancement**: Added general case handling for chained member access (e.g., `this.b.value`) by:
+  - Generating code to evaluate the object expression
+  - Resolving the object's class type from the type registry
+  - Looking up the field in the class hierarchy
+  - Generating appropriate `getfield` instruction
+- **Type Widening**: Implemented `findCommonType()` to find the widest type when multiple branches return different types (e.g., int + double → double)
+- Test coverage in `TestCompileAstFunctionComplexInference.java`: 18 comprehensive tests covering:
+  - Nested arithmetic expressions with type widening (int+long→long, int+double→double)
+  - Conditional returns (if/else) with same types, different numeric types, strings, and booleans
+  - Nested conditionals and nested if/else blocks
+  - Chained member access (`this.b.value`) and method calls (`this.helper().length`)
+  - Nested function calls (`this.helper1(this.helper2())`)
+  - Object and array literal returns (LinkedHashMap and ArrayList)
+  - String concatenation with and without numbers
+  - Parenthesized expressions
+  - Field access returns (`this.value`)
 
 ---
 

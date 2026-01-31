@@ -303,6 +303,43 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
                 return;
             }
         }
+
+        // General case: Handle field access on any object type (chained member access)
+        // This handles cases like obj.field where obj is any expression returning a custom class type
+        if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+            String fieldName = propIdent.getSym();
+
+            // Generate code to evaluate the object expression
+            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+
+            // Infer the type of the object expression
+            if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
+                // Extract the class name from the descriptor
+                String className = objType.substring(1, objType.length() - 1);
+                String qualifiedName = className.replace('/', '.');
+
+                // Try to resolve the class in the type registry
+                JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+                if (typeInfo == null) {
+                    // Try simple name
+                    int lastSlash = className.lastIndexOf('/');
+                    String simpleName = lastSlash >= 0 ? className.substring(lastSlash + 1) : className;
+                    typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+                }
+
+                if (typeInfo != null) {
+                    // Look up field in class hierarchy
+                    FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                    if (lookupResult != null) {
+                        // Generate getfield instruction
+                        int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, lookupResult.fieldInfo.descriptor());
+                        code.getfield(fieldRef);
+                        return;
+                    }
+                }
+            }
+        }
+
         // For unsupported member expressions, throw an error for now
         throw new Swc4jByteCodeCompilerException(memberExpr, "Member expression not yet supported: " + memberExpr.getProp());
     }

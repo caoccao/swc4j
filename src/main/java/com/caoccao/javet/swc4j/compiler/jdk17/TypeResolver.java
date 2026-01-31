@@ -329,23 +329,18 @@ public final class TypeResolver {
             return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
         }
 
-        // Fall back to type inference from return statement
-        for (ISwc4jAstStmt stmt : body.getStmts()) {
-            if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
-                var argOpt = returnStmt.getArg();
-                if (argOpt.isPresent()) {
-                    ISwc4jAstExpr arg = argOpt.get();
-                    // Use inferTypeFromExpr for general type inference
-                    String type = inferTypeFromExpr(arg);
-                    // If type is null (e.g., for null literal), default to Object
-                    if (type == null) {
-                        type = "Ljava/lang/Object;";
-                    }
-                    return ReturnTypeInfo.of(arg, type);
-                }
+        // Fall back to type inference from return statements (including nested ones)
+        String returnType = inferReturnTypeFromBlock(body);
+        if (returnType != null) {
+            // If type is "V" (void), return void type info
+            if ("V".equals(returnType)) {
                 return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
             }
+            // Otherwise, create ReturnTypeInfo from the inferred type
+            return createReturnTypeInfoFromDescriptor(returnType);
         }
+
+        // No return statements found - default to void
         return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
     }
 
@@ -521,22 +516,50 @@ public final class TypeResolver {
             throws Swc4jByteCodeCompilerException {
         if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
             if (returnStmt.getArg().isPresent()) {
-                return inferTypeFromExpr(returnStmt.getArg().get());
+                String type = inferTypeFromExpr(returnStmt.getArg().get());
+                // If inferTypeFromExpr returns null (e.g., for null literals),
+                // default to Object type since null is compatible with any reference type
+                if (type == null) {
+                    return "Ljava/lang/Object;";
+                }
+                return type;
             }
             return "V"; // void return
         } else if (stmt instanceof Swc4jAstBlockStmt innerBlock) {
             return inferReturnTypeFromBlock(innerBlock);
         } else if (stmt instanceof Swc4jAstIfStmt ifStmt) {
-            // Check consequent
-            if (ifStmt.getCons() instanceof Swc4jAstBlockStmt consBlock) {
-                String consType = inferReturnTypeFromBlock(consBlock);
-                if (consType != null) {
-                    return consType;
+            // For if statements, we need to find the common type from both branches
+            String consType = null;
+            String altType = null;
+
+            // Check consequent - handle both block and single statement
+            ISwc4jAstStmt cons = ifStmt.getCons();
+            if (cons instanceof Swc4jAstBlockStmt consBlock) {
+                consType = inferReturnTypeFromBlock(consBlock);
+            } else {
+                consType = findReturnTypeInStmt(cons);
+            }
+
+            // Check alternate if present - handle both block and single statement
+            if (ifStmt.getAlt().isPresent()) {
+                ISwc4jAstStmt alt = ifStmt.getAlt().get();
+                if (alt instanceof Swc4jAstBlockStmt altBlock) {
+                    altType = inferReturnTypeFromBlock(altBlock);
+                } else {
+                    altType = findReturnTypeInStmt(alt);
                 }
             }
-            // Check alternate
-            if (ifStmt.getAlt().isPresent() && ifStmt.getAlt().get() instanceof Swc4jAstBlockStmt altBlock) {
-                String altType = inferReturnTypeFromBlock(altBlock);
+
+            // If both branches have returns, find their common type
+            if (consType != null && altType != null) {
+                return findCommonType(consType, altType);
+            }
+
+            // If only one branch has a return, use that type
+            if (consType != null) {
+                return consType;
+            }
+            if (altType != null) {
                 return altType;
             }
         }
@@ -916,6 +939,34 @@ public final class TypeResolver {
                 // map.get() returns Object
                 return "Ljava/lang/Object;";
             }
+
+            // General case: Handle field access on any custom class type (chained member access)
+            // This handles cases like obj.field where obj is any expression returning a custom class type
+            if (objType != null && objType.startsWith("L") && objType.endsWith(";") && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                String fieldName = propIdent.getSym();
+
+                // Extract the class name from the descriptor
+                String className = objType.substring(1, objType.length() - 1);
+                String qualifiedName = className.replace('/', '.');
+
+                // Try to resolve the class in the type registry
+                JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+                if (typeInfo == null) {
+                    // Try simple name
+                    int lastSlash = className.lastIndexOf('/');
+                    String simpleName = lastSlash >= 0 ? className.substring(lastSlash + 1) : className;
+                    typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+                }
+
+                if (typeInfo != null) {
+                    // Look up field in class hierarchy
+                    FieldInfo fieldInfo = lookupFieldInHierarchy(typeInfo, fieldName);
+                    if (fieldInfo != null) {
+                        return fieldInfo.descriptor();
+                    }
+                }
+            }
+
             return "Ljava/lang/Object;";
         } else if (expr instanceof Swc4jAstStr) {
             return "Ljava/lang/String;";

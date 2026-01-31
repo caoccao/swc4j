@@ -58,13 +58,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Track capture holder lifetime, ensure no retained references beyond scope; add cleanup if needed.
 - Tests: Stress tests for nested closures and large capture sets.
 
-## Feature: Complex Function Return Type Inference
-- Evidence: `docs/plans/ast/class/function.md` (Phase 5 partial).
-- Status: Complex expressions partially inferred.
-- Confidence: 60%.
-- Plan: Extend TypeResolver for nested expressions, conditional returns, and member calls in return positions.
-- Tests: Mixed arithmetic, conditional returns, nested calls, and object/array returns.
-
 ## Feature: Function Rest Parameters (Varargs) Fully Working
 - Evidence: `docs/plans/ast/pat/rest-pat.md` (Phase 1 unchecked, checklist TODOs).
 - Status: Varargs handling incomplete (type resolution, analyzer integration).
