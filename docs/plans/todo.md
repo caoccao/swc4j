@@ -93,13 +93,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Add AST handling for `??`, `instanceof`, and `in`, with type rules and StackMap integration.
 - Tests: Truthy/falsy nullish, type checks, and property existence checks.
 
-## Feature: Update Expressions - Long/Double Postfix, Class Fields, Multi-D Arrays
-- Evidence: `docs/plans/ast/expr/update-expr.md`.
-- Status: Postfix for long/double arrays deferred; class field access missing; multidim arrays unsupported.
-- Confidence: 50%.
-- Plan: Add category-2 postfix stack patterns, integrate getfield/putfield updates, and extend array access to multidim.
-- Tests: Postfix on long/double arrays, `this.field++`, and `arr[i][j]++`.
-
 ## Feature: Object Literal Gaps (Methods, Accessors, Symbols, Prototypes)
 - Evidence: `docs/plans/ast/expr/lit/object-lit.md`.
 - Status: Method properties deferred; getters/setters, symbols, descriptors, prototypes unsupported.

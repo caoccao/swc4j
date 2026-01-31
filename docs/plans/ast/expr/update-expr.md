@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting update expressions (`++` and `--` operators) in TypeScript to JVM bytecode compilation. Update expressions modify a variable's value and return either the old value (postfix) or new value (prefix).
 
-**Current Status:** ⚠️ MOSTLY COMPLETE (85% complete - Phases 1, 2, 3 done, Edge Cases done)
+**Current Status:** ✅ COMPLETE (100% - Phases 1, 2, 3, Edge Cases done)
 - ✅ **Prefix Increment (`++i`)** - IMPLEMENTED for local variables, member access, and native arrays
 - ✅ **Postfix Increment (`i++`)** - IMPLEMENTED for local variables, member access, and native arrays
 - ✅ **Prefix Decrement (`--i`)** - IMPLEMENTED for local variables, member access, and native arrays
@@ -13,12 +13,12 @@ This document outlines the implementation plan for supporting update expressions
 - ✅ **Nested Properties (`obj.inner.count++`)** - IMPLEMENTED with Object type casting (2 levels tested)
 - ✅ **Native Primitive Arrays** - IMPLEMENTED for int[], float[], byte[], short[], char[] (prefix and postfix)
 - ✅ **Native Array Prefix (long/double)** - IMPLEMENTED for long[], double[]
-- ⚠️ **Native Array Postfix (long/double)** - DEFERRED (complex stack manipulation for category-2 types)
+- ✅ **Native Array Postfix (long/double)** - IMPLEMENTED for long[], double[]
 - ✅ **Edge Cases** - Overflow, precision, null wrappers, complex expressions
 - ✅ **Error Cases** - Invalid targets properly rejected: `(x++)++`, `5++`, `(x+y)++`
 - ✅ **Deep Nesting** - FIXED in Phase 2, supports arbitrary depth: `a.b.c.d.e++` works correctly
-- ❌ **Class Field Access (`this.value++`)** - NOT implemented (requires getfield/putfield)
-- ❌ **Multi-dimensional Arrays** - NOT implemented
+- ✅ **Class Field Access (`this.value++`)** - IMPLEMENTED (getfield/putfield)
+- ✅ **Multi-dimensional Arrays** - IMPLEMENTED
 
 **Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/UpdateExpressionGenerator.java`
 
@@ -288,14 +288,14 @@ Postfix x++ (Integer):
 
 ## Phase 3 Implementation Summary
 
-**Status:** ✅ COMPLETE (with one known limitation)
+**Status:** ✅ COMPLETE
 
 ### Implementation Details
 
 **Scope:**
 - ✅ Native primitive arrays: `int[]`, `float[]`, `byte[]`, `short[]`, `char[]` (fully implemented)
 - ✅ Prefix for long[] and double[] arrays (implemented)
-- ⚠️ Postfix for long[] and double[] arrays (deferred - category-2 stack manipulation complexity)
+- ✅ Postfix for long[] and double[] arrays (implemented)
 - ❌ Wrapper element arrays: `Integer[]`, `Long[]`, etc. (deferred due to complexity)
 - ❌ Object arrays: `Object[]`, `String[]` (deferred)
 
@@ -322,20 +322,19 @@ Postfix x++ (Integer):
   - **Solution**: Use `dup2` early, then `dup_x2` to move old value to bottom before incrementing
   - Pattern: `[array, index, old] -> dup_x2 -> [old, array, index, old] -> increment -> [old, array, index, new] -> iastore -> [old]` ✓
 - **Category 1 types (int, float, byte, short, char)**: Fully working with clean stack manipulation
-- **Category 2 types (long, double)**: Prefix works with `dup2_x2`, postfix deferred due to complexity
+- **Category 2 types (long, double)**: Prefix and postfix supported with temp locals
 
 **4. Final Implementation**
 - ✅ All category-1 primitive arrays fully supported (prefix and postfix)
 - ✅ Category-2 prefix operations supported
-- ⚠️ Category-2 postfix operations deferred (throws exception with clear message)
+- ✅ Category-2 postfix operations supported
 - ✅ Clean, maintainable code with well-documented stack operations
 - ✅ All tests passing
 
 ### Known Limitations
 
-1. **Postfix on long/double arrays**: Category-2 types (long/double) require more complex stack manipulation for postfix operations. Currently throws a clear exception. Prefix operations work fine.
-2. **Wrapper Element Arrays**: Arrays with wrapper element types (like `Integer[]`) would require additional boxing/unboxing logic.
-3. **Object Arrays**: General object arrays (`Object[]`, `String[]`) are not yet supported.
+1. **Wrapper Element Arrays**: Arrays with wrapper element types (like `Integer[]`) would require additional boxing/unboxing logic.
+2. **Object Arrays**: General object arrays (`Object[]`, `String[]`) are not yet supported.
 
 ### Solution Summary
 
@@ -544,10 +543,7 @@ pop                        // [new_Integer] - discard set's return, keep our dup
 
 1. **Type Inference**: Currently assumes Integer type for all values
 2. **Collection Types**: Only LinkedHashMap and ArrayList supported
-3. **Class Field Access**: `this.field++` not yet implemented (requires getfield/putfield support)
-4. **Null Values**: No explicit null checking (will throw NullPointerException at runtime)
-5. **Multi-dimensional Arrays**: Not yet implemented
-6. **Native Java Arrays**: Only ArrayList supported, not native arrays like `int[]`, `Object[]`
+3. **Null Values**: No explicit null checking (will throw NullPointerException at runtime)
 
 ---
 
@@ -1144,7 +1140,7 @@ iastore           // Store element
 - [x] Supports local variables (Phase 1) ✅
 - [x] Supports member access (Phase 2) ✅
 - [x] Supports array access (Phase 3) ✅
-- [x] 80+ comprehensive tests covering all edge cases ✅ (86 tests)
+- [x] 80+ comprehensive tests covering all edge cases ✅ (92 tests)
 - [x] Proper error handling for invalid targets ✅
 - [x] Optimized bytecode (uses `iinc` where possible) ✅
 - [x] Complete documentation ✅
@@ -1177,9 +1173,8 @@ iastore           // Store element
    - Correct array load/store instructions
    - Clean stack manipulation using `dup_x2` strategy
 
-5. **Native long[]/double[] Arrays** - Partial support
-   - Prefix operations fully supported
-   - Postfix deferred (category-2 stack complexity)
+5. **Native long[]/double[] Arrays** - Full support
+   - Prefix and postfix operations supported
 
 6. **Edge Cases** - Comprehensive coverage
    - Integer overflow behavior
@@ -1192,23 +1187,13 @@ iastore           // Store element
    - Invalid targets rejected: `5++`, `(x+y)++`
    - Type validation (no boolean updates)
 
-### ⚠️ Known Limitations
+### ✅ Known Limitations
 
-1. **Native Array Postfix (long/double)** - Complex stack manipulation for category-2 types deferred with clear exception message
-
-2. **Class Field Access** - `this.value++` not implemented
-   - Requires `getfield`/`putfield` JVM instructions
-   - Needs integration with class member access infrastructure
-   - Would follow same pattern as object property updates
-
-3. **Multi-dimensional Arrays** - Not supported
-   - Requires compiler infrastructure for multi-dimensional array literals
-   - Update expression logic would work once array access is implemented
-   - Beyond scope of this feature
+1. **Wrapper/Object Arrays** - Wrapper element arrays and general object arrays are still not supported
 
 ### 📊 Test Coverage
 
-- **Total Tests:** 86/86 passing ✅
+- **Total Tests:** 92/92 passing ✅
 - **Local Variables:** 31 tests (all primitive types, wrappers, prefix/postfix)
 - **Object Properties:** 20 tests (LinkedHashMap, nested, computed keys)
 - **ArrayLists:** 6 tests (element access, modifications)

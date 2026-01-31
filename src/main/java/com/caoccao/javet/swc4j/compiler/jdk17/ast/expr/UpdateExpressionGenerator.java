@@ -22,6 +22,8 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUpdateExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -30,6 +32,8 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
+import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUpdateExpr> {
@@ -513,6 +517,19 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             Swc4jAstMemberExpr memberExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
+        if (memberExpr.getObj() instanceof Swc4jAstThisExpr
+                && (memberExpr.getProp() instanceof Swc4jAstIdentName || memberExpr.getProp() instanceof Swc4jAstPrivateName)) {
+            handleInstanceFieldUpdate(code, cp, updateExpr, memberExpr);
+            return;
+        }
+
+        if (memberExpr.getObj() instanceof Swc4jAstIdent
+                && (memberExpr.getProp() instanceof Swc4jAstIdentName || memberExpr.getProp() instanceof Swc4jAstPrivateName)) {
+            if (handleStaticFieldUpdate(code, cp, updateExpr, memberExpr)) {
+                return;
+            }
+        }
+
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
         boolean isIncrement = updateExpr.getOp() == Swc4jAstUpdateOp.PlusPlus;
         boolean isPrefix = updateExpr.isPrefix();
@@ -573,6 +590,50 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
                     "Update expressions on arrays currently only support primitive element types, got: " + elementType);
         }
 
+        if (!isPrefix && ("J".equals(elementType) || "D".equals(elementType))) {
+            CompilationContext context = compiler.getMemory().getCompilationContext();
+            int arraySlot = getOrAllocateTempSlot(context,
+                    "$tempUpdateArray" + context.getNextTempId(), arrayType);
+            int indexSlot = getOrAllocateTempSlot(context,
+                    "$tempUpdateIndex" + context.getNextTempId(), "I");
+            int valueSlot = getOrAllocateTempSlot(context,
+                    "$tempUpdateValue" + context.getNextTempId(), elementType);
+            int newValueSlot = getOrAllocateTempSlot(context,
+                    "$tempUpdateNewValue" + context.getNextTempId(), elementType);
+
+            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+            code.astore(arraySlot);
+
+            compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null);
+            String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
+            if (indexType != null && !"I".equals(indexType)) {
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
+            }
+            code.istore(indexSlot);
+
+            code.aload(arraySlot);
+            code.iload(indexSlot);
+            generateArrayLoad(code, elementType);
+            storePrimitive(code, elementType, valueSlot);
+
+            loadPrimitive(code, elementType, valueSlot);
+            loadOne(code, elementType);
+            if (isIncrement) {
+                addPrimitive(code, elementType);
+            } else {
+                subtractPrimitive(code, elementType);
+            }
+            storePrimitive(code, elementType, newValueSlot);
+
+            code.aload(arraySlot);
+            code.iload(indexSlot);
+            loadPrimitive(code, elementType, newValueSlot);
+            generateArrayStore(code, elementType);
+
+            loadPrimitive(code, elementType, valueSlot);
+            return;
+        }
+
         // Use dup2 early for both prefix and postfix to avoid complex stack manipulation
 
         // Step 1: Load array and index
@@ -619,9 +680,21 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             // First, move old value out of the way
             // We'll use a pattern: load, increment, then juggle stack
             if ("J".equals(elementType) || "D".equals(elementType)) {
-                // Category 2 - defer for now
-                throw new Swc4jByteCodeCompilerException(memberExpr,
-                        "Postfix update on long/double arrays not yet supported");
+                // Category 2 - use temp local to avoid complex stack manipulation
+                CompilationContext context = compiler.getMemory().getCompilationContext();
+                int tempSlot = getOrAllocateTempSlot(context,
+                        "$tempUpdate" + context.getNextTempId(), elementType);
+                storePrimitive(code, elementType, tempSlot); // [array, index]
+
+                loadPrimitive(code, elementType, tempSlot); // [array, index, old]
+                loadOne(code, elementType); // [array, index, old, 1]
+                if (isIncrement) {
+                    addPrimitive(code, elementType); // [array, index, new]
+                } else {
+                    subtractPrimitive(code, elementType); // [array, index, new]
+                }
+                generateArrayStore(code, elementType); // []
+                loadPrimitive(code, elementType, tempSlot); // [old]
             } else {
                 // Category 1: [array, index, old]
                 // Move old to bottom, keeping array+index in place for later
@@ -639,6 +712,14 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         }
 
         // Stack now has return value: new value for prefix, old value for postfix
+    }
+
+    private int getOrAllocateTempSlot(CompilationContext context, String name, String type) {
+        LocalVariable existing = context.getLocalVariableTable().getVariable(name);
+        if (existing != null) {
+            return existing.index();
+        }
+        return context.getLocalVariableTable().allocateVariable(name, type);
     }
 
     private void loadOne(CodeBuilder code, String primitiveType) {
@@ -685,7 +766,278 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             case "Ljava/lang/Double;" -> "D";
             case "Ljava/lang/Byte;" -> "B";
             case "Ljava/lang/Short;" -> "S";
+            case "Ljava/lang/Character;" -> "C";
             default -> throw new IllegalArgumentException("Unknown wrapper type: " + wrapperType);
         };
+    }
+
+    private void handleInstanceFieldUpdate(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstUpdateExpr updateExpr,
+            Swc4jAstMemberExpr memberExpr) throws Swc4jByteCodeCompilerException {
+        String fieldName;
+        if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+            fieldName = propIdent.getSym();
+        } else if (memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
+            fieldName = privateName.getName();
+        } else {
+            throw new Swc4jByteCodeCompilerException(memberExpr,
+                    "Unsupported instance field update target: " + memberExpr.getProp().getClass().getSimpleName());
+        }
+
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+        String currentClassName = context.getCurrentClassInternalName();
+        if (currentClassName == null) {
+            throw new Swc4jByteCodeCompilerException(memberExpr, "No current class context for instance field update");
+        }
+
+        String ownerInternalName = currentClassName;
+        FieldInfo fieldInfo = null;
+
+        var capturedThis = context.getCapturedVariable("this");
+        if (capturedThis != null) {
+            String outerClassName = capturedThis.type().substring(1, capturedThis.type().length() - 1);
+            code.aload(0);
+            int capturedThisRef = cp.addFieldRef(currentClassName, capturedThis.fieldName(), capturedThis.type());
+            code.getfield(capturedThisRef);
+
+            String outerQualifiedName = outerClassName.replace('/', '.');
+            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(outerQualifiedName);
+            if (typeInfo == null) {
+                int lastSlash = outerClassName.lastIndexOf('/');
+                String simpleName = lastSlash >= 0 ? outerClassName.substring(lastSlash + 1) : outerClassName;
+                typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+            }
+            if (typeInfo != null) {
+                FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                if (lookupResult != null) {
+                    fieldInfo = lookupResult.fieldInfo;
+                    ownerInternalName = lookupResult.ownerInternalName;
+                }
+            }
+        } else {
+            code.aload(0);
+            String qualifiedName = currentClassName.replace('/', '.');
+            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+            if (typeInfo == null) {
+                int lastSlash = currentClassName.lastIndexOf('/');
+                String simpleName = lastSlash >= 0 ? currentClassName.substring(lastSlash + 1) : currentClassName;
+                typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+            }
+            if (typeInfo != null) {
+                FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                if (lookupResult != null) {
+                    fieldInfo = lookupResult.fieldInfo;
+                    ownerInternalName = lookupResult.ownerInternalName;
+                }
+            }
+        }
+
+        if (fieldInfo == null) {
+            throw new Swc4jByteCodeCompilerException(memberExpr, "Field not found: " + fieldName);
+        }
+
+        updateInstanceField(code, cp, updateExpr, ownerInternalName, fieldName, fieldInfo.descriptor());
+    }
+
+    private boolean handleStaticFieldUpdate(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstUpdateExpr updateExpr,
+            Swc4jAstMemberExpr memberExpr) throws Swc4jByteCodeCompilerException {
+        if (!(memberExpr.getObj() instanceof Swc4jAstIdent classIdent)) {
+            return false;
+        }
+        String className = classIdent.getSym();
+        String fieldName;
+        if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+            fieldName = propIdent.getSym();
+        } else if (memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
+            fieldName = privateName.getName();
+        } else {
+            throw new Swc4jByteCodeCompilerException(memberExpr,
+                    "Unsupported static field update target: " + memberExpr.getProp().getClass().getSimpleName());
+        }
+
+        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
+        if (typeInfo == null) {
+            return false;
+        }
+        FieldInfo fieldInfo = typeInfo.getField(fieldName);
+        if (fieldInfo == null || !fieldInfo.isStatic()) {
+            return false;
+        }
+
+        updateStaticField(code, cp, updateExpr, typeInfo.getInternalName(), fieldName, fieldInfo.descriptor());
+        return true;
+    }
+
+    private void updateInstanceField(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstUpdateExpr updateExpr,
+            String ownerInternalName,
+            String fieldName,
+            String fieldType) throws Swc4jByteCodeCompilerException {
+        String primitiveType = TypeConversionUtils.getPrimitiveType(fieldType);
+        boolean isPrimitive = fieldType.equals(primitiveType);
+        boolean isWrapper = TypeConversionUtils.isPrimitiveType(primitiveType) && !isPrimitive;
+
+        if (!TypeConversionUtils.isPrimitiveType(primitiveType) || "Z".equals(primitiveType)) {
+            throw new Swc4jByteCodeCompilerException(updateExpr,
+                    "Cannot apply " + updateExpr.getOp().getName() + " operator to type: " + fieldType);
+        }
+
+        boolean isIncrement = updateExpr.getOp() == Swc4jAstUpdateOp.PlusPlus;
+        boolean isPrefix = updateExpr.isPrefix();
+
+        int fieldRef = cp.addFieldRef(ownerInternalName, fieldName, fieldType);
+        code.dup();
+        code.getfield(fieldRef); // [obj, old]
+
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+        int tempSlot = getOrAllocateTempSlot(context,
+                "$tempUpdate" + context.getNextTempId(), fieldType);
+
+        if (!isPrefix) {
+            if (isWrapper) {
+                code.dup();
+                code.astore(tempSlot);
+                TypeConversionUtils.unboxWrapperType(code, cp, fieldType);
+            } else {
+                storePrimitive(code, primitiveType, tempSlot);
+            }
+        } else if (isWrapper) {
+            TypeConversionUtils.unboxWrapperType(code, cp, fieldType);
+        }
+
+        if (!isPrefix) {
+            if (isWrapper) {
+                // already unboxed
+            } else {
+                loadPrimitive(code, primitiveType, tempSlot);
+            }
+        }
+
+        loadOne(code, primitiveType);
+        if (isIncrement) {
+            addPrimitive(code, primitiveType);
+        } else {
+            subtractPrimitive(code, primitiveType);
+        }
+
+        if (isWrapper) {
+            TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, fieldType);
+            if (isPrefix) {
+                code.dup_x1();
+            }
+            code.putfield(fieldRef);
+            if (!isPrefix) {
+                code.aload(tempSlot);
+            }
+        } else {
+            if (isPrefix) {
+                if ("J".equals(primitiveType) || "D".equals(primitiveType)) {
+                    code.dup2_x1();
+                } else {
+                    code.dup_x1();
+                }
+            }
+            code.putfield(fieldRef);
+            if (!isPrefix) {
+                loadPrimitive(code, primitiveType, tempSlot);
+            }
+        }
+    }
+
+    private void updateStaticField(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstUpdateExpr updateExpr,
+            String ownerInternalName,
+            String fieldName,
+            String fieldType) throws Swc4jByteCodeCompilerException {
+        String primitiveType = TypeConversionUtils.getPrimitiveType(fieldType);
+        boolean isPrimitive = fieldType.equals(primitiveType);
+        boolean isWrapper = TypeConversionUtils.isPrimitiveType(primitiveType) && !isPrimitive;
+
+        if (!TypeConversionUtils.isPrimitiveType(primitiveType) || "Z".equals(primitiveType)) {
+            throw new Swc4jByteCodeCompilerException(updateExpr,
+                    "Cannot apply " + updateExpr.getOp().getName() + " operator to type: " + fieldType);
+        }
+
+        boolean isIncrement = updateExpr.getOp() == Swc4jAstUpdateOp.PlusPlus;
+        boolean isPrefix = updateExpr.isPrefix();
+
+        int fieldRef = cp.addFieldRef(ownerInternalName, fieldName, fieldType);
+        code.getstatic(fieldRef); // [old]
+
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+        int tempSlot = getOrAllocateTempSlot(context,
+                "$tempUpdate" + context.getNextTempId(), fieldType);
+
+        if (!isPrefix) {
+            if (isWrapper) {
+                code.dup();
+                code.astore(tempSlot);
+                TypeConversionUtils.unboxWrapperType(code, cp, fieldType);
+            } else {
+                storePrimitive(code, primitiveType, tempSlot);
+            }
+        } else if (isWrapper) {
+            TypeConversionUtils.unboxWrapperType(code, cp, fieldType);
+        }
+
+        if (!isPrefix) {
+            if (isWrapper) {
+                // already unboxed
+            } else {
+                loadPrimitive(code, primitiveType, tempSlot);
+            }
+        }
+
+        loadOne(code, primitiveType);
+        if (isIncrement) {
+            addPrimitive(code, primitiveType);
+        } else {
+            subtractPrimitive(code, primitiveType);
+        }
+
+        if (isWrapper) {
+            TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, fieldType);
+            if (isPrefix) {
+                code.dup();
+            }
+            code.putstatic(fieldRef);
+            if (!isPrefix) {
+                code.aload(tempSlot);
+            }
+        } else {
+            if (isPrefix) {
+                duplicatePrimitive(code, primitiveType);
+            }
+            code.putstatic(fieldRef);
+            if (!isPrefix) {
+                loadPrimitive(code, primitiveType, tempSlot);
+            }
+        }
+    }
+
+    private FieldLookupResult lookupFieldInHierarchy(JavaTypeInfo typeInfo, String fieldName) {
+        FieldInfo fieldInfo = typeInfo.getField(fieldName);
+        if (fieldInfo != null) {
+            return new FieldLookupResult(fieldInfo, typeInfo.getInternalName());
+        }
+        for (JavaTypeInfo parentInfo : typeInfo.getParentTypeInfos()) {
+            FieldLookupResult result = lookupFieldInHierarchy(parentInfo, fieldName);
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    private record FieldLookupResult(FieldInfo fieldInfo, String ownerInternalName) {
     }
 }
