@@ -72,13 +72,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Map call signatures to functional interfaces, construct signatures to factory patterns, add type mapping rules.
 - Tests: Callable and constructable interfaces used in function/constructor contexts.
 
-## Feature: Module Import Limitations (Instance Methods, Constructors, Varargs)
-- Evidence: `docs/plans/ast/module/import.md`.
-- Status: Static methods only; varargs bytecode not implemented; java/javax only.
-- Confidence: 55%.
-- Plan: Support instance method resolution, constructor calls, varargs argument packing, and custom package imports.
-- Tests: Instance method calls, `new` calls, varargs overload selection.
-
 ## Feature: Object Literal Gaps (Methods, Accessors, Symbols, Prototypes)
 - Evidence: `docs/plans/ast/expr/lit/object-lit.md`.
 - Status: Method properties deferred; getters/setters, symbols, descriptors, prototypes unsupported.

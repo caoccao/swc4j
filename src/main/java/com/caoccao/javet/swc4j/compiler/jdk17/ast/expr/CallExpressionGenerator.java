@@ -98,7 +98,25 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
         // Handle method calls on arrays, strings, Java classes, TypeScript classes, etc.
         if (callee instanceof Swc4jAstMemberExpr memberExpr) {
             String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
-            if (arrayGenerator.isTypeSupported(objType)) {
+
+            // Check if this is an explicitly imported Java class
+            // If so, use the class generator which has full reflection-based method support
+            // This takes priority over special handlers like ArrayList/String
+            boolean isImportedJavaClass = false;
+            if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
+                String internalName = objType.substring(1, objType.length() - 1);
+                var javaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolveByInternalName(internalName);
+                // Check if it's a Java class (has methods populated via reflection)
+                // TypeScript classes are also registered but have empty methods map
+                if (javaTypeInfo != null && !javaTypeInfo.getMethods().isEmpty()) {
+                    isImportedJavaClass = true;
+                }
+            }
+
+            if (isImportedJavaClass) {
+                classGenerator.generate(code, cp, callExpr, returnTypeInfo);
+                return;
+            } else if (arrayGenerator.isTypeSupported(objType)) {
                 arrayGenerator.generate(code, cp, callExpr, returnTypeInfo);
                 return;
             } else if (arrayListGenerator.isTypeSupported(objType)) {

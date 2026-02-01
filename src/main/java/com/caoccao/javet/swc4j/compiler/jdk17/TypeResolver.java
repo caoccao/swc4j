@@ -559,9 +559,7 @@ public final class TypeResolver {
             if (consType != null) {
                 return consType;
             }
-            if (altType != null) {
-                return altType;
-            }
+            return altType;
         }
         return null;
     }

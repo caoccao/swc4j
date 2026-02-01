@@ -17,13 +17,9 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUpdateOp;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUpdateExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUpdateOp;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -216,6 +212,14 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         code.invokevirtual(methodRef);
     }
 
+    private int getOrAllocateTempSlot(CompilationContext context, String name, String type) {
+        LocalVariable existing = context.getLocalVariableTable().getVariable(name);
+        if (existing != null) {
+            return existing.index();
+        }
+        return context.getLocalVariableTable().allocateVariable(name, type);
+    }
+
     /**
      * Handle update on ArrayList element: arr[index]++.
      */
@@ -314,6 +318,76 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             code.pop(); // [return_value=new_Integer]
         }
         // For postfix: [old_Integer] from set's return value
+    }
+
+    private void handleInstanceFieldUpdate(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstUpdateExpr updateExpr,
+            Swc4jAstMemberExpr memberExpr) throws Swc4jByteCodeCompilerException {
+        String fieldName;
+        if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+            fieldName = propIdent.getSym();
+        } else if (memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
+            fieldName = privateName.getName();
+        } else {
+            throw new Swc4jByteCodeCompilerException(memberExpr,
+                    "Unsupported instance field update target: " + memberExpr.getProp().getClass().getSimpleName());
+        }
+
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+        String currentClassName = context.getCurrentClassInternalName();
+        if (currentClassName == null) {
+            throw new Swc4jByteCodeCompilerException(memberExpr, "No current class context for instance field update");
+        }
+
+        String ownerInternalName = currentClassName;
+        FieldInfo fieldInfo = null;
+
+        var capturedThis = context.getCapturedVariable("this");
+        if (capturedThis != null) {
+            String outerClassName = capturedThis.type().substring(1, capturedThis.type().length() - 1);
+            code.aload(0);
+            int capturedThisRef = cp.addFieldRef(currentClassName, capturedThis.fieldName(), capturedThis.type());
+            code.getfield(capturedThisRef);
+
+            String outerQualifiedName = outerClassName.replace('/', '.');
+            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(outerQualifiedName);
+            if (typeInfo == null) {
+                int lastSlash = outerClassName.lastIndexOf('/');
+                String simpleName = lastSlash >= 0 ? outerClassName.substring(lastSlash + 1) : outerClassName;
+                typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+            }
+            if (typeInfo != null) {
+                FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                if (lookupResult != null) {
+                    fieldInfo = lookupResult.fieldInfo;
+                    ownerInternalName = lookupResult.ownerInternalName;
+                }
+            }
+        } else {
+            code.aload(0);
+            String qualifiedName = currentClassName.replace('/', '.');
+            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+            if (typeInfo == null) {
+                int lastSlash = currentClassName.lastIndexOf('/');
+                String simpleName = lastSlash >= 0 ? currentClassName.substring(lastSlash + 1) : currentClassName;
+                typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+            }
+            if (typeInfo != null) {
+                FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                if (lookupResult != null) {
+                    fieldInfo = lookupResult.fieldInfo;
+                    ownerInternalName = lookupResult.ownerInternalName;
+                }
+            }
+        }
+
+        if (fieldInfo == null) {
+            throw new Swc4jByteCodeCompilerException(memberExpr, "Field not found: " + fieldName);
+        }
+
+        updateInstanceField(code, cp, updateExpr, ownerInternalName, fieldName, fieldInfo.descriptor());
     }
 
     /**
@@ -714,12 +788,36 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         // Stack now has return value: new value for prefix, old value for postfix
     }
 
-    private int getOrAllocateTempSlot(CompilationContext context, String name, String type) {
-        LocalVariable existing = context.getLocalVariableTable().getVariable(name);
-        if (existing != null) {
-            return existing.index();
+    private boolean handleStaticFieldUpdate(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstUpdateExpr updateExpr,
+            Swc4jAstMemberExpr memberExpr) throws Swc4jByteCodeCompilerException {
+        if (!(memberExpr.getObj() instanceof Swc4jAstIdent classIdent)) {
+            return false;
         }
-        return context.getLocalVariableTable().allocateVariable(name, type);
+        String className = classIdent.getSym();
+        String fieldName;
+        if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+            fieldName = propIdent.getSym();
+        } else if (memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
+            fieldName = privateName.getName();
+        } else {
+            throw new Swc4jByteCodeCompilerException(memberExpr,
+                    "Unsupported static field update target: " + memberExpr.getProp().getClass().getSimpleName());
+        }
+
+        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
+        if (typeInfo == null) {
+            return false;
+        }
+        FieldInfo fieldInfo = typeInfo.getField(fieldName);
+        if (fieldInfo == null || !fieldInfo.isStatic()) {
+            return false;
+        }
+
+        updateStaticField(code, cp, updateExpr, typeInfo.getInternalName(), fieldName, fieldInfo.descriptor());
+        return true;
     }
 
     private void loadOne(CodeBuilder code, String primitiveType) {
@@ -738,6 +836,20 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             case "F" -> code.fload(varIndex);
             case "D" -> code.dload(varIndex);
         }
+    }
+
+    private FieldLookupResult lookupFieldInHierarchy(JavaTypeInfo typeInfo, String fieldName) {
+        FieldInfo fieldInfo = typeInfo.getField(fieldName);
+        if (fieldInfo != null) {
+            return new FieldLookupResult(fieldInfo, typeInfo.getInternalName());
+        }
+        for (JavaTypeInfo parentInfo : typeInfo.getParentTypeInfos()) {
+            FieldLookupResult result = lookupFieldInHierarchy(parentInfo, fieldName);
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
     }
 
     private void storePrimitive(CodeBuilder code, String primitiveType, int varIndex) {
@@ -769,108 +881,6 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             case "Ljava/lang/Character;" -> "C";
             default -> throw new IllegalArgumentException("Unknown wrapper type: " + wrapperType);
         };
-    }
-
-    private void handleInstanceFieldUpdate(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstUpdateExpr updateExpr,
-            Swc4jAstMemberExpr memberExpr) throws Swc4jByteCodeCompilerException {
-        String fieldName;
-        if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-            fieldName = propIdent.getSym();
-        } else if (memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
-            fieldName = privateName.getName();
-        } else {
-            throw new Swc4jByteCodeCompilerException(memberExpr,
-                    "Unsupported instance field update target: " + memberExpr.getProp().getClass().getSimpleName());
-        }
-
-        CompilationContext context = compiler.getMemory().getCompilationContext();
-        String currentClassName = context.getCurrentClassInternalName();
-        if (currentClassName == null) {
-            throw new Swc4jByteCodeCompilerException(memberExpr, "No current class context for instance field update");
-        }
-
-        String ownerInternalName = currentClassName;
-        FieldInfo fieldInfo = null;
-
-        var capturedThis = context.getCapturedVariable("this");
-        if (capturedThis != null) {
-            String outerClassName = capturedThis.type().substring(1, capturedThis.type().length() - 1);
-            code.aload(0);
-            int capturedThisRef = cp.addFieldRef(currentClassName, capturedThis.fieldName(), capturedThis.type());
-            code.getfield(capturedThisRef);
-
-            String outerQualifiedName = outerClassName.replace('/', '.');
-            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(outerQualifiedName);
-            if (typeInfo == null) {
-                int lastSlash = outerClassName.lastIndexOf('/');
-                String simpleName = lastSlash >= 0 ? outerClassName.substring(lastSlash + 1) : outerClassName;
-                typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
-            }
-            if (typeInfo != null) {
-                FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
-                if (lookupResult != null) {
-                    fieldInfo = lookupResult.fieldInfo;
-                    ownerInternalName = lookupResult.ownerInternalName;
-                }
-            }
-        } else {
-            code.aload(0);
-            String qualifiedName = currentClassName.replace('/', '.');
-            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
-            if (typeInfo == null) {
-                int lastSlash = currentClassName.lastIndexOf('/');
-                String simpleName = lastSlash >= 0 ? currentClassName.substring(lastSlash + 1) : currentClassName;
-                typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
-            }
-            if (typeInfo != null) {
-                FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
-                if (lookupResult != null) {
-                    fieldInfo = lookupResult.fieldInfo;
-                    ownerInternalName = lookupResult.ownerInternalName;
-                }
-            }
-        }
-
-        if (fieldInfo == null) {
-            throw new Swc4jByteCodeCompilerException(memberExpr, "Field not found: " + fieldName);
-        }
-
-        updateInstanceField(code, cp, updateExpr, ownerInternalName, fieldName, fieldInfo.descriptor());
-    }
-
-    private boolean handleStaticFieldUpdate(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstUpdateExpr updateExpr,
-            Swc4jAstMemberExpr memberExpr) throws Swc4jByteCodeCompilerException {
-        if (!(memberExpr.getObj() instanceof Swc4jAstIdent classIdent)) {
-            return false;
-        }
-        String className = classIdent.getSym();
-        String fieldName;
-        if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-            fieldName = propIdent.getSym();
-        } else if (memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
-            fieldName = privateName.getName();
-        } else {
-            throw new Swc4jByteCodeCompilerException(memberExpr,
-                    "Unsupported static field update target: " + memberExpr.getProp().getClass().getSimpleName());
-        }
-
-        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
-        if (typeInfo == null) {
-            return false;
-        }
-        FieldInfo fieldInfo = typeInfo.getField(fieldName);
-        if (fieldInfo == null || !fieldInfo.isStatic()) {
-            return false;
-        }
-
-        updateStaticField(code, cp, updateExpr, typeInfo.getInternalName(), fieldName, fieldInfo.descriptor());
-        return true;
     }
 
     private void updateInstanceField(
@@ -1022,20 +1032,6 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
                 loadPrimitive(code, primitiveType, tempSlot);
             }
         }
-    }
-
-    private FieldLookupResult lookupFieldInHierarchy(JavaTypeInfo typeInfo, String fieldName) {
-        FieldInfo fieldInfo = typeInfo.getField(fieldName);
-        if (fieldInfo != null) {
-            return new FieldLookupResult(fieldInfo, typeInfo.getInternalName());
-        }
-        for (JavaTypeInfo parentInfo : typeInfo.getParentTypeInfos()) {
-            FieldLookupResult result = lookupFieldInHierarchy(parentInfo, fieldName);
-            if (result != null) {
-                return result;
-            }
-        }
-        return null;
     }
 
     private record FieldLookupResult(FieldInfo fieldInfo, String ownerInternalName) {

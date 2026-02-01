@@ -1,8 +1,16 @@
-# Java Class Imports and Static Method Calls
+# Java Class Imports: Static Methods, Instance Methods, Constructors, and Varargs
 
 ## Overview
 
-swc4j now supports importing Java classes and calling their static methods from TypeScript/JavaScript code. This feature allows seamless interoperability between TypeScript code and the Java standard library.
+swc4j supports importing Java classes and calling their methods from TypeScript/JavaScript code. This includes:
+- Static method calls
+- Instance method calls with method chaining
+- Constructor calls with overload resolution
+- Varargs method support
+- Inner/nested class imports
+- Custom package imports
+
+This feature provides seamless interoperability between TypeScript code and the Java standard library as well as custom Java classes.
 
 ## Usage
 
@@ -22,11 +30,23 @@ namespace com {
 
 ### Supported Import Patterns
 
-Currently, the compiler supports importing Java classes from `java.*` and `javax.*` packages using named imports:
+The compiler supports importing Java classes from any package using named imports:
 
 ```typescript
+// Standard library imports
 import { Math, String, System } from 'java.lang'
-import { ArrayList } from 'java.util'
+import { ArrayList, LinkedHashMap } from 'java.util'
+
+// Custom package imports
+import { Point } from 'com.example.shapes'
+import { MathHelper } from 'com.example.utils'
+```
+
+Inner/nested classes are also supported:
+
+```typescript
+// Inner class import (TestClass.Point becomes TestClass$Point internally)
+import { Point } from 'com.caoccao.javet.swc4j.compiler.ast.module.TestImportConstructors'
 ```
 
 ### Calling Java Static Methods
@@ -53,17 +73,83 @@ namespace com {
 }
 ```
 
+### Creating Instances and Calling Instance Methods
+
+You can create instances of imported Java classes using `new` and call their instance methods:
+
+```typescript
+import { StringBuilder } from 'java.lang'
+
+namespace com {
+  export class A {
+    public test(): String {
+      const sb = new StringBuilder("Hello")
+      sb.append(" ")
+      sb.append("World")
+      return sb.toString()
+    }
+  }
+}
+```
+
+Method chaining is fully supported:
+
+```typescript
+import { StringBuilder } from 'java.lang'
+
+namespace com {
+  export class A {
+    public test(): String {
+      const sb = new StringBuilder()
+      return sb.append("Hello").append(" ").append("World").toString()
+    }
+  }
+}
+```
+
+### Calling Varargs Methods
+
+Varargs methods are fully supported, including methods from the Java standard library:
+
+```typescript
+import { String } from 'java.lang'
+
+namespace com {
+  export class A {
+    public test(): String {
+      return String.format("Hello %s, you are %d years old", "Alice", 25)
+    }
+  }
+}
+```
+
+Custom varargs methods also work:
+
+```typescript
+import { MathHelper } from 'com.example.utils'
+
+namespace com {
+  export class A {
+    public test(): int {
+      // MathHelper.sum is a varargs method: sum(int... numbers)
+      return MathHelper.sum(1, 2, 3, 4, 5)
+    }
+  }
+}
+```
+
 ## Implementation Details
 
 ### Architecture
 
 The Java import feature consists of several key components:
 
-1. **ScopedJavaClassRegistry**: Manages Java class registrations with file-level scope isolation
-2. **ImportDeclProcessor**: Processes import declarations and registers Java classes using reflection
-3. **JavaTypeInfo**: Stores metadata about imported Java classes (methods, descriptors, etc.)
-4. **CallExpressionForJavaClassGenerator**: Generates bytecode for Java static method calls
-5. **TypeResolver**: Enhanced to infer return types from Java methods
+1. **ScopedJavaTypeRegistry**: Manages Java class registrations with file-level scope isolation
+2. **ImportDeclProcessor**: Processes import declarations and registers Java classes using reflection (including inner classes)
+3. **JavaTypeInfo**: Stores metadata about imported Java classes (methods, constructors, descriptors, varargs info, etc.)
+4. **CallExpressionForClassGenerator**: Generates bytecode for Java static and instance method calls with varargs support
+5. **NewExpressionGenerator**: Generates bytecode for Java constructor calls
+6. **TypeResolver**: Enhanced to infer return types from Java methods and handle type conversions
 
 ### File-Level Import Isolation
 
@@ -71,12 +157,12 @@ Imports are scoped per file to prevent leakage between compilation units:
 
 ```java
 // Each file compilation enters a new scope
-memory.getScopedJavaClassRegistry().enterScope();
+memory.getScopedJavaTypeRegistry().enterScope();
 try {
     // Process imports and compile
 } finally {
     // Always exit scope, even on exceptions
-    memory.getScopedJavaClassRegistry().exitScope();
+    memory.getScopedJavaTypeRegistry().exitScope();
 }
 ```
 
@@ -146,22 +232,20 @@ The compiler automatically handles type conversions between TypeScript and Java 
 
 ## Current Limitations
 
-1. **Static Methods Only**: Currently only static method calls are supported (e.g., `Math.floor()`)
-2. **Java Packages Only**: Only classes from `java.*` and `javax.*` packages can be imported
-3. **Named Imports Only**: Only named imports are supported (not `import * as`)
-4. **Public Methods Only**: Only public methods are accessible
-5. **Varargs Bytecode Generation**: While varargs methods are recognized and scored correctly, bytecode generation for varargs calls is not yet implemented
-6. **Reference Type Hierarchy**: Overload resolution for reference types doesn't check class hierarchy (only exact matches)
+1. **Named Imports Only**: Only named imports are supported (not `import * as`)
+2. **Public Members Only**: Only public methods and constructors are accessible
+3. **Reference Type Hierarchy**: Overload resolution for reference types doesn't fully check class hierarchy
+4. **No Field Access**: Direct access to Java class fields is not yet supported
+5. **No Generic Type Parameters**: Generic type parameters in method calls are not yet supported
 
 ## Future Enhancements
 
 Potential future improvements:
-- Support for instance methods and constructors
-- Support for custom Java classes (beyond java.*/javax.*)
 - Reference type hierarchy checking in overload resolution
 - Support for Java fields and constants
 - Support for default imports (import entire package)
-- Varargs method support
+- Generic type parameter support
+- Better error messages for ambiguous overloads
 
 ## Examples
 
@@ -222,6 +306,96 @@ namespace com {
     // Automatically selects Math.max(double, double) based on parameter types
     public maxDouble(a: double, b: double): double {
       return Math.max(a, b)
+    }
+  }
+}
+```
+
+### Example 4: StringBuilder with Instance Methods
+
+```typescript
+import { StringBuilder } from 'java.lang'
+
+namespace com {
+  export class A {
+    public buildMessage(name: String, age: int): String {
+      const sb = new StringBuilder()
+      sb.append("Name: ")
+      sb.append(name)
+      sb.append(", Age: ")
+      sb.append(age)
+      return sb.toString()
+    }
+
+    // Method chaining
+    public buildMessageChained(name: String, age: int): String {
+      return new StringBuilder()
+        .append("Name: ")
+        .append(name)
+        .append(", Age: ")
+        .append(age)
+        .toString()
+    }
+  }
+}
+```
+
+### Example 5: Varargs Methods
+
+```typescript
+import { String } from 'java.lang'
+
+namespace com {
+  export class A {
+    public formatMessage(name: String, age: int, score: double): String {
+      return String.format(
+        "Student: %s, Age: %d, Score: %.2f",
+        name,
+        age,
+        score
+      )
+    }
+
+    public noVarargs(): String {
+      return String.format("No formatting needed")
+    }
+  }
+}
+```
+
+### Example 6: Custom Class with Constructors
+
+```typescript
+import { ArrayList } from 'java.util'
+
+namespace com {
+  export class A {
+    public createList(): int {
+      // No-arg constructor
+      const list1 = new ArrayList()
+      list1.add("First")
+      list1.add("Second")
+
+      // Constructor with initial capacity
+      const list2 = new ArrayList(10)
+      list2.add("Item")
+
+      return list1.size() + list2.size()
+    }
+  }
+}
+```
+
+### Example 7: Inner Class Import
+
+```typescript
+import { Point } from 'com.example.shapes.Shape'
+
+namespace com {
+  export class A {
+    public createPoint(): String {
+      const p = new Point(10, 20)
+      return p.toString()
     }
   }
 }

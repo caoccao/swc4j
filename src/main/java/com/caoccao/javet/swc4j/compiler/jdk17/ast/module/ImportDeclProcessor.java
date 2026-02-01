@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -34,6 +35,21 @@ public final class ImportDeclProcessor {
 
     public ImportDeclProcessor(ByteCodeCompiler compiler) {
         this.compiler = compiler;
+    }
+
+    /**
+     * Generates a constructor descriptor from a Java Constructor.
+     * Example: (int, double) -> void becomes "(ID)V"
+     */
+    private String getConstructorDescriptor(Constructor<?> constructor) {
+        StringBuilder descriptor = new StringBuilder("(");
+
+        for (Class<?> paramType : constructor.getParameterTypes()) {
+            descriptor.append(getTypeDescriptor(paramType));
+        }
+
+        descriptor.append(")V");
+        return descriptor.toString();
     }
 
     /**
@@ -95,11 +111,6 @@ public final class ImportDeclProcessor {
     private void processImportDecl(Swc4jAstImportDecl importDecl) {
         String source = importDecl.getSrc().getValue();
 
-        // Check if this is a Java package import
-        if (!source.startsWith("java.") && !source.startsWith("javax.")) {
-            return; // Not a Java import, skip
-        }
-
         String packageName = source;
 
         for (var specifier : importDecl.getSpecifiers()) {
@@ -107,9 +118,25 @@ public final class ImportDeclProcessor {
                 String importedName = namedImport.getLocal().getSym();
                 String fullyQualifiedName = packageName + "." + importedName;
 
+                Class<?> javaClass = null;
                 try {
                     // Load the Java class using reflection
-                    Class<?> javaClass = Class.forName(fullyQualifiedName);
+                    javaClass = Class.forName(fullyQualifiedName);
+                } catch (ClassNotFoundException e) {
+                    // Try as an inner class (replace last dot with $)
+                    int lastDotIndex = fullyQualifiedName.lastIndexOf('.');
+                    if (lastDotIndex > 0) {
+                        String innerClassName = fullyQualifiedName.substring(0, lastDotIndex) + "$" + fullyQualifiedName.substring(lastDotIndex + 1);
+                        try {
+                            javaClass = Class.forName(innerClassName);
+                            fullyQualifiedName = innerClassName;
+                        } catch (ClassNotFoundException ignored) {
+                            // Not an inner class either, will be handled below
+                        }
+                    }
+                }
+
+                if (javaClass != null) {
                     String internalName = getInternalName(fullyQualifiedName);
 
                     JavaTypeInfo typeInfo = new JavaTypeInfo(importedName, packageName, internalName);
@@ -128,16 +155,23 @@ public final class ImportDeclProcessor {
                         }
                     }
 
+                    // Scan public constructors and register them as <init>
+                    for (Constructor<?> constructor : javaClass.getConstructors()) {
+                        if (Modifier.isPublic(constructor.getModifiers())) {
+                            String descriptor = getConstructorDescriptor(constructor);
+                            boolean isVarArgs = constructor.isVarArgs();
+                            MethodInfo methodInfo = new MethodInfo("<init>", descriptor, "V", false, isVarArgs);
+                            typeInfo.addMethod("<init>", methodInfo);
+                        }
+                    }
+
                     // Register in the scoped registry
                     compiler.getMemory().getScopedJavaTypeRegistry().registerClass(importedName, typeInfo);
 
                     // Also register as a type alias so TypeResolver can resolve the type name
                     compiler.getMemory().getScopedTypeAliasRegistry().registerAlias(importedName, fullyQualifiedName);
-
-                } catch (ClassNotFoundException e) {
-                    // Class not found - could be a user error or unsupported class
-                    // For now, silently skip (could add logging later)
                 }
+                // If javaClass is still null, the import is not a Java class - silently skip
             }
         }
     }

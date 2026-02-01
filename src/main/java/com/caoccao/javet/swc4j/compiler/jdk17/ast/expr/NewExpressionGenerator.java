@@ -25,8 +25,13 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
+import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
+import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +41,20 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
 
     public NewExpressionGenerator(ByteCodeCompiler compiler) {
         super(compiler);
+    }
+
+    private void convertType(CodeBuilder code, ClassWriter.ConstantPool cp, String fromType, String toType) {
+        if (fromType.equals(toType)) {
+            return;
+        }
+        if (TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
+            TypeConversionUtils.convertPrimitiveType(code, fromType, toType);
+        } else if (TypeConversionUtils.isPrimitiveType(fromType) && !TypeConversionUtils.isPrimitiveType(toType)) {
+            String wrapperType = TypeConversionUtils.getWrapperType(fromType);
+            TypeConversionUtils.boxPrimitiveType(code, cp, fromType, wrapperType);
+        } else if (!TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
+            TypeConversionUtils.unboxWrapperType(code, cp, fromType);
+        }
     }
 
     @Override
@@ -72,30 +91,122 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
         // Duplicate the reference for the constructor call
         code.dup();
 
-        // Generate arguments and build constructor descriptor
-        StringBuilder paramDescriptors = new StringBuilder();
-        if (newExpr.getArgs().isPresent()) {
-            List<Swc4jAstExprOrSpread> args = newExpr.getArgs().get();
-            for (Swc4jAstExprOrSpread arg : args) {
-                if (arg.getSpread().isPresent()) {
-                    throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported in constructor calls");
-                }
-                // Generate argument expression
-                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-                // Infer argument type for descriptor
-                String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-                if (argType == null) {
-                    argType = "Ljava/lang/Object;";
-                }
-                paramDescriptors.append(argType);
+        List<Swc4jAstExprOrSpread> args = newExpr.getArgs().orElse(List.of());
+        List<String> argTypes = new ArrayList<>();
+        for (Swc4jAstExprOrSpread arg : args) {
+            if (arg.getSpread().isPresent()) {
+                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported in constructor calls");
             }
+            String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
+            if (argType == null) {
+                argType = "Ljava/lang/Object;";
+            }
+            argTypes.add(argType);
         }
 
-        // Generate: invokespecial <class>.<init>(args)V
-        String constructorDescriptor = "(" + paramDescriptors + ")V";
-        int constructorRef = cp.addMethodRef(internalClassName, "<init>", constructorDescriptor);
-        code.invokespecial(constructorRef);
+        JavaTypeInfo javaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
+        MethodInfo constructorInfo = javaTypeInfo != null ? javaTypeInfo.getMethod("<init>", argTypes) : null;
+
+        if (constructorInfo != null) {
+            List<String> expectedTypes = ScoreUtils.parseParameterDescriptors(constructorInfo.descriptor());
+            if (constructorInfo.isVarArgs() && !expectedTypes.isEmpty()) {
+                int fixedCount = expectedTypes.size() - 1;
+                String varargArrayType = expectedTypes.get(expectedTypes.size() - 1);
+                String componentType = varargArrayType.startsWith("[") ? varargArrayType.substring(1) : varargArrayType;
+
+                boolean directArrayPass = args.size() == expectedTypes.size()
+                        && argTypes.get(argTypes.size() - 1).equals(varargArrayType);
+
+                if (!directArrayPass) {
+                    for (int i = 0; i < fixedCount; i++) {
+                        Swc4jAstExprOrSpread arg = args.get(i);
+                        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                        convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+                    }
+                    generateVarargsArray(code, cp, args, argTypes, fixedCount, varargArrayType, componentType);
+                } else {
+                    for (int i = 0; i < args.size(); i++) {
+                        Swc4jAstExprOrSpread arg = args.get(i);
+                        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                        convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+                    }
+                }
+            } else {
+                for (int i = 0; i < args.size(); i++) {
+                    Swc4jAstExprOrSpread arg = args.get(i);
+                    compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                    if (i < expectedTypes.size()) {
+                        convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+                    }
+                }
+            }
+
+            int constructorRef = cp.addMethodRef(internalClassName, "<init>", constructorInfo.descriptor());
+            code.invokespecial(constructorRef);
+        } else {
+            StringBuilder paramDescriptors = new StringBuilder();
+            for (int i = 0; i < args.size(); i++) {
+                Swc4jAstExprOrSpread arg = args.get(i);
+                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                paramDescriptors.append(argTypes.get(i));
+            }
+            String constructorDescriptor = "(" + paramDescriptors + ")V";
+            int constructorRef = cp.addMethodRef(internalClassName, "<init>", constructorDescriptor);
+            code.invokespecial(constructorRef);
+        }
 
         // After this, the new object reference is on the stack
+    }
+
+    private void generateVarargsArray(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            List<Swc4jAstExprOrSpread> args,
+            List<String> argTypes,
+            int startIndex,
+            String arrayType,
+            String componentType) throws Swc4jByteCodeCompilerException {
+        int varargCount = args.size() - startIndex;
+        code.iconst(varargCount);
+
+        if (TypeConversionUtils.isPrimitiveType(componentType)) {
+            int typeCode = switch (componentType) {
+                case "Z" -> 4;
+                case "C" -> 5;
+                case "F" -> 6;
+                case "D" -> 7;
+                case "B" -> 8;
+                case "S" -> 9;
+                case "I" -> 10;
+                case "J" -> 11;
+                default ->
+                        throw new Swc4jByteCodeCompilerException(null, "Unsupported vararg primitive type: " + componentType);
+            };
+            code.newarray(typeCode);
+        } else {
+            String internalName = componentType.substring(1, componentType.length() - 1);
+            int classIndex = cp.addClass(internalName);
+            code.anewarray(classIndex);
+        }
+
+        for (int i = 0; i < varargCount; i++) {
+            code.dup();
+            code.iconst(i);
+            Swc4jAstExprOrSpread arg = args.get(startIndex + i);
+            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            String argType = argTypes.get(startIndex + i);
+            convertType(code, cp, argType, componentType);
+
+            switch (componentType) {
+                case "Z", "B" -> code.bastore();
+                case "C" -> code.castore();
+                case "S" -> code.sastore();
+                case "I" -> code.iastore();
+                case "J" -> code.lastore();
+                case "F" -> code.fastore();
+                case "D" -> code.dastore();
+                default -> code.aastore();
+            }
+        }
     }
 }

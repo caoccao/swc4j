@@ -310,6 +310,24 @@ public final class ScopedJavaTypeRegistry {
     }
 
     /**
+     * Resolves a Java type by internal name, searching from innermost to outermost scope.
+     *
+     * @param internalName the internal JVM name (e.g., "java/util/ArrayList")
+     * @return the JavaTypeInfo or null if not found
+     */
+    public JavaTypeInfo resolveByInternalName(String internalName) {
+        for (int i = scopeStack.size() - 1; i >= 0; i--) {
+            Map<String, JavaTypeInfo> scope = scopeStack.get(i);
+            for (JavaTypeInfo info : scope.values()) {
+                if (internalName.equals(info.getInternalName())) {
+                    return info;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Resolves a class method return type, searching from innermost to outermost scope.
      * Also searches in parent classes if not found in the current class.
      * Falls back to Java reflection for standard Java classes.

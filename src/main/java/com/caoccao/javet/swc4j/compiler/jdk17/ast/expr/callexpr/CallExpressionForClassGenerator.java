@@ -17,10 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -30,6 +27,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
+import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.ArrayList;
@@ -63,6 +61,14 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             TypeConversionUtils.boxPrimitiveType(code, cp, fromType, wrapperType);
         } else if (!TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
             TypeConversionUtils.unboxWrapperType(code, cp, fromType);
+        }
+        // Handle reference type casting (e.g., AbstractStringBuilder -> StringBuilder)
+        else if (fromType.startsWith("L") && toType.startsWith("L") && !fromType.equals(toType)) {
+            // Extract internal class names
+            String toInternalName = toType.substring(1, toType.length() - 1);
+            // Add checkcast instruction to downcast to the target type
+            int classIndex = cp.addClass(toInternalName);
+            code.checkcast(classIndex);
         }
     }
 
@@ -127,19 +133,7 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
                         "Method is not static: " + javaTypeInfo.getAlias() + "." + methodName);
             }
 
-            // Parse expected parameter types for type conversion
-            String descriptor = methodInfo.descriptor();
-            String paramTypes = descriptor.substring(1, descriptor.indexOf(')'));
-            var expectedTypes = parseParameterTypes(paramTypes);
-
-            // Generate arguments with type conversion
-            for (int i = 0; i < args.size(); i++) {
-                var arg = args.get(i);
-                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-                if (i < argTypes.size() && i < expectedTypes.size()) {
-                    convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
-                }
-            }
+            generateArgumentsWithVarargs(code, cp, args, argTypes, methodInfo);
 
             internalClassName = javaTypeInfo.getInternalName();
             methodDescriptor = methodInfo.descriptor();
@@ -152,6 +146,7 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             // TypeScript class instance/static method call
             String objType = null;
             boolean isStaticCall = false;
+            JavaTypeInfo instanceJavaTypeInfo = null;
 
             // Handle static private method calls like A.#helper()
             // Check if obj is a class identifier (before inferring type which returns Object)
@@ -168,6 +163,69 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             // For non-static calls, infer the object type
             if (objType == null) {
                 objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
+            }
+
+            if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
+                String internalName = objType.substring(1, objType.length() - 1);
+                instanceJavaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolveByInternalName(internalName);
+            }
+
+            // Only handle as Java class if it has methods (populated via reflection for imported Java classes)
+            // TypeScript classes are registered but have empty methods map, so they fall through to TS handling below
+            if (instanceJavaTypeInfo != null && !instanceJavaTypeInfo.getMethods().isEmpty()) {
+                MethodInfo methodInfo = instanceJavaTypeInfo.getMethod(methodName, argTypes);
+                if (methodInfo == null) {
+                    throw new Swc4jByteCodeCompilerException(callExpr,
+                            "Method not found: " + instanceJavaTypeInfo.getAlias() + "." + methodName +
+                                    " with argument types " + argTypes);
+                }
+                if (methodInfo.isStatic()) {
+                    throw new Swc4jByteCodeCompilerException(callExpr,
+                            "Method is static: " + instanceJavaTypeInfo.getAlias() + "." + methodName);
+                }
+
+                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+                generateArgumentsWithVarargs(code, cp, args, argTypes, methodInfo);
+
+                internalClassName = instanceJavaTypeInfo.getInternalName();
+                methodDescriptor = methodInfo.descriptor();
+                returnType = methodInfo.returnType();
+
+                String qualifiedClassName = internalClassName.replace('/', '.');
+                boolean isInterface = isInterface(qualifiedClassName);
+                if (isInterface) {
+                    int methodRef = cp.addInterfaceMethodRef(internalClassName, methodName, methodDescriptor);
+                    int argCount = args.size() + 1;
+                    code.invokeinterface(methodRef, argCount);
+                } else {
+                    int methodRef = cp.addMethodRef(internalClassName, methodName, methodDescriptor);
+                    code.invokevirtual(methodRef);
+                }
+
+                // For method chaining: if the return type is a parent class of the imported class,
+                // cast it to the imported class type to ensure subsequent chained calls work correctly
+                String expectedType = "L" + internalClassName + ";";
+                if (!returnType.equals(expectedType) && returnType.startsWith("L") && !returnType.equals("V")) {
+                    // Check if the return type is assignable to the class type
+                    // If so, cast to the class type for proper method chaining
+                    try {
+                        Class<?> returnClass = Class.forName(returnType.substring(1, returnType.length() - 1).replace('/', '.'));
+                        Class<?> expectedClass = Class.forName(qualifiedClassName);
+                        if (returnClass.isAssignableFrom(expectedClass)) {
+                            // Return type is a parent of the expected type, cast down
+                            int classIndex = cp.addClass(internalClassName);
+                            code.checkcast(classIndex);
+                            returnType = expectedType; // Update returnType for subsequent conversions
+                        }
+                    } catch (ClassNotFoundException e) {
+                        // If class not found, don't add cast
+                    }
+                }
+
+                if (returnTypeInfo != null && returnTypeInfo.descriptor() != null) {
+                    convertType(code, cp, returnType, returnTypeInfo.descriptor());
+                }
+                return;
             }
 
             if (objType == null || !objType.startsWith("L") || !objType.endsWith(";")) {
@@ -236,6 +294,104 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
         }
     }
 
+    private void generateArgumentsWithVarargs(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            List<Swc4jAstExprOrSpread> args,
+            List<String> argTypes,
+            MethodInfo methodInfo) throws Swc4jByteCodeCompilerException {
+        List<String> expectedTypes = ScoreUtils.parseParameterDescriptors(methodInfo.descriptor());
+        if (!methodInfo.isVarArgs() || expectedTypes.isEmpty()) {
+            for (int i = 0; i < args.size(); i++) {
+                Swc4jAstExprOrSpread arg = args.get(i);
+                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                if (i < expectedTypes.size()) {
+                    convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+                }
+            }
+            return;
+        }
+
+        int fixedCount = expectedTypes.size() - 1;
+        String varargArrayType = expectedTypes.get(expectedTypes.size() - 1);
+        String componentType = varargArrayType.startsWith("[") ? varargArrayType.substring(1) : varargArrayType;
+
+        boolean directArrayPass = args.size() == expectedTypes.size()
+                && argTypes.get(argTypes.size() - 1).equals(varargArrayType);
+
+        if (directArrayPass) {
+            for (int i = 0; i < args.size(); i++) {
+                Swc4jAstExprOrSpread arg = args.get(i);
+                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+            }
+            return;
+        }
+
+        for (int i = 0; i < fixedCount; i++) {
+            Swc4jAstExprOrSpread arg = args.get(i);
+            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+        }
+
+        generateVarargsArray(code, cp, args, argTypes, fixedCount, varargArrayType, componentType);
+    }
+
+    private void generateVarargsArray(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            List<Swc4jAstExprOrSpread> args,
+            List<String> argTypes,
+            int startIndex,
+            String arrayType,
+            String componentType) throws Swc4jByteCodeCompilerException {
+        int varargCount = args.size() - startIndex;
+        code.iconst(varargCount);
+
+        if (TypeConversionUtils.isPrimitiveType(componentType)) {
+            int typeCode = switch (componentType) {
+                case "Z" -> 4;
+                case "C" -> 5;
+                case "F" -> 6;
+                case "D" -> 7;
+                case "B" -> 8;
+                case "S" -> 9;
+                case "I" -> 10;
+                case "J" -> 11;
+                default ->
+                        throw new Swc4jByteCodeCompilerException(null, "Unsupported vararg primitive type: " + componentType);
+            };
+            code.newarray(typeCode);
+        } else {
+            String internalName = componentType.substring(1, componentType.length() - 1);
+            int classIndex = cp.addClass(internalName);
+            code.anewarray(classIndex);
+        }
+
+        for (int i = 0; i < varargCount; i++) {
+            code.dup();
+            code.iconst(i);
+            Swc4jAstExprOrSpread arg = args.get(startIndex + i);
+            if (arg.getSpread().isPresent()) {
+                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported in varargs calls");
+            }
+            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            String argType = argTypes.get(startIndex + i);
+            convertType(code, cp, argType, componentType);
+
+            switch (componentType) {
+                case "Z", "B" -> code.bastore();
+                case "C" -> code.castore();
+                case "S" -> code.sastore();
+                case "I" -> code.iastore();
+                case "J" -> code.lastore();
+                case "F" -> code.fastore();
+                case "D" -> code.dastore();
+                default -> code.aastore();
+            }
+        }
+    }
+
     private String getMethodName(ISwc4jAstMemberProp prop) {
         if (prop instanceof Swc4jAstIdent ident) {
             return ident.getSym();
@@ -281,44 +437,4 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
         return objType != null && objType.startsWith("L") && objType.endsWith(";");
     }
 
-    /**
-     * Parses all parameter types from a method descriptor parameter string.
-     * Returns a list of type descriptors.
-     */
-    private List<String> parseParameterTypes(String paramTypes) {
-        List<String> types = new ArrayList<>();
-        int position = 0;
-
-        while (position < paramTypes.length()) {
-            char c = paramTypes.charAt(position);
-
-            if (c == 'L') {
-                // Object type - find the semicolon
-                int semicolon = paramTypes.indexOf(';', position);
-                types.add(paramTypes.substring(position, semicolon + 1));
-                position = semicolon + 1;
-            } else if (c == '[') {
-                // Array type - consume array markers and the element type
-                int start = position;
-                while (position < paramTypes.length() && paramTypes.charAt(position) == '[') {
-                    position++;
-                }
-                if (position < paramTypes.length()) {
-                    if (paramTypes.charAt(position) == 'L') {
-                        int semicolon = paramTypes.indexOf(';', position);
-                        position = semicolon + 1;
-                    } else {
-                        position++;
-                    }
-                }
-                types.add(paramTypes.substring(start, position));
-            } else {
-                // Primitive type (single character)
-                types.add(String.valueOf(c));
-                position++;
-            }
-        }
-
-        return types;
-    }
 }

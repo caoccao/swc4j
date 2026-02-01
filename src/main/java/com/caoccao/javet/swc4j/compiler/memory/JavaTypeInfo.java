@@ -278,12 +278,22 @@ public final class JavaTypeInfo {
                 totalScore += 0.95 * ScoreUtils.scoreDescriptorMatch(argTypes.get(i), componentType);
             }
 
+            // Handle case with no arguments (all varargs)
+            if (argTypes.isEmpty()) {
+                return 0.95; // Slightly lower than exact match since it's varargs
+            }
+
             // Average score across all parameters
             return totalScore / argTypes.size();
         } else {
             // Regular method: must have exact argument count
             if (argTypes.size() != paramTypes.size()) {
                 return 0.0;
+            }
+
+            // Handle methods with no parameters (perfect match)
+            if (argTypes.isEmpty()) {
+                return 1.0;
             }
 
             double totalScore = 0.0;
