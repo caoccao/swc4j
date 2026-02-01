@@ -193,7 +193,17 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
                     case "J" -> code.laload(); // long
                     case "F" -> code.faload(); // float
                     case "D" -> code.daload(); // double
-                    default -> code.aaload(); // reference types
+                    default -> {
+                        // reference types
+                        code.aaload();
+                        // Add checkcast for non-Object element types to ensure type safety
+                        if (elemType.startsWith("L") && elemType.endsWith(";") &&
+                                !elemType.equals("Ljava/lang/Object;")) {
+                            String elementInternalName = elemType.substring(1, elemType.length() - 1);
+                            int classIndex = cp.addClass(elementInternalName);
+                            code.checkcast(classIndex);
+                        }
+                    }
                 }
                 return;
             }

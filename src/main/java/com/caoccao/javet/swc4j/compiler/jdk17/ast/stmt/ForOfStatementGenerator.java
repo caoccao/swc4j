@@ -124,6 +124,11 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
             return IterationType.STRING;
         }
 
+        // Check for array types (both primitive and object arrays)
+        if (typeDescriptor.startsWith("[")) {
+            return IterationType.ARRAY;
+        }
+
         // For object types, use isAssignableTo() for unified checking
         if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {
             String internalName = typeDescriptor.substring(1, typeDescriptor.length() - 1);
@@ -160,7 +165,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         }
 
         throw new Swc4jByteCodeCompilerException(astExpr,
-                "For-of loops require List, Set, Map, or String type, but got: " + typeDescriptor);
+                "For-of loops require List, Set, Map, String, or Array type, but got: " + typeDescriptor);
     }
 
     /**
@@ -211,6 +216,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
             case LIST, SET -> generateIteratorIteration(code, cp, forOfStmt, labelName, returnTypeInfo);
             case MAP -> generateMapIteration(code, cp, forOfStmt, labelName, returnTypeInfo);
             case STRING -> generateStringIteration(code, cp, forOfStmt, labelName, returnTypeInfo);
+            case ARRAY -> generateArrayIteration(code, cp, forOfStmt, labelName, returnTypeInfo);
         }
     }
 
@@ -968,9 +974,29 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                 int slot = context.getLocalVariableTable().allocateVariable(varName, defaultType);
                 // Also register in inferredTypes so TypeResolver can find it
                 context.getInferredTypes().put(varName, defaultType);
-                // Initialize to null in case loop doesn't execute
-                code.aconst_null();
-                code.astore(slot);
+                // Initialize with appropriate zero value based on type
+                switch (defaultType) {
+                    case "I", "B", "C", "S", "Z" -> {
+                        code.iconst(0);
+                        code.istore(slot);
+                    }
+                    case "J" -> {
+                        code.lconst(0);
+                        code.lstore(slot);
+                    }
+                    case "F" -> {
+                        code.fconst(0);
+                        code.fstore(slot);
+                    }
+                    case "D" -> {
+                        code.dconst(0);
+                        code.dstore(slot);
+                    }
+                    default -> {
+                        code.aconst_null();
+                        code.astore(slot);
+                    }
+                }
                 return slot;
             } else {
                 throw new Swc4jByteCodeCompilerException(name,
@@ -1054,12 +1080,184 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
     }
 
     /**
+     * Generate bytecode for for-of loop over an array (both primitive and object arrays).
+     * Bytecode pattern:
+     * <pre>
+     *   aload arr                              // Load array
+     *   dup                                    // Duplicate for later use
+     *   arraylength                           // Get array length
+     *   istore length                          // Store length
+     *   astore arr_temp                        // Store array
+     *   iconst_0                               // i = 0
+     *   istore counter                         // Store counter
+     *   TEST_LABEL:                            // Loop entry point
+     *   iload counter
+     *   iload length
+     *   if_icmpge END_LABEL                    // Exit if i >= length
+     *   aload arr_temp
+     *   iload counter
+     *   [a|i|d|f|l|b|c|s]aload               // Load array element (type-specific)
+     *   [checkcast if object array]            // Cast to element type if needed
+     *   [a|i|d|f|l]store value                // Store element in loop variable
+     *   [body statements]
+     *   iinc counter, 1                        // i++
+     *   goto TEST_LABEL                        // Jump back to test
+     *   END_LABEL:                             // Break target
+     * </pre>
+     *
+     * @param code           the code builder
+     * @param cp             the constant pool
+     * @param forOfStmt      the for-of statement AST node
+     * @param labelName      the label name (null if unlabeled)
+     * @param returnTypeInfo return type information for the enclosing method
+     * @throws Swc4jByteCodeCompilerException if code generation fails
+     */
+    private void generateArrayIteration(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstForOfStmt forOfStmt,
+            String labelName,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        // Get array type descriptor
+        String arrayTypeDescriptor = compiler.getTypeResolver().inferTypeFromExpr(forOfStmt.getRight());
+        if (arrayTypeDescriptor == null || !arrayTypeDescriptor.startsWith("[")) {
+            throw new Swc4jByteCodeCompilerException(forOfStmt.getRight(),
+                    "Cannot determine array type");
+        }
+
+        // Extract element type (skip the '[' prefix)
+        String elementTypeDescriptor = arrayTypeDescriptor.substring(1);
+
+        // Initialize loop variable with element type
+        int elementSlot = initializeLoopVariable(code, forOfStmt.getLeft(), elementTypeDescriptor);
+
+        // 1. Generate right expression (array)
+        compiler.getExpressionGenerator().generate(code, cp, forOfStmt.getRight(), null);
+
+        // 2. Duplicate array for later use
+        code.dup();
+
+        // 3. Get array length
+        code.arraylength();
+
+        // 4. Store length in temporary variable
+        int lengthSlot = context.getLocalVariableTable().allocateVariable("$length", "I");
+        code.istore(lengthSlot);
+
+        // 5. Store array in temporary variable
+        int arraySlot = context.getLocalVariableTable().allocateVariable("$array", arrayTypeDescriptor);
+        code.astore(arraySlot);
+
+        // 6. Initialize counter: i = 0
+        code.iconst(0);
+        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", "I");
+        code.istore(counterSlot);
+
+        // 7. Mark test label (loop entry point)
+        int testLabel = code.getCurrentOffset();
+
+        // 8. Test counter < length
+        code.iload(counterSlot);
+        code.iload(lengthSlot);
+
+        // 9. Jump to end if i >= length
+        code.if_icmpge(0); // Placeholder
+        int exitJumpPos = code.getCurrentOffset() - 2;
+
+        // 10. Load array[counter]
+        code.aload(arraySlot);
+        code.iload(counterSlot);
+
+        // Use type-specific array load instruction
+        switch (elementTypeDescriptor) {
+            case "I" -> code.iaload();  // int[]
+            case "D" -> code.daload();  // double[]
+            case "F" -> code.faload();  // float[]
+            case "J" -> code.laload();  // long[]
+            case "B" -> code.baload();  // byte[]
+            case "C" -> code.caload();  // char[]
+            case "S" -> code.saload();  // short[]
+            case "Z" -> code.baload();  // boolean[] (uses baload)
+            default -> {
+                // Object arrays
+                code.aaload();
+                // Add checkcast for object arrays if needed
+                if (elementTypeDescriptor.startsWith("L") && elementTypeDescriptor.endsWith(";")) {
+                    String elementInternalName = elementTypeDescriptor.substring(1, elementTypeDescriptor.length() - 1);
+                    int classIndex = cp.addClass(elementInternalName);
+                    code.checkcast(classIndex);
+                }
+            }
+        }
+
+        // 11. Store in loop variable
+        switch (elementTypeDescriptor) {
+            case "I", "B", "C", "S", "Z" -> code.istore(elementSlot);  // int, byte, char, short, boolean
+            case "D" -> code.dstore(elementSlot);  // double
+            case "F" -> code.fstore(elementSlot);  // float
+            case "J" -> code.lstore(elementSlot);  // long
+            default -> code.astore(elementSlot);  // Object references
+        }
+
+        // 12. Setup break/continue labels
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
+        LoopLabelInfo continueLabel = new LoopLabelInfo(labelName);
+
+        context.pushBreakLabel(breakLabel);
+        context.pushContinueLabel(continueLabel);
+
+        // 13. Generate body
+        compiler.getStatementGenerator().generate(code, cp, forOfStmt.getBody(), returnTypeInfo);
+
+        // 14. Pop labels
+        context.popContinueLabel();
+        context.popBreakLabel();
+
+        // 15. Mark update label (continue target)
+        int updateLabel = code.getCurrentOffset();
+        continueLabel.setTargetOffset(updateLabel);
+
+        // 16. Increment counter: i++
+        code.iinc(counterSlot, 1);
+
+        // 17. Jump back to test
+        code.gotoLabel(0); // Placeholder
+        int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
+        int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
+        int backwardGotoOffset = testLabel - backwardGotoOpcodePos;
+        code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
+
+        // 18. Mark end label
+        int endLabel = code.getCurrentOffset();
+        breakLabel.setTargetOffset(endLabel);
+
+        // 19. Patch exit jump
+        int exitOffset = endLabel - (exitJumpPos - 1);
+        code.patchShort(exitJumpPos, (short) exitOffset);
+
+        // 20. Patch all break statements
+        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchInt(patchInfo.offsetPos(), offset);
+        }
+
+        // 21. Patch all continue statements
+        for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
+            int offset = updateLabel - patchInfo.opcodePos();
+            code.patchInt(patchInfo.offsetPos(), offset);
+        }
+    }
+
+    /**
      * Enum representing the type of iteration to perform.
      */
     private enum IterationType {
         LIST,
         SET,
         MAP,
-        STRING
+        STRING,
+        ARRAY
     }
 }

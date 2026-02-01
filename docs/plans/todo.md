@@ -58,13 +58,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Track capture holder lifetime, ensure no retained references beyond scope; add cleanup if needed.
 - Tests: Stress tests for nested closures and large capture sets.
 
-## Feature: Function Rest Parameters (Varargs) Fully Working
-- Evidence: `docs/plans/ast/pat/rest-pat.md` (Phase 1 unchecked, checklist TODOs).
-- Status: Varargs handling incomplete (type resolution, analyzer integration).
-- Confidence: 70%.
-- Plan: Create `RestPatternGenerator`, resolve varargs types, update VariableAnalyzer, add param rest tests.
-- Tests: `TestCompileAstRestPatFunctionParam` plus nested and typed varargs.
-
 ## Feature: TS Interface Call/Construct Signatures
 - Evidence: `docs/plans/ast/stmt/ts-interface-decl.md`.
 - Status: Not supported.
