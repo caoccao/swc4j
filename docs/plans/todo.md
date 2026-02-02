@@ -30,13 +30,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Add union coercion strategy (Object return + tagging), update TypeResolver, and ensure boxing rules.
 - Tests: Union returns with numeric/object/string branches and nested arrows.
 
-## Feature: Arrow Default/Rest/Optional Params on Standard Functional Interfaces
-- Evidence: `docs/plans/ast/expr/arrow.md`.
-- Status: Limited to custom interfaces; standard interfaces not fully supported.
-- Confidence: 50%.
-- Plan: Generate adapter methods or synthetic overloads, update functional interface resolution.
-- Tests: `Consumer`, `Function`, `BiFunction` with defaults/rest/optional params.
-
 ## Feature: Arrow Custom Interface Type Inference
 - Evidence: `docs/plans/ast/expr/arrow.md`.
 - Status: Limited inference for custom interfaces.

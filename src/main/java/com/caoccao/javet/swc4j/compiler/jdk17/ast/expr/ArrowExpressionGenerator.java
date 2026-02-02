@@ -32,7 +32,9 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
@@ -732,6 +734,28 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         }
     }
 
+    private void generateEmptyArray(CodeBuilder code, ClassWriter.ConstantPool cp, String arrayType) {
+        String componentType = arrayType.substring(1);
+        code.iconst(0);
+        if (TypeConversionUtils.isPrimitiveType(componentType)) {
+            int typeCode = switch (componentType) {
+                case "Z" -> 4;
+                case "C" -> 5;
+                case "F" -> 6;
+                case "D" -> 7;
+                case "B" -> 8;
+                case "S" -> 9;
+                case "I" -> 10;
+                case "J" -> 11;
+                default -> 10;
+            };
+            code.newarray(typeCode);
+        } else {
+            int classRef = cp.addClass(toInternalName(componentType));
+            code.anewarray(classRef);
+        }
+    }
+
     private void generateInstantiation(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
@@ -886,8 +910,64 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         // Generate method body
         CodeBuilder code = new CodeBuilder();
 
-        // Generate destructuring extraction code for parameters
+        // Cast erased Object parameters to their declared types
+        List<String> descriptorParams = ScoreUtils.parseParameterDescriptors(typeInfo.methodDescriptor());
+        for (int i = 0; i < descriptorParams.size() && i < typeInfo.paramTypes().size(); i++) {
+            String descriptorParam = descriptorParams.get(i);
+            String paramType = typeInfo.paramTypes().get(i);
+            if ("Ljava/lang/Object;".equals(descriptorParam) && !"Ljava/lang/Object;".equals(paramType)) {
+                String paramName = typeInfo.paramNames().get(i);
+                LocalVariable paramVar = lambdaContext.getLocalVariableTable().getVariable(paramName);
+                code.aload(paramVar.index());
+                int classRef = cp.addClass(paramType.startsWith("[") ? paramType : paramType.substring(1, paramType.length() - 1));
+                code.checkcast(classRef);
+                code.astore(paramVar.index());
+            }
+        }
+
+        // Apply default parameter values for assign patterns (null -> default)
         List<ISwc4jAstPat> params = arrowExpr.getParams();
+        for (int i = 0; i < params.size(); i++) {
+            ISwc4jAstPat param = params.get(i);
+            if (param instanceof Swc4jAstAssignPat assignPat) {
+                String paramName = typeInfo.paramNames().get(i);
+                LocalVariable paramVar = lambdaContext.getLocalVariableTable().getVariable(paramName);
+                String paramType = typeInfo.paramTypes().get(i);
+                if (!TypeConversionUtils.isPrimitiveType(paramType)) {
+                    code.aload(paramVar.index());
+                    code.ifnonnull(0);
+                    int ifnonnullOffsetPos = code.getCurrentOffset() - 2;
+                    int ifnonnullOpcodePos = code.getCurrentOffset() - 3;
+
+                    ReturnTypeInfo defaultTypeInfo = ReturnTypeInfo.of(assignPat, paramType);
+                    compiler.getExpressionGenerator().generate(code, cp, assignPat.getRight(), defaultTypeInfo);
+                    storeValueByType(code, paramVar.index(), paramType);
+
+                    int endLabel = code.getCurrentOffset();
+                    int ifnonnullOffset = endLabel - ifnonnullOpcodePos;
+                    code.patchShort(ifnonnullOffsetPos, ifnonnullOffset);
+                }
+            } else if (param instanceof Swc4jAstRestPat) {
+                String paramName = typeInfo.paramNames().get(i);
+                LocalVariable paramVar = lambdaContext.getLocalVariableTable().getVariable(paramName);
+                String paramType = typeInfo.paramTypes().get(i);
+                if (paramType.startsWith("[")) {
+                    code.aload(paramVar.index());
+                    code.ifnonnull(0);
+                    int ifnonnullOffsetPos = code.getCurrentOffset() - 2;
+                    int ifnonnullOpcodePos = code.getCurrentOffset() - 3;
+
+                    generateEmptyArray(code, cp, paramType);
+                    code.astore(paramVar.index());
+
+                    int endLabel = code.getCurrentOffset();
+                    int ifnonnullOffset = endLabel - ifnonnullOpcodePos;
+                    code.patchShort(ifnonnullOffsetPos, ifnonnullOffset);
+                }
+            }
+        }
+
+        // Generate destructuring extraction code for parameters
         for (int i = 0; i < params.size(); i++) {
             ISwc4jAstPat param = params.get(i);
             if (param instanceof Swc4jAstArrayPat arrayPat) {
@@ -1575,6 +1655,16 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             case "D" -> code.dstore(slot);
             default -> code.astore(slot);
         }
+    }
+
+    private String toInternalName(String typeDescriptor) {
+        if (typeDescriptor.startsWith("[")) {
+            return typeDescriptor;
+        }
+        if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {
+            return typeDescriptor.substring(1, typeDescriptor.length() - 1);
+        }
+        return typeDescriptor;
     }
 
     /**

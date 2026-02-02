@@ -1483,7 +1483,9 @@ public final class TypeResolver {
 
     public String mapTsTypeToDescriptor(
             ISwc4jAstTsType tsType) {
-        if (tsType instanceof Swc4jAstTsArrayType arrayType) {
+        if (tsType instanceof Swc4jAstTsOptionalType optionalType) {
+            return mapTsTypeToDescriptor(optionalType.getTypeAnn());
+        } else if (tsType instanceof Swc4jAstTsArrayType arrayType) {
             // type[] syntax - maps to Java array
             String elemType = mapTsTypeToDescriptor(arrayType.getElemType());
             return "[" + elemType;

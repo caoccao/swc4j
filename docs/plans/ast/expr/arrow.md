@@ -337,19 +337,19 @@ Methods within the inner class:
 
 When arrow expressions are assigned to standard functional interfaces (e.g., `IntUnaryOperator`, `Function<T,R>`), the interface dictates the method signature. This creates limitations:
 
-1. **Default Parameter Values**: The interface always provides the parameter, so default values are never used. Syntax is parsed but the default value is ignored.
+1. **Default Parameter Values**: Supported for standard functional interfaces by treating missing args as null and applying defaults in the lambda body.
    ```typescript
    // Default value is parsed but ignored since IntUnaryOperator always provides 'x'
    const fn: IntUnaryOperator = (x: int = 10) => x * 2
    ```
 
-2. **Rest Parameters**: Standard functional interfaces have fixed arity. Varargs would require custom interfaces.
+2. **Rest Parameters**: Supported for standard functional interfaces when the last parameter is an array type. Extra args are packed into the array; missing args produce an empty array.
    ```typescript
    // Not compatible with standard functional interfaces
    const sum = (...values: int[]) => total(values)
    ```
 
-3. **Optional Parameters**: Similar to defaults - the interface requires the parameter.
+3. **Optional Parameters**: Supported for standard functional interfaces by allowing missing args to be passed as null.
    ```typescript
    // Interface always provides 'x', so it's never null/undefined
    const fn: IntUnaryOperator = (x?: int) => x ?? 0
@@ -1347,7 +1347,7 @@ Use primitive specializations to avoid boxing:
 4. **Mutable Captures**: ✓ IMPLEMENTED - Uses holder object pattern (int[], long[], Object[], etc.) for variables declared with `let` that are modified after lambda creation
 5. **IIFE (Immediately Invoked Function Expression)**: IMPLEMENTED - Generates custom interface with naming convention $interfaceN and anonymous implementation class
 6. **Destructuring Parameters**: ✓ IMPLEMENTED - Object/array destructuring in parameters supported
-7. **Default/Rest/Optional Parameters**: LIMITED - Only work with custom interfaces, not standard functional interfaces
+7. **Default/Rest/Optional Parameters**: ✓ IMPLEMENTED for standard functional interfaces (null/empty array padding)
 8. **Recursive Arrows**: ✓ IMPLEMENTED - Self-referencing arrows (e.g., factorial, fibonacci) work via non-final captured field updated after instantiation
 9. **Reflection on Arrows**: Limited - Anonymous inner class details not accessible
 10. **Serialization**: Anonymous inner classes may have serialization issues

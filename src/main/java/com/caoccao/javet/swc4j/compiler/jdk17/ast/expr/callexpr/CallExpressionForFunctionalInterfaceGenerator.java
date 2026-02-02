@@ -17,7 +17,9 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -25,9 +27,12 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CapturedVariable;
 import com.caoccao.javet.swc4j.compiler.memory.ScopedFunctionalInterfaceRegistry.SamMethodInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
+import java.util.List;
 
 /**
  * Generates bytecode for calling functional interface variables directly.
@@ -77,11 +82,32 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
                     "Type " + interfaceName + " is not a functional interface");
         }
 
-        // Verify argument count matches parameter count
+        // Verify argument count matches parameter count (allow rest/optional padding)
         var args = callExpr.getArgs();
-        if (args.size() != samInfo.paramTypes().size()) {
+        int paramCount = samInfo.paramTypes().size();
+        boolean hasArrayRest = paramCount > 0 && samInfo.paramTypes().get(paramCount - 1).startsWith("[");
+        String syntheticRestType = null;
+        if (!hasArrayRest && paramCount == 1 && args.size() > 1
+                && "Ljava/lang/Object;".equals(samInfo.paramTypes().get(0))) {
+            hasArrayRest = true;
+            syntheticRestType = "[Ljava/lang/Object;";
+        }
+        if (args.size() > paramCount && !hasArrayRest) {
             throw new Swc4jByteCodeCompilerException(callExpr,
-                    "Expected " + samInfo.paramTypes().size() + " arguments but got " + args.size());
+                    "Expected " + paramCount + " arguments but got " + args.size());
+        }
+        if (hasArrayRest && args.size() < paramCount - 1) {
+            throw new Swc4jByteCodeCompilerException(callExpr,
+                    "Expected at least " + (paramCount - 1) + " arguments but got " + args.size());
+        }
+        if (!hasArrayRest && args.size() < paramCount) {
+            for (int i = args.size(); i < paramCount; i++) {
+                String expectedType = samInfo.paramTypes().get(i);
+                if (TypeConversionUtils.isPrimitiveType(expectedType)) {
+                    throw new Swc4jByteCodeCompilerException(callExpr,
+                            "Missing primitive argument at index " + i + " for " + interfaceName);
+                }
+            }
         }
 
         // Load the functional interface variable
@@ -100,15 +126,24 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
             throw new Swc4jByteCodeCompilerException(callExpr, "Variable not found: " + varName);
         }
 
-        // Generate arguments
-        for (int i = 0; i < args.size(); i++) {
-            var arg = args.get(i);
-            if (arg.getSpread().isPresent()) {
-                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported");
-            }
+        // Generate arguments (with rest packing / optional padding)
+        for (int i = 0; i < paramCount; i++) {
             String expectedType = samInfo.paramTypes().get(i);
-            ReturnTypeInfo argTypeInfo = ReturnTypeInfo.of(arg.getExpr(), expectedType);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), argTypeInfo);
+            if (hasArrayRest && i == paramCount - 1) {
+                String restType = syntheticRestType != null ? syntheticRestType : expectedType;
+                generateRestArray(code, cp, args, i, restType);
+                continue;
+            }
+            if (i < args.size()) {
+                var arg = args.get(i);
+                if (arg.getSpread().isPresent()) {
+                    throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported");
+                }
+                ReturnTypeInfo argTypeInfo = ReturnTypeInfo.of(arg.getExpr(), expectedType);
+                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), argTypeInfo);
+            } else {
+                pushMissingArg(code, cp, expectedType);
+            }
         }
 
         // Call the SAM method using invokeinterface
@@ -120,6 +155,63 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
             slotCount += ("J".equals(paramType) || "D".equals(paramType)) ? 2 : 1;
         }
         code.invokeinterface(methodRef, slotCount);
+    }
+
+    private void generateRestArray(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            List<Swc4jAstExprOrSpread> args,
+            int startIndex,
+            String arrayType) throws Swc4jByteCodeCompilerException {
+        String componentType = arrayType.substring(1);
+        int restCount = Math.max(0, args.size() - startIndex);
+
+        code.iconst(restCount);
+        if (TypeConversionUtils.isPrimitiveType(componentType)) {
+            int typeCode = switch (componentType) {
+                case "Z" -> 4;
+                case "C" -> 5;
+                case "F" -> 6;
+                case "D" -> 7;
+                case "B" -> 8;
+                case "S" -> 9;
+                case "I" -> 10;
+                case "J" -> 11;
+                default -> throw new Swc4jByteCodeCompilerException(null,
+                        "Unsupported rest primitive type: " + componentType);
+            };
+            code.newarray(typeCode);
+        } else {
+            int classRef = cp.addClass(toInternalName(componentType));
+            code.anewarray(classRef);
+        }
+
+        for (int i = 0; i < restCount; i++) {
+            var arg = args.get(startIndex + i);
+            if (arg.getSpread().isPresent()) {
+                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported");
+            }
+            code.dup();
+            code.iconst(i);
+            ReturnTypeInfo argTypeInfo = ReturnTypeInfo.of(arg.getExpr(), componentType);
+            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), argTypeInfo);
+            if ("Ljava/lang/Object;".equals(componentType)) {
+                String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
+                if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
+                    TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
+                }
+            }
+            switch (componentType) {
+                case "Z", "B" -> code.bastore();
+                case "C" -> code.castore();
+                case "S" -> code.sastore();
+                case "I" -> code.iastore();
+                case "J" -> code.lastore();
+                case "F" -> code.fastore();
+                case "D" -> code.dastore();
+                default -> code.aastore();
+            }
+        }
     }
 
     /**
@@ -152,5 +244,49 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
         // Check if it's a functional interface using the scoped registry
         String interfaceName = varType.substring(1, varType.length() - 1);
         return compiler.getMemory().getScopedFunctionalInterfaceRegistry().isFunctionalInterface(interfaceName);
+    }
+
+    private void pushMissingArg(CodeBuilder code, ClassWriter.ConstantPool cp, String expectedType) {
+        if (expectedType.startsWith("[")) {
+            String componentType = expectedType.substring(1);
+            code.iconst(0);
+            if (TypeConversionUtils.isPrimitiveType(componentType)) {
+                int typeCode = switch (componentType) {
+                    case "Z" -> 4;
+                    case "C" -> 5;
+                    case "F" -> 6;
+                    case "D" -> 7;
+                    case "B" -> 8;
+                    case "S" -> 9;
+                    case "I" -> 10;
+                    case "J" -> 11;
+                    default -> 10;
+                };
+                code.newarray(typeCode);
+            } else {
+                int classRef = cp.addClass(toInternalName(componentType));
+                code.anewarray(classRef);
+            }
+        } else if (TypeConversionUtils.isPrimitiveType(expectedType)) {
+            switch (expectedType) {
+                case "Z", "B", "C", "S", "I" -> code.iconst(0);
+                case "J" -> code.lconst(0L);
+                case "F" -> code.fconst(0.0f);
+                case "D" -> code.dconst(0.0d);
+                default -> code.iconst(0);
+            }
+        } else {
+            code.aconst_null();
+        }
+    }
+
+    private String toInternalName(String typeDescriptor) {
+        if (typeDescriptor.startsWith("[")) {
+            return typeDescriptor;
+        }
+        if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {
+            return typeDescriptor.substring(1, typeDescriptor.length() - 1);
+        }
+        return typeDescriptor;
     }
 }
