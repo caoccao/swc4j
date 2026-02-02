@@ -44,13 +44,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Decide representation for methods/accessors (class generation or wrapper), add symbol key handling, and document prototype limits.
 - Tests: Method properties in literals, getter/setter usage, and symbol key rejection.
 
-## Feature: Object Literal Type Parsing for Array<T>
-- Evidence: `docs/plans/ast/expr/lit/object-lit.md` limitation (Array<T> parsing not implemented).
-- Status: TypeResolver lacks Array<T> in object literal contexts.
-- Confidence: 75%.
-- Plan: Extend TypeResolver to parse `Array<T>` and propagate into Record value validation.
-- Tests: Record values that are typed arrays and nested arrays.
-
 ## Feature: Array Literal Semantics (Holes, Bounds, Length Growth)
 - Evidence: `docs/plans/ast/expr/lit/array-lit.md`.
 - Status: Holes untested, out-of-bounds behavior JS-incompatible, length grow not verified.

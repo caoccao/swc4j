@@ -1565,6 +1565,55 @@ public final class TypeResolver {
     }
 
     /**
+     * Parses {@code Array<T>} type annotation and extracts the element type.
+     * <p>
+     * Supports:
+     * <ul>
+     * <li>{@code Array<number>} → "I" (int)</li>
+     * <li>{@code Array<string>} → "Ljava/lang/String;"</li>
+     * <li>{@code Array<Array<number>>} → nested array handling</li>
+     * </ul>
+     *
+     * @param tsType TypeScript type annotation (expected to be TsTypeRef for Array)
+     * @return element type descriptor, or null if not an Array type
+     */
+    public String parseArrayType(ISwc4jAstTsType tsType) {
+        if (!(tsType instanceof Swc4jAstTsTypeRef typeRef)) {
+            return null;
+        }
+
+        // Check if this is an "Array" type
+        ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
+        if (!(entityName instanceof Swc4jAstIdent ident)) {
+            return null;
+        }
+
+        String typeName = ident.getSym();
+        if (!"Array".equals(typeName)) {
+            return null;
+        }
+
+        // Extract type parameter
+        Optional<Swc4jAstTsTypeParamInstantiation> typeParamsOpt = typeRef.getTypeParams();
+        if (typeParamsOpt.isEmpty()) {
+            // Array without type parameter - default to Array<Object>
+            return "Ljava/lang/Object;";
+        }
+
+        Swc4jAstTsTypeParamInstantiation typeParams = typeParamsOpt.get();
+        List<ISwc4jAstTsType> params = typeParams.getParams();
+
+        if (params.isEmpty() || params.size() > 1) {
+            // Array type must have exactly 1 type parameter
+            return null;
+        }
+
+        // Parse element type (first and only parameter)
+        ISwc4jAstTsType elementTsType = params.get(0);
+        return mapTsTypeToDescriptor(elementTsType);
+    }
+
+    /**
      * Parse {@code Record<K, V>} type annotation to extract generic type parameters.
      * <p>
      * Supports:
@@ -1619,6 +1668,13 @@ public final class TypeResolver {
         if (nestedInfo != null) {
             // Nested Record type: Record<K, Record<K2, V2>>
             return GenericTypeInfo.ofNested(keyType, nestedInfo);
+        }
+
+        // Check if value type is an Array
+        String arrayElementType = parseArrayType(valueTsType);
+        if (arrayElementType != null) {
+            // Array value type: Record<K, Array<T>>
+            return GenericTypeInfo.ofArray(keyType, arrayElementType);
         }
 
         // Simple Record type: Record<K, V>

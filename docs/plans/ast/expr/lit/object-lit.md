@@ -2763,3 +2763,101 @@ This design matches Java's type erasure semantics and provides the right balance
 - Created temp debug tests: `TestRecordNumberStringDebug.java`, `TestMapOfDebug.java`, `TestRecordNumberStringLiteralKeysDebug.java`
 
 **Test Results:** All 164 tests passing ✅
+
+---
+
+## Phase 8: Array<T> Type Parsing Support
+
+**Phase 8 Implementation Summary (Array Type Parsing for Record Values): ✅ COMPLETED**
+
+**Goal:** Support `Record<string, Array<T>>` type annotations with proper element type validation.
+
+**Previously:**
+- `Record<string, Array<T>>` type validation was not supported
+- Tests had to use `Record<string, Object>` as a workaround
+- Array element types could not be validated at compile time
+
+**Features Implemented:**
+1. Extended `GenericTypeInfo` to support Array value types with element type tracking
+2. Added `parseArrayType()` method to `TypeResolver` for parsing `Array<T>` type annotations
+3. Modified `parseRecordType()` to detect and handle Array value types
+4. Added array element validation in `ObjectLiteralGenerator.validateArrayElements()`
+5. Support for nested arrays: `Record<string, Array<Array<number>>>`
+
+**Implementation Details:**
+
+### GenericTypeInfo Changes
+- Added `isArrayValue` boolean field
+- Added `arrayElementType` String field for tracking element type descriptor
+- Added `GenericTypeInfo.ofArray(keyType, arrayElementType)` factory method
+- Updated `equals()`, `hashCode()`, and `toString()` methods
+
+### TypeResolver Changes
+- Added `parseArrayType(ISwc4jAstTsType)` method:
+  - Parses `Array<T>` type annotations
+  - Extracts element type descriptor
+  - Supports nested arrays via recursive `mapTsTypeToDescriptor()` call
+- Modified `parseRecordType()` to check for Array value types before falling back to generic type mapping
+
+### ObjectLiteralGenerator Changes
+- Added `validateArrayElements()` method for validating array literal elements against expected element type
+- Modified `validateKeyValueProperty()` to handle Array value validation
+- Array element type mismatches now produce clear compile-time errors
+
+**Tests Added (10 tests, all passing):**
+- ✅ `testRecordStringArrayNumber` - Record<string, Array<number>> with integer arrays
+- ✅ `testRecordStringArrayString` - Record<string, Array<String>> with string arrays
+- ✅ `testRecordStringArrayBoolean` - Record<string, Array<boolean>> with boolean arrays
+- ✅ `testRecordStringNestedArrays` - Record<string, Array<Array<number>>> with nested arrays
+- ✅ `testRecordStringEmptyArray` - Empty arrays and single-element arrays
+- ✅ `testRecordStringArrayLong` - Record<string, Array<long>> with long values
+- ✅ `testRecordStringArrayDouble` - Record<string, Array<double>> with double values
+- ✅ `testRecordIntegerArrayString` - Record<int, Array<String>> with integer keys
+- ✅ `testRecordStringArrayWithVariables` - Array elements from variables
+- ✅ `testRecordStringArrayWithComputedValues` - Array elements from computed expressions
+
+**Key Insights:**
+- Array value types are now fully validated at compile time
+- Element type mismatches produce clear error messages: "key (array element): expected T, got U"
+- Nested arrays (Array<Array<T>>) work correctly with recursive type parsing
+- All primitive and reference types supported as array elements
+- Array literals compile to ArrayList instances
+- Type validation ensures type safety before code generation
+
+**Supported Array Element Types:**
+- Primitive types: `int`, `long`, `double`, `boolean`, `byte`, `short`, `char`, `float`
+- Reference types: `String`, `Object`, and any custom class type
+- Nested arrays: `Array<Array<T>>`, `Array<Array<Array<T>>>`, etc.
+
+**Example Usage:**
+```typescript
+// Simple array values
+const data: Record<string, Array<number>> = {
+  scores: [95, 87, 92],
+  ages: [25, 30, 35]
+}
+
+// Nested arrays
+const matrix: Record<string, Array<Array<number>>> = {
+  grid: [[1, 2], [3, 4], [5, 6]]
+}
+
+// Mixed key types
+const lookup: Record<int, Array<String>> = {
+  0: ["first", "entry"],
+  1: ["second", "entry"]
+}
+```
+
+**Limitations Removed:**
+- ✅ `Record<string, Array<T>>` type validation now fully supported
+- ✅ Array element types validated at compile time
+- ✅ Nested arrays supported
+
+**Files Modified:**
+- `GenericTypeInfo.java` - Extended to support Array value types
+- `TypeResolver.java` - Added `parseArrayType()` method
+- `ObjectLiteralGenerator.java` - Added `validateArrayElements()` method
+- `TestCompileAstObjectLitArrayType.java` - Added 10 comprehensive tests
+
+**Test Results:** 10/10 tests passing ✅

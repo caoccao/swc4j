@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstKeyValueProp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSpreadElement;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
@@ -428,6 +429,42 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                 "C".equals(typeDescriptor);
     }
 
+    private void validateArrayElements(
+            Swc4jAstArrayLit arrayLit,
+            String expectedElementType,
+            Swc4jAstKeyValueProp kvProp) throws Swc4jByteCodeCompilerException {
+        // Validate each element in the array literal
+        for (var elemOpt : arrayLit.getElems()) {
+            if (elemOpt.isPresent()) {
+                var elem = elemOpt.get();
+                ISwc4jAstExpr elemExpr = elem.getExpr();
+
+                // Skip spread elements for now (they would need recursive validation)
+                if (elem.getSpread().isPresent()) {
+                    continue;
+                }
+
+                // Infer the actual element type
+                String actualElementType = compiler.getTypeResolver().inferTypeFromExpr(elemExpr);
+                if (actualElementType == null) {
+                    actualElementType = "Ljava/lang/Object;";
+                }
+
+                // Check if the actual element type is assignable to the expected element type
+                if (!TypeResolver.isAssignable(actualElementType, expectedElementType)) {
+                    String keyName = getPropertyName(kvProp.getKey());
+                    throw Swc4jByteCodeCompilerException.typeMismatch(
+                            elemExpr,
+                            keyName + " (array element)",
+                            expectedElementType,
+                            actualElementType,
+                            false  // isKey = false (this is an element value)
+                    );
+                }
+            }
+        }
+    }
+
     private void validateKeyValueProperty(
             Swc4jAstKeyValueProp kvProp,
             GenericTypeInfo genericTypeInfo) throws Swc4jByteCodeCompilerException {
@@ -481,6 +518,14 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                 // For now, we skip validation for spread (will use runtime types)
             }
             // Nested validation complete - actual type is LinkedHashMap which matches expected
+            return;
+        }
+
+        // Handle Array value types - validate array literal elements
+        if (genericTypeInfo.isArrayValue() && valueExpr instanceof Swc4jAstArrayLit arrayLit) {
+            String expectedElementType = genericTypeInfo.getArrayElementType();
+            validateArrayElements(arrayLit, expectedElementType, kvProp);
+            // Array validation complete - actual type is ArrayList which matches expected
             return;
         }
 
