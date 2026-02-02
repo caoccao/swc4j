@@ -1532,6 +1532,14 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             // BiPredicate.test(Object, Object): boolean
             return new FunctionalInterfaceInfo(interfaceName, "test", "(Ljava/lang/Object;Ljava/lang/Object;)Z");
         }
+
+        // Check if it's a custom functional interface registered in the registry
+        var samInfo = compiler.getMemory().getScopedFunctionalInterfaceRegistry()
+                .getSamMethodInfo(interfaceName);
+        if (samInfo != null) {
+            return new FunctionalInterfaceInfo(interfaceName, samInfo.methodName(), samInfo.methodDescriptor());
+        }
+
         return null;
     }
 

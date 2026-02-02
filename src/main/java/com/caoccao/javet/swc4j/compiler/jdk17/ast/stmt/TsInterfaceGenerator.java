@@ -155,23 +155,43 @@ public final class TsInterfaceGenerator {
             }
         }
 
+        // Track abstract methods to detect functional interfaces (SAM)
+        List<MethodInfo> abstractMethods = new ArrayList<>();
+
         // Process body members
         for (ISwc4jAstTsTypeElement element : interfaceDecl.getBody().getBody()) {
             if (element instanceof Swc4jAstTsPropertySignature prop) {
                 generatePropertyMethods(classWriter, prop, typeParamNames);
+                // Properties generate getters/setters, not SAM candidates
             } else if (element instanceof Swc4jAstTsMethodSignature method) {
-                generateMethod(classWriter, method, typeParamNames);
+                MethodInfo methodInfo = generateMethod(classWriter, method, typeParamNames);
+                abstractMethods.add(methodInfo);
             } else if (element instanceof Swc4jAstTsGetterSignature getter) {
                 generateGetterSignature(classWriter, getter, typeParamNames);
+                // Getters/setters are not SAM candidates
             } else if (element instanceof Swc4jAstTsSetterSignature setter) {
                 generateSetterSignature(classWriter, setter, typeParamNames);
             } else if (element instanceof Swc4jAstTsIndexSignature indexSig) {
                 generateIndexSignature(classWriter, indexSig, typeParamNames);
+                // Index signatures are not SAM candidates
             } else if (element instanceof Swc4jAstTsCallSignatureDecl callSig) {
-                generateCallSignature(classWriter, callSig, typeParamNames);
+                MethodInfo methodInfo = generateCallSignature(classWriter, callSig, typeParamNames);
+                abstractMethods.add(methodInfo);
             } else if (element instanceof Swc4jAstTsConstructSignatureDecl constructSig) {
-                generateConstructSignature(classWriter, constructSig, typeParamNames);
+                MethodInfo methodInfo = generateConstructSignature(classWriter, constructSig, typeParamNames);
+                abstractMethods.add(methodInfo);
             }
+        }
+
+        // Register as functional interface if it has exactly one abstract method (SAM)
+        if (abstractMethods.size() == 1) {
+            MethodInfo samMethod = abstractMethods.get(0);
+            compiler.getMemory().getScopedFunctionalInterfaceRegistry().register(
+                    internalClassName,
+                    samMethod.methodName(),
+                    samMethod.paramTypes(),
+                    samMethod.returnType()
+            );
         }
 
         try {
@@ -191,13 +211,15 @@ public final class TsInterfaceGenerator {
      * @param classWriter    the class writer
      * @param callSig        the call signature
      * @param typeParamNames the set of type parameter names in scope
+     * @return MethodInfo for the generated method
      */
-    private void generateCallSignature(
+    private MethodInfo generateCallSignature(
             ClassWriter classWriter,
             Swc4jAstTsCallSignatureDecl callSig,
             Set<String> typeParamNames) {
         // Build method descriptor
         StringBuilder paramDescriptors = new StringBuilder("(");
+        List<String> paramTypes = new ArrayList<>();
         for (ISwc4jAstTsFnParam param : callSig.getParams()) {
             String paramType = "Ljava/lang/Object;"; // Default
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
@@ -210,6 +232,7 @@ public final class TsInterfaceGenerator {
                     }
                 }
             }
+            paramTypes.add(paramType);
             paramDescriptors.append(paramType);
         }
         paramDescriptors.append(")");
@@ -236,6 +259,8 @@ public final class TsInterfaceGenerator {
                 0,    // max stack
                 0     // max locals
         );
+
+        return new MethodInfo("call", paramTypes, returnType, descriptor);
     }
 
     /**
@@ -248,13 +273,15 @@ public final class TsInterfaceGenerator {
      * @param classWriter    the class writer
      * @param constructSig   the construct signature
      * @param typeParamNames the set of type parameter names in scope
+     * @return MethodInfo for the generated method
      */
-    private void generateConstructSignature(
+    private MethodInfo generateConstructSignature(
             ClassWriter classWriter,
             Swc4jAstTsConstructSignatureDecl constructSig,
             Set<String> typeParamNames) {
         // Build method descriptor
         StringBuilder paramDescriptors = new StringBuilder("(");
+        List<String> paramTypes = new ArrayList<>();
         for (ISwc4jAstTsFnParam param : constructSig.getParams()) {
             String paramType = "Ljava/lang/Object;"; // Default
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
@@ -267,6 +294,7 @@ public final class TsInterfaceGenerator {
                     }
                 }
             }
+            paramTypes.add(paramType);
             paramDescriptors.append(paramType);
         }
         paramDescriptors.append(")");
@@ -293,6 +321,8 @@ public final class TsInterfaceGenerator {
                 0,    // max stack
                 0     // max locals
         );
+
+        return new MethodInfo("create", paramTypes, returnType, descriptor);
     }
 
     /**
@@ -404,8 +434,9 @@ public final class TsInterfaceGenerator {
      * @param classWriter    the class writer
      * @param method         the method signature
      * @param typeParamNames the set of type parameter names in scope
+     * @return MethodInfo for the generated method
      */
-    private void generateMethod(
+    private MethodInfo generateMethod(
             ClassWriter classWriter,
             Swc4jAstTsMethodSignature method,
             Set<String> typeParamNames) {
@@ -413,6 +444,7 @@ public final class TsInterfaceGenerator {
 
         // Build method descriptor
         StringBuilder paramDescriptors = new StringBuilder("(");
+        List<String> paramTypes = new ArrayList<>();
         for (ISwc4jAstTsFnParam param : method.getParams()) {
             String paramType = "Ljava/lang/Object;"; // Default
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
@@ -425,6 +457,7 @@ public final class TsInterfaceGenerator {
                     }
                 }
             }
+            paramTypes.add(paramType);
             paramDescriptors.append(paramType);
         }
         paramDescriptors.append(")");
@@ -451,6 +484,8 @@ public final class TsInterfaceGenerator {
                 0,    // max stack
                 0     // max locals
         );
+
+        return new MethodInfo(methodName, paramTypes, returnType, descriptor);
     }
 
     /**
@@ -670,5 +705,17 @@ public final class TsInterfaceGenerator {
             }
         }
         return interfaceNames.toArray(new String[0]);
+    }
+
+    /**
+     * Record containing information about a method in an interface.
+     * Used to track abstract methods for functional interface detection.
+     *
+     * @param methodName       the method name
+     * @param paramTypes       list of parameter type descriptors
+     * @param returnType       return type descriptor
+     * @param methodDescriptor full method descriptor
+     */
+    private record MethodInfo(String methodName, List<String> paramTypes, String returnType, String methodDescriptor) {
     }
 }

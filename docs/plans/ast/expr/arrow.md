@@ -1352,7 +1352,7 @@ Use primitive specializations to avoid boxing:
 9. **Reflection on Arrows**: Limited - Anonymous inner class details not accessible
 10. **Serialization**: Anonymous inner classes may have serialization issues
 11. **Debugging**: Anonymous class names may be harder to debug
-12. **Custom Interfaces**: Arrow expressions currently only implement java.util.function interfaces. Direct implementation of custom TypeScript interfaces (Callable, Comparator, etc.) has type inference issues
+12. **Custom Interfaces**: ✓ IMPLEMENTED - Arrow expressions can now be assigned to custom TypeScript interfaces. Single abstract method (SAM) interfaces are automatically detected and registered, allowing arrows to implement custom functional interfaces with proper type inference.
 
 ---
 

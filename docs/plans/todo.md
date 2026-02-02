@@ -30,13 +30,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Add union coercion strategy (Object return + tagging), update TypeResolver, and ensure boxing rules.
 - Tests: Union returns with numeric/object/string branches and nested arrows.
 
-## Feature: Arrow Custom Interface Type Inference
-- Evidence: `docs/plans/ast/expr/arrow.md`.
-- Status: Limited inference for custom interfaces.
-- Confidence: 55%.
-- Plan: Improve inference by resolving single-abstract-method signatures from interface type metadata.
-- Tests: Custom interfaces with generics, overload-like erasure, and captures.
-
 ## Feature: Arrow Capture Leak Audit
 - Evidence: `docs/plans/ast/expr/arrow.md` quality gate unchecked.
 - Status: Not verified.
