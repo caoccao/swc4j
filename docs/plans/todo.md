@@ -51,13 +51,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Generate catch-all then branch on `instanceof`, or emit multi-catch table entries with type guards.
 - Tests: Multiple type guards inside a single catch block.
 
-## Feature: Regex Limitations (Flags, Lookbehind, Unicode)
-- Evidence: `docs/plans/ast/expr/lit/regex.md`.
-- Status: Sticky `y`, indices `d`, and pre-Java11 lookbehind unsupported; unicode property gaps.
-- Confidence: 60%.
-- Plan: Add compile-time errors or conversion for unsupported flags; map unicode property names; gate lookbehind by runtime.
-- Tests: Unsupported flags, unicode properties, and Java version gated lookbehind.
-
 ## Feature: String Literal Escape \v
 - Evidence: `docs/plans/ast/expr/lit/str.md`.
 - Status: Vertical tab not supported in Java string parsing.

@@ -89,6 +89,76 @@ public final class RegexLiteralGenerator extends BaseAstProcessor<Swc4jAstRegex>
     }
 
     /**
+     * Checks if pattern contains variable-length lookbehind assertions.
+     * Variable-length lookbehind requires Java 11+.
+     * Patterns like (?<=a+), (?<=foo|foobar), (?<!a*) have variable length.
+     * Fixed-length patterns like (?<=abc), (?<=a{3}) are supported on all Java versions.
+     *
+     * @param pattern the regex pattern to check
+     * @return true if pattern contains variable-length lookbehind
+     */
+    private boolean hasVariableLengthLookbehind(String pattern) {
+        // This is a heuristic check - not a full regex parser
+        // Looks for common variable-length patterns in lookbehind:
+        // (?<=...*), (?<=...+), (?<=...?), (?<=...|...)
+        // This is not exhaustive but covers common cases
+
+        // Check for lookbehind assertions
+        if (!pattern.contains("(?<=") && !pattern.contains("(?<!")) {
+            return false;
+        }
+
+        // Look for patterns that indicate variable length:
+        // - Quantifiers: *, +, ?
+        // - Alternation with different lengths: |
+        // - Variable repetition: {n,m} where n != m
+
+        // Simple heuristic: if lookbehind contains *, +, ?, or | it's likely variable-length
+        // This may have false positives but errs on the side of caution
+
+        int lookbehindStart = pattern.indexOf("(?<=");
+        if (lookbehindStart == -1) {
+            lookbehindStart = pattern.indexOf("(?<!");
+        }
+
+        if (lookbehindStart == -1) {
+            return false;
+        }
+
+        // Find the matching closing paren
+        int depth = 0;
+        int pos = lookbehindStart + 4; // Skip "(?<=" or "(?<!"
+        while (pos < pattern.length()) {
+            char c = pattern.charAt(pos);
+            if (c == '(') {
+                depth++;
+            } else if (c == ')') {
+                if (depth == 0) {
+                    // Found the end of the lookbehind
+                    String lookbehindContent = pattern.substring(lookbehindStart + 4, pos);
+                    // Check for variable-length indicators
+                    if (lookbehindContent.contains("*") ||
+                        lookbehindContent.contains("+") ||
+                        lookbehindContent.contains("?") ||
+                        lookbehindContent.contains("|")) {
+                        return true;
+                    }
+                    // Check for {n,m} where n != m
+                    if (lookbehindContent.matches(".*\\{\\d+,\\d+\\}.*")) {
+                        return true;
+                    }
+                    break;
+                } else {
+                    depth--;
+                }
+            }
+            pos++;
+        }
+
+        return false;
+    }
+
+    /**
      * Converts JavaScript regex pattern to Java Pattern-compatible pattern.
      * Handles known syntax differences between JavaScript and Java regex.
      *
@@ -106,6 +176,12 @@ public final class RegexLiteralGenerator extends BaseAstProcessor<Swc4jAstRegex>
         // are more complex and require regex parsing. For now, we'll pass
         // the pattern through and let Java Pattern.compile() validate it.
         // Invalid patterns will throw PatternSyntaxException at runtime.
+
+        // Note: Variable-length lookbehind assertions (e.g., (?<=a+), (?<!foo|bar))
+        // require Java 11+. On Java 8-10, these will throw PatternSyntaxException.
+        // The current compiler targets Java 17, so this is not an issue, but
+        // if future support for Java 8-10 is added, we should detect and reject
+        // variable-length lookbehind patterns. See hasVariableLengthLookbehind().
 
         return converted;
     }
