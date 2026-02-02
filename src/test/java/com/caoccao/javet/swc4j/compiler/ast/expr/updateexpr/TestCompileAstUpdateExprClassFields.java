@@ -35,7 +35,7 @@ public class TestCompileAstUpdateExprClassFields extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     private value: int = 5
-
+                
                     test() {
                       const result = this.value++
                       return [result, this.value]
@@ -53,7 +53,7 @@ public class TestCompileAstUpdateExprClassFields extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     private value: int = 5
-
+                
                     test() {
                       const result = ++this.value
                       return [result, this.value]
@@ -71,7 +71,7 @@ public class TestCompileAstUpdateExprClassFields extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     static value: int = 3
-
+                
                     test() {
                       const result = A.value--
                       return [result, A.value]

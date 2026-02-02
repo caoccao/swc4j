@@ -28,6 +28,21 @@ public class TestCompileUnaryExprVoid extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testVoidDouble(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Object {
+                      const x: double = 3.25
+                      return void x
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testVoidExpression(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -56,20 +71,5 @@ public class TestCompileUnaryExprVoid extends BaseTestCompileSuite {
                   }
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testVoidDouble(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): Object {
-                      const x: double = 3.25
-                      return void x
-                    }
-                  }
-                }""");
-        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
     }
 }

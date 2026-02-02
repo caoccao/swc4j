@@ -31,35 +31,20 @@ public class TestCompileBinExprNullishCoalescing extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullishReturnsRightOnNull(JdkVersion jdkVersion) throws Exception {
+    public void testNullishEvaluatesRightWhenNull(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
+                      let counter: int = 0
                       const value: Integer = null
-                      const result = value ?? 42
-                      return result
+                      const result = value ?? ++counter
+                      return [result, counter]
                     }
                   }
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
-                .isEqualTo(42);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNullishKeepsLeftPrimitive(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const value: int = 7
-                      const result = value ?? 99
-                      return result
-                    }
-                  }
-                }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(7);
+                .isEqualTo(List.of(1, 1));
     }
 
     @ParameterizedTest
@@ -82,20 +67,52 @@ public class TestCompileBinExprNullishCoalescing extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNullishEvaluatesRightWhenNull(JdkVersion jdkVersion) throws Exception {
+    public void testNullishKeepsLeftPrimitive(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let counter: int = 0
-                      const value: Integer = null
-                      const result = value ?? ++counter
-                      return [result, counter]
+                      const value: int = 7
+                      const result = value ?? 99
+                      return result
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(7);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNullishObjectFallback(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const value: Object = null
+                      const result = value ?? {a: 1, b: 2}
+                      return result
                     }
                   }
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
-                .isEqualTo(List.of(1, 1));
+                .isEqualTo(Map.of("a", 1, "b", 2));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNullishReturnsRightOnNull(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const value: Integer = null
+                      const result = value ?? 42
+                      return result
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -114,22 +131,5 @@ public class TestCompileBinExprNullishCoalescing extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
                 .isEqualTo(List.of(5, 0));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNullishObjectFallback(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const value: Object = null
-                      const result = value ?? {a: 1, b: 2}
-                      return result
-                    }
-                  }
-                }""");
-        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
-                .isEqualTo(Map.of("a", 1, "b", 2));
     }
 }

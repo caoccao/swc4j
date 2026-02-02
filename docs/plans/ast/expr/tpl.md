@@ -8,7 +8,7 @@ const name = "World";
 const greeting = `Hello ${name}!`;  // "Hello World!"
 ```
 
-This document covers the implementation of `Swc4jAstTpl` (basic template literals) and the plan for `Swc4jAstTaggedTpl` (tagged templates).
+This document covers the implementation of `Swc4jAstTpl` (basic template literals).
 
 ## AST Structure
 
@@ -103,74 +103,11 @@ code.invokestatic(valueOfRef);
 3. **TypeResolver integration** - Leverages existing type inference infrastructure
 4. **TypeConversionUtils boxing** - Reuses primitive boxing utilities
 
-### 🔲 Not Implemented: Tagged Templates (Swc4jAstTaggedTpl)
-
-Tagged templates allow custom processing of template literals:
-```typescript
-function tag(strings: string[], ...values: any[]): string {
-    // strings[0] = "Hello "
-    // strings[1] = "!"
-    // strings.raw[0] = "Hello "
-    // strings.raw[1] = "!"
-    // values[0] = name
-    return strings[0] + values[0].toUpperCase() + strings[1];
-}
-
-const name = "world";
-const result = tag`Hello ${name}!`;  // "Hello WORLD!"
-```
-
-**Challenges:**
-1. **Template Object Caching** - Tagged template objects should be cached per call site
-2. **Raw String Array** - Need to provide both cooked and raw string arrays
-3. **Runtime Support** - Requires runtime class/interface for template objects
-4. **Function Interface Mapping** - Tag function can have any signature
-
-**Proposed Implementation Plan:**
-
-#### Step 1: Define Template Object Interface
-```java
-// Runtime support class
-package com.caoccao.javet.swc4j.runtime;
-
-public interface TemplateObject {
-    String[] getStrings();      // Cooked strings
-    String[] getRawStrings();   // Raw strings
-}
-```
-
-#### Step 2: Generate Template Object per Call Site
-```java
-// For each tagged template call site, generate:
-private static final TemplateObject $tpl$0 = new TemplateObjectImpl(
-    new String[]{"Hello ", "!"},  // cooked
-    new String[]{"Hello ", "!"}   // raw
-);
-```
-
-#### Step 3: Generate Tag Function Call
-```java
-// tag`Hello ${name}!` becomes:
-// tag($tpl$0.getStrings(), name)  // if tag expects (String[], Object...)
-// or
-// tag($tpl$0, name)  // if tag expects (TemplateObject, Object...)
-```
-
-#### Step 4: Handle Different Tag Signatures
-- Infer tag function signature from type annotations
-- Support common patterns: `(strings: string[], ...values: any[]) => T`
-- Fall back to Object[] for unknown signatures
-
-#### Step 5: Template Object Deduplication
-- Cache template objects at class level (static final fields)
-- Use content hash to deduplicate identical template literals
-- Generate unique field names: `$tpl$0`, `$tpl$1`, etc.
-
 ## Test Coverage
 
-### ✅ Implemented Tests (TestCompileAstTemplateLiteral)
+### ✅ Implemented Tests (TestCompileAstTplBasic)
 
-All 10 tests passing (100% success rate):
+All 10 basic tests passing (100% success rate):
 
 1. **testTemplateSimple** - Basic interpolation: `` `Hello ${name}!` ``
 2. **testTemplateNoInterpolation** - Plain text: `` `Hello World!` ``
@@ -183,21 +120,20 @@ All 10 tests passing (100% success rate):
 9. **testTemplateWithEscapes** - Escape sequences: `` `Tab\there` ``
 10. **testTemplateConsecutiveInterpolations** - Back-to-back: `` `${a}${b}` ``
 
-### 🔲 Missing Test Coverage
+### ✅ Implemented Tests (TestCompileAstTplAdvanced)
 
-**Template Literals:**
-- Nested template literals: `` `Outer ${`inner ${x}`} end` ``
-- Template in conditional: `condition ? \`yes\` : \`no\``
-- Template with complex expressions: `` `Result: ${obj.method().field}` ``
-- Template with null/undefined: `` `Value: ${null}` `` → "Value: null"
-- Template with boolean: `` `Flag: ${true}` `` → "Flag: true"
+All 10 advanced tests passing (100% success rate):
 
-**Tagged Templates (Future):**
-- Basic tagged template: `tag\`Hello ${name}\``
-- Tagged template with multiple values: `tag\`${a} and ${b}\``
-- Nested tagged templates: `outer\`prefix ${inner\`${x}\`} suffix\``
-- Tag function with custom return type
-- Raw string access in tag function
+1. **testTemplateNestedTemplate** - Nested template literals
+2. **testTemplateInConditional** - Template in ternary expression
+3. **testTemplateWithNull** - Null interpolation → "null"
+4. **testTemplateWithBoolean** - Boolean interpolation → "true"/"false"
+5. **testTemplateWithMethodCall** - Method call in interpolation
+6. **testTemplateWithConditionalExpression** - Ternary inside interpolation
+7. **testTemplateWithLongValue** - Long primitive interpolation
+8. **testTemplateWithDoubleValue** - Double primitive interpolation
+9. **testTemplateReturnedFromMethod** - Template as method return value
+10. **testTemplateManyInterpolations** - Five interpolations in one template
 
 ## Integration Points
 
@@ -205,9 +141,6 @@ All 10 tests passing (100% success rate):
 ```java
 } else if (expr instanceof Swc4jAstTpl tpl) {
     compiler.getTemplateLiteralGenerator().generate(code, cp, tpl, returnTypeInfo);
-} else if (expr instanceof Swc4jAstTaggedTpl taggedTpl) {
-    // TODO: Implement tagged template support
-    throw new Swc4jByteCodeCompilerException(expr, "Tagged templates are not yet supported");
 }
 ```
 
@@ -219,9 +152,7 @@ protected final TemplateLiteralGenerator templateLiteralGenerator;
 templateLiteralGenerator = new TemplateLiteralGenerator(this);
 
 // Getter:
-public TemplateLiteralGenerator getTemplateLiteralGenerator() {
-    return templateLiteralGenerator;
-}
+public TemplateLiteralGenerator getTemplateLiteralGenerator() { ... }
 ```
 
 ### TypeResolver
@@ -249,22 +180,12 @@ if (expr instanceof Swc4jAstTpl) {
 2. **Single Expression Optimization** - Could skip StringBuilder for `` `${expr}` ``
 3. **Compile-Time Concatenation** - Could merge adjacent string literals at compile time
 
-### Tagged Template Performance
-- Template object caching prevents repeated allocations
-- Static final fields ensure one-time initialization
-- No runtime overhead for template string preparation
-
 ## Error Handling
 
 ### Current Error Cases
 1. **Empty cooked value** - Falls back to raw value
 2. **Null expression type** - TypeResolver handles gracefully
 3. **Unsupported expression** - Propagates from ExpressionGenerator
-
-### Future Error Cases (Tagged Templates)
-1. **Unknown tag function signature** - Should provide clear error
-2. **Invalid tag function reference** - Type checking needed
-3. **Missing template object support** - Runtime dependency check
 
 ## Dependencies
 
@@ -274,12 +195,6 @@ if (expr instanceof Swc4jAstTpl) {
 - `TypeConversionUtils.getWrapperType()` - Wrapper type mapping
 - `TypeConversionUtils.boxPrimitiveType()` - Primitive boxing
 - `ExpressionGenerator.generate()` - Expression bytecode generation
-
-### Required For Tagged Templates (Future)
-- Runtime template object interface
-- Template object caching mechanism
-- Function signature analysis
-- Spread argument handling
 
 ## JVM Bytecode Details
 
@@ -351,21 +266,16 @@ INVOKEVIRTUAL java/lang/StringBuilder.toString()Ljava/lang/String;
 
 ## Future Enhancements
 
-1. **Tagged Template Support** (High Priority)
-   - Implement `Swc4jAstTaggedTpl` handling
-   - Add runtime template object support
-   - Cache template objects per call site
-
-2. **Optimization Passes** (Medium Priority)
+1. **Optimization Passes** (Medium Priority)
    - Compile-time string folding for constant expressions
    - Skip StringBuilder for single-expression templates
    - Inline small templates
 
-3. **Extended String Features** (Low Priority)
+2. **Extended String Features** (Low Priority)
    - Support for template literal types (TypeScript type system)
    - Integration with string literal types in type checking
 
-4. **Diagnostics** (Medium Priority)
+3. **Diagnostics** (Medium Priority)
    - Better error messages for unsupported escape sequences
    - Type mismatch warnings for expressions
 
@@ -374,5 +284,6 @@ INVOKEVIRTUAL java/lang/StringBuilder.toString()Ljava/lang/String;
 - **TypeScript Spec:** [Template Literals](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html)
 - **ECMAScript Spec:** [Template Literals](https://tc39.es/ecma262/#sec-template-literals)
 - **Implementation:** `TemplateLiteralGenerator.java`
-- **Tests:** `TestCompileAstTemplateLiteral.java`
+- **Tests:** `TestCompileAstTplBasic.java`, `TestCompileAstTplAdvanced.java`
 - **Related:** `TypeConversionUtils.java`, `TypeResolver.java`
+- **See also:** [Tagged Template Literals](tagged-tpl.md)

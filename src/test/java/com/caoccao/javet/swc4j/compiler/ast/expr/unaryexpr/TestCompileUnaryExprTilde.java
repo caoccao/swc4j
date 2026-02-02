@@ -29,32 +29,18 @@ public class TestCompileUnaryExprTilde extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testTildeInt(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      const x: int = 5
-                      return ~x
-                    }
-                  }
-                }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-6);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testTildeLong(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): long {
-                      const x: long = 100
-                      return ~x
-                    }
-                  }
-                }""");
-        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-101L);
+    public void testTildeBooleanThrows(JdkVersion jdkVersion) {
+        assertThatThrownBy(() -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const x: boolean = true
+                          return ~x
+                        }
+                      }
+                    }""");
+        }).isInstanceOf(Exception.class);
     }
 
     @ParameterizedTest
@@ -75,18 +61,33 @@ public class TestCompileUnaryExprTilde extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testTildeShort(JdkVersion jdkVersion) throws Exception {
+    public void testTildeFloatThrows(JdkVersion jdkVersion) {
+        assertThatThrownBy(() -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const x: float = 1.5
+                          return ~x
+                        }
+                      }
+                    }""");
+        }).isInstanceOf(Exception.class);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTildeInt(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      const x: short = 2
-                      const y: int = ~x
-                      return y
+                      const x: int = 5
+                      return ~x
                     }
                   }
                 }""");
-        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-3);
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-6);
     }
 
     @ParameterizedTest
@@ -106,6 +107,21 @@ public class TestCompileUnaryExprTilde extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testTildeLong(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): long {
+                      const x: long = 100
+                      return ~x
+                    }
+                  }
+                }""");
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-101L);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testTildeLongWrapper(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -121,33 +137,17 @@ public class TestCompileUnaryExprTilde extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testTildeFloatThrows(JdkVersion jdkVersion) {
-        assertThatThrownBy(() -> {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const x: float = 1.5
-                          return ~x
-                        }
-                      }
-                    }""");
-        }).isInstanceOf(Exception.class);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testTildeBooleanThrows(JdkVersion jdkVersion) {
-        assertThatThrownBy(() -> {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const x: boolean = true
-                          return ~x
-                        }
-                      }
-                    }""");
-        }).isInstanceOf(Exception.class);
+    public void testTildeShort(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const x: short = 2
+                      const y: int = ~x
+                      return y
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-3);
     }
 }

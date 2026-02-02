@@ -79,6 +79,7 @@ public sealed abstract class ByteCodeCompiler permits
     protected final StringLiteralGenerator stringLiteralGenerator;
     protected final Swc4j swc4j;
     protected final SwitchStatementGenerator switchStatementGenerator;
+    protected final TaggedTemplateLiteralGenerator taggedTemplateLiteralGenerator;
     protected final TemplateLiteralGenerator templateLiteralGenerator;
     protected final ThisExpressionGenerator thisExpressionGenerator;
     protected final ThrowStatementGenerator throwStatementGenerator;
@@ -142,6 +143,7 @@ public sealed abstract class ByteCodeCompiler permits
         standaloneFunctionGenerator = new StandaloneFunctionGenerator(this);
         statementGenerator = new StatementGenerator(this);
         stringLiteralGenerator = new StringLiteralGenerator(this);
+        taggedTemplateLiteralGenerator = new TaggedTemplateLiteralGenerator(this);
         templateLiteralGenerator = new TemplateLiteralGenerator(this);
         switchStatementGenerator = new SwitchStatementGenerator(this);
         thisExpressionGenerator = new ThisExpressionGenerator(this);
@@ -336,6 +338,10 @@ public sealed abstract class ByteCodeCompiler permits
 
     public SwitchStatementGenerator getSwitchStatementGenerator() {
         return switchStatementGenerator;
+    }
+
+    public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() {
+        return taggedTemplateLiteralGenerator;
     }
 
     public TemplateLiteralGenerator getTemplateLiteralGenerator() {

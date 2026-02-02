@@ -67,6 +67,23 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testNativeDoubleArrayPostfixDecrement(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr: double[] = [2.5, 1.5]
+                      const result = arr[0]--
+                      return [result, arr[0]]
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo(List.of(2.5, 1.5));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testNativeFloatArrayDecrement(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -198,6 +215,23 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testNativeIntMatrixUpdate(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(matrix: int[][]) {
+                      const result = matrix[1][0]++
+                      return [result, matrix[1][0]]
+                    }
+                  }
+                }""");
+        int[][] matrix = new int[][]{{1, 2}, {3, 4}};
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test", (Object) matrix))
+                .isEqualTo(List.of(3, 4));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testNativeLongArrayIncrement(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -227,40 +261,6 @@ public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
                 .isEqualTo(List.of(100L, 101L));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNativeDoubleArrayPostfixDecrement(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const arr: double[] = [2.5, 1.5]
-                      const result = arr[0]--
-                      return [result, arr[0]]
-                    }
-                  }
-                }""");
-        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
-                .isEqualTo(List.of(2.5, 1.5));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNativeIntMatrixUpdate(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(matrix: int[][]) {
-                      const result = matrix[1][0]++
-                      return [result, matrix[1][0]]
-                    }
-                  }
-                }""");
-        int[][] matrix = new int[][]{{1, 2}, {3, 4}};
-        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test", (Object) matrix))
-                .isEqualTo(List.of(3, 4));
     }
 
     @ParameterizedTest

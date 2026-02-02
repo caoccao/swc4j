@@ -21,12 +21,27 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.within;
+import static org.assertj.core.api.Assertions.*;
 
 
 public class TestCompileUnaryExprMinus extends BaseTestCompileSuite {
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMinusBooleanThrows(JdkVersion jdkVersion) {
+        assertThatThrownBy(() -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const x: boolean = true
+                          const c = -x
+                          return c
+                        }
+                      }
+                    }""");
+        }).isInstanceOf(Exception.class);
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -369,23 +384,6 @@ public class TestCompileUnaryExprMinus extends BaseTestCompileSuite {
                   }
                 }""");
         assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-9223372036854775808L);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testMinusBooleanThrows(JdkVersion jdkVersion) {
-        assertThatThrownBy(() -> {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const x: boolean = true
-                          const c = -x
-                          return c
-                        }
-                      }
-                    }""");
-        }).isInstanceOf(Exception.class);
     }
 
     @ParameterizedTest

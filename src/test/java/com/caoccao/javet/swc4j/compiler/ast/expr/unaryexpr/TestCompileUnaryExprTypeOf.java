@@ -30,22 +30,6 @@ public class TestCompileUnaryExprTypeOf extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testTypeOfPrimitives(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): Array<String> {
-                      const result: Array<String> = [typeof 1, typeof true, typeof "hello"]
-                      return result
-                    }
-                  }
-                }""");
-        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
-                .isEqualTo(List.of("number", "boolean", "string"));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testTypeOfNull(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -75,6 +59,22 @@ public class TestCompileUnaryExprTypeOf extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
                 .isEqualTo("object");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTypeOfPrimitives(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Array<String> {
+                      const result: Array<String> = [typeof 1, typeof true, typeof "hello"]
+                      return result
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo(List.of("number", "boolean", "string"));
     }
 
     @ParameterizedTest

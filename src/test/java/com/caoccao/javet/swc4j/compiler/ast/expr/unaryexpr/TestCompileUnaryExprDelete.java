@@ -68,6 +68,22 @@ public class TestCompileUnaryExprDelete extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testDeleteArrayThrows(JdkVersion jdkVersion) {
+        assertThatThrownBy(() -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const arr: int[] = [1, 2, 3]
+                          return delete arr[0]
+                        }
+                      }
+                    }""");
+        }).isInstanceOf(Exception.class);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testDeleteMapEntry(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 import { LinkedHashMap } from 'java.util'
@@ -98,21 +114,5 @@ public class TestCompileUnaryExprDelete extends BaseTestCompileSuite {
                   }
                 }""");
         assertThat((boolean) runner.createInstanceRunner("com.A").invoke("test")).isTrue();
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testDeleteArrayThrows(JdkVersion jdkVersion) {
-        assertThatThrownBy(() -> {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const arr: int[] = [1, 2, 3]
-                          return delete arr[0]
-                        }
-                      }
-                    }""");
-        }).isInstanceOf(Exception.class);
     }
 }
