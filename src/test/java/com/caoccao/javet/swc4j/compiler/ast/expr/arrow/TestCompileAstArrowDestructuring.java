@@ -21,6 +21,9 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -75,6 +78,25 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
         assertThat((int) result).isEqualTo(6);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayDestructuringRest(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Array<int> {
+                      const arr: List<int> = [1, 2, 3]
+                      const result = (([first, ...rest]: List<int>): Array<int> => {
+                        return [first, rest.length, rest[0]]
+                      })(arr)
+                      return result
+                    }
+                  }
+                }""");
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertThat(instanceRunner.<Object>invoke("test")).isEqualTo(List.of(1, 2, 2));
     }
 
     @ParameterizedTest
@@ -168,6 +190,25 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testNestedObjectDestructuring(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const map: Map<String, Object> = { point: { x: 3, y: 4 } }
+                      const result: String = (({point: {x, y}}: Map<String, Object>): String => {
+                        return x + y
+                      })(map)
+                      return result
+                    }
+                  }
+                }""");
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertThat(instanceRunner.<Object>invoke("test")).isEqualTo("34");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testObjectDestructuringBasic(JdkVersion jdkVersion) throws Exception {
         // Edge case 11: Object destructuring parameter {x, y}
         var runner = getCompiler(jdkVersion).compile("""
@@ -187,6 +228,26 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
         var instanceRunner = runner.createInstanceRunner("com.A");
         var result = instanceRunner.invoke("test");
         assertThat((int) result).isEqualTo(30);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testObjectDestructuringRest(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                import { Map } from 'java.util'
+                namespace com {
+                  export class A {
+                    test(): Map<String, int> {
+                      const map: Map<String, int> = { x: 10, y: 20, z: 30 }
+                      const result = (({x, ...rest}: Map<String, int>): Map<String, int> => {
+                        return rest
+                      })(map)
+                      return result
+                    }
+                  }
+                }""");
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertThat(instanceRunner.<Object>invoke("test")).isEqualTo(Map.of("y", 20, "z", 30));
     }
 
     @ParameterizedTest

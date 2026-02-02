@@ -1346,7 +1346,7 @@ Use primitive specializations to avoid boxing:
 3. **Union Return Types**: NOT SUPPORTED - JVM requires single return type
 4. **Mutable Captures**: ✓ IMPLEMENTED - Uses holder object pattern (int[], long[], Object[], etc.) for variables declared with `let` that are modified after lambda creation
 5. **IIFE (Immediately Invoked Function Expression)**: IMPLEMENTED - Generates custom interface with naming convention $interfaceN and anonymous implementation class
-6. **Destructuring Parameters**: NOT SUPPORTED - Object/array destructuring in parameters not implemented
+6. **Destructuring Parameters**: ✓ IMPLEMENTED - Object/array destructuring in parameters supported
 7. **Default/Rest/Optional Parameters**: LIMITED - Only work with custom interfaces, not standard functional interfaces
 8. **Recursive Arrows**: ✓ IMPLEMENTED - Self-referencing arrows (e.g., factorial, fibonacci) work via non-final captured field updated after instantiation
 9. **Reflection on Arrows**: Limited - Anonymous inner class details not accessible

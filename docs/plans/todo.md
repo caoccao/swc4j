@@ -30,13 +30,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Add union coercion strategy (Object return + tagging), update TypeResolver, and ensure boxing rules.
 - Tests: Union returns with numeric/object/string branches and nested arrows.
 
-## Feature: Arrow Parameter Destructuring
-- Evidence: `docs/plans/ast/expr/arrow.md` (known limitation despite other param features).
-- Status: Not supported for arrow params.
-- Confidence: 60%.
-- Plan: Reuse rest/destructuring generators for arrow parameters, map destructured variables into closure scope.
-- Tests: Array/object destructuring params with defaults and nested patterns.
-
 ## Feature: Arrow Default/Rest/Optional Params on Standard Functional Interfaces
 - Evidence: `docs/plans/ast/expr/arrow.md`.
 - Status: Limited to custom interfaces; standard interfaces not fully supported.
