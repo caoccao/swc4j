@@ -81,6 +81,8 @@ public final class ExpressionGenerator extends BaseAstProcessor<ISwc4jAstExpr> {
             compiler.getThisExpressionGenerator().generate(code, cp, thisExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstArrowExpr arrowExpr) {
             compiler.getArrowExpressionGenerator().generate(code, cp, arrowExpr, returnTypeInfo);
+        } else if (expr instanceof Swc4jAstTpl tpl) {
+            compiler.getTemplateLiteralGenerator().generate(code, cp, tpl, returnTypeInfo);
         } else {
             throw new Swc4jByteCodeCompilerException(expr, "Unsupported expression type: " + expr.getClass().getSimpleName());
         }

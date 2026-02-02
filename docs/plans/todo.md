@@ -84,12 +84,13 @@ These need to be addressed so errors always include source snippet, line, column
 - Plan: Add nullish checks around member/call chains, preserve short-circuit semantics, and ensure return type inference for optional results.
 - Tests: Optional chain on fields, calls, nested chains, and mixed with updates/assignments.
 
-## Feature: Template Literals and Tagged Templates
-- Evidence: `ExpressionGenerator` lacks `Swc4jAstTpl`, `Swc4jAstTaggedTpl`, `Swc4jAstTplElement` handling.
-- Status: Not implemented.
+## Feature: Tagged Templates
+- Evidence: `ExpressionGenerator` lacks `Swc4jAstTaggedTpl` handling.
+- Status: Not implemented. ✅ Plain template literals (`Swc4jAstTpl`) are implemented.
 - Confidence: 45%.
-- Plan: Implement string concatenation lowering for plain templates and provide runtime support for tagged templates (cooked/raw array + substitutions).
-- Tests: Basic template literals, expression interpolation, multiline, and tagged template calls.
+- Plan: Provide runtime support for tagged templates (cooked/raw array + substitutions).
+- Tests: Tagged template calls with custom tag functions.
+- Note: Basic template literals (`Swc4jAstTpl`) with string concatenation lowering are implemented and tested in `TestCompileAstTemplateLiteral` (10 test cases covering basic templates, interpolation, multiline, escapes, and consecutive interpolations).
 
 ## Feature: Function Expressions and Class Expressions
 - Evidence: `ExpressionGenerator` lacks `Swc4jAstFnExpr` and `Swc4jAstClassExpr` handling.
