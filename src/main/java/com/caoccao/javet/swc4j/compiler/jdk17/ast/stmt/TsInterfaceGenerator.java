@@ -167,6 +167,10 @@ public final class TsInterfaceGenerator {
                 generateSetterSignature(classWriter, setter, typeParamNames);
             } else if (element instanceof Swc4jAstTsIndexSignature indexSig) {
                 generateIndexSignature(classWriter, indexSig, typeParamNames);
+            } else if (element instanceof Swc4jAstTsCallSignatureDecl callSig) {
+                generateCallSignature(classWriter, callSig, typeParamNames);
+            } else if (element instanceof Swc4jAstTsConstructSignatureDecl constructSig) {
+                generateConstructSignature(classWriter, constructSig, typeParamNames);
             }
         }
 
@@ -175,6 +179,120 @@ public final class TsInterfaceGenerator {
         } catch (IOException e) {
             throw new Swc4jByteCodeCompilerException(interfaceDecl, "Failed to generate bytecode for interface", e);
         }
+    }
+
+    /**
+     * Generates an abstract method for a call signature.
+     * Call signatures make interfaces callable (functional interfaces).
+     * The generated method is named "call" to match functional interface semantics.
+     * <p>
+     * Example: {@code (x: number): string} becomes {@code String call(int x)}
+     *
+     * @param classWriter    the class writer
+     * @param callSig        the call signature
+     * @param typeParamNames the set of type parameter names in scope
+     */
+    private void generateCallSignature(
+            ClassWriter classWriter,
+            Swc4jAstTsCallSignatureDecl callSig,
+            Set<String> typeParamNames) {
+        // Build method descriptor
+        StringBuilder paramDescriptors = new StringBuilder("(");
+        for (ISwc4jAstTsFnParam param : callSig.getParams()) {
+            String paramType = "Ljava/lang/Object;"; // Default
+            if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+                if (bindingIdent.getTypeAnn().isPresent()) {
+                    ISwc4jAstTsType type = bindingIdent.getTypeAnn().get().getTypeAnn();
+                    if (isTypeParameter(type, typeParamNames)) {
+                        paramType = "Ljava/lang/Object;";
+                    } else {
+                        paramType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+                    }
+                }
+            }
+            paramDescriptors.append(paramType);
+        }
+        paramDescriptors.append(")");
+
+        // Get return type
+        String returnType = "V"; // Default to void
+        if (callSig.getTypeAnn().isPresent()) {
+            ISwc4jAstTsType type = callSig.getTypeAnn().get().getTypeAnn();
+            if (isTypeParameter(type, typeParamNames)) {
+                returnType = "Ljava/lang/Object;";
+            } else {
+                returnType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+            }
+        }
+
+        String descriptor = paramDescriptors + returnType;
+
+        // Add abstract method named "call"
+        classWriter.addMethod(
+                METHOD_ACCESS_FLAGS,
+                "call",
+                descriptor,
+                null, // No code for abstract methods
+                0,    // max stack
+                0     // max locals
+        );
+    }
+
+    /**
+     * Generates an abstract factory method for a construct signature.
+     * Construct signatures represent constructor patterns.
+     * The generated method is named "create" to match factory pattern semantics.
+     * <p>
+     * Example: {@code new (name: string): Person} becomes {@code Person create(String name)}
+     *
+     * @param classWriter    the class writer
+     * @param constructSig   the construct signature
+     * @param typeParamNames the set of type parameter names in scope
+     */
+    private void generateConstructSignature(
+            ClassWriter classWriter,
+            Swc4jAstTsConstructSignatureDecl constructSig,
+            Set<String> typeParamNames) {
+        // Build method descriptor
+        StringBuilder paramDescriptors = new StringBuilder("(");
+        for (ISwc4jAstTsFnParam param : constructSig.getParams()) {
+            String paramType = "Ljava/lang/Object;"; // Default
+            if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+                if (bindingIdent.getTypeAnn().isPresent()) {
+                    ISwc4jAstTsType type = bindingIdent.getTypeAnn().get().getTypeAnn();
+                    if (isTypeParameter(type, typeParamNames)) {
+                        paramType = "Ljava/lang/Object;";
+                    } else {
+                        paramType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+                    }
+                }
+            }
+            paramDescriptors.append(paramType);
+        }
+        paramDescriptors.append(")");
+
+        // Get return type (the type being constructed)
+        String returnType = "Ljava/lang/Object;"; // Default to Object
+        if (constructSig.getTypeAnn().isPresent()) {
+            ISwc4jAstTsType type = constructSig.getTypeAnn().get().getTypeAnn();
+            if (isTypeParameter(type, typeParamNames)) {
+                returnType = "Ljava/lang/Object;";
+            } else {
+                returnType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+            }
+        }
+
+        String descriptor = paramDescriptors + returnType;
+
+        // Add abstract method named "create"
+        classWriter.addMethod(
+                METHOD_ACCESS_FLAGS,
+                "create",
+                descriptor,
+                null, // No code for abstract methods
+                0,    // max stack
+                0     // max locals
+        );
     }
 
     /**

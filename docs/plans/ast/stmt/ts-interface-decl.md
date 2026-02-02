@@ -4,7 +4,7 @@
 
 This plan covers the implementation of `Swc4jAstTsInterfaceDecl` for compiling TypeScript interface declarations to JVM bytecode. TypeScript interfaces are compiled to Java interfaces with appropriate getters, setters, and method signatures.
 
-**Current Status:** IMPLEMENTED (Phases 1-7, 9 complete; Phase 8 documented as limitation)
+**Current Status:** IMPLEMENTED (All phases 1-9 complete)
 
 **Syntax:**
 ```typescript
@@ -37,7 +37,7 @@ interface Container<T> {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclAccessors.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclGenerics.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclIndexSignature.java` ✓
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclMethods.java` (NOT IMPLEMENTED)
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/tsinterfacedecl/TestCompileAstTsInterfaceDeclCallConstruct.java` ✓
 
 **Additional Implementation Files:**
 - `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/TsInterfaceCollector.java` ✓
@@ -500,11 +500,11 @@ public interface ReadonlyDict {
 
 ### Phase 8: Call and Construct Signatures - Priority: LOW
 
-**Status:** NOT SUPPORTED (Documented Limitation)
+**Status:** IMPLEMENTED ✓ (2026-02-01)
 
 **Scope:**
-- Call signatures (functional interfaces) - Not supported
-- Construct signatures - Not supported
+- Call signatures (functional interfaces) - Implemented
+- Construct signatures - Implemented
 
 **Example:**
 ```typescript
@@ -517,7 +517,43 @@ interface Constructable {
 }
 ```
 
-**Note:** Call signatures and construct signatures are not supported. These TypeScript features do not have direct Java equivalents and require complex mapping patterns. Users needing functional interfaces should use Java's built-in functional interfaces or define explicit method signatures.
+**Implementation:**
+Call signatures are mapped to functional interfaces with a `call` method:
+```java
+@FunctionalInterface
+public interface Callable {
+    int call(int x);
+}
+```
+
+Construct signatures are mapped to factory interfaces with a `create` method:
+```java
+@FunctionalInterface
+public interface Constructable {
+    Object create(String name);
+}
+```
+
+**Test Coverage:**
+- Call signature with no parameters
+- Call signature with single parameter
+- Call signature with multiple parameters
+- Call signature with void return
+- Call signature with String parameters
+- Call signature with mixed types
+- Call signature with implementation
+- Construct signature with no parameters
+- Construct signature with single parameter
+- Construct signature with multiple parameters
+- Construct signature with typed return
+- Construct signature with implementation
+- Combined call and property signatures
+- Combined construct and property signatures
+- Combined call and method signatures
+- Multiple call signatures (overloads)
+- Mixed parameter types in construct signatures
+- Double parameter call signatures
+- Interfaces with both call and construct signatures
 
 ---
 
@@ -1369,7 +1405,7 @@ When an interface extends another interface:
 - [x] Phase 5: Interface inheritance working
 - [x] Phase 6: Generic interfaces working
 - [x] Phase 7: Index signatures working
-- [x] Phase 8: Call/construct signatures (documented as limitation)
+- [x] Phase 8: Call/construct signatures working
 - [x] Phase 9: Explicit getters/setters working
 - [x] All edge cases handled or documented as limitations
 - [x] All tests passing
@@ -1391,11 +1427,9 @@ The following TypeScript interface features are NOT supported:
 
 1. **Symbol property keys** - Java doesn't support symbols
 2. **Computed property names** (unless string literal) - Cannot evaluate at compile time
-3. **Call signatures** - May be partially supported via functional interface pattern
-4. **Construct signatures** - No direct Java equivalent
-5. **Declaration merging** - Interfaces with same name are not merged
-6. **Conditional types in properties** - Complex to evaluate
-7. **Mapped types** - Not applicable to interface declarations
+3. **Declaration merging** - Interfaces with same name are not merged
+4. **Conditional types in properties** - Complex to evaluate
+5. **Mapped types** - Not applicable to interface declarations
 
 ---
 

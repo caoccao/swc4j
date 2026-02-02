@@ -58,13 +58,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Track capture holder lifetime, ensure no retained references beyond scope; add cleanup if needed.
 - Tests: Stress tests for nested closures and large capture sets.
 
-## Feature: TS Interface Call/Construct Signatures
-- Evidence: `docs/plans/ast/stmt/ts-interface-decl.md`.
-- Status: Not supported.
-- Confidence: 45%.
-- Plan: Map call signatures to functional interfaces, construct signatures to factory patterns, add type mapping rules.
-- Tests: Callable and constructable interfaces used in function/constructor contexts.
-
 ## Feature: Object Literal Gaps (Methods, Accessors, Symbols, Prototypes)
 - Evidence: `docs/plans/ast/expr/lit/object-lit.md`.
 - Status: Method properties deferred; getters/setters, symbols, descriptors, prototypes unsupported.
