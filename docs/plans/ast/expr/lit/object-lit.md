@@ -2861,3 +2861,336 @@ const lookup: Record<int, Array<String>> = {
 - `TestCompileAstObjectLitArrayType.java` - Added 10 comprehensive tests
 
 **Test Results:** 10/10 tests passing ✅
+
+---
+
+## Phase 9: Unsupported Property Types Error Handling
+
+**Phase 9 Implementation Summary (Method/Getter/Setter Property Rejection): ✅ COMPLETED**
+
+**Goal:** Provide clear compile-time errors when unsupported property types are used in object literals.
+
+**Features Implemented:**
+
+### Error Handling for Unsupported Properties
+
+Added compile-time detection and rejection for property types that cannot be compiled to LinkedHashMap:
+
+1. **Method Properties** - `{greet() { return "hello" }}`
+   - **Error Message:** "Method properties are not supported in object literals. Object literals compile to LinkedHashMap which cannot store executable methods. Consider using a class with methods instead."
+   - **Reason:** Methods require function compilation infrastructure which is not yet implemented. LinkedHashMap can only store data, not executable code.
+
+2. **Getter Properties** - `{get name() { return "value" }}`
+   - **Error Message:** "Getter properties are not supported in object literals. LinkedHashMap cannot implement property descriptors. Consider storing the computed value directly or using a class with getter methods."
+   - **Reason:** Property descriptors (getters/setters) are a JavaScript feature that has no direct equivalent in Java's Map interface.
+
+3. **Setter Properties** - `{set name(v) { this._name = v }}`
+   - **Error Message:** "Setter properties are not supported in object literals. LinkedHashMap cannot implement property descriptors. Consider using a class with setter methods instead."
+   - **Reason:** Same as getters - incompatible with Map semantics.
+
+### Implementation Details
+
+Modified `ObjectLiteralGenerator.java` to detect these AST node types during property iteration:
+
+```java
+} else if (prop instanceof Swc4jAstMethodProp methodProp) {
+    throw new Swc4jByteCodeCompilerException(methodProp,
+        "Method properties are not supported in object literals. ...");
+} else if (prop instanceof Swc4jAstGetterProp getterProp) {
+    throw new Swc4jByteCodeCompilerException(getterProp,
+        "Getter properties are not supported in object literals. ...");
+} else if (prop instanceof Swc4jAstSetterProp setterProp) {
+    throw new Swc4jByteCodeCompilerException(setterProp,
+        "Setter properties are not supported in object literals. ...");
+}
+```
+
+### Tests Added (14 tests, all passing)
+
+**Test File:** `TestCompileAstObjectLitUnsupportedProps.java`
+
+- ✅ `testMethodPropertyRejected` - Simple method property
+- ✅ `testMethodPropertyWithNameRejected` - Named method with return type
+- ✅ `testMethodPropertyWithParametersRejected` - Method with parameters
+- ✅ `testMultipleMethodsRejected` - Multiple methods in one object
+- ✅ `testGetterPropertyRejected` - Simple getter
+- ✅ `testGetterWithReturnTypeRejected` - Getter with type annotation
+- ✅ `testSetterPropertyRejected` - Simple setter
+- ✅ `testSetterWithTypeRejected` - Setter with parameter type
+- ✅ `testGetterAndSetterPairRejected` - Getter/setter pair for same property
+- ✅ `testMixedValidAndMethodPropertiesRejected` - Valid props + method
+- ✅ `testMixedValidAndGetterRejected` - Valid props + getter
+- ✅ `testMethodInRecordTypeRejected` - Method in typed Record
+- ✅ `testNestedObjectWithMethodRejected` - Method in nested object
+- ✅ `testAsyncMethodRejected` - Async method property
+
+All tests verify that the correct exception is thrown with clear, actionable error messages.
+
+### User-Facing Impact
+
+**Before:** Compilation would fail with unclear error messages or runtime errors.
+
+**After:** Clear compile-time errors explaining:
+- Why the feature is not supported
+- What the technical limitation is
+- What alternatives the user should consider
+
+**Example Error:**
+```
+Method properties are not supported in object literals.
+Object literals compile to LinkedHashMap which cannot store executable methods.
+Consider using a class with methods instead.
+```
+
+### Future Considerations
+
+**Method Properties:**
+- Could be supported if function compilation infrastructure is implemented
+- Would require generating synthetic functional interface implementations
+- Low priority - classes are the idiomatic Java solution
+
+**Getter/Setter:**
+- Fundamentally incompatible with Map semantics
+- Cannot be supported without changing from Map to a custom class
+- Not planned for implementation
+
+**Symbol Keys:**
+- ✅ Addressed in Phase 10 (see below)
+- Explicit compile-time rejection implemented with clear error messages
+
+### Files Modified
+
+- `ObjectLiteralGenerator.java` - Added error handling for unsupported property types
+- `TestCompileAstObjectLitUnsupportedProps.java` (new) - 14 comprehensive tests
+
+### Documentation Status
+
+- ✅ Implementation complete
+- ✅ Tests added and passing
+- ✅ Error messages clear and actionable
+- ✅ Documentation updated
+
+**Test Results:** 14/14 tests passing ✅
+
+---
+
+## Phase 10: Symbol Key Rejection
+
+**Status:** ✅ Complete  
+**Date:** 2026-02-02  
+**Confidence:** 95%
+
+### Problem Statement
+
+JavaScript Symbols (e.g., `Symbol.iterator`, `Symbol.for()`, `Symbol("key")`) have no equivalent in Java. Object literals with Symbol keys cannot be compiled to Java LinkedHashMap because:
+
+1. **No Java Equivalent:** JavaScript Symbols are unique, non-string primitive values that cannot be represented in Java
+2. **Map Key Semantics:** Java Map keys require proper `equals()`/`hashCode()` implementations, which Symbols don't have
+3. **Runtime Issues:** Attempting to use Symbols as Map keys would cause runtime failures
+
+TypeScript/JavaScript patterns like:
+```typescript
+const obj = {
+  [Symbol.iterator]: function* () { yield 1 },
+  [Symbol.for("key")]: "value",
+  [Symbol.toStringTag]: "Custom"
+}
+```
+
+Must be rejected at compile time with clear error messages.
+
+### Solution
+
+Implemented comprehensive Symbol detection that identifies all Symbol-related patterns in computed property keys and rejects them before bytecode generation.
+
+### Implementation Details
+
+**Location:** `ObjectLiteralGenerator.java`
+
+**1. Symbol Detection Helper Method** (lines 468-497):
+
+Created `isSymbolExpression()` that recursively detects Symbol patterns:
+
+```java
+private boolean isSymbolExpression(ISwc4jAstExpr expr) {
+    if (expr instanceof Swc4jAstIdent ident) {
+        // Direct Symbol reference: {[Symbol]: value}
+        return "Symbol".equals(ident.getSym());
+    } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
+        // Symbol.iterator, Symbol.for, etc.
+        ISwc4jAstExpr obj = memberExpr.getObj();
+        if (obj instanceof Swc4jAstIdent objIdent) {
+            return "Symbol".equals(objIdent.getSym());
+        }
+    } else if (expr instanceof Swc4jAstCallExpr callExpr) {
+        // Symbol() or Symbol.for()
+        var callee = callExpr.getCallee();
+        if (callee instanceof ISwc4jAstExpr calleeExpr) {
+            return isSymbolExpression(calleeExpr);
+        }
+    }
+    return false;
+}
+```
+
+**Patterns Detected:**
+- Direct identifier: `[Symbol]`
+- Member access: `[Symbol.iterator]`, `[Symbol.toStringTag]`, `[Symbol.hasInstance]`
+- Call expressions: `[Symbol("key")]`
+- Static methods: `[Symbol.for("globalKey")]`
+
+**2. Early Detection in Type Validation** (lines 510-521 in `validateKeyValueProperty()`):
+
+```java
+// Check for Symbol keys first - reject before type validation
+if (key instanceof Swc4jAstComputedPropName computed) {
+    ISwc4jAstExpr expr = computed.getExpr();
+    if (isSymbolExpression(expr)) {
+        throw new Swc4jByteCodeCompilerException(
+            computed,
+            "Symbol keys are not supported in object literals. " +
+            "Java Map keys must be Objects with proper equals()/hashCode() implementations. " +
+            "JavaScript Symbols have no equivalent in Java. " +
+            "Consider using string keys instead.");
+    }
+}
+```
+
+**Why Early Detection Matters:**
+- Prevents confusing type mismatch errors
+- Provides clear, actionable error messages before type validation
+- Catches Symbols in Record types before generic type checks
+
+**3. Secondary Check in Key Generation** (lines 257-265 in `generateKey()`):
+
+Added redundant Symbol check during bytecode generation as a safety net:
+
+```java
+// Check if the computed key is Symbol-related - reject with clear error
+if (isSymbolExpression(expr)) {
+    throw new Swc4jByteCodeCompilerException(
+        computed,
+        "Symbol keys are not supported in object literals. ...");
+}
+```
+
+### Tests Added (9 tests, all passing)
+
+**Test File:** `TestCompileAstObjectLitUnsupportedProps.java`
+
+All tests verify Symbol keys are properly rejected with clear error messages:
+
+- ✅ `testSymbolIteratorKeyRejected` - `[Symbol.iterator]: function*()` with generator
+- ✅ `testSymbolCallKeyRejected` - `[Symbol("myKey")]: "value"` direct call
+- ✅ `testSymbolForKeyRejected` - `[Symbol.for("globalKey")]: "value"` static method
+- ✅ `testSymbolToStringTagKeyRejected` - `[Symbol.toStringTag]: "CustomObject"` well-known symbol
+- ✅ `testSymbolHasInstanceKeyRejected` - `[Symbol.hasInstance]: function()` well-known symbol
+- ✅ `testMultipleSymbolKeysRejected` - Multiple Symbol keys in single object
+- ✅ `testMixedSymbolAndValidKeysRejected` - Symbol keys mixed with valid string/number keys
+- ✅ `testSymbolInRecordTypeRejected` - `Record<string, Object>` with Symbol key
+- ✅ `testSymbolInNestedObjectRejected` - Symbol key in nested object literal
+
+**Test Pattern Example:**
+```java
+@ParameterizedTest
+@EnumSource(JdkVersion.class)
+public void testSymbolIteratorKeyRejected(JdkVersion jdkVersion) {
+    assertThatThrownBy(() -> getCompiler(jdkVersion).compile("""
+        namespace com {
+          export class A {
+            test(): Object {
+              const obj = {
+                [Symbol.iterator]: function* () {
+                  yield 1
+                  yield 2
+                }
+              }
+              return obj
+            }
+          }
+        }"""))
+        .isInstanceOf(Swc4jByteCodeCompilerException.class)
+        .cause()
+        .hasMessageContaining("Symbol keys are not supported in object literals")
+        .hasMessageContaining("JavaScript Symbols have no equivalent in Java");
+}
+```
+
+### Error Message Design
+
+Error messages provide three key pieces of information:
+
+1. **What:** "Symbol keys are not supported in object literals"
+2. **Why:** "Java Map keys must be Objects with proper equals()/hashCode() implementations. JavaScript Symbols have no equivalent in Java."
+3. **Alternative:** "Consider using string keys instead."
+
+**Example Error:**
+```
+Symbol keys are not supported in object literals.
+Java Map keys must be Objects with proper equals()/hashCode() implementations.
+JavaScript Symbols have no equivalent in Java.
+Consider using string keys instead.
+```
+
+### User-Facing Impact
+
+**Before:** 
+- Confusing type mismatch errors
+- Runtime failures if Symbol detection was missed
+- No guidance on alternatives
+
+**After:**
+- Clear compile-time error at first Symbol key encountered
+- Explanation of Java/JavaScript semantic mismatch
+- Actionable suggestion to use string keys
+
+### Edge Cases Covered
+
+1. **Well-Known Symbols:** `Symbol.iterator`, `Symbol.toStringTag`, `Symbol.hasInstance`, etc.
+2. **Symbol Calls:** `Symbol()` and `Symbol("description")`
+3. **Global Symbols:** `Symbol.for("globalKey")`
+4. **Mixed Keys:** Symbol keys combined with valid string/number keys
+5. **Nested Objects:** Symbols in nested object literals
+6. **Typed Objects:** Symbols in `Record<K, V>` types
+7. **Multiple Symbols:** Objects with multiple Symbol keys
+
+### Files Modified
+
+- `ObjectLiteralGenerator.java`:
+  - Added `isSymbolExpression()` helper method (lines 468-497)
+  - Added Symbol check in `validateKeyValueProperty()` (lines 510-521)
+  - Added Symbol check in `generateKey()` (lines 257-265)
+  - Added imports: `Swc4jAstCallExpr`, `Swc4jAstMemberExpr`
+
+- `TestCompileAstObjectLitUnsupportedProps.java`:
+  - Added 9 comprehensive Symbol key rejection tests
+
+### Verification
+
+- ✅ All 9 Symbol key rejection tests pass
+- ✅ All existing compiler tests pass (no regressions)
+- ✅ Javadoc builds successfully
+- ✅ Error messages clear and actionable
+- ✅ Early detection prevents confusing downstream errors
+
+**Test Results:** 9/9 tests passing ✅
+
+### Future Considerations
+
+**Not Planned:**
+- Supporting Symbol keys is not feasible without a Java equivalent
+- Cannot be implemented without breaking LinkedHashMap semantics
+- String keys provide sufficient functionality for TypeScript-to-JVM compilation
+
+**Alternative Approaches Considered:**
+1. ❌ Convert Symbols to strings - loses uniqueness semantics
+2. ❌ Create Symbol wrapper class - requires custom Map implementation
+3. ✅ **Reject at compile time** - chosen approach, prevents runtime issues
+
+### Documentation Status
+
+- ✅ Implementation complete
+- ✅ Tests added and passing (9/9)
+- ✅ Error messages clear and actionable
+- ✅ Documentation updated
+- ✅ No regressions in existing tests

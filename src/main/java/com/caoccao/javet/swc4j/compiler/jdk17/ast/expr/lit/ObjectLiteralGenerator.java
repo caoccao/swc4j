@@ -16,11 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
 
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstKeyValueProp;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSpreadElement;
+import com.caoccao.javet.swc4j.ast.clazz.*;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
@@ -187,8 +184,28 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                         "(Ljava/util/Map;)V");
                 code.invokevirtual(putAllRef); // Stack: [map]
                 // Note: putAll returns void, so no need to pop
+            } else if (prop instanceof Swc4jAstMethodProp methodProp) {
+                // Method properties are not supported - requires function compilation
+                throw new Swc4jByteCodeCompilerException(
+                        methodProp,
+                        "Method properties are not supported in object literals. " +
+                                "Object literals compile to LinkedHashMap which cannot store executable methods. " +
+                                "Consider using a class with methods instead.");
+            } else if (prop instanceof Swc4jAstGetterProp getterProp) {
+                // Getter properties are not supported - incompatible with Map semantics
+                throw new Swc4jByteCodeCompilerException(
+                        getterProp,
+                        "Getter properties are not supported in object literals. " +
+                                "LinkedHashMap cannot implement property descriptors. " +
+                                "Consider storing the computed value directly or using a class with getter methods.");
+            } else if (prop instanceof Swc4jAstSetterProp setterProp) {
+                // Setter properties are not supported - incompatible with Map semantics
+                throw new Swc4jByteCodeCompilerException(
+                        setterProp,
+                        "Setter properties are not supported in object literals. " +
+                                "LinkedHashMap cannot implement property descriptors. " +
+                                "Consider using a class with setter methods instead.");
             }
-            // TODO: Phase 5+ - Handle other property types (Method, Getter/Setter, etc.)
         }
         // Stack: [map]
         // LinkedHashMap instance is left on stack for return/assignment
@@ -228,6 +245,17 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
             // Computed property name: {[expr]: value}
             // Phase 2.1: Generate expression and convert to appropriate type (String or Number)
             ISwc4jAstExpr expr = computed.getExpr();
+
+            // Check if the computed key is Symbol-related - reject with clear error
+            if (isSymbolExpression(expr)) {
+                throw new Swc4jByteCodeCompilerException(
+                        computed,
+                        "Symbol keys are not supported in object literals. " +
+                                "Java Map keys must be Objects with proper equals()/hashCode() implementations. " +
+                                "JavaScript Symbols have no equivalent in Java. " +
+                                "Consider using string keys instead.");
+            }
+
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
             if (exprType == null) {
                 exprType = "Ljava/lang/Object;";
@@ -429,6 +457,37 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                 "C".equals(typeDescriptor);
     }
 
+    /**
+     * Check if an expression is Symbol-related.
+     * Detects patterns like:
+     * - Symbol (identifier)
+     * - Symbol.iterator (member expression)
+     * - Symbol() (call expression)
+     * - Symbol.for() (call on member expression)
+     *
+     * @param expr the expression to check
+     * @return true if the expression is Symbol-related
+     */
+    private boolean isSymbolExpression(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstIdent ident) {
+            // Direct Symbol reference: {[Symbol]: value}
+            return "Symbol".equals(ident.getSym());
+        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
+            // Symbol.iterator, Symbol.for, etc.
+            ISwc4jAstExpr obj = memberExpr.getObj();
+            if (obj instanceof Swc4jAstIdent objIdent) {
+                return "Symbol".equals(objIdent.getSym());
+            }
+        } else if (expr instanceof Swc4jAstCallExpr callExpr) {
+            // Symbol() or Symbol.for()
+            var callee = callExpr.getCallee();
+            if (callee instanceof ISwc4jAstExpr calleeExpr) {
+                return isSymbolExpression(calleeExpr);
+            }
+        }
+        return false;
+    }
+
     private void validateArrayElements(
             Swc4jAstArrayLit arrayLit,
             String expectedElementType,
@@ -470,6 +529,19 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
             GenericTypeInfo genericTypeInfo) throws Swc4jByteCodeCompilerException {
         ISwc4jAstPropName key = kvProp.getKey();
         ISwc4jAstExpr valueExpr = kvProp.getValue();
+
+        // Check for Symbol keys first - reject before type validation
+        if (key instanceof Swc4jAstComputedPropName computed) {
+            ISwc4jAstExpr expr = computed.getExpr();
+            if (isSymbolExpression(expr)) {
+                throw new Swc4jByteCodeCompilerException(
+                        computed,
+                        "Symbol keys are not supported in object literals. " +
+                                "Java Map keys must be Objects with proper equals()/hashCode() implementations. " +
+                                "JavaScript Symbols have no equivalent in Java. " +
+                                "Consider using string keys instead.");
+            }
+        }
 
         // Validate key type
         String actualKeyType = compiler.getTypeResolver().inferKeyType(key);

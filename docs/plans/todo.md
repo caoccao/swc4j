@@ -37,13 +37,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Track capture holder lifetime, ensure no retained references beyond scope; add cleanup if needed.
 - Tests: Stress tests for nested closures and large capture sets.
 
-## Feature: Object Literal Gaps (Methods, Accessors, Symbols, Prototypes)
-- Evidence: `docs/plans/ast/expr/lit/object-lit.md`.
-- Status: Method properties deferred; getters/setters, symbols, descriptors, prototypes unsupported.
-- Confidence: 40%.
-- Plan: Decide representation for methods/accessors (class generation or wrapper), add symbol key handling, and document prototype limits.
-- Tests: Method properties in literals, getter/setter usage, and symbol key rejection.
-
 ## Feature: Array Literal Semantics (Holes, Bounds, Length Growth)
 - Evidence: `docs/plans/ast/expr/lit/array-lit.md`.
 - Status: Holes untested, out-of-bounds behavior JS-incompatible, length grow not verified.
