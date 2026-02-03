@@ -77,21 +77,6 @@ These need to be addressed so errors always include source snippet, line, column
 - Compiler pathways pass only code strings; there is no centralized source map to resolve span offsets to line/column and snippet.
 - Error propagation does not standardize a single formatter for all thrown `Swc4jByteCodeCompilerException` cases.
 
-## Feature: Optional Chaining and Optional Calls
-- Evidence: `ExpressionGenerator` lacks `Swc4jAstOptChainExpr` and `Swc4jAstOptCall` handling.
-- Status: Not implemented.
-- Confidence: 60%.
-- Plan: Add nullish checks around member/call chains, preserve short-circuit semantics, and ensure return type inference for optional results.
-- Tests: Optional chain on fields, calls, nested chains, and mixed with updates/assignments.
-
-## Feature: Tagged Templates
-- Evidence: `ExpressionGenerator` lacks `Swc4jAstTaggedTpl` handling.
-- Status: Not implemented. ✅ Plain template literals (`Swc4jAstTpl`) are implemented.
-- Confidence: 45%.
-- Plan: Provide runtime support for tagged templates (cooked/raw array + substitutions).
-- Tests: Tagged template calls with custom tag functions.
-- Note: Basic template literals (`Swc4jAstTpl`) with string concatenation lowering are implemented and tested in `TestCompileAstTemplateLiteral` (10 test cases covering basic templates, interpolation, multiline, escapes, and consecutive interpolations).
-
 ## Feature: Function Expressions and Class Expressions
 - Evidence: `ExpressionGenerator` lacks `Swc4jAstFnExpr` and `Swc4jAstClassExpr` handling.
 - Status: Not implemented.

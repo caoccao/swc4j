@@ -428,6 +428,21 @@ public final class TypeResolver {
         return parseRecordType(tsType);
     }
 
+    public String extractMemberExprPropName(Swc4jAstMemberExpr memberExpr) {
+        if (memberExpr.getProp() instanceof Swc4jAstIdentName identName) {
+            return identName.getSym();
+        }
+        if (memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
+            return privateName.getName();
+        }
+        if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+            if (computedProp.getExpr() instanceof Swc4jAstStr str) {
+                return str.getValue();
+            }
+        }
+        return null;
+    }
+
     /**
      * Extracts the parameter name from a pattern.
      *
@@ -1213,6 +1228,8 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
             // For parenthesized expressions, infer type from the inner expression
             return inferTypeFromExpr(parenExpr.getExpr());
+        } else if (expr instanceof Swc4jAstOptChainExpr) {
+            return "Ljava/lang/Object;";
         } else if (expr instanceof Swc4jAstCallExpr callExpr) {
             // For call expressions, try to infer the return type
 

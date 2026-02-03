@@ -71,6 +71,8 @@ public final class ExpressionGenerator extends BaseAstProcessor<ISwc4jAstExpr> {
             compiler.getUnaryExpressionGenerator().generate(code, cp, unaryExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstUpdateExpr updateExpr) {
             compiler.getUpdateExpressionGenerator().generate(code, cp, updateExpr, returnTypeInfo);
+        } else if (expr instanceof Swc4jAstOptChainExpr optChainExpr) {
+            compiler.getOptionalChainExpressionGenerator().generate(code, cp, optChainExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstCondExpr condExpr) {
             compiler.getConditionalExpressionGenerator().generate(code, cp, condExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
