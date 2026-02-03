@@ -77,12 +77,7 @@ public final class TypeResolver {
 
         // Same type - no conversion needed
         if (type1.equals(type2)) {
-            // For primitives, keep the specific type
-            if (TypeConversionUtils.isPrimitiveType(type1)) {
-                return type1;
-            }
-            // For reference types, use Object for stackmap compatibility
-            return "Ljava/lang/Object;";
+            return type1;
         }
 
         // Both primitives - use numeric widening
@@ -968,6 +963,13 @@ public final class TypeResolver {
             return "Ljava/lang/Object;";
         } else if (expr instanceof Swc4jAstStr) {
             return "Ljava/lang/String;";
+        } else if (expr instanceof Swc4jAstTpl) {
+            // Template literal always returns String
+            return "Ljava/lang/String;";
+        } else if (expr instanceof Swc4jAstTaggedTpl) {
+            // Tagged template - return type depends on the tag function
+            // For now, return null to let method resolution handle it
+            return null;
         } else if (expr instanceof Swc4jAstAssignExpr assignExpr) {
             // Assignment expression result is the type of the left operand (the variable being assigned to)
             // because the right operand is converted to the left operand's type before storing

@@ -87,7 +87,7 @@ where the tag function receives a `String[]` of quasis followed by individual ex
 
 ### ✅ Implemented Tests (TestCompileAstTaggedTplBasic)
 
-All 8 tagged template tests passing (100% success rate):
+All 8 basic tagged template tests passing (100% success rate):
 
 1. **testTaggedTemplateBasic** - Basic tagged template: `this.tag\`Hello ${name}!\``
 2. **testTaggedTemplateNoInterpolation** - Tag with no expressions
@@ -98,10 +98,24 @@ All 8 tagged template tests passing (100% success rate):
 7. **testTaggedTemplateEmptyTemplate** - Empty tagged template
 8. **testTaggedTemplateCustomJoin** - Custom join with brackets
 
+### ✅ Implemented Tests (TestCompileAstTaggedTplAdvanced)
+
+All 10 advanced tagged template tests passing (100% success rate):
+
+1. **testTaggedTemplateInConditional** - Tagged template in ternary expression
+2. **testTaggedTemplateManyInterpolations** - Four interpolated values with delimiters
+3. **testTaggedTemplateNestedRegularTemplate** - Regular template literal as interpolated expression
+4. **testTaggedTemplateNestedTaggedTemplate** - Tagged template result as interpolated expression
+5. **testTaggedTemplateReturnedFromMethod** - Tagged template returned from helper method
+6. **testTaggedTemplateWithBooleanValue** - Boolean expression in tagged template
+7. **testTaggedTemplateWithConditionalExpression** - Conditional expression result as argument
+8. **testTaggedTemplateWithDoubleValue** - Double primitive expression
+9. **testTaggedTemplateWithLongValue** - Long primitive expression
+10. **testTaggedTemplateWithMethodCallExpression** - Method call result as argument
+
 ### 🔲 Missing Test Coverage
 
 - Standalone function tags (non-member expression)
-- Nested tagged templates: `outer\`prefix ${inner\`${x}\`} suffix\``
 - Raw string access in tag function
 
 ## Integration Points
@@ -136,6 +150,8 @@ public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() { ... 
 
 ### Used By Tagged Templates
 - `TypeResolver.inferTypeFromExpr()` - Object and expression type inference
+  - Added support for `Swc4jAstTpl` → returns `Ljava/lang/String;`
+  - Added support for `Swc4jAstTaggedTpl` → returns `null` (resolved by method lookup)
 - `ScopedJavaTypeRegistry.resolveClassMethodReturnType()` - Tag method return type resolution
 - `ExpressionGenerator.generate()` - Object reference and expression bytecode generation
 - `TypeConversionUtils.boxPrimitiveType()` / `unboxWrapperType()` - Return type conversion
@@ -159,6 +175,6 @@ public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() { ... 
 - **TypeScript Spec:** [Template Literals](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html)
 - **ECMAScript Spec:** [Tagged Templates](https://tc39.es/ecma262/#sec-tagged-templates)
 - **Implementation:** `TaggedTemplateLiteralGenerator.java`
-- **Tests:** `TestCompileAstTaggedTplBasic.java`
+- **Tests:** `TestCompileAstTaggedTplBasic.java`, `TestCompileAstTaggedTplAdvanced.java`
 - **Related:** `TypeConversionUtils.java`, `TypeResolver.java`, `ScopedJavaTypeRegistry.java`
 - **See also:** [Template Literals](tpl.md)
