@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstTplElement;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstFnDecl;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -49,6 +50,16 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         super(compiler);
     }
 
+    private Swc4jAstFnDecl findStandaloneFunction(String packageName, String functionName) {
+        var functions = compiler.getMemory().getScopedStandaloneFunctionRegistry().getFunctions(packageName);
+        for (Swc4jAstFnDecl fnDecl : functions) {
+            if (fnDecl.getIdent().getSym().equals(functionName)) {
+                return fnDecl;
+            }
+        }
+        return null;
+    }
+
     @Override
     public void generate(
             CodeBuilder code,
@@ -62,6 +73,8 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
 
         if (tag instanceof Swc4jAstMemberExpr memberExpr) {
             generateMemberExprTagCall(code, cp, taggedTpl, memberExpr, quasis, exprs, returnTypeInfo);
+        } else if (tag instanceof Swc4jAstIdent ident) {
+            generateStandaloneFunctionTagCall(code, cp, taggedTpl, ident, quasis, exprs, returnTypeInfo);
         } else {
             throw new Swc4jByteCodeCompilerException(taggedTpl,
                     "Unsupported tag expression type: " + tag.getClass().getSimpleName());
@@ -146,6 +159,78 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         }
     }
 
+    private void generateStandaloneFunctionTagCall(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstTaggedTpl taggedTpl,
+            Swc4jAstIdent ident,
+            List<Swc4jAstTplElement> quasis,
+            List<ISwc4jAstExpr> exprs,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        String functionName = ident.getSym();
+
+        // Get the current package name
+        String currentClassInternalName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+        int lastSlash = currentClassInternalName.lastIndexOf('/');
+        String packageName = lastSlash >= 0 ? currentClassInternalName.substring(0, lastSlash).replace('/', '.') : "";
+
+        // Look up the standalone function in the registry
+        Swc4jAstFnDecl fnDecl = findStandaloneFunction(packageName, functionName);
+        if (fnDecl == null) {
+            throw new Swc4jByteCodeCompilerException(taggedTpl,
+                    "Standalone function not found: " + functionName);
+        }
+
+        // Get the dummy class name for this package
+        String dummyClassName = compiler.getMemory().getScopedStandaloneFunctionRegistry().getDummyClassName(packageName);
+        if (dummyClassName == null) {
+            throw new Swc4jByteCodeCompilerException(taggedTpl,
+                    "Dummy class not found for package: " + packageName);
+        }
+
+        // Build the internal class name
+        String dummyClassInternalName = packageName.isEmpty() ? dummyClassName : packageName.replace('.', '/') + "/" + dummyClassName;
+
+        // Build method descriptor: first param is String[], rest are expression types
+        StringBuilder paramDescriptors = new StringBuilder();
+
+        // First argument: String[] for quasis (loaded from cached static field)
+        paramDescriptors.append("[Ljava/lang/String;");
+        loadCachedStringArray(code, cp, quasis);
+
+        // Remaining arguments: interpolated expressions
+        for (ISwc4jAstExpr expr : exprs) {
+            String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
+            compiler.getExpressionGenerator().generate(code, cp, expr, null);
+            if (exprType == null) {
+                exprType = "Ljava/lang/Object;";
+            }
+            paramDescriptors.append(exprType);
+        }
+
+        // Resolve the return type from the function declaration
+        String methodReturnType = resolveStandaloneFunctionReturnType(fnDecl, taggedTpl);
+
+        String methodDescriptor = "(" + paramDescriptors + ")" + methodReturnType;
+
+        // Invoke the static method
+        int methodRef = cp.addMethodRef(dummyClassInternalName, functionName, methodDescriptor);
+        code.invokestatic(methodRef);
+
+        // Handle return type conversion if needed
+        if (returnTypeInfo != null && returnTypeInfo.descriptor() != null
+                && !methodReturnType.equals(returnTypeInfo.descriptor())) {
+            if (TypeConversionUtils.isPrimitiveType(methodReturnType)
+                    && !TypeConversionUtils.isPrimitiveType(returnTypeInfo.descriptor())) {
+                String wrapperType = TypeConversionUtils.getWrapperType(methodReturnType);
+                TypeConversionUtils.boxPrimitiveType(code, cp, methodReturnType, wrapperType);
+            } else if (!TypeConversionUtils.isPrimitiveType(methodReturnType)
+                    && TypeConversionUtils.isPrimitiveType(returnTypeInfo.descriptor())) {
+                TypeConversionUtils.unboxWrapperType(code, cp, "L" + methodReturnType + ";");
+            }
+        }
+    }
+
     /**
      * Load a cached String[] array onto the stack containing the template quasis (cooked values).
      * <p>
@@ -172,5 +257,15 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         // Generate GETSTATIC to load the cached array
         int fieldRef = cp.addFieldRef(classInternalName, fieldName, "[Ljava/lang/String;");
         code.getstatic(fieldRef);
+    }
+
+    private String resolveStandaloneFunctionReturnType(Swc4jAstFnDecl fnDecl, Swc4jAstTaggedTpl taggedTpl) throws Swc4jByteCodeCompilerException {
+        var function = fnDecl.getFunction();
+        var returnTypeAnn = function.getReturnType();
+        if (returnTypeAnn.isPresent()) {
+            return compiler.getTypeResolver().mapTsTypeToDescriptor(returnTypeAnn.get().getTypeAnn());
+        }
+        // Default to String return type for tag functions
+        return "Ljava/lang/String;";
     }
 }

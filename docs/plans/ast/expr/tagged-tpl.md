@@ -64,6 +64,7 @@ where the tag function receives a `String[]` of quasis followed by individual ex
 
 **Supported Features:**
 - Member expression tags (`this.method` style)
+- Standalone function tags (non-member expression tags)
 - Multiple interpolated expressions with mixed types
 - String and primitive return types
 - Empty templates (no quasis content)
@@ -73,12 +74,14 @@ where the tag function receives a `String[]` of quasis followed by individual ex
 - Deduplication of identical quasis within the same class
 
 **Tag Function Resolution:**
-- Method name extracted from `Swc4jAstIdentName` or `Swc4jAstIdent` property
-- Object type inferred via `TypeResolver.inferTypeFromExpr()`
-- Return type resolved via `ScopedJavaTypeRegistry.resolveClassMethodReturnType()`
+- Member expression tags: Method name extracted from `Swc4jAstIdentName` or `Swc4jAstIdent` property
+  - Object type inferred via `TypeResolver.inferTypeFromExpr()`
+  - Return type resolved via `ScopedJavaTypeRegistry.resolveClassMethodReturnType()`
+- Standalone function tags: Function name from `Swc4jAstIdent`
+  - Function looked up in `ScopedStandaloneFunctionRegistry`
+  - Invoked via `INVOKESTATIC` on the dummy class (e.g., `com/$`)
 
 **Limitations:**
-- Only supports `MemberExpr` tags (e.g., `this.tag`). Standalone function tags not yet supported.
 - No raw string array support
 
 ### ✅ Implemented: Template Object Caching
@@ -121,6 +124,44 @@ GETSTATIC com/A.$tpl$0 : [Ljava/lang/String;
 - Lower GC pressure
 - Identical quasis share the same cached field
 
+### ✅ Implemented: Standalone Function Tags
+
+**File:** `TaggedTemplateLiteralGenerator.java`
+
+**Strategy:** Support `Swc4jAstIdent` tags (standalone function names) in addition to `MemberExpr` tags.
+Standalone functions are compiled into dummy classes (e.g., `$` or `com/$`) and invoked via `INVOKESTATIC`.
+
+**Bytecode Generation:**
+```java
+// For: tag`Hello ${name}!` (where tag is a standalone function)
+1. Load cached String[] for quasis via GETSTATIC
+2. Generate each interpolated expression
+3. Build method descriptor from quasis and expression types
+4. INVOKESTATIC on the dummy class (e.g., com/$.tag)
+5. Handle return type conversion if needed
+```
+
+**How it works:**
+1. Tag expression is `Swc4jAstIdent` (simple function name like `tag`)
+2. Function is looked up in `ScopedStandaloneFunctionRegistry` using current package
+3. Dummy class name is retrieved from registry (e.g., `$`, `$1`, `com/$`)
+4. Method descriptor is built from `String[]` + expression types + return type
+5. `INVOKESTATIC` is generated to call the static method on the dummy class
+
+**Example:**
+```typescript
+namespace com {
+  export function tag(strings: String[], value: String): String {
+    return strings[0] + value + strings[1]
+  }
+  export class A {
+    test(): String {
+      return tag`Hello ${"World"}!`  // Calls com/$.tag via INVOKESTATIC
+    }
+  }
+}
+```
+
 ## Test Coverage
 
 ### ✅ Implemented Tests (TestCompileAstTaggedTplBasic)
@@ -162,9 +203,21 @@ All 6 caching tests passing (100% success rate):
 5. **testTemplateCacheNoInterpolation** - Template with no interpolation has single-element cache
 6. **testTemplateCacheManyInterpolations** - Template with many interpolations has correct cache
 
+### ✅ Implemented Tests (TestCompileAstTaggedTplStandalone)
+
+All 8 standalone function tag tests passing (100% success rate):
+
+1. **testStandaloneTagBasic** - Basic standalone function tag: `tag\`Hello ${name}!\``
+2. **testStandaloneTagMultipleInterpolations** - Multiple interpolated values
+3. **testStandaloneTagNoInterpolation** - Tag with no expressions
+4. **testStandaloneTagWithIntValue** - Integer expression in tagged template
+5. **testStandaloneTagReturnsInt** - Standalone tag function returning int
+6. **testStandaloneTagWithVariable** - Using local variable in interpolation
+7. **testStandaloneTagInDefaultPackage** - Standalone tag in default package (no namespace)
+8. **testStandaloneTagWithMethodCall** - Method call result as argument
+
 ### 🔲 Missing Test Coverage
 
-- Standalone function tags (non-member expression)
 - Raw string access in tag function
 
 ## Integration Points
@@ -190,10 +243,12 @@ public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() { ... 
 ## Error Handling
 
 ### Error Cases
-1. **Unsupported tag expression type** - Only `MemberExpr` tags supported; throws `Swc4jByteCodeCompilerException`
-2. **Unsupported tag property type** - Only `Swc4jAstIdentName` and `Swc4jAstIdent` supported
+1. **Unsupported tag expression type** - Only `MemberExpr` and `Ident` tags supported; throws `Swc4jByteCodeCompilerException`
+2. **Unsupported tag property type** - Only `Swc4jAstIdentName` and `Swc4jAstIdent` supported for member expression tags
 3. **Cannot infer object type** - Object type must resolve to `L...;` descriptor
 4. **Cannot infer return type** - Method must be resolvable via `ScopedJavaTypeRegistry`
+5. **Standalone function not found** - Function name must exist in `ScopedStandaloneFunctionRegistry`
+6. **Dummy class not found** - Package must have a dummy class registered for standalone functions
 
 ## Dependencies
 
@@ -202,6 +257,7 @@ public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() { ... 
   - Added support for `Swc4jAstTpl` → returns `Ljava/lang/String;`
   - Added support for `Swc4jAstTaggedTpl` → returns `null` (resolved by method lookup)
 - `ScopedJavaTypeRegistry.resolveClassMethodReturnType()` - Tag method return type resolution
+- `ScopedStandaloneFunctionRegistry` - Standalone function lookup for function tags
 - `ExpressionGenerator.generate()` - Object reference and expression bytecode generation
 - `TypeConversionUtils.boxPrimitiveType()` / `unboxWrapperType()` - Return type conversion
 - `ScopedTemplateCacheRegistry` - Scoped template cache tracking with deduplication
@@ -209,10 +265,7 @@ public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() { ... 
 
 ## Future Enhancements
 
-1. **Standalone Function Tags** (Medium Priority)
-   - Support non-member expression tags (e.g., standalone function references)
-
-2. **Raw String Array Support** (Low Priority)
+1. **Raw String Array Support** (Low Priority)
    - Provide both cooked and raw string arrays to tag functions
    - Support `strings.raw` access pattern
 
@@ -221,6 +274,6 @@ public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() { ... 
 - **TypeScript Spec:** [Template Literals](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html)
 - **ECMAScript Spec:** [Tagged Templates](https://tc39.es/ecma262/#sec-tagged-templates)
 - **Implementation:** `TaggedTemplateLiteralGenerator.java`, `ScopedTemplateCacheRegistry.java`
-- **Tests:** `TestCompileAstTaggedTplBasic.java`, `TestCompileAstTaggedTplAdvanced.java`, `TestCompileAstTaggedTplCaching.java`
+- **Tests:** `TestCompileAstTaggedTplBasic.java`, `TestCompileAstTaggedTplAdvanced.java`, `TestCompileAstTaggedTplCaching.java`, `TestCompileAstTaggedTplStandalone.java`
 - **Related:** `TypeConversionUtils.java`, `TypeResolver.java`, `ScopedJavaTypeRegistry.java`, `ClassGenerator.java`
 - **See also:** [Template Literals](tpl.md)
