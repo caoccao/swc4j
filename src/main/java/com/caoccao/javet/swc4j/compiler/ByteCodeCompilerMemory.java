@@ -29,6 +29,7 @@ public final class ByteCodeCompilerMemory {
     private final ScopedFunctionalInterfaceRegistry scopedFunctionalInterfaceRegistry;
     private final ScopedJavaTypeRegistry scopedJavaTypeRegistry;
     private final ScopedStandaloneFunctionRegistry scopedStandaloneFunctionRegistry;
+    private final ScopedTemplateCacheRegistry scopedTemplateCacheRegistry;
     private final ScopedTypeAliasRegistry scopedTypeAliasRegistry;
     private int fnInterfaceCounter;
 
@@ -38,6 +39,7 @@ public final class ByteCodeCompilerMemory {
         scopedFunctionalInterfaceRegistry = new ScopedFunctionalInterfaceRegistry();
         scopedJavaTypeRegistry = new ScopedJavaTypeRegistry();
         scopedStandaloneFunctionRegistry = new ScopedStandaloneFunctionRegistry();
+        scopedTemplateCacheRegistry = new ScopedTemplateCacheRegistry();
         scopedTypeAliasRegistry = new ScopedTypeAliasRegistry();
         fnInterfaceCounter = 0;
     }
@@ -97,6 +99,15 @@ public final class ByteCodeCompilerMemory {
         return scopedStandaloneFunctionRegistry;
     }
 
+    /**
+     * Get the scoped template cache registry for tagged template literal optimization.
+     *
+     * @return the scoped template cache registry
+     */
+    public ScopedTemplateCacheRegistry getScopedTemplateCacheRegistry() {
+        return scopedTemplateCacheRegistry;
+    }
+
     public ScopedTypeAliasRegistry getScopedTypeAliasRegistry() {
         return scopedTypeAliasRegistry;
     }
@@ -129,6 +140,7 @@ public final class ByteCodeCompilerMemory {
         scopedFunctionalInterfaceRegistry.clear();
         scopedJavaTypeRegistry.clear();
         scopedStandaloneFunctionRegistry.clear();
+        scopedTemplateCacheRegistry.clear();
         scopedTypeAliasRegistry.clear();
     }
 

@@ -62,7 +62,7 @@ public class TestCompileAstTaggedTplAdvanced extends BaseTestCompileSuite {
                       return strings[0] + a + strings[1] + b + strings[2] + c + strings[3] + d + strings[4]
                     }
                     test(): String {
-                      return this.join`[${\"A\"}|${\"B\"}|${\"C\"}|${\"D\"}]`
+                      return this.join`[${"A"}|${"B"}|${"C"}|${"D"}]`
                     }
                   }
                 }""");

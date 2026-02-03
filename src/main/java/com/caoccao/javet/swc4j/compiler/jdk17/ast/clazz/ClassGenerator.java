@@ -34,6 +34,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
+import com.caoccao.javet.swc4j.compiler.memory.ScopedTemplateCacheRegistry;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
@@ -102,6 +103,9 @@ public final class ClassGenerator extends BaseAstProcessor {
 
         // Push the current class onto the stack for 'this' resolution (supports nested classes)
         compiler.getMemory().getCompilationContext().pushClass(internalClassName);
+
+        // Enter template cache scope for this class
+        compiler.getMemory().getScopedTemplateCacheRegistry().enterScope();
 
         // Push type parameters scope for generics support (type erasure)
         TypeParameterScope typeParamScope = clazz.getTypeParams()
@@ -176,11 +180,6 @@ public final class ClassGenerator extends BaseAstProcessor {
                 }
             }
 
-            // Generate <clinit> for static field initialization and static blocks if needed
-            if (!staticInitItems.isEmpty()) {
-                generateClinitMethod(classWriter, cp, internalClassName, staticInitItems);
-            }
-
             // Collect all explicit constructors
             List<Swc4jAstConstructor> constructors = new ArrayList<>();
             for (ISwc4jAstClassMember member : clazz.getBody()) {
@@ -200,7 +199,7 @@ public final class ClassGenerator extends BaseAstProcessor {
                 generateDefaultConstructor(classWriter, cp, superClassInternalName);
             }
 
-            // Generate methods
+            // Generate methods (this may create template cache entries)
             for (ISwc4jAstClassMember member : clazz.getBody()) {
                 if (member instanceof Swc4jAstClassMethod method) {
                     compiler.getMethodGenerator().generate(classWriter, cp, method);
@@ -210,8 +209,27 @@ public final class ClassGenerator extends BaseAstProcessor {
                 }
             }
 
+            // After method generation, get template caches from current scope and add static fields
+            List<ScopedTemplateCacheRegistry.TemplateCacheEntry> templateCaches =
+                    compiler.getMemory().getScopedTemplateCacheRegistry().getCurrentCaches();
+            for (ScopedTemplateCacheRegistry.TemplateCacheEntry cache : templateCaches) {
+                // Add private static final field for each template cache
+                classWriter.addField(
+                        0x001A, // ACC_PRIVATE | ACC_STATIC | ACC_FINAL
+                        cache.fieldName(),
+                        "[Ljava/lang/String;"
+                );
+            }
+
+            // Generate <clinit> for static field initialization, static blocks, and template caches
+            if (!staticInitItems.isEmpty() || !templateCaches.isEmpty()) {
+                generateClinitMethod(classWriter, cp, internalClassName, staticInitItems, templateCaches);
+            }
+
             return classWriter.toByteArray();
         } finally {
+            // Exit template cache scope (automatically cleans up)
+            compiler.getMemory().getScopedTemplateCacheRegistry().exitScope();
             // Pop the type parameter scope when done
             if (typeParamScope != null) {
                 compiler.getMemory().getCompilationContext().popTypeParameterScope();
@@ -222,14 +240,16 @@ public final class ClassGenerator extends BaseAstProcessor {
     }
 
     /**
-     * Generates the &lt;clinit&gt; method for static field initialization and static blocks.
+     * Generates the &lt;clinit&gt; method for static field initialization, static blocks, and template caches.
      * Items are processed in declaration order to ensure correct initialization sequence.
+     * Template caches are initialized at the end of &lt;clinit&gt;.
      */
     private void generateClinitMethod(
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
             String internalClassName,
-            List<StaticInitItem> staticInitItems) throws Swc4jByteCodeCompilerException {
+            List<StaticInitItem> staticInitItems,
+            List<ScopedTemplateCacheRegistry.TemplateCacheEntry> templateCaches) throws Swc4jByteCodeCompilerException {
         // Reset compilation context for static initialization
         compiler.getMemory().resetCompilationContext(true); // is static
 
@@ -259,6 +279,30 @@ public final class ClassGenerator extends BaseAstProcessor {
                     compiler.getStatementGenerator().generate(code, cp, stmt, null);
                 }
             }
+        }
+
+        // Initialize template cache fields
+        int stringClassRef = cp.addClass("java/lang/String");
+        for (ScopedTemplateCacheRegistry.TemplateCacheEntry cache : templateCaches) {
+            List<String> quasis = cache.quasis();
+            int size = quasis.size();
+
+            // Create String[] array: new String[size]
+            code.iconst(size);
+            code.anewarray(stringClassRef);
+
+            // Populate array: strings[i] = quasis[i]
+            for (int i = 0; i < size; i++) {
+                code.dup();
+                code.iconst(i);
+                int stringRef = cp.addString(quasis.get(i));
+                code.ldc(stringRef);
+                code.aastore();
+            }
+
+            // Store to static field: $tpl$N = array
+            int fieldRef = cp.addFieldRef(internalClassName, cache.fieldName(), "[Ljava/lang/String;");
+            code.putstatic(fieldRef);
         }
 
         code.returnVoid(); // return

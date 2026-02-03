@@ -6,7 +6,7 @@ Tagged templates allow custom processing of template literals by calling a tag f
 ```typescript
 this.tag`Hello ${name}!`
 // Compiles to equivalent of:
-this.tag(new String[]{"Hello ", "!"}, name)
+this.tag($tpl$0, name)  // where $tpl$0 is a cached static final String[]
 ```
 
 This document covers the implementation of `Swc4jAstTaggedTpl` (tagged template literals).
@@ -55,10 +55,7 @@ where the tag function receives a `String[]` of quasis followed by individual ex
 ```java
 // For: this.tag`Hello ${name}!`
 1. Generate object reference (this)
-2. Create String[] for quasis:
-   a. ICONST size
-   b. ANEWARRAY java/lang/String
-   c. For each quasi: DUP, ICONST index, LDC string, AASTORE
+2. Load cached String[] for quasis via GETSTATIC
 3. Generate each interpolated expression
 4. Resolve method descriptor from parameter types
 5. INVOKEVIRTUAL tag method
@@ -72,6 +69,8 @@ where the tag function receives a `String[]` of quasis followed by individual ex
 - Empty templates (no quasis content)
 - Templates with no interpolation
 - Return type conversion (boxing/unboxing)
+- Template caching (String[] created once at class load, reused on every call)
+- Deduplication of identical quasis within the same class
 
 **Tag Function Resolution:**
 - Method name extracted from `Swc4jAstIdentName` or `Swc4jAstIdent` property
@@ -80,8 +79,47 @@ where the tag function receives a `String[]` of quasis followed by individual ex
 
 **Limitations:**
 - Only supports `MemberExpr` tags (e.g., `this.tag`). Standalone function tags not yet supported.
-- No template object caching (String[] created per call site)
 - No raw string array support
+
+### ✅ Implemented: Template Object Caching
+
+**File:** `ScopedTemplateCacheRegistry.java`
+
+**Strategy:** Cache quasis String[] arrays as private static final fields, initialized once in `<clinit>`.
+Uses a scoped registry pattern for proper cleanup and nested class support.
+
+**How it works:**
+1. `ClassGenerator` calls `enterScope()` when starting class compilation
+2. During method compilation, `TaggedTemplateLiteralGenerator` registers quasis with `ScopedTemplateCacheRegistry`
+3. Registry returns a field name (e.g., `$tpl$0`) and deduplicates identical quasis within the scope
+4. After all methods are compiled, `ClassGenerator` adds static fields and `<clinit>` initialization
+5. `ClassGenerator` calls `exitScope()` in finally block (automatic cleanup)
+6. At runtime, `GETSTATIC` loads the cached array instead of creating a new one
+
+**Bytecode (before caching):**
+```
+ICONST 2
+ANEWARRAY java/lang/String
+DUP
+ICONST 0
+LDC "Hello "
+AASTORE
+DUP
+ICONST 1
+LDC "!"
+AASTORE
+```
+
+**Bytecode (with caching):**
+```
+GETSTATIC com/A.$tpl$0 : [Ljava/lang/String;
+```
+
+**Benefits:**
+- Reduced bytecode size (1 instruction vs 10+ instructions)
+- No array allocation on every call
+- Lower GC pressure
+- Identical quasis share the same cached field
 
 ## Test Coverage
 
@@ -112,6 +150,17 @@ All 10 advanced tagged template tests passing (100% success rate):
 8. **testTaggedTemplateWithDoubleValue** - Double primitive expression
 9. **testTaggedTemplateWithLongValue** - Long primitive expression
 10. **testTaggedTemplateWithMethodCallExpression** - Method call result as argument
+
+### ✅ Implemented Tests (TestCompileAstTaggedTplCaching)
+
+All 6 caching tests passing (100% success rate):
+
+1. **testTemplateCacheFieldExists** - Verifies static final $tpl$ field is generated
+2. **testTemplateCacheDeduplication** - Identical quasis share same cached field
+3. **testTemplateCacheMultipleDifferentTemplates** - Different quasis create different fields
+4. **testTemplateCacheEmptyTemplate** - Empty template creates cache entry
+5. **testTemplateCacheNoInterpolation** - Template with no interpolation has single-element cache
+6. **testTemplateCacheManyInterpolations** - Template with many interpolations has correct cache
 
 ### 🔲 Missing Test Coverage
 
@@ -155,18 +204,15 @@ public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() { ... 
 - `ScopedJavaTypeRegistry.resolveClassMethodReturnType()` - Tag method return type resolution
 - `ExpressionGenerator.generate()` - Object reference and expression bytecode generation
 - `TypeConversionUtils.boxPrimitiveType()` / `unboxWrapperType()` - Return type conversion
+- `ScopedTemplateCacheRegistry` - Scoped template cache tracking with deduplication
+- `ClassGenerator` - Generates static fields and `<clinit>` initialization for template caches
 
 ## Future Enhancements
 
 1. **Standalone Function Tags** (Medium Priority)
    - Support non-member expression tags (e.g., standalone function references)
 
-2. **Template Object Caching** (Medium Priority)
-   - Cache String[] per call site using static final fields
-   - Use content hash to deduplicate identical template literals
-   - Generate unique field names: `$tpl$0`, `$tpl$1`, etc.
-
-3. **Raw String Array Support** (Low Priority)
+2. **Raw String Array Support** (Low Priority)
    - Provide both cooked and raw string arrays to tag functions
    - Support `strings.raw` access pattern
 
@@ -174,7 +220,7 @@ public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() { ... 
 
 - **TypeScript Spec:** [Template Literals](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html)
 - **ECMAScript Spec:** [Tagged Templates](https://tc39.es/ecma262/#sec-tagged-templates)
-- **Implementation:** `TaggedTemplateLiteralGenerator.java`
-- **Tests:** `TestCompileAstTaggedTplBasic.java`, `TestCompileAstTaggedTplAdvanced.java`
-- **Related:** `TypeConversionUtils.java`, `TypeResolver.java`, `ScopedJavaTypeRegistry.java`
+- **Implementation:** `TaggedTemplateLiteralGenerator.java`, `ScopedTemplateCacheRegistry.java`
+- **Tests:** `TestCompileAstTaggedTplBasic.java`, `TestCompileAstTaggedTplAdvanced.java`, `TestCompileAstTaggedTplCaching.java`
+- **Related:** `TypeConversionUtils.java`, `TypeResolver.java`, `ScopedJavaTypeRegistry.java`, `ClassGenerator.java`
 - **See also:** [Template Literals](tpl.md)

@@ -16,11 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstTaggedTpl;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstTpl;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstTplElement;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
@@ -31,6 +27,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,7 +37,12 @@ import java.util.List;
  * where the tag function receives a String[] of template strings followed by
  * the interpolated expression values as individual arguments.
  * <p>
- * {@code this.tag`Hello ${name}!`} compiles to {@code this.tag(new String[]{"Hello ", "!"}, name)}
+ * {@code this.tag`Hello ${name}!`} compiles to {@code this.tag($tpl$0, name)}
+ * where {@code $tpl$0} is a cached static final String[] field initialized in {@code <clinit>}.
+ * <p>
+ * Template caching improves performance by creating the quasis String[] once at class
+ * load time instead of on every method invocation. Identical quasis arrays within the
+ * same class are deduplicated to share the same cached field.
  */
 public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4jAstTaggedTpl> {
     public TaggedTemplateLiteralGenerator(ByteCodeCompiler compiler) {
@@ -98,9 +100,9 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         // Build method descriptor: first param is String[], rest are expression types
         StringBuilder paramDescriptors = new StringBuilder();
 
-        // First argument: String[] for quasis
+        // First argument: String[] for quasis (loaded from cached static field)
         paramDescriptors.append("[Ljava/lang/String;");
-        generateStringArray(code, cp, quasis);
+        loadCachedStringArray(code, cp, quasis);
 
         // Remaining arguments: interpolated expressions
         for (ISwc4jAstExpr expr : exprs) {
@@ -145,25 +147,30 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
     }
 
     /**
-     * Generate a String[] array on the stack containing the template quasis (cooked values).
+     * Load a cached String[] array onto the stack containing the template quasis (cooked values).
+     * <p>
+     * The array is cached as a static final field and loaded via GETSTATIC.
+     * This avoids creating a new array on every invocation.
      */
-    private void generateStringArray(
+    private void loadCachedStringArray(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             List<Swc4jAstTplElement> quasis) {
-        int size = quasis.size();
-        code.iconst(size);
-        int stringClass = cp.addClass("java/lang/String");
-        code.anewarray(stringClass);
-
-        for (int i = 0; i < size; i++) {
-            code.dup();
-            code.iconst(i);
-            Swc4jAstTplElement quasi = quasis.get(i);
-            String cookedValue = quasi.getCooked().orElse(quasi.getRaw());
-            int stringRef = cp.addString(cookedValue);
-            code.ldc(stringRef);
-            code.aastore();
+        // Extract quasis strings
+        List<String> quasisStrings = new ArrayList<>(quasis.size());
+        for (Swc4jAstTplElement quasi : quasis) {
+            quasisStrings.add(quasi.getCooked().orElse(quasi.getRaw()));
         }
+
+        // Get current class name
+        String classInternalName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+
+        // Get or create cached field in the current scope
+        String fieldName = compiler.getMemory().getScopedTemplateCacheRegistry()
+                .getOrCreateCache(quasisStrings);
+
+        // Generate GETSTATIC to load the cached array
+        int fieldRef = cp.addFieldRef(classInternalName, fieldName, "[Ljava/lang/String;");
+        code.getstatic(fieldRef);
     }
 }
