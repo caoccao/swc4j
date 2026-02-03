@@ -213,11 +213,17 @@ public final class ClassGenerator extends BaseAstProcessor {
             List<ScopedTemplateCacheRegistry.TemplateCacheEntry> templateCaches =
                     compiler.getMemory().getScopedTemplateCacheRegistry().getCurrentCaches();
             for (ScopedTemplateCacheRegistry.TemplateCacheEntry cache : templateCaches) {
-                // Add private static final field for each template cache
+                // Add private static final String[] field for cooked strings
                 classWriter.addField(
                         0x001A, // ACC_PRIVATE | ACC_STATIC | ACC_FINAL
                         cache.fieldName(),
                         "[Ljava/lang/String;"
+                );
+                // Add private static final TemplateStringsArray field for raw string access
+                classWriter.addField(
+                        0x001A, // ACC_PRIVATE | ACC_STATIC | ACC_FINAL
+                        cache.fieldName() + "$raw",
+                        "Lcom/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray;"
                 );
             }
 
@@ -283,26 +289,67 @@ public final class ClassGenerator extends BaseAstProcessor {
 
         // Initialize template cache fields
         int stringClassRef = cp.addClass("java/lang/String");
-        for (ScopedTemplateCacheRegistry.TemplateCacheEntry cache : templateCaches) {
-            List<String> quasis = cache.quasis();
-            int size = quasis.size();
+        String templateStringsArrayClass = "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray";
+        int templateStringsArrayClassRef = cp.addClass(templateStringsArrayClass);
+        int templateStringsArrayCtorRef = cp.addMethodRef(
+                templateStringsArrayClass,
+                "<init>",
+                "([Ljava/lang/String;[Ljava/lang/String;)V"
+        );
 
-            // Create String[] array: new String[size]
+        for (ScopedTemplateCacheRegistry.TemplateCacheEntry cache : templateCaches) {
+            List<String> cooked = cache.cooked();
+            List<String> raw = cache.raw();
+            int size = cooked.size();
+
+            // Create cooked String[] array: new String[size]
             code.iconst(size);
             code.anewarray(stringClassRef);
 
-            // Populate array: strings[i] = quasis[i]
+            // Populate cooked array: strings[i] = cooked[i]
             for (int i = 0; i < size; i++) {
                 code.dup();
                 code.iconst(i);
-                int stringRef = cp.addString(quasis.get(i));
+                int stringRef = cp.addString(cooked.get(i));
                 code.ldc(stringRef);
                 code.aastore();
             }
 
-            // Store to static field: $tpl$N = array
-            int fieldRef = cp.addFieldRef(internalClassName, cache.fieldName(), "[Ljava/lang/String;");
-            code.putstatic(fieldRef);
+            // Store cooked array to static field: $tpl$N = array
+            int cookedFieldRef = cp.addFieldRef(internalClassName, cache.fieldName(), "[Ljava/lang/String;");
+            code.putstatic(cookedFieldRef);
+
+            // Create TemplateStringsArray with both cooked and raw arrays
+            // new TemplateStringsArray(cooked, raw)
+            code.newInstance(templateStringsArrayClassRef);
+            code.dup();
+
+            // Load cooked array from field
+            code.getstatic(cookedFieldRef);
+
+            // Create raw String[] array: new String[size]
+            code.iconst(size);
+            code.anewarray(stringClassRef);
+
+            // Populate raw array: rawStrings[i] = raw[i]
+            for (int i = 0; i < size; i++) {
+                code.dup();
+                code.iconst(i);
+                int stringRef = cp.addString(raw.get(i));
+                code.ldc(stringRef);
+                code.aastore();
+            }
+
+            // Invoke constructor: TemplateStringsArray(cooked, raw)
+            code.invokespecial(templateStringsArrayCtorRef);
+
+            // Store to static field: $tpl$N$raw = templateStringsArray
+            int rawFieldRef = cp.addFieldRef(
+                    internalClassName,
+                    cache.fieldName() + "$raw",
+                    "Lcom/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray;"
+            );
+            code.putstatic(rawFieldRef);
         }
 
         code.returnVoid(); // return

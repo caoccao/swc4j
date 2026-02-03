@@ -931,6 +931,16 @@ public final class TypeResolver {
                 // LinkedHashMap operations (object literal member access)
                 // map.get() returns Object
                 return "Ljava/lang/Object;";
+            } else if ("Lcom/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray;".equals(objType)) {
+                // TemplateStringsArray operations (for raw string access in tagged templates)
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String propName = propIdent.getSym();
+                    if ("raw".equals(propName)) {
+                        return "[Ljava/lang/String;"; // raw field is String[]
+                    } else if ("length".equals(propName)) {
+                        return "I"; // length field is int
+                    }
+                }
             }
 
             // General case: Handle field access on any custom class type (chained member access)

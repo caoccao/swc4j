@@ -87,15 +87,33 @@ public final class ScopedTemplateCacheRegistry {
      * existing field name (deduplication). Otherwise, creates a new cache entry
      * and returns the new field name.
      *
-     * @param quasis the list of template quasis strings
+     * @param cooked the list of cooked (processed) template strings
      * @return the field name for the cached String[] (e.g., "$tpl$0")
      * @throws IllegalStateException if no scope is active
+     * @deprecated Use {@link #getOrCreateCache(List, List)} instead
      */
-    public String getOrCreateCache(List<String> quasis) {
+    @Deprecated
+    public String getOrCreateCache(List<String> cooked) {
+        return getOrCreateCache(cooked, cooked);
+    }
+
+    /**
+     * Get or create a cached template field for the given cooked and raw strings in the current scope.
+     * <p>
+     * If an identical template (both cooked and raw) already exists in this scope, returns the
+     * existing field name (deduplication). Otherwise, creates a new cache entry
+     * and returns the new field name.
+     *
+     * @param cooked the list of cooked (processed) template strings
+     * @param raw    the list of raw (unprocessed) template strings
+     * @return the field name for the cached template (e.g., "$tpl$0")
+     * @throws IllegalStateException if no scope is active
+     */
+    public String getOrCreateCache(List<String> cooked, List<String> raw) {
         if (scopeStack.isEmpty()) {
             throw new IllegalStateException("No active template cache scope. Call enterScope() first.");
         }
-        return scopeStack.peek().getOrCreateCache(quasis);
+        return scopeStack.peek().getOrCreateCache(cooked, raw);
     }
 
     /**
@@ -132,16 +150,16 @@ public final class ScopedTemplateCacheRegistry {
             return caches;
         }
 
-        String getOrCreateCache(List<String> quasis) {
+        String getOrCreateCache(List<String> cooked, List<String> raw) {
             // Check for existing cache with identical content (deduplication)
             for (TemplateCacheEntry entry : caches) {
-                if (entry.quasis().equals(quasis)) {
+                if (entry.cooked().equals(cooked) && entry.raw().equals(raw)) {
                     return entry.fieldName();
                 }
             }
             // Create new cache entry
             String fieldName = "$tpl$" + counter++;
-            caches.add(new TemplateCacheEntry(fieldName, new ArrayList<>(quasis)));
+            caches.add(new TemplateCacheEntry(fieldName, new ArrayList<>(cooked), new ArrayList<>(raw)));
             return fieldName;
         }
     }
@@ -150,8 +168,32 @@ public final class ScopedTemplateCacheRegistry {
      * Represents a single template cache entry.
      *
      * @param fieldName the static field name (e.g., "$tpl$0")
-     * @param quasis    the list of template quasis strings
+     * @param cooked    the list of cooked (processed) template strings
+     * @param raw       the list of raw (unprocessed) template strings
      */
-    public record TemplateCacheEntry(String fieldName, List<String> quasis) {
+    public record TemplateCacheEntry(String fieldName, List<String> cooked, List<String> raw) {
+        /**
+         * Creates a cache entry with only cooked strings (for backward compatibility).
+         *
+         * @param fieldName the static field name
+         * @param cooked    the list of cooked template strings
+         * @return the cache entry
+         * @deprecated Use {@link #TemplateCacheEntry(String, List, List)} instead
+         */
+        @Deprecated
+        public static TemplateCacheEntry ofCookedOnly(String fieldName, List<String> cooked) {
+            return new TemplateCacheEntry(fieldName, cooked, cooked);
+        }
+
+        /**
+         * Gets the quasis (cooked strings) for backward compatibility.
+         *
+         * @return the cooked strings
+         * @deprecated Use {@link #cooked()} instead
+         */
+        @Deprecated
+        public List<String> quasis() {
+            return cooked;
+        }
     }
 }

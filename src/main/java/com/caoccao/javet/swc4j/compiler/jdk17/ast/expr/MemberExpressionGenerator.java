@@ -314,6 +314,34 @@ public final class MemberExpressionGenerator extends BaseAstProcessor<Swc4jAstMe
             }
         }
 
+        // Handle TemplateStringsArray field access (for raw string support in tagged templates)
+        if ("Lcom/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray;".equals(objType)) {
+            if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                String fieldName = propIdent.getSym();
+                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+
+                if ("raw".equals(fieldName)) {
+                    // Access raw field: String[]
+                    int fieldRef = cp.addFieldRef(
+                            "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray",
+                            "raw",
+                            "[Ljava/lang/String;"
+                    );
+                    code.getfield(fieldRef);
+                    return;
+                } else if ("length".equals(fieldName)) {
+                    // Access length field: int
+                    int fieldRef = cp.addFieldRef(
+                            "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray",
+                            "length",
+                            "I"
+                    );
+                    code.getfield(fieldRef);
+                    return;
+                }
+            }
+        }
+
         // General case: Handle field access on any object type (chained member access)
         // This handles cases like obj.field where obj is any expression returning a custom class type
         if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {

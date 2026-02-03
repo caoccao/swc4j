@@ -82,7 +82,7 @@ where the tag function receives a `String[]` of quasis followed by individual ex
   - Invoked via `INVOKESTATIC` on the dummy class (e.g., `com/$`)
 
 **Limitations:**
-- No raw string array support
+- None (all features implemented)
 
 ### ✅ Implemented: Template Object Caching
 
@@ -162,6 +162,57 @@ namespace com {
 }
 ```
 
+### ✅ Implemented: Raw String Array Support
+
+**File:** `TemplateStringsArray.java`, `TaggedTemplateLiteralGenerator.java`
+
+**Strategy:** Create a `TemplateStringsArray` class that provides access to both cooked (processed) and raw
+(unprocessed) template strings. Tag functions can declare `TemplateStringsArray` as their first parameter
+to access raw strings via the `raw` field.
+
+**TemplateStringsArray class:**
+```java
+public final class TemplateStringsArray {
+    public final String[] raw;     // Raw strings (escape sequences preserved)
+    public final int length;       // Number of template string parts
+    private final String[] cooked; // Cooked strings (escape sequences processed)
+
+    public String get(int index) { return cooked[index]; }
+}
+```
+
+**How it works:**
+1. `ClassGenerator` creates two cached fields for each template:
+   - `$tpl$N` - `String[]` containing cooked strings
+   - `$tpl$N$raw` - `TemplateStringsArray` containing both cooked and raw strings
+2. `TaggedTemplateLiteralGenerator` detects if the tag function accepts `TemplateStringsArray`:
+   - If yes, loads the `$tpl$N$raw` field via `GETSTATIC`
+   - If no (accepts `String[]`), loads the `$tpl$N` field (backward compatible)
+3. Tag functions access raw strings via `strings.raw[index]`
+
+**Example:**
+```typescript
+import { TemplateStringsArray } from "com.caoccao.javet.swc4j.compiler.jdk17.ast.utils"
+namespace com {
+  export class A {
+    tag(strings: TemplateStringsArray, value: String): String {
+      // strings.get(0) - cooked string (escape sequences processed)
+      // strings.raw[0] - raw string (escape sequences preserved)
+      return strings.get(0) + "|" + strings.raw[0]
+    }
+    test(): String {
+      return this.tag`line1\nline2 ${"value"}`
+      // Cooked: "line1" + newline + "line2 "
+      // Raw: "line1\\nline2 "
+    }
+  }
+}
+```
+
+**Cooked vs Raw strings:**
+- Cooked: Escape sequences are processed (e.g., `\n` becomes a newline character)
+- Raw: Escape sequences are preserved as literal characters (e.g., `\n` remains as backslash-n)
+
 ## Test Coverage
 
 ### ✅ Implemented Tests (TestCompileAstTaggedTplBasic)
@@ -216,9 +267,22 @@ All 8 standalone function tag tests passing (100% success rate):
 7. **testStandaloneTagInDefaultPackage** - Standalone tag in default package (no namespace)
 8. **testStandaloneTagWithMethodCall** - Method call result as argument
 
+### ✅ Implemented Tests (TestCompileAstTaggedTplRaw)
+
+All 8 raw string access tests passing (100% success rate):
+
+1. **testRawStringAccessBasic** - Basic raw string access: `strings.raw[0]`
+2. **testRawStringWithEscapeSequence** - Raw preserves `\n` as backslash-n
+3. **testRawStringWithTab** - Raw preserves `\t` as backslash-t
+4. **testRawStringLength** - `strings.length` returns count of template parts
+5. **testRawStringMultipleParts** - Access multiple raw string parts
+6. **testRawStringCacheFieldExists** - Verify `$tpl$0` and `$tpl$0$raw` fields exist
+7. **testRawStringStandaloneFunction** - Raw string access with standalone function tag
+8. **testBackwardCompatibilityWithStringArray** - Tag with `String[]` still works
+
 ### 🔲 Missing Test Coverage
 
-- Raw string access in tag function
+- (None)
 
 ## Integration Points
 
@@ -256,24 +320,26 @@ public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() { ... 
 - `TypeResolver.inferTypeFromExpr()` - Object and expression type inference
   - Added support for `Swc4jAstTpl` → returns `Ljava/lang/String;`
   - Added support for `Swc4jAstTaggedTpl` → returns `null` (resolved by method lookup)
+  - Added support for `TemplateStringsArray.raw` → returns `[Ljava/lang/String;`
+  - Added support for `TemplateStringsArray.length` → returns `I`
 - `ScopedJavaTypeRegistry.resolveClassMethodReturnType()` - Tag method return type resolution
 - `ScopedStandaloneFunctionRegistry` - Standalone function lookup for function tags
 - `ExpressionGenerator.generate()` - Object reference and expression bytecode generation
 - `TypeConversionUtils.boxPrimitiveType()` / `unboxWrapperType()` - Return type conversion
-- `ScopedTemplateCacheRegistry` - Scoped template cache tracking with deduplication
+- `ScopedTemplateCacheRegistry` - Scoped template cache tracking with cooked and raw strings
 - `ClassGenerator` - Generates static fields and `<clinit>` initialization for template caches
+- `MemberExpressionGenerator` - Field access for `TemplateStringsArray.raw` and `TemplateStringsArray.length`
+- `TemplateStringsArray` - Wrapper class for cooked and raw template strings
 
 ## Future Enhancements
 
-1. **Raw String Array Support** (Low Priority)
-   - Provide both cooked and raw string arrays to tag functions
-   - Support `strings.raw` access pattern
+- (All planned features have been implemented)
 
 ## References
 
 - **TypeScript Spec:** [Template Literals](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html)
 - **ECMAScript Spec:** [Tagged Templates](https://tc39.es/ecma262/#sec-tagged-templates)
-- **Implementation:** `TaggedTemplateLiteralGenerator.java`, `ScopedTemplateCacheRegistry.java`
-- **Tests:** `TestCompileAstTaggedTplBasic.java`, `TestCompileAstTaggedTplAdvanced.java`, `TestCompileAstTaggedTplCaching.java`, `TestCompileAstTaggedTplStandalone.java`
+- **Implementation:** `TaggedTemplateLiteralGenerator.java`, `ScopedTemplateCacheRegistry.java`, `TemplateStringsArray.java`
+- **Tests:** `TestCompileAstTaggedTplBasic.java`, `TestCompileAstTaggedTplAdvanced.java`, `TestCompileAstTaggedTplCaching.java`, `TestCompileAstTaggedTplStandalone.java`, `TestCompileAstTaggedTplRaw.java`
 - **Related:** `TypeConversionUtils.java`, `TypeResolver.java`, `ScopedJavaTypeRegistry.java`, `ClassGenerator.java`
 - **See also:** [Template Literals](tpl.md)

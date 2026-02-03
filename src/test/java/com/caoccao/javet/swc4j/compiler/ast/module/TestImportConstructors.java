@@ -235,20 +235,20 @@ public class TestImportConstructors extends BaseTestCompileSuite {
     }
 
     /**
-         * Static helper class for testing custom class imports.
-         */
-        public record Point(int x, int y) {
-            public Point() {
-                this(0, 0);
-            }
+     * Static helper class for testing custom class imports.
+     */
+    public record Point(int x, int y) {
+        public Point() {
+            this(0, 0);
+        }
 
         public Point(Point other) {
-                this(other.x, other.y);
-            }
-
-            @Override
-            public String toString() {
-                return "Point(" + x + ", " + y + ")";
-            }
+            this(other.x, other.y);
         }
+
+        @Override
+        public String toString() {
+            return "Point(" + x + ", " + y + ")";
+        }
+    }
 }

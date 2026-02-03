@@ -289,8 +289,8 @@ public class TestCompileAstFunctionComplexInference extends BaseTestCompileSuite
         var instanceRunner = runner.createInstanceRunner("com.A");
         assertThat(
                 List.of(
-                        (int) instanceRunner.invoke("test", 5),
-                        (int) instanceRunner.invoke("test", 15),
+                        instanceRunner.invoke("test", 5),
+                        instanceRunner.invoke("test", 15),
                         (int) instanceRunner.invoke("test", 25)
                 )
         ).isEqualTo(
@@ -347,9 +347,9 @@ public class TestCompileAstFunctionComplexInference extends BaseTestCompileSuite
         var instanceRunner = runner.createInstanceRunner("com.A");
         assertThat(
                 List.of(
-                        (int) instanceRunner.invoke("test", 5, 10),
-                        (int) instanceRunner.invoke("test", 5, -10),
-                        (int) instanceRunner.invoke("test", -5, 10),
+                        instanceRunner.invoke("test", 5, 10),
+                        instanceRunner.invoke("test", 5, -10),
+                        instanceRunner.invoke("test", -5, 10),
                         (int) instanceRunner.invoke("test", -5, -10)
                 )
         ).isEqualTo(
