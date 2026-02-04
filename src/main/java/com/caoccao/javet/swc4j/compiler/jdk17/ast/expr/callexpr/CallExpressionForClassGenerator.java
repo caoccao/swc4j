@@ -46,11 +46,12 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
     /**
      * Converts between types when needed.
      */
-    private void convertType(CodeBuilder code, ClassWriter.ConstantPool cp, String fromType, String toType) {
+    private void convertType(CodeBuilder code, ClassWriter classWriter, String fromType, String toType) {
         if (fromType.equals(toType)) {
             return;
         }
 
+        var cp = classWriter.getConstantPool();
         // Handle primitive conversions
         if (TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
             TypeConversionUtils.convertPrimitiveType(code, fromType, toType);
@@ -58,9 +59,9 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
         // Handle boxing/unboxing
         else if (TypeConversionUtils.isPrimitiveType(fromType) && !TypeConversionUtils.isPrimitiveType(toType)) {
             String wrapperType = TypeConversionUtils.getWrapperType(fromType);
-            TypeConversionUtils.boxPrimitiveType(code, cp, fromType, wrapperType);
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, fromType, wrapperType);
         } else if (!TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
-            TypeConversionUtils.unboxWrapperType(code, cp, fromType);
+            TypeConversionUtils.unboxWrapperType(code, classWriter, fromType);
         }
         // Handle reference type casting (e.g., AbstractStringBuilder -> StringBuilder)
         else if (fromType.startsWith("L") && toType.startsWith("L") && !fromType.equals(toType)) {
@@ -75,9 +76,10 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         if (!(callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr)) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Class method call must be a member expression");
         }
@@ -133,7 +135,7 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
                         "Method is not static: " + javaTypeInfo.getAlias() + "." + methodName);
             }
 
-            generateArgumentsWithVarargs(code, cp, args, argTypes, methodInfo);
+            generateArgumentsWithVarargs(code, classWriter, args, argTypes, methodInfo);
 
             internalClassName = javaTypeInfo.getInternalName();
             methodDescriptor = methodInfo.descriptor();
@@ -184,8 +186,8 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
                             "Method is static: " + instanceJavaTypeInfo.getAlias() + "." + methodName);
                 }
 
-                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
-                generateArgumentsWithVarargs(code, cp, args, argTypes, methodInfo);
+                compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null);
+                generateArgumentsWithVarargs(code, classWriter, args, argTypes, methodInfo);
 
                 internalClassName = instanceJavaTypeInfo.getInternalName();
                 methodDescriptor = methodInfo.descriptor();
@@ -223,7 +225,7 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
                 }
 
                 if (returnTypeInfo != null && returnTypeInfo.descriptor() != null) {
-                    convertType(code, cp, returnType, returnTypeInfo.descriptor());
+                    convertType(code, classWriter, returnType, returnTypeInfo.descriptor());
                 }
                 return;
             }
@@ -234,14 +236,14 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
 
             // Generate the object reference for instance calls
             if (!isStaticCall) {
-                compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null);
             }
 
             // Generate arguments
             StringBuilder paramDescriptors = new StringBuilder();
             for (int i = 0; i < args.size(); i++) {
                 var arg = args.get(i);
-                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
                 paramDescriptors.append(argTypes.get(i));
             }
 
@@ -290,13 +292,13 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
 
         // Type conversion for return value (Java static calls only)
         if (isJavaStaticCall && returnTypeInfo != null && returnTypeInfo.descriptor() != null) {
-            convertType(code, cp, returnType, returnTypeInfo.descriptor());
+            convertType(code, classWriter, returnType, returnTypeInfo.descriptor());
         }
     }
 
     private void generateArgumentsWithVarargs(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             List<Swc4jAstExprOrSpread> args,
             List<String> argTypes,
             MethodInfo methodInfo) throws Swc4jByteCodeCompilerException {
@@ -304,9 +306,9 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
         if (!methodInfo.isVarArgs() || expectedTypes.isEmpty()) {
             for (int i = 0; i < args.size(); i++) {
                 Swc4jAstExprOrSpread arg = args.get(i);
-                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
                 if (i < expectedTypes.size()) {
-                    convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+                    convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                 }
             }
             return;
@@ -322,24 +324,24 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
         if (directArrayPass) {
             for (int i = 0; i < args.size(); i++) {
                 Swc4jAstExprOrSpread arg = args.get(i);
-                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-                convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+                compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
+                convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
             }
             return;
         }
 
         for (int i = 0; i < fixedCount; i++) {
             Swc4jAstExprOrSpread arg = args.get(i);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-            convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
+            convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
         }
 
-        generateVarargsArray(code, cp, args, argTypes, fixedCount, varargArrayType, componentType);
+        generateVarargsArray(code, classWriter, args, argTypes, fixedCount, varargArrayType, componentType);
     }
 
     private void generateVarargsArray(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             List<Swc4jAstExprOrSpread> args,
             List<String> argTypes,
             int startIndex,
@@ -348,6 +350,7 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
         int varargCount = args.size() - startIndex;
         code.iconst(varargCount);
 
+        var cp = classWriter.getConstantPool();
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
             int typeCode = switch (componentType) {
                 case "Z" -> 4;
@@ -375,9 +378,9 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             if (arg.getSpread().isPresent()) {
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported in varargs calls");
             }
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
             String argType = argTypes.get(startIndex + i);
-            convertType(code, cp, argType, componentType);
+            convertType(code, classWriter, argType, componentType);
 
             switch (componentType) {
                 case "Z", "B" -> code.bastore();

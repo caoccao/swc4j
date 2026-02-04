@@ -47,9 +47,10 @@ public final class TemplateLiteralGenerator extends BaseAstProcessor<Swc4jAstTpl
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstTpl tpl,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         List<Swc4jAstTplElement> quasis = tpl.getQuasis();
         List<ISwc4jAstExpr> exprs = tpl.getExprs();
 
@@ -97,12 +98,12 @@ public final class TemplateLiteralGenerator extends BaseAstProcessor<Swc4jAstTpl
                 String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
 
                 // Generate the expression with its natural type
-                compiler.getExpressionGenerator().generate(code, cp, expr, null);
+                compiler.getExpressionGenerator().generate(code, classWriter, expr, null);
 
                 // If the expression is a primitive, box it to its wrapper type
                 if (TypeConversionUtils.isPrimitiveType(exprType)) {
                     String wrapperType = TypeConversionUtils.getWrapperType(exprType);
-                    TypeConversionUtils.boxPrimitiveType(code, cp, exprType, wrapperType);
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, exprType, wrapperType);
                 }
 
                 // Convert to String using String.valueOf(Object)

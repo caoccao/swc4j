@@ -37,12 +37,13 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
             // Generate code for the object (ArrayList)
-            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null);
 
             // Get the method name
             String methodName = null;
@@ -51,54 +52,55 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
             }
 
             switch (methodName) {
-                case "concat" -> generateConcat(code, cp, callExpr);
-                case "copyWithin" -> generateCopyWithin(code, cp, callExpr);
-                case "fill" -> generateFill(code, cp, callExpr);
-                case "filter" -> generateFilter(code, cp, callExpr);
-                case "find" -> generateFind(code, cp, callExpr);
-                case "findIndex" -> generateFindIndex(code, cp, callExpr);
-                case "flat" -> generateFlat(code, cp, callExpr);
-                case "flatMap" -> generateFlatMap(code, cp, callExpr);
-                case "forEach" -> generateForEach(code, cp, callExpr);
-                case "includes" -> generateIncludes(code, cp, callExpr);
-                case "indexOf" -> generateIndexOf(code, cp, callExpr);
-                case "join" -> generateJoin(code, cp, callExpr);
-                case "lastIndexOf" -> generateLastIndexOf(code, cp, callExpr);
-                case "keys" -> generateKeys(code, cp, callExpr);
-                case "map" -> generateMap(code, cp, callExpr);
-                case "pop" -> generatePop(code, cp);
-                case "push" -> generatePush(code, cp, callExpr);
-                case "reduce" -> generateReduce(code, cp, callExpr);
-                case "reduceRight" -> generateReduceRight(code, cp, callExpr);
-                case "reverse" -> generateReverse(code, cp);
-                case "some" -> generateSome(code, cp, callExpr);
-                case "values" -> generateValues(code, cp, callExpr);
-                case "entries" -> generateEntries(code, cp, callExpr);
-                case "every" -> generateEvery(code, cp, callExpr);
-                case "shift" -> generateShift(code, cp);
-                case "slice" -> generateSlice(code, cp, callExpr);
-                case "sort" -> generateSort(code, cp);
-                case "splice" -> generateSplice(code, cp, callExpr);
-                case "toLocaleString" -> generateToLocaleString(code, cp);
-                case "toReversed" -> generateToReversed(code, cp);
-                case "toSorted" -> generateToSorted(code, cp);
-                case "toSpliced" -> generateToSpliced(code, cp, callExpr);
-                case "toString" -> generateToString(code, cp);
-                case "unshift" -> generateUnshift(code, cp, callExpr);
-                case "with" -> generateWith(code, cp, callExpr);
+                case "concat" -> generateConcat(code, classWriter, callExpr);
+                case "copyWithin" -> generateCopyWithin(code, classWriter, callExpr);
+                case "fill" -> generateFill(code, classWriter, callExpr);
+                case "filter" -> generateFilter(code, classWriter, callExpr);
+                case "find" -> generateFind(code, classWriter, callExpr);
+                case "findIndex" -> generateFindIndex(code, classWriter, callExpr);
+                case "flat" -> generateFlat(code, classWriter, callExpr);
+                case "flatMap" -> generateFlatMap(code, classWriter, callExpr);
+                case "forEach" -> generateForEach(code, classWriter, callExpr);
+                case "includes" -> generateIncludes(code, classWriter, callExpr);
+                case "indexOf" -> generateIndexOf(code, classWriter, callExpr);
+                case "join" -> generateJoin(code, classWriter, callExpr);
+                case "lastIndexOf" -> generateLastIndexOf(code, classWriter, callExpr);
+                case "keys" -> generateKeys(code, classWriter, callExpr);
+                case "map" -> generateMap(code, classWriter, callExpr);
+                case "pop" -> generatePop(code, classWriter);
+                case "push" -> generatePush(code, classWriter, callExpr);
+                case "reduce" -> generateReduce(code, classWriter, callExpr);
+                case "reduceRight" -> generateReduceRight(code, classWriter, callExpr);
+                case "reverse" -> generateReverse(code, classWriter);
+                case "some" -> generateSome(code, classWriter, callExpr);
+                case "values" -> generateValues(code, classWriter, callExpr);
+                case "entries" -> generateEntries(code, classWriter, callExpr);
+                case "every" -> generateEvery(code, classWriter, callExpr);
+                case "shift" -> generateShift(code, classWriter);
+                case "slice" -> generateSlice(code, classWriter, callExpr);
+                case "sort" -> generateSort(code, classWriter);
+                case "splice" -> generateSplice(code, classWriter, callExpr);
+                case "toLocaleString" -> generateToLocaleString(code, classWriter);
+                case "toReversed" -> generateToReversed(code, classWriter);
+                case "toSorted" -> generateToSorted(code, classWriter);
+                case "toSpliced" -> generateToSpliced(code, classWriter, callExpr);
+                case "toString" -> generateToString(code, classWriter);
+                case "unshift" -> generateUnshift(code, classWriter, callExpr);
+                case "with" -> generateWith(code, classWriter, callExpr);
                 default ->
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Method '" + methodName + "()' not supported on ArrayList");
             }
         }
     }
 
-    private void generateConcat(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateConcat(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.concat(arr2) -> ArrayListApiUtils.concat(arr, arr2)
         // JavaScript's concat() returns a new array
+        var cp = classWriter.getConstantPool();
         if (!callExpr.getArgs().isEmpty()) {
             // Get the second array argument
             var arg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
 
             // Call ArrayListApiUtils.concat(ArrayList, ArrayList)
             int concatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "concat",
@@ -116,7 +118,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         }
     }
 
-    private void generateCopyWithin(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateCopyWithin(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.copyWithin(target, start, end) -> ArrayListApiUtils.copyWithin(arr, target, start, [end])
         // Returns the array itself (mutates in place)
         int argCount = callExpr.getArgs().size();
@@ -128,10 +130,11 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
         // Generate the target argument
         var targetArg = callExpr.getArgs().get(0);
-        compiler.getExpressionGenerator().generate(code, cp, targetArg.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, targetArg.getExpr(), null);
 
         // Unbox target if needed
         String targetType = compiler.getTypeResolver().inferTypeFromExpr(targetArg.getExpr());
+        var cp = classWriter.getConstantPool();
         if ("Ljava/lang/Integer;".equals(targetType)) {
             int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
             code.invokevirtual(intValueMethod);
@@ -139,7 +142,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
         // Generate the start argument
         var startArg = callExpr.getArgs().get(1);
-        compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, startArg.getExpr(), null);
 
         // Unbox start if needed
         String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -157,7 +160,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         } else {
             // copyWithin(target, start, end) - three arguments
             var endArg = callExpr.getArgs().get(2);
-            compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, endArg.getExpr(), null);
 
             // Unbox end if needed
             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
@@ -173,27 +176,29 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         }
     }
 
-    private void generateEntries(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateEntries(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (!callExpr.getArgs().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "entries() does not accept arguments");
         }
+        var cp = classWriter.getConstantPool();
         int entriesMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "entries",
                 "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
         code.invokestatic(entriesMethod);
     }
 
-    private void generateEvery(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateEvery(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "every() requires a callback");
         }
         String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
-        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        generateFunctionalArg(code, classWriter, callExpr, 0, interfaceDescriptor);
+        var cp = classWriter.getConstantPool();
         int everyMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "every",
                 "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Z");
         code.invokestatic(everyMethod);
     }
 
-    private void generateFill(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateFill(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.fill(value, start, end) -> ArrayListApiUtils.fill(arr, value, [start], [end])
         // Returns the array itself (mutates in place)
         int argCount = callExpr.getArgs().size();
@@ -205,14 +210,15 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
         // Generate the value argument
         var valueArg = callExpr.getArgs().get(0);
-        compiler.getExpressionGenerator().generate(code, cp, valueArg.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, valueArg.getExpr(), null);
 
         // Box primitive value if needed
         String valueType = compiler.getTypeResolver().inferTypeFromExpr(valueArg.getExpr());
         if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
-            TypeConversionUtils.boxPrimitiveType(code, cp, valueType, TypeConversionUtils.getWrapperType(valueType));
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, valueType, TypeConversionUtils.getWrapperType(valueType));
         }
 
+        var cp = classWriter.getConstantPool();
         if (argCount == 1) {
             // fill(value) - fill entire array
             int fillMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "fill",
@@ -222,7 +228,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         } else if (argCount == 2) {
             // fill(value, start) - fill from start to end
             var startArg = callExpr.getArgs().get(1);
-            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, startArg.getExpr(), null);
 
             // Unbox if needed
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -239,7 +245,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         } else {
             // fill(value, start, end) - three arguments
             var startArg = callExpr.getArgs().get(1);
-            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, startArg.getExpr(), null);
 
             // Unbox start if needed
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -249,7 +255,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
             }
 
             var endArg = callExpr.getArgs().get(2);
-            compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, endArg.getExpr(), null);
 
             // Unbox end if needed
             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
@@ -265,41 +271,45 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         }
     }
 
-    private void generateFilter(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateFilter(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "filter() requires a callback");
         }
         String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
-        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        generateFunctionalArg(code, classWriter, callExpr, 0, interfaceDescriptor);
+        var cp = classWriter.getConstantPool();
         int filterMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "filter",
                 "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Ljava/util/ArrayList;");
         code.invokestatic(filterMethod);
     }
 
-    private void generateFind(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateFind(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "find() requires a callback");
         }
         String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
-        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        generateFunctionalArg(code, classWriter, callExpr, 0, interfaceDescriptor);
+        var cp = classWriter.getConstantPool();
         int findMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "find",
                 "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Ljava/lang/Object;");
         code.invokestatic(findMethod);
     }
 
-    private void generateFindIndex(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateFindIndex(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "findIndex() requires a callback");
         }
         String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
-        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        generateFunctionalArg(code, classWriter, callExpr, 0, interfaceDescriptor);
+        var cp = classWriter.getConstantPool();
         int findIndexMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "findIndex",
                 "(Ljava/util/ArrayList;" + interfaceDescriptor + ")I");
         code.invokestatic(findIndexMethod);
     }
 
-    private void generateFlat(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateFlat(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         int argCount = callExpr.getArgs().size();
+        var cp = classWriter.getConstantPool();
         if (argCount == 0) {
             int flatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "flat",
                     "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
@@ -307,7 +317,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
             return;
         }
         var depthArg = callExpr.getArgs().get(0);
-        compiler.getExpressionGenerator().generate(code, cp, depthArg.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, depthArg.getExpr(), null);
         String depthType = compiler.getTypeResolver().inferTypeFromExpr(depthArg.getExpr());
         if ("Ljava/lang/Integer;".equals(depthType)) {
             int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
@@ -320,23 +330,25 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         code.invokestatic(flatMethod);
     }
 
-    private void generateFlatMap(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateFlatMap(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "flatMap() requires a callback");
         }
         String interfaceDescriptor = resolveMapInterfaceDescriptor(callExpr, 0);
-        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        generateFunctionalArg(code, classWriter, callExpr, 0, interfaceDescriptor);
+        var cp = classWriter.getConstantPool();
         int flatMapMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "flatMap",
                 "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Ljava/util/ArrayList;");
         code.invokestatic(flatMapMethod);
     }
 
-    private void generateForEach(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateForEach(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "forEach() requires a callback");
         }
         String interfaceDescriptor = selectConsumerInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
-        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        generateFunctionalArg(code, classWriter, callExpr, 0, interfaceDescriptor);
+        var cp = classWriter.getConstantPool();
         int forEachMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "forEach",
                 "(Ljava/util/ArrayList;" + interfaceDescriptor + ")V");
         code.invokestatic(forEachMethod);
@@ -344,25 +356,26 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
     private void generateFunctionalArg(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr,
             int index,
             String interfaceDescriptor) throws Swc4jByteCodeCompilerException {
         var arg = callExpr.getArgs().get(index);
         ReturnTypeInfo targetTypeInfo = ReturnTypeInfo.of(callExpr, interfaceDescriptor);
-        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), targetTypeInfo);
+        compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), targetTypeInfo);
     }
 
-    private void generateIncludes(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateIncludes(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.includes(elem) -> arr.contains(elem)
         // Returns boolean: true if element exists, false otherwise
+        var cp = classWriter.getConstantPool();
         if (!callExpr.getArgs().isEmpty()) {
             var arg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
             // Box argument if primitive
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-                TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
             }
 
             int containsMethod = cp.addMethodRef("java/util/ArrayList", "contains", "(Ljava/lang/Object;)Z");
@@ -374,16 +387,17 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         }
     }
 
-    private void generateIndexOf(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateIndexOf(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.indexOf(elem) -> arr.indexOf(elem)
         // Returns int: index or -1 if not found
+        var cp = classWriter.getConstantPool();
         if (!callExpr.getArgs().isEmpty()) {
             var arg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
             // Box argument if primitive
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-                TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
             }
 
             int indexOfMethod = cp.addMethodRef("java/util/ArrayList", "indexOf", "(Ljava/lang/Object;)I");
@@ -395,17 +409,18 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         }
     }
 
-    private void generateJoin(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateJoin(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.join(sep) -> ArrayHelper.join(arr, sep)
         // JavaScript's join() returns a string
         // Default separator is "," if not provided
+        var cp = classWriter.getConstantPool();
         if (callExpr.getArgs().isEmpty()) {
             // No separator provided - use default ","
             code.ldc(cp.addString(","));
         } else {
             // Get separator argument
             var arg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
 
             // If the separator is not a String, convert it
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
@@ -422,25 +437,27 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         code.invokestatic(joinMethod);
     }
 
-    private void generateKeys(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateKeys(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (!callExpr.getArgs().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "keys() does not accept arguments");
         }
+        var cp = classWriter.getConstantPool();
         int keysMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "keys",
                 "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
         code.invokestatic(keysMethod);
     }
 
-    private void generateLastIndexOf(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateLastIndexOf(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.lastIndexOf(elem) -> arr.lastIndexOf(elem)
         // Returns int: last index or -1 if not found
+        var cp = classWriter.getConstantPool();
         if (!callExpr.getArgs().isEmpty()) {
             var arg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
             // Box argument if primitive
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-                TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
             }
 
             int lastIndexOfMethod = cp.addMethodRef("java/util/ArrayList", "lastIndexOf", "(Ljava/lang/Object;)I");
@@ -452,20 +469,22 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         }
     }
 
-    private void generateMap(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateMap(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "map() requires a callback");
         }
         String interfaceDescriptor = resolveMapInterfaceDescriptor(callExpr, 0);
-        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        generateFunctionalArg(code, classWriter, callExpr, 0, interfaceDescriptor);
+        var cp = classWriter.getConstantPool();
         int mapMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "map",
                 "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Ljava/util/ArrayList;");
         code.invokestatic(mapMethod);
     }
 
-    private void generatePop(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generatePop(CodeBuilder code, ClassWriter classWriter) {
         // arr.pop() -> arr.remove(arr.size() - 1)
         // Returns the removed element
+        var cp = classWriter.getConstantPool();
         code.dup(); // Duplicate ArrayList reference for size() call
 
         int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
@@ -478,23 +497,24 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         code.invokevirtual(removeMethod); // Returns removed element
     }
 
-    private void generatePush(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generatePush(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.push(value) -> arr.add(value)
         if (!callExpr.getArgs().isEmpty()) {
             var arg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
             // Box if primitive
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-                TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
             }
+            var cp = classWriter.getConstantPool();
             int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
             code.invokevirtual(addMethod);
             code.pop(); // Pop the boolean return value
         }
     }
 
-    private void generateReduce(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateReduce(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         int argCount = callExpr.getArgs().size();
         if (argCount == 0) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "reduce() requires a callback");
@@ -505,7 +525,8 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         }
         String primitiveType = resolveReductionPrimitiveType(callExpr, initType);
         String interfaceDescriptor = selectBinaryOperatorInterfaceDescriptor(primitiveType);
-        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        generateFunctionalArg(code, classWriter, callExpr, 0, interfaceDescriptor);
+        var cp = classWriter.getConstantPool();
         if (argCount == 1) {
             int reduceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "reduce",
                     "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Ljava/lang/Object;");
@@ -515,11 +536,11 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         var initArg = callExpr.getArgs().get(1);
         if (primitiveType != null) {
             ReturnTypeInfo initTypeInfo = ReturnTypeInfo.of(initArg.getExpr(), primitiveType);
-            compiler.getExpressionGenerator().generate(code, cp, initArg.getExpr(), initTypeInfo);
+            compiler.getExpressionGenerator().generate(code, classWriter, initArg.getExpr(), initTypeInfo);
         } else {
-            compiler.getExpressionGenerator().generate(code, cp, initArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, initArg.getExpr(), null);
             if (initType != null && TypeConversionUtils.isPrimitiveType(initType)) {
-                TypeConversionUtils.boxPrimitiveType(code, cp, initType, TypeConversionUtils.getWrapperType(initType));
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, initType, TypeConversionUtils.getWrapperType(initType));
             }
         }
         String initDescriptor = primitiveType != null ? primitiveType : "Ljava/lang/Object;";
@@ -528,7 +549,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         code.invokestatic(reduceMethod);
     }
 
-    private void generateReduceRight(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateReduceRight(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         int argCount = callExpr.getArgs().size();
         if (argCount == 0) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "reduceRight() requires a callback");
@@ -539,7 +560,8 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         }
         String primitiveType = resolveReductionPrimitiveType(callExpr, initType);
         String interfaceDescriptor = selectBinaryOperatorInterfaceDescriptor(primitiveType);
-        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        generateFunctionalArg(code, classWriter, callExpr, 0, interfaceDescriptor);
+        var cp = classWriter.getConstantPool();
         if (argCount == 1) {
             int reduceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "reduceRight",
                     "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Ljava/lang/Object;");
@@ -549,11 +571,11 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         var initArg = callExpr.getArgs().get(1);
         if (primitiveType != null) {
             ReturnTypeInfo initTypeInfo = ReturnTypeInfo.of(initArg.getExpr(), primitiveType);
-            compiler.getExpressionGenerator().generate(code, cp, initArg.getExpr(), initTypeInfo);
+            compiler.getExpressionGenerator().generate(code, classWriter, initArg.getExpr(), initTypeInfo);
         } else {
-            compiler.getExpressionGenerator().generate(code, cp, initArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, initArg.getExpr(), null);
             if (initType != null && TypeConversionUtils.isPrimitiveType(initType)) {
-                TypeConversionUtils.boxPrimitiveType(code, cp, initType, TypeConversionUtils.getWrapperType(initType));
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, initType, TypeConversionUtils.getWrapperType(initType));
             }
         }
         String initDescriptor = primitiveType != null ? primitiveType : "Ljava/lang/Object;";
@@ -562,31 +584,34 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         code.invokestatic(reduceMethod);
     }
 
-    private void generateReverse(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateReverse(CodeBuilder code, ClassWriter classWriter) {
         // arr.reverse() -> Collections.reverse(arr); returns void but we keep arr on stack
         // JavaScript's reverse() returns the array itself (for chaining)
         code.dup(); // Duplicate array reference for return
 
+        var cp = classWriter.getConstantPool();
         int reverseMethod = cp.addMethodRef("java/util/Collections", "reverse", "(Ljava/util/List;)V");
         code.invokestatic(reverseMethod); // Reverse in place
 
         // The duplicated array reference is now on top of stack, ready to return
     }
 
-    private void generateShift(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateShift(CodeBuilder code, ClassWriter classWriter) {
         // arr.shift() -> arr.remove(0)
         // Returns the removed element
         code.iconst(0); // Index 0
 
+        var cp = classWriter.getConstantPool();
         int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
         code.invokevirtual(removeMethod); // Returns removed element
     }
 
-    private void generateSlice(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateSlice(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.slice(start, end) -> ArrayListApiUtils.slice(arr, start, end)
         // JavaScript's slice() returns a new array with extracted elements
         int argCount = callExpr.getArgs().size();
 
+        var cp = classWriter.getConstantPool();
         if (argCount == 0) {
             // No arguments: arr.slice() - copy entire array
             code.iconst(0);  // start = 0
@@ -611,7 +636,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         } else if (argCount == 1) {
             // One argument: arr.slice(start) - from start to end
             var startArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, startArg.getExpr(), null);
 
             // Need to unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -640,7 +665,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         } else {
             // Two arguments: arr.slice(start, end)
             var startArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, startArg.getExpr(), null);
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -650,7 +675,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
             }
 
             var endArg = callExpr.getArgs().get(1);
-            compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, endArg.getExpr(), null);
 
             // Unbox if Integer
             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
@@ -666,29 +691,31 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         code.invokestatic(sliceMethod);
     }
 
-    private void generateSome(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateSome(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "some() requires a callback");
         }
         String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
-        generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
+        generateFunctionalArg(code, classWriter, callExpr, 0, interfaceDescriptor);
+        var cp = classWriter.getConstantPool();
         int someMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "some",
                 "(Ljava/util/ArrayList;" + interfaceDescriptor + ")Z");
         code.invokestatic(someMethod);
     }
 
-    private void generateSort(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateSort(CodeBuilder code, ClassWriter classWriter) {
         // arr.sort() -> Collections.sort(arr); returns void but we keep arr on stack
         // JavaScript's sort() returns the array itself (for chaining)
         code.dup(); // Duplicate array reference for return
 
+        var cp = classWriter.getConstantPool();
         int sortMethod = cp.addMethodRef("java/util/Collections", "sort", "(Ljava/util/List;)V");
         code.invokestatic(sortMethod); // Sort in place
 
         // The duplicated array reference is now on top of stack, ready to return
     }
 
-    private void generateSplice(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateSplice(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.splice(start, deleteCount, ...items) -> ArrayListApiUtils.splice(arr, start, deleteCount, items)
         // JavaScript's splice() mutates the array and returns removed elements
         int argCount = callExpr.getArgs().size();
@@ -696,6 +723,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         // Keep ArrayList reference for later (splice mutates it)
         code.dup();
 
+        var cp = classWriter.getConstantPool();
         if (argCount == 0) {
             // No arguments: splice() - remove nothing, return empty array
             code.iconst(0);  // start = 0
@@ -704,7 +732,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         } else if (argCount == 1) {
             // One argument: splice(start) - remove from start to end
             var startArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, startArg.getExpr(), null);
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -719,7 +747,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         } else {
             // Two or more arguments: splice(start, deleteCount, ...items)
             var startArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, startArg.getExpr(), null);
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -730,7 +758,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
             // Generate deleteCount parameter
             var deleteCountArg = callExpr.getArgs().get(1);
-            compiler.getExpressionGenerator().generate(code, cp, deleteCountArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, deleteCountArg.getExpr(), null);
 
             // Unbox if Integer
             String deleteCountType = compiler.getTypeResolver().inferTypeFromExpr(deleteCountArg.getExpr());
@@ -755,12 +783,12 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
                     code.dup();  // Duplicate itemsList for add() call
 
                     var itemArg = callExpr.getArgs().get(i);
-                    compiler.getExpressionGenerator().generate(code, cp, itemArg.getExpr(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, itemArg.getExpr(), null);
 
                     // Box if primitive
                     String itemType = compiler.getTypeResolver().inferTypeFromExpr(itemArg.getExpr());
                     if (itemType != null && TypeConversionUtils.isPrimitiveType(itemType)) {
-                        TypeConversionUtils.boxPrimitiveType(code, cp, itemType, TypeConversionUtils.getWrapperType(itemType));
+                        TypeConversionUtils.boxPrimitiveType(code, classWriter, itemType, TypeConversionUtils.getWrapperType(itemType));
                     }
 
                     code.invokevirtual(addMethod);
@@ -783,35 +811,39 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         code.pop();   // Pop the original ArrayList
     }
 
-    private void generateToLocaleString(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateToLocaleString(CodeBuilder code, ClassWriter classWriter) {
         // arr.toLocaleString() -> ArrayListApiUtils.arrayToLocaleString(arr)
         // Returns locale-specific string representation (comma-separated values)
+        var cp = classWriter.getConstantPool();
         int toLocaleStringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "arrayToLocaleString",
                 "(Ljava/util/List;)Ljava/lang/String;");
         code.invokestatic(toLocaleStringMethod);
     }
 
-    private void generateToReversed(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateToReversed(CodeBuilder code, ClassWriter classWriter) {
         // arr.toReversed() -> ArrayListApiUtils.toReversed(arr)
         // Returns new reversed array without modifying original (ES2023)
+        var cp = classWriter.getConstantPool();
         int toReversedMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "toReversed",
                 "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
         code.invokestatic(toReversedMethod);
     }
 
-    private void generateToSorted(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateToSorted(CodeBuilder code, ClassWriter classWriter) {
         // arr.toSorted() -> ArrayListApiUtils.toSorted(arr)
         // Returns new sorted array without modifying original (ES2023)
+        var cp = classWriter.getConstantPool();
         int toSortedMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "toSorted",
                 "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
         code.invokestatic(toSortedMethod);
     }
 
-    private void generateToSpliced(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateToSpliced(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.toSpliced(start, deleteCount, ...items) -> ArrayListApiUtils.toSpliced(arr, start, deleteCount, items)
         // Returns new array with elements removed/inserted (ES2023 non-mutating)
         int argCount = callExpr.getArgs().size();
 
+        var cp = classWriter.getConstantPool();
         if (argCount == 0) {
             // No arguments: toSpliced() - returns copy with no changes
             code.iconst(0);  // start = 0
@@ -820,7 +852,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         } else if (argCount == 1) {
             // One argument: toSpliced(start) - remove from start to end
             var startArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, startArg.getExpr(), null);
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -835,7 +867,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         } else {
             // Two or more arguments: toSpliced(start, deleteCount, ...items)
             var startArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, startArg.getExpr(), null);
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
@@ -846,7 +878,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
             // Generate deleteCount parameter
             var deleteCountArg = callExpr.getArgs().get(1);
-            compiler.getExpressionGenerator().generate(code, cp, deleteCountArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, deleteCountArg.getExpr(), null);
 
             // Unbox if Integer
             String deleteCountType = compiler.getTypeResolver().inferTypeFromExpr(deleteCountArg.getExpr());
@@ -871,12 +903,12 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
                     code.dup();  // Duplicate itemsList for add() call
 
                     var itemArg = callExpr.getArgs().get(i);
-                    compiler.getExpressionGenerator().generate(code, cp, itemArg.getExpr(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, itemArg.getExpr(), null);
 
                     // Box if primitive
                     String itemType = compiler.getTypeResolver().inferTypeFromExpr(itemArg.getExpr());
                     if (itemType != null && TypeConversionUtils.isPrimitiveType(itemType)) {
-                        TypeConversionUtils.boxPrimitiveType(code, cp, itemType, TypeConversionUtils.getWrapperType(itemType));
+                        TypeConversionUtils.boxPrimitiveType(code, classWriter, itemType, TypeConversionUtils.getWrapperType(itemType));
                     }
 
                     code.invokevirtual(addMethod);
@@ -894,42 +926,45 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         code.invokestatic(toSplicedMethod);
     }
 
-    private void generateToString(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateToString(CodeBuilder code, ClassWriter classWriter) {
         // arr.toString() -> ArrayListApiUtils.arrayToString(arr)
         // Returns string representation (comma-separated values)
+        var cp = classWriter.getConstantPool();
         int toStringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "arrayToString",
                 "(Ljava/util/List;)Ljava/lang/String;");
         code.invokestatic(toStringMethod);
     }
 
-    private void generateUnshift(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateUnshift(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.unshift(value) -> arr.add(0, value)
         if (!callExpr.getArgs().isEmpty()) {
             code.iconst(0); // Index 0
 
             var arg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
             // Box if primitive
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-                TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
             }
 
+            var cp = classWriter.getConstantPool();
             int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(ILjava/lang/Object;)V");
             code.invokevirtual(addMethod);
         }
     }
 
-    private void generateValues(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateValues(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (!callExpr.getArgs().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "values() does not accept arguments");
         }
+        var cp = classWriter.getConstantPool();
         int valuesMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "values",
                 "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
         code.invokestatic(valuesMethod);
     }
 
-    private void generateWith(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateWith(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // arr.with(index, value) -> ArrayListApiUtils.with(arr, index, value)
         // Returns new array with one element changed (ES2023)
         if (callExpr.getArgs().size() < 2) {
@@ -938,8 +973,9 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
         // Generate index argument
         var indexArg = callExpr.getArgs().get(0);
-        compiler.getExpressionGenerator().generate(code, cp, indexArg.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, indexArg.getExpr(), null);
 
+        var cp = classWriter.getConstantPool();
         // Unbox index if needed
         String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
         if ("Ljava/lang/Integer;".equals(indexType)) {
@@ -949,12 +985,12 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
         // Generate value argument
         var valueArg = callExpr.getArgs().get(1);
-        compiler.getExpressionGenerator().generate(code, cp, valueArg.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, valueArg.getExpr(), null);
 
         // Box value if primitive
         String valueType = compiler.getTypeResolver().inferTypeFromExpr(valueArg.getExpr());
         if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
-            TypeConversionUtils.boxPrimitiveType(code, cp, valueType, TypeConversionUtils.getWrapperType(valueType));
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, valueType, TypeConversionUtils.getWrapperType(valueType));
         }
 
         // Call ArrayListApiUtils.with(ArrayList, int, Object)

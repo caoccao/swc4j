@@ -33,9 +33,10 @@ public final class BoolLiteralGenerator extends BaseAstProcessor<Swc4jAstBool> {
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstBool bool,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         boolean value = bool.isValue();
         // Check if we need to box to Boolean
         if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT

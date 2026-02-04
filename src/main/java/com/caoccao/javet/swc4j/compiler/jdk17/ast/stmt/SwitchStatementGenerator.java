@@ -343,17 +343,20 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         return 1 + padding + 12 + (numEntries * 4);
     }
 
-    private void emitDoubleConstant(CodeBuilder code, ClassWriter.ConstantPool cp, double value) {
+    private void emitDoubleConstant(CodeBuilder code, ClassWriter classWriter, double value) {
+        var cp = classWriter.getConstantPool();
         int constantIndex = cp.addDouble(value);
         code.ldc2_w(constantIndex);
     }
 
-    private void emitFloatConstant(CodeBuilder code, ClassWriter.ConstantPool cp, float value) {
+    private void emitFloatConstant(CodeBuilder code, ClassWriter classWriter, float value) {
+        var cp = classWriter.getConstantPool();
         int constantIndex = cp.addFloat(value);
         code.ldc(constantIndex);
     }
 
-    private void emitLongConstant(CodeBuilder code, ClassWriter.ConstantPool cp, long value) {
+    private void emitLongConstant(CodeBuilder code, ClassWriter classWriter, long value) {
+        var cp = classWriter.getConstantPool();
         if (value == 0L || value == 1L) {
             code.lconst(value);
         } else {
@@ -540,18 +543,19 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(code, cp, switchStmt, null, returnTypeInfo);
+        generate(code, classWriter, switchStmt, null, returnTypeInfo);
     }
 
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         // 1. Determine discriminant type
         String discriminantType = compiler.getTypeResolver().inferTypeFromExpr(switchStmt.getDiscriminant());
@@ -560,54 +564,54 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
 
         // String switches use 2-phase hash approach
         if ("Ljava/lang/String;".equals(discriminantType)) {
-            generateStringSwitch(code, cp, switchStmt, labelName, returnTypeInfo);
+            generateStringSwitch(code, classWriter, switchStmt, labelName, returnTypeInfo);
             return;
         }
 
         // Boxed type switches: unbox then use integer switch
         if ("Ljava/lang/Integer;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Integer", "intValue", "()I", labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Integer", "intValue", "()I", labelName, returnTypeInfo);
             return;
         }
         if ("Ljava/lang/Byte;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Byte", "byteValue", "()B", labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Byte", "byteValue", "()B", labelName, returnTypeInfo);
             return;
         }
         if ("Ljava/lang/Short;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Short", "shortValue", "()S", labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Short", "shortValue", "()S", labelName, returnTypeInfo);
             return;
         }
         if ("Ljava/lang/Character;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Character", "charValue", "()C", labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Character", "charValue", "()C", labelName, returnTypeInfo);
             return;
         }
         if ("Ljava/lang/Boolean;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Boolean", "booleanValue", "()Z", labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Boolean", "booleanValue", "()Z", labelName, returnTypeInfo);
             return;
         }
         if ("Ljava/lang/Long;".equals(discriminantType)) {
-            generateBoxedLongSwitch(code, cp, switchStmt, "java/lang/Long", "longValue", "()J", labelName, returnTypeInfo);
+            generateBoxedLongSwitch(code, classWriter, switchStmt, "java/lang/Long", "longValue", "()J", labelName, returnTypeInfo);
             return;
         }
         if ("Ljava/lang/Float;".equals(discriminantType)) {
-            generateBoxedFloatSwitch(code, cp, switchStmt, "java/lang/Float", "floatValue", "()F", labelName, returnTypeInfo);
+            generateBoxedFloatSwitch(code, classWriter, switchStmt, "java/lang/Float", "floatValue", "()F", labelName, returnTypeInfo);
             return;
         }
         if ("Ljava/lang/Double;".equals(discriminantType)) {
-            generateBoxedDoubleSwitch(code, cp, switchStmt, "java/lang/Double", "doubleValue", "()D", labelName, returnTypeInfo);
+            generateBoxedDoubleSwitch(code, classWriter, switchStmt, "java/lang/Double", "doubleValue", "()D", labelName, returnTypeInfo);
             return;
         }
 
         if ("J".equals(discriminantType)) {
-            generateLongSwitch(code, cp, switchStmt, labelName, returnTypeInfo);
+            generateLongSwitch(code, classWriter, switchStmt, labelName, returnTypeInfo);
             return;
         }
         if ("F".equals(discriminantType)) {
-            generateFloatSwitch(code, cp, switchStmt, labelName, returnTypeInfo);
+            generateFloatSwitch(code, classWriter, switchStmt, labelName, returnTypeInfo);
             return;
         }
         if ("D".equals(discriminantType)) {
-            generateDoubleSwitch(code, cp, switchStmt, labelName, returnTypeInfo);
+            generateDoubleSwitch(code, classWriter, switchStmt, labelName, returnTypeInfo);
             return;
         }
 
@@ -615,42 +619,44 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         // Check if it's an object type (starts with L) but not a known type
         if (discriminantType != null && discriminantType.startsWith("L") && discriminantType.endsWith(";")) {
             // Likely an enum type - call ordinal()
-            generateEnumSwitch(code, cp, switchStmt, discriminantType, labelName, returnTypeInfo);
+            generateEnumSwitch(code, classWriter, switchStmt, discriminantType, labelName, returnTypeInfo);
             return;
         }
 
         // 3. Integer switch (int, byte, short, char, boolean - primitives are auto-promoted to int)
-        generateIntegerSwitch(code, cp, switchStmt, labelName, returnTypeInfo);
+        generateIntegerSwitch(code, classWriter, switchStmt, labelName, returnTypeInfo);
     }
 
     private void generateBoxedDoubleSwitch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String className,
             String unboxMethod,
             String methodDescriptor,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        var cp = classWriter.getConstantPool();
+        compiler.getExpressionGenerator().generate(code, classWriter, switchStmt.getDiscriminant(), null);
         int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
         code.invokevirtual(unboxRef);
-        generateDoubleSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+        generateDoubleSwitchWithDiscriminantOnStack(code, classWriter, switchStmt, labelName, returnTypeInfo);
     }
 
     private void generateBoxedFloatSwitch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String className,
             String unboxMethod,
             String methodDescriptor,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        var cp = classWriter.getConstantPool();
+        compiler.getExpressionGenerator().generate(code, classWriter, switchStmt.getDiscriminant(), null);
         int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
         code.invokevirtual(unboxRef);
-        generateFloatSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+        generateFloatSwitchWithDiscriminantOnStack(code, classWriter, switchStmt, labelName, returnTypeInfo);
     }
 
     /**
@@ -659,16 +665,17 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
      */
     private void generateBoxedIntegerSwitch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String className,
             String unboxMethod,
             String methodDescriptor,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         // Generate discriminant expression (boxed value on stack)
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, switchStmt.getDiscriminant(), null);
 
         // Call appropriate unboxing method
         int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
@@ -676,37 +683,38 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
 
         // For byte, short, char, the value is already promoted to int on the stack by JVM
         // Now use integer switch with the unboxed value on stack
-        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+        generateIntegerSwitchWithDiscriminantOnStack(code, classWriter, switchStmt, labelName, returnTypeInfo);
     }
 
     private void generateBoxedLongSwitch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String className,
             String unboxMethod,
             String methodDescriptor,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        var cp = classWriter.getConstantPool();
+        compiler.getExpressionGenerator().generate(code, classWriter, switchStmt.getDiscriminant(), null);
         int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
         code.invokevirtual(unboxRef);
-        generateLongSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+        generateLongSwitchWithDiscriminantOnStack(code, classWriter, switchStmt, labelName, returnTypeInfo);
     }
 
     private void generateDoubleSwitch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
-        generateDoubleSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+        compiler.getExpressionGenerator().generate(code, classWriter, switchStmt.getDiscriminant(), null);
+        generateDoubleSwitchWithDiscriminantOnStack(code, classWriter, switchStmt, labelName, returnTypeInfo);
     }
 
     private void generateDoubleSwitchWithDiscriminantOnStack(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
@@ -728,7 +736,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                 continue;
             }
             code.dload(tempIndex);
-            emitDoubleConstant(code, cp, caseInfo.caseValue);
+            emitDoubleConstant(code, classWriter, caseInfo.caseValue);
             code.dcmpl();
 
             code.ifne(0);
@@ -754,7 +762,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         for (DoubleCaseInfo caseInfo : cases) {
             caseInfo.labelOffset = code.getCurrentOffset();
             for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+                compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
             }
         }
 
@@ -789,14 +797,15 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
      */
     private void generateEnumSwitch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String enumType,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         // Generate discriminant expression
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, switchStmt.getDiscriminant(), null);
 
         // Call ordinal() method to get int value
         // ordinal() is defined in java.lang.Enum and returns int
@@ -804,22 +813,22 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         code.invokevirtual(ordinalRef);
 
         // Now use integer switch with the ordinal value on stack
-        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+        generateIntegerSwitchWithDiscriminantOnStack(code, classWriter, switchStmt, labelName, returnTypeInfo);
     }
 
     private void generateFloatSwitch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
-        generateFloatSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+        compiler.getExpressionGenerator().generate(code, classWriter, switchStmt.getDiscriminant(), null);
+        generateFloatSwitchWithDiscriminantOnStack(code, classWriter, switchStmt, labelName, returnTypeInfo);
     }
 
     private void generateFloatSwitchWithDiscriminantOnStack(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
@@ -841,7 +850,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                 continue;
             }
             code.fload(tempIndex);
-            emitFloatConstant(code, cp, caseInfo.caseValue);
+            emitFloatConstant(code, classWriter, caseInfo.caseValue);
             code.fcmpl();
 
             code.ifne(0);
@@ -867,7 +876,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         for (FloatCaseInfo caseInfo : cases) {
             caseInfo.labelOffset = code.getCurrentOffset();
             for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+                compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
             }
         }
 
@@ -901,7 +910,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
      */
     private void generateIntegerSwitch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
@@ -911,7 +920,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         List<CaseInfo> cases = analyzeCases(switchStmt);
 
         // 2. Evaluate discriminant (push value onto stack)
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, switchStmt.getDiscriminant(), null);
 
         if (cases.isEmpty()) {
             // Empty switch - just pop the discriminant value
@@ -939,7 +948,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         for (CaseInfo caseInfo : cases) {
             caseInfo.labelOffset = code.getCurrentOffset();
             for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+                compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
             }
         }
 
@@ -974,7 +983,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
      */
     private void generateIntegerSwitchWithDiscriminantOnStack(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
@@ -1043,7 +1052,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
 
             // Generate case body
             for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+                compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
             }
             // Fall-through is automatic - no goto unless break was generated
         }
@@ -1074,17 +1083,17 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
 
     private void generateLongSwitch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
-        generateLongSwitchWithDiscriminantOnStack(code, cp, switchStmt, labelName, returnTypeInfo);
+        compiler.getExpressionGenerator().generate(code, classWriter, switchStmt.getDiscriminant(), null);
+        generateLongSwitchWithDiscriminantOnStack(code, classWriter, switchStmt, labelName, returnTypeInfo);
     }
 
     private void generateLongSwitchWithDiscriminantOnStack(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
@@ -1106,7 +1115,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                 continue;
             }
             code.lload(tempIndex);
-            emitLongConstant(code, cp, caseInfo.caseValue);
+            emitLongConstant(code, classWriter, caseInfo.caseValue);
             code.lcmp();
 
             code.ifne(0);
@@ -1132,7 +1141,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         for (LongCaseInfo caseInfo : cases) {
             caseInfo.labelOffset = code.getCurrentOffset();
             for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+                compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
             }
         }
 
@@ -1167,11 +1176,12 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
      */
     private void generatePhase1HashSwitch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             int strLocal,
             int posLocal,
             Map<Integer, Set<String>> hashToStrings,
             Map<String, Integer> caseLabelToPosition) {
+        var cp = classWriter.getConstantPool();
 
         int hashCodeRef = cp.addMethodRef("java/lang/String", "hashCode", "()I");
         int equalsRef = cp.addMethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z");
@@ -1258,7 +1268,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
      */
     private void generatePhase2PositionSwitch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             int posLocal,
             List<StringCaseInfo> stringCases,
             int defaultCasePosition,
@@ -1312,7 +1322,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
 
             // Generate case body
             for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+                compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
             }
             // Fall-through is automatic
         }
@@ -1351,7 +1361,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
      */
     private void generateStringSwitch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
@@ -1362,7 +1372,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
 
         if (stringCases.isEmpty()) {
             // Empty switch - just evaluate discriminant for side effects
-            compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, switchStmt.getDiscriminant(), null);
             code.pop();
             return;
         }
@@ -1393,7 +1403,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
 
         // 3. Store discriminant in local variable
         int strLocal = context.getLocalVariableTable().allocateVariable("$switch$str", "Ljava/lang/String;");
-        compiler.getExpressionGenerator().generate(code, cp, switchStmt.getDiscriminant(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, switchStmt.getDiscriminant(), null);
         code.astore(strLocal);
 
         // 4. Create temp variable for position, initialized to -1
@@ -1403,11 +1413,11 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
 
         // 5. Phase 1: Switch on hashCode() to determine position
         if (!hashToStrings.isEmpty()) {
-            generatePhase1HashSwitch(code, cp, strLocal, posLocal, hashToStrings, caseLabelToPosition);
+            generatePhase1HashSwitch(code, classWriter, strLocal, posLocal, hashToStrings, caseLabelToPosition);
         }
 
         // 6. Phase 2: Switch on position with original case bodies
-        generatePhase2PositionSwitch(code, cp, posLocal, stringCases, defaultCasePosition,
+        generatePhase2PositionSwitch(code, classWriter, posLocal, stringCases, defaultCasePosition,
                 labelName, returnTypeInfo);
     }
 

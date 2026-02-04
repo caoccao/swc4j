@@ -108,10 +108,10 @@ public final class WhileStatementGenerator extends BaseAstProcessor<Swc4jAstWhil
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstWhileStmt whileStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(code, cp, whileStmt, null, returnTypeInfo);
+        generate(code, classWriter, whileStmt, null, returnTypeInfo);
     }
 
     /**
@@ -126,10 +126,11 @@ public final class WhileStatementGenerator extends BaseAstProcessor<Swc4jAstWhil
      */
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstWhileStmt whileStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // 1. Mark test label (loop entry point)
@@ -147,18 +148,18 @@ public final class WhileStatementGenerator extends BaseAstProcessor<Swc4jAstWhil
         if (!isInfiniteLoop) {
             // Generate conditional test and jump to body if TRUE
             if (testExpr instanceof Swc4jAstBinExpr binExpr) {
-                boolean generated = generateDirectConditionalJumpToBody(code, cp, binExpr);
+                boolean generated = generateDirectConditionalJumpToBody(code, classWriter, binExpr);
                 if (generated) {
                     condJumpOffsetPos = code.getCurrentOffset() - 2;
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
                 } else {
-                    compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, testExpr, null);
                     code.ifne(0); // Placeholder - jump to body if TRUE
                     condJumpOffsetPos = code.getCurrentOffset() - 2;
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
                 }
             } else {
-                compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
+                compiler.getExpressionGenerator().generate(code, classWriter, testExpr, null);
                 code.ifne(0); // Placeholder - jump to body if TRUE
                 condJumpOffsetPos = code.getCurrentOffset() - 2;
                 condJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -184,7 +185,7 @@ public final class WhileStatementGenerator extends BaseAstProcessor<Swc4jAstWhil
         context.pushContinueLabel(continueLabel);
 
         // 4. Generate body and check if it can fall through
-        compiler.getStatementGenerator().generate(code, cp, whileStmt.getBody(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, whileStmt.getBody(), returnTypeInfo);
         boolean bodyCanFallThrough = canFallThrough(whileStmt.getBody());
 
         // 5. Mark continue label (continue jumps to test label for while loops)
@@ -235,7 +236,7 @@ public final class WhileStatementGenerator extends BaseAstProcessor<Swc4jAstWhil
      */
     private boolean generateDirectConditionalJumpToBody(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstBinExpr binExpr) throws Swc4jByteCodeCompilerException {
 
         Swc4jAstBinaryOp op = binExpr.getOp();
@@ -255,10 +256,10 @@ public final class WhileStatementGenerator extends BaseAstProcessor<Swc4jAstWhil
         }
 
         // Generate left operand
-        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
 
         // Generate right operand
-        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
 
         // Generate comparison - jump to body if condition is TRUE
         // For "i < 10", we want to jump to body if "i < 10", so use if_icmplt

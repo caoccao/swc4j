@@ -62,7 +62,8 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
         super(compiler);
     }
 
-    public static void generateDefaultConstructor(ClassWriter classWriter, ClassWriter.ConstantPool cp, String superClassInternalName) {
+    public static void generateDefaultConstructor(ClassWriter classWriter, String superClassInternalName) {
+        var cp = classWriter.getConstantPool();
         // Generate: public <init>() { super(); }
         int superCtorRef = cp.addMethodRef(superClassInternalName, "<init>", "()V");
 
@@ -82,7 +83,7 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
     }
 
     @Override
-    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstClassDecl classDecl, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+    public void generate(CodeBuilder code, ClassWriter classWriter, Swc4jAstClassDecl classDecl, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         String currentPackage = compiler.getMemory().getScopedPackage().getCurrentPackage();
         String className = classDecl.getIdent().getSym();
         String fullClassName = currentPackage.isEmpty() ? className : currentPackage + "." + className;
@@ -205,21 +206,21 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
             // Generate constructors
             if (!constructors.isEmpty()) {
                 for (Swc4jAstConstructor ctor : constructors) {
-                    generateExplicitConstructor(classWriter, cp, internalClassName, superClassInternalName, ctor);
+                    generateExplicitConstructor(classWriter, internalClassName, superClassInternalName, ctor);
                 }
             } else if (!instanceFields.isEmpty()) {
-                generateConstructorWithFieldInit(classWriter, cp, internalClassName, superClassInternalName, instanceFields);
+                generateConstructorWithFieldInit(classWriter, internalClassName, superClassInternalName, instanceFields);
             } else {
-                generateDefaultConstructor(classWriter, cp, superClassInternalName);
+                generateDefaultConstructor(classWriter, superClassInternalName);
             }
 
             // Generate methods (this may create template cache entries)
             for (ISwc4jAstClassMember member : clazz.getBody()) {
                 if (member instanceof Swc4jAstClassMethod method) {
-                    compiler.getClassMethodGenerator().generate(classWriter, cp, method);
+                    compiler.getClassMethodGenerator().generate(classWriter, method);
                 } else if (member instanceof Swc4jAstPrivateMethod privateMethod) {
                     // ES2022 private methods (#method)
-                    compiler.getClassMethodGenerator().generate(classWriter, cp, privateMethod);
+                    compiler.getClassMethodGenerator().generate(classWriter, privateMethod);
                 }
             }
 
@@ -243,7 +244,7 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
 
             // Generate <clinit> for static field initialization, static blocks, and template caches
             if (!staticInitItems.isEmpty() || !templateCaches.isEmpty()) {
-                generateClinitMethod(classWriter, cp, internalClassName, staticInitItems, templateCaches);
+                generateClinitMethod(classWriter, internalClassName, staticInitItems, templateCaches);
             }
 
             return classWriter.toByteArray();
@@ -266,10 +267,10 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
      */
     private void generateClinitMethod(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String internalClassName,
             List<StaticInitItem> staticInitItems,
             List<ScopedTemplateCacheRegistry.TemplateCacheEntry> templateCaches) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Reset compilation context for static initialization
         compiler.getMemory().resetCompilationContext(true); // is static
 
@@ -281,7 +282,7 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
                 FieldInfo field = fieldInit.fieldInfo();
                 if (field.initializer().isPresent()) {
                     // Generate code for the initializer expression
-                    compiler.getExpressionGenerator().generate(code, cp, field.initializer().get(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, field.initializer().get(), null);
                     // Store to static field
                     int fieldRef = cp.addFieldRef(internalClassName, field.name(), field.descriptor());
                     code.putstatic(fieldRef);
@@ -296,7 +297,7 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
 
                 // Generate code for each statement in the static block
                 for (ISwc4jAstStmt stmt : body.getStmts()) {
-                    compiler.getStatementGenerator().generate(code, cp, stmt, null);
+                    compiler.getStatementGenerator().generate(code, classWriter, stmt, null);
                 }
             }
         }
@@ -396,10 +397,10 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
 
     public void generateConstructorWithFieldInit(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String internalClassName,
             String superClassInternalName,
             List<FieldInfo> fieldsToInit) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Generate: public <init>() { super(); this.field1 = value1; ... }
         int superCtorRef = cp.addMethodRef(superClassInternalName, "<init>", "()V");
 
@@ -415,7 +416,7 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
             if (field.initializer().isPresent()) {
                 code.aload(0); // load this for putfield
                 // Generate code for the initializer expression
-                compiler.getExpressionGenerator().generate(code, cp, field.initializer().get(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, field.initializer().get(), null);
                 // Store to field
                 int fieldRef = cp.addFieldRef(internalClassName, field.name(), field.descriptor());
                 code.putfield(fieldRef);
@@ -439,10 +440,10 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
      */
     public void generateExplicitConstructor(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String internalClassName,
             String superClassInternalName,
             Swc4jAstConstructor constructor) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Reset compilation context for constructor code generation (not static)
         compiler.getMemory().resetCompilationContext(false);
 
@@ -498,7 +499,7 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
 
             // Process statements in the constructor body
             for (ISwc4jAstStmt stmt : stmts) {
-                compiler.getStatementGenerator().generate(code, cp, stmt, null);
+                compiler.getStatementGenerator().generate(code, classWriter, stmt, null);
             }
         } else {
             // No body - generate default super() call

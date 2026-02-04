@@ -60,21 +60,21 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
     }
 
     @Override
-    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstClassMethod classMethod, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+    public void generate(CodeBuilder code, ClassWriter classWriter, Swc4jAstClassMethod classMethod, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         throw new Swc4jByteCodeCompilerException(getSourceCode(), classMethod, "Use generate method with ClassWriter for class methods.");
     }
 
     public void generate(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             Swc4jAstClassMethod method) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         ISwc4jAstPropName key = method.getKey();
         String methodName = CodeGeneratorUtils.getMethodName(key);
         Swc4jAstFunction function = method.getFunction();
 
         // Handle abstract methods (no body)
         if (method.isAbstract()) {
-            generateAbstractMethod(classWriter, cp, method, methodName, function);
+            generateAbstractMethod(classWriter, method, methodName, function);
             return;
         }
 
@@ -109,7 +109,7 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
                 // Determine return type from method body or explicit annotation
                 ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, body);
                 String descriptor = generateDescriptor(function, returnTypeInfo);
-                CodeBuilder code = generateCode(cp, body, returnTypeInfo);
+                CodeBuilder code = generateCode(classWriter, body, returnTypeInfo);
 
                 int accessFlags = getAccessFlags(method.getAccessibility());
                 if (method.isStatic()) {
@@ -160,7 +160,7 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
                 }
 
                 // Generate overloaded methods for default parameters
-                generateDefaultParameterOverloads(classWriter, cp, method, methodName, function, returnTypeInfo, accessFlags);
+                generateDefaultParameterOverloads(classWriter, method, methodName, function, returnTypeInfo, accessFlags);
             } catch (Exception e) {
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), method, "Failed to generate method: " + methodName, e);
             } finally {
@@ -179,15 +179,15 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
      */
     public void generate(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             Swc4jAstPrivateMethod method) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Get method name from PrivateName (without the # prefix)
         String methodName = method.getKey().getName();
         Swc4jAstFunction function = method.getFunction();
 
         // Handle abstract private methods (rare but possible in interfaces)
         if (method.isAbstract()) {
-            generateAbstractPrivateMethod(classWriter, cp, method, methodName, function);
+            generateAbstractPrivateMethod(classWriter, method, methodName, function);
             return;
         }
 
@@ -221,7 +221,7 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
                 // Determine return type from method body or explicit annotation
                 ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, body);
                 String descriptor = generateDescriptor(function, returnTypeInfo);
-                CodeBuilder code = generateCode(cp, body, returnTypeInfo);
+                CodeBuilder code = generateCode(classWriter, body, returnTypeInfo);
 
                 // Private methods are always ACC_PRIVATE (0x0002)
                 int accessFlags = 0x0002; // ACC_PRIVATE
@@ -266,7 +266,7 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
                 }
 
                 // Generate overloaded methods for default parameters
-                generateDefaultParameterOverloadsForPrivateMethod(classWriter, cp, method, methodName, function, returnTypeInfo, accessFlags);
+                generateDefaultParameterOverloadsForPrivateMethod(classWriter, method, methodName, function, returnTypeInfo, accessFlags);
             } catch (Exception e) {
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), method, "Failed to generate private method: " + methodName, e);
             } finally {
@@ -279,7 +279,6 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
 
     private void generateAbstractMethod(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             Swc4jAstClassMethod method,
             String methodName,
             Swc4jAstFunction function) throws Swc4jByteCodeCompilerException {
@@ -320,7 +319,6 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
 
     private void generateAbstractPrivateMethod(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             Swc4jAstPrivateMethod method,
             String methodName,
             Swc4jAstFunction function) throws Swc4jByteCodeCompilerException {
@@ -352,13 +350,13 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
     }
 
     public CodeBuilder generateCode(
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstBlockStmt body,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CodeBuilder code = new CodeBuilder();
 
         // Process statements in the method body
-        compiler.getStatementGenerator().generate(code, cp, body.getStmts(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, body.getStmts(), returnTypeInfo);
 
         // Add implicit return for void methods if not already present
         if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.VOID) {
@@ -378,7 +376,6 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
      */
     private void generateDefaultParameterOverloads(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             Swc4jAstClassMethod method,
             String methodName,
             Swc4jAstFunction function,
@@ -409,7 +406,7 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
         // - add(int a) calls add(a, 10, 20)
         // - add(int a, int b) calls add(a, b, 20)
         for (int paramCount = firstDefaultIndex; paramCount < params.size(); paramCount++) {
-            generateOverloadMethod(classWriter, cp, method, methodName, function, returnTypeInfo,
+            generateOverloadMethod(classWriter, method, methodName, function, returnTypeInfo,
                     baseAccessFlags, paramCount, fullDescriptor, internalClassName);
         }
     }
@@ -419,7 +416,6 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
      */
     private void generateDefaultParameterOverloadsForPrivateMethod(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             Swc4jAstPrivateMethod method,
             String methodName,
             Swc4jAstFunction function,
@@ -443,7 +439,7 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
         String internalClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
 
         for (int paramCount = firstDefaultIndex; paramCount < params.size(); paramCount++) {
-            generatePrivateOverloadMethod(classWriter, cp, method, methodName, function, returnTypeInfo,
+            generatePrivateOverloadMethod(classWriter, method, methodName, function, returnTypeInfo,
                     baseAccessFlags, paramCount, fullDescriptor, internalClassName);
         }
     }
@@ -480,7 +476,6 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
      */
     private void generateOverloadMethod(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             Swc4jAstClassMethod method,
             String methodName,
             Swc4jAstFunction function,
@@ -489,6 +484,7 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
             int paramCount,
             String fullDescriptor,
             String internalClassName) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         List<Swc4jAstParam> params = function.getParams();
         boolean isStatic = method.isStatic();
 
@@ -528,7 +524,7 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
                 // Create ReturnTypeInfo for the expected parameter type
                 String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
                 ReturnTypeInfo expectedType = createReturnTypeInfoFromDescriptor(paramType);
-                compiler.getExpressionGenerator().generate(code, cp, defaultValue, expectedType);
+                compiler.getExpressionGenerator().generate(code, classWriter, defaultValue, expectedType);
             } else {
                 // This shouldn't happen if firstDefaultIndex is correct
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), params.get(i),
@@ -564,7 +560,6 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
      */
     private void generatePrivateOverloadMethod(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             Swc4jAstPrivateMethod method,
             String methodName,
             Swc4jAstFunction function,
@@ -573,6 +568,7 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
             int paramCount,
             String fullDescriptor,
             String internalClassName) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         List<Swc4jAstParam> params = function.getParams();
         boolean isStatic = method.isStatic();
 
@@ -605,7 +601,7 @@ public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMe
             if (defaultValue != null) {
                 String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
                 ReturnTypeInfo expectedType = createReturnTypeInfoFromDescriptor(paramType);
-                compiler.getExpressionGenerator().generate(code, cp, defaultValue, expectedType);
+                compiler.getExpressionGenerator().generate(code, classWriter, defaultValue, expectedType);
             } else {
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), params.get(i),
                         "Expected default value for parameter at index " + i);

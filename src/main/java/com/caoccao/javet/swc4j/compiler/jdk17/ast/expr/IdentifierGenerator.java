@@ -35,9 +35,10 @@ public final class IdentifierGenerator extends BaseAstProcessor<Swc4jAstIdent> {
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstIdent ident,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
         String varName = ident.getSym();
 

@@ -37,9 +37,10 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         if (!(callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr)) {
             return;
         }
@@ -51,9 +52,9 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Array static method name not supported");
         }
         switch (methodName) {
-            case "isArray" -> generateIsArray(code, cp, callExpr);
-            case "from" -> generateFrom(code, cp, callExpr);
-            case "of" -> generateOf(code, cp, callExpr);
+            case "isArray" -> generateIsArray(code, classWriter, callExpr);
+            case "from" -> generateFrom(code, classWriter, callExpr);
+            case "of" -> generateOf(code, classWriter, callExpr);
             default ->
                     throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Array." + methodName + "() not supported");
         }
@@ -61,7 +62,7 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
 
     private void generateFrom(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Array.from() requires an argument");
@@ -73,11 +74,12 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
         if (arg.getSpread().isPresent()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported");
         }
-        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
         String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
         if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-            TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
         }
+        var cp = classWriter.getConstantPool();
         int fromMethod = cp.addMethodRef(
                 "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayStaticApiUtils",
                 "from",
@@ -87,7 +89,7 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
 
     private void generateIsArray(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
             code.iconst(0);
@@ -97,11 +99,12 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
         if (arg.getSpread().isPresent()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported");
         }
-        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
         String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
         if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-            TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
         }
+        var cp = classWriter.getConstantPool();
         int isArrayMethod = cp.addMethodRef(
                 "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayStaticApiUtils",
                 "isArray",
@@ -111,8 +114,9 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
 
     private void generateOf(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         int arrayListClass = cp.addClass("java/util/ArrayList");
         int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
         int arrayListAdd = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
@@ -126,10 +130,10 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported");
             }
             code.dup();
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-                TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
             }
             code.invokevirtual(arrayListAdd);
             code.pop();

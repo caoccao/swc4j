@@ -55,7 +55,7 @@ public final class LabeledStatementGenerator extends BaseAstProcessor<Swc4jAstLa
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstLabeledStmt labeledStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // Extract label name
@@ -66,26 +66,26 @@ public final class LabeledStatementGenerator extends BaseAstProcessor<Swc4jAstLa
 
         if (body instanceof Swc4jAstForStmt forStmt) {
             // Generate labeled for loop
-            compiler.getForStatementGenerator().generate(code, cp, forStmt, labelName, returnTypeInfo);
+            compiler.getForStatementGenerator().generate(code, classWriter, forStmt, labelName, returnTypeInfo);
         } else if (body instanceof Swc4jAstForInStmt forInStmt) {
             // Generate labeled for-in loop
-            compiler.getForInStatementGenerator().generate(code, cp, forInStmt, labelName, returnTypeInfo);
+            compiler.getForInStatementGenerator().generate(code, classWriter, forInStmt, labelName, returnTypeInfo);
         } else if (body instanceof Swc4jAstForOfStmt forOfStmt) {
             // Generate labeled for-of loop
-            compiler.getForOfStatementGenerator().generate(code, cp, forOfStmt, labelName, returnTypeInfo);
+            compiler.getForOfStatementGenerator().generate(code, classWriter, forOfStmt, labelName, returnTypeInfo);
         } else if (body instanceof Swc4jAstWhileStmt whileStmt) {
             // Generate labeled while loop
-            compiler.getWhileStatementGenerator().generate(code, cp, whileStmt, labelName, returnTypeInfo);
+            compiler.getWhileStatementGenerator().generate(code, classWriter, whileStmt, labelName, returnTypeInfo);
         } else if (body instanceof Swc4jAstDoWhileStmt doWhileStmt) {
             // Generate labeled do-while loop
-            compiler.getDoWhileStatementGenerator().generate(code, cp, doWhileStmt, labelName, returnTypeInfo);
+            compiler.getDoWhileStatementGenerator().generate(code, classWriter, doWhileStmt, labelName, returnTypeInfo);
         } else if (body instanceof Swc4jAstSwitchStmt switchStmt) {
             // Generate labeled switch statement
-            compiler.getSwitchStatementGenerator().generate(code, cp, switchStmt, labelName, returnTypeInfo);
+            compiler.getSwitchStatementGenerator().generate(code, classWriter, switchStmt, labelName, returnTypeInfo);
         } else {
             // For other statement types, just generate the body
             // (labels on non-loop statements are allowed but don't affect code generation)
-            compiler.getStatementGenerator().generate(code, cp, body, returnTypeInfo);
+            compiler.getStatementGenerator().generate(code, classWriter, body, returnTypeInfo);
         }
     }
 }

@@ -76,18 +76,19 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstTaggedTpl taggedTpl,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         ISwc4jAstExpr tag = taggedTpl.getTag();
         Swc4jAstTpl tpl = taggedTpl.getTpl();
         List<Swc4jAstTplElement> quasis = tpl.getQuasis();
         List<ISwc4jAstExpr> exprs = tpl.getExprs();
 
         if (tag instanceof Swc4jAstMemberExpr memberExpr) {
-            generateMemberExprTagCall(code, cp, taggedTpl, memberExpr, quasis, exprs, returnTypeInfo);
+            generateMemberExprTagCall(code, classWriter, taggedTpl, memberExpr, quasis, exprs, returnTypeInfo);
         } else if (tag instanceof Swc4jAstIdent ident) {
-            generateStandaloneFunctionTagCall(code, cp, taggedTpl, ident, quasis, exprs, returnTypeInfo);
+            generateStandaloneFunctionTagCall(code, classWriter, taggedTpl, ident, quasis, exprs, returnTypeInfo);
         } else {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), taggedTpl,
                     "Unsupported tag expression type: " + tag.getClass().getSimpleName());
@@ -96,7 +97,7 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
 
     private void generateMemberExprTagCall(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstTaggedTpl taggedTpl,
             Swc4jAstMemberExpr memberExpr,
             List<Swc4jAstTplElement> quasis,
@@ -142,7 +143,7 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         boolean useTemplateStringsArray = tsaReturnType != null;
 
         // Generate object reference
-        compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null);
 
         // Build method descriptor based on whether we use TemplateStringsArray or String[]
         String firstParamDescriptor;
@@ -150,7 +151,7 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         if (useTemplateStringsArray) {
             firstParamDescriptor = templateStringsArrayDescriptor;
             methodReturnType = tsaReturnType;
-            loadCachedTemplateStringsArray(code, cp, quasis);
+            loadCachedTemplateStringsArray(code, classWriter, quasis);
         } else {
             firstParamDescriptor = "[Ljava/lang/String;";
             String stringArrayParamDescriptor = "(" + firstParamDescriptor + exprParamDescriptors + ")";
@@ -161,18 +162,19 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
                         "Cannot infer return type for tagged template tag function " +
                                 qualifiedClassName + "." + methodName);
             }
-            loadCachedStringArray(code, cp, quasis);
+            loadCachedStringArray(code, classWriter, quasis);
         }
 
         // Generate expression arguments
         for (ISwc4jAstExpr expr : exprs) {
-            compiler.getExpressionGenerator().generate(code, cp, expr, null);
+            compiler.getExpressionGenerator().generate(code, classWriter, expr, null);
         }
 
         String paramDescriptor = "(" + firstParamDescriptor + exprParamDescriptors + ")";
         String methodDescriptor = paramDescriptor + methodReturnType;
 
         // Invoke the method
+        var cp = classWriter.getConstantPool();
         int methodRef = cp.addMethodRef(internalClassName, methodName, methodDescriptor);
         code.invokevirtual(methodRef);
 
@@ -182,17 +184,17 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
             if (TypeConversionUtils.isPrimitiveType(methodReturnType)
                     && !TypeConversionUtils.isPrimitiveType(returnTypeInfo.descriptor())) {
                 String wrapperType = TypeConversionUtils.getWrapperType(methodReturnType);
-                TypeConversionUtils.boxPrimitiveType(code, cp, methodReturnType, wrapperType);
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, methodReturnType, wrapperType);
             } else if (!TypeConversionUtils.isPrimitiveType(methodReturnType)
                     && TypeConversionUtils.isPrimitiveType(returnTypeInfo.descriptor())) {
-                TypeConversionUtils.unboxWrapperType(code, cp, "L" + methodReturnType + ";");
+                TypeConversionUtils.unboxWrapperType(code, classWriter, "L" + methodReturnType + ";");
             }
         }
     }
 
     private void generateStandaloneFunctionTagCall(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstTaggedTpl taggedTpl,
             Swc4jAstIdent ident,
             List<Swc4jAstTplElement> quasis,
@@ -229,10 +231,10 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         String firstParamDescriptor;
         if (useTemplateStringsArray) {
             firstParamDescriptor = "Lcom/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray;";
-            loadCachedTemplateStringsArray(code, cp, quasis);
+            loadCachedTemplateStringsArray(code, classWriter, quasis);
         } else {
             firstParamDescriptor = "[Ljava/lang/String;";
-            loadCachedStringArray(code, cp, quasis);
+            loadCachedStringArray(code, classWriter, quasis);
         }
 
         // Build method descriptor: first param is String[] or TemplateStringsArray, rest are expression types
@@ -242,7 +244,7 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         // Remaining arguments: interpolated expressions
         for (ISwc4jAstExpr expr : exprs) {
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
-            compiler.getExpressionGenerator().generate(code, cp, expr, null);
+            compiler.getExpressionGenerator().generate(code, classWriter, expr, null);
             if (exprType == null) {
                 exprType = "Ljava/lang/Object;";
             }
@@ -255,6 +257,7 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         String methodDescriptor = "(" + paramDescriptors + ")" + methodReturnType;
 
         // Invoke the static method
+        var cp = classWriter.getConstantPool();
         int methodRef = cp.addMethodRef(dummyClassInternalName, functionName, methodDescriptor);
         code.invokestatic(methodRef);
 
@@ -264,10 +267,10 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
             if (TypeConversionUtils.isPrimitiveType(methodReturnType)
                     && !TypeConversionUtils.isPrimitiveType(returnTypeInfo.descriptor())) {
                 String wrapperType = TypeConversionUtils.getWrapperType(methodReturnType);
-                TypeConversionUtils.boxPrimitiveType(code, cp, methodReturnType, wrapperType);
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, methodReturnType, wrapperType);
             } else if (!TypeConversionUtils.isPrimitiveType(methodReturnType)
                     && TypeConversionUtils.isPrimitiveType(returnTypeInfo.descriptor())) {
-                TypeConversionUtils.unboxWrapperType(code, cp, "L" + methodReturnType + ";");
+                TypeConversionUtils.unboxWrapperType(code, classWriter, "L" + methodReturnType + ";");
             }
         }
     }
@@ -280,7 +283,7 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
      */
     private void loadCachedStringArray(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             List<Swc4jAstTplElement> quasis) {
         // Register in cache and get field name
         String fieldName = registerQuasisInCache(quasis);
@@ -289,6 +292,7 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         String classInternalName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
 
         // Generate GETSTATIC to load the cached array
+        var cp = classWriter.getConstantPool();
         int fieldRef = cp.addFieldRef(classInternalName, fieldName, "[Ljava/lang/String;");
         code.getstatic(fieldRef);
     }
@@ -301,7 +305,7 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
      */
     private void loadCachedTemplateStringsArray(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             List<Swc4jAstTplElement> quasis) {
         // Register in cache and get field name
         String fieldName = registerQuasisInCache(quasis);
@@ -310,6 +314,7 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         String classInternalName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
 
         // Generate GETSTATIC to load the cached TemplateStringsArray
+        var cp = classWriter.getConstantPool();
         int fieldRef = cp.addFieldRef(classInternalName, fieldName + "$raw",
                 "Lcom/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray;");
         code.getstatic(fieldRef);

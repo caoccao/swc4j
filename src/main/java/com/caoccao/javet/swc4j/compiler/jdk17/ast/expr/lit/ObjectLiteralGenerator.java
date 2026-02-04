@@ -66,9 +66,10 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstObjectLit objectLit,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         // Phase 2: Extract generic type info for Record type validation
         GenericTypeInfo genericTypeInfo = returnTypeInfo != null ? returnTypeInfo.genericTypeInfo() : null;
@@ -97,7 +98,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
 
                 // Generate key
                 String expectedKeyType = genericTypeInfo != null ? genericTypeInfo.getKeyType() : null;
-                generateKey(code, cp, kvProp.getKey(), expectedKeyType);
+                generateKey(code, classWriter, kvProp.getKey(), expectedKeyType);
                 // Stack: [map, map, key]
 
                 // Generate value
@@ -114,13 +115,13 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                     valueReturnType = ReturnTypeInfo.of(valueExpr, "Ljava/util/LinkedHashMap;", genericTypeInfo.getNestedTypeInfo());
                 }
 
-                compiler.getExpressionGenerator().generate(code, cp, valueExpr, valueReturnType);
+                compiler.getExpressionGenerator().generate(code, classWriter, valueExpr, valueReturnType);
                 // Stack: [map, map, key, value]
 
                 // Box primitive values to Object
                 if (TypeConversionUtils.isPrimitiveType(valueType)) {
                     String wrapperType = TypeConversionUtils.getWrapperType(valueType);
-                    TypeConversionUtils.boxPrimitiveType(code, cp, valueType, wrapperType);
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, valueType, wrapperType);
                 }
                 // Stack: [map, map, key, boxedValue]
 
@@ -150,13 +151,13 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                     valueType = "Ljava/lang/Object;";
                 }
 
-                compiler.getExpressionGenerator().generate(code, cp, ident, null);
+                compiler.getExpressionGenerator().generate(code, classWriter, ident, null);
                 // Stack: [map, map, key, value]
 
                 // Box primitive values to Object
                 if (TypeConversionUtils.isPrimitiveType(valueType)) {
                     String wrapperType = TypeConversionUtils.getWrapperType(valueType);
-                    TypeConversionUtils.boxPrimitiveType(code, cp, valueType, wrapperType);
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, valueType, wrapperType);
                 }
                 // Stack: [map, map, key, boxedValue]
 
@@ -176,7 +177,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
 
                 // Generate the spread expression (should evaluate to a Map)
                 ISwc4jAstExpr spreadExpr = spread.getExpr();
-                compiler.getExpressionGenerator().generate(code, cp, spreadExpr, null);
+                compiler.getExpressionGenerator().generate(code, classWriter, spreadExpr, null);
                 // Stack: [map, map, spreadMap]
 
                 // Call map.putAll(spreadMap) to merge all properties
@@ -213,9 +214,10 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
 
     private void generateKey(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             ISwc4jAstPropName key,
             String expectedKeyType) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         // Phase 2.1: Check if we should generate primitive wrapper keys (not String)
         boolean nonStringKeys = isPrimitiveKeyType(expectedKeyType);
@@ -234,7 +236,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
             // Numeric key handling depends on Record type
             if (nonStringKeys) {
                 // Phase 2.1: Record<T, V> where T is a wrapper type - generate boxed key
-                generateNumericKey(code, cp, num, expectedKeyType);
+                generateNumericKey(code, classWriter, num, expectedKeyType);
             } else {
                 // Phase 1: Default behavior - convert to String
                 String keyStr = String.valueOf((int) num.getValue());
@@ -262,7 +264,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
             }
 
             // Generate the expression
-            compiler.getExpressionGenerator().generate(code, cp, expr, null);
+            compiler.getExpressionGenerator().generate(code, classWriter, expr, null);
             // Stack: [expr_result]
 
             // Phase 2.1: Convert to appropriate key type based on Record type
@@ -271,7 +273,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                 if (TypeConversionUtils.isPrimitiveType(exprType)) {
                     // Box primitive types
                     String wrapperType = TypeConversionUtils.getWrapperType(exprType);
-                    TypeConversionUtils.boxPrimitiveType(code, cp, exprType, wrapperType);
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, exprType, wrapperType);
                     // Stack: [boxed value]
                 } else if (isPrimitiveKeyType(exprType)) {
                     // Already boxed primitive wrapper type, no conversion needed
@@ -288,7 +290,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                     // Box primitives first, then call String.valueOf(Object)
                     if (TypeConversionUtils.isPrimitiveType(exprType)) {
                         String wrapperType = TypeConversionUtils.getWrapperType(exprType);
-                        TypeConversionUtils.boxPrimitiveType(code, cp, exprType, wrapperType);
+                        TypeConversionUtils.boxPrimitiveType(code, classWriter, exprType, wrapperType);
                     }
                     // Stack: [Object]
 
@@ -322,9 +324,10 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
      */
     private void generateNumericKey(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstNumber num,
             String expectedKeyType) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         double value = num.getValue();
 
         // For explicit Long type annotation, always use Long

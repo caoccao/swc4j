@@ -33,9 +33,10 @@ public final class TsAsExpressionGenerator extends BaseAstProcessor<Swc4jAstTsAs
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstTsAsExpr asExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Handle explicit type cast (e.g., a as double)
         String targetType = compiler.getTypeResolver().inferTypeFromExpr(asExpr);
         String innerType = compiler.getTypeResolver().inferTypeFromExpr(asExpr.getExpr());
@@ -44,7 +45,7 @@ public final class TsAsExpressionGenerator extends BaseAstProcessor<Swc4jAstTsAs
         if (innerType == null) innerType = "Ljava/lang/Object;";
 
         // Generate code for the inner expression
-        compiler.getExpressionGenerator().generate(code, cp, asExpr.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, asExpr.getExpr(), null);
 
         // Handle Object to primitive conversion
         // When the source is Object and target is a primitive, we need to cast first
@@ -115,7 +116,7 @@ public final class TsAsExpressionGenerator extends BaseAstProcessor<Swc4jAstTsAs
         }
 
         // Unbox if the inner expression is a wrapper type
-        TypeConversionUtils.unboxWrapperType(code, cp, innerType);
+        TypeConversionUtils.unboxWrapperType(code, classWriter, innerType);
 
         // Get the primitive types for conversion
         String innerPrimitive = TypeConversionUtils.getPrimitiveType(innerType);
@@ -125,6 +126,6 @@ public final class TsAsExpressionGenerator extends BaseAstProcessor<Swc4jAstTsAs
         TypeConversionUtils.convertPrimitiveType(code, innerPrimitive, targetPrimitive);
 
         // Box if the target type is a wrapper
-        TypeConversionUtils.boxPrimitiveType(code, cp, targetPrimitive, targetType);
+        TypeConversionUtils.boxPrimitiveType(code, classWriter, targetPrimitive, targetType);
     }
 }

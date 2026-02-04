@@ -33,9 +33,10 @@ public final class NumberLiteralGenerator extends BaseAstProcessor<Swc4jAstNumbe
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstNumber number,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         double value = number.getValue();
 
         // Check if we need to convert to float or double based on return type

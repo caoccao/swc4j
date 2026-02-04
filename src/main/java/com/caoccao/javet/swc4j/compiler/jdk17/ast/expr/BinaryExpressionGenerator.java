@@ -42,7 +42,8 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
      * Stack before: [primitive value]
      * Stack after: [BigInteger]
      */
-    private void convertToBigInteger(CodeBuilder code, ClassWriter.ConstantPool cp, String fromType) {
+    private void convertToBigInteger(CodeBuilder code, ClassWriter classWriter, String fromType) {
+        var cp = classWriter.getConstantPool();
         String primitiveType = TypeConversionUtils.getPrimitiveType(fromType);
 
         // Convert to long first if needed
@@ -114,9 +115,10 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstBinExpr binExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         String resultType = null;
         switch (binExpr.getOp()) {
             case Add -> {
@@ -134,7 +136,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     StringApiUtils.generateConcat(
                             compiler,
                             code,
-                            cp,
+                            classWriter,
                             binExpr.getLeft(), binExpr.getRight(),
                             leftType,
                             rightType);
@@ -144,17 +146,17 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "Ljava/math/BigInteger;";
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (!isBigInteger(leftType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                        convertToBigInteger(code, cp, leftType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
+                        convertToBigInteger(code, classWriter, leftType);
                     }
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (!isBigInteger(rightType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                        convertToBigInteger(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
+                        convertToBigInteger(code, classWriter, rightType);
                     }
 
                     // Call BigInteger.add()
@@ -165,13 +167,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                     // Generate appropriate add instruction based on result type
@@ -195,17 +197,17 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "Ljava/math/BigInteger;";
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (!isBigInteger(leftType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                        convertToBigInteger(code, cp, leftType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
+                        convertToBigInteger(code, classWriter, leftType);
                     }
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (!isBigInteger(rightType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                        convertToBigInteger(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
+                        convertToBigInteger(code, classWriter, rightType);
                     }
 
                     // Call BigInteger.subtract()
@@ -216,13 +218,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                     // Generate appropriate sub instruction based on result type
@@ -246,17 +248,17 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "Ljava/math/BigInteger;";
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (!isBigInteger(leftType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                        convertToBigInteger(code, cp, leftType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
+                        convertToBigInteger(code, classWriter, leftType);
                     }
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (!isBigInteger(rightType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                        convertToBigInteger(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
+                        convertToBigInteger(code, classWriter, rightType);
                     }
 
                     // Call BigInteger.multiply()
@@ -267,13 +269,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                     // Generate appropriate mul instruction based on result type
@@ -297,17 +299,17 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "Ljava/math/BigInteger;";
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (!isBigInteger(leftType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                        convertToBigInteger(code, cp, leftType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
+                        convertToBigInteger(code, classWriter, leftType);
                     }
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (!isBigInteger(rightType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                        convertToBigInteger(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
+                        convertToBigInteger(code, classWriter, rightType);
                     }
 
                     // Call BigInteger.divide()
@@ -318,13 +320,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                     // Generate appropriate div instruction based on result type
@@ -348,17 +350,17 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "Ljava/math/BigInteger;";
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (!isBigInteger(leftType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                        convertToBigInteger(code, cp, leftType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
+                        convertToBigInteger(code, classWriter, leftType);
                     }
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (!isBigInteger(rightType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                        convertToBigInteger(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
+                        convertToBigInteger(code, classWriter, rightType);
                     }
 
                     // Call BigInteger.remainder()
@@ -369,13 +371,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                     // Generate appropriate rem instruction based on result type
@@ -399,16 +401,16 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "Ljava/math/BigInteger;";
 
                     // Generate left operand (base)
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
 
                     // Generate right operand (exponent) and convert to int
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (isBigInteger(rightType)) {
                         // Convert BigInteger to int using intValue()
                         int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
                         code.invokevirtual(intValueRef);
                     } else {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                         TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
                     }
 
@@ -419,13 +421,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "D"; // Math.pow returns double
 
                     // Generate left operand (base) and convert to double
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), "D");
 
                     // Generate right operand (exponent) and convert to double
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "D");
 
                     // Call Math.pow(double, double)
@@ -445,16 +447,16 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "Ljava/math/BigInteger;";
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
 
                     // Generate right operand (shift amount) and convert to int
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (isBigInteger(rightType)) {
                         // Convert BigInteger to int using intValue()
                         int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
                         code.invokevirtual(intValueRef);
                     } else {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                         TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
                     }
 
@@ -466,13 +468,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                     // Generate left operand and convert to result type (int or long)
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                     // Generate right operand (shift amount) and convert to int
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
 
                     // Generate appropriate shift instruction based on result type
@@ -499,16 +501,16 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "Ljava/math/BigInteger;";
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
 
                     // Generate right operand (shift amount) and convert to int
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (isBigInteger(rightType)) {
                         // Convert BigInteger to int using intValue()
                         int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
                         code.invokevirtual(intValueRef);
                     } else {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                         TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
                     }
 
@@ -520,13 +522,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                     // Generate left operand and convert to result type (int or long)
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                     // Generate right operand (shift amount) and convert to int
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
 
                     // Generate appropriate shift instruction based on result type
@@ -554,16 +556,16 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "Ljava/math/BigInteger;";
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
 
                     // Generate right operand (shift amount) and convert to int
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (isBigInteger(rightType)) {
                         // Convert BigInteger to int using intValue()
                         int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
                         code.invokevirtual(intValueRef);
                     } else {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                         TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
                     }
 
@@ -575,13 +577,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                     // Generate left operand and convert to result type (int or long)
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                     // Generate right operand (shift amount) and convert to int
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
 
                     // Generate appropriate unsigned shift instruction based on result type
@@ -608,17 +610,17 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "Ljava/math/BigInteger;";
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (!isBigInteger(leftType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                        convertToBigInteger(code, cp, leftType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
+                        convertToBigInteger(code, classWriter, leftType);
                     }
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (!isBigInteger(rightType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                        convertToBigInteger(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
+                        convertToBigInteger(code, classWriter, rightType);
                     }
 
                     // Call BigInteger.and()
@@ -629,13 +631,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                     // Generate appropriate bitwise AND instruction based on result type
@@ -657,17 +659,17 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "Ljava/math/BigInteger;";
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (!isBigInteger(leftType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                        convertToBigInteger(code, cp, leftType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
+                        convertToBigInteger(code, classWriter, leftType);
                     }
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (!isBigInteger(rightType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                        convertToBigInteger(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
+                        convertToBigInteger(code, classWriter, rightType);
                     }
 
                     // Call BigInteger.or()
@@ -678,13 +680,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                     // Generate appropriate bitwise OR instruction based on result type
@@ -706,17 +708,17 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = "Ljava/math/BigInteger;";
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (!isBigInteger(leftType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                        convertToBigInteger(code, cp, leftType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
+                        convertToBigInteger(code, classWriter, leftType);
                     }
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (!isBigInteger(rightType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                        convertToBigInteger(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
+                        convertToBigInteger(code, classWriter, rightType);
                     }
 
                     // Call BigInteger.xor()
@@ -727,13 +729,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     resultType = compiler.getTypeResolver().inferTypeFromExpr(binExpr);
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                     // Generate appropriate bitwise XOR instruction based on result type
@@ -757,17 +759,17 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
                     // BigInteger equality
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (!isBigInteger(leftType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                        convertToBigInteger(code, cp, leftType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
+                        convertToBigInteger(code, classWriter, leftType);
                     }
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (!isBigInteger(rightType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                        convertToBigInteger(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
+                        convertToBigInteger(code, classWriter, rightType);
                     }
 
                     // Call BigInteger.equals()
@@ -792,16 +794,16 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(binExpr, comparisonType);
 
                         // Generate left operand with type hint
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), compTypeInfo);
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), compTypeInfo);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                         // Skip conversion for number literals - they're already generated in the target type
                         if (!isNumberLiteralWithTypeHint(binExpr.getLeft(), comparisonType)) {
                             TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
                         }
 
                         // Generate right operand with type hint
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), compTypeInfo);
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), compTypeInfo);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                         // Skip conversion for number literals - they're already generated in the target type
                         if (!isNumberLiteralWithTypeHint(binExpr.getRight(), comparisonType)) {
                             TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
@@ -846,15 +848,15 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     } else {
                         // Object comparison: use Objects.equals() for null-safe comparison
                         // Generate left operand
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                         if (TypeConversionUtils.isPrimitiveType(leftType)) {
-                            TypeConversionUtils.boxPrimitiveType(code, cp, leftType, TypeConversionUtils.getWrapperType(leftType));
+                            TypeConversionUtils.boxPrimitiveType(code, classWriter, leftType, TypeConversionUtils.getWrapperType(leftType));
                         }
 
                         // Generate right operand
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                         if (TypeConversionUtils.isPrimitiveType(rightType)) {
-                            TypeConversionUtils.boxPrimitiveType(code, cp, rightType, TypeConversionUtils.getWrapperType(rightType));
+                            TypeConversionUtils.boxPrimitiveType(code, classWriter, rightType, TypeConversionUtils.getWrapperType(rightType));
                         }
 
                         // Objects.equals returns boolean (Z) which is represented as 0 or 1
@@ -877,17 +879,17 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
                     // BigInteger inequality
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (!isBigInteger(leftType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                        convertToBigInteger(code, cp, leftType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
+                        convertToBigInteger(code, classWriter, leftType);
                     }
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (!isBigInteger(rightType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                        convertToBigInteger(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
+                        convertToBigInteger(code, classWriter, rightType);
                     }
 
                     // Call BigInteger.equals() and invert result
@@ -915,16 +917,16 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(binExpr, comparisonType);
 
                         // Generate left operand with type hint
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), compTypeInfo);
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), compTypeInfo);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                         // Skip conversion for number literals - they're already generated in the target type
                         if (!isNumberLiteralWithTypeHint(binExpr.getLeft(), comparisonType)) {
                             TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
                         }
 
                         // Generate right operand with type hint
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), compTypeInfo);
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), compTypeInfo);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                         // Skip conversion for number literals - they're already generated in the target type
                         if (!isNumberLiteralWithTypeHint(binExpr.getRight(), comparisonType)) {
                             TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
@@ -969,15 +971,15 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     } else {
                         // Object comparison: use Objects.equals() then invert the result
                         // Generate left operand
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                         if (TypeConversionUtils.isPrimitiveType(leftType)) {
-                            TypeConversionUtils.boxPrimitiveType(code, cp, leftType, TypeConversionUtils.getWrapperType(leftType));
+                            TypeConversionUtils.boxPrimitiveType(code, classWriter, leftType, TypeConversionUtils.getWrapperType(leftType));
                         }
 
                         // Generate right operand
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                         if (TypeConversionUtils.isPrimitiveType(rightType)) {
-                            TypeConversionUtils.boxPrimitiveType(code, cp, rightType, TypeConversionUtils.getWrapperType(rightType));
+                            TypeConversionUtils.boxPrimitiveType(code, classWriter, rightType, TypeConversionUtils.getWrapperType(rightType));
                         }
 
                         // Objects.equals returns boolean (Z) which is represented as 0 or 1
@@ -1007,17 +1009,17 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     boolean isLtEq = binExpr.getOp() == Swc4jAstBinaryOp.LtEq;
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (!isBigInteger(leftType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                        convertToBigInteger(code, cp, leftType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
+                        convertToBigInteger(code, classWriter, leftType);
                     }
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (!isBigInteger(rightType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                        convertToBigInteger(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
+                        convertToBigInteger(code, classWriter, rightType);
                     }
 
                     // Call BigInteger.compareTo() - returns -1, 0, or 1
@@ -1055,16 +1057,16 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(binExpr, comparisonType);
 
                         // Generate left operand with type hint
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), compTypeInfo);
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), compTypeInfo);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                         // Skip conversion for number literals - they're already generated in the target type
                         if (!isNumberLiteralWithTypeHint(binExpr.getLeft(), comparisonType)) {
                             TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
                         }
 
                         // Generate right operand with type hint
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), compTypeInfo);
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), compTypeInfo);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                         // Skip conversion for number literals - they're already generated in the target type
                         if (!isNumberLiteralWithTypeHint(binExpr.getRight(), comparisonType)) {
                             TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
@@ -1146,17 +1148,17 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     boolean isGtEq = binExpr.getOp() == Swc4jAstBinaryOp.GtEq;
 
                     // Generate left operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (!isBigInteger(leftType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                        convertToBigInteger(code, cp, leftType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
+                        convertToBigInteger(code, classWriter, leftType);
                     }
 
                     // Generate right operand
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (!isBigInteger(rightType)) {
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                        convertToBigInteger(code, cp, rightType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
+                        convertToBigInteger(code, classWriter, rightType);
                     }
 
                     // Call BigInteger.compareTo() - returns -1, 0, or 1
@@ -1194,16 +1196,16 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(binExpr, comparisonType);
 
                         // Generate left operand with type hint
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), compTypeInfo);
-                        TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), compTypeInfo);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                         // Skip conversion for number literals - they're already generated in the target type
                         if (!isNumberLiteralWithTypeHint(binExpr.getLeft(), comparisonType)) {
                             TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
                         }
 
                         // Generate right operand with type hint
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), compTypeInfo);
-                        TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), compTypeInfo);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
                         // Skip conversion for number literals - they're already generated in the target type
                         if (!isNumberLiteralWithTypeHint(binExpr.getRight(), comparisonType)) {
                             TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
@@ -1282,9 +1284,9 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
 
                 // Generate left operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                 // Unbox if it's a Boolean object
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
 
                 // Short-circuit: if left is false (0), skip right evaluation
                 // Pattern:
@@ -1305,9 +1307,9 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 int ifeqOpcodePos = code.getCurrentOffset() - 3;
 
                 // Generate right operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                 // Unbox if it's a Boolean object
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
 
                 code.gotoLabel(0); // Placeholder for goto
                 int gotoOffsetPos = code.getCurrentOffset() - 2;
@@ -1349,7 +1351,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 String internalName = compiler.getMemory().resolveType(className, rightExpr).getInternalName();
 
                 // Generate the left operand (object to check)
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
 
                 // Add the class to constant pool and emit instanceof instruction
                 int classRef = cp.addClass(internalName);
@@ -1369,7 +1371,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         // For Maps: call map.containsKey(key)
                         // Generate left operand (key) - convert to String for JS semantics
                         String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
 
                         // Convert to String if not already a String
                         if (!"Ljava/lang/String;".equals(leftType)) {
@@ -1379,7 +1381,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         }
 
                         // Generate right operand (map)
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
 
                         // Swap to get: map, key on stack
                         code.swap();
@@ -1395,13 +1397,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         // For float/double, must be a whole number (1.0 is valid, 1.1 is not)
                         // Non-whole floats are converted to -1, which fails the bounds check
                         String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
 
                         // Convert left operand to int, with whole number check for float/double
-                        generateConvertToIntForIndex(code, cp, leftType);
+                        generateConvertToIntForIndex(code, classWriter, leftType);
 
                         // Generate right operand (list)
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
 
                         // Get list size: List.size() -> int
                         int sizeRef = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
@@ -1418,13 +1420,13 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         // For float/double, must be a whole number (1.0 is valid, 1.1 is not)
                         // Non-whole floats are converted to -1, which fails the bounds check
                         String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
 
                         // Convert left operand to int, with whole number check for float/double
-                        generateConvertToIntForIndex(code, cp, leftType);
+                        generateConvertToIntForIndex(code, classWriter, leftType);
 
                         // Generate right operand (string)
-                        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
 
                         // Get string length: String.length() -> int
                         int lengthRef = cp.addMethodRef("java/lang/String", "length", "()I");
@@ -1447,15 +1449,15 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
 
                 if (leftPrimitive && rightPrimitive) {
                     resultType = TypeResolver.getWidenedType(leftType, rightType);
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
                 } else {
                     resultType = "Ljava/lang/Object;";
 
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                     if (leftPrimitive) {
-                        TypeConversionUtils.boxPrimitiveType(code, cp, leftType, TypeConversionUtils.getWrapperType(leftType));
+                        TypeConversionUtils.boxPrimitiveType(code, classWriter, leftType, TypeConversionUtils.getWrapperType(leftType));
                     }
 
                     code.dup();
@@ -1464,9 +1466,9 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                     int ifnonnullOpcodePos = code.getCurrentOffset() - 3;
 
                     code.pop();
-                    compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                     if (rightPrimitive) {
-                        TypeConversionUtils.boxPrimitiveType(code, cp, rightType, TypeConversionUtils.getWrapperType(rightType));
+                        TypeConversionUtils.boxPrimitiveType(code, classWriter, rightType, TypeConversionUtils.getWrapperType(rightType));
                     }
 
                     int endLabel = code.getCurrentOffset();
@@ -1487,9 +1489,9 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
 
                 // Generate left operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
                 // Unbox if it's a Boolean object
-                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
 
                 // Short-circuit: if left is true (non-zero), skip right evaluation
                 // Pattern:
@@ -1510,9 +1512,9 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 int ifneOpcodePos = code.getCurrentOffset() - 3;
 
                 // Generate right operand
-                compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
                 // Unbox if it's a Boolean object
-                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
 
                 code.gotoLabel(0); // Placeholder for goto
                 int gotoOrOffsetPos = code.getCurrentOffset() - 2;
@@ -1568,7 +1570,8 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
      * @param cp       the constant pool
      * @param leftType the type descriptor of the value on the stack
      */
-    private void generateConvertToIntForIndex(CodeBuilder code, ClassWriter.ConstantPool cp, String leftType) {
+    private void generateConvertToIntForIndex(CodeBuilder code, ClassWriter classWriter, String leftType) {
+        var cp = classWriter.getConstantPool();
         switch (leftType) {
             case "I" -> {
                 // Already int, no conversion needed
@@ -1579,18 +1582,18 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
             }
             case "F" -> {
                 // float to int with whole number check
-                generateFloatToIntWithWholeCheck(code, cp);
+                generateFloatToIntWithWholeCheck(code, classWriter);
             }
             case "D" -> {
                 // double to int with whole number check
-                generateDoubleToIntWithWholeCheck(code, cp);
+                generateDoubleToIntWithWholeCheck(code, classWriter);
             }
             case "B", "S", "C" -> {
                 // byte, short, char are already int-compatible on stack
             }
             case "Ljava/lang/String;" -> {
                 // Safely parse string to int, returning MIN_VALUE for invalid formats
-                generateSafeStringToInt(code, cp);
+                generateSafeStringToInt(code, classWriter);
             }
             case "Ljava/lang/Integer;" -> {
                 // Unbox Integer to int
@@ -1607,20 +1610,20 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 // Unbox Float to float, then check for whole number and convert to int
                 int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
                 code.invokevirtual(floatValueRef);
-                generateFloatToIntWithWholeCheck(code, cp);
+                generateFloatToIntWithWholeCheck(code, classWriter);
             }
             case "Ljava/lang/Double;" -> {
                 // Unbox Double to double, then check for whole number and convert to int
                 int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
                 code.invokevirtual(doubleValueRef);
-                generateDoubleToIntWithWholeCheck(code, cp);
+                generateDoubleToIntWithWholeCheck(code, classWriter);
             }
             default -> {
                 // For other object types, convert to String first, then safely parse
                 int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf",
                         "(Ljava/lang/Object;)Ljava/lang/String;");
                 code.invokestatic(valueOfRef);
-                generateSafeStringToInt(code, cp);
+                generateSafeStringToInt(code, classWriter);
             }
         }
     }
@@ -1632,7 +1635,8 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
      * <p>
      * Stack: [double] -> [int] (valid index if whole, Integer.MIN_VALUE if not whole)
      */
-    private void generateDoubleToIntWithWholeCheck(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateDoubleToIntWithWholeCheck(CodeBuilder code, ClassWriter classWriter) {
+        var cp = classWriter.getConstantPool();
         // Stack: [double] (2 slots)
         code.dup2();     // [double, double]
         code.d2i();      // [double, int]
@@ -1685,7 +1689,8 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
      * If not equal, we know it wasn't a whole number.
      * We set index = index - (cmp != 0 ? index + 1 : 0) which gives -1 for non-whole.
      */
-    private void generateFloatToIntWithWholeCheck(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateFloatToIntWithWholeCheck(CodeBuilder code, ClassWriter classWriter) {
+        var cp = classWriter.getConstantPool();
         // Stack: [float]
         // Strategy: convert to int, check if valid, use arithmetic to get -1 for invalid
         // f2i truncates, so 1.9 -> 1. We need to detect this.
@@ -1809,9 +1814,10 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
      * Uses try-catch to handle NumberFormatException from Integer.parseInt().
      *
      * @param code the code builder
-     * @param cp   the constant pool
+     * @param classWriter   the class writer
      */
-    private void generateSafeStringToInt(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateSafeStringToInt(CodeBuilder code, ClassWriter classWriter) {
+        var cp = classWriter.getConstantPool();
         // Stack: [String]
 
         // Try block: call Integer.parseInt

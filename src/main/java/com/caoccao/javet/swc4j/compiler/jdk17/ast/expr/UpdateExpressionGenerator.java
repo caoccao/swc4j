@@ -56,17 +56,18 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstUpdateExpr updateExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         // Check what kind of operand we have
         if (updateExpr.getArg() instanceof Swc4jAstIdent ident) {
             // Phase 1: Local variables
-            handleLocalVariable(code, cp, updateExpr, ident, returnTypeInfo);
+            handleLocalVariable(code, classWriter, updateExpr, ident, returnTypeInfo);
         } else if (updateExpr.getArg() instanceof Swc4jAstMemberExpr memberExpr) {
             // Phase 2: Member access (obj.prop++ or arr[i]++)
-            handleMemberAccess(code, cp, updateExpr, memberExpr, returnTypeInfo);
+            handleMemberAccess(code, classWriter, updateExpr, memberExpr, returnTypeInfo);
         } else {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
                     "Update expressions only support identifiers and member expressions, got: " + updateExpr.getArg().getClass().getSimpleName());
@@ -105,7 +106,8 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         }
     }
 
-    private void generateBox(CodeBuilder code, ClassWriter.ConstantPool cp, String primitiveType, String wrapperType) {
+    private void generateBox(CodeBuilder code, ClassWriter classWriter, String primitiveType, String wrapperType) {
+        var cp = classWriter.getConstantPool();
         String className = wrapperType.substring(1, wrapperType.length() - 1); // Remove L and ;
         String descriptor = "(" + primitiveType + ")" + wrapperType;
         int methodRef = cp.addMethodRef(className, "valueOf", descriptor);
@@ -118,7 +120,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
      */
     private void generateGeneralUpdate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             String varType,
             int varIndex,
             boolean isIncrement,
@@ -131,7 +133,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         if (isWrapper) {
             // Load wrapper, unbox to primitive
             code.aload(varIndex);
-            generateUnbox(code, cp, varType, primitiveType);
+            generateUnbox(code, classWriter, varType, primitiveType);
         } else {
             // Load primitive directly
             loadPrimitive(code, primitiveType, varIndex);
@@ -152,7 +154,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
 
         if (isWrapper) {
             // Box the new value
-            generateBox(code, cp, primitiveType, varType);
+            generateBox(code, classWriter, primitiveType, varType);
             // For prefix: duplicate boxed value BEFORE storing
             if (isPrefix) {
                 code.dup(); // Duplicate the wrapper reference
@@ -160,7 +162,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             code.astore(varIndex);
             // For postfix: box the old primitive value left on stack
             if (!isPrefix) {
-                generateBox(code, cp, primitiveType, varType);
+                generateBox(code, classWriter, primitiveType, varType);
             }
         } else {
             // For prefix: duplicate new primitive value AFTER modification
@@ -195,7 +197,8 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         }
     }
 
-    private void generateUnbox(CodeBuilder code, ClassWriter.ConstantPool cp, String wrapperType, String primitiveType) {
+    private void generateUnbox(CodeBuilder code, ClassWriter classWriter, String wrapperType, String primitiveType) {
+        var cp = classWriter.getConstantPool();
         String methodName = switch (primitiveType) {
             case "I" -> "intValue";
             case "J" -> "longValue";
@@ -225,15 +228,16 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
      */
     private void handleArrayListUpdate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstMemberExpr memberExpr,
             Swc4jAstComputedPropName computedProp,
             boolean isIncrement,
             boolean isPrefix) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         // Step 1: Get current value from ArrayList
-        compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // [ArrayList]
-        compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // [ArrayList, index]
+        compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null); // [ArrayList]
+        compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null); // [ArrayList, index]
 
         // Convert index to int if needed
         String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
@@ -275,11 +279,11 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         // Stack is now: [new_Integer] (postfix) or [new_Integer, new_Integer] (prefix)
 
         // Generate ArrayList reference
-        compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null);
         // Stack: [new_Integer, ArrayList] or [new_Integer, new_Integer, ArrayList]
 
         // Load index
-        compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null);
 
         // Convert index to int if needed
         if (indexType != null && !"I".equals(indexType)) {
@@ -322,7 +326,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
 
     private void handleInstanceFieldUpdate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstUpdateExpr updateExpr,
             Swc4jAstMemberExpr memberExpr) throws Swc4jByteCodeCompilerException {
         String fieldName;
@@ -344,6 +348,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         String ownerInternalName = currentClassName;
         FieldInfo fieldInfo = null;
 
+        var cp = classWriter.getConstantPool();
         var capturedThis = context.getCapturedVariable("this");
         if (capturedThis != null) {
             String outerClassName = capturedThis.type().substring(1, capturedThis.type().length() - 1);
@@ -387,7 +392,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "Field not found: " + fieldName);
         }
 
-        updateInstanceField(code, cp, updateExpr, ownerInternalName, fieldName, fieldInfo.descriptor());
+        updateInstanceField(code, classWriter, updateExpr, ownerInternalName, fieldName, fieldInfo.descriptor());
     }
 
     /**
@@ -395,7 +400,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
      */
     private void handleLinkedHashMapUpdate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstMemberExpr memberExpr,
             boolean isIncrement,
             boolean isPrefix) throws Swc4jByteCodeCompilerException {
@@ -416,10 +421,11 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         }
 
         // Step 1: Get current value from map
-        compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // [map or Object]
+        compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null); // [map or Object]
 
         // Cast to LinkedHashMap if the type is Object (for nested properties)
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
+        var cp = classWriter.getConstantPool();
         if ("Ljava/lang/Object;".equals(objType)) {
             int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
             code.checkcast(linkedHashMapClass); // [LinkedHashMap]
@@ -427,11 +433,11 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
 
         if (isComputedKey) {
             Swc4jAstComputedPropName computedProp = (Swc4jAstComputedPropName) memberExpr.getProp();
-            compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // [map, key]
+            compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null); // [map, key]
             // Box key if primitive
             String keyType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
             if (keyType != null && TypeConversionUtils.isPrimitiveType(keyType)) {
-                TypeConversionUtils.boxPrimitiveType(code, cp, keyType, TypeConversionUtils.getWrapperType(keyType));
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, keyType, TypeConversionUtils.getWrapperType(keyType));
             }
         } else {
             // Named property: load string constant
@@ -474,7 +480,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         // Stack is now: [new_Integer] (postfix) or [new_Integer, new_Integer] (prefix)
 
         // Generate map reference
-        compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null);
         // Stack: [new_Integer, map or Object] or [new_Integer, new_Integer, map or Object]
 
         // Cast to LinkedHashMap if the type is Object (for nested properties)
@@ -487,11 +493,11 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         // Load key
         if (isComputedKey) {
             Swc4jAstComputedPropName computedProp = (Swc4jAstComputedPropName) memberExpr.getProp();
-            compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null);
             // Box key if primitive
             String keyType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
             if (keyType != null && TypeConversionUtils.isPrimitiveType(keyType)) {
-                TypeConversionUtils.boxPrimitiveType(code, cp, keyType, TypeConversionUtils.getWrapperType(keyType));
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, keyType, TypeConversionUtils.getWrapperType(keyType));
             }
         } else {
             int keyIndex = cp.addString(propertyName);
@@ -538,7 +544,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
      */
     private void handleLocalVariable(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstUpdateExpr updateExpr,
             Swc4jAstIdent ident,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
@@ -576,7 +582,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             generateIntUpdate(code, varIndex, isIncrement, isPrefix);
         } else {
             // General case for other numeric types
-            generateGeneralUpdate(code, cp, varType, varIndex, isIncrement, isPrefix);
+            generateGeneralUpdate(code, classWriter, varType, varIndex, isIncrement, isPrefix);
         }
     }
 
@@ -586,20 +592,20 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
      */
     private void handleMemberAccess(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstUpdateExpr updateExpr,
             Swc4jAstMemberExpr memberExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         if (memberExpr.getObj() instanceof Swc4jAstThisExpr
                 && (memberExpr.getProp() instanceof Swc4jAstIdentName || memberExpr.getProp() instanceof Swc4jAstPrivateName)) {
-            handleInstanceFieldUpdate(code, cp, updateExpr, memberExpr);
+            handleInstanceFieldUpdate(code, classWriter, updateExpr, memberExpr);
             return;
         }
 
         if (memberExpr.getObj() instanceof Swc4jAstIdent
                 && (memberExpr.getProp() instanceof Swc4jAstIdentName || memberExpr.getProp() instanceof Swc4jAstPrivateName)) {
-            if (handleStaticFieldUpdate(code, cp, updateExpr, memberExpr)) {
+            if (handleStaticFieldUpdate(code, classWriter, updateExpr, memberExpr)) {
                 return;
             }
         }
@@ -610,14 +616,14 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
 
         // Handle LinkedHashMap (object literals): obj.prop++ or obj[key]++
         if ("Ljava/util/LinkedHashMap;".equals(objType)) {
-            handleLinkedHashMapUpdate(code, cp, memberExpr, isIncrement, isPrefix);
+            handleLinkedHashMapUpdate(code, classWriter, memberExpr, isIncrement, isPrefix);
             return;
         }
 
         // Handle ArrayList: arr[index]++
         if ("Ljava/util/ArrayList;".equals(objType)) {
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
-                handleArrayListUpdate(code, cp, memberExpr, computedProp, isIncrement, isPrefix);
+                handleArrayListUpdate(code, classWriter, memberExpr, computedProp, isIncrement, isPrefix);
                 return;
             }
         }
@@ -625,7 +631,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         // Handle native Java arrays: arr[index]++ for int[], Object[], etc.
         if (objType != null && objType.startsWith("[")) {
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
-                handleNativeArrayUpdate(code, cp, memberExpr, computedProp, objType, isIncrement, isPrefix);
+                handleNativeArrayUpdate(code, classWriter, memberExpr, computedProp, objType, isIncrement, isPrefix);
                 return;
             }
         }
@@ -633,7 +639,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         // Handle Object type (nested properties like obj.inner.count++ where obj.inner returns Object)
         // Assume it's a LinkedHashMap since that's what object literals compile to
         if ("Ljava/lang/Object;".equals(objType)) {
-            handleLinkedHashMapUpdate(code, cp, memberExpr, isIncrement, isPrefix);
+            handleLinkedHashMapUpdate(code, classWriter, memberExpr, isIncrement, isPrefix);
             return;
         }
 
@@ -647,7 +653,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
      */
     private void handleNativeArrayUpdate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstMemberExpr memberExpr,
             Swc4jAstComputedPropName computedProp,
             String arrayType,
@@ -675,10 +681,10 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             int newValueSlot = getOrAllocateTempSlot(context,
                     "$tempUpdateNewValue" + context.getNextTempId(), elementType);
 
-            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null);
             code.astore(arraySlot);
 
-            compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null);
             String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
             if (indexType != null && !"I".equals(indexType)) {
                 TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
@@ -711,8 +717,8 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         // Use dup2 early for both prefix and postfix to avoid complex stack manipulation
 
         // Step 1: Load array and index
-        compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // [array]
-        compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // [array, index]
+        compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null); // [array]
+        compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null); // [array, index]
 
         // Convert index to int if needed
         String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
@@ -790,7 +796,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
 
     private boolean handleStaticFieldUpdate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstUpdateExpr updateExpr,
             Swc4jAstMemberExpr memberExpr) throws Swc4jByteCodeCompilerException {
         if (!(memberExpr.getObj() instanceof Swc4jAstIdent classIdent)) {
@@ -816,7 +822,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             return false;
         }
 
-        updateStaticField(code, cp, updateExpr, typeInfo.getInternalName(), fieldName, fieldInfo.descriptor());
+        updateStaticField(code, classWriter, updateExpr, typeInfo.getInternalName(), fieldName, fieldInfo.descriptor());
         return true;
     }
 
@@ -885,7 +891,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
 
     private void updateInstanceField(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstUpdateExpr updateExpr,
             String ownerInternalName,
             String fieldName,
@@ -902,6 +908,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         boolean isIncrement = updateExpr.getOp() == Swc4jAstUpdateOp.PlusPlus;
         boolean isPrefix = updateExpr.isPrefix();
 
+        var cp = classWriter.getConstantPool();
         int fieldRef = cp.addFieldRef(ownerInternalName, fieldName, fieldType);
         code.dup();
         code.getfield(fieldRef); // [obj, old]
@@ -914,12 +921,12 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             if (isWrapper) {
                 code.dup();
                 code.astore(tempSlot);
-                TypeConversionUtils.unboxWrapperType(code, cp, fieldType);
+                TypeConversionUtils.unboxWrapperType(code, classWriter, fieldType);
             } else {
                 storePrimitive(code, primitiveType, tempSlot);
             }
         } else if (isWrapper) {
-            TypeConversionUtils.unboxWrapperType(code, cp, fieldType);
+            TypeConversionUtils.unboxWrapperType(code, classWriter, fieldType);
         }
 
         if (!isPrefix) {
@@ -938,7 +945,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         }
 
         if (isWrapper) {
-            TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, fieldType);
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, primitiveType, fieldType);
             if (isPrefix) {
                 code.dup_x1();
             }
@@ -963,7 +970,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
 
     private void updateStaticField(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstUpdateExpr updateExpr,
             String ownerInternalName,
             String fieldName,
@@ -980,6 +987,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         boolean isIncrement = updateExpr.getOp() == Swc4jAstUpdateOp.PlusPlus;
         boolean isPrefix = updateExpr.isPrefix();
 
+        var cp = classWriter.getConstantPool();
         int fieldRef = cp.addFieldRef(ownerInternalName, fieldName, fieldType);
         code.getstatic(fieldRef); // [old]
 
@@ -991,12 +999,12 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             if (isWrapper) {
                 code.dup();
                 code.astore(tempSlot);
-                TypeConversionUtils.unboxWrapperType(code, cp, fieldType);
+                TypeConversionUtils.unboxWrapperType(code, classWriter, fieldType);
             } else {
                 storePrimitive(code, primitiveType, tempSlot);
             }
         } else if (isWrapper) {
-            TypeConversionUtils.unboxWrapperType(code, cp, fieldType);
+            TypeConversionUtils.unboxWrapperType(code, classWriter, fieldType);
         }
 
         if (!isPrefix) {
@@ -1015,7 +1023,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         }
 
         if (isWrapper) {
-            TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, fieldType);
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, primitiveType, fieldType);
             if (isPrefix) {
                 code.dup();
             }

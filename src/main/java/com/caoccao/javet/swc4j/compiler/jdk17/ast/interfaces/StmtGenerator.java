@@ -34,15 +34,15 @@ public final class StmtGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
     }
 
     @Override
-    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, ISwc4jAstStmt stmt, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+    public void generate(CodeBuilder code, ClassWriter classWriter, ISwc4jAstStmt stmt, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         if (stmt instanceof Swc4jAstTsModuleDecl tsModuleDecl) {
-            compiler.getTsModuleDeclGenerator().generate(code, cp, tsModuleDecl, returnTypeInfo);
+            compiler.getTsModuleDeclGenerator().generate(code, classWriter, tsModuleDecl, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstClassDecl classDecl) {
-            compiler.getClassDeclGenerator().generate(code, cp, classDecl, returnTypeInfo);
+            compiler.getClassDeclGenerator().generate(code, classWriter, classDecl, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstTsEnumDecl tsEnumDecl) {
-            compiler.getTsEnumDeclGenerator().generate(code, cp, tsEnumDecl, returnTypeInfo);
+            compiler.getTsEnumDeclGenerator().generate(code, classWriter, tsEnumDecl, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstTsInterfaceDecl tsInterfaceDecl) {
-            compiler.getTsInterfaceDeclGenerator().generate(code, cp, tsInterfaceDecl, returnTypeInfo);
+            compiler.getTsInterfaceDeclGenerator().generate(code, classWriter, tsInterfaceDecl, returnTypeInfo);
         }
     }
 }

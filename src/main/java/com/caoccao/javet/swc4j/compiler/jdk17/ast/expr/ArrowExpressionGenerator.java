@@ -583,10 +583,11 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstArrowExpr arrowExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(code, cp, arrowExpr, returnTypeInfo, null);
+        var cp = classWriter.getConstantPool();
+        generate(code, classWriter, arrowExpr, returnTypeInfo, null);
     }
 
     /**
@@ -601,7 +602,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
      */
     public SelfReferenceInfo generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstArrowExpr arrowExpr,
             ReturnTypeInfo returnTypeInfo,
             String selfReferenceName) throws Swc4jByteCodeCompilerException {
@@ -631,7 +632,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             compiler.getMemory().getByteCodeMap().put(lambdaClassName.replace('/', '.'), lambdaBytecode);
 
             // Generate code to instantiate the lambda
-            generateInstantiation(code, cp, lambdaClassName, capturedVariables);
+            generateInstantiation(code, classWriter, lambdaClassName, capturedVariables);
 
             // Check if there are self-references that need post-processing
             for (CapturedVariable captured : capturedVariables) {
@@ -650,9 +651,10 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
      */
     public void generateArrayPatternExtraction(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstArrayPat arrayPat) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         int listClass = cp.addClass("java/util/List");
         code.checkcast(listClass);
@@ -706,7 +708,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
                 code.invokeinterface(listGetRef, 2);
 
                 // Add type conversion/unboxing if needed
-                generateUnboxingIfNeeded(code, cp, elementType);
+                generateUnboxingIfNeeded(code, classWriter, elementType);
                 storeValueByType(code, localVar.index(), elementType);
                 currentIndex++;
 
@@ -716,7 +718,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
                 code.iconst(currentIndex);
                 code.invokeinterface(listGetRef, 2);
                 // Recursively extract nested array pattern
-                generateArrayPatternExtraction(code, cp, context, nestedArrayPat);
+                generateArrayPatternExtraction(code, classWriter, context, nestedArrayPat);
                 currentIndex++;
 
             } else if (elem instanceof Swc4jAstObjectPat nestedObjectPat) {
@@ -725,16 +727,17 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
                 code.iconst(currentIndex);
                 code.invokeinterface(listGetRef, 2);
                 // Recursively extract nested object pattern
-                generateObjectPatternExtraction(code, cp, context, nestedObjectPat);
+                generateObjectPatternExtraction(code, classWriter, context, nestedObjectPat);
                 currentIndex++;
 
             } else if (elem instanceof Swc4jAstRestPat restPat) {
-                generateRestPatternExtraction(code, cp, context, restPat, tempListSlot, restStartIndex, true, listGetRef, listSizeRef, listAddRef);
+                generateRestPatternExtraction(code, classWriter, context, restPat, tempListSlot, restStartIndex, true, listGetRef, listSizeRef, listAddRef);
             }
         }
     }
 
-    private void generateEmptyArray(CodeBuilder code, ClassWriter.ConstantPool cp, String arrayType) {
+    private void generateEmptyArray(CodeBuilder code, ClassWriter classWriter, String arrayType) {
+        var cp = classWriter.getConstantPool();
         String componentType = arrayType.substring(1);
         code.iconst(0);
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
@@ -758,9 +761,10 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
 
     private void generateInstantiation(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             String lambdaClassName,
             List<CapturedVariable> capturedVariables) {
+        var cp = classWriter.getConstantPool();
         // new LambdaClass
         int classRef = cp.addClass(lambdaClassName);
         code.newInstance(classRef);
@@ -817,10 +821,10 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
         }
 
         // Generate constructor
-        generateLambdaConstructor(classWriter, cp, lambdaClassName, capturedVariables);
+        generateLambdaConstructor(classWriter, lambdaClassName, capturedVariables);
 
         // Generate the functional interface method
-        generateLambdaMethod(classWriter, cp, lambdaClassName, arrowExpr, typeInfo, capturedVariables);
+        generateLambdaMethod(classWriter, lambdaClassName, arrowExpr, typeInfo, capturedVariables);
 
         return classWriter.toByteArray();
     }
@@ -836,9 +840,9 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
 
     private void generateLambdaConstructor(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String lambdaClassName,
             List<CapturedVariable> capturedVariables) {
+        var cp = classWriter.getConstantPool();
         CodeBuilder code = new CodeBuilder();
 
         // Call super()
@@ -871,11 +875,11 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
 
     private void generateLambdaMethod(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String lambdaClassName,
             Swc4jAstArrowExpr arrowExpr,
             ArrowTypeInfo typeInfo,
             List<CapturedVariable> capturedVariables) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Push a new compilation context for the lambda method (instance method, so slot 0 is 'this')
         CompilationContext lambdaContext = compiler.getMemory().pushCompilationContext(false);
 
@@ -940,7 +944,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
                     int ifnonnullOpcodePos = code.getCurrentOffset() - 3;
 
                     ReturnTypeInfo defaultTypeInfo = ReturnTypeInfo.of(assignPat, paramType);
-                    compiler.getExpressionGenerator().generate(code, cp, assignPat.getRight(), defaultTypeInfo);
+                    compiler.getExpressionGenerator().generate(code, classWriter, assignPat.getRight(), defaultTypeInfo);
                     storeValueByType(code, paramVar.index(), paramType);
 
                     int endLabel = code.getCurrentOffset();
@@ -957,7 +961,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
                     int ifnonnullOffsetPos = code.getCurrentOffset() - 2;
                     int ifnonnullOpcodePos = code.getCurrentOffset() - 3;
 
-                    generateEmptyArray(code, cp, paramType);
+                    generateEmptyArray(code, classWriter, paramType);
                     code.astore(paramVar.index());
 
                     int endLabel = code.getCurrentOffset();
@@ -976,14 +980,14 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
                 LocalVariable paramVar = lambdaContext.getLocalVariableTable().getVariable(paramName);
                 code.aload(paramVar.index());
                 // Generate array destructuring extraction
-                generateArrayPatternExtraction(code, cp, lambdaContext, arrayPat);
+                generateArrayPatternExtraction(code, classWriter, lambdaContext, arrayPat);
             } else if (param instanceof Swc4jAstObjectPat objectPat) {
                 // Load the parameter value onto the stack
                 String paramName = typeInfo.paramNames().get(i);
                 LocalVariable paramVar = lambdaContext.getLocalVariableTable().getVariable(paramName);
                 code.aload(paramVar.index());
                 // Generate object destructuring extraction
-                generateObjectPatternExtraction(code, cp, lambdaContext, objectPat);
+                generateObjectPatternExtraction(code, classWriter, lambdaContext, objectPat);
             }
         }
 
@@ -992,13 +996,13 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             // Block body - generate statements
             compiler.getVariableAnalyzer().analyzeVariableDeclarations(blockStmt);
             for (ISwc4jAstStmt stmt : blockStmt.getStmts()) {
-                compiler.getStatementGenerator().generate(code, cp, stmt, typeInfo.returnTypeInfo());
+                compiler.getStatementGenerator().generate(code, classWriter, stmt, typeInfo.returnTypeInfo());
             }
             // Add return if needed
             addReturnIfNeeded(code, typeInfo.returnTypeInfo());
         } else if (body instanceof ISwc4jAstExpr expr) {
             // Expression body - implicit return
-            compiler.getExpressionGenerator().generate(code, cp, expr, typeInfo.returnTypeInfo());
+            compiler.getExpressionGenerator().generate(code, classWriter, expr, typeInfo.returnTypeInfo());
             generateReturn(code, typeInfo.returnTypeInfo());
         }
 
@@ -1026,9 +1030,10 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
      */
     public void generateObjectPatternExtraction(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstObjectPat objectPat) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         int mapClass = cp.addClass("java/util/Map");
         code.checkcast(mapClass);
@@ -1077,7 +1082,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
                 code.invokeinterface(mapGetRef, 2);
 
                 // Add type conversion/unboxing if needed
-                generateUnboxingIfNeeded(code, cp, valueType);
+                generateUnboxingIfNeeded(code, classWriter, valueType);
                 storeValueByType(code, localVar.index(), valueType);
 
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
@@ -1094,18 +1099,18 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
                     String varName = bindingIdent.getId().getSym();
                     LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
                     // Add type conversion/unboxing if needed
-                    generateUnboxingIfNeeded(code, cp, valueType);
+                    generateUnboxingIfNeeded(code, classWriter, valueType);
                     storeValueByType(code, localVar.index(), valueType);
                 } else if (valuePat instanceof Swc4jAstArrayPat nestedArrayPat) {
                     // Nested array pattern: { arr: [a, ...rest] }
-                    generateArrayPatternExtraction(code, cp, context, nestedArrayPat);
+                    generateArrayPatternExtraction(code, classWriter, context, nestedArrayPat);
                 } else if (valuePat instanceof Swc4jAstObjectPat nestedObjectPat) {
                     // Nested object pattern: { nested: { y, ...rest } }
-                    generateObjectPatternExtraction(code, cp, context, nestedObjectPat);
+                    generateObjectPatternExtraction(code, classWriter, context, nestedObjectPat);
                 }
 
             } else if (prop instanceof Swc4jAstRestPat restPat) {
-                generateObjectRestExtraction(code, cp, context, restPat, tempMapSlot, extractedKeys, mapRemoveRef);
+                generateObjectRestExtraction(code, classWriter, context, restPat, tempMapSlot, extractedKeys, mapRemoveRef);
             }
         }
     }
@@ -1115,12 +1120,13 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
      */
     private void generateObjectRestExtraction(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstRestPat restPat,
             int tempMapSlot,
             List<String> extractedKeys,
             int mapRemoveRef) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         ISwc4jAstPat arg = restPat.getArg();
         if (!(arg instanceof Swc4jAstBindingIdent bindingIdent)) {
@@ -1225,7 +1231,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
      */
     private void generateRestPatternExtraction(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstRestPat restPat,
             int tempListSlot,
@@ -1234,6 +1240,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             int listGetRef,
             int listSizeRef,
             int listAddRef) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         ISwc4jAstPat arg = restPat.getArg();
         if (!(arg instanceof Swc4jAstBindingIdent bindingIdent)) {
@@ -1307,7 +1314,8 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
      * Generate unboxing code if the target type is a primitive.
      * Converts boxed types (Integer, Long, etc.) to primitives (int, long, etc.).
      */
-    private void generateUnboxingIfNeeded(CodeBuilder code, ClassWriter.ConstantPool cp, String targetType) {
+    private void generateUnboxingIfNeeded(CodeBuilder code, ClassWriter classWriter, String targetType) {
+        var cp = classWriter.getConstantPool();
         switch (targetType) {
             case "I" -> { // int
                 int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");

@@ -47,12 +47,13 @@ public final class StringApiUtils {
 
     public static void appendOperandToStringBuilder(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             ISwc4jAstExpr operand,
             String operandType,
             int appendString,
             int appendInt,
             int appendChar) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         switch (operandType) {
             case "Ljava/lang/String;" -> code.invokevirtual(appendString);
             case "I", "B", "S" -> code.invokevirtual(appendInt); // int, byte, short all use append(int)
@@ -195,11 +196,12 @@ public final class StringApiUtils {
     public static void generateConcat(
             ByteCodeCompiler compiler,
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             ISwc4jAstExpr left,
             ISwc4jAstExpr right,
             String leftType,
             String rightType) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Use StringBuilder for string concatenation
         // new StringBuilder
         int stringBuilderClass = cp.addClass("java/lang/StringBuilder");
@@ -227,8 +229,8 @@ public final class StringApiUtils {
         // Append all operands
         for (int i = 0; i < operands.size(); i++) {
             ISwc4jAstExpr operand = operands.get(i);
-            compiler.getExpressionGenerator().generate(code, cp, operand, null);
-            appendOperandToStringBuilder(code, cp, operand, operandTypes.get(i), appendString, appendInt, appendChar);
+            compiler.getExpressionGenerator().generate(code, classWriter, operand, null);
+            appendOperandToStringBuilder(code, classWriter, operand, operandTypes.get(i), appendString, appendInt, appendChar);
         }
 
         // Call toString()

@@ -122,7 +122,7 @@ public final class TsInterfaceDeclGenerator extends BaseAstProcessor<Swc4jAstTsI
     }
 
     @Override
-    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstTsInterfaceDecl tsInterfaceDecl, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+    public void generate(CodeBuilder code, ClassWriter classWriter, Swc4jAstTsInterfaceDecl tsInterfaceDecl, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         String currentPackage = compiler.getMemory().getScopedPackage().getCurrentPackage();
         String interfaceName = tsInterfaceDecl.getId().getSym();
         String fullClassName = currentPackage.isEmpty() ? interfaceName : currentPackage + "." + interfaceName;
@@ -136,7 +136,7 @@ public final class TsInterfaceDeclGenerator extends BaseAstProcessor<Swc4jAstTsI
         String[] extendedInterfaces = processExtends(tsInterfaceDecl.getExtends());
 
         // Create ClassWriter with java/lang/Object as superclass (interfaces always extend Object)
-        ClassWriter classWriter = new ClassWriter(internalClassName, "java/lang/Object", extendedInterfaces);
+        classWriter = new ClassWriter(internalClassName, "java/lang/Object", extendedInterfaces);
 
         // Set interface flags: ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT
         classWriter.setAccessFlags(INTERFACE_ACCESS_FLAGS);

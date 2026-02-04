@@ -98,24 +98,24 @@ public final class IfStatementGenerator extends BaseAstProcessor<Swc4jAstIfStmt>
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstIfStmt ifStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // Evaluate the test condition
-        compiler.getExpressionGenerator().generate(code, cp, ifStmt.getTest(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, ifStmt.getTest(), null);
 
         if (ifStmt.getAlt().isEmpty()) {
             // Simple if without else
-            generateSimpleIf(code, cp, ifStmt, returnTypeInfo);
+            generateSimpleIf(code, classWriter, ifStmt, returnTypeInfo);
         } else {
             // If-else
-            generateIfElse(code, cp, ifStmt, returnTypeInfo);
+            generateIfElse(code, classWriter, ifStmt, returnTypeInfo);
         }
     }
 
     private void generateIfElse(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstIfStmt ifStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
@@ -125,7 +125,7 @@ public final class IfStatementGenerator extends BaseAstProcessor<Swc4jAstIfStmt>
         int ifeqOpcodePos = code.getCurrentOffset() - 3;
 
         // Generate consequent (then branch)
-        compiler.getStatementGenerator().generate(code, cp, ifStmt.getCons(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, ifStmt.getCons(), returnTypeInfo);
 
         // Check if consequent ends with unconditional jump - if so, no need for goto
         boolean consEndsWithJump = endsWithUnconditionalJump(ifStmt.getCons());
@@ -142,7 +142,7 @@ public final class IfStatementGenerator extends BaseAstProcessor<Swc4jAstIfStmt>
 
         // Generate alternate (else branch)
         int elseLabel = code.getCurrentOffset();
-        compiler.getStatementGenerator().generate(code, cp, ifStmt.getAlt().get(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, ifStmt.getAlt().get(), returnTypeInfo);
 
         // End of if-else statement
         int endLabel = code.getCurrentOffset();
@@ -160,7 +160,7 @@ public final class IfStatementGenerator extends BaseAstProcessor<Swc4jAstIfStmt>
 
     private void generateSimpleIf(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstIfStmt ifStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
@@ -170,7 +170,7 @@ public final class IfStatementGenerator extends BaseAstProcessor<Swc4jAstIfStmt>
         int ifeqOpcodePos = code.getCurrentOffset() - 3;
 
         // Generate consequent (then branch)
-        compiler.getStatementGenerator().generate(code, cp, ifStmt.getCons(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, ifStmt.getCons(), returnTypeInfo);
 
         // End of if statement
         int endLabel = code.getCurrentOffset();

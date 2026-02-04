@@ -63,9 +63,10 @@ public final class ContinueStatementGenerator extends BaseAstProcessor<Swc4jAstC
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstContinueStmt continueStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         LoopLabelInfo continueLabel;
@@ -96,7 +97,7 @@ public final class ContinueStatementGenerator extends BaseAstProcessor<Swc4jAstC
             context.markFinallyBlockAsInlineExecuting(finallyBlock);
             try {
                 for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
-                    compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+                    compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
                     // If finally has its own terminal statement, it takes precedence
                     if (isTerminalStatement(stmt)) {
                         return; // Finally's return/throw supersedes the continue

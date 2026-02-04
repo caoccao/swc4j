@@ -119,9 +119,10 @@ public final class RegexLiteralGenerator extends BaseAstProcessor<Swc4jAstRegex>
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstRegex regex,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Get pattern and flags
         String pattern = regex.getExp();
         String flags = regex.getFlags();

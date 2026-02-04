@@ -33,9 +33,10 @@ public final class StringLiteralGenerator extends BaseAstProcessor<Swc4jAstStr> 
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstStr str,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         String value = str.getValue();
         // Check if we need to convert to char based on return type
         if (returnTypeInfo != null && (returnTypeInfo.type() == ReturnType.CHAR

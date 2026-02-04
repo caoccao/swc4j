@@ -27,7 +27,8 @@ public final class TypeConversionUtils {
     private TypeConversionUtils() {
     }
 
-    public static void boxPrimitiveType(CodeBuilder code, ClassWriter.ConstantPool cp, String primitiveType, String targetType) {
+    public static void boxPrimitiveType(CodeBuilder code, ClassWriter classWriter, String primitiveType, String targetType) {
+        var cp = classWriter.getConstantPool();
         // Only box if targetType is a wrapper
         if (!targetType.startsWith("Ljava/lang/")) {
             return; // Target is primitive, no boxing needed
@@ -163,7 +164,8 @@ public final class TypeConversionUtils {
         return PRIMITIVE_TYPES.contains(type);
     }
 
-    public static void unboxWrapperType(CodeBuilder code, ClassWriter.ConstantPool cp, String type) {
+    public static void unboxWrapperType(CodeBuilder code, ClassWriter classWriter, String type) {
+        var cp = classWriter.getConstantPool();
         switch (type) {
             case "Ljava/lang/Boolean;" -> {
                 int booleanValueRef = cp.addMethodRef("java/lang/Boolean", "booleanValue", "()Z");

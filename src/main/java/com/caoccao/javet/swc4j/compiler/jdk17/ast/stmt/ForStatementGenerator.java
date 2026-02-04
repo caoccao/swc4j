@@ -111,10 +111,10 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForStmt forStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(code, cp, forStmt, null, returnTypeInfo);
+        generate(code, classWriter, forStmt, null, returnTypeInfo);
     }
 
     /**
@@ -129,10 +129,11 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
      */
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForStmt forStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // Enter scope for for-loop variables (matches the scope entered during analysis)
@@ -140,7 +141,7 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
 
         // 1. Generate init (if present)
         if (forStmt.getInit().isPresent()) {
-            generateInit(code, cp, forStmt.getInit().get());
+            generateInit(code, classWriter, forStmt.getInit().get());
         }
 
         // 2. Mark test label (loop entry point)
@@ -155,20 +156,20 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
 
             // Try to generate direct conditional jump (like javac does)
             if (testExpr instanceof Swc4jAstBinExpr binExpr) {
-                boolean generated = generateDirectConditionalJump(code, cp, binExpr);
+                boolean generated = generateDirectConditionalJump(code, classWriter, binExpr);
                 if (generated) {
                     condJumpOffsetPos = code.getCurrentOffset() - 2;
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
                 } else {
                     // Fallback: generate boolean expression and use ifeq
-                    compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, testExpr, null);
                     code.ifeq(0); // Placeholder
                     condJumpOffsetPos = code.getCurrentOffset() - 2;
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
                 }
             } else {
                 // Non-binary expression: generate as boolean and use ifeq
-                compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
+                compiler.getExpressionGenerator().generate(code, classWriter, testExpr, null);
                 code.ifeq(0); // Placeholder
                 condJumpOffsetPos = code.getCurrentOffset() - 2;
                 condJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -185,7 +186,7 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
 
         // 5. Generate body and track if it can fall through
         boolean bodyCanFallThrough = generateBodyAndCheckFallThrough(
-                code, cp, forStmt.getBody(), returnTypeInfo);
+                code, classWriter, forStmt.getBody(), returnTypeInfo);
 
         // 6. Mark update label (continue jumps here)
         int updateLabel = code.getCurrentOffset();
@@ -199,7 +200,7 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
         if (bodyCanFallThrough || hasContinue) {
             // Generate update (if present)
             if (forStmt.getUpdate().isPresent()) {
-                generateUpdate(code, cp, forStmt.getUpdate().get());
+                generateUpdate(code, classWriter, forStmt.getUpdate().get());
             }
 
             // Jump back to test (backward jump)
@@ -250,12 +251,12 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
      */
     private boolean generateBodyAndCheckFallThrough(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             ISwc4jAstStmt body,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         // Generate the body
-        compiler.getStatementGenerator().generate(code, cp, body, returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, body, returnTypeInfo);
 
         // Check if the body can fall through
         return canFallThrough(body);
@@ -269,7 +270,7 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
      */
     private boolean generateDirectConditionalJump(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstBinExpr binExpr) throws Swc4jByteCodeCompilerException {
 
         Swc4jAstBinaryOp op = binExpr.getOp();
@@ -289,10 +290,10 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
         }
 
         // Generate left operand
-        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
 
         // Generate right operand
-        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
 
         // Generate inverted comparison (jump to end if condition is FALSE)
         // For "i < 10", we want to exit if "i >= 10", so use if_icmpge
@@ -316,7 +317,7 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
      */
     private void generateInit(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             ISwc4jAstVarDeclOrExpr init) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
@@ -331,9 +332,9 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
                     context.getLocalVariableTable().addExistingVariableToCurrentScope(varName, varType);
                 }
             }
-            compiler.getVarDeclGenerator().generate(code, cp, varDecl, null);
+            compiler.getVarDeclGenerator().generate(code, classWriter, varDecl, null);
         } else if (init instanceof ISwc4jAstExpr expr) {
-            compiler.getExpressionGenerator().generate(code, cp, expr, null);
+            compiler.getExpressionGenerator().generate(code, classWriter, expr, null);
 
             // Pop the result of the init expression if it leaves a value on the stack
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
@@ -352,10 +353,10 @@ public final class ForStatementGenerator extends BaseAstProcessor<Swc4jAstForStm
      */
     private void generateUpdate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             ISwc4jAstExpr updateExpr) throws Swc4jByteCodeCompilerException {
 
-        compiler.getExpressionGenerator().generate(code, cp, updateExpr, null);
+        compiler.getExpressionGenerator().generate(code, classWriter, updateExpr, null);
 
         // Pop the result of the update expression if it leaves a value on the stack
         // This includes AssignExpr (i = 5), UpdateExpr (i++), and SeqExpr (i++, j--)

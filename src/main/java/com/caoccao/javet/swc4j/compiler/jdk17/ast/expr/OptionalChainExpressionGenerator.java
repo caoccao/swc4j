@@ -61,7 +61,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
         nullJumpPositions.add(code.getCurrentOffset() - 3);
     }
 
-    private void convertType(CodeBuilder code, ClassWriter.ConstantPool cp, String fromType, String toType) {
+    private void convertType(CodeBuilder code, ClassWriter classWriter, String fromType, String toType) {
         if (fromType.equals(toType)) {
             return;
         }
@@ -69,18 +69,19 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
             TypeConversionUtils.convertPrimitiveType(code, fromType, toType);
         } else if (TypeConversionUtils.isPrimitiveType(fromType) && !TypeConversionUtils.isPrimitiveType(toType)) {
             String wrapperType = TypeConversionUtils.getWrapperType(fromType);
-            TypeConversionUtils.boxPrimitiveType(code, cp, fromType, wrapperType);
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, fromType, wrapperType);
         } else if (!TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
-            TypeConversionUtils.unboxWrapperType(code, cp, fromType);
+            TypeConversionUtils.unboxWrapperType(code, classWriter, fromType);
         }
     }
 
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstOptChainExpr optChainExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Collect all optional chain points to handle short-circuit properly
         List<Integer> nullJumpPositions = new ArrayList<>();
         int resultSlot = compiler.getMemory().getCompilationContext()
@@ -89,7 +90,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
                         "Ljava/lang/Object;");
 
         // Generate the chain with null checks
-        generateChain(code, cp, optChainExpr, nullJumpPositions);
+        generateChain(code, classWriter, optChainExpr, nullJumpPositions);
 
         // Store non-null result
         code.astore(resultSlot);
@@ -124,7 +125,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
      */
     private void generateCallFromStack(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstOptChainExpr optChainExpr,
             Swc4jAstOptCall optCall,
             Swc4jAstOptChainExpr nestedChain) throws Swc4jByteCodeCompilerException {
@@ -136,7 +137,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
             throw new Swc4jByteCodeCompilerException(getSourceCode(), optChainExpr,
                     "Cannot infer callee type for optional call");
         }
-        generateFunctionalInterfaceCall(code, cp, optChainExpr, optCall, calleeType);
+        generateFunctionalInterfaceCall(code, classWriter, optChainExpr, optCall, calleeType);
     }
 
     /**
@@ -144,15 +145,15 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
      */
     private void generateChain(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstOptChainExpr optChainExpr,
             List<Integer> nullJumpPositions) throws Swc4jByteCodeCompilerException {
         ISwc4jAstOptChainBase base = optChainExpr.getBase();
 
         if (base instanceof Swc4jAstMemberExpr memberExpr) {
-            generateMemberAccess(code, cp, optChainExpr, memberExpr, nullJumpPositions);
+            generateMemberAccess(code, classWriter, optChainExpr, memberExpr, nullJumpPositions);
         } else if (base instanceof Swc4jAstOptCall optCall) {
-            generateOptCall(code, cp, optChainExpr, optCall, nullJumpPositions);
+            generateOptCall(code, classWriter, optChainExpr, optCall, nullJumpPositions);
         } else {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), optChainExpr,
                     "Unsupported optional chain base: " + base.getClass().getSimpleName());
@@ -165,8 +166,9 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
      */
     private void generateFieldAccess(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstMemberExpr memberExpr) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Infer object type
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
         if (objType == null) {
@@ -176,7 +178,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
 
         if (objType.startsWith("[")) {
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName computedProp) {
-                compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null);
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                 if (indexType != null && !"I".equals(indexType)) {
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
@@ -201,20 +203,20 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
                 }
                 if (TypeConversionUtils.isPrimitiveType(elemType)) {
                     String wrapperType = TypeConversionUtils.getWrapperType(elemType);
-                    TypeConversionUtils.boxPrimitiveType(code, cp, elemType, wrapperType);
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, elemType, wrapperType);
                 }
                 return;
             }
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
                 if ("length".equals(propIdent.getSym())) {
                     code.arraylength();
-                    TypeConversionUtils.boxPrimitiveType(code, cp, "I", "Ljava/lang/Integer;");
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, "I", "Ljava/lang/Integer;");
                     return;
                 }
             }
         } else if ("Ljava/util/ArrayList;".equals(objType) || "Ljava/util/List;".equals(objType)) {
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName computedProp) {
-                compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null);
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                 if ("Ljava/lang/String;".equals(indexType)) {
                     int parseIntMethod = cp.addMethodRef("java/lang/Integer", "parseInt", "(Ljava/lang/String;)I");
@@ -228,7 +230,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
                 if ("length".equals(propIdent.getSym())) {
                     int sizeMethod = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
                     code.invokeinterface(sizeMethod, 1);
-                    TypeConversionUtils.boxPrimitiveType(code, cp, "I", "Ljava/lang/Integer;");
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, "I", "Ljava/lang/Integer;");
                     return;
                 }
             }
@@ -237,7 +239,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
                 if ("length".equals(propIdent.getSym())) {
                     int lengthMethod = cp.addMethodRef("java/lang/String", "length", "()I");
                     code.invokevirtual(lengthMethod);
-                    TypeConversionUtils.boxPrimitiveType(code, cp, "I", "Ljava/lang/Integer;");
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, "I", "Ljava/lang/Integer;");
                     return;
                 }
             }
@@ -245,11 +247,11 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
             int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
             code.checkcast(linkedHashMapClass);
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName computedProp) {
-                compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null);
                 String keyType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                 if (keyType != null && TypeConversionUtils.isPrimitiveType(keyType)) {
                     String wrapperType = TypeConversionUtils.getWrapperType(keyType);
-                    TypeConversionUtils.boxPrimitiveType(code, cp, keyType, wrapperType);
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, keyType, wrapperType);
                 }
                 int getMethod = cp.addMethodRef("java/util/LinkedHashMap", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
                 code.invokevirtual(getMethod);
@@ -280,7 +282,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
                             "I"
                     );
                     code.getfield(fieldRef);
-                    TypeConversionUtils.boxPrimitiveType(code, cp, "I", "Ljava/lang/Integer;");
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, "I", "Ljava/lang/Integer;");
                     return;
                 }
             }
@@ -311,7 +313,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
                     code.getfield(fieldRef);
                     if (TypeConversionUtils.isPrimitiveType(fieldInfo.descriptor())) {
                         String wrapperType = TypeConversionUtils.getWrapperType(fieldInfo.descriptor());
-                        TypeConversionUtils.boxPrimitiveType(code, cp, fieldInfo.descriptor(), wrapperType);
+                        TypeConversionUtils.boxPrimitiveType(code, classWriter, fieldInfo.descriptor(), wrapperType);
                     }
                     return;
                 }
@@ -324,10 +326,11 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
 
     private void generateFunctionalInterfaceCall(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstOptChainExpr optChainExpr,
             Swc4jAstOptCall optCall,
             String calleeType) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         if (!calleeType.startsWith("L") || !calleeType.endsWith(";")) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), optChainExpr,
                     "Cannot infer callee type for optional call");
@@ -345,7 +348,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
 
         List<Swc4jAstExprOrSpread> args = optCall.getArgs();
         for (Swc4jAstExprOrSpread arg : args) {
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
         }
 
         int methodRef = cp.addInterfaceMethodRef(interfaceName, samInfo.methodName(), samInfo.methodDescriptor());
@@ -354,7 +357,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
         String returnType = samInfo.returnType();
         if (TypeConversionUtils.isPrimitiveType(returnType)) {
             String wrapperType = TypeConversionUtils.getWrapperType(returnType);
-            TypeConversionUtils.boxPrimitiveType(code, cp, returnType, wrapperType);
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, returnType, wrapperType);
         }
     }
 
@@ -363,7 +366,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
      */
     private void generateMemberAccess(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstOptChainExpr optChainExpr,
             Swc4jAstMemberExpr memberExpr,
             List<Integer> nullJumpPositions) throws Swc4jByteCodeCompilerException {
@@ -372,10 +375,10 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
         // Check if the object is also an optional chain (for nested chains like a?.b?.c)
         if (obj instanceof Swc4jAstOptChainExpr nestedChain) {
             // Recursively handle the nested chain
-            generateChain(code, cp, nestedChain, nullJumpPositions);
+            generateChain(code, classWriter, nestedChain, nullJumpPositions);
         } else {
             // Generate the base object expression
-            compiler.getExpressionGenerator().generate(code, cp, obj, null);
+            compiler.getExpressionGenerator().generate(code, classWriter, obj, null);
         }
 
         // If this is an optional access point, add null check
@@ -388,7 +391,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
         // Now generate the member access on the non-null object
         // We need to use the MemberExpressionGenerator but the object is already on stack
         // So we generate only the field access part
-        generateFieldAccess(code, cp, memberExpr);
+        generateFieldAccess(code, classWriter, memberExpr);
     }
 
     /**
@@ -396,9 +399,10 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
      */
     private void generateMethodCall(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstMemberExpr memberExpr,
             Swc4jAstOptCall optCall) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Get method name
         String methodName = compiler.getTypeResolver().extractMemberExprPropName(memberExpr);
         if (methodName == null) {
@@ -467,16 +471,16 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
 
                 for (int i = 0; i < fixedCount; i++) {
                     Swc4jAstExprOrSpread arg = args.get(i);
-                    compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-                    convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+                    compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
+                    convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                 }
-                generateVarargsArray(code, cp, args, argTypes, fixedCount, varargArrayType, componentType);
+                generateVarargsArray(code, classWriter, args, argTypes, fixedCount, varargArrayType, componentType);
             } else {
                 for (int i = 0; i < args.size(); i++) {
                     Swc4jAstExprOrSpread arg = args.get(i);
-                    compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
                     if (i < expectedTypes.size()) {
-                        convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+                        convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                     }
                 }
             }
@@ -495,7 +499,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
 
         if (TypeConversionUtils.isPrimitiveType(returnType)) {
             String wrapperType = TypeConversionUtils.getWrapperType(returnType);
-            TypeConversionUtils.boxPrimitiveType(code, cp, returnType, wrapperType);
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, returnType, wrapperType);
         }
     }
 
@@ -504,7 +508,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
      */
     private void generateOptCall(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstOptChainExpr optChainExpr,
             Swc4jAstOptCall optCall,
             List<Integer> nullJumpPositions) throws Swc4jByteCodeCompilerException {
@@ -515,9 +519,9 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
             if (nestedChain.getBase() instanceof Swc4jAstMemberExpr nestedMemberExpr) {
                 ISwc4jAstExpr obj = nestedMemberExpr.getObj();
                 if (obj instanceof Swc4jAstOptChainExpr nestedObjChain) {
-                    generateChain(code, cp, nestedObjChain, nullJumpPositions);
+                    generateChain(code, classWriter, nestedObjChain, nullJumpPositions);
                 } else {
-                    compiler.getExpressionGenerator().generate(code, cp, obj, null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, obj, null);
                 }
 
                 if (nestedChain.isOptional()) {
@@ -525,27 +529,27 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
                     addNullJump(code, nullJumpPositions);
                 }
 
-                generateMethodCall(code, cp, nestedMemberExpr, optCall);
+                generateMethodCall(code, classWriter, nestedMemberExpr, optCall);
                 return;
             }
 
-            generateChain(code, cp, nestedChain, nullJumpPositions);
+            generateChain(code, classWriter, nestedChain, nullJumpPositions);
 
             if (optChainExpr.isOptional()) {
                 code.dup();
                 addNullJump(code, nullJumpPositions);
             }
 
-            generateCallFromStack(code, cp, optChainExpr, optCall, nestedChain);
+            generateCallFromStack(code, classWriter, optChainExpr, optCall, nestedChain);
         } else if (callee instanceof Swc4jAstMemberExpr memberExpr) {
             // Callee is obj.method - need to evaluate obj and call method
             ISwc4jAstExpr obj = memberExpr.getObj();
 
             // Handle nested optional chains in the object
             if (obj instanceof Swc4jAstOptChainExpr nestedChain) {
-                generateChain(code, cp, nestedChain, nullJumpPositions);
+                generateChain(code, classWriter, nestedChain, nullJumpPositions);
             } else {
-                compiler.getExpressionGenerator().generate(code, cp, obj, null);
+                compiler.getExpressionGenerator().generate(code, classWriter, obj, null);
             }
 
             // Add null check if this is an optional point
@@ -555,10 +559,10 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
             }
 
             // Generate the method call
-            generateMethodCall(code, cp, memberExpr, optCall);
+            generateMethodCall(code, classWriter, memberExpr, optCall);
         } else {
             // Direct call (e.g., fn?.())
-            compiler.getExpressionGenerator().generate(code, cp, callee, null);
+            compiler.getExpressionGenerator().generate(code, classWriter, callee, null);
 
             if (optChainExpr.isOptional()) {
                 code.dup();
@@ -571,18 +575,19 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), optChainExpr,
                         "Cannot infer callee type for optional call");
             }
-            generateFunctionalInterfaceCall(code, cp, optChainExpr, optCall, calleeType);
+            generateFunctionalInterfaceCall(code, classWriter, optChainExpr, optCall, calleeType);
         }
     }
 
     private void generateVarargsArray(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             List<Swc4jAstExprOrSpread> args,
             List<String> argTypes,
             int startIndex,
             String arrayType,
             String componentType) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         int varargCount = args.size() - startIndex;
         code.iconst(varargCount);
 
@@ -608,9 +613,9 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
             code.dup();
             code.iconst(i);
             Swc4jAstExprOrSpread arg = args.get(startIndex + i);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
             String argType = argTypes.get(startIndex + i);
-            convertType(code, cp, argType, componentType);
+            convertType(code, classWriter, argType, componentType);
 
             switch (componentType) {
                 case "Z", "B" -> code.bastore();

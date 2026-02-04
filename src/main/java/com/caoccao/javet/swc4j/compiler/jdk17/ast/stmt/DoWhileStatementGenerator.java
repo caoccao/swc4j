@@ -114,10 +114,10 @@ public final class DoWhileStatementGenerator extends BaseAstProcessor<Swc4jAstDo
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstDoWhileStmt doWhileStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(code, cp, doWhileStmt, null, returnTypeInfo);
+        generate(code, classWriter, doWhileStmt, null, returnTypeInfo);
     }
 
     /**
@@ -132,10 +132,11 @@ public final class DoWhileStatementGenerator extends BaseAstProcessor<Swc4jAstDo
      */
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstDoWhileStmt doWhileStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // 1. Mark body label (loop entry point - body executes first)
@@ -150,7 +151,7 @@ public final class DoWhileStatementGenerator extends BaseAstProcessor<Swc4jAstDo
         context.pushContinueLabel(continueLabel);
 
         // 3. Generate body and check if it can fall through
-        compiler.getStatementGenerator().generate(code, cp, doWhileStmt.getBody(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, doWhileStmt.getBody(), returnTypeInfo);
         boolean bodyCanFallThrough = canFallThrough(doWhileStmt.getBody());
 
         // 4. Mark test label (continue target - before test evaluation)
@@ -168,10 +169,10 @@ public final class DoWhileStatementGenerator extends BaseAstProcessor<Swc4jAstDo
             if (!isInfiniteLoop) {
                 // Generate conditional test - jump BACK to body if TRUE (inverted from while)
                 if (testExpr instanceof Swc4jAstBinExpr binExpr) {
-                    boolean generated = generateDirectConditionalJumpToBody(code, cp, binExpr, bodyLabel);
+                    boolean generated = generateDirectConditionalJumpToBody(code, classWriter, binExpr, bodyLabel);
                     if (!generated) {
                         // Fallback: generate boolean expression and use ifne (jump if TRUE)
-                        compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, testExpr, null);
                         code.ifne(0); // Placeholder - jump back if TRUE
                         int backwardJumpOffsetPos = code.getCurrentOffset() - 2;
                         int backwardJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -180,7 +181,7 @@ public final class DoWhileStatementGenerator extends BaseAstProcessor<Swc4jAstDo
                     }
                 } else {
                     // Non-binary expression: generate as boolean and use ifne
-                    compiler.getExpressionGenerator().generate(code, cp, testExpr, null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, testExpr, null);
                     code.ifne(0); // Placeholder - jump back if TRUE
                     int backwardJumpOffsetPos = code.getCurrentOffset() - 2;
                     int backwardJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -228,7 +229,7 @@ public final class DoWhileStatementGenerator extends BaseAstProcessor<Swc4jAstDo
      */
     private boolean generateDirectConditionalJumpToBody(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstBinExpr binExpr,
             int bodyLabel) throws Swc4jByteCodeCompilerException {
 
@@ -249,10 +250,10 @@ public final class DoWhileStatementGenerator extends BaseAstProcessor<Swc4jAstDo
         }
 
         // Generate left operand
-        compiler.getExpressionGenerator().generate(code, cp, binExpr.getLeft(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getLeft(), null);
 
         // Generate right operand
-        compiler.getExpressionGenerator().generate(code, cp, binExpr.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, binExpr.getRight(), null);
 
         // Generate comparison - jump BACK to body if condition is TRUE (inverted from while)
         // For do-while with "i < 10", we want to jump back if "i < 10" is TRUE, so use if_icmplt

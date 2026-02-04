@@ -33,13 +33,13 @@ public final class ModuleItemGenerator extends BaseAstProcessor<ISwc4jAstModuleI
     }
 
     @Override
-    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, ISwc4jAstModuleItem moduleItem, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+    public void generate(CodeBuilder code, ClassWriter classWriter, ISwc4jAstModuleItem moduleItem, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         if (moduleItem instanceof Swc4jAstTsModuleDecl moduleDecl) {
-            compiler.getTsModuleDeclGenerator().generate(code, cp, moduleDecl, returnTypeInfo);
+            compiler.getTsModuleDeclGenerator().generate(code, classWriter, moduleDecl, returnTypeInfo);
         } else if (moduleItem instanceof Swc4jAstExportDecl exportDecl) {
-            compiler.getExportDeclGenerator().generate(code, cp, exportDecl, returnTypeInfo);
+            compiler.getExportDeclGenerator().generate(code, classWriter, exportDecl, returnTypeInfo);
         } else if (moduleItem instanceof ISwc4jAstStmt stmt) {
-            compiler.getStmtGenerator().generate(code, cp, stmt, returnTypeInfo);
+            compiler.getStmtGenerator().generate(code, classWriter, stmt, returnTypeInfo);
         }
     }
 }

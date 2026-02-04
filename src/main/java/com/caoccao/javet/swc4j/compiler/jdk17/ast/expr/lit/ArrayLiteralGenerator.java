@@ -36,9 +36,10 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor<Swc4jAstArrayL
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstArrayLit arrayLit,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Check if we should generate a Java array or ArrayList
         boolean isJavaArray = returnTypeInfo != null &&
                 returnTypeInfo.descriptor() != null &&
@@ -46,7 +47,7 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor<Swc4jAstArrayL
 
         if (isJavaArray) {
             // Generate Java array
-            generateJavaArray(code, cp, arrayLit, returnTypeInfo.descriptor());
+            generateJavaArray(code, classWriter, arrayLit, returnTypeInfo.descriptor());
         } else {
             // Array literal - convert to ArrayList
             int arrayListClass = cp.addClass("java/util/ArrayList");
@@ -71,7 +72,7 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor<Swc4jAstArrayL
                         ISwc4jAstExpr elemExpr = elem.getExpr();
 
                         // Generate code for the spread expression (should be an array/collection)
-                        compiler.getExpressionGenerator().generate(code, cp, elemExpr, null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, elemExpr, null);
 
                         // Call ArrayList.addAll(Collection) to add all elements
                         code.invokevirtual(arrayListAddAll);
@@ -84,13 +85,13 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor<Swc4jAstArrayL
                         String elemType = compiler.getTypeResolver().inferTypeFromExpr(elemExpr);
                         if (elemType == null) elemType = "Ljava/lang/Object;";
 
-                        compiler.getExpressionGenerator().generate(code, cp, elemExpr, null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, elemExpr, null);
 
                         // Box primitives to objects
                         if ("I".equals(elemType) || "Z".equals(elemType) || "B".equals(elemType) ||
                                 "C".equals(elemType) || "S".equals(elemType) || "J".equals(elemType) ||
                                 "F".equals(elemType) || "D".equals(elemType)) {
-                            TypeConversionUtils.boxPrimitiveType(code, cp, elemType, TypeConversionUtils.getWrapperType(elemType));
+                            TypeConversionUtils.boxPrimitiveType(code, classWriter, elemType, TypeConversionUtils.getWrapperType(elemType));
                         }
 
                         // Call ArrayList.add(Object)
@@ -105,9 +106,10 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor<Swc4jAstArrayL
 
     private void generateJavaArray(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstArrayLit arrayLit,
             String arrayDescriptor) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Extract element type from array descriptor (e.g., "[I" -> "I", "[Ljava/lang/String;" -> "Ljava/lang/String;")
         String elemType = arrayDescriptor.substring(1);
 
@@ -149,10 +151,10 @@ public final class ArrayLiteralGenerator extends BaseAstProcessor<Swc4jAstArrayL
                 String exprType = compiler.getTypeResolver().inferTypeFromExpr(elemExpr);
                 if (exprType == null) exprType = "Ljava/lang/Object;";
 
-                compiler.getExpressionGenerator().generate(code, cp, elemExpr, null);
+                compiler.getExpressionGenerator().generate(code, classWriter, elemExpr, null);
 
                 // Unbox if needed
-                TypeConversionUtils.unboxWrapperType(code, cp, exprType);
+                TypeConversionUtils.unboxWrapperType(code, classWriter, exprType);
 
                 // Convert to target type if needed
                 String exprPrimitive = TypeConversionUtils.getPrimitiveType(exprType);

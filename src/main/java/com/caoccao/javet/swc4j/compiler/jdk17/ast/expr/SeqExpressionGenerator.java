@@ -47,7 +47,7 @@ public final class SeqExpressionGenerator extends BaseAstProcessor<Swc4jAstSeqEx
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstSeqExpr seqExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
@@ -57,7 +57,7 @@ public final class SeqExpressionGenerator extends BaseAstProcessor<Swc4jAstSeqEx
             boolean isLast = (i == exprs.size() - 1);
 
             // Generate the expression
-            compiler.getExpressionGenerator().generate(code, cp, expr, isLast ? returnTypeInfo : null);
+            compiler.getExpressionGenerator().generate(code, classWriter, expr, isLast ? returnTypeInfo : null);
 
             // Pop the result of non-last expressions (they're evaluated for side effects only)
             if (!isLast) {

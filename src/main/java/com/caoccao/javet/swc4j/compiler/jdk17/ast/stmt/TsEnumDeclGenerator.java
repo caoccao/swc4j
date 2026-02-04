@@ -128,7 +128,7 @@ public final class TsEnumDeclGenerator extends BaseAstProcessor<Swc4jAstTsEnumDe
     }
 
     @Override
-    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstTsEnumDecl tsEnumDecl, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+    public void generate(CodeBuilder code, ClassWriter classWriter, Swc4jAstTsEnumDecl tsEnumDecl, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         String currentPackage = compiler.getMemory().getScopedPackage().getCurrentPackage();
         String enumName = tsEnumDecl.getId().getSym();
         String fullClassName = currentPackage.isEmpty() ? enumName : currentPackage + "." + enumName;
@@ -195,31 +195,31 @@ public final class TsEnumDeclGenerator extends BaseAstProcessor<Swc4jAstTsEnumDe
         );
 
         // Generate private constructor
-        generateConstructor(classWriter, cp, internalClassName, enumInfo.isStringEnum);
+        generateConstructor(classWriter, internalClassName, enumInfo.isStringEnum);
 
         // Generate static initializer <clinit>
-        generateStaticInitializer(classWriter, cp, internalClassName, enumInfo);
+        generateStaticInitializer(classWriter, internalClassName, enumInfo);
 
         // Generate values() method
-        generateValuesMethod(classWriter, cp, internalClassName);
+        generateValuesMethod(classWriter, internalClassName);
 
         // Generate valueOf(String) method
-        generateValueOfMethod(classWriter, cp, internalClassName);
+        generateValueOfMethod(classWriter, internalClassName);
 
         // Generate getValue() method
-        generateGetValueMethod(classWriter, cp, internalClassName, enumInfo.isStringEnum);
+        generateGetValueMethod(classWriter, internalClassName, enumInfo.isStringEnum);
 
         // Generate fromValue() method
-        generateFromValueMethod(classWriter, cp, internalClassName, enumInfo);
+        generateFromValueMethod(classWriter, internalClassName, enumInfo);
 
         return classWriter.toByteArray();
     }
 
     private void generateConstructor(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String internalClassName,
             boolean isStringEnum) {
+        var cp = classWriter.getConstantPool();
         // Generate: private EnumType(String name, int ordinal, <type> value)
         String descriptor = isStringEnum ? "(Ljava/lang/String;ILjava/lang/String;)V" : "(Ljava/lang/String;II)V";
         int superCtorRef = cp.addMethodRef("java/lang/Enum", "<init>", "(Ljava/lang/String;I)V");
@@ -261,9 +261,9 @@ public final class TsEnumDeclGenerator extends BaseAstProcessor<Swc4jAstTsEnumDe
 
     private void generateFromValueMethod(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String internalClassName,
             EnumInfo enumInfo) {
+        var cp = classWriter.getConstantPool();
         // Generate: public static EnumType fromValue(<type> value)
         String valueType = enumInfo.isStringEnum ? "Ljava/lang/String;" : "I";
         String enumDescriptor = "L" + internalClassName + ";";
@@ -458,9 +458,9 @@ public final class TsEnumDeclGenerator extends BaseAstProcessor<Swc4jAstTsEnumDe
 
     private void generateGetValueMethod(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String internalClassName,
             boolean isStringEnum) {
+        var cp = classWriter.getConstantPool();
         // Generate: public <type> getValue()
         String valueFieldDescriptor = isStringEnum ? "Ljava/lang/String;" : "I";
         String methodDescriptor = "()" + valueFieldDescriptor;
@@ -488,9 +488,9 @@ public final class TsEnumDeclGenerator extends BaseAstProcessor<Swc4jAstTsEnumDe
 
     private void generateStaticInitializer(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String internalClassName,
             EnumInfo enumInfo) {
+        var cp = classWriter.getConstantPool();
         // Generate: static { ... }
         CodeBuilder code = new CodeBuilder();
         int enumClassRef = cp.addClass(internalClassName);
@@ -598,8 +598,8 @@ public final class TsEnumDeclGenerator extends BaseAstProcessor<Swc4jAstTsEnumDe
 
     private void generateValueOfMethod(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String internalClassName) {
+        var cp = classWriter.getConstantPool();
         // Generate: public static EnumType valueOf(String name)
         int enumClassRef = cp.addClass(internalClassName);
         String enumDescriptor = "L" + internalClassName + ";";
@@ -627,8 +627,8 @@ public final class TsEnumDeclGenerator extends BaseAstProcessor<Swc4jAstTsEnumDe
 
     private void generateValuesMethod(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String internalClassName) {
+        var cp = classWriter.getConstantPool();
         // Generate: public static EnumType[] values()
         String arrayDescriptor = "[L" + internalClassName + ";";
         int arrayFieldRef = cp.addFieldRef(internalClassName, "$VALUES", arrayDescriptor);

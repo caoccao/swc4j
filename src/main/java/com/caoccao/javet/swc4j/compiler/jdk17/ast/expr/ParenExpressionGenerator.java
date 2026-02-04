@@ -32,10 +32,10 @@ public final class ParenExpressionGenerator extends BaseAstProcessor<Swc4jAstPar
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstParenExpr parenExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // For parenthesized expressions, generate code for the inner expression
-        compiler.getExpressionGenerator().generate(code, cp, parenExpr.getExpr(), returnTypeInfo);
+        compiler.getExpressionGenerator().generate(code, classWriter, parenExpr.getExpr(), returnTypeInfo);
     }
 }

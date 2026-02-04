@@ -68,7 +68,7 @@ public final class StandaloneFunctionGenerator extends BaseAstProcessor {
     }
 
     @Override
-    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, ISwc4jAst ast, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+    public void generate(CodeBuilder code, ClassWriter classWriter, ISwc4jAst ast, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         throw new Swc4jByteCodeCompilerException(getSourceCode(), ast, "StandaloneFunctionGenerator does not support generic generate method.");
     }
 
@@ -84,17 +84,17 @@ public final class StandaloneFunctionGenerator extends BaseAstProcessor {
         ClassWriter.ConstantPool cp = classWriter.getConstantPool();
 
         // Generate default constructor
-        ClassDeclGenerator.generateDefaultConstructor(classWriter, cp, "java/lang/Object");
+        ClassDeclGenerator.generateDefaultConstructor(classWriter, "java/lang/Object");
 
         // Generate each function as a static method
         for (Swc4jAstFnDecl fnDecl : functions) {
-            generateStaticMethod(classWriter, cp, fnDecl, internalClassName);
+            generateStaticMethod(classWriter, fnDecl, internalClassName);
         }
 
         return classWriter.toByteArray();
     }
 
-    private void generateStaticMethod(ClassWriter classWriter, ClassWriter.ConstantPool cp, Swc4jAstFnDecl fnDecl, String internalClassName) throws Swc4jByteCodeCompilerException {
+    private void generateStaticMethod(ClassWriter classWriter, Swc4jAstFnDecl fnDecl, String internalClassName) throws Swc4jByteCodeCompilerException {
         String methodName = fnDecl.getIdent().getSym();
         Swc4jAstFunction function = fnDecl.getFunction();
 
@@ -145,7 +145,7 @@ public final class StandaloneFunctionGenerator extends BaseAstProcessor {
             // Generate method body
             CodeBuilder code = new CodeBuilder();
             for (ISwc4jAstStmt stmt : body.getStmts()) {
-                compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+                compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
             }
 
             // Add return if needed
@@ -158,7 +158,7 @@ public final class StandaloneFunctionGenerator extends BaseAstProcessor {
             boolean isStatic = true;
 
             // Generate stack map table for methods with branches (required for Java 7+)
-            var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, internalClassName, descriptor, cp);
+            var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, internalClassName, descriptor, classWriter.getConstantPool());
             var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
 
             classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), 10, maxLocals,

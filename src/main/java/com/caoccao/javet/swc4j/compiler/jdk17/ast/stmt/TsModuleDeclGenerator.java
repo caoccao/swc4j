@@ -33,7 +33,7 @@ public final class TsModuleDeclGenerator extends BaseAstProcessor<Swc4jAstTsModu
     }
 
     @Override
-    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstTsModuleDecl tsModuleDecl, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+    public void generate(CodeBuilder code, ClassWriter classWriter, Swc4jAstTsModuleDecl tsModuleDecl, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         ISwc4jAstTsModuleName moduleName = tsModuleDecl.getId();
         String namespaceName = getModuleName(moduleName);
 
@@ -43,7 +43,7 @@ public final class TsModuleDeclGenerator extends BaseAstProcessor<Swc4jAstTsModu
         try {
             var bodyOpt = tsModuleDecl.getBody();
             if (bodyOpt.isPresent() && bodyOpt.get() instanceof Swc4jAstTsModuleBlock moduleBlock) {
-                compiler.getModuleItemGenerator().generate(code, cp, moduleBlock.getBody(), returnTypeInfo);
+                compiler.getModuleItemGenerator().generate(code, classWriter, moduleBlock.getBody(), returnTypeInfo);
             }
         } finally {
             // Exit the package scope

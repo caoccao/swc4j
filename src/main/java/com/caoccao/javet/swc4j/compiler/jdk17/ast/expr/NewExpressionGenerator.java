@@ -43,7 +43,7 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
         super(compiler);
     }
 
-    private void convertType(CodeBuilder code, ClassWriter.ConstantPool cp, String fromType, String toType) {
+    private void convertType(CodeBuilder code, ClassWriter classWriter, String fromType, String toType) {
         if (fromType.equals(toType)) {
             return;
         }
@@ -51,18 +51,19 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
             TypeConversionUtils.convertPrimitiveType(code, fromType, toType);
         } else if (TypeConversionUtils.isPrimitiveType(fromType) && !TypeConversionUtils.isPrimitiveType(toType)) {
             String wrapperType = TypeConversionUtils.getWrapperType(fromType);
-            TypeConversionUtils.boxPrimitiveType(code, cp, fromType, wrapperType);
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, fromType, wrapperType);
         } else if (!TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
-            TypeConversionUtils.unboxWrapperType(code, cp, fromType);
+            TypeConversionUtils.unboxWrapperType(code, classWriter, fromType);
         }
     }
 
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstNewExpr newExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         ISwc4jAstExpr callee = newExpr.getCallee();
 
         // Only support simple class name constructors for now
@@ -120,23 +121,23 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
                 if (!directArrayPass) {
                     for (int i = 0; i < fixedCount; i++) {
                         Swc4jAstExprOrSpread arg = args.get(i);
-                        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-                        convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+                        compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
+                        convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                     }
-                    generateVarargsArray(code, cp, args, argTypes, fixedCount, varargArrayType, componentType);
+                    generateVarargsArray(code, classWriter, args, argTypes, fixedCount, varargArrayType, componentType);
                 } else {
                     for (int i = 0; i < args.size(); i++) {
                         Swc4jAstExprOrSpread arg = args.get(i);
-                        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
-                        convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+                        compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
+                        convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                     }
                 }
             } else {
                 for (int i = 0; i < args.size(); i++) {
                     Swc4jAstExprOrSpread arg = args.get(i);
-                    compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
                     if (i < expectedTypes.size()) {
-                        convertType(code, cp, argTypes.get(i), expectedTypes.get(i));
+                        convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                     }
                 }
             }
@@ -147,7 +148,7 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
             StringBuilder paramDescriptors = new StringBuilder();
             for (int i = 0; i < args.size(); i++) {
                 Swc4jAstExprOrSpread arg = args.get(i);
-                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
                 paramDescriptors.append(argTypes.get(i));
             }
             String constructorDescriptor = "(" + paramDescriptors + ")V";
@@ -160,12 +161,13 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
 
     private void generateVarargsArray(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             List<Swc4jAstExprOrSpread> args,
             List<String> argTypes,
             int startIndex,
             String arrayType,
             String componentType) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         int varargCount = args.size() - startIndex;
         code.iconst(varargCount);
 
@@ -193,9 +195,9 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
             code.dup();
             code.iconst(i);
             Swc4jAstExprOrSpread arg = args.get(startIndex + i);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
             String argType = argTypes.get(startIndex + i);
-            convertType(code, cp, argType, componentType);
+            convertType(code, classWriter, argType, componentType);
 
             switch (componentType) {
                 case "Z", "B" -> code.bastore();

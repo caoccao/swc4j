@@ -99,9 +99,10 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstTryStmt tryStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         boolean hasCatch = tryStmt.getHandler().isPresent();
         boolean hasFinally = tryStmt.getFinalizer().isPresent();
@@ -123,11 +124,11 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         }
 
         if (hasCatch && hasFinally) {
-            generateTryCatchFinally(code, cp, tryStmt, returnTypeInfo);
+            generateTryCatchFinally(code, classWriter, tryStmt, returnTypeInfo);
         } else if (hasCatch) {
-            generateTryCatch(code, cp, tryStmt, returnTypeInfo);
+            generateTryCatch(code, classWriter, tryStmt, returnTypeInfo);
         } else {
-            generateTryFinally(code, cp, tryStmt, returnTypeInfo);
+            generateTryFinally(code, classWriter, tryStmt, returnTypeInfo);
         }
     }
 
@@ -151,7 +152,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
      */
     private void generateCatchDestructuring(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstObjectPat objectPat,
             int exceptionSlot,
             String exceptionType) throws Swc4jByteCodeCompilerException {
@@ -180,11 +181,11 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
                 context.getInferredTypes().put(varName, varType);
 
                 // Generate code to extract the property
-                generatePropertyExtraction(code, cp, exceptionSlot, exceptionClassName, propertyName, variable);
+                generatePropertyExtraction(code, classWriter, exceptionSlot, exceptionClassName, propertyName, variable);
 
                 // Handle default value if present
                 if (assignProp.getValue().isPresent()) {
-                    handleDefaultValue(code, cp, assignProp, variable);
+                    handleDefaultValue(code, classWriter, assignProp, variable);
                 }
 
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
@@ -209,7 +210,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
                     context.getInferredTypes().put(varName, varType);
 
                     // Generate code to extract the property
-                    generatePropertyExtraction(code, cp, exceptionSlot, exceptionClassName, propertyName, variable);
+                    generatePropertyExtraction(code, classWriter, exceptionSlot, exceptionClassName, propertyName, variable);
                 } else {
                     throw new Swc4jByteCodeCompilerException(getSourceCode(), keyValueProp,
                             "Unsupported value pattern type in catch destructuring: " + valuePat.getClass().getName());
@@ -227,11 +228,11 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
      */
     private void generateFinallyBlock(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstBlockStmt finallyBlock,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
-            compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+            compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
         }
     }
 
@@ -248,11 +249,12 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
      */
     private void generatePropertyExtraction(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             int exceptionSlot,
             String exceptionClassName,
             String propertyName,
             LocalVariable variable) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         switch (propertyName) {
             case "message" -> {
                 // exception.getMessage() -> String
@@ -343,9 +345,10 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
      */
     private void generateTryCatch(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstTryStmt tryStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         // Record try block start
         int tryStartPc = code.getCurrentOffset();
@@ -354,7 +357,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         Swc4jAstBlockStmt tryBlock = tryStmt.getBlock();
         boolean tryEndsWithTerminal = false;
         for (ISwc4jAstStmt stmt : tryBlock.getStmts()) {
-            compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+            compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
             if (isTerminalStatement(stmt)) {
                 tryEndsWithTerminal = true;
                 break;
@@ -419,7 +422,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
                 code.astore(tempVar.index());
 
                 // Generate destructuring code
-                generateCatchDestructuring(code, cp, objectPat, tempVar.index(), catchType);
+                generateCatchDestructuring(code, classWriter, objectPat, tempVar.index(), catchType);
             } else {
                 // Other pattern types - pop exception
                 code.pop();
@@ -432,7 +435,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         // Generate catch body
         Swc4jAstBlockStmt catchBody = catchClause.getBody();
         for (ISwc4jAstStmt stmt : catchBody.getStmts()) {
-            compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+            compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
         }
 
         // Mark end of catch-try
@@ -484,9 +487,10 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
      */
     private void generateTryCatchFinally(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstTryStmt tryStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         // Get the finally block and check if it ends with terminal statement
         Swc4jAstBlockStmt finalizerBlock = tryStmt.getFinalizer().get();
@@ -503,7 +507,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         Swc4jAstBlockStmt tryBlock = tryStmt.getBlock();
         boolean tryEndsWithTerminal = false;
         for (ISwc4jAstStmt stmt : tryBlock.getStmts()) {
-            compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+            compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
             if (isTerminalStatement(stmt)) {
                 tryEndsWithTerminal = true;
                 break;
@@ -517,7 +521,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         int goto1OffsetPos = -1;
         int goto1OpcodePos = -1;
         if (!tryEndsWithTerminal) {
-            generateFinallyBlock(code, cp, finalizerBlock, returnTypeInfo);
+            generateFinallyBlock(code, classWriter, finalizerBlock, returnTypeInfo);
 
             // Only need goto if finally doesn't end with terminal
             if (!finallyEndsWithTerminal) {
@@ -572,7 +576,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
                 code.astore(tempVar.index());
 
                 // Generate destructuring code
-                generateCatchDestructuring(code, cp, objectPat, tempVar.index(), catchType);
+                generateCatchDestructuring(code, classWriter, objectPat, tempVar.index(), catchType);
             } else {
                 // Other pattern types - pop exception
                 code.pop();
@@ -586,7 +590,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         Swc4jAstBlockStmt catchBody = catchClause.getBody();
         boolean catchEndsWithTerminal = false;
         for (ISwc4jAstStmt stmt : catchBody.getStmts()) {
-            compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+            compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
             if (isTerminalStatement(stmt)) {
                 catchEndsWithTerminal = true;
                 break;
@@ -603,7 +607,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         int goto2OffsetPos = -1;
         int goto2OpcodePos = -1;
         if (!catchEndsWithTerminal) {
-            generateFinallyBlock(code, cp, finalizerBlock, returnTypeInfo);
+            generateFinallyBlock(code, classWriter, finalizerBlock, returnTypeInfo);
 
             // Only need goto if finally doesn't end with terminal
             if (!finallyEndsWithTerminal) {
@@ -632,7 +636,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         }
 
         // Execute finally
-        generateFinallyBlock(code, cp, finalizerBlock, returnTypeInfo);
+        generateFinallyBlock(code, classWriter, finalizerBlock, returnTypeInfo);
 
         // Re-throw exception (only if finally doesn't end with terminal)
         if (!finallyEndsWithTerminal) {
@@ -696,7 +700,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
      */
     private void generateTryFinally(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstTryStmt tryStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
@@ -715,7 +719,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         Swc4jAstBlockStmt tryBlock = tryStmt.getBlock();
         boolean tryEndsWithTerminal = false;
         for (ISwc4jAstStmt stmt : tryBlock.getStmts()) {
-            compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+            compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
             if (isTerminalStatement(stmt)) {
                 tryEndsWithTerminal = true;
                 break;
@@ -733,7 +737,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         int gotoOffsetPos = -1;
         int gotoOpcodePos = -1;
         if (!tryEndsWithTerminal) {
-            generateFinallyBlock(code, cp, finalizerBlock, returnTypeInfo);
+            generateFinallyBlock(code, classWriter, finalizerBlock, returnTypeInfo);
 
             // Only need goto if finally doesn't end with terminal
             if (!finallyEndsWithTerminal) {
@@ -762,7 +766,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         }
 
         // Execute finally
-        generateFinallyBlock(code, cp, finalizerBlock, returnTypeInfo);
+        generateFinallyBlock(code, classWriter, finalizerBlock, returnTypeInfo);
 
         // Re-throw exception (only if finally doesn't end with terminal)
         if (!finallyEndsWithTerminal) {
@@ -812,7 +816,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
      */
     private void handleDefaultValue(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstAssignPatProp assignProp,
             LocalVariable variable) throws Swc4jByteCodeCompilerException {
         // Load the current value
@@ -822,7 +826,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         int skipDefaultPos = code.getCurrentOffset() - 2;
 
         // Value is null, generate default value and store
-        compiler.getExpressionGenerator().generate(code, cp, assignProp.getValue().get(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, assignProp.getValue().get(), null);
         code.astore(variable.index());
 
         // Patch the skip jump

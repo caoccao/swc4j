@@ -36,7 +36,7 @@ public final class ConditionalExpressionGenerator extends BaseAstProcessor<Swc4j
      */
     private void convertToCommonType(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             String sourceType,
             String targetType) throws Swc4jByteCodeCompilerException {
 
@@ -49,7 +49,7 @@ public final class ConditionalExpressionGenerator extends BaseAstProcessor<Swc4j
         }
 
         // Unbox if source is a wrapper type
-        TypeConversionUtils.unboxWrapperType(code, cp, sourceType);
+        TypeConversionUtils.unboxWrapperType(code, classWriter, sourceType);
         String primitiveSource = TypeConversionUtils.getPrimitiveType(sourceType);
 
         // Unbox if target is a wrapper type
@@ -62,7 +62,7 @@ public final class ConditionalExpressionGenerator extends BaseAstProcessor<Swc4j
 
         // Box if target is a wrapper type
         if (!targetType.equals(primitiveTarget) && primitiveTarget != null) {
-            TypeConversionUtils.boxPrimitiveType(code, cp, primitiveTarget, targetType);
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, primitiveTarget, targetType);
         }
     }
 
@@ -107,7 +107,7 @@ public final class ConditionalExpressionGenerator extends BaseAstProcessor<Swc4j
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCondExpr condExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
@@ -119,7 +119,7 @@ public final class ConditionalExpressionGenerator extends BaseAstProcessor<Swc4j
         String commonType = findCommonType(consType, altType);
 
         // Evaluate the test condition
-        compiler.getExpressionGenerator().generate(code, cp, condExpr.getTest(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, condExpr.getTest(), null);
 
         // Pattern:
         //   [test expression]          // Stack: [boolean]
@@ -136,9 +136,9 @@ public final class ConditionalExpressionGenerator extends BaseAstProcessor<Swc4j
         int ifeqOpcodePos = code.getCurrentOffset() - 3;
 
         // True branch (consequent)
-        compiler.getExpressionGenerator().generate(code, cp, condExpr.getCons(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, condExpr.getCons(), null);
         // Convert to common type if needed
-        convertToCommonType(code, cp, consType, commonType);
+        convertToCommonType(code, classWriter, consType, commonType);
 
         // Jump over the alternate branch
         code.gotoLabel(0); // Placeholder for goto
@@ -147,9 +147,9 @@ public final class ConditionalExpressionGenerator extends BaseAstProcessor<Swc4j
 
         // False branch (alternate)
         int elseLabel = code.getCurrentOffset();
-        compiler.getExpressionGenerator().generate(code, cp, condExpr.getAlt(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, condExpr.getAlt(), null);
         // Convert to common type if needed
-        convertToCommonType(code, cp, altType, commonType);
+        convertToCommonType(code, classWriter, altType, commonType);
 
         // End of conditional expression
         int endLabel = code.getCurrentOffset();
@@ -169,7 +169,7 @@ public final class ConditionalExpressionGenerator extends BaseAstProcessor<Swc4j
                 commonType != null && TypeConversionUtils.isPrimitiveType(commonType)) {
             // Box primitive to wrapper type
             String wrapperType = TypeConversionUtils.getWrapperType(commonType);
-            TypeConversionUtils.boxPrimitiveType(code, cp, commonType, wrapperType);
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, commonType, wrapperType);
         }
     }
 

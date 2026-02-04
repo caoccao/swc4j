@@ -48,7 +48,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
     private void coerceAssignmentValue(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstAssignExpr assignExpr,
             String valueType,
             String targetType) throws Swc4jByteCodeCompilerException {
@@ -62,7 +62,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr,
                         "Cannot assign non-primitive type " + valueType + " to primitive " + targetType);
             }
-            TypeConversionUtils.unboxWrapperType(code, cp, valueType);
+            TypeConversionUtils.unboxWrapperType(code, classWriter, valueType);
             if (!primitiveValueType.equals(targetType)) {
                 TypeConversionUtils.convertPrimitiveType(code, primitiveValueType, targetType);
             }
@@ -75,9 +75,9 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
         if ("Ljava/lang/String;".equals(targetType)) {
             if (valueIsPrimitive) {
-                generateStringValueOf(code, cp, primitiveValueType);
+                generateStringValueOf(code, classWriter, primitiveValueType);
             } else if (!"Ljava/lang/String;".equals(valueType)) {
-                generateStringValueOf(code, cp, "Ljava/lang/Object;");
+                generateStringValueOf(code, classWriter, "Ljava/lang/Object;");
             }
             return;
         }
@@ -85,7 +85,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
         if (valueIsPrimitive) {
             String wrapperType = TypeConversionUtils.getWrapperType(primitiveValueType);
             if ("Ljava/lang/Object;".equals(targetType) || targetType.equals(wrapperType)) {
-                TypeConversionUtils.boxPrimitiveType(code, cp, primitiveValueType, wrapperType);
+                TypeConversionUtils.boxPrimitiveType(code, classWriter, primitiveValueType, wrapperType);
                 return;
             }
             throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr,
@@ -95,11 +95,11 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
         if (isWrapperType(targetType) && isWrapperType(valueType)) {
             String fromPrimitive = TypeConversionUtils.getPrimitiveType(valueType);
             String toPrimitive = TypeConversionUtils.getPrimitiveType(targetType);
-            TypeConversionUtils.unboxWrapperType(code, cp, valueType);
+            TypeConversionUtils.unboxWrapperType(code, classWriter, valueType);
             if (!fromPrimitive.equals(toPrimitive)) {
                 TypeConversionUtils.convertPrimitiveType(code, fromPrimitive, toPrimitive);
             }
-            TypeConversionUtils.boxPrimitiveType(code, cp, toPrimitive, targetType);
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, toPrimitive, targetType);
         }
     }
 
@@ -120,9 +120,10 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstAssignExpr assignExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
         // Handle assignments like arr[1] = value or arr.length = 0
         var left = assignExpr.getLeft();
@@ -148,11 +149,11 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         if (fieldInfo != null) {
                             // Generate: aload 0; <value>; dup_x1; putfield
                             code.aload(0); // load this
-                            compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+                            compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
 
                             // Convert value type if needed
                             String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                            coerceAssignmentValue(code, cp, assignExpr, valueType, fieldInfo.descriptor());
+                            coerceAssignmentValue(code, classWriter, assignExpr, valueType, fieldInfo.descriptor());
 
                             // Duplicate value for assignment expression result (assignment returns the assigned value)
                             String fieldDesc = fieldInfo.descriptor();
@@ -188,11 +189,11 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         FieldInfo fieldInfo = typeInfo.getField(fieldName);
                         if (fieldInfo != null) {
                             code.aload(0); // load this
-                            compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+                            compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
 
                             // Convert value type if needed
                             String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                            coerceAssignmentValue(code, cp, assignExpr, valueType, fieldInfo.descriptor());
+                            coerceAssignmentValue(code, classWriter, assignExpr, valueType, fieldInfo.descriptor());
 
                             // Duplicate value for assignment expression result
                             String fieldDesc = fieldInfo.descriptor();
@@ -221,11 +222,11 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                     FieldInfo fieldInfo = typeInfo.getField(fieldName);
                     if (fieldInfo != null && fieldInfo.isStatic()) {
                         // Generate: <value>; dup; putstatic
-                        compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
 
                         // Convert value type if needed
                         String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                        coerceAssignmentValue(code, cp, assignExpr, valueType, fieldInfo.descriptor());
+                        coerceAssignmentValue(code, classWriter, assignExpr, valueType, fieldInfo.descriptor());
 
                         // Duplicate value for assignment expression result
                         String fieldDesc = fieldInfo.descriptor();
@@ -253,11 +254,11 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                     FieldInfo fieldInfo = typeInfo.getField(fieldName);
                     if (fieldInfo != null && fieldInfo.isStatic()) {
                         // Generate: <value>; dup; putstatic
-                        compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+                        compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
 
                         // Convert value type if needed
                         String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                        coerceAssignmentValue(code, cp, assignExpr, valueType, fieldInfo.descriptor());
+                        coerceAssignmentValue(code, classWriter, assignExpr, valueType, fieldInfo.descriptor());
 
                         // Duplicate value for assignment expression result
                         String fieldDesc = fieldInfo.descriptor();
@@ -280,8 +281,8 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 // Java array operations
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                     // arr[index] = value - array element assignment
-                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [array]
-                    compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [array, index]
+                    compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [array]
+                    compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null); // Stack: [array, index]
 
                     // Convert index to int if needed
                     String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
@@ -291,10 +292,10 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
                     // Generate the value to store
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                    compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null); // Stack: [array, index, value]
+                    compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null); // Stack: [array, index, value]
 
                     // Unbox if needed
-                    TypeConversionUtils.unboxWrapperType(code, cp, valueType);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, valueType);
 
                     // Convert to target element type if needed
                     String elemType = objType.substring(1); // Remove leading "["
@@ -336,8 +337,8 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 // Check if it's arr[index] = value
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                     // arr[index] = value -> arr.set(index, value)
-                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList/List]
-                    compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [ArrayList/List, index]
+                    compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [ArrayList/List]
+                    compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null); // Stack: [ArrayList/List, index]
 
                     // Convert index to int if it's a String (for-in returns string indices in JS semantics)
                     String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
@@ -347,7 +348,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         code.invokestatic(parseIntMethod); // Stack: [ArrayList/List, int]
                     }
 
-                    compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null); // Stack: [ArrayList/List, index, value]
+                    compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null); // Stack: [ArrayList/List, index, value]
 
                     // Box value if needed
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
@@ -373,7 +374,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         // arr.length = newLength
                         // Special case: arr.length = 0 -> arr.clear()
                         if (assignExpr.getRight() instanceof Swc4jAstNumber number && number.getValue() == 0.0) {
-                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [List]
+                            compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [List]
                             int clearMethod = cp.addInterfaceMethodRef("java/util/List", "clear", "()V");
                             code.invokeinterface(clearMethod, 1); // Stack: []
                             // Assignment expression should return the assigned value (0 in this case)
@@ -387,12 +388,12 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                             int newLength = (int) number.getValue();
 
                             // Call arr.subList(newLength, arr.size()).clear()
-                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [List]
+                            compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [List]
                             code.dup(); // Stack: [List, List] - keep one for potential use
                             code.iconst(newLength); // Stack: [List, List, newLength]
 
                             // Get arr.size() - need to load List again
-                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [List, List, newLength, List]
+                            compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [List, List, newLength, List]
                             int sizeMethod = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
                             code.invokeinterface(sizeMethod, 1); // Stack: [List, List, newLength, size]
 
@@ -419,23 +420,23 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 // Check if it's obj[key] = value (computed property)
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                     // obj[key] = value -> map.put(key, value)
-                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [LinkedHashMap]
-                    compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [LinkedHashMap, key]
+                    compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [LinkedHashMap]
+                    compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null); // Stack: [LinkedHashMap, key]
 
                     // Box primitive keys if needed
                     String keyType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                     if (keyType != null && TypeConversionUtils.isPrimitiveType(keyType)) {
                         String wrapperType = TypeConversionUtils.getWrapperType(keyType);
-                        TypeConversionUtils.boxPrimitiveType(code, cp, keyType, wrapperType);
+                        TypeConversionUtils.boxPrimitiveType(code, classWriter, keyType, wrapperType);
                     }
 
-                    compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null); // Stack: [LinkedHashMap, key, value]
+                    compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null); // Stack: [LinkedHashMap, key, value]
 
                     // Box primitive values if needed
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
                     if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
                         String wrapperType = TypeConversionUtils.getWrapperType(valueType);
-                        TypeConversionUtils.boxPrimitiveType(code, cp, valueType, wrapperType);
+                        TypeConversionUtils.boxPrimitiveType(code, classWriter, valueType, wrapperType);
                     }
 
                     // Call LinkedHashMap.put(Object, Object)
@@ -449,17 +450,17 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
                     // obj.prop = value -> map.put("prop", value)
-                    compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [LinkedHashMap]
+                    compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [LinkedHashMap]
                     int keyIndex = cp.addString(propName);
                     code.ldc(keyIndex); // Stack: [LinkedHashMap, "prop"]
 
-                    compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null); // Stack: [LinkedHashMap, "prop", value]
+                    compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null); // Stack: [LinkedHashMap, "prop", value]
 
                     // Box primitive values if needed
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
                     if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
                         String wrapperType = TypeConversionUtils.getWrapperType(valueType);
-                        TypeConversionUtils.boxPrimitiveType(code, cp, valueType, wrapperType);
+                        TypeConversionUtils.boxPrimitiveType(code, classWriter, valueType, wrapperType);
                     }
 
                     // Call LinkedHashMap.put(Object, Object)
@@ -476,7 +477,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
             // First check if it's a captured variable (inside a lambda)
             var capturedVar = context.getCapturedVariable(varName);
             if (capturedVar != null) {
-                generateCapturedVariableAssignment(code, cp, context, assignExpr, capturedVar);
+                generateCapturedVariableAssignment(code, classWriter, context, assignExpr, capturedVar);
                 return;
             }
 
@@ -497,9 +498,9 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
                 if (op == Swc4jAstAssignOp.Assign) {
                     // Simple assignment
-                    compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                    coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
+                    coerceAssignmentValue(code, classWriter, assignExpr, valueType, varType);
                 } else {
                     // Compound assignment - load current value first
                     code.aload(var.holderIndex());
@@ -515,12 +516,12 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         default -> code.aaload();
                     }
 
-                    compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                    coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
+                    coerceAssignmentValue(code, classWriter, assignExpr, valueType, varType);
 
                     // Perform operation
-                    generateCompoundOperation(code, cp, op, varType);
+                    generateCompoundOperation(code, classWriter, op, varType);
                 }
 
                 // Duplicate for expression result, then store
@@ -546,11 +547,11 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
             if (op == Swc4jAstAssignOp.Assign) {
                 // Simple assignment: x = value
-                compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
 
                 // Convert to the variable's type if needed
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
+                coerceAssignmentValue(code, classWriter, assignExpr, valueType, varType);
             } else {
                 // Compound assignment: x += value, x -= value, etc.
                 // Load current value of variable
@@ -563,7 +564,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 }
 
                 // Generate the right-hand side expression
-                compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
 
                 // Convert to the variable's type if needed
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
@@ -585,11 +586,11 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         code.invokestatic(valueOfRef);
                     }
                 } else if (valueType != null && !valueType.equals(varType)) {
-                    coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
+                    coerceAssignmentValue(code, classWriter, assignExpr, valueType, varType);
                 }
 
                 // Perform the operation based on the compound operator
-                generateCompoundOperation(code, cp, op, varType);
+                generateCompoundOperation(code, classWriter, op, varType);
             }
 
             // Duplicate the value on the stack before storing (assignment returns the value)
@@ -611,11 +612,11 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
             return;
         } else if (left instanceof Swc4jAstArrayPat arrayPat) {
             // Array destructuring assignment: [a, ...rest] = newArray;
-            generateArrayPatternAssign(code, cp, context, assignExpr, arrayPat);
+            generateArrayPatternAssign(code, classWriter, context, assignExpr, arrayPat);
             return;
         } else if (left instanceof Swc4jAstObjectPat objectPat) {
             // Object destructuring assignment: { x, ...rest } = newObject;
-            generateObjectPatternAssign(code, cp, context, assignExpr, objectPat);
+            generateObjectPatternAssign(code, classWriter, context, assignExpr, objectPat);
             return;
         }
         throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr, "Assignment expression not yet supported: " + left);
@@ -627,13 +628,14 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
      */
     private void generateArrayPatternAssign(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstAssignExpr assignExpr,
             Swc4jAstArrayPat arrayPat) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         // Generate the right-hand side expression and store in a temp variable
-        compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
         int listClass = cp.addClass("java/util/List");
         code.checkcast(listClass);
         int tempListSlot = getOrAllocateTempSlot(context, "$tempList", "Ljava/util/List;");
@@ -758,10 +760,11 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
      */
     private void generateCapturedVariableAssignment(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstAssignExpr assignExpr,
             com.caoccao.javet.swc4j.compiler.memory.CapturedVariable capturedVar) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         String currentClass = context.getCurrentClassInternalName();
         int fieldRef = cp.addFieldRef(currentClass, capturedVar.fieldName(), capturedVar.type());
@@ -776,9 +779,9 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
 
             if (op == Swc4jAstAssignOp.Assign) {
                 // Simple assignment
-                compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
+                coerceAssignmentValue(code, classWriter, assignExpr, valueType, varType);
             } else {
                 // Compound assignment - load current value first
                 code.aload(0);
@@ -795,12 +798,12 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                     default -> code.aaload();
                 }
 
-                compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
+                coerceAssignmentValue(code, classWriter, assignExpr, valueType, varType);
 
                 // Perform operation
-                generateCompoundOperation(code, cp, op, varType);
+                generateCompoundOperation(code, classWriter, op, varType);
             }
 
             // Duplicate for expression result, then store into holder array
@@ -827,25 +830,25 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
             code.aload(0);  // Load 'this' (lambda instance)
 
             if (op == Swc4jAstAssignOp.Assign) {
-                compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
-                coerceAssignmentValue(code, cp, assignExpr, valueType, varType);
+                coerceAssignmentValue(code, classWriter, assignExpr, valueType, varType);
             } else {
                 // Compound assignment
                 code.dup();  // Keep 'this' for putfield
                 code.getfield(fieldRef);  // Get current value
 
-                compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
                 if (valueType != null && !valueType.equals(varType)) {
-                    TypeConversionUtils.unboxWrapperType(code, cp, valueType);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, valueType);
                     String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
                     if (valuePrimitive != null && !valuePrimitive.equals(varType)) {
                         TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, varType);
                     }
                 }
 
-                generateCompoundOperation(code, cp, op, varType);
+                generateCompoundOperation(code, classWriter, op, varType);
             }
 
             // Duplicate for expression result, then store
@@ -862,7 +865,8 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
     /**
      * Generate compound operation bytecode (e.g., iadd, isub, etc.)
      */
-    private void generateCompoundOperation(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstAssignOp op, String varType) throws Swc4jByteCodeCompilerException {
+    private void generateCompoundOperation(CodeBuilder code, ClassWriter classWriter, Swc4jAstAssignOp op, String varType) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         switch (op) {
             case AddAssign -> {
                 switch (varType) {
@@ -956,13 +960,14 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
      */
     private void generateObjectPatternAssign(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstAssignExpr assignExpr,
             Swc4jAstObjectPat objectPat) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         // Generate the right-hand side expression and store in a temp variable
-        compiler.getExpressionGenerator().generate(code, cp, assignExpr.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, assignExpr.getRight(), null);
         int mapClass = cp.addClass("java/util/Map");
         code.checkcast(mapClass);
         int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap", "Ljava/util/Map;");
@@ -1011,7 +1016,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                     code.ifnonnull(0);
                     int skipDefaultPos = code.getCurrentOffset() - 2;
 
-                    compiler.getExpressionGenerator().generate(code, cp, assignProp.getValue().get(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, assignProp.getValue().get(), null);
                     code.astore(localVar.index());
 
                     int afterDefaultLabel = code.getCurrentOffset();
@@ -1081,7 +1086,8 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
         code.aload(tempMapSlot);
     }
 
-    private void generateStringValueOf(CodeBuilder code, ClassWriter.ConstantPool cp, String valueType) {
+    private void generateStringValueOf(CodeBuilder code, ClassWriter classWriter, String valueType) {
+        var cp = classWriter.getConstantPool();
         String descriptor = switch (valueType) {
             case "I" -> "(I)Ljava/lang/String;";
             case "J" -> "(J)Ljava/lang/String;";

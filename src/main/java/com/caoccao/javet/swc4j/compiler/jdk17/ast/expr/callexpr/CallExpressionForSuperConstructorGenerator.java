@@ -38,9 +38,10 @@ public final class CallExpressionForSuperConstructorGenerator extends BaseAstPro
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Get the current class and resolve its superclass
         String currentClassInternalName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
         if (currentClassInternalName == null) {
@@ -71,7 +72,7 @@ public final class CallExpressionForSuperConstructorGenerator extends BaseAstPro
             if (arg.getSpread().isPresent()) {
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not yet supported in super constructor calls");
             }
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType == null) {
                 argType = "Ljava/lang/Object;";

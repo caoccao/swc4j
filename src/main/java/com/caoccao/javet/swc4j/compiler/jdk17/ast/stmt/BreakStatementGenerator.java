@@ -62,7 +62,7 @@ public final class BreakStatementGenerator extends BaseAstProcessor<Swc4jAstBrea
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstBreakStmt breakStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
@@ -95,7 +95,7 @@ public final class BreakStatementGenerator extends BaseAstProcessor<Swc4jAstBrea
             context.markFinallyBlockAsInlineExecuting(finallyBlock);
             try {
                 for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
-                    compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
+                    compiler.getStatementGenerator().generate(code, classWriter, stmt, returnTypeInfo);
                     // If finally has its own terminal statement, it takes precedence
                     if (isTerminalStatement(stmt)) {
                         return; // Finally's return/throw supersedes the break

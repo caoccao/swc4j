@@ -159,19 +159,20 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstVarDecl varDecl,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
         boolean allowShadow = varDecl.getKind() != Swc4jAstVarDeclKind.Var;
         for (Swc4jAstVarDeclarator declarator : varDecl.getDecls()) {
             ISwc4jAstPat name = declarator.getName();
             if (name instanceof Swc4jAstBindingIdent bindingIdent) {
-                generateBindingIdentDecl(code, cp, context, declarator, bindingIdent, allowShadow);
+                generateBindingIdentDecl(code, classWriter, context, declarator, bindingIdent, allowShadow);
             } else if (name instanceof Swc4jAstArrayPat arrayPat) {
-                generateArrayPatternDecl(code, cp, context, declarator, arrayPat, allowShadow);
+                generateArrayPatternDecl(code, classWriter, context, declarator, arrayPat, allowShadow);
             } else if (name instanceof Swc4jAstObjectPat objectPat) {
-                generateObjectPatternDecl(code, cp, context, declarator, objectPat, allowShadow);
+                generateObjectPatternDecl(code, classWriter, context, declarator, objectPat, allowShadow);
             } else {
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), name,
                         "Unsupported pattern type in variable declaration: " + name.getClass().getName());
@@ -186,19 +187,20 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
      */
     private void generateArrayPatternDecl(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstVarDeclarator declarator,
             Swc4jAstArrayPat arrayPat,
             boolean allowShadow) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         if (declarator.getInit().isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), declarator,
                     "Array destructuring requires an initializer");
         }
 
         // Generate the initializer expression and store in a temp variable
-        compiler.getExpressionGenerator().generate(code, cp, declarator.getInit().get(), null);
-        generateArrayPatternExtraction(code, cp, context, arrayPat, allowShadow);
+        compiler.getExpressionGenerator().generate(code, classWriter, declarator.getInit().get(), null);
+        generateArrayPatternExtraction(code, classWriter, context, arrayPat, allowShadow);
     }
 
     /**
@@ -207,10 +209,11 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
      */
     private void generateArrayPatternExtraction(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstArrayPat arrayPat,
             boolean allowShadow) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         int listClass = cp.addClass("java/util/List");
         code.checkcast(listClass);
@@ -269,7 +272,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.iconst(currentIndex);
                 code.invokeinterface(listGetRef, 2);
                 // Recursively extract nested array pattern
-                generateArrayPatternExtraction(code, cp, context, nestedArrayPat, allowShadow);
+                generateArrayPatternExtraction(code, classWriter, context, nestedArrayPat, allowShadow);
                 currentIndex++;
 
             } else if (elem instanceof Swc4jAstObjectPat nestedObjectPat) {
@@ -278,11 +281,11 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.iconst(currentIndex);
                 code.invokeinterface(listGetRef, 2);
                 // Recursively extract nested object pattern
-                generateObjectPatternExtraction(code, cp, context, nestedObjectPat, allowShadow);
+                generateObjectPatternExtraction(code, classWriter, context, nestedObjectPat, allowShadow);
                 currentIndex++;
 
             } else if (elem instanceof Swc4jAstRestPat restPat) {
-                generateRestPatternExtraction(code, cp, context, restPat, tempListSlot, restStartIndex, true, listGetRef, listSizeRef, listAddRef);
+                generateRestPatternExtraction(code, classWriter, context, restPat, tempListSlot, restStartIndex, true, listGetRef, listSizeRef, listAddRef);
             }
         }
     }
@@ -292,11 +295,12 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
      */
     private void generateBindingIdentDecl(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstVarDeclarator declarator,
             Swc4jAstBindingIdent bindingIdent,
             boolean allowShadow) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         String varName = bindingIdent.getId().getSym();
         LocalVariable localVar = allowShadow ?
                 context.getLocalVariableTable().getVariableInCurrentScope(varName) :
@@ -335,7 +339,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
 
             // Check if this variable needs a holder (mutable variable captured by lambda)
             if (localVar.needsHolder()) {
-                generateHolderInitialization(code, cp, localVar, init, varTypeInfo);
+                generateHolderInitialization(code, classWriter, localVar, init, varTypeInfo);
             } else if (isSelfReferencingArrow) {
                 // Pre-initialize to null (for reference types) or default value (for primitives)
                 // This ensures the variable slot is initialized when captured by the lambda
@@ -365,7 +369,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 // Call arrow generator directly with self-reference name
                 Swc4jAstArrowExpr arrowExpr = (Swc4jAstArrowExpr) init;
                 ArrowExpressionGenerator.SelfReferenceInfo selfRefInfo =
-                        compiler.getArrowExpressionGenerator().generate(code, cp, arrowExpr, varTypeInfo, varName);
+                        compiler.getArrowExpressionGenerator().generate(code, classWriter, arrowExpr, varTypeInfo, varName);
 
                 // Store the lambda in the local variable
                 code.astore(localVar.index());
@@ -385,7 +389,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 }
             } else {
                 // Normal case: generate expression and store
-                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                compiler.getExpressionGenerator().generate(code, classWriter, init, varTypeInfo);
 
                 // Store the value in the local variable
                 switch (localVar.type()) {
@@ -399,7 +403,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
         } else {
             // Check if this variable needs a holder even without initializer
             if (localVar.needsHolder()) {
-                generateHolderDefaultInitialization(code, cp, localVar);
+                generateHolderDefaultInitialization(code, classWriter, localVar);
             } else {
                 // Generate default initialization for variables without initializers
                 // This is required by the JVM verifier to track variable initialization
@@ -435,8 +439,9 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
      */
     private void generateHolderDefaultInitialization(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             LocalVariable localVar) {
+        var cp = classWriter.getConstantPool();
         String type = localVar.type();
         int holderSlot = localVar.holderIndex();
 
@@ -504,10 +509,11 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
      */
     private void generateHolderInitialization(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             LocalVariable localVar,
             com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr init,
             ReturnTypeInfo varTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         String type = localVar.type();
         int holderSlot = localVar.holderIndex();
 
@@ -517,7 +523,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.newarray(10); // T_INT
                 code.dup();
                 code.iconst(0);
-                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                compiler.getExpressionGenerator().generate(code, classWriter, init, varTypeInfo);
                 code.iastore();
                 code.astore(holderSlot);
             }
@@ -526,7 +532,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.newarray(11); // T_LONG
                 code.dup();
                 code.iconst(0);
-                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                compiler.getExpressionGenerator().generate(code, classWriter, init, varTypeInfo);
                 code.lastore();
                 code.astore(holderSlot);
             }
@@ -535,7 +541,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.newarray(7); // T_DOUBLE
                 code.dup();
                 code.iconst(0);
-                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                compiler.getExpressionGenerator().generate(code, classWriter, init, varTypeInfo);
                 code.dastore();
                 code.astore(holderSlot);
             }
@@ -544,7 +550,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.newarray(6); // T_FLOAT
                 code.dup();
                 code.iconst(0);
-                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                compiler.getExpressionGenerator().generate(code, classWriter, init, varTypeInfo);
                 code.fastore();
                 code.astore(holderSlot);
             }
@@ -553,7 +559,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.newarray(4); // T_BOOLEAN
                 code.dup();
                 code.iconst(0);
-                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                compiler.getExpressionGenerator().generate(code, classWriter, init, varTypeInfo);
                 code.bastore();
                 code.astore(holderSlot);
             }
@@ -562,7 +568,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.newarray(8); // T_BYTE
                 code.dup();
                 code.iconst(0);
-                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                compiler.getExpressionGenerator().generate(code, classWriter, init, varTypeInfo);
                 code.bastore();
                 code.astore(holderSlot);
             }
@@ -571,7 +577,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.newarray(5); // T_CHAR
                 code.dup();
                 code.iconst(0);
-                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                compiler.getExpressionGenerator().generate(code, classWriter, init, varTypeInfo);
                 code.castore();
                 code.astore(holderSlot);
             }
@@ -580,7 +586,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.newarray(9); // T_SHORT
                 code.dup();
                 code.iconst(0);
-                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                compiler.getExpressionGenerator().generate(code, classWriter, init, varTypeInfo);
                 code.sastore();
                 code.astore(holderSlot);
             }
@@ -598,7 +604,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.anewarray(elementClass);
                 code.dup();
                 code.iconst(0);
-                compiler.getExpressionGenerator().generate(code, cp, init, varTypeInfo);
+                compiler.getExpressionGenerator().generate(code, classWriter, init, varTypeInfo);
                 code.aastore();
                 code.astore(holderSlot);
             }
@@ -612,7 +618,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
      */
     private void generateObjectPatternDecl(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstVarDeclarator declarator,
             Swc4jAstObjectPat objectPat,
@@ -623,8 +629,8 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
         }
 
         // Generate the initializer expression and extract patterns
-        compiler.getExpressionGenerator().generate(code, cp, declarator.getInit().get(), null);
-        generateObjectPatternExtraction(code, cp, context, objectPat, allowShadow);
+        compiler.getExpressionGenerator().generate(code, classWriter, declarator.getInit().get(), null);
+        generateObjectPatternExtraction(code, classWriter, context, objectPat, allowShadow);
     }
 
     /**
@@ -633,10 +639,11 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
      */
     private void generateObjectPatternExtraction(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstObjectPat objectPat,
             boolean allowShadow) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         int mapClass = cp.addClass("java/util/Map");
         code.checkcast(mapClass);
@@ -688,7 +695,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                     code.ifnonnull(0);
                     int skipDefaultPos = code.getCurrentOffset() - 2;
 
-                    compiler.getExpressionGenerator().generate(code, cp, assignProp.getValue().get(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, assignProp.getValue().get(), null);
                     code.astore(localVar.index());
 
                     int afterDefaultLabel = code.getCurrentOffset();
@@ -714,14 +721,14 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                     code.astore(localVar.index());
                 } else if (valuePat instanceof Swc4jAstArrayPat nestedArrayPat) {
                     // Nested array pattern: { arr: [a, ...rest] }
-                    generateArrayPatternExtraction(code, cp, context, nestedArrayPat, allowShadow);
+                    generateArrayPatternExtraction(code, classWriter, context, nestedArrayPat, allowShadow);
                 } else if (valuePat instanceof Swc4jAstObjectPat nestedObjectPat) {
                     // Nested object pattern: { nested: { y, ...rest } }
-                    generateObjectPatternExtraction(code, cp, context, nestedObjectPat, allowShadow);
+                    generateObjectPatternExtraction(code, classWriter, context, nestedObjectPat, allowShadow);
                 }
 
             } else if (prop instanceof Swc4jAstRestPat restPat) {
-                generateObjectRestExtraction(code, cp, context, restPat, tempMapSlot, extractedKeys, mapRemoveRef);
+                generateObjectRestExtraction(code, classWriter, context, restPat, tempMapSlot, extractedKeys, mapRemoveRef);
             }
         }
     }
@@ -731,12 +738,13 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
      */
     private void generateObjectRestExtraction(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstRestPat restPat,
             int sourceSlot,
             List<String> extractedKeys,
             int mapRemoveRef) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         ISwc4jAstPat arg = restPat.getArg();
         if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
@@ -771,7 +779,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
      */
     private void generateRestPatternExtraction(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstRestPat restPat,
             int sourceSlot,
@@ -780,6 +788,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             int listGetRef,
             int listSizeRef,
             int listAddRef) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
 
         ISwc4jAstPat arg = restPat.getArg();
         if (arg instanceof Swc4jAstBindingIdent bindingIdent) {

@@ -43,9 +43,10 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstUnaryExpr unaryExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         Swc4jAstUnaryOp op = unaryExpr.getOp();
 
         switch (op) {
@@ -57,10 +58,10 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                 // Bang operator requires boolean operand
                 if ("Z".equals(argType) || "Ljava/lang/Boolean;".equals(argType)) {
                     // Generate the operand
-                    compiler.getExpressionGenerator().generate(code, cp, arg, null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, arg, null);
 
                     // Unbox if wrapper type
-                    TypeConversionUtils.unboxWrapperType(code, cp, argType);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, argType);
 
                     // Invert the boolean value using ifeq
                     // If value == 0 (false), jump to TRUE_LABEL and push 1 (true)
@@ -103,8 +104,8 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                     } else if ("Ljava/util/ArrayList;".equals(objType)) {
                         if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                             // delete arr[index] -> arr.remove(index)
-                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [ArrayList]
-                            compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [ArrayList, index]
+                            compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [ArrayList]
+                            compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null); // Stack: [ArrayList, index]
 
                             // Call ArrayList.remove(int)
                             int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
@@ -119,15 +120,15 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                             || "Ljava/util/HashMap;".equals(objType)
                             || "Ljava/util/LinkedHashMap;".equals(objType)) {
                         if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
-                            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null); // Stack: [Map]
-                            compiler.getExpressionGenerator().generate(code, cp, computedProp.getExpr(), null); // Stack: [Map, key]
+                            compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [Map]
+                            compiler.getExpressionGenerator().generate(code, classWriter, computedProp.getExpr(), null); // Stack: [Map, key]
 
                             String keyType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                             if (keyType != null) {
                                 String primitiveType = TypeConversionUtils.getPrimitiveType(keyType);
                                 if (TypeConversionUtils.isPrimitiveType(primitiveType)) {
                                     String wrapperType = TypeConversionUtils.getWrapperType(primitiveType);
-                                    TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, wrapperType);
+                                    TypeConversionUtils.boxPrimitiveType(code, classWriter, primitiveType, wrapperType);
                                 }
                             }
 
@@ -284,10 +285,10 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                     negatedBigInt.setValue(value);
                     negatedBigInt.setSign(Swc4jAstBigIntSign.NoSign);
 
-                    compiler.getBigIntLiteralGenerator().generate(code, cp, negatedBigInt, returnTypeInfo);
+                    compiler.getBigIntLiteralGenerator().generate(code, classWriter, negatedBigInt, returnTypeInfo);
                 } else {
                     // For complex expressions, generate the expression first then negate
-                    compiler.getExpressionGenerator().generate(code, cp, arg, null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, arg, null);
 
                     String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
                     // Handle null type - should not happen for negation, default to int
@@ -309,7 +310,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                         boolean isWrapper = !argType.equals(primitiveType);
 
                         // Unbox wrapper types before negation
-                        TypeConversionUtils.unboxWrapperType(code, cp, argType);
+                        TypeConversionUtils.unboxWrapperType(code, classWriter, argType);
 
                         // Get the primitive type for determining which negation instruction to use
                         switch (primitiveType) {
@@ -321,7 +322,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
 
                         // Box back to wrapper type if original was wrapper
                         if (isWrapper) {
-                            TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, argType);
+                            TypeConversionUtils.boxPrimitiveType(code, classWriter, primitiveType, argType);
                         }
                     }
                 }
@@ -332,7 +333,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
 
                 // Special case for BigInt: +123n is just 123n (no-op)
                 if (arg instanceof Swc4jAstBigInt bigInt) {
-                    compiler.getBigIntLiteralGenerator().generate(code, cp, bigInt, returnTypeInfo);
+                    compiler.getBigIntLiteralGenerator().generate(code, classWriter, bigInt, returnTypeInfo);
                     return;
                 }
 
@@ -366,17 +367,17 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                 }
 
                 // For numeric types, just generate the expression
-                compiler.getExpressionGenerator().generate(code, cp, arg, null);
+                compiler.getExpressionGenerator().generate(code, classWriter, arg, null);
 
                 // Check if argType is a wrapper before unboxing
                 boolean isWrapper = !argType.equals(primitiveType);
 
                 // Unbox wrapper types to get primitive
                 if (isWrapper) {
-                    TypeConversionUtils.unboxWrapperType(code, cp, argType);
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, argType);
 
                     // Box back to wrapper type if original was wrapper
-                    TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, argType);
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, primitiveType, argType);
                 }
                 // For primitive types, nothing more to do (no-op)
             }
@@ -393,7 +394,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                     Swc4jAstBigInt notBigInt = Swc4jAstBigInt.create();
                     notBigInt.setValue(value);
                     notBigInt.setSign(Swc4jAstBigIntSign.NoSign);
-                    compiler.getBigIntLiteralGenerator().generate(code, cp, notBigInt, returnTypeInfo);
+                    compiler.getBigIntLiteralGenerator().generate(code, classWriter, notBigInt, returnTypeInfo);
                     return;
                 }
 
@@ -403,7 +404,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                 }
 
                 if ("Ljava/math/BigInteger;".equals(argType)) {
-                    compiler.getExpressionGenerator().generate(code, cp, arg, null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, arg, null);
                     int notRef = cp.addMethodRef("java/math/BigInteger", "not", "()Ljava/math/BigInteger;");
                     code.invokevirtual(notRef);
                     return;
@@ -417,10 +418,10 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                             "Bitwise NOT (~) requires integer type, got: " + argType);
                 }
 
-                compiler.getExpressionGenerator().generate(code, cp, arg, null);
+                compiler.getExpressionGenerator().generate(code, classWriter, arg, null);
 
                 boolean isWrapper = !argType.equals(primitiveType);
-                TypeConversionUtils.unboxWrapperType(code, cp, argType);
+                TypeConversionUtils.unboxWrapperType(code, classWriter, argType);
 
                 if ("J".equals(primitiveType)) {
                     int longIndex = cp.addLong(-1L);
@@ -433,14 +434,14 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
                 }
 
                 if (isWrapper) {
-                    TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, argType);
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, primitiveType, argType);
                 }
             }
             case TypeOf -> {
                 ISwc4jAstExpr arg = unaryExpr.getArg();
                 String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
 
-                compiler.getExpressionGenerator().generate(code, cp, arg, null);
+                compiler.getExpressionGenerator().generate(code, classWriter, arg, null);
 
                 if (argType == null) {
                     argType = "Ljava/lang/Object;";
@@ -576,7 +577,7 @@ public final class UnaryExpressionGenerator extends BaseAstProcessor<Swc4jAstUna
             }
             case Void -> {
                 ISwc4jAstExpr arg = unaryExpr.getArg();
-                compiler.getExpressionGenerator().generate(code, cp, arg, null);
+                compiler.getExpressionGenerator().generate(code, classWriter, arg, null);
 
                 String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
                 if (argType == null) {

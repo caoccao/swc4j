@@ -204,19 +204,20 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
      */
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForOfStmt forOfStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Determine iteration strategy based on compile-time type
         IterationType iterationType = determineIterationType(forOfStmt.getRight());
 
         // Generate the appropriate iteration code
         switch (iterationType) {
-            case LIST, SET -> generateIteratorIteration(code, cp, forOfStmt, labelName, returnTypeInfo);
-            case MAP -> generateMapIteration(code, cp, forOfStmt, labelName, returnTypeInfo);
-            case STRING -> generateStringIteration(code, cp, forOfStmt, labelName, returnTypeInfo);
-            case ARRAY -> generateArrayIteration(code, cp, forOfStmt, labelName, returnTypeInfo);
+            case LIST, SET -> generateIteratorIteration(code, classWriter, forOfStmt, labelName, returnTypeInfo);
+            case MAP -> generateMapIteration(code, classWriter, forOfStmt, labelName, returnTypeInfo);
+            case STRING -> generateStringIteration(code, classWriter, forOfStmt, labelName, returnTypeInfo);
+            case ARRAY -> generateArrayIteration(code, classWriter, forOfStmt, labelName, returnTypeInfo);
         }
     }
 
@@ -232,10 +233,10 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForOfStmt forOfStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(code, cp, forOfStmt, null, returnTypeInfo);
+        generate(code, classWriter, forOfStmt, null, returnTypeInfo);
     }
 
     /**
@@ -253,11 +254,12 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
      */
     private void generateArrayDestructuringExtraction(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstArrayPat arrayPat,
             int listSlot,
             int restStartIndex) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         int listGetRef = cp.addInterfaceMethodRef("java/util/List", "get", "(I)Ljava/lang/Object;");
         int listSizeRef = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
         int listAddRef = cp.addInterfaceMethodRef("java/util/List", "add", "(Ljava/lang/Object;)Z");
@@ -390,10 +392,11 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
      */
     private void generateArrayIteration(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForOfStmt forOfStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // Get array type descriptor
@@ -410,7 +413,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         int elementSlot = initializeLoopVariable(code, forOfStmt.getLeft(), elementTypeDescriptor);
 
         // 1. Generate right expression (array)
-        compiler.getExpressionGenerator().generate(code, cp, forOfStmt.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, forOfStmt.getRight(), null);
 
         // 2. Duplicate array for later use
         code.dup();
@@ -485,7 +488,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         context.pushContinueLabel(continueLabel);
 
         // 13. Generate body
-        compiler.getStatementGenerator().generate(code, cp, forOfStmt.getBody(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, forOfStmt.getBody(), returnTypeInfo);
 
         // 14. Pop labels
         context.popContinueLabel();
@@ -534,10 +537,11 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
      */
     private void generateIteratorIteration(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForOfStmt forOfStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // Check for destructuring patterns
@@ -573,7 +577,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         }
 
         // 1. Generate right expression (iterable)
-        compiler.getExpressionGenerator().generate(code, cp, forOfStmt.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, forOfStmt.getRight(), null);
 
         // 2. Get iterator: Iterable.iterator() -> Iterator
         int iteratorRef = cp.addInterfaceMethodRef("java/lang/Iterable", "iterator", "()Ljava/util/Iterator;");
@@ -609,7 +613,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
             code.astore(tempElementSlot);
 
             // Extract each property from the map
-            generateObjectDestructuringExtraction(code, cp, context, objectPat, tempElementSlot, extractedKeys);
+            generateObjectDestructuringExtraction(code, classWriter, context, objectPat, tempElementSlot, extractedKeys);
         } else if (hasArrayDestructuring) {
             // 8b. Handle array destructuring - element is a List
             // Cast to List and store temporarily
@@ -619,7 +623,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
             code.astore(tempElementSlot);
 
             // Extract each element from the list
-            generateArrayDestructuringExtraction(code, cp, context, arrayPat, tempElementSlot, restStartIndex);
+            generateArrayDestructuringExtraction(code, classWriter, context, arrayPat, tempElementSlot, restStartIndex);
         } else {
             // 8c. Store in loop variable (NO conversion - keep actual value)
             code.astore(valueSlot);
@@ -634,7 +638,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         context.pushContinueLabel(continueLabel);
 
         // 10. Generate body
-        compiler.getStatementGenerator().generate(code, cp, forOfStmt.getBody(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, forOfStmt.getBody(), returnTypeInfo);
 
         // 11. Pop labels
         context.popContinueLabel();
@@ -674,10 +678,11 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
      */
     private void generateMapIteration(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForOfStmt forOfStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // Check if we have array destructuring pattern [key, value]
@@ -722,7 +727,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         }
 
         // 1. Generate right expression (map)
-        compiler.getExpressionGenerator().generate(code, cp, forOfStmt.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, forOfStmt.getRight(), null);
 
         // 2. Get entrySet: Map.entrySet() -> Set<Entry>
         int entrySetRef = cp.addInterfaceMethodRef("java/util/Map", "entrySet", "()Ljava/util/Set;");
@@ -791,7 +796,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         context.pushContinueLabel(continueLabel);
 
         // 14. Generate body
-        compiler.getStatementGenerator().generate(code, cp, forOfStmt.getBody(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, forOfStmt.getBody(), returnTypeInfo);
 
         // 15. Pop labels
         context.popContinueLabel();
@@ -841,11 +846,12 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
      */
     private void generateObjectDestructuringExtraction(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             CompilationContext context,
             Swc4jAstObjectPat objectPat,
             int mapSlot,
             List<String> extractedKeys) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         int mapGetRef = cp.addInterfaceMethodRef("java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
 
         for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
@@ -873,7 +879,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                     int skipDefaultPos = code.getCurrentOffset() - 2;
 
                     // Value is null, generate default value and store
-                    compiler.getExpressionGenerator().generate(code, cp, assignProp.getValue().get(), null);
+                    compiler.getExpressionGenerator().generate(code, classWriter, assignProp.getValue().get(), null);
                     code.astore(variable.index()); // Stack: []
 
                     // Patch the skip jump
@@ -959,17 +965,18 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
      */
     private void generateStringIteration(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForOfStmt forOfStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // Initialize loop variable with String type (for-of over string returns chars as strings)
         int charSlot = initializeLoopVariable(code, forOfStmt.getLeft(), "Ljava/lang/String;");
 
         // 1. Generate right expression (string)
-        compiler.getExpressionGenerator().generate(code, cp, forOfStmt.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, forOfStmt.getRight(), null);
 
         // 2. Duplicate string for later charAt calls
         code.dup();
@@ -1023,7 +1030,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         context.pushContinueLabel(continueLabel);
 
         // 14. Generate body
-        compiler.getStatementGenerator().generate(code, cp, forOfStmt.getBody(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, forOfStmt.getBody(), returnTypeInfo);
 
         // 15. Pop labels
         context.popContinueLabel();

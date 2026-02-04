@@ -38,9 +38,10 @@ public final class CallExpressionForThisConstructorGenerator extends BaseAstProc
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Get the current class
         String currentClassInternalName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
         if (currentClassInternalName == null) {
@@ -57,7 +58,7 @@ public final class CallExpressionForThisConstructorGenerator extends BaseAstProc
             if (arg.getSpread().isPresent()) {
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not yet supported in this() constructor calls");
             }
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType == null) {
                 argType = "Ljava/lang/Object;";

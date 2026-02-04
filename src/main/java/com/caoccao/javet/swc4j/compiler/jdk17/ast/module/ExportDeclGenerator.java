@@ -30,7 +30,7 @@ public final class ExportDeclGenerator extends BaseAstProcessor<Swc4jAstExportDe
     }
 
     @Override
-    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstExportDecl exportDecl, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        compiler.getDeclGenerator().generate(code, cp, exportDecl.getDecl(), returnTypeInfo);
+    public void generate(CodeBuilder code, ClassWriter classWriter, Swc4jAstExportDecl exportDecl, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        compiler.getDeclGenerator().generate(code, classWriter, exportDecl.getDecl(), returnTypeInfo);
     }
 }

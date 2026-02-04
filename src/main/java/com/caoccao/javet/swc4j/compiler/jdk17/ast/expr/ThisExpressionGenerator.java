@@ -32,7 +32,7 @@ public final class ThisExpressionGenerator extends BaseAstProcessor<Swc4jAstThis
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstThisExpr thisExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // 'this' reference is always stored in local variable slot 0 for instance methods

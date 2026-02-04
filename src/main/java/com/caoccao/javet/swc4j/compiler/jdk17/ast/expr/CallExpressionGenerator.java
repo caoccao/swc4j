@@ -55,43 +55,43 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         var callee = callExpr.getCallee();
 
         // Handle super() constructor calls
         if (superConstructorGenerator.isCalleeSupported(callee)) {
-            superConstructorGenerator.generate(code, cp, callExpr, returnTypeInfo);
+            superConstructorGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
 
         // Handle this() constructor calls (constructor chaining)
         if (thisConstructorGenerator.isCalleeSupported(callee)) {
-            thisConstructorGenerator.generate(code, cp, callExpr, returnTypeInfo);
+            thisConstructorGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
 
         // Handle super.method() calls
         if (superMethodGenerator.isCalleeSupported(callee)) {
-            superMethodGenerator.generate(code, cp, callExpr, returnTypeInfo);
+            superMethodGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
 
         // Handle IIFE (Immediately Invoked Function Expression)
         if (iifeGenerator.isCalleeSupported(callee)) {
-            iifeGenerator.generate(code, cp, callExpr, returnTypeInfo);
+            iifeGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
 
         // Handle direct calls to functional interface variables (e.g., factorial(n - 1))
         if (functionalInterfaceGenerator.isCalleeSupported(callee)) {
-            functionalInterfaceGenerator.generate(code, cp, callExpr, returnTypeInfo);
+            functionalInterfaceGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
 
         if (arrayStaticGenerator.isCalleeSupported(callee)) {
-            arrayStaticGenerator.generate(code, cp, callExpr, returnTypeInfo);
+            arrayStaticGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
 
@@ -114,19 +114,19 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
             }
 
             if (isImportedJavaClass) {
-                classGenerator.generate(code, cp, callExpr, returnTypeInfo);
+                classGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
                 return;
             } else if (arrayGenerator.isTypeSupported(objType)) {
-                arrayGenerator.generate(code, cp, callExpr, returnTypeInfo);
+                arrayGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
                 return;
             } else if (arrayListGenerator.isTypeSupported(objType)) {
-                arrayListGenerator.generate(code, cp, callExpr, returnTypeInfo);
+                arrayListGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
                 return;
             } else if (stringGenerator.isTypeSupported(objType)) {
-                stringGenerator.generate(code, cp, callExpr, returnTypeInfo);
+                stringGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
                 return;
             } else if (classGenerator.isTypeSupported(objType)) {
-                classGenerator.generate(code, cp, callExpr, returnTypeInfo);
+                classGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
                 return;
             }
         }

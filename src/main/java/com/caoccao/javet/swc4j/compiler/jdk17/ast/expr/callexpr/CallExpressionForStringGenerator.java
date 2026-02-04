@@ -34,12 +34,13 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
             // Generate code for the object (String)
-            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null);
 
             // Get the method name
             String methodName = null;
@@ -48,44 +49,45 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             }
 
             switch (methodName) {
-                case "charAt" -> generateCharAt(code, cp, callExpr);
-                case "charCodeAt" -> generateCharCodeAt(code, cp, callExpr);
-                case "codePointAt" -> generateCodePointAt(code, cp, callExpr);
-                case "concat" -> generateConcat(code, cp, callExpr);
-                case "endsWith" -> generateEndsWith(code, cp, callExpr);
-                case "includes" -> generateIncludes(code, cp, callExpr);
-                case "indexOf" -> generateIndexOf(code, cp, callExpr);
-                case "lastIndexOf" -> generateLastIndexOf(code, cp, callExpr);
-                case "match" -> generateMatch(code, cp, callExpr);
-                case "matchAll" -> generateMatchAll(code, cp, callExpr);
-                case "padEnd" -> generatePadEnd(code, cp, callExpr);
-                case "padStart" -> generatePadStart(code, cp, callExpr);
-                case "repeat" -> generateRepeat(code, cp, callExpr);
-                case "replace" -> generateReplace(code, cp, callExpr);
-                case "replaceAll" -> generateReplaceAll(code, cp, callExpr);
-                case "search" -> generateSearch(code, cp, callExpr);
-                case "slice" -> generateSlice(code, cp, callExpr);
-                case "split" -> generateSplit(code, cp, callExpr);
-                case "startsWith" -> generateStartsWith(code, cp, callExpr);
-                case "substr" -> generateSubstr(code, cp, callExpr);
-                case "substring" -> generateSubstring(code, cp, callExpr);
-                case "test" -> generateTest(code, cp, callExpr);
-                case "toLowerCase" -> generateToLowerCase(code, cp);
-                case "toUpperCase" -> generateToUpperCase(code, cp);
-                case "trim" -> generateTrim(code, cp);
-                case "trimEnd", "trimRight" -> generateTrimEnd(code, cp);
-                case "trimStart", "trimLeft" -> generateTrimStart(code, cp);
+                case "charAt" -> generateCharAt(code, classWriter, callExpr);
+                case "charCodeAt" -> generateCharCodeAt(code, classWriter, callExpr);
+                case "codePointAt" -> generateCodePointAt(code, classWriter, callExpr);
+                case "concat" -> generateConcat(code, classWriter, callExpr);
+                case "endsWith" -> generateEndsWith(code, classWriter, callExpr);
+                case "includes" -> generateIncludes(code, classWriter, callExpr);
+                case "indexOf" -> generateIndexOf(code, classWriter, callExpr);
+                case "lastIndexOf" -> generateLastIndexOf(code, classWriter, callExpr);
+                case "match" -> generateMatch(code, classWriter, callExpr);
+                case "matchAll" -> generateMatchAll(code, classWriter, callExpr);
+                case "padEnd" -> generatePadEnd(code, classWriter, callExpr);
+                case "padStart" -> generatePadStart(code, classWriter, callExpr);
+                case "repeat" -> generateRepeat(code, classWriter, callExpr);
+                case "replace" -> generateReplace(code, classWriter, callExpr);
+                case "replaceAll" -> generateReplaceAll(code, classWriter, callExpr);
+                case "search" -> generateSearch(code, classWriter, callExpr);
+                case "slice" -> generateSlice(code, classWriter, callExpr);
+                case "split" -> generateSplit(code, classWriter, callExpr);
+                case "startsWith" -> generateStartsWith(code, classWriter, callExpr);
+                case "substr" -> generateSubstr(code, classWriter, callExpr);
+                case "substring" -> generateSubstring(code, classWriter, callExpr);
+                case "test" -> generateTest(code, classWriter, callExpr);
+                case "toLowerCase" -> generateToLowerCase(code, classWriter);
+                case "toUpperCase" -> generateToUpperCase(code, classWriter);
+                case "trim" -> generateTrim(code, classWriter);
+                case "trimEnd", "trimRight" -> generateTrimEnd(code, classWriter);
+                case "trimStart", "trimLeft" -> generateTrimStart(code, classWriter);
                 default ->
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "Method '" + methodName + "()' not supported on String");
             }
         }
     }
 
-    private void generateCharAt(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateCharAt(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // Use StringApiUtils.charAt to handle bounds checking
+        var cp = classWriter.getConstantPool();
         if (!callExpr.getArgs().isEmpty()) {
             var indexArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, indexArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, indexArg.getExpr(), null);
 
             // Unbox if Integer wrapper
             String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
@@ -105,15 +107,16 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateCharCodeAt(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateCharCodeAt(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // Use StringApiUtils.charCodeAt
+        var cp = classWriter.getConstantPool();
         if (callExpr.getArgs().isEmpty()) {
             // No index - return -1 (NaN)
             code.pop();
             code.iconst(-1);
         } else {
             var indexArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, indexArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, indexArg.getExpr(), null);
 
             String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
             if ("Ljava/lang/Integer;".equals(indexType)) {
@@ -127,15 +130,16 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateCodePointAt(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateCodePointAt(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // Use Java's codePointAt for proper surrogate pair handling
+        var cp = classWriter.getConstantPool();
         if (callExpr.getArgs().isEmpty()) {
             // No index - return -1 (similar to charCodeAt behavior)
             code.pop();
             code.iconst(-1);
         } else {
             var indexArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, indexArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, indexArg.getExpr(), null);
 
             String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
             if ("Ljava/lang/Integer;".equals(indexType)) {
@@ -149,14 +153,15 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateConcat(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateConcat(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // str.concat(str1, str2, ...) - chain multiple concat calls
         if (callExpr.getArgs().isEmpty()) {
             // No arguments - return original string (already on stack)
         } else {
             // For each argument, call concat
+            var cp = classWriter.getConstantPool();
             for (var arg : callExpr.getArgs()) {
-                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
                 int concatMethod = cp.addMethodRef("java/lang/String", "concat", "(Ljava/lang/String;)Ljava/lang/String;");
                 code.invokevirtual(concatMethod);
                 // Stack now has result, which becomes receiver for next concat
@@ -164,35 +169,37 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateEndsWith(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateEndsWith(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // str.endsWith(searchString)
         if (callExpr.getArgs().isEmpty()) {
             code.pop();
             code.iconst(0); // false
         } else {
             var searchArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, searchArg.getExpr(), null);
 
+            var cp = classWriter.getConstantPool();
             int endsWithMethod = cp.addMethodRef("java/lang/String", "endsWith", "(Ljava/lang/String;)Z");
             code.invokevirtual(endsWithMethod);
         }
     }
 
-    private void generateIncludes(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateIncludes(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // str.includes(searchString)
         if (callExpr.getArgs().isEmpty()) {
             code.pop();
             code.iconst(0); // false
         } else {
             var searchArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, searchArg.getExpr(), null);
 
+            var cp = classWriter.getConstantPool();
             int containsMethod = cp.addMethodRef("java/lang/String", "contains", "(Ljava/lang/CharSequence;)Z");
             code.invokevirtual(containsMethod);
         }
     }
 
-    private void generateIndexOf(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateIndexOf(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // str.indexOf(searchString) or str.indexOf(searchString, position)
         if (callExpr.getArgs().isEmpty()) {
             // No arguments - return -1
@@ -201,12 +208,13 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         } else {
             // First argument: search string
             var searchArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, searchArg.getExpr(), null);
 
+            var cp = classWriter.getConstantPool();
             if (callExpr.getArgs().size() > 1) {
                 // Second argument: fromIndex
                 var fromIndexArg = callExpr.getArgs().get(1);
-                compiler.getExpressionGenerator().generate(code, cp, fromIndexArg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, fromIndexArg.getExpr(), null);
 
                 // Unbox if Integer
                 String fromIndexType = compiler.getTypeResolver().inferTypeFromExpr(fromIndexArg.getExpr());
@@ -226,7 +234,7 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateLastIndexOf(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateLastIndexOf(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // str.lastIndexOf(searchString) or str.lastIndexOf(searchString, position)
         if (callExpr.getArgs().isEmpty()) {
             // No arguments - return -1
@@ -234,11 +242,12 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             code.iconst(-1);
         } else {
             var searchArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, searchArg.getExpr(), null);
 
+            var cp = classWriter.getConstantPool();
             if (callExpr.getArgs().size() > 1) {
                 var fromIndexArg = callExpr.getArgs().get(1);
-                compiler.getExpressionGenerator().generate(code, cp, fromIndexArg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, fromIndexArg.getExpr(), null);
 
                 String fromIndexType = compiler.getTypeResolver().inferTypeFromExpr(fromIndexArg.getExpr());
                 if ("Ljava/lang/Integer;".equals(fromIndexType)) {
@@ -255,7 +264,7 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateMatch(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateMatch(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // str.match(pattern) - Returns ArrayList<String> or null
         if (callExpr.getArgs().isEmpty()) {
             // No pattern - return null
@@ -263,16 +272,18 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             code.aconst_null();
         } else {
             var patternArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, patternArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, patternArg.getExpr(), null);
 
             // Call StringApiUtils.match(String, String) -> ArrayList<String>
+            var cp = classWriter.getConstantPool();
             int matchMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "match", "(Ljava/lang/String;Ljava/lang/String;)Ljava/util/ArrayList;");
             code.invokestatic(matchMethod);
         }
     }
 
-    private void generateMatchAll(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateMatchAll(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // str.matchAll(pattern) - Returns ArrayList<ArrayList<String>>
+        var cp = classWriter.getConstantPool();
         if (callExpr.getArgs().isEmpty()) {
             // No pattern - return empty ArrayList
             code.pop();
@@ -283,7 +294,7 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             code.invokespecial(arrayListInit);
         } else {
             var patternArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, patternArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, patternArg.getExpr(), null);
 
             // Call StringApiUtils.matchAll(String, String) -> ArrayList<ArrayList<String>>
             int matchAllMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "matchAll", "(Ljava/lang/String;Ljava/lang/String;)Ljava/util/ArrayList;");
@@ -291,14 +302,15 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generatePadEnd(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generatePadEnd(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // Use StringApiUtils.padEnd
         if (callExpr.getArgs().isEmpty()) {
             // No arguments - return original string
         } else {
             var targetLengthArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, targetLengthArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, targetLengthArg.getExpr(), null);
 
+            var cp = classWriter.getConstantPool();
             String lengthType = compiler.getTypeResolver().inferTypeFromExpr(targetLengthArg.getExpr());
             if ("Ljava/lang/Integer;".equals(lengthType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
@@ -308,7 +320,7 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             if (callExpr.getArgs().size() > 1) {
                 // Custom pad string
                 var padStringArg = callExpr.getArgs().get(1);
-                compiler.getExpressionGenerator().generate(code, cp, padStringArg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, padStringArg.getExpr(), null);
 
                 // Call StringApiUtils.padEnd(String, int, String)
                 int padEndMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "padEnd", "(Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;");
@@ -324,14 +336,15 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generatePadStart(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generatePadStart(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // Use StringApiUtils.padStart
         if (callExpr.getArgs().isEmpty()) {
             // No arguments - return original string
         } else {
             var targetLengthArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, targetLengthArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, targetLengthArg.getExpr(), null);
 
+            var cp = classWriter.getConstantPool();
             String lengthType = compiler.getTypeResolver().inferTypeFromExpr(targetLengthArg.getExpr());
             if ("Ljava/lang/Integer;".equals(lengthType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
@@ -341,7 +354,7 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             if (callExpr.getArgs().size() > 1) {
                 // Custom pad string
                 var padStringArg = callExpr.getArgs().get(1);
-                compiler.getExpressionGenerator().generate(code, cp, padStringArg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, padStringArg.getExpr(), null);
 
                 // Call StringApiUtils.padStart(String, int, String)
                 int padStartMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "padStart", "(Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;");
@@ -357,8 +370,9 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateRepeat(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateRepeat(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // str.repeat(count)
+        var cp = classWriter.getConstantPool();
         if (callExpr.getArgs().isEmpty()) {
             // No count - return empty string
             code.pop();
@@ -366,7 +380,7 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             code.ldc(emptyStrIndex);
         } else {
             var countArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, countArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, countArg.getExpr(), null);
 
             // Unbox if Integer
             String countType = compiler.getTypeResolver().inferTypeFromExpr(countArg.getExpr());
@@ -381,41 +395,43 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateReplace(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateReplace(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // Use StringApiUtils.replace to match JavaScript behavior (first occurrence only, literal)
         if (callExpr.getArgs().size() < 2) {
             // Not enough arguments - return original string
         } else {
             var searchArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, searchArg.getExpr(), null);
 
             var replacementArg = callExpr.getArgs().get(1);
-            compiler.getExpressionGenerator().generate(code, cp, replacementArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, replacementArg.getExpr(), null);
 
             // Call StringApiUtils.replace(String, String, String)
+            var cp = classWriter.getConstantPool();
             int replaceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "replace", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
             code.invokestatic(replaceMethod);
         }
     }
 
-    private void generateReplaceAll(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateReplaceAll(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // str.replaceAll(search, replacement)
         // Use Java's replace(CharSequence, CharSequence) which replaces ALL
         if (callExpr.getArgs().size() < 2) {
             // Not enough arguments - return original string
         } else {
             var searchArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, searchArg.getExpr(), null);
 
             var replacementArg = callExpr.getArgs().get(1);
-            compiler.getExpressionGenerator().generate(code, cp, replacementArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, replacementArg.getExpr(), null);
 
+            var cp = classWriter.getConstantPool();
             int replaceMethod = cp.addMethodRef("java/lang/String", "replace", "(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Ljava/lang/String;");
             code.invokevirtual(replaceMethod);
         }
     }
 
-    private void generateSearch(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateSearch(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // str.search(pattern) - Returns int (index or -1)
         if (callExpr.getArgs().isEmpty()) {
             // No pattern - return -1
@@ -423,23 +439,25 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             code.iconst(-1);
         } else {
             var patternArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, patternArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, patternArg.getExpr(), null);
 
             // Call StringApiUtils.search(String, String) -> int
+            var cp = classWriter.getConstantPool();
             int searchMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "search", "(Ljava/lang/String;Ljava/lang/String;)I");
             code.invokestatic(searchMethod);
         }
     }
 
-    private void generateSlice(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateSlice(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // Use StringApiUtils.slice to handle negative indices
         if (callExpr.getArgs().isEmpty()) {
             // No arguments - return whole string
         } else {
             var startArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, startArg.getExpr(), null);
 
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
+            var cp = classWriter.getConstantPool();
             if ("Ljava/lang/Integer;".equals(startType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
@@ -448,7 +466,7 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             if (callExpr.getArgs().size() > 1) {
                 // Two arguments: slice(start, end)
                 var endArg = callExpr.getArgs().get(1);
-                compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, endArg.getExpr(), null);
 
                 String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
                 if ("Ljava/lang/Integer;".equals(endType)) {
@@ -467,8 +485,9 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateSplit(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateSplit(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // Returns ArrayList<String> (JavaScript returns Array)
+        var cp = classWriter.getConstantPool();
         if (callExpr.getArgs().isEmpty()) {
             // No separator - call StringApiUtils.split with null separator
             code.aconst_null();
@@ -478,12 +497,12 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             code.invokestatic(splitMethod);
         } else {
             var separatorArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, separatorArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, separatorArg.getExpr(), null);
 
             if (callExpr.getArgs().size() > 1) {
                 // With limit
                 var limitArg = callExpr.getArgs().get(1);
-                compiler.getExpressionGenerator().generate(code, cp, limitArg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, limitArg.getExpr(), null);
 
                 String limitType = compiler.getTypeResolver().inferTypeFromExpr(limitArg.getExpr());
                 if ("Ljava/lang/Integer;".equals(limitType)) {
@@ -503,19 +522,20 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateStartsWith(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateStartsWith(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // str.startsWith(searchString) or str.startsWith(searchString, position)
         if (callExpr.getArgs().isEmpty()) {
             code.pop();
             code.iconst(0); // false
         } else {
             var searchArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, searchArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, searchArg.getExpr(), null);
 
+            var cp = classWriter.getConstantPool();
             if (callExpr.getArgs().size() > 1) {
                 // With position
                 var posArg = callExpr.getArgs().get(1);
-                compiler.getExpressionGenerator().generate(code, cp, posArg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, posArg.getExpr(), null);
 
                 String posType = compiler.getTypeResolver().inferTypeFromExpr(posArg.getExpr());
                 if ("Ljava/lang/Integer;".equals(posType)) {
@@ -532,16 +552,17 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateSubstr(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateSubstr(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // Use StringApiUtils.substr to handle start+length semantics
         // Note: substr is deprecated in JavaScript but still widely used
         if (callExpr.getArgs().isEmpty()) {
             // No arguments - return whole string
         } else {
             var startArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, startArg.getExpr(), null);
 
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
+            var cp = classWriter.getConstantPool();
             if ("Ljava/lang/Integer;".equals(startType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
@@ -550,7 +571,7 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             if (callExpr.getArgs().size() > 1) {
                 // Two arguments: substr(start, length)
                 var lengthArg = callExpr.getArgs().get(1);
-                compiler.getExpressionGenerator().generate(code, cp, lengthArg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, lengthArg.getExpr(), null);
 
                 String lengthType = compiler.getTypeResolver().inferTypeFromExpr(lengthArg.getExpr());
                 if ("Ljava/lang/Integer;".equals(lengthType)) {
@@ -571,15 +592,16 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateSubstring(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateSubstring(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // Use StringApiUtils.substring to handle edge cases
         if (callExpr.getArgs().isEmpty()) {
             // No arguments - return whole string
         } else {
             var startArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, startArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, startArg.getExpr(), null);
 
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
+            var cp = classWriter.getConstantPool();
             if ("Ljava/lang/Integer;".equals(startType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
@@ -588,7 +610,7 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             if (callExpr.getArgs().size() > 1) {
                 // Two arguments: substring(start, end)
                 var endArg = callExpr.getArgs().get(1);
-                compiler.getExpressionGenerator().generate(code, cp, endArg.getExpr(), null);
+                compiler.getExpressionGenerator().generate(code, classWriter, endArg.getExpr(), null);
 
                 String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
                 if ("Ljava/lang/Integer;".equals(endType)) {
@@ -607,7 +629,7 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
         }
     }
 
-    private void generateTest(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
+    private void generateTest(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         // str.test(pattern) - Returns boolean
         if (callExpr.getArgs().isEmpty()) {
             // No pattern - return false
@@ -615,42 +637,48 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
             code.iconst(0); // false
         } else {
             var patternArg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, patternArg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, patternArg.getExpr(), null);
 
             // Call StringApiUtils.test(String, String) -> boolean
+            var cp = classWriter.getConstantPool();
             int testMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "test", "(Ljava/lang/String;Ljava/lang/String;)Z");
             code.invokestatic(testMethod);
         }
     }
 
-    private void generateToLowerCase(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateToLowerCase(CodeBuilder code, ClassWriter classWriter) {
         // str.toLowerCase()
+        var cp = classWriter.getConstantPool();
         int toLowerMethod = cp.addMethodRef("java/lang/String", "toLowerCase", "()Ljava/lang/String;");
         code.invokevirtual(toLowerMethod);
     }
 
-    private void generateToUpperCase(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateToUpperCase(CodeBuilder code, ClassWriter classWriter) {
         // str.toUpperCase()
+        var cp = classWriter.getConstantPool();
         int toUpperMethod = cp.addMethodRef("java/lang/String", "toUpperCase", "()Ljava/lang/String;");
         code.invokevirtual(toUpperMethod);
     }
 
-    private void generateTrim(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateTrim(CodeBuilder code, ClassWriter classWriter) {
         // str.trim()
+        var cp = classWriter.getConstantPool();
         int trimMethod = cp.addMethodRef("java/lang/String", "trim", "()Ljava/lang/String;");
         code.invokevirtual(trimMethod);
     }
 
-    private void generateTrimEnd(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateTrimEnd(CodeBuilder code, ClassWriter classWriter) {
         // str.trimEnd() or str.trimRight() (alias)
         // Use StringApiUtils.trimEnd which uses stripTrailing() (JDK 11+)
+        var cp = classWriter.getConstantPool();
         int trimEndMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "trimEnd", "(Ljava/lang/String;)Ljava/lang/String;");
         code.invokestatic(trimEndMethod);
     }
 
-    private void generateTrimStart(CodeBuilder code, ClassWriter.ConstantPool cp) {
+    private void generateTrimStart(CodeBuilder code, ClassWriter classWriter) {
         // str.trimStart() or str.trimLeft() (alias)
         // Use StringApiUtils.trimStart which uses stripLeading() (JDK 11+)
+        var cp = classWriter.getConstantPool();
         int trimStartMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "trimStart", "(Ljava/lang/String;)Ljava/lang/String;");
         code.invokestatic(trimStartMethod);
     }

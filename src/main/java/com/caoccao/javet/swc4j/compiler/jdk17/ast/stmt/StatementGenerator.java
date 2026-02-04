@@ -62,45 +62,46 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             ISwc4jAstStmt stmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         if (compiler.getOptions().debug() && stmt.getSpan() != null) {
             code.setLineNumber(stmt.getSpan().getLine());
         }
 
         if (stmt instanceof Swc4jAstVarDecl varDecl) {
-            compiler.getVarDeclGenerator().generate(code, cp, varDecl, returnTypeInfo);
+            compiler.getVarDeclGenerator().generate(code, classWriter, varDecl, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstExprStmt exprStmt) {
-            generateExprStmt(code, cp, exprStmt);
+            generateExprStmt(code, classWriter, exprStmt);
         } else if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
-            generateReturnStmt(code, cp, returnStmt, returnTypeInfo);
+            generateReturnStmt(code, classWriter, returnStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstIfStmt ifStmt) {
-            compiler.getIfStatementGenerator().generate(code, cp, ifStmt, returnTypeInfo);
+            compiler.getIfStatementGenerator().generate(code, classWriter, ifStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstForStmt forStmt) {
-            compiler.getForStatementGenerator().generate(code, cp, forStmt, returnTypeInfo);
+            compiler.getForStatementGenerator().generate(code, classWriter, forStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstForInStmt forInStmt) {
-            compiler.getForInStatementGenerator().generate(code, cp, forInStmt, returnTypeInfo);
+            compiler.getForInStatementGenerator().generate(code, classWriter, forInStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstForOfStmt forOfStmt) {
-            compiler.getForOfStatementGenerator().generate(code, cp, forOfStmt, returnTypeInfo);
+            compiler.getForOfStatementGenerator().generate(code, classWriter, forOfStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstWhileStmt whileStmt) {
-            compiler.getWhileStatementGenerator().generate(code, cp, whileStmt, returnTypeInfo);
+            compiler.getWhileStatementGenerator().generate(code, classWriter, whileStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstDoWhileStmt doWhileStmt) {
-            compiler.getDoWhileStatementGenerator().generate(code, cp, doWhileStmt, returnTypeInfo);
+            compiler.getDoWhileStatementGenerator().generate(code, classWriter, doWhileStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstBreakStmt breakStmt) {
-            compiler.getBreakStatementGenerator().generate(code, cp, breakStmt, returnTypeInfo);
+            compiler.getBreakStatementGenerator().generate(code, classWriter, breakStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstContinueStmt continueStmt) {
-            compiler.getContinueStatementGenerator().generate(code, cp, continueStmt, returnTypeInfo);
+            compiler.getContinueStatementGenerator().generate(code, classWriter, continueStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstLabeledStmt labeledStmt) {
-            compiler.getLabeledStatementGenerator().generate(code, cp, labeledStmt, returnTypeInfo);
+            compiler.getLabeledStatementGenerator().generate(code, classWriter, labeledStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
-            generateBlockStmt(code, cp, blockStmt, returnTypeInfo);
+            generateBlockStmt(code, classWriter, blockStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstSwitchStmt switchStmt) {
-            compiler.getSwitchStatementGenerator().generate(code, cp, switchStmt, returnTypeInfo);
+            compiler.getSwitchStatementGenerator().generate(code, classWriter, switchStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstThrowStmt throwStmt) {
-            compiler.getThrowStatementGenerator().generate(code, cp, throwStmt, returnTypeInfo);
+            compiler.getThrowStatementGenerator().generate(code, classWriter, throwStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstTryStmt tryStmt) {
-            compiler.getTryStatementGenerator().generate(code, cp, tryStmt, returnTypeInfo);
+            compiler.getTryStatementGenerator().generate(code, classWriter, tryStmt, returnTypeInfo);
         } else {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), stmt,
                     "Unsupported statement type: " + stmt.getClass().getSimpleName());
@@ -118,7 +119,7 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
      */
     private void generateBlockStmt(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstBlockStmt blockStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
@@ -127,7 +128,7 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
             // Generate code for each statement in the block
             // Stop generating code after a terminal control flow statement (break, continue, return)
             for (ISwc4jAstStmt stmt : blockStmt.getStmts()) {
-                generate(code, cp, stmt, returnTypeInfo);
+                generate(code, classWriter, stmt, returnTypeInfo);
 
                 // Check if this was a terminal statement - subsequent statements are unreachable
                 if (isTerminalStatement(stmt)) {
@@ -141,10 +142,10 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
 
     private void generateExprStmt(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstExprStmt exprStmt) throws Swc4jByteCodeCompilerException {
         ISwc4jAstExpr expr = exprStmt.getExpr();
-        compiler.getExpressionGenerator().generate(code, cp, expr, null);
+        compiler.getExpressionGenerator().generate(code, classWriter, expr, null);
 
         // Unwrap paren expressions to check the inner expression type
         ISwc4jAstExpr unwrappedExpr = expr.unParenExpr();
@@ -190,7 +191,7 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
 
     private void generateReturnStmt(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstReturnStmt returnStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
@@ -201,7 +202,7 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
 
         if (returnStmt.getArg().isPresent()) {
             // Generate the return value expression
-            compiler.getExpressionGenerator().generate(code, cp, returnStmt.getArg().get(),
+            compiler.getExpressionGenerator().generate(code, classWriter, returnStmt.getArg().get(),
                     returnTypeInfo);
 
             // If there are pending finally blocks, save return value and execute them
@@ -222,7 +223,7 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
                     context.markFinallyBlockAsInlineExecuting(finallyBlock);
                     try {
                         for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
-                            generate(code, cp, stmt, returnTypeInfo);
+                            generate(code, classWriter, stmt, returnTypeInfo);
                             // If finally has its own return/throw, that takes precedence
                             if (isTerminalStatement(stmt)) {
                                 return; // Finally's return/throw supersedes the original return
@@ -245,7 +246,7 @@ public final class StatementGenerator extends BaseAstProcessor<ISwc4jAstStmt> {
                 context.markFinallyBlockAsInlineExecuting(finallyBlock);
                 try {
                     for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
-                        generate(code, cp, stmt, returnTypeInfo);
+                        generate(code, classWriter, stmt, returnTypeInfo);
                         if (isTerminalStatement(stmt)) {
                             return; // Finally's return/throw supersedes the original return
                         }

@@ -48,9 +48,10 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         var callee = callExpr.getCallee();
         if (!(callee instanceof Swc4jAstIdent ident)) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Expected identifier callee for functional interface call");
@@ -130,7 +131,7 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
             String expectedType = samInfo.paramTypes().get(i);
             if (hasArrayRest && i == paramCount - 1) {
                 String restType = syntheticRestType != null ? syntheticRestType : expectedType;
-                generateRestArray(code, cp, args, i, restType);
+                generateRestArray(code, classWriter, args, i, restType);
                 continue;
             }
             if (i < args.size()) {
@@ -139,9 +140,9 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
                     throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported");
                 }
                 ReturnTypeInfo argTypeInfo = ReturnTypeInfo.of(arg.getExpr(), expectedType);
-                compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), argTypeInfo);
+                compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), argTypeInfo);
             } else {
-                pushMissingArg(code, cp, expectedType);
+                pushMissingArg(code, classWriter, expectedType);
             }
         }
 
@@ -158,13 +159,14 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
 
     private void generateRestArray(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             List<Swc4jAstExprOrSpread> args,
             int startIndex,
             String arrayType) throws Swc4jByteCodeCompilerException {
         String componentType = arrayType.substring(1);
         int restCount = Math.max(0, args.size() - startIndex);
 
+        var cp = classWriter.getConstantPool();
         code.iconst(restCount);
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
             int typeCode = switch (componentType) {
@@ -193,11 +195,11 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
             code.dup();
             code.iconst(i);
             ReturnTypeInfo argTypeInfo = ReturnTypeInfo.of(arg.getExpr(), componentType);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), argTypeInfo);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), argTypeInfo);
             if ("Ljava/lang/Object;".equals(componentType)) {
                 String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
                 if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
-                    TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
                 }
             }
             switch (componentType) {
@@ -245,7 +247,8 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
         return compiler.getMemory().getScopedFunctionalInterfaceRegistry().isFunctionalInterface(interfaceName);
     }
 
-    private void pushMissingArg(CodeBuilder code, ClassWriter.ConstantPool cp, String expectedType) {
+    private void pushMissingArg(CodeBuilder code, ClassWriter classWriter, String expectedType) {
+        var cp = classWriter.getConstantPool();
         if (expectedType.startsWith("[")) {
             String componentType = expectedType.substring(1);
             code.iconst(0);

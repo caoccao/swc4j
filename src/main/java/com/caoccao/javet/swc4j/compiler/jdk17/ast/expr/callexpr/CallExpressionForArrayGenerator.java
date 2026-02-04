@@ -47,9 +47,10 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
             // Get the method name
             String methodName = null;
@@ -63,19 +64,19 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
             String arrayTypeName = getArrayTypeName(arrayType);
 
             // Generate code for the array object
-            compiler.getExpressionGenerator().generate(code, cp, memberExpr.getObj(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, memberExpr.getObj(), null);
 
             switch (methodName) {
-                case "fill" -> generateFill(code, cp, callExpr, elementType);
-                case "includes" -> generateIncludes(code, cp, callExpr, elementType);
-                case "indexOf" -> generateIndexOf(code, cp, callExpr, elementType);
-                case "join" -> generateJoin(code, cp, callExpr, elementType);
-                case "lastIndexOf" -> generateLastIndexOf(code, cp, callExpr, elementType);
-                case "reverse" -> generateReverse(code, cp, elementType);
-                case "sort" -> generateSort(code, cp, elementType);
-                case "toReversed" -> generateToReversed(code, cp, elementType);
-                case "toSorted" -> generateToSorted(code, cp, elementType);
-                case "toString" -> generateToString(code, cp, elementType);
+                case "fill" -> generateFill(code, classWriter, callExpr, elementType);
+                case "includes" -> generateIncludes(code, classWriter, callExpr, elementType);
+                case "indexOf" -> generateIndexOf(code, classWriter, callExpr, elementType);
+                case "join" -> generateJoin(code, classWriter, callExpr, elementType);
+                case "lastIndexOf" -> generateLastIndexOf(code, classWriter, callExpr, elementType);
+                case "reverse" -> generateReverse(code, classWriter, elementType);
+                case "sort" -> generateSort(code, classWriter, elementType);
+                case "toReversed" -> generateToReversed(code, classWriter, elementType);
+                case "toSorted" -> generateToSorted(code, classWriter, elementType);
+                case "toString" -> generateToString(code, classWriter, elementType);
                 default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                         "Method '" + methodName + "()' is not supported on Java arrays (" + arrayTypeName + "). " +
                                 "Java arrays only support: .length property and index access arr[i].");
@@ -86,13 +87,14 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Invalid call expression on Java array");
     }
 
-    private void generateFill(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
+    private void generateFill(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
         // arr.fill(value) -> ArrayApiUtils.fill(arr, value)
         if (callExpr.getArgs().isEmpty()) {
             code.pop(); // Pop array reference
             return;
         }
 
+        var cp = classWriter.getConstantPool();
         // Cast reference type arrays to Object[] for the method call
         if (elementType.startsWith("L")) {
             int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
@@ -100,7 +102,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         }
 
         var arg = callExpr.getArgs().get(0);
-        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
 
         // For reference types, cast to Object; for primitives, unbox and convert
         if (elementType.startsWith("L")) {
@@ -108,7 +110,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         } else {
             // Primitive type - unbox if needed and convert to element type
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-            TypeConversionUtils.unboxWrapperType(code, cp, argType);
+            TypeConversionUtils.unboxWrapperType(code, classWriter, argType);
             String argPrimitive = TypeConversionUtils.getPrimitiveType(argType);
             TypeConversionUtils.convertPrimitiveType(code, argPrimitive, elementType);
         }
@@ -126,7 +128,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         }
     }
 
-    private void generateIncludes(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
+    private void generateIncludes(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
         // arr.includes(value) -> ArrayApiUtils.includes(arr, value)
         if (callExpr.getArgs().isEmpty()) {
             code.pop(); // Pop array reference
@@ -134,6 +136,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
             return;
         }
 
+        var cp = classWriter.getConstantPool();
         // Cast reference type arrays to Object[] for the method call
         if (elementType.startsWith("L")) {
             int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
@@ -141,7 +144,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         }
 
         var arg = callExpr.getArgs().get(0);
-        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
 
         // For reference types, cast to Object; for primitives, unbox and convert
         if (elementType.startsWith("L")) {
@@ -149,7 +152,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         } else {
             // Primitive type - unbox if needed and convert to element type
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-            TypeConversionUtils.unboxWrapperType(code, cp, argType);
+            TypeConversionUtils.unboxWrapperType(code, classWriter, argType);
             String argPrimitive = TypeConversionUtils.getPrimitiveType(argType);
             TypeConversionUtils.convertPrimitiveType(code, argPrimitive, elementType);
         }
@@ -160,7 +163,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         code.invokestatic(includesMethod);
     }
 
-    private void generateIndexOf(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
+    private void generateIndexOf(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
         // arr.indexOf(value) -> ArrayApiUtils.indexOf(arr, value)
         if (callExpr.getArgs().isEmpty()) {
             code.pop(); // Pop array reference
@@ -168,6 +171,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
             return;
         }
 
+        var cp = classWriter.getConstantPool();
         // Cast reference type arrays to Object[] for the method call
         if (elementType.startsWith("L")) {
             int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
@@ -175,7 +179,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         }
 
         var arg = callExpr.getArgs().get(0);
-        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
 
         // For reference types, cast to Object; for primitives, unbox and convert
         if (elementType.startsWith("L")) {
@@ -183,7 +187,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         } else {
             // Primitive type - unbox if needed and convert to element type
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-            TypeConversionUtils.unboxWrapperType(code, cp, argType);
+            TypeConversionUtils.unboxWrapperType(code, classWriter, argType);
             String argPrimitive = TypeConversionUtils.getPrimitiveType(argType);
             TypeConversionUtils.convertPrimitiveType(code, argPrimitive, elementType);
         }
@@ -194,9 +198,10 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         code.invokestatic(indexOfMethod);
     }
 
-    private void generateJoin(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
+    private void generateJoin(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
         // arr.join(separator) -> ArrayApiUtils.join(arr, separator)
         // Cast reference type arrays to Object[] for the method call
+        var cp = classWriter.getConstantPool();
         if (elementType.startsWith("L")) {
             int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
             code.checkcast(objectArrayClass);
@@ -208,7 +213,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
             code.ldc(commaIndex);
         } else {
             var arg = callExpr.getArgs().get(0);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
         }
 
         // Call ArrayApiUtils.join
@@ -217,7 +222,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         code.invokestatic(joinMethod);
     }
 
-    private void generateLastIndexOf(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
+    private void generateLastIndexOf(CodeBuilder code, ClassWriter classWriter, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {
         // arr.lastIndexOf(value) -> ArrayApiUtils.lastIndexOf(arr, value)
         if (callExpr.getArgs().isEmpty()) {
             code.pop(); // Pop array reference
@@ -225,6 +230,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
             return;
         }
 
+        var cp = classWriter.getConstantPool();
         // Cast reference type arrays to Object[] for the method call
         if (elementType.startsWith("L")) {
             int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
@@ -232,7 +238,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         }
 
         var arg = callExpr.getArgs().get(0);
-        compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), null);
 
         // For reference types, cast to Object; for primitives, unbox and convert
         if (elementType.startsWith("L")) {
@@ -240,7 +246,7 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         } else {
             // Primitive type - unbox if needed and convert to element type
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-            TypeConversionUtils.unboxWrapperType(code, cp, argType);
+            TypeConversionUtils.unboxWrapperType(code, classWriter, argType);
             String argPrimitive = TypeConversionUtils.getPrimitiveType(argType);
             TypeConversionUtils.convertPrimitiveType(code, argPrimitive, elementType);
         }
@@ -251,9 +257,10 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         code.invokestatic(lastIndexOfMethod);
     }
 
-    private void generateReverse(CodeBuilder code, ClassWriter.ConstantPool cp, String elementType) {
+    private void generateReverse(CodeBuilder code, ClassWriter classWriter, String elementType) {
         // arr.reverse() -> ArrayApiUtils.reverse(arr)
         // Cast reference type arrays to Object[] for the method call
+        var cp = classWriter.getConstantPool();
         if (elementType.startsWith("L")) {
             int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
             code.checkcast(objectArrayClass);
@@ -271,9 +278,10 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         }
     }
 
-    private void generateSort(CodeBuilder code, ClassWriter.ConstantPool cp, String elementType) {
+    private void generateSort(CodeBuilder code, ClassWriter classWriter, String elementType) {
         // arr.sort() -> ArrayApiUtils.sort(arr)
         // Cast reference type arrays to Object[] for the method call
+        var cp = classWriter.getConstantPool();
         if (elementType.startsWith("L")) {
             int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
             code.checkcast(objectArrayClass);
@@ -291,9 +299,10 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         }
     }
 
-    private void generateToReversed(CodeBuilder code, ClassWriter.ConstantPool cp, String elementType) {
+    private void generateToReversed(CodeBuilder code, ClassWriter classWriter, String elementType) {
         // arr.toReversed() -> ArrayApiUtils.toReversed(arr)
         // Cast reference type arrays to Object[] for the method call
+        var cp = classWriter.getConstantPool();
         if (elementType.startsWith("L")) {
             int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
             code.checkcast(objectArrayClass);
@@ -311,9 +320,10 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         }
     }
 
-    private void generateToSorted(CodeBuilder code, ClassWriter.ConstantPool cp, String elementType) {
+    private void generateToSorted(CodeBuilder code, ClassWriter classWriter, String elementType) {
         // arr.toSorted() -> ArrayApiUtils.toSorted(arr)
         // Cast reference type arrays to Object[] for the method call
+        var cp = classWriter.getConstantPool();
         if (elementType.startsWith("L")) {
             int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
             code.checkcast(objectArrayClass);
@@ -331,9 +341,10 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
         }
     }
 
-    private void generateToString(CodeBuilder code, ClassWriter.ConstantPool cp, String elementType) {
+    private void generateToString(CodeBuilder code, ClassWriter classWriter, String elementType) {
         // arr.toString() -> ArrayApiUtils.toString(arr)
         // Cast reference type arrays to Object[] for the method call
+        var cp = classWriter.getConstantPool();
         if (elementType.startsWith("L")) {
             int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
             code.checkcast(objectArrayClass);

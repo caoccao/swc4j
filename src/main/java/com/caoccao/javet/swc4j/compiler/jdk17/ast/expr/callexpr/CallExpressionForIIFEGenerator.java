@@ -316,9 +316,10 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Extract arrow expression from parenthesized expression
         var callee = callExpr.getCallee();
         if (!(callee instanceof ISwc4jAstExpr calleeExpr)) {
@@ -355,7 +356,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
             compiler.getMemory().getByteCodeMap().put(implClassName.replace('/', '.'), implBytecode);
 
             // Generate code to instantiate, invoke, and get result
-            generateInvocation(code, cp, implClassName, capturedVariables, typeInfo, callExpr.getArgs());
+            generateInvocation(code, classWriter, implClassName, capturedVariables, typeInfo, callExpr.getArgs());
         } catch (IOException e) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Failed to generate IIFE", e);
         }
@@ -379,10 +380,10 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
         }
 
         // Generate constructor
-        generateImplConstructor(classWriter, cp, implClassName, capturedVariables);
+        generateImplConstructor(classWriter, implClassName, capturedVariables);
 
         // Generate the interface method implementation
-        generateImplMethod(classWriter, cp, implClassName, arrowExpr, typeInfo, capturedVariables);
+        generateImplMethod(classWriter, implClassName, arrowExpr, typeInfo, capturedVariables);
 
         return classWriter.toByteArray();
     }
@@ -398,13 +399,13 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
 
     private void generateImplConstructor(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String implClassName,
             List<IIFECapturedVariable> capturedVariables) {
         CodeBuilder code = new CodeBuilder();
 
         // Call super()
         code.aload(0);
+        var cp = classWriter.getConstantPool();
         int superInit = cp.addMethodRef("java/lang/Object", "<init>", "()V");
         code.invokespecial(superInit);
 
@@ -433,7 +434,6 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
 
     private void generateImplMethod(
             ClassWriter classWriter,
-            ClassWriter.ConstantPool cp,
             String implClassName,
             Swc4jAstArrowExpr arrowExpr,
             IIFETypeInfo typeInfo,
@@ -478,14 +478,14 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
                 LocalVariable paramVar = methodContext.getLocalVariableTable().getVariable(paramName);
                 code.aload(paramVar.index());
                 // Generate array destructuring extraction
-                compiler.getArrowExpressionGenerator().generateArrayPatternExtraction(code, cp, methodContext, arrayPat);
+                compiler.getArrowExpressionGenerator().generateArrayPatternExtraction(code, classWriter, methodContext, arrayPat);
             } else if (param instanceof Swc4jAstObjectPat objectPat) {
                 // Load the parameter value onto the stack
                 String paramName = typeInfo.paramNames().get(i);
                 LocalVariable paramVar = methodContext.getLocalVariableTable().getVariable(paramName);
                 code.aload(paramVar.index());
                 // Generate object destructuring extraction
-                compiler.getArrowExpressionGenerator().generateObjectPatternExtraction(code, cp, methodContext, objectPat);
+                compiler.getArrowExpressionGenerator().generateObjectPatternExtraction(code, classWriter, methodContext, objectPat);
             }
         }
 
@@ -494,12 +494,12 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
             // Block body - generate statements
             compiler.getVariableAnalyzer().analyzeVariableDeclarations(blockStmt);
             for (ISwc4jAstStmt stmt : blockStmt.getStmts()) {
-                compiler.getStatementGenerator().generate(code, cp, stmt, typeInfo.returnTypeInfo());
+                compiler.getStatementGenerator().generate(code, classWriter, stmt, typeInfo.returnTypeInfo());
             }
             addReturnIfNeeded(code, typeInfo.returnTypeInfo());
         } else if (body instanceof ISwc4jAstExpr expr) {
             // Expression body - implicit return
-            compiler.getExpressionGenerator().generate(code, cp, expr, typeInfo.returnTypeInfo());
+            compiler.getExpressionGenerator().generate(code, classWriter, expr, typeInfo.returnTypeInfo());
             generateReturn(code, typeInfo.returnTypeInfo());
         }
 
@@ -510,6 +510,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
 
         // Generate stack map table
         boolean isStatic = false;
+        var cp = classWriter.getConstantPool();
         var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, implClassName,
                 typeInfo.methodDescriptor(), cp);
         var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
@@ -544,12 +545,13 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
 
     private void generateInvocation(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             String implClassName,
             List<IIFECapturedVariable> capturedVariables,
             IIFETypeInfo typeInfo,
             List<Swc4jAstExprOrSpread> callArgs) throws Swc4jByteCodeCompilerException {
         // new ImplClass
+        var cp = classWriter.getConstantPool();
         int classRef = cp.addClass(implClassName);
         code.newInstance(classRef);
         code.dup();
@@ -580,7 +582,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
             // Create return type info for the argument based on the parameter type
             String paramType = typeInfo.paramTypes().get(i);
             ReturnTypeInfo argReturnType = compiler.getTypeResolver().createReturnTypeInfoFromDescriptor(paramType);
-            compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), argReturnType);
+            compiler.getExpressionGenerator().generate(code, classWriter, arg.getExpr(), argReturnType);
         }
 
         // invokeinterface call

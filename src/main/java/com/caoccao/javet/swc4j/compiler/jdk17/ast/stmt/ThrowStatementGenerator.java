@@ -52,13 +52,13 @@ public final class ThrowStatementGenerator extends BaseAstProcessor<Swc4jAstThro
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstThrowStmt throwStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
         // Generate code to evaluate the exception expression
         // This pushes the exception object onto the stack
-        compiler.getExpressionGenerator().generate(code, cp, throwStmt.getArg(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, throwStmt.getArg(), null);
 
         // Throw the exception
         code.athrow();

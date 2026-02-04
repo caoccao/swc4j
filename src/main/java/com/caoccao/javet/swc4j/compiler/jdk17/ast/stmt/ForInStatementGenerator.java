@@ -151,7 +151,7 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
      */
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForInStmt forInStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
@@ -160,9 +160,9 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
 
         // Generate the appropriate iteration code
         switch (iterationType) {
-            case LIST -> generateArrayIteration(code, cp, forInStmt, labelName, returnTypeInfo);
-            case MAP -> generateObjectIteration(code, cp, forInStmt, labelName, returnTypeInfo);
-            case STRING -> generateStringIteration(code, cp, forInStmt, labelName, returnTypeInfo);
+            case LIST -> generateArrayIteration(code, classWriter, forInStmt, labelName, returnTypeInfo);
+            case MAP -> generateObjectIteration(code, classWriter, forInStmt, labelName, returnTypeInfo);
+            case STRING -> generateStringIteration(code, classWriter, forInStmt, labelName, returnTypeInfo);
         }
     }
 
@@ -178,10 +178,10 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForInStmt forInStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(code, cp, forInStmt, null, returnTypeInfo);
+        generate(code, classWriter, forInStmt, null, returnTypeInfo);
     }
 
     /**
@@ -190,17 +190,18 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
      */
     private void generateArrayIteration(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForInStmt forInStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // Initialize loop variable with String type (for-in keys are always strings in JS)
         int keySlot = initializeLoopVariable(code, forInStmt.getLeft());
 
         // 1. Generate right expression (array)
-        compiler.getExpressionGenerator().generate(code, cp, forInStmt.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, forInStmt.getRight(), null);
 
         // 2. Get size: List.size() -> int
         int sizeRef = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
@@ -242,7 +243,7 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
         context.pushContinueLabel(continueLabel);
 
         // 11. Generate body
-        compiler.getStatementGenerator().generate(code, cp, forInStmt.getBody(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, forInStmt.getBody(), returnTypeInfo);
 
         // 12. Pop labels
         context.popContinueLabel();
@@ -288,17 +289,18 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
      */
     private void generateObjectIteration(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForInStmt forInStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // Initialize existing variable to null if needed (in case loop doesn't execute)
         int keySlot = initializeLoopVariable(code, forInStmt.getLeft());
 
         // 1. Generate right expression (object)
-        compiler.getExpressionGenerator().generate(code, cp, forInStmt.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, forInStmt.getRight(), null);
 
         // 2. Get keySet: Map.keySet() -> Set
         int keySetRef = cp.addInterfaceMethodRef("java/util/Map", "keySet", "()Ljava/util/Set;");
@@ -345,7 +347,7 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
         context.pushContinueLabel(continueLabel);
 
         // 12. Generate body
-        compiler.getStatementGenerator().generate(code, cp, forInStmt.getBody(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, forInStmt.getBody(), returnTypeInfo);
 
         // 13. Pop labels
         context.popContinueLabel();
@@ -385,17 +387,18 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
      */
     private void generateStringIteration(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstForInStmt forInStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // Initialize loop variable with String type (for-in keys are always strings in JS)
         int keySlot = initializeLoopVariable(code, forInStmt.getLeft());
 
         // 1. Generate right expression (string)
-        compiler.getExpressionGenerator().generate(code, cp, forInStmt.getRight(), null);
+        compiler.getExpressionGenerator().generate(code, classWriter, forInStmt.getRight(), null);
 
         // 2. Get length: String.length() -> int
         int lengthRef = cp.addMethodRef("java/lang/String", "length", "()I");
@@ -437,7 +440,7 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
         context.pushContinueLabel(continueLabel);
 
         // 11. Generate body
-        compiler.getStatementGenerator().generate(code, cp, forInStmt.getBody(), returnTypeInfo);
+        compiler.getStatementGenerator().generate(code, classWriter, forInStmt.getBody(), returnTypeInfo);
 
         // 12. Pop labels
         context.popContinueLabel();

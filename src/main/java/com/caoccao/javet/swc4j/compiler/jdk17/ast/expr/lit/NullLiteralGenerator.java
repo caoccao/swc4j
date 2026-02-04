@@ -32,7 +32,7 @@ public final class NullLiteralGenerator extends BaseAstProcessor<Swc4jAstNull> {
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstNull nullLit,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // null literal - always push null reference onto the stack

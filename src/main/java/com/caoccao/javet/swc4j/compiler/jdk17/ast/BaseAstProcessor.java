@@ -34,17 +34,17 @@ public abstract class BaseAstProcessor<AST extends ISwc4jAst> {
 
     public abstract void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             AST ast,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException;
 
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            List<AST> ast,
+            ClassWriter classWriter,
+            List<AST> asts,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        for (AST item : ast) {
-            generate(code, cp, item, returnTypeInfo);
+        for (AST ast : asts) {
+            generate(code, classWriter, ast, returnTypeInfo);
         }
     }
 

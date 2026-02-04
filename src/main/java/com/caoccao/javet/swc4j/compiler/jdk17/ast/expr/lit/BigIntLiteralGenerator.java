@@ -42,7 +42,8 @@ public final class BigIntLiteralGenerator extends BaseAstProcessor<Swc4jAstBigIn
      * Converts BigInteger on stack to primitive type.
      * Calls appropriate conversion method (intValue, longValue, etc.).
      */
-    private void convertToPrimitive(CodeBuilder code, ClassWriter.ConstantPool cp, ReturnTypeInfo returnTypeInfo) {
+    private void convertToPrimitive(CodeBuilder code, ClassWriter classWriter, ReturnTypeInfo returnTypeInfo) {
+        var cp = classWriter.getConstantPool();
         String descriptor = returnTypeInfo.getPrimitiveTypeDescriptor();
         if (descriptor == null) return;
 
@@ -93,20 +94,21 @@ public final class BigIntLiteralGenerator extends BaseAstProcessor<Swc4jAstBigIn
     @Override
     public void generate(
             CodeBuilder code,
-            ClassWriter.ConstantPool cp,
+            ClassWriter classWriter,
             Swc4jAstBigInt bigInt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
         // Get signed value
         BigInteger value = getSignedValue(bigInt);
 
         // Check if we need to convert to primitive type
         if (returnTypeInfo != null && returnTypeInfo.type() != ReturnType.OBJECT) {
             // Generate BigInteger first, then convert to primitive
-            generateBigInteger(code, cp, value);
-            convertToPrimitive(code, cp, returnTypeInfo);
+            generateBigInteger(code, classWriter, value);
+            convertToPrimitive(code, classWriter, returnTypeInfo);
         } else {
             // Return as BigInteger object (default)
-            generateBigInteger(code, cp, value);
+            generateBigInteger(code, classWriter, value);
         }
     }
 
@@ -114,7 +116,8 @@ public final class BigIntLiteralGenerator extends BaseAstProcessor<Swc4jAstBigIn
      * Generates bytecode to create a BigInteger object on the stack.
      * Uses optimization for common values (ZERO, ONE, TEN) when possible.
      */
-    private void generateBigInteger(CodeBuilder code, ClassWriter.ConstantPool cp, BigInteger value) {
+    private void generateBigInteger(CodeBuilder code, ClassWriter classWriter, BigInteger value) {
+        var cp = classWriter.getConstantPool();
         // Optimize for common values using static constants
         if (BigInteger.ZERO.equals(value)) {
             int zeroFieldRef = cp.addFieldRef("java/math/BigInteger", "ZERO", "Ljava/math/BigInteger;");
