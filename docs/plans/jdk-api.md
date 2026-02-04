@@ -529,7 +529,7 @@ registry during compilation. Never directly access globalJavaClassRegistry for i
 ```
 
 **Integration Point**:
-- Call from `AstProcessor` or `ClassGenerator` when processing module-level statements
+- Call from `AstProcessor` or `ClassProcessor` when processing module-level statements
 - Process all imports at the beginning of module compilation
 - Must run before any class or method processing
 
@@ -735,7 +735,7 @@ public boolean tryGenerateJavaStaticCall(
 
                 // Generate arguments
                 for (ExprOrSpread arg : callExpr.getArgs()) {
-                    compiler.getExpressionGenerator()
+                    compiler.getExpressionProcessor()
                         .generate(code, cp, arg.getExpr(), null);
 
                     // TODO: Type conversion if needed
@@ -759,8 +759,8 @@ public boolean tryGenerateJavaStaticCall(
 }
 ```
 
-#### 3.2 Integrate into CallExpressionGenerator
-Update `CallExpressionGenerator.generate()`:
+#### 3.2 Integrate into CallExpressionProcessor
+Update `CallExpressionProcessor.generate()`:
 
 ```java
 @Override

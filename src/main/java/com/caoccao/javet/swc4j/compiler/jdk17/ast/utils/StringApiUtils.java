@@ -229,7 +229,7 @@ public final class StringApiUtils {
         // Append all operands
         for (int i = 0; i < operands.size(); i++) {
             ISwc4jAstExpr operand = operands.get(i);
-            compiler.getExpressionGenerator().generate(code, classWriter, operand, null);
+            compiler.getExpressionProcessor().generate(code, classWriter, operand, null);
             appendOperandToStringBuilder(code, classWriter, operand, operandTypes.get(i), appendString, appendInt, appendChar);
         }
 

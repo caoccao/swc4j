@@ -7,9 +7,9 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 **Current Status:** 🟢 **PHASE 1, 2 & 3 COMPLETE** - String literals and 26 String methods fully implemented
 
 **Implementation Files:**
-- ✅ [StringLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/StringLiteralGenerator.java) - String literal bytecode generation
-- ✅ [MemberExpressionGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/MemberExpressionGenerator.java) - String.length property access
-- ✅ [CallExpressionGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/CallExpressionGenerator.java) - String method calls (18 methods)
+- ✅ [StringLiteralProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/StringLiteralProcessor.java) - String literal bytecode generation
+- ✅ [MemberExpressionProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/MemberExpressionProcessor.java) - String.length property access
+- ✅ [CallExpressionProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/CallExpressionProcessor.java) - String method calls (18 methods)
 - ✅ [StringApiUtils.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils.java) - Helper utilities for JS-compatible String operations
 - ✅ [TypeResolver.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/TypeResolver.java) - Type inference for String methods
 
@@ -60,14 +60,14 @@ The current implementation is production-ready for string literals and the most 
 ### Files Modified/Created
 
 **Phase 1 - String Literals:**
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/StringLiteralGenerator.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/StringLiteralProcessor.java`
   - Fixed large char value handling (> 32767) to use `ldc` instead of `iconst`
   - Supports three conversion modes based on ReturnTypeInfo
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/MemberExpressionGenerator.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/MemberExpressionProcessor.java`
   - Added String.length property access support
 
 **Phase 2 - String Method Calls:**
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/CallExpressionGenerator.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/CallExpressionProcessor.java`
   - Added String method handling block with 18 method implementations
   - Switch-based dispatch for method routing
   - Proper argument handling and type conversions
@@ -118,15 +118,15 @@ Tests use `assertEquals()` for simple values (String, int, boolean) and `List.of
 ### Implementation Checklist
 
 **Phase 1 - String Literals:**
-✅ **StringLiteralGenerator.java** - Handles all three modes (String, char, Character)
-✅ **String.length support** - MemberExpressionGenerator + TypeResolver handle property access
+✅ **StringLiteralProcessor.java** - Handles all three modes (String, char, Character)
+✅ **String.length support** - MemberExpressionProcessor + TypeResolver handle property access
 ✅ **82 tests implemented** - All edge cases covered across 7 test files
 ✅ **Type-based conversion** - Automatic conversion based on return type annotations
 ✅ **Full Unicode support** - Emojis, international characters, surrogate pairs
 ✅ **All escape sequences** - \n, \t, \r, \\, \', \", \b, \f, \0
 
 **Phase 2 - String Method Calls:**
-✅ **CallExpressionGenerator.java** - 26 String methods with switch-based dispatch
+✅ **CallExpressionProcessor.java** - 26 String methods with switch-based dispatch
 ✅ **StringApiUtils.java** - 18 utility methods for JS-compatible operations (including 4 regex methods)
 ✅ **TypeResolver updates** - Return type inference for all String methods
 ✅ **107 method tests** - Comprehensive coverage across 6 test files
@@ -184,7 +184,7 @@ Tests use `assertEquals()` for simple values (String, int, boolean) and `List.of
 
 ## Current Implementation Review
 
-### StringLiteralGenerator.java Status
+### StringLiteralProcessor.java Status
 
 **✅ Implemented Features:**
 
@@ -762,7 +762,7 @@ invokestatic Character.valueOf(C)Ljava/lang/Character;
 
 **Goal:** Verify constant pool behavior and deduplication.
 
-**Status:** These tests are **not implemented** because constant pool optimization is handled automatically by the JVM. The JVM automatically deduplicates string constants in the constant pool, so there's no code to test in the StringLiteralGenerator. These would be JVM behavior tests, not compiler tests.
+**Status:** These tests are **not implemented** because constant pool optimization is handled automatically by the JVM. The JVM automatically deduplicates string constants in the constant pool, so there's no code to test in the StringLiteralProcessor. These would be JVM behavior tests, not compiler tests.
 
 71. **testStringConstPoolDeduplication** - Same string reused
     ```typescript
@@ -1052,7 +1052,7 @@ The following tests were **intentionally excluded** as they require features bey
    - Escape sequences, Unicode, emojis in length
    - Type inference (returns int without annotation)
    - Very long strings, special characters
-   - **Implementation:** MemberExpressionGenerator + TypeResolver
+   - **Implementation:** MemberExpressionProcessor + TypeResolver
 
 8. ❌ **TestCompileAstStrConstPool.java** - Phase 8 (Not implemented)
    - Constant pool optimization handled automatically by JVM
@@ -1681,15 +1681,15 @@ String str = "line1\u000Bline2";  // Java equivalent
 
 ### Solution
 
-The SWC (Speedy Web Compiler) Rust parser automatically converts JavaScript `\v` escape sequences to the actual vertical tab character (U+000B) during the parsing phase. By the time the string value reaches the Java StringLiteralGenerator, `\v` has already been converted to the Unicode character U+000B.
+The SWC (Speedy Web Compiler) Rust parser automatically converts JavaScript `\v` escape sequences to the actual vertical tab character (U+000B) during the parsing phase. By the time the string value reaches the Java StringLiteralProcessor, `\v` has already been converted to the Unicode character U+000B.
 
 **Key Insight:** No Java-side conversion needed! The Rust parser handles this transformation automatically.
 
 ### Implementation Details
 
-**No Changes Required to StringLiteralGenerator.java**
+**No Changes Required to StringLiteralProcessor.java**
 
-The StringLiteralGenerator already handles all Unicode characters correctly by storing them in the JVM constant pool:
+The StringLiteralProcessor already handles all Unicode characters correctly by storing them in the JVM constant pool:
 
 ```java
 // Regular string (line 70-71)
@@ -1708,7 +1708,7 @@ When the SWC parser encounters `\v` in TypeScript/JavaScript code:
 TypeScript: "line1\vline2"
     ↓ (SWC Rust Parser)
 AST value: "line1<U+000B>line2"
-    ↓ (StringLiteralGenerator)
+    ↓ (StringLiteralProcessor)
 Constant Pool: String "line1<U+000B>line2"
     ↓ (Bytecode)
 ldc #<string_index>
@@ -1830,7 +1830,7 @@ const len = "a\vb".length             // 3
 
 **No further work needed:**
 - SWC parser handles all JavaScript escape sequences
-- StringLiteralGenerator already handles all Unicode characters
+- StringLiteralProcessor already handles all Unicode characters
 - Test coverage comprehensive
 
 **Related Escape Sequences (Already Supported):**

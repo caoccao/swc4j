@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting conditional expres
 
 **Syntax:** `condition ? consequent : alternate`
 
-**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/ConditionalExpressionGenerator.java` ✅ CREATED
+**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/ConditionalExpressionProcessor.java` ✅ CREATED
 
 **Test File:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileAstCondExpr.java` ✅ CREATED
 
@@ -37,12 +37,12 @@ This document outlines the implementation plan for supporting conditional expres
    - For reference types, returns Object for stackmap compatibility
    - For primitives, uses numeric widening rules
 
-2. **StackMapGenerator Frame Merging** - Fixed data flow analysis
+2. **StackMapProcessor Frame Merging** - Fixed data flow analysis
    - Added proper frame merging at branch convergence points
    - Implemented mergeTypes() for combining verification types
    - NULL + OBJECT = OBJECT, FLOAT + DOUBLE = DOUBLE, etc.
 
-3. **StackMapGenerator Instruction Support** - Added missing instructions
+3. **StackMapProcessor Instruction Support** - Added missing instructions
    - iinc (0x84) - Increment local variable
    - f2d (0x8D), l2d (0x8A), d2f (0x90), l2f (0x89), f2l (0x8C), d2l (0x8F) - Type conversions
 
@@ -79,22 +79,22 @@ This document outlines the implementation plan for supporting conditional expres
 
 ### Core Components
 
-#### 1. ConditionalExpressionGenerator.java (216 lines)
+#### 1. ConditionalExpressionProcessor.java (216 lines)
 
-**Location**: `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/ConditionalExpressionGenerator.java`
+**Location**: `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/ConditionalExpressionProcessor.java`
 
 **Primary Method**: `generate(CodeBuilder, ConstantPool, Swc4jAstCondExpr, ReturnTypeInfo, CompilationContext, ByteCodeCompilerOptions)`
 
 **Bytecode Generation Pattern**:
 ```java
 // Evaluate test condition → [boolean] on stack
-ExpressionGenerator.generate(code, cp, condExpr.getTest(), ...);
+ExpressionProcessor.generate(code, cp, condExpr.getTest(), ...);
 
 // ifeq ELSE_LABEL (jump if false/0)
 code.ifeq(0); // Placeholder offset
 
 // Consequent branch (true path)
-ExpressionGenerator.generate(code, cp, condExpr.getCons(), ...);
+ExpressionProcessor.generate(code, cp, condExpr.getCons(), ...);
 convertToCommonType(code, cp, consType, commonType);
 
 // goto END_LABEL
@@ -102,7 +102,7 @@ code.gotoLabel(0); // Placeholder offset
 
 // ELSE_LABEL:
 // Alternate branch (false path)
-ExpressionGenerator.generate(code, cp, condExpr.getAlt(), ...);
+ExpressionProcessor.generate(code, cp, condExpr.getAlt(), ...);
 convertToCommonType(code, cp, altType, commonType);
 
 // END_LABEL:
@@ -144,7 +144,7 @@ if (expr instanceof Swc4jAstCondExpr condExpr) {
 - `reference + same reference` → `Object` (conservative for stackmap)
 - `mixed types` → `Object`
 
-#### 3. StackMapGenerator.java - Verification
+#### 3. StackMapProcessor.java - Verification
 
 **Key Enhancements**:
 - **Frame Merging**: `mergeFrames()` properly combines frames from different control flow paths
@@ -207,7 +207,7 @@ if (existingFrame != null) {
 #### Type System Integration
 
 1. **Dual findCommonType() Implementations**:
-   - **ConditionalExpressionGenerator.findCommonType()**: Local implementation for bytecode generation
+   - **ConditionalExpressionProcessor.findCommonType()**: Local implementation for bytecode generation
    - **TypeResolver.findCommonType()**: Global implementation for type inference
    - Both use similar logic but serve different purposes in the compilation pipeline
 
@@ -706,7 +706,7 @@ For nested conditionals, generate unique labels (e.g., `else_1`, `else_2`, `end_
 
 ### Code Generation
 
-- [ ] Create `ConditionalExpressionGenerator.java`
+- [ ] Create `ConditionalExpressionProcessor.java`
 - [ ] Implement `generate()` method
 - [ ] Add label generation and management
 - [ ] Implement type inference for branches
@@ -726,7 +726,7 @@ For nested conditionals, generate unique labels (e.g., `else_1`, `else_2`, `end_
 
 ### Integration
 
-- [ ] Add CondExpr case to ExpressionGenerator dispatch
+- [ ] Add CondExpr case to ExpressionProcessor dispatch
 - [ ] Update TypeResolver to handle conditional expressions
 - [ ] Ensure proper line number information
 - [ ] Add debug support
@@ -850,20 +850,20 @@ For nested conditionals, generate unique labels (e.g., `else_1`, `else_2`, `end_
 - [x] Proper error handling for type mismatches ✅
 - [x] Complete documentation ✅
 - [x] All tests passing (23/23 - 100%) ✅
-- [x] Integration with ExpressionGenerator ✅
+- [x] Integration with ExpressionProcessor ✅
 
 ## Implementation Summary
 
 ### What Was Built
 
 **Files Created:**
-1. `ConditionalExpressionGenerator.java` (216 lines) - Core bytecode generation
+1. `ConditionalExpressionProcessor.java` (216 lines) - Core bytecode generation
 2. `TestCompileAstCondExpr.java` (448 lines) - Comprehensive test suite with 23 tests
 
 **Files Modified:**
 1. `TypeResolver.java` - Added conditional expression type inference
-2. `StackMapGenerator.java` - Fixed frame merging and added type conversion instruction support
-3. `ExpressionGenerator.java` - Added CondExpr dispatch case
+2. `StackMapProcessor.java` - Fixed frame merging and added type conversion instruction support
+3. `ExpressionProcessor.java` - Added CondExpr dispatch case
 
 ### Key Technical Achievements
 
@@ -883,7 +883,7 @@ For nested conditionals, generate unique labels (e.g., `else_1`, `else_2`, `end_
    - Local version in generator handles bytecode-level decisions
    - Global version in TypeResolver handles semantic type inference
 
-3. **Instruction Coverage**: Many type conversion instructions missing from initial StackMapGenerator
+3. **Instruction Coverage**: Many type conversion instructions missing from initial StackMapProcessor
    - Systematic approach: support all `i2X`, `l2X`, `f2X`, `d2X` instructions
    - Future work should proactively add instruction support before implementing features
 
@@ -908,7 +908,7 @@ For nested conditionals, generate unique labels (e.g., `else_1`, `else_2`, `end_
 ### Files Delivered
 
 **Production Code:**
-1. **ConditionalExpressionGenerator.java** (216 lines)
+1. **ConditionalExpressionProcessor.java** (216 lines)
    - Location: `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/`
    - Purpose: Core bytecode generation for conditional expressions
    - Methods: `generate()`, `findCommonType()`, `widenPrimitiveTypes()`, `convertToCommonType()`
@@ -918,7 +918,7 @@ For nested conditionals, generate unique labels (e.g., `else_1`, `else_2`, `end_
    - Added: Conditional expression case in `inferTypeFromExpr()`
    - Integration: Seamless with existing type system
 
-3. **StackMapGenerator.java** (Modified)
+3. **StackMapProcessor.java** (Modified)
    - Added: Frame merging logic (`mergeFrames()`, `mergeTypes()`)
    - Added: Data flow analysis with reprocessing (`computeFramesDataFlow()`)
    - Added: Type conversion instruction support (i2l, l2f, f2d, etc.)
@@ -934,7 +934,7 @@ For nested conditionals, generate unique labels (e.g., `else_1`, `else_2`, `end_
 - [x] All source files compile without errors
 - [x] All 23 unit tests pass (100% success rate)
 - [x] Javadoc builds successfully (no blocking errors)
-- [x] Integration with ExpressionGenerator complete
+- [x] Integration with ExpressionProcessor complete
 - [x] Type system integration verified
 - [x] StackMap frame verification passes for all tests
 - [x] No external dependencies introduced
@@ -977,7 +977,7 @@ For nested conditionals, generate unique labels (e.g., `else_1`, `else_2`, `end_
 - CodeBuilder.java - Bytecode generation primitives
 - TypeResolver.java - Type inference system
 - TypeConversionUtils.java - Type conversion utilities
-- StackMapGenerator.java - Stack map frame computation
+- StackMapProcessor.java - Stack map frame computation
 
 **Testing**:
 - Run: `./gradlew test --tests "*.TestCompileAstCondExpr"`
@@ -993,7 +993,7 @@ For nested conditionals, generate unique labels (e.g., `else_1`, `else_2`, `end_
 - **JavaScript Specification:** ECMAScript Section 12.13 - Conditional Operator
 - **TypeScript Specification:** Section 4.19 - Conditional Operator
 - **Java Language Specification:** Section 15.25 - Conditional Operator
-- **Existing Implementation:** BinaryExpressionGenerator.java (for comparison generation)
+- **Existing Implementation:** BinaryExpressionProcessor.java (for comparison generation)
 - **Test Reference:** TestCompileBinExpr.java (for test structure)
 
 ---

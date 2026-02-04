@@ -6,7 +6,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Current Status:** ✅ Partially Implemented (Basic functionality working)
 
-**Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
+**Implementation File:** [ArrayLiteralProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralProcessor.java) ✅
 
 **Test Files:**
 - [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (255 tests passing)
@@ -43,7 +43,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 ## Current Implementation Review
 
-### ArrayLiteralGenerator.java Status
+### ArrayLiteralProcessor.java Status
 
 **✅ Implemented Features:**
 
@@ -77,18 +77,18 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
    - Unboxing for Java array elements
    - Primitive type conversion (e.g., int → long)
 
-### CallExpressionForArrayGenerator.java Status
+### CallExpressionForArrayProcessor.java Status
 
 **✅ Implemented Features:**
 
-**Implementation File:** [CallExpressionForArrayGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/callexpr/CallExpressionForArrayGenerator.java) ✅
+**Implementation File:** [CallExpressionForArrayProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/callexpr/CallExpressionForArrayProcessor.java) ✅
 
 **Purpose:** Handles method call expressions on Java arrays (not ArrayList), implementing supported methods and providing clear error messages for unsupported methods.
 
 **Key Features:**
 1. **Type Detection**
    - Uses `isTypeSupported(type)` to check if type is a Java array (starts with '[')
-   - Integrated into CallExpressionGenerator's type routing logic
+   - Integrated into CallExpressionProcessor's type routing logic
 
 2. **Supported Methods** (10 methods via ArrayApiUtils)
    - ✅ **indexOf(value)** - Returns first index of value, or -1 if not found
@@ -134,9 +134,9 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
    - Example: "Method 'push()' is not supported on Java arrays (int[]). Java arrays have fixed size. Use ArrayList for dynamic arrays with these methods."
 
 **Note:** Java arrays DO support .length property, getter (arr[i]), and setter (arr[i] = x), but these are NOT method calls and are handled by:
-- `.length` → MemberExpressionGenerator
-- `arr[i]` → ComputedMemberExpressionGenerator
-- `arr[i] = x` → AssignExpressionGenerator
+- `.length` → MemberExpressionProcessor
+- `arr[i]` → ComputedMemberExpressionProcessor
+- `arr[i] = x` → AssignExpressionProcessor
 
 ### TestCompileAstArrayLit.java Status
 
@@ -681,7 +681,7 @@ const merged = [0, ...arr1, ...arr2, 7]  // [0, 1, 2, 3, 4, 5, 6, 7]
 **Detection:** `elem.getSpread().isPresent()` checks if element is a spread
 
 **Implementation:**
-- **File:** ArrayLiteralGenerator.java lines 70-82
+- **File:** ArrayLiteralProcessor.java lines 70-82
 - **Bytecode:** Uses `ArrayList.addAll(Collection)` to add all elements from spread array
 - **Sequence:** `dup` (keep ArrayList reference) → generate spread expression → `invokevirtual addAll` → `pop` (discard boolean return)
 - **Tests:** 7 comprehensive tests covering all spread scenarios
@@ -974,51 +974,51 @@ arr.customProperty = "hello"  // JS allows this
 
 ### Phase 3: Common Array Methods (Priority: HIGH)
 - [x] `pop()` - Remove last element ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 78-93
+  - **Implementation:** CallExpressionProcessor.java lines 78-93
   - **Bytecode:** Uses `dup`, `size()`, `iconst 1`, `isub`, `remove(I)Ljava/lang/Object;`
   - **Return:** Returns the removed element (Object type)
   - **Tests:** 8 comprehensive tests covering basic functionality, length changes, multiple pops, type compatibility, edge cases, integration with push, error handling
 - [x] `shift()` - Remove first element ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 94-103
+  - **Implementation:** CallExpressionProcessor.java lines 94-103
   - **Bytecode:** Uses `iconst 0`, `remove(I)Ljava/lang/Object;`
   - **Return:** Returns the removed element (Object type)
   - **Tests:** 9 comprehensive tests covering basic functionality, length changes, multiple shifts, type compatibility, edge cases, integration with push, remaining elements verification, error handling
 - [x] `unshift(elem)` - Add to beginning ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 104-121
+  - **Implementation:** CallExpressionProcessor.java lines 104-121
   - **Bytecode:** Uses `iconst 0`, element expression, boxing if needed, `add(ILjava/lang/Object;)V`
   - **Return:** void (JavaScript returns new length, but we don't return it yet)
   - **Tests:** 9 comprehensive tests covering basic functionality, length changes, multiple unshifts, empty array, type compatibility, integration with shift/push, order preservation, error handling
 - [x] `indexOf(elem)` - Find index ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 122-142
+  - **Implementation:** CallExpressionProcessor.java lines 122-142
   - **Bytecode:** Uses element expression, boxing if needed, `indexOf(Ljava/lang/Object;)I`
   - **Return:** int (primitive) - returns index or -1 if not found
   - **Tests:** 10 comprehensive tests covering basic functionality, not found case, first/last element, duplicates (returns first), strings, empty array, mixed types, after modifications, error handling
 - [x] `lastIndexOf(elem)` - Find last index ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 143-163
+  - **Implementation:** CallExpressionProcessor.java lines 143-163
   - **Bytecode:** Uses element expression, boxing if needed, `lastIndexOf(Ljava/lang/Object;)I`
   - **Return:** int (primitive) - returns last index or -1 if not found
   - **Tests:** 12 comprehensive tests covering basic functionality, not found case, first/last element, duplicates (returns last occurrence), multiple duplicates, strings, string not found, empty array, mixed types, after modifications, error handling for Java arrays
   - **Key difference from indexOf:** Returns the LAST occurrence of the element instead of the first
 - [x] `includes(elem)` - Check existence ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 143-163
+  - **Implementation:** CallExpressionProcessor.java lines 143-163
   - **Bytecode:** Uses element expression, boxing if needed, `contains(Ljava/lang/Object;)Z`
   - **Return:** boolean (primitive) - returns true if element exists, false otherwise
   - **Tests:** 10 comprehensive tests covering basic functionality, not found case, first/last element, strings, empty array, mixed types, after modifications, type mismatch, error handling
 - [x] `reverse()` - Reverse in place ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 164-174
+  - **Implementation:** CallExpressionProcessor.java lines 164-174
   - **Bytecode:** Uses `dup` to duplicate array reference, then `invokestatic Collections.reverse(List)V`
   - **Return:** ArrayList (the array itself) - JavaScript's reverse() returns the array for method chaining
   - **Tests:** 8 comprehensive tests covering basic reverse, returns array, strings, empty array, single element, mixed types, reverse twice (restore original), after modifications, error handling
   - **Note:** Collections.reverse() returns void, so we use `dup` before the call to keep the array reference on the stack for return
 - [x] `sort()` - Sort in place ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 175-185
+  - **Implementation:** CallExpressionProcessor.java lines 175-185
   - **Bytecode:** Uses `dup` to duplicate array reference, then `invokestatic Collections.sort(List)V`
   - **Return:** ArrayList (the array itself) - JavaScript's sort() returns the array for method chaining
   - **Tests:** 10 comprehensive tests covering basic sort (integers), returns array, strings (alphabetical), empty array (via pop operations), single element, already sorted, reverse sorted, after modifications (push/unshift), duplicates, error handling
   - **Note:** Collections.sort() returns void, so we use `dup` before the call to keep the array reference on the stack for return
   - **Limitation:** Elements must be Comparable - sorting mixed types (e.g., Integer + String) will throw ClassCastException at runtime
 - [x] `join(sep)` - Convert to string ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 186-214
+  - **Implementation:** CallExpressionProcessor.java lines 186-214
   - **Bytecode:** Calls `ArrayApiUtils.join(List, String)Ljava/lang/String;` static helper method
   - **Return:** String - joined elements separated by the specified separator
   - **Tests:** 11 comprehensive tests covering basic join with comma, default separator (comma), custom separator, empty array, single element, empty separator (concatenate), mixed types, after modifications, numbers, multi-character separator, error handling
@@ -1026,7 +1026,7 @@ arr.customProperty = "hello"  // JS allows this
   - **Default separator:** "," if no argument provided (JavaScript behavior)
   - **Element conversion:** Uses String.valueOf() to convert each element (null becomes "null")
 - [x] `concat(arr2)` - Merge arrays ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 215-240
+  - **Implementation:** CallExpressionProcessor.java lines 215-240
   - **Bytecode:** Calls `ArrayApiUtils.concat(ArrayList, ArrayList)Ljava/util/ArrayList;` static helper method when argument provided; uses ArrayList copy constructor `new ArrayList(Collection)` when no argument
   - **Return:** ArrayList (new array) - JavaScript's concat() returns a new array containing elements from both arrays
   - **Tests:** 10 comprehensive tests covering basic concat (merge two arrays), empty array, no argument (returns copy), returns new array (not modifying original), strings, mixed types, single element, concat with empty first array, chaining multiple concat calls, error handling
@@ -1034,7 +1034,7 @@ arr.customProperty = "hello"  // JS allows this
   - **No argument behavior:** Returns a shallow copy of the array (new ArrayList with same elements)
   - **Chaining support:** TypeResolver updated to infer return type of concat() as ArrayList, enabling method chaining like `arr1.concat(arr2).concat(arr3)`
 - [x] `slice(start, end)` - Extract subarray ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 241-365
+  - **Implementation:** CallExpressionProcessor.java lines 241-365
   - **Bytecode:** Calls `ArrayApiUtils.slice(ArrayList, int, int)Ljava/util/ArrayList;` static helper method with start and end indices
   - **Return:** ArrayList (new array) - JavaScript's slice() returns a new array with extracted elements
   - **Tests:** 13 comprehensive tests covering basic slice with start and end, slice with only start, no arguments (copy entire array), negative start index, negative end index, both negative indices, empty array, start >= end (returns empty), out of bounds indices (clamped), strings, returns new array (non-mutating), method chaining, error handling for Java arrays
@@ -1047,7 +1047,7 @@ arr.customProperty = "hello"  // JS allows this
   - **Bounds checking:** Out of bounds indices are clamped to valid range [0, length]
   - **Stack manipulation:** Complex bytecode for argument cases using dup, dup_x1, dup_x2, swap, pop to arrange stack properly for static method call
 - [x] `splice(index, count, ...items)` - Complex insertion/deletion ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 366-480
+  - **Implementation:** CallExpressionProcessor.java lines 366-480
   - **Bytecode:** Calls `ArrayApiUtils.splice(ArrayList, int, int, ArrayList)Ljava/util/ArrayList;` static helper method with start index, deleteCount, and items to insert
   - **Return:** ArrayList (new array) - JavaScript's splice() returns an array of removed elements
   - **Tests:** 14 comprehensive tests covering basic splice with start and deleteCount, mutates original array, insert items while deleting, only start (remove to end), no arguments (returns empty), negative start index, insert without delete (deleteCount=0), delete all elements, strings, empty array, returns removed elements, single item, out of bounds start, error handling for Java arrays
@@ -1065,7 +1065,7 @@ arr.customProperty = "hello"  // JS allows this
 
 ### Phase 4: Spread Operator ✅ COMPLETE
 - [x] Detect spread elements in AST ✅ **IMPLEMENTED**
-  - **Implementation:** ArrayLiteralGenerator.java lines 70-82
+  - **Implementation:** ArrayLiteralProcessor.java lines 70-82
   - **Detection:** Uses `elem.getSpread().isPresent()` to check if element is a spread
   - **Bytecode:** For spread elements, generates code for the spread expression and calls `ArrayList.addAll(Collection)` to add all elements at once
   - **Return:** void (addAll returns boolean, but we pop it from stack)
@@ -1092,7 +1092,7 @@ arr.customProperty = "hello"  // JS allows this
 
 ### Phase 5: Advanced Features (Priority: MEDIUM)
 - [x] `fill(value, start, end)` ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 481-564, ArrayApiUtils.java lines 53-106
+  - **Implementation:** CallExpressionProcessor.java lines 481-564, ArrayApiUtils.java lines 53-106
   - **Bytecode:** Calls overloaded `ArrayApiUtils.fill()` static methods based on argument count
   - **Method signatures:**
     - `fill(ArrayList, Object)` - fills entire array
@@ -1118,7 +1118,7 @@ arr.customProperty = "hello"  // JS allows this
   - **Index handling:** Negative indices converted to positive, out of bounds indices clamped to valid range
   - **Edge cases:** Empty arrays, start >= end (no-op), out of bounds indices handled correctly
 - [x] `copyWithin(target, start, end)` ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 565-633, ArrayApiUtils.java lines 108-163
+  - **Implementation:** CallExpressionProcessor.java lines 565-633, ArrayApiUtils.java lines 108-163
   - **Bytecode:** Calls overloaded `ArrayApiUtils.copyWithin()` static methods based on argument count
   - **Method signatures:**
     - `copyWithin(ArrayList, int, int)` - copies from start to end
@@ -1145,7 +1145,7 @@ arr.customProperty = "hello"  // JS allows this
   - **Edge cases:** Empty arrays, overlapping ranges (uses temp ArrayList to avoid overwriting), out of bounds handled correctly
   - **Algorithm:** Creates temporary ArrayList to hold copied elements, then writes to target to handle overlapping ranges correctly
 - [x] `toString()` ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 634-646, ArrayApiUtils.java lines 193-205
+  - **Implementation:** CallExpressionProcessor.java lines 634-646, ArrayApiUtils.java lines 193-205
   - **Bytecode:** Calls `ArrayApiUtils.arrayToString(List)` static method
   - **Return:** String - comma-separated values without brackets (e.g., "1,2,3")
   - **Tests:** 8 comprehensive tests covering basic usage, empty arrays, single elements, different types, method chaining, non-mutating behavior
@@ -1162,7 +1162,7 @@ arr.customProperty = "hello"  // JS allows this
   - **Format difference:** JavaScript arrays use "1,2,3" while Java's ArrayList.toString() returns "[1, 2, 3]"
   - **Note:** Equivalent to calling join(",") - returns comma-separated values
 - [x] `toLocaleString()` ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 668-680, ArrayApiUtils.java lines 44-73
+  - **Implementation:** CallExpressionProcessor.java lines 668-680, ArrayApiUtils.java lines 44-73
   - **Bytecode:** Calls `ArrayApiUtils.arrayToLocaleString(List)` static method
   - **Return:** String - locale-specific comma-separated values (e.g., "1,2,3")
   - **Tests:** 9 comprehensive tests covering basic usage, empty arrays, single elements, different types, method chaining, non-mutating behavior, error handling
@@ -1181,7 +1181,7 @@ arr.customProperty = "hello"  // JS allows this
   - **Future enhancement:** Could add locale-specific number/date formatting for improved JavaScript compatibility
   - **Format:** Returns comma-separated values like toString(), but designed for locale-specific formatting
 - [x] `toReversed()` - ES2023 non-mutating reverse ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 196-208, ArrayApiUtils.java lines 306-326
+  - **Implementation:** CallExpressionProcessor.java lines 196-208, ArrayApiUtils.java lines 306-326
   - **Bytecode:** Calls `ArrayApiUtils.toReversed(ArrayList)` static method
   - **Return:** ArrayList (new array) - reversed copy without modifying original
   - **Tests:** 10 comprehensive tests covering basic usage, non-mutating behavior, empty arrays, single elements, different types, method chaining, error handling
@@ -1200,7 +1200,7 @@ arr.customProperty = "hello"  // JS allows this
   - **Key difference from reverse():** Creates new array instead of mutating original
   - **ES2023 feature:** Part of ES2023 specification for non-mutating array methods
 - [x] `toSorted()` - ES2023 non-mutating sort ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 220-232, ArrayApiUtils.java lines 328-349
+  - **Implementation:** CallExpressionProcessor.java lines 220-232, ArrayApiUtils.java lines 328-349
   - **Bytecode:** Calls `ArrayApiUtils.toSorted(ArrayList)` static method
   - **Return:** ArrayList (new array) - sorted copy without modifying original
   - **Tests:** 11 comprehensive tests covering basic usage, non-mutating behavior, empty arrays, single elements, different types, method chaining, error handling
@@ -1221,7 +1221,7 @@ arr.customProperty = "hello"  // JS allows this
   - **ES2023 feature:** Part of ES2023 specification for non-mutating array operations
   - **Requirement:** Elements must be Comparable, otherwise ClassCastException at runtime
 - [x] `with(index, value)` - ES2023 non-mutating element replacement ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 233-271, ArrayApiUtils.java lines 351-385
+  - **Implementation:** CallExpressionProcessor.java lines 233-271, ArrayApiUtils.java lines 351-385
   - **Bytecode:** Calls `ArrayApiUtils.with(ArrayList, int, Object)` static method
   - **Return:** ArrayList (new array) - copy with one element changed at specified index
   - **Tests:** 13 comprehensive tests covering basic usage, non-mutating behavior, empty arrays, negative indices, out of bounds, method chaining, different types, error handling
@@ -1245,7 +1245,7 @@ arr.customProperty = "hello"  // JS allows this
   - **ES2023 feature:** Part of ES2023 specification for non-mutating array operations
   - **Use case:** Create array variant with one element changed without modifying original
 - [x] `toSpliced(start, deleteCount, ...items)` - ES2023 non-mutating splice ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 272-375, ArrayApiUtils.java lines 387-412
+  - **Implementation:** CallExpressionProcessor.java lines 272-375, ArrayApiUtils.java lines 387-412
   - **Bytecode:** Calls `ArrayApiUtils.toSpliced(ArrayList, int, int, ArrayList)` static method
   - **Return:** ArrayList (new array) - copy with elements removed and/or inserted
   - **Tests:** 13 comprehensive tests covering basic usage, non-mutating behavior, empty arrays, insertions, deletions, negative indices, method chaining, different types
@@ -1530,7 +1530,7 @@ namespace com {
 - [Java ArrayList Documentation](https://docs.oracle.com/javase/8/docs/api/java/util/ArrayList.html)
 - [Java Arrays Class](https://docs.oracle.com/javase/8/docs/api/java/util/Arrays.html)
 - [JVM Array Instructions](https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-6.html#jvms-6.5.newarray)
-- [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java)
+- [ArrayLiteralProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralProcessor.java)
 - [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
 ---
@@ -1555,7 +1555,7 @@ namespace com {
   - Type inference updated in TypeResolver for return types
   - 21 comprehensive tests added in TestCompileAstArrayLitJavaArrays.java covering all methods and edge cases
   - **Implementation files:**
-    - [CallExpressionForArrayGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/callexpr/CallExpressionForArrayGenerator.java)
+    - [CallExpressionForArrayProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/callexpr/CallExpressionForArrayProcessor.java)
     - [ArrayApiUtils.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils.java) (NEW)
   - **Test file:** [TestCompileAstArrayLitJavaArrays.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/arraylit/TestCompileAstArrayLitJavaArrays.java)
 
@@ -1563,10 +1563,10 @@ namespace com {
   - 35 tests in TestCompileAstArrayLitJavaArrayMethods.java verify .length property, arr[i] getter, and arr[i] = value setter
   - Handles all primitive types (int[], double[], boolean[], etc.) and reference types (String[], Object[], etc.)
   - **Implementation files:**
-    - [MemberExpressionGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/MemberExpressionGenerator.java) (for .length and getter)
-    - [AssignExpressionGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/AssignExpressionGenerator.java) (for setter)
+    - [MemberExpressionProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/MemberExpressionProcessor.java) (for .length and getter)
+    - [AssignExpressionProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/AssignExpressionProcessor.java) (for setter)
 
-- ✅ **toSpliced() method (ES2023)** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
+- ✅ **toSpliced() method (ES2023)** - Implemented in CallExpressionProcessor.java with ArrayApiUtils helper
   - Non-mutating version of splice() that returns a new array with elements removed/inserted
   - 13 comprehensive tests added covering all scenarios including insertions, deletions, negative indices
   - Returns new ArrayList with modifications applied (removes/inserts elements)
@@ -1577,7 +1577,7 @@ namespace com {
   - **Key difference from splice():** Returns the modified array (not removed elements), doesn't mutate original
   - **Use case:** Get modified array with elements removed/inserted without mutating original
 
-- ✅ **with() method (ES2023)** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
+- ✅ **with() method (ES2023)** - Implemented in CallExpressionProcessor.java with ArrayApiUtils helper
   - Non-mutating method that returns a new array with one element changed
   - 13 comprehensive tests added covering all scenarios including negative indices and edge cases
   - Returns new ArrayList with element at specified index replaced with new value
@@ -1588,7 +1588,7 @@ namespace com {
   - **Index handling:** Negative indices converted to positive (e.g., -1 becomes last element), out of bounds returns unchanged copy
   - **Use case:** Create array variant with single element modification without mutating original
 
-- ✅ **toSorted() method (ES2023)** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
+- ✅ **toSorted() method (ES2023)** - Implemented in CallExpressionProcessor.java with ArrayApiUtils helper
   - Non-mutating version of sort() that returns a new sorted array
   - 11 comprehensive tests added covering all scenarios
   - Returns new ArrayList with elements in sorted order
@@ -1599,7 +1599,7 @@ namespace com {
   - **Limitation:** Elements must be Comparable, otherwise ClassCastException at runtime
   - **Use case:** Get sorted array without modifying original, enabling functional programming patterns
 
-- ✅ **toReversed() method (ES2023)** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
+- ✅ **toReversed() method (ES2023)** - Implemented in CallExpressionProcessor.java with ArrayApiUtils helper
   - Non-mutating version of reverse() that returns a new reversed array
   - 10 comprehensive tests added covering all scenarios
   - Returns new ArrayList with elements in reversed order
@@ -1609,7 +1609,7 @@ namespace com {
   - **ES2023 compliance:** Part of ES2023 specification for non-mutating array operations
   - **Use case:** Get reversed array without modifying original, enabling functional programming patterns
 
-- ✅ **toLocaleString() method** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
+- ✅ **toLocaleString() method** - Implemented in CallExpressionProcessor.java with ArrayApiUtils helper
   - Converts ArrayList to locale-specific string representation (non-mutating)
   - 9 comprehensive tests added covering all common scenarios
   - Returns string with comma-separated values: "1,2,3"
@@ -1619,7 +1619,7 @@ namespace com {
   - **Current behavior:** Uses comma separator (future: locale-specific formatting for numbers/dates)
   - **Use case:** Displaying array contents with locale-appropriate formatting
 
-- ✅ **lastIndexOf() method** - Implemented in CallExpressionGenerator.java using ArrayList.lastIndexOf()
+- ✅ **lastIndexOf() method** - Implemented in CallExpressionProcessor.java using ArrayList.lastIndexOf()
   - Finds the last occurrence of an element in ArrayList (non-mutating)
   - 12 comprehensive tests added covering all common scenarios including duplicates
   - Returns int (primitive) - last index or -1 if not found
@@ -1627,7 +1627,7 @@ namespace com {
   - **Bytecode generation:** Uses element expression, boxing if needed, calls `lastIndexOf(Ljava/lang/Object;)I`
   - **Use case:** Finding the last position of an element in an array with duplicates
 
-- ✅ **toString() method** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
+- ✅ **toString() method** - Implemented in CallExpressionProcessor.java with ArrayApiUtils helper
   - Converts ArrayList to string representation with comma-separated values (non-mutating)
   - 8 comprehensive tests added covering all common scenarios
   - Returns string in JavaScript format: "1,2,3" (not Java's "[1, 2, 3]")
@@ -1635,7 +1635,7 @@ namespace com {
   - **Bytecode generation:** Calls ArrayApiUtils.arrayToString(List) which returns String
   - **Format:** Comma-separated values without brackets, matching JavaScript's toString() behavior
 
-- ✅ **copyWithin() method** - Implemented in CallExpressionGenerator.java with overloaded ArrayApiUtils helpers
+- ✅ **copyWithin() method** - Implemented in CallExpressionProcessor.java with overloaded ArrayApiUtils helpers
   - Copies part of ArrayList to another location within the same ArrayList (mutating)
   - 14 comprehensive tests added covering all argument combinations and edge cases
   - Returns the ArrayList (the array itself) for method chaining
@@ -1649,7 +1649,7 @@ namespace com {
   - **Algorithm:** Uses temporary ArrayList to avoid overwriting during copy, handles overlapping ranges correctly
   - **Limitation:** Not supported for Java arrays (throws compilation error)
 
-- ✅ **fill() method** - Implemented in CallExpressionGenerator.java with overloaded ArrayApiUtils helpers
+- ✅ **fill() method** - Implemented in CallExpressionProcessor.java with overloaded ArrayApiUtils helpers
   - Fills all or part of an ArrayList with a static value (mutating)
   - 13 comprehensive tests added covering all argument combinations and edge cases
   - Returns the ArrayList (the array itself) for method chaining
@@ -1663,7 +1663,7 @@ namespace com {
   - **Bytecode generation:** Calls appropriate overloaded method based on argCount, boxing value if primitive
   - **Limitation:** Not supported for Java arrays (throws compilation error)
 
-- ✅ **Spread operator** - Implemented in ArrayLiteralGenerator.java for ArrayList mode
+- ✅ **Spread operator** - Implemented in ArrayLiteralProcessor.java for ArrayList mode
   - Detects spread elements using `elem.getSpread().isPresent()`
   - Uses `ArrayList.addAll(Collection)` to add all elements from spread arrays
   - 7 comprehensive tests added covering all spread scenarios
@@ -1673,7 +1673,7 @@ namespace com {
   - **Bytecode sequence:** `dup` (keep ArrayList reference) → generate spread expression → `invokevirtual addAll` → `pop` (discard boolean return)
   - **Limitation:** Not supported for Java arrays (typed arrays like `int[]`) - requires ArrayList mode
 
-- ✅ **splice() method** - Implemented in CallExpressionGenerator.java with ArrayApiUtils runtime utility
+- ✅ **splice() method** - Implemented in CallExpressionProcessor.java with ArrayApiUtils runtime utility
   - Removes and/or inserts elements at a specific position in ArrayList (mutating)
   - 14 comprehensive tests added covering all edge cases
   - Error handling for Java arrays (throws exception)

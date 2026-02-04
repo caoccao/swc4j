@@ -13,7 +13,7 @@ for (const prop in obj) { console.log(prop); }
 for (let index in array) { console.log(index); }
 ```
 
-**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/ForInStatementGenerator.java`
+**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/ForInStatementProcessor.java`
 
 **Test Files:**
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/forinstmt/TestCompileAstForInStmtBasic.java`
@@ -1222,7 +1222,7 @@ public void generateObjectIteration(
         Swc4jAstForInStmt forInStmt) {
 
     // 1. Generate right expression (object)
-    compiler.getExpressionGenerator().generate(code, cp, forInStmt.getRight(), null);
+    compiler.getExpressionProcessor().generate(code, cp, forInStmt.getRight(), null);
 
     // 2. Get keySet
     int keySetRef = cp.addInterfaceMethodRef(
@@ -1270,7 +1270,7 @@ public void generateObjectIteration(
     context.pushContinueLabel(testLabel);
 
     // 11. Generate body
-    compiler.getStatementGenerator().generate(code, cp, forInStmt.getBody(), null);
+    compiler.getStatementProcessor().generate(code, cp, forInStmt.getBody(), null);
 
     // 12. Pop labels
     context.popContinueLabel();
@@ -1296,7 +1296,7 @@ public void generateArrayIteration(
         Swc4jAstForInStmt forInStmt) {
 
     // 1. Generate right expression (array)
-    compiler.getExpressionGenerator().generate(code, cp, forInStmt.getRight(), null);
+    compiler.getExpressionProcessor().generate(code, cp, forInStmt.getRight(), null);
 
     // 2. Get size
     int sizeRef = cp.addInterfaceMethodRef(
@@ -1338,7 +1338,7 @@ public void generateArrayIteration(
     context.pushContinueLabel(updateLabel);
 
     // 10. Generate body
-    compiler.getStatementGenerator().generate(code, cp, forInStmt.getBody(), null);
+    compiler.getStatementProcessor().generate(code, cp, forInStmt.getBody(), null);
 
     // 11. Pop labels
     context.popContinueLabel();
@@ -1367,11 +1367,11 @@ public void generateArrayIteration(
 
 ### Statement Generator
 
-Update `StatementGenerator.java` to dispatch ForInStmt:
+Update `StatementProcessor.java` to dispatch ForInStmt:
 
 ```java
 if (stmt instanceof Swc4jAstForInStmt forInStmt) {
-    ForInStatementGenerator.generate(code, cp, forInStmt, returnTypeInfo, context);
+    ForInStatementProcessor.generate(code, cp, forInStmt, returnTypeInfo, context);
 }
 ```
 
@@ -1495,9 +1495,9 @@ CompilationContext must track:
 - Object keys are String type
 - **Compile-time type checking** using `JavaTypeInfo.isAssignableTo()` replaces runtime instanceof checks
 - Type hierarchy is built from `extends` and `implements` clauses during class collection
-- VarDeclGenerator now properly initializes variables without initializers (required for JVM verifier)
-- StackMapGenerator handles unreachable code after return/throw statements
-- AssignExpressionGenerator handles String += int concatenation using String.valueOf()
+- VarDeclProcessor now properly initializes variables without initializers (required for JVM verifier)
+- StackMapProcessor handles unreachable code after return/throw statements
+- AssignExpressionProcessor handles String += int concatenation using String.valueOf()
 
 ---
 
@@ -1523,8 +1523,8 @@ CompilationContext must track:
 - **TypeScript Specification:** Section 5.5 - For-In Statements
 - **Java Collections:** java.util.Iterator interface
 - **Java Collections:** java.util.Map.keySet() method
-- **Existing Implementation:** ForStatementGenerator.java (for control flow patterns)
-- **Existing Implementation:** IfStatementGenerator.java (for conditional jumps)
+- **Existing Implementation:** ForStatementProcessor.java (for control flow patterns)
+- **Existing Implementation:** IfStatementProcessor.java (for conditional jumps)
 - **Test Reference:** TestCompileAstForStmt*.java (for test structure)
 
 ---
@@ -1555,7 +1555,7 @@ CompilationContext must track:
 ## Implementation Checklist
 
 ### Code Generation
-- [x] Create `ForInStatementGenerator.java`
+- [x] Create `ForInStatementProcessor.java`
 - [x] Implement `generate()` method for for-in loops
 - [x] Implement object iteration (LinkedHashMap)
 - [x] Implement array iteration (ArrayList)
@@ -1567,7 +1567,7 @@ CompilationContext must track:
 - [x] Add iterator/counter to local variable table
 
 ### Integration
-- [x] Add ForInStmt case to StatementGenerator dispatch
+- [x] Add ForInStmt case to StatementProcessor dispatch
 - [x] Use TypeResolver for right expression type
 - [x] Handle VarDecl in left (loop variable)
 - [x] Handle existing variable in left

@@ -6,7 +6,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Current Status:** 🟢 **FULLY IMPLEMENTED** (66 passing tests across 6 files)
 
-**Implementation File:** ✅ [NumberLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/NumberLiteralGenerator.java)
+**Implementation File:** ✅ [NumberLiteralProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/NumberLiteralProcessor.java)
 
 **Test Files:** ✅ **66 tests across 6 files** (Phases 1, 2, 3, 5, 6 complete)
 - [TestCompileAstNumberInt.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/number/TestCompileAstNumberInt.java) - 15 tests
@@ -95,7 +95,7 @@ const value: Integer = 123  // → Integer
 
 ## Current Implementation Review
 
-### NumberLiteralGenerator.java Status
+### NumberLiteralProcessor.java Status
 
 **✅ Implemented Features:**
 

@@ -20,7 +20,7 @@ This document outlines the implementation plan for supporting update expressions
 - ✅ **Class Field Access (`this.value++`)** - IMPLEMENTED (getfield/putfield)
 - ✅ **Multi-dimensional Arrays** - IMPLEMENTED
 
-**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/UpdateExpressionGenerator.java`
+**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/UpdateExpressionProcessor.java`
 
 **Test File:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileAstUpdateExpr.java`
 
@@ -174,11 +174,11 @@ case PlusPlus, MinusMinus -> {
 ### Implementation Details
 
 **Files Created:**
-1. `UpdateExpressionGenerator.java` - Main generator for update expressions
+1. `UpdateExpressionProcessor.java` - Main generator for update expressions
 2. `TestCompileAstUpdateExpr.java` - Comprehensive test suite (41 tests)
 
 **Files Modified:**
-1. `ExpressionGenerator.java` - Added UpdateExpr case to dispatch to UpdateExpressionGenerator
+1. `ExpressionProcessor.java` - Added UpdateExpr case to dispatch to UpdateExpressionProcessor
 2. `TypeResolver.java` - Added type inference support for UpdateExpr (infers type from operand)
 3. `MethodGenerator.java` - Added UpdateExpr to expression statement pop logic
 4. `CodeBuilder.java` - Added `iinc(int index, int delta)` instruction
@@ -187,7 +187,7 @@ case PlusPlus, MinusMinus -> {
 
 **1. Always Leave Value on Stack**
 - Update expressions ALWAYS leave a value on the stack (old value for postfix, new value for prefix)
-- This matches the behavior of other expression generators (AssignExpressionGenerator, etc.)
+- This matches the behavior of other expression generators (AssignExpressionProcessor, etc.)
 - Statement-level code (MethodGenerator) pops the value if it's a standalone expression statement
 
 **2. Optimization Using `iinc`**
@@ -300,7 +300,7 @@ Postfix x++ (Integer):
 - ❌ Object arrays: `Object[]`, `String[]` (deferred)
 
 **Files Modified:**
-1. `UpdateExpressionGenerator.java` - Added `handleNativeArrayUpdate()` method
+1. `UpdateExpressionProcessor.java` - Added `handleNativeArrayUpdate()` method
 2. `TestCompileAstUpdateExpr.java` - Added 12 comprehensive tests for native arrays
 
 **Key Implementation Decisions:**
@@ -386,11 +386,11 @@ This elegant solution avoids complex multi-step stack rotations and works perfec
 - ✅ Both increment and decrement operations
 
 **Files Modified:**
-1. `UpdateExpressionGenerator.java` - Added member access support:
+1. `UpdateExpressionProcessor.java` - Added member access support:
    - `handleMemberAccess()` - Dispatcher for member expressions
    - `handleLinkedHashMapUpdate()` - Updates to LinkedHashMap properties (with Object type support)
    - `handleArrayListUpdate()` - Updates to ArrayList elements
-2. `MemberExpressionGenerator.java` - Added Object type support for nested properties
+2. `MemberExpressionProcessor.java` - Added Object type support for nested properties
 
 ### Key Implementation Decisions
 
@@ -426,7 +426,7 @@ This elegant solution avoids complex multi-step stack rotations and works perfec
 **5. Object Type Handling for Nested Properties**
 - When accessing nested properties like `obj.inner.count++`, the type of `obj.inner` is `Object`
 - Solution: Added handling for `Object` type by casting to `LinkedHashMap` before operations
-- Applied in both `UpdateExpressionGenerator` and `MemberExpressionGenerator`
+- Applied in both `UpdateExpressionProcessor` and `MemberExpressionProcessor`
 - Enables deep nesting: `obj.a.b.c.d++` works correctly
 
 ### Bytecode Patterns
@@ -536,7 +536,7 @@ pop                        // [new_Integer] - discard set's return, keep our dup
 - **Solution**:
   - Handle `Object` type as a valid case alongside `LinkedHashMap`
   - Cast `Object` to `LinkedHashMap` using `checkcast` instruction
-  - Applied fix to both `UpdateExpressionGenerator` and `MemberExpressionGenerator`
+  - Applied fix to both `UpdateExpressionProcessor` and `MemberExpressionProcessor`
 - **Result**: Supports arbitrary nesting depth: `a.b.c.d.e++` works correctly
 
 ### Known Limitations
@@ -585,7 +585,7 @@ During edge case testing, the following limitations were identified:
 
 1. **Complex Expression Integration**: Update expressions on LinkedHashMap/ArrayList return boxed Integer objects. Using these directly in arithmetic operations (e.g., `obj.count++ * 2`) requires additional unboxing logic that's not yet implemented.
 
-2. **Chained Assignments**: Patterns like `y = x++` where x is assigned to y require BindingIdent assignment support which is not fully implemented in AssignExpressionGenerator.
+2. **Chained Assignments**: Patterns like `y = x++` where x is assigned to y require BindingIdent assignment support which is not fully implemented in AssignExpressionProcessor.
 
 3. **Type Coercion**: When update expressions return boxed types, automatic unboxing for use in primitive operations is not always applied correctly.
 
@@ -980,7 +980,7 @@ iastore           // Store element
 **Goal:** Basic increment/decrement of local variables
 
 **Tasks:**
-1. Create UpdateExpressionGenerator.java
+1. Create UpdateExpressionProcessor.java
 2. Implement basic increment (++) for int local variables
 3. Implement basic decrement (--) for int local variables
 4. Handle prefix vs postfix for int
@@ -997,7 +997,7 @@ iastore           // Store element
 - 10 tests: Error cases (invalid types, const variables)
 
 **Deliverables:**
-- UpdateExpressionGenerator.java
+- UpdateExpressionProcessor.java
 - TestCompileUpdateExpr.java (Phase 1 tests)
 - Documentation update
 
@@ -1020,7 +1020,7 @@ iastore           // Store element
 - 5 tests: Error cases (read-only properties)
 
 **Deliverables:**
-- UpdateExpressionGenerator.java (Phase 2)
+- UpdateExpressionProcessor.java (Phase 2)
 - TestCompileUpdateExpr.java (Phase 2 tests)
 
 ### Phase 3: Array Access 🔶 Medium Priority
@@ -1042,7 +1042,7 @@ iastore           // Store element
 - 5 tests: Error cases (index out of bounds - runtime)
 
 **Deliverables:**
-- UpdateExpressionGenerator.java (Phase 3)
+- UpdateExpressionProcessor.java (Phase 3)
 - TestCompileUpdateExpr.java (Phase 3 tests)
 
 ### Phase 4: Optimization & Edge Cases ⚪ Low Priority
@@ -1213,7 +1213,7 @@ iastore           // Store element
 **Multi-dimensional Arrays:**
 - Blocked on compiler support for multi-dimensional array literal syntax
 - The update expression logic itself is complete (would work with chained member access)
-- Requires ArrayLiteralGenerator enhancements first
+- Requires ArrayLiteralProcessor enhancements first
 - Estimated effort: High (requires array infrastructure work)
 - Priority: Low (single-dimensional arrays cover common cases)
 
@@ -1246,5 +1246,5 @@ iastore           // Store element
 - **JVM Specification:** Chapter 6 - Instructions
 - **JavaScript Specification:** ECMAScript Section 12.4 - Update Expressions
 - **TypeScript Specification:** Section 4.17 - Increment and Decrement Operators
-- **Existing Implementation:** UnaryExpressionGenerator.java (for reference pattern)
+- **Existing Implementation:** UnaryExpressionProcessor.java (for reference pattern)
 - **Test Reference:** TestCompileUnaryExprMinus.java (for test structure)

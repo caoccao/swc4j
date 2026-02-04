@@ -428,7 +428,7 @@ public class CodeBuilder {
      */
     public java.util.List<ClassWriter.StackMapEntry> generateStackMapTable(int maxLocals, boolean isStatic, String className, String descriptor, ClassWriter.ConstantPool constantPool) {
         byte[] bytecode = toByteArray();
-        StackMapGenerator generator = new StackMapGenerator(bytecode, maxLocals, isStatic, className, descriptor, constantPool, exceptionTable);
+        StackMapProcessor generator = new StackMapProcessor(bytecode, maxLocals, isStatic, className, descriptor, constantPool, exceptionTable);
         return generator.generate();
     }
 

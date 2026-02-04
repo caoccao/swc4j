@@ -46,7 +46,7 @@ this.tag(new String[]{"Hello ", " ", "!"}, firstName, lastName)
 
 ### ✅ Implemented: Tagged Templates (Swc4jAstTaggedTpl)
 
-**File:** `TaggedTemplateLiteralGenerator.java`
+**File:** `TaggedTemplateLiteralProcessor.java`
 
 **Strategy:** Method call transformation - tagged templates are compiled to direct method calls
 where the tag function receives a `String[]` of quasis followed by individual expression arguments.
@@ -92,11 +92,11 @@ where the tag function receives a `String[]` of quasis followed by individual ex
 Uses a scoped registry pattern for proper cleanup and nested class support.
 
 **How it works:**
-1. `ClassGenerator` calls `enterScope()` when starting class compilation
-2. During method compilation, `TaggedTemplateLiteralGenerator` registers quasis with `ScopedTemplateCacheRegistry`
+1. `ClassProcessor` calls `enterScope()` when starting class compilation
+2. During method compilation, `TaggedTemplateLiteralProcessor` registers quasis with `ScopedTemplateCacheRegistry`
 3. Registry returns a field name (e.g., `$tpl$0`) and deduplicates identical quasis within the scope
-4. After all methods are compiled, `ClassGenerator` adds static fields and `<clinit>` initialization
-5. `ClassGenerator` calls `exitScope()` in finally block (automatic cleanup)
+4. After all methods are compiled, `ClassProcessor` adds static fields and `<clinit>` initialization
+5. `ClassProcessor` calls `exitScope()` in finally block (automatic cleanup)
 6. At runtime, `GETSTATIC` loads the cached array instead of creating a new one
 
 **Bytecode (before caching):**
@@ -126,7 +126,7 @@ GETSTATIC com/A.$tpl$0 : [Ljava/lang/String;
 
 ### ✅ Implemented: Standalone Function Tags
 
-**File:** `TaggedTemplateLiteralGenerator.java`
+**File:** `TaggedTemplateLiteralProcessor.java`
 
 **Strategy:** Support `Swc4jAstIdent` tags (standalone function names) in addition to `MemberExpr` tags.
 Standalone functions are compiled into dummy classes (e.g., `$` or `com/$`) and invoked via `INVOKESTATIC`.
@@ -164,7 +164,7 @@ namespace com {
 
 ### ✅ Implemented: Raw String Array Support
 
-**File:** `TemplateStringsArray.java`, `TaggedTemplateLiteralGenerator.java`
+**File:** `TemplateStringsArray.java`, `TaggedTemplateLiteralProcessor.java`
 
 **Strategy:** Create a `TemplateStringsArray` class that provides access to both cooked (processed) and raw
 (unprocessed) template strings. Tag functions can declare `TemplateStringsArray` as their first parameter
@@ -182,10 +182,10 @@ public final class TemplateStringsArray {
 ```
 
 **How it works:**
-1. `ClassGenerator` creates two cached fields for each template:
+1. `ClassProcessor` creates two cached fields for each template:
    - `$tpl$N` - `String[]` containing cooked strings
    - `$tpl$N$raw` - `TemplateStringsArray` containing both cooked and raw strings
-2. `TaggedTemplateLiteralGenerator` detects if the tag function accepts `TemplateStringsArray`:
+2. `TaggedTemplateLiteralProcessor` detects if the tag function accepts `TemplateStringsArray`:
    - If yes, loads the `$tpl$N$raw` field via `GETSTATIC`
    - If no (accepts `String[]`), loads the `$tpl$N` field (backward compatible)
 3. Tag functions access raw strings via `strings.raw[index]`
@@ -286,22 +286,22 @@ All 8 raw string access tests passing (100% success rate):
 
 ## Integration Points
 
-### ExpressionGenerator
+### ExpressionProcessor
 ```java
 } else if (expr instanceof Swc4jAstTaggedTpl taggedTpl) {
-    compiler.getTaggedTemplateLiteralGenerator().generate(code, cp, taggedTpl, returnTypeInfo);
+    compiler.getTaggedTemplateLiteralProcessor().generate(code, cp, taggedTpl, returnTypeInfo);
 }
 ```
 
 ### ByteCodeCompiler
 ```java
-protected final TaggedTemplateLiteralGenerator taggedTemplateLiteralGenerator;
+protected final TaggedTemplateLiteralProcessor taggedTemplateLiteralProcessor;
 
 // In constructor:
-taggedTemplateLiteralGenerator = new TaggedTemplateLiteralGenerator(this);
+taggedTemplateLiteralProcessor = new TaggedTemplateLiteralProcessor(this);
 
 // Getter:
-public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() { ... }
+public TaggedTemplateLiteralProcessor getTaggedTemplateLiteralProcessor() { ... }
 ```
 
 ## Error Handling
@@ -324,11 +324,11 @@ public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() { ... 
   - Added support for `TemplateStringsArray.length` → returns `I`
 - `ScopedJavaTypeRegistry.resolveClassMethodReturnType()` - Tag method return type resolution
 - `ScopedStandaloneFunctionRegistry` - Standalone function lookup for function tags
-- `ExpressionGenerator.generate()` - Object reference and expression bytecode generation
+- `ExpressionProcessor.generate()` - Object reference and expression bytecode generation
 - `TypeConversionUtils.boxPrimitiveType()` / `unboxWrapperType()` - Return type conversion
 - `ScopedTemplateCacheRegistry` - Scoped template cache tracking with cooked and raw strings
-- `ClassGenerator` - Generates static fields and `<clinit>` initialization for template caches
-- `MemberExpressionGenerator` - Field access for `TemplateStringsArray.raw` and `TemplateStringsArray.length`
+- `ClassProcessor` - Generates static fields and `<clinit>` initialization for template caches
+- `MemberExpressionProcessor` - Field access for `TemplateStringsArray.raw` and `TemplateStringsArray.length`
 - `TemplateStringsArray` - Wrapper class for cooked and raw template strings
 
 ## Future Enhancements
@@ -339,7 +339,7 @@ public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() { ... 
 
 - **TypeScript Spec:** [Template Literals](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html)
 - **ECMAScript Spec:** [Tagged Templates](https://tc39.es/ecma262/#sec-tagged-templates)
-- **Implementation:** `TaggedTemplateLiteralGenerator.java`, `ScopedTemplateCacheRegistry.java`, `TemplateStringsArray.java`
+- **Implementation:** `TaggedTemplateLiteralProcessor.java`, `ScopedTemplateCacheRegistry.java`, `TemplateStringsArray.java`
 - **Tests:** `TestCompileAstTaggedTplBasic.java`, `TestCompileAstTaggedTplAdvanced.java`, `TestCompileAstTaggedTplCaching.java`, `TestCompileAstTaggedTplStandalone.java`, `TestCompileAstTaggedTplRaw.java`
-- **Related:** `TypeConversionUtils.java`, `TypeResolver.java`, `ScopedJavaTypeRegistry.java`, `ClassGenerator.java`
+- **Related:** `TypeConversionUtils.java`, `TypeResolver.java`, `ScopedJavaTypeRegistry.java`, `ClassProcessor.java`
 - **See also:** [Template Literals](tpl.md)

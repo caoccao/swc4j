@@ -34,7 +34,7 @@ This document outlines the implementation plan for supporting all 25 binary oper
 - ✅ All 22 operations above have BigInt support using BigInteger methods
 - ✅ **All special operations complete**
 
-**Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
+**Implementation File:** [BinaryExpressionProcessor.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionProcessor.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
 **Enum Definition:** [Swc4jAstBinaryOp.java](../../src/main/java/com/caoccao/javet/swc4j/ast/enums/Swc4jAstBinaryOp.java)
 
@@ -232,12 +232,12 @@ case Add -> {
         String resultType = TypeResolver.inferBinaryResultType(leftType, rightType);
         
         // Generate left operand
-        ExpressionGenerator.generate(code, cp, binExpr.getLeft(), context, options);
+        ExpressionProcessor.generate(code, cp, binExpr.getLeft(), context, options);
         ByteCodeTypeUtils.unboxIfNeeded(code, leftType);
         ByteCodeTypeUtils.convertPrimitive(code, leftType, resultType);
         
         // Generate right operand
-        ExpressionGenerator.generate(code, cp, binExpr.getRight(), context, options);
+        ExpressionProcessor.generate(code, cp, binExpr.getRight(), context, options);
         ByteCodeTypeUtils.unboxIfNeeded(code, rightType);
         ByteCodeTypeUtils.convertPrimitive(code, rightType, resultType);
         
@@ -969,7 +969,7 @@ Enhance `CodeBuilder`:
 
 ## References
 
-- **Current Implementation:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)
+- **Current Implementation:** [BinaryExpressionProcessor.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionProcessor.java)
 - **Test Suite:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)
 - **Enum Definition:** [Swc4jAstBinaryOp.java](../../src/main/java/com/caoccao/javet/swc4j/ast/enums/Swc4jAstBinaryOp.java)
 - **Type Utilities:** [ByteCodeTypeUtils.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/utils/ByteCodeTypeUtils.java)
@@ -1061,6 +1061,6 @@ checkcast               - Cast to type (throws ClassCastException)
 
 **Recent Fixes (January 22, 2026):**
 - Fixed BigInt comparison operators (<, <=, >, >=) using hardcoded branch offsets instead of placeholder/patch pattern
-- Fixed StackMapGenerator to properly handle `new` opcode and method invocations
+- Fixed StackMapProcessor to properly handle `new` opcode and method invocations
 - Added instruction size handling for new, getfield, putfield, getstatic, putstatic, checkcast, instanceof, newarray
 - Improved invokevirtual, invokespecial, and invokestatic simulation for correct stackmap frame generation

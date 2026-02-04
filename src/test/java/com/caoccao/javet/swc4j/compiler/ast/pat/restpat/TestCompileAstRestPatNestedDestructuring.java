@@ -352,7 +352,7 @@ public class TestCompileAstRestPatNestedDestructuring extends BaseTestCompileSui
     }
 
     // Note: testNestedArrayInForOfLoop and testNestedObjectInForOfLoop are not implemented yet
-    // They require updates to ForOfStatementGenerator to support nested patterns in for-of loop variable declarations
+    // They require updates to ForOfStatementProcessor to support nested patterns in for-of loop variable declarations
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

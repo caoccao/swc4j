@@ -40,7 +40,7 @@ class Circle implements IShape {
 ```
 
 **Implementation Files:**
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/ClassGenerator.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/ClassProcessor.java`
 - `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/MethodGenerator.java`
 - `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/ConstructorGenerator.java`
 - `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/FieldGenerator.java`
@@ -309,7 +309,7 @@ class A {
 
 **Implementation Details:**
 - Added `StaticInitItem` sealed interface to track both static field initializers and static blocks in declaration order
-- Updated `ClassGenerator` to collect `Swc4jAstStaticBlock` nodes alongside static field initializers
+- Updated `ClassProcessor` to collect `Swc4jAstStaticBlock` nodes alongside static field initializers
 - Updated `generateClinitMethod()` to process both field initializers and static blocks in declaration order
 - Added stack map table generation for proper verification of loops/conditionals in static blocks
 - Test coverage in `TestCompileAstClassStaticBlock.java`: 9 tests covering basic, multiple blocks, local variables, loops, conditionals, interleaving with fields
@@ -352,7 +352,7 @@ class A {
 ```
 
 **Implementation Details:**
-- Updated `ClassGenerator` to handle `Swc4jAstPrivateMethod`:
+- Updated `ClassProcessor` to handle `Swc4jAstPrivateMethod`:
   - Extract method name from `Swc4jAstPrivateName.getName()` (without `#` prefix)
   - Set ACC_PRIVATE access flag
   - Generate method body using same pattern as regular methods
@@ -361,7 +361,7 @@ class A {
   - Instance and static private methods
   - Default parameter overloads
   - Return type inference
-- Updated `CallExpressionForClassGenerator` to handle `this.#method()` and `ClassName.#method()` calls:
+- Updated `CallExpressionForClassProcessor` to handle `this.#method()` and `ClassName.#method()` calls:
   - Recognize `Swc4jAstPrivateName` in member expressions
   - Generate `invokespecial` for instance private method calls
   - Generate `invokestatic` for static private method calls
@@ -389,7 +389,7 @@ JVM generics use type erasure - generic type parameters are replaced with Object
 - Added `TypeParameterScope` class to track type parameters in scope
 - `CompilationContext` maintains a stack of type parameter scopes for nested generic classes/methods
 - `TypeResolver.mapTypeNameToDescriptor()` checks for type parameters and erases to Object or constraint type
-- `ClassGenerator` pushes type parameter scope when compiling generic classes
+- `ClassProcessor` pushes type parameter scope when compiling generic classes
 - `MethodGenerator` pushes type parameter scope when compiling generic methods
 - `ClassCollector` also pushes type parameter scope during field/method analysis
 
@@ -1145,10 +1145,10 @@ Field:
 **'this' Expression Support (Stack-based):**
 - `CompilationContext` uses a `Stack<String> classStack` for tracking the current class internal name
 - Supports nested classes via `pushClass()`/`popClass()` methods
-- `ClassGenerator` uses try/finally to ensure proper stack cleanup
+- `ClassProcessor` uses try/finally to ensure proper stack cleanup
 
 **Primitive Array Iteration Fix:**
-- The `StackMapGenerator` was missing array operation handlers, causing compilation to hang when iterating primitive arrays inside for loops
+- The `StackMapProcessor` was missing array operation handlers, causing compilation to hang when iterating primitive arrays inside for loops
 - Fixed by adding handlers for `iaload`, `laload`, `faload`, `daload`, `aaload`, `baload`, `caload`, `saload`, `arraylength`, `newarray`, and `anewarray` instructions
 - This fix enables methods that iterate over primitive arrays (e.g., `int[]`, `double[]`) to compile correctly
 
@@ -1156,49 +1156,49 @@ Field:
 - Added `FieldInfo` record class to store field metadata (name, descriptor, isStatic, initializer)
 - Updated `JavaTypeInfo` to store fields and provide field lookup
 - Updated `ClassCollector` to collect field information during class pre-processing
-- Updated `ClassGenerator` to generate field declarations and initialize fields in constructor
-- Updated `MemberExpressionGenerator` for `this.field` access (getfield instruction)
-- Updated `AssignExpressionGenerator` for `this.field = value` assignment (putfield instruction)
+- Updated `ClassProcessor` to generate field declarations and initialize fields in constructor
+- Updated `MemberExpressionProcessor` for `this.field` access (getfield instruction)
+- Updated `AssignExpressionProcessor` for `this.field = value` assignment (putfield instruction)
 - Updated `TypeResolver` to infer types for `this.field` expressions
-- Added `getfield`/`putfield`/`getstatic`/`putstatic` handlers to `StackMapGenerator`
+- Added `getfield`/`putfield`/`getstatic`/`putstatic` handlers to `StackMapProcessor`
 - Class registry lookup uses fallback pattern: try qualified name first, then simple name
 
 **Inheritance (extends) Support (2026-01-25):**
-- Updated `ClassGenerator.resolveSuperClass()` to resolve parent class from AST
+- Updated `ClassProcessor.resolveSuperClass()` to resolve parent class from AST
 - Updated `ClassWriter` constructor call to pass superclass internal name
 - Updated constructor generation to call parent class `<init>` instead of Object.<init>
-- Added `super.method()` call support in `CallExpressionGenerator` using `invokespecial`
+- Added `super.method()` call support in `CallExpressionProcessor` using `invokespecial`
 - Added `resolveSuperClass()` method to `ScopedJavaTypeRegistry`
-- Added inherited field lookup in `MemberExpressionGenerator.lookupFieldInHierarchy()`
+- Added inherited field lookup in `MemberExpressionProcessor.lookupFieldInHierarchy()`
 - Added inherited field lookup in `TypeResolver.lookupFieldInHierarchy()`
 - Updated `ScopedJavaTypeRegistry.resolveClassMethodReturnType()` to search parent classes
 - Type inference for `super.method()` expressions in `TypeResolver`
 
 **Explicit Constructor Support (2026-01-25):**
-- Added `generateExplicitConstructor()` method in `ClassGenerator` to handle `Swc4jAstConstructor`
+- Added `generateExplicitConstructor()` method in `ClassProcessor` to handle `Swc4jAstConstructor`
 - Added `extractParameterName()` method in `TypeResolver` for constructor parameter name extraction
-- Added `generateSuperConstructorCall()` method in `CallExpressionGenerator` for `super()` calls
+- Added `generateSuperConstructorCall()` method in `CallExpressionProcessor` for `super()` calls
 - Constructor parameter allocation uses the same slot allocation system as method parameters
 - Implicit `super()` injection when constructor body doesn't start with explicit `super()` call
 - Multi-level inheritance with `super(args)` chaining is fully supported
 
 **Static Fields Support (2026-01-25):**
-- Added `generateClinitMethod()` in `ClassGenerator` for static field initialization
-- Added static field read support in `MemberExpressionGenerator` using `getstatic`
-- Added static field write support in `AssignExpressionGenerator` using `putstatic`
+- Added `generateClinitMethod()` in `ClassProcessor` for static field initialization
+- Added static field read support in `MemberExpressionProcessor` using `getstatic`
+- Added static field write support in `AssignExpressionProcessor` using `putstatic`
 - Added static field type inference in `TypeResolver` for `ClassName.staticField` access
 - Static fields are collected and initialized in `<clinit>` method
 
 **Constructor Overloading and this() Calls (2026-01-25):**
-- Updated `ClassGenerator.generateBytecode()` to collect ALL explicit constructors (not just first)
+- Updated `ClassProcessor.generateBytecode()` to collect ALL explicit constructors (not just first)
 - Each constructor is generated via `generateExplicitConstructor()` with its own descriptor
-- Added `generateThisConstructorCall()` in `CallExpressionGenerator` for `this()` calls
-- Updated `ClassGenerator` to detect both `super()` and `this()` calls before injecting implicit `super()`
+- Added `generateThisConstructorCall()` in `CallExpressionProcessor` for `this()` calls
+- Updated `ClassProcessor` to detect both `super()` and `this()` calls before injecting implicit `super()`
 - Constructor chaining uses `invokespecial` to call another constructor in the same class
 - Method descriptor built from argument types for overload resolution
 
 **Abstract Classes Support (2026-01-25):**
-- Updated `ClassGenerator.generateBytecode()` to set ACC_ABSTRACT (0x0400) flag when `clazz.isAbstract()` is true
+- Updated `ClassProcessor.generateBytecode()` to set ACC_ABSTRACT (0x0400) flag when `clazz.isAbstract()` is true
 - Added `generateAbstractMethod()` in `MethodGenerator` for abstract method declarations
 - Abstract methods have ACC_ABSTRACT flag and no Code attribute (code = null)
 - Updated `TypeResolver.analyzeReturnType()` to handle null body for abstract methods
@@ -1209,7 +1209,7 @@ Field:
   - Added `List<String> interfaces` field to store interface names
   - Added `addInterface(String interfaceInternalName)` method
   - Updated `toByteArray()` to pre-add interfaces to constant pool and write interface indexes
-- Added `resolveInterfaces()` method in `ClassGenerator`:
+- Added `resolveInterfaces()` method in `ClassProcessor`:
   - Iterates over `clazz.getImplements()` list of `Swc4jAstTsExprWithTypeArgs`
   - Extracts interface name from `expr` (Swc4jAstIdent)
   - Resolves via type alias registry, Java type registry, or uses simple name as fallback
@@ -1227,7 +1227,7 @@ Field:
     - `Private` → `ACC_PRIVATE` (0x0002)
   - Updated regular method generation to use `getAccessFlags(method.getAccessibility())` instead of hardcoded ACC_PUBLIC
   - Updated abstract method generation similarly
-- Updated `ClassGenerator`:
+- Updated `ClassProcessor`:
   - Added same `getAccessFlags()` helper method
   - Updated field generation to use `getAccessFlags(prop.getAccessibility())` instead of hardcoded ACC_PUBLIC
 - Default behavior unchanged: when `accessibility` is empty (not specified), defaults to ACC_PUBLIC
@@ -1236,9 +1236,9 @@ Field:
 **ES2022 Private Fields Support (2026-01-25):**
 - Added support for ES2022 private fields (`#field` syntax) - both instance and static
 - Updated `ClassCollector` to register private field metadata via `Swc4jAstPrivateProp`
-- Updated `ClassGenerator` to generate private fields with ACC_PRIVATE flag
-- Updated `MemberExpressionGenerator` to handle `this.#field` and `ClassName.#field` access
-- Updated `AssignExpressionGenerator` to handle `this.#field = value` and `ClassName.#field = value` assignment
+- Updated `ClassProcessor` to generate private fields with ACC_PRIVATE flag
+- Updated `MemberExpressionProcessor` to handle `this.#field` and `ClassName.#field` access
+- Updated `AssignExpressionProcessor` to handle `this.#field = value` and `ClassName.#field = value` assignment
 - Updated `TypeResolver.inferTypeFromExpr` to properly infer types for private field access (instance and static)
 - Private fields are stored without the `#` prefix in JVM bytecode
 - Test coverage in `TestCompileAstClassPrivateFields.java`: 12 tests covering:
@@ -1270,4 +1270,4 @@ Field:
 - **JVM Specification:** Chapter 4.6 - Methods
 - **TypeScript Specification:** Classes
 - **ECMAScript Specification:** Class Definitions
-- **Existing Implementation:** ClassGenerator.java, MethodGenerator.java
+- **Existing Implementation:** ClassProcessor.java, MethodGenerator.java

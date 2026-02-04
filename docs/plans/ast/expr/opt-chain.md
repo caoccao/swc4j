@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting optional chaining 
 
 **Syntax:** `obj?.prop`, `obj?.method()`, `fn?.()`
 
-**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/OptionalChainExpressionGenerator.java` ✅ CREATED
+**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/OptionalChainExpressionProcessor.java` ✅ CREATED
 
 **Test File:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/optchain/TestCompileAstOptionalChain.java` ✅ CREATED
 
@@ -29,8 +29,8 @@ This document outlines the implementation plan for supporting optional chaining 
 ### Key Fixes Applied
 
 1. **Expression Generator Wiring**
-   - Added `Swc4jAstOptChainExpr` handling in `ExpressionGenerator`
-   - Initialized and exposed `OptionalChainExpressionGenerator`
+   - Added `Swc4jAstOptChainExpr` handling in `ExpressionProcessor`
+   - Initialized and exposed `OptionalChainExpressionProcessor`
 
 2. **Short-Circuit Control Flow**
    - Null checks at optional points
@@ -58,12 +58,12 @@ This document outlines the implementation plan for supporting optional chaining 
 
 ### Core Components
 
-- **OptionalChainExpressionGenerator**
+- **OptionalChainExpressionProcessor**
   - Emits null checks and short-circuit jumps
   - Boxes primitive results to `Object`
   - Handles optional member and call chains
 
-- **ExpressionGenerator**
+- **ExpressionProcessor**
   - Dispatches `Swc4jAstOptChainExpr`
 
 ### Bytecode Strategy

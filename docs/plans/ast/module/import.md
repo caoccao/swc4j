@@ -147,8 +147,8 @@ The Java import feature consists of several key components:
 1. **ScopedJavaTypeRegistry**: Manages Java class registrations with file-level scope isolation
 2. **ImportDeclProcessor**: Processes import declarations and registers Java classes using reflection (including inner classes)
 3. **JavaTypeInfo**: Stores metadata about imported Java classes (methods, constructors, descriptors, varargs info, etc.)
-4. **CallExpressionForClassGenerator**: Generates bytecode for Java static and instance method calls with varargs support
-5. **NewExpressionGenerator**: Generates bytecode for Java constructor calls
+4. **CallExpressionForClassProcessor**: Generates bytecode for Java static and instance method calls with varargs support
+5. **NewExpressionProcessor**: Generates bytecode for Java constructor calls
 6. **TypeResolver**: Enhanced to infer return types from Java methods and handle type conversions
 
 ### File-Level Import Isolation

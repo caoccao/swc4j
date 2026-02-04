@@ -13,7 +13,7 @@ while (i < 10) { /* body */ }
 while (true) { /* infinite loop */ }
 ```
 
-**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/WhileStatementGenerator.java` (to be created)
+**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/WhileStatementProcessor.java` (to be created)
 
 **Test File:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/whilestmt/TestCompileAstWhileStmt*.java` (to be created)
 
@@ -1101,12 +1101,12 @@ public static void generate(
         boolean generated = generateDirectConditionalJump(code, cp, binExpr, context, options);
         if (!generated) {
             // Fallback: generate boolean expression and use ifeq
-            ExpressionGenerator.generate(code, cp, testExpr, null, context, options);
+            ExpressionProcessor.generate(code, cp, testExpr, null, context, options);
             code.ifeq(0); // Placeholder
         }
     } else {
         // Non-binary expression: generate as boolean and use ifeq
-        ExpressionGenerator.generate(code, cp, testExpr, null, context, options);
+        ExpressionProcessor.generate(code, cp, testExpr, null, context, options);
         code.ifeq(0); // Placeholder
     }
 
@@ -1122,7 +1122,7 @@ public static void generate(
     context.pushContinueLabel(continueLabel);
 
     // 4. Generate body
-    StatementGenerator.generate(code, cp, whileStmt.getBody(), returnTypeInfo, context, options);
+    StatementProcessor.generate(code, cp, whileStmt.getBody(), returnTypeInfo, context, options);
 
     // 5. Mark continue label (continue jumps here, which is same as test)
     continueLabel.setTargetOffset(testLabel);
@@ -1213,11 +1213,11 @@ JVM requires consistent stack state at backward jump targets:
 
 ### Statement Generator
 
-Update `StatementGenerator.java` to dispatch WhileStmt:
+Update `StatementProcessor.java` to dispatch WhileStmt:
 
 ```java
 if (stmt instanceof Swc4jAstWhileStmt whileStmt) {
-    WhileStatementGenerator.generate(code, cp, whileStmt, returnTypeInfo, context, options);
+    WhileStatementProcessor.generate(code, cp, whileStmt, returnTypeInfo, context, options);
 }
 ```
 
@@ -1237,11 +1237,11 @@ Break and continue statements are already handled (implemented for for loops).
 
 ### Labeled Statement Support
 
-Reuse existing `LabeledStatementGenerator`:
+Reuse existing `LabeledStatementProcessor`:
 
 ```java
 if (body instanceof Swc4jAstWhileStmt whileStmt) {
-    WhileStatementGenerator.generate(code, cp, whileStmt, labelName, returnTypeInfo, context, options);
+    WhileStatementProcessor.generate(code, cp, whileStmt, labelName, returnTypeInfo, context, options);
 }
 ```
 
@@ -1356,7 +1356,7 @@ if (body instanceof Swc4jAstWhileStmt whileStmt) {
 ## Implementation Checklist
 
 ### Code Generation
-- [x] Create `WhileStatementGenerator.java`
+- [x] Create `WhileStatementProcessor.java`
 - [x] Implement `generate()` method for while loops
 - [x] Handle test condition evaluation
 - [x] Reuse break and continue statement generators
@@ -1366,8 +1366,8 @@ if (body instanceof Swc4jAstWhileStmt whileStmt) {
 - [x] Handle infinite loop patterns (while(true))
 
 ### Integration
-- [x] Add WhileStmt case to StatementGenerator dispatch
-- [x] Update LabeledStatementGenerator for while loops
+- [x] Add WhileStmt case to StatementProcessor dispatch
+- [x] Update LabeledStatementProcessor for while loops
 - [x] Ensure expression generator works for test condition
 - [x] Handle nested loops correctly
 - [x] Add debug/line number information
@@ -1400,8 +1400,8 @@ if (body instanceof Swc4jAstWhileStmt whileStmt) {
 - **JavaScript Specification:** ECMAScript Section 13.7.2 - The while Statement
 - **TypeScript Specification:** Section 5.3 - While Statements
 - **Java Language Specification:** Section 14.12 - The while Statement
-- **Existing Implementation:** ForStatementGenerator.java (for control flow patterns)
-- **Existing Implementation:** BreakStatementGenerator.java, ContinueStatementGenerator.java
+- **Existing Implementation:** ForStatementProcessor.java (for control flow patterns)
+- **Existing Implementation:** BreakStatementProcessor.java, ContinueStatementProcessor.java
 - **Test Reference:** TestCompileAstForStmt*.java (for test structure)
 
 ---
@@ -1432,10 +1432,10 @@ if (body instanceof Swc4jAstWhileStmt whileStmt) {
 - **Total: 4-6 hours**
 
 **Dependencies:**
-- ForStatementGenerator (for pattern reference)
-- BreakStatementGenerator (already implemented)
-- ContinueStatementGenerator (already implemented)
-- LabeledStatementGenerator (already implemented)
+- ForStatementProcessor (for pattern reference)
+- BreakStatementProcessor (already implemented)
+- ContinueStatementProcessor (already implemented)
+- LabeledStatementProcessor (already implemented)
 - CompilationContext label stacks (already implemented)
 
 **Complexity: LOW** - Simpler version of for loops with existing infrastructure

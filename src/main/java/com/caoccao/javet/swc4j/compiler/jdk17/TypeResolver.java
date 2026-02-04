@@ -624,7 +624,7 @@ public final class TypeResolver {
             throw new RuntimeException("Failed to generate functional interface", e);
         }
 
-        // Register the interface so ArrowExpressionGenerator can look up parameter types
+        // Register the interface so ArrowExpressionProcessor can look up parameter types
         compiler.getMemory().getScopedFunctionalInterfaceRegistry().register(
                 interfaceName,
                 "call",

@@ -1438,7 +1438,7 @@ The following TypeScript interface features are NOT supported:
 - [JVM Specification - Interfaces](https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html)
 - [TypeScript Handbook - Interfaces](https://www.typescriptlang.org/docs/handbook/interfaces.html)
 - [Java Naming Conventions](https://www.oracle.com/java/technologies/javase/codeconventions-namingconventions.html)
-- Existing class implementation: `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/ClassGenerator.java`
+- Existing class implementation: `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/ClassProcessor.java`
 
 ---
 

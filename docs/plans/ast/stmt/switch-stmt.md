@@ -60,7 +60,7 @@ switch (expression) {
 }
 ```
 
-**Implementation File:** ✅ `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/SwitchStatementGenerator.java` (CREATED)
+**Implementation File:** ✅ `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/SwitchStatementProcessor.java` (CREATED)
 
 **Test Files:** ✅ `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/switchstmt/TestCompileAstSwitchStmt*.java` (8 files created)
 
@@ -73,7 +73,7 @@ switch (expression) {
 ### What's Been Implemented (Updated 2026-01-21)
 
 **Core Infrastructure:**
-1. ✅ `SwitchStatementGenerator.java` - Main generator for switch statements
+1. ✅ `SwitchStatementProcessor.java` - Main generator for switch statements
    - tableswitch vs lookupswitch selection (density threshold: 50%)
    - Case analysis and duplicate detection
    - Fall-through detection and proper bytecode generation
@@ -95,7 +95,7 @@ switch (expression) {
    - Manages TypeRegistry and ScopedTypeRegistry lifecycle
    - Coordinates type collection and resolution phases
 
-5. ✅ `StackMapGenerator` enhancements
+5. ✅ `StackMapProcessor` enhancements
    - Added tableswitch (0xAA) and lookupswitch (0xAB) instruction support
    - Proper branch target identification for all case labels
    - Fixed method parameter initialization in initial frames
@@ -1677,7 +1677,7 @@ outer: switch (x) {
 
 ### Core Files to Create
 
-1. **SwitchStatementGenerator.java**
+1. **SwitchStatementProcessor.java**
    - Main generator for switch statements
    - tableswitch vs lookupswitch selection logic
    - Case label management
@@ -1698,9 +1698,9 @@ outer: switch (x) {
 
 ### Core Files to Modify
 
-1. **StatementGenerator.java**
+1. **StatementProcessor.java**
    - Add dispatch for `Swc4jAstSwitchStmt`
-   - Route to `SwitchStatementGenerator.generate()`
+   - Route to `SwitchStatementProcessor.generate()`
 
 2. **CompilationContext.java**
    - Add switch break label stack management
@@ -1710,7 +1710,7 @@ outer: switch (x) {
    - Analyze switch body as single scope
    - Handle variable declarations in cases
 
-4. **BreakStatementGenerator.java**
+4. **BreakStatementProcessor.java**
    - May need updates to handle switch break labels
    - Should already work with label stack
 
@@ -2050,7 +2050,7 @@ context.getLocalVariableTable().exitScope();
 **Effort:** HIGH (complex instruction selection, string handling, fall-through semantics)
 
 **Time Estimate:**
-- SwitchStatementGenerator core: 4-6 hours
+- SwitchStatementProcessor core: 4-6 hours
 - tableswitch/lookupswitch selection: 2-3 hours
 - String switch support: 3-4 hours
 - Fall-through logic: 2-3 hours
@@ -2060,10 +2060,10 @@ context.getLocalVariableTable().exitScope();
 - **Total: 19-28 hours**
 
 **Dependencies:**
-- BreakStatementGenerator (already implemented)
-- LabeledStatementGenerator (already implemented)
+- BreakStatementProcessor (already implemented)
+- LabeledStatementProcessor (already implemented)
 - CompilationContext label stacks (already implemented)
-- ExpressionGenerator (for discriminant and case expressions)
+- ExpressionProcessor (for discriminant and case expressions)
 - TypeResolver (for type checking)
 - **TsEnumDecl support (COMPLETED 2026-01-19):**
   - TypeScript enums compile to Java enums with ordinal() method

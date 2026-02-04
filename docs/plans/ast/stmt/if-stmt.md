@@ -13,7 +13,7 @@ if (condition) { consequent } else { alternate }
 if (c1) { b1 } else if (c2) { b2 } else { b3 }
 ```
 
-**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/IfStatementGenerator.java` ✅
+**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/IfStatementProcessor.java` ✅
 
 **Test File:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/TestCompileAstIfStmt.java` ✅
 
@@ -841,7 +841,7 @@ public static void generate(
         ByteCodeCompilerOptions options) {
 
     // 1. Generate test condition
-    ExpressionGenerator.generate(code, cp, ifStmt.getTest(), ...);
+    ExpressionProcessor.generate(code, cp, ifStmt.getTest(), ...);
 
     // 2. Jump if condition is false
     code.ifeq(0); // Placeholder
@@ -849,7 +849,7 @@ public static void generate(
     int ifeqOpcode = code.getCurrentOffset() - 3;
 
     // 3. Generate consequent
-    StatementGenerator.generate(code, cp, ifStmt.getCons(), ...);
+    StatementProcessor.generate(code, cp, ifStmt.getCons(), ...);
 
     // 4. If there's an alternate, add goto and generate it
     if (ifStmt.getAlt().isPresent()) {
@@ -858,7 +858,7 @@ public static void generate(
         int gotoOpcode = code.getCurrentOffset() - 3;
 
         int elseLabel = code.getCurrentOffset();
-        StatementGenerator.generate(code, cp, ifStmt.getAlt().get(), ...);
+        StatementProcessor.generate(code, cp, ifStmt.getAlt().get(), ...);
 
         int endLabel = code.getCurrentOffset();
 
@@ -932,11 +932,11 @@ if (condition) {
 
 ### Statement Generator
 
-Update `StatementGenerator.java` to dispatch IfStmt:
+Update `StatementProcessor.java` to dispatch IfStmt:
 
 ```java
 if (stmt instanceof Swc4jAstIfStmt ifStmt) {
-    IfStatementGenerator.generate(code, cp, ifStmt, context, options);
+    IfStatementProcessor.generate(code, cp, ifStmt, context, options);
 }
 ```
 
@@ -1065,7 +1065,7 @@ CompilationContext must track:
 ## Implementation Checklist
 
 ### Code Generation
-- [x] Create `IfStatementGenerator.java` ✅
+- [x] Create `IfStatementProcessor.java` ✅
 - [x] Implement `generate()` method ✅
 - [x] Add label generation and management ✅
 - [x] Handle if-only (no else) ✅
@@ -1076,7 +1076,7 @@ CompilationContext must track:
 - [x] Add local variable scope tracking ✅
 
 ### Integration
-- [x] Add IfStmt case to StatementGenerator dispatch ✅
+- [x] Add IfStmt case to StatementProcessor dispatch ✅
 - [x] Ensure expression generator works for conditions ✅
 - [x] Handle block statement generation ✅
 - [x] Track variable scopes across branches ✅
@@ -1103,7 +1103,7 @@ CompilationContext must track:
 - **JavaScript Specification:** ECMAScript Section 13.6 - If Statement
 - **TypeScript Specification:** Section 5.4 - If, Do, and While Statements
 - **Java Language Specification:** Section 14.9 - If Statement
-- **Existing Implementation:** ConditionalExpressionGenerator.java (for conditional logic patterns)
+- **Existing Implementation:** ConditionalExpressionProcessor.java (for conditional logic patterns)
 - **Test Reference:** TestCompileAstCondExpr.java (for test structure)
 
 ---
@@ -1125,7 +1125,7 @@ CompilationContext must track:
 
 ### Files Created
 
-1. **IfStatementGenerator.java** (`src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/`)
+1. **IfStatementProcessor.java** (`src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/`)
    - Main generator for if statements
    - Methods:
      - `generate()` - Main entry point, dispatches to simple-if or if-else
@@ -1137,7 +1137,7 @@ CompilationContext must track:
      - Proper stackmap frame handling at merge points
      - Supports nested if statements and else-if chains (via recursion)
 
-2. **StatementGenerator.java** (`src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/`)
+2. **StatementProcessor.java** (`src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/`)
    - Central dispatcher for all statement types
    - Methods:
      - `generate()` - Main dispatcher (handles VarDecl, ExprStmt, ReturnStmt, IfStmt, BlockStmt)
@@ -1158,11 +1158,11 @@ CompilationContext must track:
 ### Files Modified
 
 1. **MethodGenerator.java**
-   - Simplified `generateCode()` method to use StatementGenerator
+   - Simplified `generateCode()` method to use StatementProcessor
    - Removed inline statement dispatch logic
    - Cleaner, more maintainable code
 
-2. **AssignExpressionGenerator.java**
+2. **AssignExpressionProcessor.java**
    - Added support for simple variable assignment (BindingIdent)
    - New case for `x = value` assignments to local variables
    - Proper type conversion and stack management
@@ -1175,20 +1175,20 @@ User Code (TypeScript)
   ↓
 If Statement AST (Swc4jAstIfStmt)
   ↓
-IfStatementGenerator.generate()
+IfStatementProcessor.generate()
   ↓
   ├─ generateSimpleIf() [if no alt]
-  │  ├─ ExpressionGenerator.generate(test)
+  │  ├─ ExpressionProcessor.generate(test)
   │  ├─ ifeq END
-  │  ├─ StatementGenerator.generate(cons)
+  │  ├─ StatementProcessor.generate(cons)
   │  └─ END: (patch ifeq offset)
   │
   └─ generateIfElse() [if alt present]
-     ├─ ExpressionGenerator.generate(test)
+     ├─ ExpressionProcessor.generate(test)
      ├─ ifeq ELSE
-     ├─ StatementGenerator.generate(cons)
+     ├─ StatementProcessor.generate(cons)
      ├─ goto END [if cons doesn't end with return]
-     ├─ ELSE: StatementGenerator.generate(alt)
+     ├─ ELSE: StatementProcessor.generate(alt)
      └─ END: (patch ifeq and goto offsets)
 ```
 
@@ -1311,9 +1311,9 @@ end:
 
 1. **Goto Optimization:** When a branch ends with a return statement, we skip generating the goto instruction since it's unreachable. This is detected by the `endsWithReturn()` helper method.
 
-2. **Statement Abstraction:** Created StatementGenerator as a central dispatcher for all statement types. This makes MethodGenerator cleaner and follows the same pattern as ExpressionGenerator.
+2. **Statement Abstraction:** Created StatementProcessor as a central dispatcher for all statement types. This makes MethodGenerator cleaner and follows the same pattern as ExpressionProcessor.
 
-3. **Block Statement Handling:** Block statements in if branches are handled recursively by StatementGenerator, which processes each statement in the block.
+3. **Block Statement Handling:** Block statements in if branches are handled recursively by StatementProcessor, which processes each statement in the block.
 
 4. **No Scope Management:** Current implementation doesn't manage block-level scopes for local variables (would be needed for Phase 6 edge cases like shadowing).
 
@@ -1331,14 +1331,14 @@ None for if-statement handling. Remaining compiler limitations are tracked in `d
 
 3. **Expression vs Statement:** The key difference from conditional expressions is that if statements don't leave values on the stack. This affects how we handle the branches.
 
-4. **Abstraction Benefits:** Creating StatementGenerator simplified both MethodGenerator and enabled if statement implementation to reuse statement generation logic.
+4. **Abstraction Benefits:** Creating StatementProcessor simplified both MethodGenerator and enabled if statement implementation to reuse statement generation logic.
 
 5. **Assignment as Expression:** Supporting if statements required implementing simple variable assignment (x = value), which wasn't needed for conditional expressions.
 
 ### Future Work
 
 1. Implement block scope for local variables
-2. Fix string comparison operator in BinaryExpressionGenerator
+2. Fix string comparison operator in BinaryExpressionProcessor
 3. Fix assignment type handling for mixed primitive types
 4. Add support for single-statement if bodies (no braces)
 5. Add variable declaration tests (const/let in if blocks)

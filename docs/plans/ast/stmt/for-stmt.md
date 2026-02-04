@@ -14,7 +14,7 @@ for (; condition; ) { /* body */ }        // init and update optional
 for (;;) { /* infinite loop */ }          // all parts optional
 ```
 
-**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/ForStatementGenerator.java` (to be created)
+**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/ForStatementProcessor.java` (to be created)
 
 **Test File:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/forstmt/TestCompileAstForStmt*.java` (to be created)
 
@@ -1080,7 +1080,7 @@ public static void generate(
 
     // 3. Generate test condition (if present)
     if (forStmt.getTest().isPresent()) {
-        ExpressionGenerator.generate(code, cp, forStmt.getTest().get(), ...);
+        ExpressionProcessor.generate(code, cp, forStmt.getTest().get(), ...);
         code.ifeq(0); // Placeholder
         int ifeqPos = code.getCurrentOffset() - 2;
         int ifeqOpcode = code.getCurrentOffset() - 3;
@@ -1093,12 +1093,12 @@ public static void generate(
     }
 
     // 4. Generate body
-    StatementGenerator.generate(code, cp, forStmt.getBody(), returnTypeInfo, context, options);
+    StatementProcessor.generate(code, cp, forStmt.getBody(), returnTypeInfo, context, options);
 
     // 5. Generate update (if present)
     int updateLabel = code.getCurrentOffset();
     if (forStmt.getUpdate().isPresent()) {
-        ExpressionGenerator.generate(code, cp, forStmt.getUpdate().get(), null, context, options);
+        ExpressionProcessor.generate(code, cp, forStmt.getUpdate().get(), null, context, options);
         // Pop result if update leaves value on stack
         String updateType = TypeResolver.inferTypeFromExpr(forStmt.getUpdate().get(), context, options);
         if (updateType != null && !updateType.equals("V")) {
@@ -1201,11 +1201,11 @@ JVM requires consistent stack state at backward jump targets:
 
 ### Statement Generator
 
-Update `StatementGenerator.java` to dispatch ForStmt:
+Update `StatementProcessor.java` to dispatch ForStmt:
 
 ```java
 if (stmt instanceof Swc4jAstForStmt forStmt) {
-    ForStatementGenerator.generate(code, cp, forStmt, returnTypeInfo, context, options);
+    ForStatementProcessor.generate(code, cp, forStmt, returnTypeInfo, context, options);
 }
 ```
 
@@ -1213,11 +1213,11 @@ Also handle break and continue statements:
 
 ```java
 if (stmt instanceof Swc4jAstBreakStmt breakStmt) {
-    BreakStatementGenerator.generate(code, cp, breakStmt, context, options);
+    BreakStatementProcessor.generate(code, cp, breakStmt, context, options);
 }
 
 if (stmt instanceof Swc4jAstContinueStmt continueStmt) {
-    ContinueStatementGenerator.generate(code, cp, continueStmt, context, options);
+    ContinueStatementProcessor.generate(code, cp, continueStmt, context, options);
 }
 ```
 
@@ -1352,9 +1352,9 @@ CompilationContext must track:
 ## Implementation Checklist
 
 ### Code Generation
-- [x] Create `ForStatementGenerator.java`
-- [x] Create `BreakStatementGenerator.java`
-- [x] Create `ContinueStatementGenerator.java`
+- [x] Create `ForStatementProcessor.java`
+- [x] Create `BreakStatementProcessor.java`
+- [x] Create `ContinueStatementProcessor.java`
 - [x] Implement `generate()` method for for loops
 - [x] Handle optional init, test, update components
 - [x] Handle break and continue statements
@@ -1364,9 +1364,9 @@ CompilationContext must track:
 - [x] Add break/continue label stack to CompilationContext
 
 ### Integration
-- [x] Add ForStmt case to StatementGenerator dispatch
-- [x] Add BreakStmt case to StatementGenerator dispatch
-- [x] Add ContinueStmt case to StatementGenerator dispatch
+- [x] Add ForStmt case to StatementProcessor dispatch
+- [x] Add BreakStmt case to StatementProcessor dispatch
+- [x] Add ContinueStmt case to StatementProcessor dispatch
 - [x] Ensure expression generator works for init/test/update
 - [x] Handle VarDecl in init
 - [x] Track loop variable scopes
@@ -1402,7 +1402,7 @@ CompilationContext must track:
 - **JavaScript Specification:** ECMAScript Section 13.7.4 - The for Statement
 - **TypeScript Specification:** Section 5.5 - For Statements
 - **Java Language Specification:** Section 14.14 - The for Statement
-- **Existing Implementation:** IfStatementGenerator.java (for control flow patterns)
+- **Existing Implementation:** IfStatementProcessor.java (for control flow patterns)
 - **Test Reference:** TestCompileAstIfStmt*.java (for test structure)
 
 ---
@@ -1428,18 +1428,18 @@ CompilationContext must track:
 ### Completed (2026-01-19)
 
 ✅ **Core Implementation:**
-- Created `ForStatementGenerator.java` with full for loop code generation
-- Created `BreakStatementGenerator.java` for break statement support
-- Created `ContinueStatementGenerator.java` for continue statement support
+- Created `ForStatementProcessor.java` with full for loop code generation
+- Created `BreakStatementProcessor.java` for break statement support
+- Created `ContinueStatementProcessor.java` for continue statement support
 - Updated `CompilationContext.java` with break/continue label stacks and patch tracking
-- Updated `StatementGenerator.java` to dispatch ForStmt, BreakStmt, ContinueStmt
+- Updated `StatementProcessor.java` to dispatch ForStmt, BreakStmt, ContinueStmt
 - Updated `VariableAnalyzer.java` to recursively analyze for loop variable declarations with scoping support
 - Implemented scope stack in `LocalVariableTable` for proper variable shadowing
 - Fixed `TypeResolver.inferTypeFromExpr` for compound assignments
-- Fixed `StackMapGenerator.findBranchTargets` to properly skip instruction operands
-- Fixed `IfStatementGenerator` to detect break/continue as unconditional jumps
-- Created `LabeledStatementGenerator` for labeled statement support
-- Updated `BreakStatementGenerator` and `ContinueStatementGenerator` to handle labeled jumps
+- Fixed `StackMapProcessor.findBranchTargets` to properly skip instruction operands
+- Fixed `IfStatementProcessor` to detect break/continue as unconditional jumps
+- Created `LabeledStatementProcessor` for labeled statement support
+- Updated `BreakStatementProcessor` and `ContinueStatementProcessor` to handle labeled jumps
 - Added label search methods to `CompilationContext`
 - Updated `VariableAnalyzer` to analyze labeled statement bodies
 
@@ -1495,7 +1495,7 @@ for (let i: int = 0; i < arr.length; i++) {
 }
 ```
 
-**Root Cause:** The `StackMapGenerator.simulateInstruction` method was missing handlers for array operations:
+**Root Cause:** The `StackMapProcessor.simulateInstruction` method was missing handlers for array operations:
 - Array load instructions: `iaload`, `laload`, `faload`, `daload`, `aaload`, `baload`, `caload`, `saload`
 - Array store instructions: `iastore`, `lastore`, `fastore`, `dastore`, `aastore`, `bastore`, `castore`, `sastore`
 - Array length instruction: `arraylength`
@@ -1503,7 +1503,7 @@ for (let i: int = 0; i < arr.length; i++) {
 
 Without these handlers, the data flow analysis in stack map frame generation could not correctly track the stack state, causing the work queue to never converge.
 
-**Fix:** Added proper stack effect simulation for all array operations in `StackMapGenerator.java`:
+**Fix:** Added proper stack effect simulation for all array operations in `StackMapProcessor.java`:
 - Array loads: pop arrayref and index, push element type
 - Array stores: pop arrayref, index, and value
 - arraylength: pop arrayref, push int

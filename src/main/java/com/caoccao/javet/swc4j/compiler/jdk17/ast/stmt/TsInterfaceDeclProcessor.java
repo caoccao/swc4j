@@ -1,0 +1,721 @@
+/*
+ * Copyright (c) 2026. caoccao.com Sam Cao
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
+
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsTypeElement;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsInterfaceDecl;
+import com.caoccao.javet.swc4j.ast.ts.*;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
+import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Generates JVM bytecode for TypeScript interface declarations.
+ * Converts TypeScript interfaces to Java interfaces with abstract getter/setter methods.
+ */
+public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsInterfaceDecl> {
+    /**
+     * ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT
+     */
+    private static final int INTERFACE_ACCESS_FLAGS = 0x0001 | 0x0200 | 0x0400;
+
+    /**
+     * ACC_PUBLIC | ACC_ABSTRACT
+     */
+    private static final int METHOD_ACCESS_FLAGS = 0x0001 | 0x0400;
+
+    public TsInterfaceDeclProcessor(ByteCodeCompiler compiler) {
+        super(compiler);
+    }
+
+    /**
+     * Builds a generic class signature for Java bytecode.
+     * For example: {@code <T:Ljava/lang/Object;>Ljava/lang/Object;} or
+     * {@code <T:Ljava/lang/Number;>Ljava/lang/Object;}
+     *
+     * @param typeParams         the type parameter declaration
+     * @param extendedInterfaces the extended interfaces
+     * @return the generic class signature, or null if no type parameters
+     */
+    private String buildClassSignature(Swc4jAstTsTypeParamDecl typeParams, String[] extendedInterfaces) {
+        if (typeParams == null || typeParams.getParams().isEmpty()) {
+            return null;
+        }
+
+        StringBuilder signature = new StringBuilder("<");
+        for (Swc4jAstTsTypeParam param : typeParams.getParams()) {
+            String paramName = param.getName().getSym();
+            signature.append(paramName);
+            signature.append(":");
+
+            // Handle constraint (extends)
+            if (param.getConstraint().isPresent()) {
+                String constraintSignature = mapTsTypeToSignature(param.getConstraint().get());
+                signature.append(constraintSignature);
+            } else {
+                signature.append("Ljava/lang/Object;");
+            }
+        }
+        signature.append(">");
+
+        // Add superclass (always Object for interfaces)
+        signature.append("Ljava/lang/Object;");
+
+        // Add extended interfaces with their signatures
+        for (String iface : extendedInterfaces) {
+            signature.append("L").append(iface).append(";");
+        }
+
+        return signature.toString();
+    }
+
+    private String capitalize(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
+
+    /**
+     * Collects the set of type parameter names from the interface declaration.
+     *
+     * @param interfaceDecl the interface declaration
+     * @return set of type parameter names
+     */
+    private Set<String> collectTypeParameterNames(Swc4jAstTsInterfaceDecl interfaceDecl) {
+        Set<String> names = new HashSet<>();
+        if (interfaceDecl.getTypeParams().isPresent()) {
+            for (Swc4jAstTsTypeParam param : interfaceDecl.getTypeParams().get().getParams()) {
+                names.add(param.getName().getSym());
+            }
+        }
+        return names;
+    }
+
+    @Override
+    public void generate(CodeBuilder code, ClassWriter classWriter, Swc4jAstTsInterfaceDecl tsInterfaceDecl, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        String currentPackage = compiler.getMemory().getScopedPackage().getCurrentPackage();
+        String interfaceName = tsInterfaceDecl.getId().getSym();
+        String fullClassName = currentPackage.isEmpty() ? interfaceName : currentPackage + "." + interfaceName;
+        String internalClassName = fullClassName.replace('.', '/');
+        // Skip ambient declarations
+        if (tsInterfaceDecl.isDeclare()) {
+            return;
+        }
+
+        // Collect extended interfaces
+        String[] extendedInterfaces = processExtends(tsInterfaceDecl.getExtends());
+
+        // Create ClassWriter with java/lang/Object as superclass (interfaces always extend Object)
+        classWriter = new ClassWriter(internalClassName, "java/lang/Object", extendedInterfaces);
+
+        // Set interface flags: ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT
+        classWriter.setAccessFlags(INTERFACE_ACCESS_FLAGS);
+
+        // Collect type parameter names for this interface
+        Set<String> typeParamNames = collectTypeParameterNames(tsInterfaceDecl);
+
+        // Build and set class signature for generic interfaces
+        if (tsInterfaceDecl.getTypeParams().isPresent()) {
+            String classSignature = buildClassSignature(tsInterfaceDecl.getTypeParams().get(), extendedInterfaces);
+            if (classSignature != null) {
+                classWriter.setClassSignature(classSignature);
+            }
+        }
+
+        // Track abstract methods to detect functional interfaces (SAM)
+        List<MethodInfo> abstractMethods = new ArrayList<>();
+
+        // Process body members
+        for (ISwc4jAstTsTypeElement element : tsInterfaceDecl.getBody().getBody()) {
+            if (element instanceof Swc4jAstTsPropertySignature prop) {
+                generatePropertyMethods(classWriter, prop, typeParamNames);
+                // Properties generate getters/setters, not SAM candidates
+            } else if (element instanceof Swc4jAstTsMethodSignature method) {
+                MethodInfo methodInfo = generateMethod(classWriter, method, typeParamNames);
+                abstractMethods.add(methodInfo);
+            } else if (element instanceof Swc4jAstTsGetterSignature getter) {
+                generateGetterSignature(classWriter, getter, typeParamNames);
+                // Getters/setters are not SAM candidates
+            } else if (element instanceof Swc4jAstTsSetterSignature setter) {
+                generateSetterSignature(classWriter, setter, typeParamNames);
+            } else if (element instanceof Swc4jAstTsIndexSignature indexSig) {
+                generateIndexSignature(classWriter, indexSig, typeParamNames);
+                // Index signatures are not SAM candidates
+            } else if (element instanceof Swc4jAstTsCallSignatureDecl callSig) {
+                MethodInfo methodInfo = generateCallSignature(classWriter, callSig, typeParamNames);
+                abstractMethods.add(methodInfo);
+            } else if (element instanceof Swc4jAstTsConstructSignatureDecl constructSig) {
+                MethodInfo methodInfo = generateConstructSignature(classWriter, constructSig, typeParamNames);
+                abstractMethods.add(methodInfo);
+            }
+        }
+
+        // Register as functional interface if it has exactly one abstract method (SAM)
+        if (abstractMethods.size() == 1) {
+            MethodInfo samMethod = abstractMethods.get(0);
+            compiler.getMemory().getScopedFunctionalInterfaceRegistry().register(
+                    internalClassName,
+                    samMethod.methodName(),
+                    samMethod.paramTypes(),
+                    samMethod.returnType()
+            );
+        }
+
+        try {
+            byte[] bytecode = classWriter.toByteArray();
+            if (bytecode != null) {  // null means ambient declaration
+                compiler.getMemory().getByteCodeMap().put(fullClassName, bytecode);
+            }
+        } catch (IOException e) {
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), tsInterfaceDecl, "Failed to generate bytecode for interface", e);
+        }
+    }
+
+    /**
+     * Generates an abstract method for a call signature.
+     * Call signatures make interfaces callable (functional interfaces).
+     * The generated method is named "call" to match functional interface semantics.
+     * <p>
+     * Example: {@code (x: number): string} becomes {@code String call(int x)}
+     *
+     * @param classWriter    the class writer
+     * @param callSig        the call signature
+     * @param typeParamNames the set of type parameter names in scope
+     * @return MethodInfo for the generated method
+     */
+    private MethodInfo generateCallSignature(
+            ClassWriter classWriter,
+            Swc4jAstTsCallSignatureDecl callSig,
+            Set<String> typeParamNames) {
+        // Build method descriptor
+        StringBuilder paramDescriptors = new StringBuilder("(");
+        List<String> paramTypes = new ArrayList<>();
+        for (ISwc4jAstTsFnParam param : callSig.getParams()) {
+            String paramType = "Ljava/lang/Object;"; // Default
+            if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+                if (bindingIdent.getTypeAnn().isPresent()) {
+                    ISwc4jAstTsType type = bindingIdent.getTypeAnn().get().getTypeAnn();
+                    if (isTypeParameter(type, typeParamNames)) {
+                        paramType = "Ljava/lang/Object;";
+                    } else {
+                        paramType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+                    }
+                }
+            }
+            paramTypes.add(paramType);
+            paramDescriptors.append(paramType);
+        }
+        paramDescriptors.append(")");
+
+        // Get return type
+        String returnType = "V"; // Default to void
+        if (callSig.getTypeAnn().isPresent()) {
+            ISwc4jAstTsType type = callSig.getTypeAnn().get().getTypeAnn();
+            if (isTypeParameter(type, typeParamNames)) {
+                returnType = "Ljava/lang/Object;";
+            } else {
+                returnType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+            }
+        }
+
+        String descriptor = paramDescriptors + returnType;
+
+        // Add abstract method named "call"
+        classWriter.addMethod(
+                METHOD_ACCESS_FLAGS,
+                "call",
+                descriptor,
+                null, // No code for abstract methods
+                0,    // max stack
+                0     // max locals
+        );
+
+        return new MethodInfo("call", paramTypes, returnType, descriptor);
+    }
+
+    /**
+     * Generates an abstract factory method for a construct signature.
+     * Construct signatures represent constructor patterns.
+     * The generated method is named "create" to match factory pattern semantics.
+     * <p>
+     * Example: {@code new (name: string): Person} becomes {@code Person create(String name)}
+     *
+     * @param classWriter    the class writer
+     * @param constructSig   the construct signature
+     * @param typeParamNames the set of type parameter names in scope
+     * @return MethodInfo for the generated method
+     */
+    private MethodInfo generateConstructSignature(
+            ClassWriter classWriter,
+            Swc4jAstTsConstructSignatureDecl constructSig,
+            Set<String> typeParamNames) {
+        // Build method descriptor
+        StringBuilder paramDescriptors = new StringBuilder("(");
+        List<String> paramTypes = new ArrayList<>();
+        for (ISwc4jAstTsFnParam param : constructSig.getParams()) {
+            String paramType = "Ljava/lang/Object;"; // Default
+            if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+                if (bindingIdent.getTypeAnn().isPresent()) {
+                    ISwc4jAstTsType type = bindingIdent.getTypeAnn().get().getTypeAnn();
+                    if (isTypeParameter(type, typeParamNames)) {
+                        paramType = "Ljava/lang/Object;";
+                    } else {
+                        paramType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+                    }
+                }
+            }
+            paramTypes.add(paramType);
+            paramDescriptors.append(paramType);
+        }
+        paramDescriptors.append(")");
+
+        // Get return type (the type being constructed)
+        String returnType = "Ljava/lang/Object;"; // Default to Object
+        if (constructSig.getTypeAnn().isPresent()) {
+            ISwc4jAstTsType type = constructSig.getTypeAnn().get().getTypeAnn();
+            if (isTypeParameter(type, typeParamNames)) {
+                returnType = "Ljava/lang/Object;";
+            } else {
+                returnType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+            }
+        }
+
+        String descriptor = paramDescriptors + returnType;
+
+        // Add abstract method named "create"
+        classWriter.addMethod(
+                METHOD_ACCESS_FLAGS,
+                "create",
+                descriptor,
+                null, // No code for abstract methods
+                0,    // max stack
+                0     // max locals
+        );
+
+        return new MethodInfo("create", paramTypes, returnType, descriptor);
+    }
+
+    /**
+     * Generates an abstract getter method for an explicit getter signature.
+     *
+     * @param classWriter    the class writer
+     * @param getter         the getter signature
+     * @param typeParamNames the set of type parameter names in scope
+     */
+    private void generateGetterSignature(
+            ClassWriter classWriter,
+            Swc4jAstTsGetterSignature getter,
+            Set<String> typeParamNames) {
+        String propName = getPropertyName(getter.getKey());
+
+        // Get type descriptor (use Object for type parameters)
+        String descriptor = "Ljava/lang/Object;"; // Default
+        if (getter.getTypeAnn().isPresent()) {
+            ISwc4jAstTsType type = getter.getTypeAnn().get().getTypeAnn();
+            if (isTypeParameter(type, typeParamNames)) {
+                descriptor = "Ljava/lang/Object;";
+            } else {
+                descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+            }
+        }
+
+        // Generate getter method with proper name
+        String getterName = getGetterName(propName, descriptor);
+        String getterDescriptor = "()" + descriptor;
+        classWriter.addMethod(
+                METHOD_ACCESS_FLAGS,
+                getterName,
+                getterDescriptor,
+                null, // No code for abstract methods
+                0,    // max stack
+                0     // max locals
+        );
+    }
+
+    /**
+     * Generates abstract get/set methods for an index signature.
+     * Index signatures like {@code [key: string]: number} are translated to:
+     * - {@code Object get(String key)} - getter method
+     * - {@code void set(String key, double value)} - setter method (if not readonly)
+     *
+     * @param classWriter    the class writer
+     * @param indexSig       the index signature
+     * @param typeParamNames the set of type parameter names in scope
+     */
+    private void generateIndexSignature(
+            ClassWriter classWriter,
+            Swc4jAstTsIndexSignature indexSig,
+            Set<String> typeParamNames) {
+        // Get key type from params (first parameter)
+        String keyDescriptor = "Ljava/lang/Object;"; // Default
+        if (!indexSig.getParams().isEmpty()) {
+            ISwc4jAstTsFnParam param = indexSig.getParams().get(0);
+            if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+                if (bindingIdent.getTypeAnn().isPresent()) {
+                    ISwc4jAstTsType keyType = bindingIdent.getTypeAnn().get().getTypeAnn();
+                    if (isTypeParameter(keyType, typeParamNames)) {
+                        keyDescriptor = "Ljava/lang/Object;";
+                    } else {
+                        keyDescriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(keyType);
+                    }
+                }
+            }
+        }
+
+        // Get value type from typeAnn
+        String valueDescriptor = "Ljava/lang/Object;"; // Default
+        if (indexSig.getTypeAnn().isPresent()) {
+            ISwc4jAstTsType valueType = indexSig.getTypeAnn().get().getTypeAnn();
+            if (isTypeParameter(valueType, typeParamNames)) {
+                valueDescriptor = "Ljava/lang/Object;";
+            } else {
+                valueDescriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(valueType);
+            }
+        }
+
+        // Generate getter: Object get(KeyType key)
+        String getterDescriptor = "(" + keyDescriptor + ")" + valueDescriptor;
+        classWriter.addMethod(
+                METHOD_ACCESS_FLAGS,
+                "get",
+                getterDescriptor,
+                null, // No code for abstract methods
+                0,    // max stack
+                0     // max locals
+        );
+
+        // Generate setter (if not readonly): void set(KeyType key, ValueType value)
+        if (!indexSig.isReadonly()) {
+            String setterDescriptor = "(" + keyDescriptor + valueDescriptor + ")V";
+            classWriter.addMethod(
+                    METHOD_ACCESS_FLAGS,
+                    "set",
+                    setterDescriptor,
+                    null, // No code for abstract methods
+                    0,    // max stack
+                    0     // max locals
+            );
+        }
+    }
+
+    /**
+     * Generates an abstract method for a method signature.
+     *
+     * @param classWriter    the class writer
+     * @param method         the method signature
+     * @param typeParamNames the set of type parameter names in scope
+     * @return MethodInfo for the generated method
+     */
+    private MethodInfo generateMethod(
+            ClassWriter classWriter,
+            Swc4jAstTsMethodSignature method,
+            Set<String> typeParamNames) {
+        String methodName = getPropertyName(method.getKey());
+
+        // Build method descriptor
+        StringBuilder paramDescriptors = new StringBuilder("(");
+        List<String> paramTypes = new ArrayList<>();
+        for (ISwc4jAstTsFnParam param : method.getParams()) {
+            String paramType = "Ljava/lang/Object;"; // Default
+            if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+                if (bindingIdent.getTypeAnn().isPresent()) {
+                    ISwc4jAstTsType type = bindingIdent.getTypeAnn().get().getTypeAnn();
+                    if (isTypeParameter(type, typeParamNames)) {
+                        paramType = "Ljava/lang/Object;";
+                    } else {
+                        paramType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+                    }
+                }
+            }
+            paramTypes.add(paramType);
+            paramDescriptors.append(paramType);
+        }
+        paramDescriptors.append(")");
+
+        // Get return type
+        String returnType = "V"; // Default to void
+        if (method.getTypeAnn().isPresent()) {
+            ISwc4jAstTsType type = method.getTypeAnn().get().getTypeAnn();
+            if (isTypeParameter(type, typeParamNames)) {
+                returnType = "Ljava/lang/Object;";
+            } else {
+                returnType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+            }
+        }
+
+        String descriptor = paramDescriptors + returnType;
+
+        // Add abstract method (no code)
+        classWriter.addMethod(
+                METHOD_ACCESS_FLAGS,
+                methodName,
+                descriptor,
+                null, // No code for abstract methods
+                0,    // max stack
+                0     // max locals
+        );
+
+        return new MethodInfo(methodName, paramTypes, returnType, descriptor);
+    }
+
+    /**
+     * Generates getter and optional setter methods for a property signature.
+     *
+     * @param classWriter    the class writer
+     * @param prop           the property signature
+     * @param typeParamNames the set of type parameter names in scope
+     */
+    private void generatePropertyMethods(
+            ClassWriter classWriter,
+            Swc4jAstTsPropertySignature prop,
+            Set<String> typeParamNames) {
+        String propName = getPropertyName(prop.getKey());
+
+        // Get type descriptor (use Object for type parameters)
+        String descriptor = "Ljava/lang/Object;"; // Default
+        if (prop.getTypeAnn().isPresent()) {
+            ISwc4jAstTsType type = prop.getTypeAnn().get().getTypeAnn();
+            if (isTypeParameter(type, typeParamNames)) {
+                descriptor = "Ljava/lang/Object;";
+            } else {
+                descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+            }
+        }
+
+        // Generate getter
+        String getterName = getGetterName(propName, descriptor);
+        String getterDescriptor = "()" + descriptor;
+        classWriter.addMethod(
+                METHOD_ACCESS_FLAGS,
+                getterName,
+                getterDescriptor,
+                null, // No code for abstract methods
+                0,    // max stack
+                0     // max locals
+        );
+
+        // Generate setter (if not readonly)
+        if (!prop.isReadonly()) {
+            String setterName = "set" + capitalize(propName);
+            String setterDescriptor = "(" + descriptor + ")V";
+            classWriter.addMethod(
+                    METHOD_ACCESS_FLAGS,
+                    setterName,
+                    setterDescriptor,
+                    null, // No code for abstract methods
+                    0,    // max stack
+                    0     // max locals
+            );
+        }
+    }
+
+    /**
+     * Generates an abstract setter method for an explicit setter signature.
+     *
+     * @param classWriter    the class writer
+     * @param setter         the setter signature
+     * @param typeParamNames the set of type parameter names in scope
+     */
+    private void generateSetterSignature(
+            ClassWriter classWriter,
+            Swc4jAstTsSetterSignature setter,
+            Set<String> typeParamNames) {
+        String propName = getPropertyName(setter.getKey());
+
+        // Get type descriptor from parameter (use Object for type parameters)
+        String descriptor = "Ljava/lang/Object;"; // Default
+        ISwc4jAstTsFnParam param = setter.getParam();
+        if (param instanceof Swc4jAstBindingIdent bindingIdent) {
+            if (bindingIdent.getTypeAnn().isPresent()) {
+                ISwc4jAstTsType type = bindingIdent.getTypeAnn().get().getTypeAnn();
+                if (isTypeParameter(type, typeParamNames)) {
+                    descriptor = "Ljava/lang/Object;";
+                } else {
+                    descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
+                }
+            }
+        }
+
+        // Generate setter method
+        String setterName = "set" + capitalize(propName);
+        String setterDescriptor = "(" + descriptor + ")V";
+        classWriter.addMethod(
+                METHOD_ACCESS_FLAGS,
+                setterName,
+                setterDescriptor,
+                null, // No code for abstract methods
+                0,    // max stack
+                0     // max locals
+        );
+    }
+
+    /**
+     * Gets the getter method name following Java naming conventions.
+     *
+     * @param propName   the property name
+     * @param descriptor the type descriptor
+     * @return the getter method name
+     */
+    private String getGetterName(String propName, String descriptor) {
+        if ("Z".equals(descriptor)) {
+            // Boolean: use 'is' prefix unless already prefixed
+            if (propName.startsWith("is") || propName.startsWith("has") || propName.startsWith("can")) {
+                return propName;
+            }
+            return "is" + capitalize(propName);
+        }
+        return "get" + capitalize(propName);
+    }
+
+    /**
+     * Extracts property name from a key expression.
+     *
+     * @param key the key expression
+     * @return the property name
+     */
+    private String getPropertyName(ISwc4jAstExpr key) {
+        if (key instanceof Swc4jAstIdent ident) {
+            return ident.getSym();
+        }
+        return key.toString();
+    }
+
+    /**
+     * Checks if a TypeScript type is a type parameter reference.
+     *
+     * @param type           the TypeScript type
+     * @param typeParamNames the set of type parameter names in scope
+     * @return true if the type is a type parameter reference
+     */
+    private boolean isTypeParameter(ISwc4jAstTsType type, Set<String> typeParamNames) {
+        if (type instanceof Swc4jAstTsTypeRef typeRef) {
+            var typeName = typeRef.getTypeName();
+            if (typeName instanceof Swc4jAstIdent ident) {
+                return typeParamNames.contains(ident.getSym());
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Maps a TypeScript type to a Java generic signature for use in class signature bounds.
+     * For example, maps 'number' to 'Ljava/lang/Number;' or a type parameter 'T' to 'TT;'.
+     * <p>
+     * Uses the type alias registry and java type registry for name resolution instead of
+     * hardcoded mappings.
+     *
+     * @param type the TypeScript type
+     * @return the Java generic signature (always a reference type for bounds)
+     */
+    private String mapTsTypeToSignature(ISwc4jAstTsType type) {
+        if (type instanceof Swc4jAstTsTypeRef typeRef) {
+            var typeName = typeRef.getTypeName();
+            if (typeName instanceof Swc4jAstIdent ident) {
+                String name = ident.getSym();
+                return mapTypeNameToSignature(name);
+            } else if (typeName instanceof Swc4jAstTsQualifiedName) {
+                // Handle qualified names like com.example.MyClass
+                String qualifiedName = AstUtils.extractQualifiedName(typeRef.getTypeName());
+                if (qualifiedName != null) {
+                    return "L" + qualifiedName.replace('.', '/') + ";";
+                }
+            }
+        } else if (type instanceof Swc4jAstTsKeywordType keywordType) {
+            // For generic bounds, keyword types must be mapped to their boxed/wrapper types
+            // since type bounds in Java must be reference types
+            return mapTypeNameToSignature(keywordType.getKind().getName());
+        }
+        return "Ljava/lang/Object;";
+    }
+
+    /**
+     * Maps a type name to a Java generic signature using the registries.
+     *
+     * @param typeName the type name to map
+     * @return the Java generic signature (always a reference type)
+     */
+    private String mapTypeNameToSignature(String typeName) {
+        // First, try to resolve using the type alias registry
+        String resolvedType = compiler.getMemory().getScopedTypeAliasRegistry().resolve(typeName);
+        if (resolvedType == null) {
+            resolvedType = typeName;
+        }
+
+        // Try to look up in the java type registry
+        var javaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(resolvedType);
+        if (javaTypeInfo != null) {
+            return "L" + javaTypeInfo.getInternalName() + ";";
+        }
+
+        // Fall back to treating as a class name - use resolved name with package handling
+        return "L" + resolvedType.replace('.', '/') + ";";
+    }
+
+    /**
+     * Processes the extends clause and returns the internal names of extended interfaces.
+     *
+     * @param extendsList the list of extended interfaces
+     * @return array of internal interface names
+     */
+    private String[] processExtends(List<Swc4jAstTsExprWithTypeArgs> extendsList) {
+        if (extendsList == null || extendsList.isEmpty()) {
+            return new String[0];
+        }
+
+        List<String> interfaceNames = new ArrayList<>();
+        for (Swc4jAstTsExprWithTypeArgs extendsExpr : extendsList) {
+            String qualifiedName = AstUtils.extractQualifiedName(extendsExpr.getExpr());
+            if (qualifiedName != null) {
+                // Try to resolve from type alias registry
+                String resolvedName = compiler.getMemory().getScopedTypeAliasRegistry().resolve(qualifiedName);
+                if (resolvedName != null) {
+                    qualifiedName = resolvedName;
+                }
+                interfaceNames.add(qualifiedName.replace('.', '/'));
+            }
+        }
+        return interfaceNames.toArray(new String[0]);
+    }
+
+    /**
+     * Record containing information about a method in an interface.
+     * Used to track abstract methods for functional interface detection.
+     *
+     * @param methodName       the method name
+     * @param paramTypes       list of parameter type descriptors
+     * @param returnType       return type descriptor
+     * @param methodDescriptor full method descriptor
+     */
+    private record MethodInfo(String methodName, List<String> paramTypes, String returnType, String methodDescriptor) {
+    }
+}

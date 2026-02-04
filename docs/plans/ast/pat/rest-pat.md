@@ -21,7 +21,7 @@ const { a, b, ...rest } = { a: 1, b: 2, c: 3, d: 4 };  // rest = { c: 3, d: 4 }
 **Implementation File:** Multiple files depending on context:
 - `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/MethodGenerator.java` (function params)
 - `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/VariableAnalyzer.java` (parameter analysis)
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/ForOfStatementGenerator.java` (loop destructuring)
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/ForOfStatementProcessor.java` (loop destructuring)
 - New: `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/pat/RestPatternGenerator.java`
 
 **Test Files:**
@@ -1212,7 +1212,7 @@ private void generateArrayRestExtraction(
 - **Java Collections:** java.util.ArrayList for array rest
 - **Java Collections:** java.util.LinkedHashMap for object rest
 - **Existing Implementation:** MethodGenerator.java (varargs handling)
-- **Existing Implementation:** ForOfStatementGenerator.java (destructuring patterns)
+- **Existing Implementation:** ForOfStatementProcessor.java (destructuring patterns)
 
 ---
 
@@ -1235,19 +1235,19 @@ private void generateArrayRestExtraction(
 
 ### Code Generation
 - [ ] Create `RestPatternGenerator.java`
-- [x] Implement array rest extraction (in ForOfStatementGenerator)
-- [x] Implement object rest extraction (in ForOfStatementGenerator)
+- [x] Implement array rest extraction (in ForOfStatementProcessor)
+- [x] Implement object rest extraction (in ForOfStatementProcessor)
 - [x] Handle varargs type resolution (TypeResolver.extractParameterType)
 - [x] Generate proper backward jumps for rest loops
 - [x] Implement stack map frame generation for rest loops
-- [x] Add array iteration support to ForOfStatementGenerator (primitive and object arrays)
-- [x] Add type-based initialization for loop variables in ForOfStatementGenerator
-- [x] Add checkcast for array element access in MemberExpressionGenerator
+- [x] Add array iteration support to ForOfStatementProcessor (primitive and object arrays)
+- [x] Add type-based initialization for loop variables in ForOfStatementProcessor
+- [x] Add checkcast for array element access in MemberExpressionProcessor
 
 ### Integration
 - [ ] Update VariableAnalyzer for rest pattern variables
-- [x] Update ForOfStatementGenerator for rest in loop variables (array and object destructuring)
-- [x] Update VarDeclGenerator for rest in declarations (array and object destructuring)
+- [x] Update ForOfStatementProcessor for rest in loop variables (array and object destructuring)
+- [x] Update VarDeclProcessor for rest in declarations (array and object destructuring)
 - [ ] Handle nested rest patterns
 - [x] Track extracted keys for object rest
 - [x] Track rest start index for array rest

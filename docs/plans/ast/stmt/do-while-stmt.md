@@ -13,7 +13,7 @@ do { statements } while (i < 10)
 do { /* at least once */ } while (false)
 ```
 
-**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/DoWhileStatementGenerator.java` (to be created)
+**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/DoWhileStatementProcessor.java` (to be created)
 
 **Test File:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/dowhilestmt/TestCompileAstDoWhileStmt*.java` (to be created)
 
@@ -1105,7 +1105,7 @@ public static void generate(
     context.pushContinueLabel(continueLabel);
 
     // 3. Generate body and check if it can fall through
-    StatementGenerator.generate(code, cp, doWhileStmt.getBody(), returnTypeInfo, context, options);
+    StatementProcessor.generate(code, cp, doWhileStmt.getBody(), returnTypeInfo, context, options);
     boolean bodyCanFallThrough = canFallThrough(doWhileStmt.getBody());
 
     // 4. Mark test label (continue target - before test)
@@ -1126,7 +1126,7 @@ public static void generate(
                 boolean generated = generateDirectConditionalJumpToBody(code, cp, binExpr, context, options);
                 if (!generated) {
                     // Fallback: generate boolean expression and use ifne
-                    ExpressionGenerator.generate(code, cp, testExpr, null, context, options);
+                    ExpressionProcessor.generate(code, cp, testExpr, null, context, options);
                     code.ifne(0); // Placeholder - jump back if TRUE
                     int backwardJumpOffsetPos = code.getCurrentOffset() - 2;
                     int backwardJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -1135,7 +1135,7 @@ public static void generate(
                 }
             } else {
                 // Non-binary expression: generate as boolean and use ifne
-                ExpressionGenerator.generate(code, cp, testExpr, null, context, options);
+                ExpressionProcessor.generate(code, cp, testExpr, null, context, options);
                 code.ifne(0); // Placeholder - jump back if TRUE
                 int backwardJumpOffsetPos = code.getCurrentOffset() - 2;
                 int backwardJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -1229,11 +1229,11 @@ JVM requires consistent stack state at backward jump targets:
 
 ### Statement Generator
 
-Update `StatementGenerator.java` to dispatch DoWhileStmt:
+Update `StatementProcessor.java` to dispatch DoWhileStmt:
 
 ```java
 if (stmt instanceof Swc4jAstDoWhileStmt doWhileStmt) {
-    DoWhileStatementGenerator.generate(code, cp, doWhileStmt, returnTypeInfo, context, options);
+    DoWhileStatementProcessor.generate(code, cp, doWhileStmt, returnTypeInfo, context, options);
 }
 ```
 
@@ -1253,11 +1253,11 @@ Break and continue statements are already handled (implemented for for/while loo
 
 ### Labeled Statement Support
 
-Reuse existing `LabeledStatementGenerator`:
+Reuse existing `LabeledStatementProcessor`:
 
 ```java
 if (body instanceof Swc4jAstDoWhileStmt doWhileStmt) {
-    DoWhileStatementGenerator.generate(code, cp, doWhileStmt, labelName, returnTypeInfo, context, options);
+    DoWhileStatementProcessor.generate(code, cp, doWhileStmt, labelName, returnTypeInfo, context, options);
 }
 ```
 
@@ -1373,7 +1373,7 @@ if (body instanceof Swc4jAstDoWhileStmt doWhileStmt) {
 ## Implementation Checklist
 
 ### Code Generation
-- [ ] Create `DoWhileStatementGenerator.java`
+- [ ] Create `DoWhileStatementProcessor.java`
 - [ ] Implement `generate()` method for do-while loops
 - [ ] Handle test condition evaluation after body
 - [ ] Reuse break and continue statement generators
@@ -1384,8 +1384,8 @@ if (body instanceof Swc4jAstDoWhileStmt doWhileStmt) {
 - [ ] Handle single-iteration patterns (do...while(false))
 
 ### Integration
-- [ ] Add DoWhileStmt case to StatementGenerator dispatch
-- [ ] Update LabeledStatementGenerator for do-while loops
+- [ ] Add DoWhileStmt case to StatementProcessor dispatch
+- [ ] Update LabeledStatementProcessor for do-while loops
 - [ ] Ensure expression generator works for test condition
 - [ ] Handle nested loops correctly
 - [ ] Add debug/line number information
@@ -1418,8 +1418,8 @@ if (body instanceof Swc4jAstDoWhileStmt doWhileStmt) {
 - **JavaScript Specification:** ECMAScript Section 13.7.3 - The do-while Statement
 - **TypeScript Specification:** Section 5.4 - Do-While Statements
 - **Java Language Specification:** Section 14.13 - The do Statement
-- **Existing Implementation:** WhileStatementGenerator.java (for control flow patterns)
-- **Existing Implementation:** BreakStatementGenerator.java, ContinueStatementGenerator.java
+- **Existing Implementation:** WhileStatementProcessor.java (for control flow patterns)
+- **Existing Implementation:** BreakStatementProcessor.java, ContinueStatementProcessor.java
 - **Test Reference:** TestCompileAstWhileStmt*.java (for test structure)
 
 ---
@@ -1450,10 +1450,10 @@ if (body instanceof Swc4jAstDoWhileStmt doWhileStmt) {
 - **Total: 4-6 hours**
 
 **Dependencies:**
-- WhileStatementGenerator (for pattern reference)
-- BreakStatementGenerator (already implemented)
-- ContinueStatementGenerator (already implemented)
-- LabeledStatementGenerator (already implemented)
+- WhileStatementProcessor (for pattern reference)
+- BreakStatementProcessor (already implemented)
+- ContinueStatementProcessor (already implemented)
+- LabeledStatementProcessor (already implemented)
 - CompilationContext label stacks (already implemented)
 
 **Complexity: LOW** - Similar to while loops with reversed execution order and inverted conditional jump
@@ -1469,9 +1469,9 @@ if (body instanceof Swc4jAstDoWhileStmt doWhileStmt) {
 ### Files Created/Modified:
 
 **Core Implementation:**
-- ✅ `DoWhileStatementGenerator.java` - Complete generator for do-while loops (315 lines)
-- ✅ `StatementGenerator.java` - Added do-while dispatch  
-- ✅ `LabeledStatementGenerator.java` - Added labeled do-while support
+- ✅ `DoWhileStatementProcessor.java` - Complete generator for do-while loops (315 lines)
+- ✅ `StatementProcessor.java` - Added do-while dispatch  
+- ✅ `LabeledStatementProcessor.java` - Added labeled do-while support
 - ✅ `VariableAnalyzer.java` - Added do-while body variable analysis
 
 **Test Files (57 tests total):**

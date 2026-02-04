@@ -6,7 +6,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Current Status:** ✅ Phase 0-6 COMPLETED (Type validation infrastructure + Record<K,V> validation + Primitive wrapper keys + Nested Record types + Computed key type validation + Spread type validation with nested Records + Shorthand type validation + Return type context) + Phase 1 Implemented (Basic key-value pairs) + Phase 7 Mixed Scenarios & Array Values & Null Handling & 3-Level Nested Testing & Edge Cases 2,6,10-12,14-20,23-34 & Computed Keys with Side Effects & Computed Property Type Validation & Record<string, number> Comprehensive Testing & Record<number, string> Comprehensive Testing ✅
 
-**Implementation File:** [ObjectLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ObjectLiteralGenerator.java) ✅
+**Implementation File:** [ObjectLiteralProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ObjectLiteralProcessor.java) ✅
 
 **Test File:** [TestCompileAstObjectLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstObjectLit.java) ✅ (164 tests passing: 37 Phase 1 + 7 Phase 2.0 + 6 Phase 2.1 + 7 Phase 2.2 + 5 Phase 2.3 + 4 Phase 3 + 8 Phase 4 + 5 Phase 5 + 10 Phase 6 + 71 Phase 7 - Phase 6.4 enhanced type inference not implementable)
 
@@ -551,7 +551,7 @@ public static void generate(
         ReturnTypeInfo returnTypeInfo,
         CompilationContext context,
         ByteCodeCompilerOptions options,
-        ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
+        ExpressionProcessorCallback callback) throws Swc4jByteCodeCompilerException {
 
     // Create new LinkedHashMap instance
     int hashMapClass = cp.addClass("java/util/LinkedHashMap");
@@ -604,7 +604,7 @@ private static void generateKey(
         ISwc4jAstPropName key,
         CompilationContext context,
         ByteCodeCompilerOptions options,
-        ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
+        ExpressionProcessorCallback callback) throws Swc4jByteCodeCompilerException {
 
     if (key instanceof Swc4jAstIdentName identName) {
         // String literal key
@@ -1390,7 +1390,7 @@ map.put("b", Integer.valueOf(2));
 - [x] Test type validation infrastructure with unit tests ✅ (all components tested)
 
 ### Phase 1: Basic Implementation (No Type Annotation) ✅ COMPLETED
-- [x] Create ObjectLiteralGenerator.java
+- [x] Create ObjectLiteralProcessor.java
 - [x] Implement empty object generation `{}` → `LinkedHashMap<String, Object>`
 - [x] Implement simple key-value pairs `{a: 1, b: "x"}`
 - [x] Support IdentName keys → String keys
@@ -1423,11 +1423,11 @@ map.put("b", Integer.valueOf(2));
 3. Extended `CompilationContext` with `genericTypeInfoMap` to store GenericTypeInfo for variables
 4. Added `TypeResolver.extractGenericTypeInfo()` to extract Record type info from type annotations
 5. Enhanced `VariableAnalyzer` to extract and store GenericTypeInfo during variable analysis
-6. Updated `VarDeclGenerator` to retrieve GenericTypeInfo and pass it through ReturnTypeInfo
+6. Updated `VarDeclProcessor` to retrieve GenericTypeInfo and pass it through ReturnTypeInfo
 
 **Validation Logic:**
-1. `ObjectLiteralGenerator.validateKeyValueProperty()` - Validates key/value types against Record constraints
-2. `ObjectLiteralGenerator.validateShorthandProperty()` - Validates shorthand properties
+1. `ObjectLiteralProcessor.validateKeyValueProperty()` - Validates key/value types against Record constraints
+2. `ObjectLiteralProcessor.validateShorthandProperty()` - Validates shorthand properties
 3. Uses `TypeResolver.inferKeyType()` to infer actual key types
 4. Uses `TypeResolver.isAssignable()` to check type compatibility
 5. Throws `Swc4jByteCodeCompilerException.typeMismatch()` for violations
@@ -1478,7 +1478,7 @@ map.put("b", Integer.valueOf(2));
 - ✅ `testRecordNumberValueTypeMismatch` - Correctly rejects string value for number type
 
 **Files Modified:**
-- `ObjectLiteralGenerator.java` - Added numeric key generation logic
+- `ObjectLiteralProcessor.java` - Added numeric key generation logic
 - `TestCompileAstObjectLit.java` - Added 6 Phase 2.1 tests
 
 **Phase 2.2 Implementation Summary (Type Alias Keys: Integer, Long, Short, Byte, Float, Double, Boolean, Character):**
@@ -1517,7 +1517,7 @@ map.put("b", Integer.valueOf(2));
 **Note:** Float, Double, Boolean, Short, Byte, and Character are supported in the implementation but not tested per user request.
 
 **Files Modified:**
-- `ObjectLiteralGenerator.java` - Extended primitive wrapper support, renamed method, enhanced validation
+- `ObjectLiteralProcessor.java` - Extended primitive wrapper support, renamed method, enhanced validation
 - `TestCompileAstObjectLit.java` - Added 7 Phase 2.2 tests
 
 **Phase 2.3 Implementation Summary (Nested Record Types: Record<string, Record<string, V>>):**
@@ -1529,7 +1529,7 @@ map.put("b", Integer.valueOf(2));
 4. Type validation for all levels of nested object literals
 
 **Implementation Details:**
-1. Enhanced value generation in ObjectLiteralGenerator (lines 116-123):
+1. Enhanced value generation in ObjectLiteralProcessor (lines 116-123):
    - Check if GenericTypeInfo has `isNested()` flag set
    - Extract nested GenericTypeInfo using `getNestedTypeInfo()`
    - Pass nested type info through ReturnTypeInfo to recursive object literal generation
@@ -1551,7 +1551,7 @@ map.put("b", Integer.valueOf(2));
 - ✅ `testNestedRecordInvalidNestedKey` - Rejects invalid nested key type (string instead of number)
 
 **Files Modified:**
-- `ObjectLiteralGenerator.java` - Added nested type info propagation and recursive validation
+- `ObjectLiteralProcessor.java` - Added nested type info propagation and recursive validation
 - `TestCompileAstObjectLit.java` - Added 5 Phase 2.3 tests
 
 **Phase 3 Implementation Summary (Computed Key Type Validation with Record<K, V>):**
@@ -1659,7 +1659,7 @@ map.put("b", Integer.valueOf(2));
 - Spread operations validate at compile time when types are known
 
 **Files Modified:**
-- `ObjectLiteralGenerator.java` - Added validateSpreadElement() method and validation call
+- `ObjectLiteralProcessor.java` - Added validateSpreadElement() method and validation call
 - `TestCompileAstObjectLit.java` - Added 5 Phase 4 tests
 
 **Phase 4.1 Implementation Summary (Spread with Nested Record Types):**
@@ -1694,7 +1694,7 @@ map.put("b", Integer.valueOf(2));
 - Nesting level mismatches are detected and rejected
 
 **Files Modified:**
-- `ObjectLiteralGenerator.java` - Enhanced validateSpreadElement() for nested validation
+- `ObjectLiteralProcessor.java` - Enhanced validateSpreadElement() for nested validation
 - `TestCompileAstObjectLit.java` - Added 3 Phase 4.1 tests
 
 **Phase 7 Implementation Summary (Mixed Scenarios Testing):**
@@ -1956,8 +1956,8 @@ map.put("b", Integer.valueOf(2));
 
 **Implementation Status:**
 - ✅ Support in return type context - COMPLETED
-- ❌ Support in member access (obj.prop → map.get()) - Not implemented (requires MemberExpressionGenerator changes)
-- ❌ Support in assignment (obj.prop = x → map.put()) - Not implemented (requires AssignExpressionGenerator changes)
+- ❌ Support in member access (obj.prop → map.get()) - Not implemented (requires MemberExpressionProcessor changes)
+- ❌ Support in assignment (obj.prop = x → map.put()) - Not implemented (requires AssignExpressionProcessor changes)
 - ❌ Add to type inference system (TypeResolver) - Future work
 - ❌ Update documentation - Deferred
 
@@ -1979,7 +1979,7 @@ The "Support in return type context" task from Phase 6: Integration is now **COM
 5. Primitive key boxing for computed property access
 
 **Code Changes:**
-1. **MemberExpressionGenerator.java** - Added LinkedHashMap member access support (lines 106-140)
+1. **MemberExpressionProcessor.java** - Added LinkedHashMap member access support (lines 106-140)
    - Handles dot notation: `obj.prop` generates `map.get("prop")`
    - Handles computed properties: `obj[key]` generates `map.get(key)` with primitive boxing
    - Uses `LinkedHashMap.get(Object)` method
@@ -2010,7 +2010,7 @@ The "Support in return type context" task from Phase 6: Integration is now **COM
 - Always returns Object type, requiring runtime casts for specific types
 
 **Files Modified:**
-- `MemberExpressionGenerator.java` - Added LinkedHashMap member access support (lines 106-140)
+- `MemberExpressionProcessor.java` - Added LinkedHashMap member access support (lines 106-140)
 - `TypeResolver.java` - Added ObjectLit type inference (lines 316-318, 343-347)
 - `TestCompileAstObjectLit.java` - Added 5 Phase 6.2 member access tests (lines 3026-3122)
 
@@ -2026,7 +2026,7 @@ The "Support in return type context" task from Phase 6: Integration is now **COM
 5. Support for modifying existing properties and adding new ones
 
 **Code Changes:**
-1. **AssignExpressionGenerator.java** (lines 176-230):
+1. **AssignExpressionProcessor.java** (lines 176-230):
    - Added LinkedHashMap assignment support for computed properties
    - Added LinkedHashMap assignment support for named properties
    - Automatically boxes primitive keys and values before calling Map.put()
@@ -2059,7 +2059,7 @@ The "Support in return type context" task from Phase 6: Integration is now **COM
 - Chained assignments (obj.a = obj.b = 5) may have unexpected behavior with Map.put() return values
 
 **Files Modified:**
-- `AssignExpressionGenerator.java` - Added LinkedHashMap assignment support (lines 176-230)
+- `AssignExpressionProcessor.java` - Added LinkedHashMap assignment support (lines 176-230)
 - `TestCompileAstObjectLit.java` - Added 5 Phase 6.3 assignment tests (lines 3124-3223)
 
 **Phase 2.0-2.1 Files Modified (from previous implementation):**
@@ -2067,8 +2067,8 @@ The "Support in return type context" task from Phase 6: Integration is now **COM
 - `CompilationContext.java` - Added genericTypeInfoMap
 - `TypeResolver.java` - Added extractGenericTypeInfo(), updated mapTsTypeToDescriptor()
 - `VariableAnalyzer.java` - Extract and store GenericTypeInfo
-- `VarDeclGenerator.java` - Retrieve and pass GenericTypeInfo
-- `ObjectLiteralGenerator.java` - Added validation methods
+- `VarDeclProcessor.java` - Retrieve and pass GenericTypeInfo
+- `ObjectLiteralProcessor.java` - Added validation methods
 - `Swc4jByteCodeCompilerException.java` - Already had typeMismatch() factory methods (from Phase 0)
 - `TestCompileAstObjectLit.java` - Added 7 Phase 2 tests
 
@@ -2100,10 +2100,10 @@ The "Support in return type context" task from Phase 6: Integration is now **COM
 - [x] Test shorthand type validation - All 5 tests pass (Phase 5)
 
 ### Phase 6: Integration ✅ COMPLETED (Return Type Context + Member Access + Assignment)
-- [x] Integrate with ExpressionGenerator (Phase 1 integration complete)
+- [x] Integrate with ExpressionProcessor (Phase 1 integration complete)
 - [ ] Add to type inference system (TypeResolver) - Future work for Record<K,V> types
-- [x] Support in member access (obj.prop → map.get()) - ✅ COMPLETED (5 tests added, MemberExpressionGenerator + TypeResolver updated)
-- [x] Support in assignment (obj.prop = x → map.put()) - ✅ COMPLETED (5 tests added, AssignExpressionGenerator updated)
+- [x] Support in member access (obj.prop → map.get()) - ✅ COMPLETED (5 tests added, MemberExpressionProcessor + TypeResolver updated)
+- [x] Support in assignment (obj.prop = x → map.put()) - ✅ COMPLETED (5 tests added, AssignExpressionProcessor updated)
 - [x] Support in return type context - ✅ COMPLETED (4 tests added)
 - [ ] Update documentation - Deferred
 
@@ -2296,7 +2296,7 @@ namespace com {
 - [Java LinkedHashMap Documentation](https://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashMap.html)
 - [Java Map Interface](https://docs.oracle.com/javase/8/docs/api/java/util/Map.html)
 - [ES6 Object Literal Extensions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer#new_notations_in_ecmascript_2015)
-- [ArrayLiteralGenerator Implementation](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java)
+- [ArrayLiteralProcessor Implementation](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralProcessor.java)
 
 ---
 
@@ -2401,7 +2401,7 @@ namespace com {
    - Nested typed objects
    - Type validation errors
    - All 40+ edge cases
-5. ✅ Integration with ExpressionGenerator
+5. ✅ Integration with ExpressionProcessor
 6. ✅ Documentation updated
 
 
@@ -2646,7 +2646,7 @@ This design matches Java's type erasure semantics and provides the right balance
 
 ### Implementation Notes:
 
-- **No Code Changes Required:** All tests use existing ObjectLiteralGenerator implementation
+- **No Code Changes Required:** All tests use existing ObjectLiteralProcessor implementation
 - **Comprehensive Coverage:** These tests cover nearly all possible usage patterns for Record<string, number>
 - **Type Safety:** Tests verify compile-time type checking and runtime type mapping
 - **Real-World Scenarios:** Tests reflect common usage patterns in TypeScript/JavaScript codebases
@@ -2746,7 +2746,7 @@ This design matches Java's type erasure semantics and provides the right balance
 
 ### Implementation Notes:
 
-- **No Code Changes Required:** All tests use existing ObjectLiteralGenerator implementation
+- **No Code Changes Required:** All tests use existing ObjectLiteralProcessor implementation
 - **Type Context Matters:** Variable type annotations affect key types differently than return type annotations
 - **Numeric Type Preservation:** When type context is available, numeric keys are preserved as numbers (Integer or Double)
 - **Type Coercion Fallback:** Without type context, numeric keys are coerced to strings
@@ -2781,7 +2781,7 @@ This design matches Java's type erasure semantics and provides the right balance
 1. Extended `GenericTypeInfo` to support Array value types with element type tracking
 2. Added `parseArrayType()` method to `TypeResolver` for parsing `Array<T>` type annotations
 3. Modified `parseRecordType()` to detect and handle Array value types
-4. Added array element validation in `ObjectLiteralGenerator.validateArrayElements()`
+4. Added array element validation in `ObjectLiteralProcessor.validateArrayElements()`
 5. Support for nested arrays: `Record<string, Array<Array<number>>>`
 
 **Implementation Details:**
@@ -2799,7 +2799,7 @@ This design matches Java's type erasure semantics and provides the right balance
   - Supports nested arrays via recursive `mapTsTypeToDescriptor()` call
 - Modified `parseRecordType()` to check for Array value types before falling back to generic type mapping
 
-### ObjectLiteralGenerator Changes
+### ObjectLiteralProcessor Changes
 - Added `validateArrayElements()` method for validating array literal elements against expected element type
 - Modified `validateKeyValueProperty()` to handle Array value validation
 - Array element type mismatches now produce clear compile-time errors
@@ -2857,7 +2857,7 @@ const lookup: Record<int, Array<String>> = {
 **Files Modified:**
 - `GenericTypeInfo.java` - Extended to support Array value types
 - `TypeResolver.java` - Added `parseArrayType()` method
-- `ObjectLiteralGenerator.java` - Added `validateArrayElements()` method
+- `ObjectLiteralProcessor.java` - Added `validateArrayElements()` method
 - `TestCompileAstObjectLitArrayType.java` - Added 10 comprehensive tests
 
 **Test Results:** 10/10 tests passing ✅
@@ -2890,7 +2890,7 @@ Added compile-time detection and rejection for property types that cannot be com
 
 ### Implementation Details
 
-Modified `ObjectLiteralGenerator.java` to detect these AST node types during property iteration:
+Modified `ObjectLiteralProcessor.java` to detect these AST node types during property iteration:
 
 ```java
 } else if (prop instanceof Swc4jAstMethodProp methodProp) {
@@ -2960,7 +2960,7 @@ Consider using a class with methods instead.
 
 ### Files Modified
 
-- `ObjectLiteralGenerator.java` - Added error handling for unsupported property types
+- `ObjectLiteralProcessor.java` - Added error handling for unsupported property types
 - `TestCompileAstObjectLitUnsupportedProps.java` (new) - 14 comprehensive tests
 
 ### Documentation Status
@@ -3005,7 +3005,7 @@ Implemented comprehensive Symbol detection that identifies all Symbol-related pa
 
 ### Implementation Details
 
-**Location:** `ObjectLiteralGenerator.java`
+**Location:** `ObjectLiteralProcessor.java`
 
 **1. Symbol Detection Helper Method** (lines 468-497):
 
@@ -3156,7 +3156,7 @@ Consider using string keys instead.
 
 ### Files Modified
 
-- `ObjectLiteralGenerator.java`:
+- `ObjectLiteralProcessor.java`:
   - Added `isSymbolExpression()` helper method (lines 468-497)
   - Added Symbol check in `validateKeyValueProperty()` (lines 510-521)
   - Added Symbol check in `generateKey()` (lines 257-265)

@@ -6,7 +6,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Current Status:** ✅ **IMPLEMENTED** (Core features working, 64 tests passing)
 
-**Implementation File:** ✅ [RegexLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/RegexLiteralGenerator.java)
+**Implementation File:** ✅ [RegexLiteralProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/RegexLiteralProcessor.java)
 
 **Test Files:** ✅ 4 test files created with 64 tests passing
 - [TestCompileRegexBasic.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileRegexBasic.java) - 14 tests (Phase 1) ✅
@@ -1016,7 +1016,7 @@ int convertFlags(String jsFlags) {
 ## Implementation Phases
 
 ### Phase 1: Basic Pattern Support (Week 1)
-- Implement RegexLiteralGenerator.java
+- Implement RegexLiteralProcessor.java
 - Handle simple patterns without flags
 - Generate Pattern.compile() bytecode
 - Tests: Basic patterns (Phase 1)
@@ -1048,7 +1048,7 @@ int convertFlags(String jsFlags) {
 ### Phase 6: Documentation & Integration (Week 6)
 - Complete test suite
 - Update documentation
-- Integration with ExpressionGenerator
+- Integration with ExpressionProcessor
 - Tests: Java Pattern API usage (Phase 8)
 
 ---
@@ -1068,7 +1068,7 @@ int convertFlags(String jsFlags) {
 ## Success Criteria
 
 ### Implementation Complete When:
-- [x] RegexLiteralGenerator.java created and functional
+- [x] RegexLiteralProcessor.java created and functional
 - [x] All compatible flags (`i`, `m`, `s`, `u`) supported
 - [x] Unsupported flags (`y`, `d`) properly rejected
 - [x] Pattern conversion for `\v` working
@@ -1132,9 +1132,9 @@ int convertFlags(String jsFlags) {
 ### ✅ Completed Features
 
 **Core Implementation:**
-- `RegexLiteralGenerator.java` - Generates bytecode for regex literals
+- `RegexLiteralProcessor.java` - Generates bytecode for regex literals
 - Compiles JavaScript regex to Java `Pattern.compile(String, int)`
-- Integrated with `ExpressionGenerator` and `ByteCodeCompiler`
+- Integrated with `ExpressionProcessor` and `ByteCodeCompiler`
 - Added `Pattern` type alias to `ByteCodeCompilerOptions`
 
 **Flag Support:**
@@ -1283,7 +1283,7 @@ Added detection logic for variable-length lookbehind patterns and comprehensive 
 
 ### Implementation Details
 
-**Location:** `RegexLiteralGenerator.java`
+**Location:** `RegexLiteralProcessor.java`
 
 **1. Variable-Length Lookbehind Detection** (lines 91-159):
 
@@ -1442,7 +1442,7 @@ const pattern = /(?<=a+)b/  // Throws PatternSyntaxException on Java 8-10
 
 ### Files Modified
 
-- `RegexLiteralGenerator.java`:
+- `RegexLiteralProcessor.java`:
   - Added `hasVariableLengthLookbehind()` detection method (lines 91-159)
   - Added documentation comments about Java 11+ requirement (lines 180-184)
 
@@ -1475,7 +1475,7 @@ const pattern = /(?<=a+)b/  // Throws PatternSyntaxException on Java 8-10
            "Either upgrade to Java 11+ or use fixed-length lookbehind.");
    }
    ```
-3. Add Java version parameter to RegexLiteralGenerator
+3. Add Java version parameter to RegexLiteralProcessor
 
 **Unicode Property Mapping:**
 - Consider adding automatic conversion for common JavaScript-specific properties:

@@ -6,7 +6,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Current Status:** 🟢 **FULLY IMPLEMENTED** (Comprehensive test coverage complete)
 
-**Implementation File:** ✅ [BoolLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/BoolLiteralGenerator.java)
+**Implementation File:** ✅ [BoolLiteralProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/BoolLiteralProcessor.java)
 
 **Test Files:** ✅ 38 passing tests across 4 test files (see Test Organization section)
 
@@ -35,7 +35,7 @@ The implementation is production-ready for all boolean literal use cases. Featur
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/bool/TestCompileAstBoolEdgeCases.java` (10 tests)
 
 **Implementation:**
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/BoolLiteralGenerator.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/BoolLiteralProcessor.java`
   - Already implemented with primitive and boxed support
   - Uses `iconst_0`/`iconst_1` for values
   - Uses `Boolean.valueOf(Z)` for boxing
@@ -43,7 +43,7 @@ The implementation is production-ready for all boolean literal use cases. Featur
 ### Verification Status
 
 ✅ **All tests passing:** 38 tests across 4 test files
-✅ **No implementation changes needed:** Existing BoolLiteralGenerator handles all cases
+✅ **No implementation changes needed:** Existing BoolLiteralProcessor handles all cases
 ✅ **Javadoc passing:** No errors in documentation generation
 ✅ **Full test suite passing:** No regressions introduced
 
@@ -51,7 +51,7 @@ The implementation is production-ready for all boolean literal use cases. Featur
 
 ### Implementation Checklist
 
-✅ **Implementation complete** - BoolLiteralGenerator.java handles both modes (boolean, Boolean)
+✅ **Implementation complete** - BoolLiteralProcessor.java handles both modes (boolean, Boolean)
 ✅ **38 tests implemented** - All edge cases covered across 4 organized test files
 ✅ **All tests passing** - No failures, no regressions
 ✅ **Javadoc passing** - No errors in documentation generation
@@ -99,7 +99,7 @@ The original test file `TestCompileAstBool.java` (5 tests) has been split into o
 
 ## Current Implementation Review
 
-### BoolLiteralGenerator.java Status
+### BoolLiteralProcessor.java Status
 
 **✅ Implemented Features:**
 

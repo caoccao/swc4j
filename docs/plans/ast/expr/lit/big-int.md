@@ -6,7 +6,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Current Status:** ✅ **FULLY IMPLEMENTED** (All features implemented, all 80 tests passing)
 
-**Implementation File:** ✅ [BigIntLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/BigIntLiteralGenerator.java)
+**Implementation File:** ✅ [BigIntLiteralProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/BigIntLiteralProcessor.java)
 
 **Test Files:** ✅ **7 test files created** (all phases implemented, all tests passing)
 - [TestCompileAstBigIntBasic.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/bigint/TestCompileAstBigIntBasic.java) - 15 tests (Phase 1) ✅
@@ -348,7 +348,7 @@ Similarly for other primitives:
 ## Implementation Status
 
 ### ❌ Not Implemented
-1. **BigIntLiteralGenerator.java** - Needs to be created
+1. **BigIntLiteralProcessor.java** - Needs to be created
 2. **All test files** - No tests exist
 3. **Type conversion logic** - BigInt → primitives
 4. **Sign handling** - NoSign, Plus, Minus
@@ -362,7 +362,7 @@ Similarly for other primitives:
 
 ### 🚧 BigInt Binary Operations (Partially Implemented)
 
-**Status:** Implemented in BinaryExpressionGenerator.java with some limitations
+**Status:** Implemented in BinaryExpressionProcessor.java with some limitations
 
 **Arithmetic Operations (✅ WORKING):**
 - ✅ Addition (`+`) - Uses BigInteger.add(BigInteger val)
@@ -403,8 +403,8 @@ Similarly for other primitives:
 
 **Recent Fixes (January 22, 2026):**
 - ✅ Fixed comparison operators (<, <=, >, >=) by using hardcoded branch offsets instead of placeholder/patch pattern
-- ✅ Fixed StackMapGenerator to properly handle `new` opcode for BigInteger object creation
-- ✅ Fixed method invocation simulation in StackMapGenerator for correct stackmap frames
+- ✅ Fixed StackMapProcessor to properly handle `new` opcode for BigInteger object creation
+- ✅ Fixed method invocation simulation in StackMapProcessor for correct stackmap frames
 - ✅ All comparison tests now passing - no more VerifyError issues
 
 ### ❌ Out of Scope
@@ -625,7 +625,7 @@ Key differences when migrating from number literal support:
 
 ### ✅ Completed
 
-1. **BigIntLiteralGenerator.java** - ✅ Created and fully implemented
+1. **BigIntLiteralProcessor.java** - ✅ Created and fully implemented
    - Bytecode generation for BigInteger construction using `new BigInteger(String)`
    - Sign handling (NoSign, Plus, Minus) working correctly
    - Static constant optimization (ZERO, ONE, TEN) implemented
@@ -641,11 +641,11 @@ Key differences when migrating from number literal support:
    - TestCompileAstBigIntAnnotations.java (10 tests, Phase 6) ✅
    - TestCompileAstBigIntEdgeCases.java (15 tests, Phase 7) ✅
 
-3. **ExpressionGenerator Integration** - ✅ Complete
+3. **ExpressionProcessor Integration** - ✅ Complete
    - BigInt case added to expression dispatcher
-   - Routes Swc4jAstBigInt nodes to BigIntLiteralGenerator
+   - Routes Swc4jAstBigInt nodes to BigIntLiteralProcessor
 
-4. **UnaryExpressionGenerator Updates** - ✅ Complete
+4. **UnaryExpressionProcessor Updates** - ✅ Complete
    - Unary minus (-) operator for BigInt literals
    - Unary plus (+) operator for BigInt literals
    - BigInteger.negate() method for complex expressions
@@ -735,7 +735,7 @@ All planned features have been successfully implemented:
 - ✅ **Arithmetic operations**: Fully implemented - BigInteger.add(), subtract(), multiply(), divide(), remainder(), pow()
 - ✅ **Comparison operations**: Fully implemented - BigInteger.compareTo() and equals()
 - ✅ **Bitwise operations**: Fully implemented - BigInteger.and(), or(), xor(), shiftLeft(), shiftRight()
-- **Implementation location**: BinaryExpressionGenerator.java
+- **Implementation location**: BinaryExpressionProcessor.java
 - **Test location**: TestCompileBinExpr*.java files
 - **See**: docs/plans/ast/expr/binary-expr.md for detailed implementation plan
 

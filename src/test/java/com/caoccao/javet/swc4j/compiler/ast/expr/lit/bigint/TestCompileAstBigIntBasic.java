@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for basic BigInt literals.
  * Phase 1: Basic BigInt Values (15 tests)
  * <p>
- * NOTE: These tests are placeholders. BigIntLiteralGenerator.java needs to be implemented first.
+ * NOTE: These tests are placeholders. BigIntLiteralProcessor.java needs to be implemented first.
  */
 public class TestCompileAstBigIntBasic extends BaseTestCompileSuite {
 

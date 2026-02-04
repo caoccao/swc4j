@@ -13,7 +13,7 @@ This document outlines the implementation plan for supporting all 7 unary operat
 - ✅ **TypeOf (`typeof`)** - Implemented with primitive/wrapper/object handling
 - ✅ **Void (`void`)** - Implemented with side-effect evaluation and null return
 
-**Implementation File:** [UnaryExpressionGenerator.java](../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/UnaryExpressionGenerator.java)
+**Implementation File:** [UnaryExpressionProcessor.java](../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/UnaryExpressionProcessor.java)
 **Test Files:**
 - [TestCompileUnaryExprBang.java](../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileUnaryExprBang.java) (Bang operator - 15 tests, all passing ✅)
 - [TestCompileUnaryExprMinus.java](../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileUnaryExprMinus.java) (Minus operator - 30 tests, all passing ✅)
@@ -67,7 +67,7 @@ case Minus -> {
         // Uses iconst/ldc/ldc2_w for optimal constant loading
     } else {
         // For complex expressions, generate then negate
-        ExpressionGenerator.generate(code, cp, arg, null, context, options);
+        ExpressionProcessor.generate(code, cp, arg, null, context, options);
         String argType = TypeResolver.inferTypeFromExpr(arg, context, options);
 
         switch (argType) {
@@ -115,7 +115,7 @@ case Bang -> {
     String argType = TypeResolver.inferTypeFromExpr(arg, context, options);
 
     // Generate the operand
-    ExpressionGenerator.generate(code, cp, arg, null, context, options);
+    ExpressionProcessor.generate(code, cp, arg, null, context, options);
 
     // For boolean types, use simple inversion
     if ("Z".equals(argType) || "Ljava/lang/Boolean;".equals(argType)) {
@@ -211,8 +211,8 @@ case Delete -> {
         if ("Ljava/util/ArrayList;".equals(objType)) {
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                 // delete arr[index] → arr.remove(index)
-                ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options);
-                ExpressionGenerator.generate(code, cp, computedProp.getExpr(), null, context, options);
+                ExpressionProcessor.generate(code, cp, memberExpr.getObj(), null, context, options);
+                ExpressionProcessor.generate(code, cp, computedProp.getExpr(), null, context, options);
 
                 int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
                 code.invokevirtual(removeMethod);
@@ -227,10 +227,10 @@ case Delete -> {
                 || "Ljava/util/HashMap;".equals(objType)
                 || "Ljava/util/LinkedHashMap;".equals(objType)) {
             // delete map[key] → map.remove(key)
-            ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options);
+            ExpressionProcessor.generate(code, cp, memberExpr.getObj(), null, context, options);
 
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
-                ExpressionGenerator.generate(code, cp, computedProp.getExpr(), null, context, options);
+                ExpressionProcessor.generate(code, cp, computedProp.getExpr(), null, context, options);
                 // Box primitive keys if needed
                 // ... type checking and boxing logic ...
 
@@ -320,7 +320,7 @@ case Plus -> {
     }
 
     // For numeric types, just generate the expression
-    ExpressionGenerator.generate(code, cp, arg, null, context, options);
+    ExpressionProcessor.generate(code, cp, arg, null, context, options);
 
     // Check if argType is a wrapper before unboxing
     boolean isWrapper = !argType.equals(primitiveType);
@@ -405,7 +405,7 @@ case Tilde -> {
         argType.equals("B") || argType.equals("S") || argType.equals("C")) {
 
         // Generate the operand
-        ExpressionGenerator.generate(code, cp, arg, null, context, options);
+        ExpressionProcessor.generate(code, cp, arg, null, context, options);
 
         // Unbox if wrapper
         TypeConversionHelper.unboxWrapperType(code, cp, argType);
@@ -503,7 +503,7 @@ case TypeOf -> {
             case "Ljava/lang/String;" -> typeString = "string";
             default -> {
                 // For objects, generate runtime check
-                ExpressionGenerator.generate(code, cp, arg, null, context, options);
+                ExpressionProcessor.generate(code, cp, arg, null, context, options);
 
                 // Check for null
                 code.dup();
@@ -585,7 +585,7 @@ case Void -> {
     ISwc4jAstExpr arg = unaryExpr.getArg();
 
     // Generate the operand (to evaluate side effects)
-    ExpressionGenerator.generate(code, cp, arg, null, context, options);
+    ExpressionProcessor.generate(code, cp, arg, null, context, options);
 
     // Determine the return type to know how much to pop
     String argType = TypeResolver.inferTypeFromExpr(arg, context, options);
@@ -649,7 +649,7 @@ void (1 + 2)            // null/undefined (3 is discarded)
    - Actual effort: ~2 hours
    - Complexity: Low
    - Impact: High (unblocked multiple tests)
-   - Implementation: Lines 47-87 in UnaryExpressionGenerator.java
+   - Implementation: Lines 47-87 in UnaryExpressionProcessor.java
    - Tests: TestCompileUnaryExprBang.java (15 test cases)
 
 ### Phase 2: Common Operations

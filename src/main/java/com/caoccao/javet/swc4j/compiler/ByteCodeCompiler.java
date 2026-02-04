@@ -19,18 +19,19 @@ package com.caoccao.javet.swc4j.compiler;
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.compiler.jdk17.*;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassDeclGenerator;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassMethodGenerator;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.StandaloneFunctionGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassDeclProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassMethodProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.PrivateMethodProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit.*;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.interfaces.DeclGenerator;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.interfaces.ModuleItemGenerator;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.interfaces.StmtGenerator;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ExportDeclGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.interfaces.DeclProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.interfaces.ModuleItemProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.interfaces.StmtProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ExportDeclProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ImportDeclProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt.*;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.ts.TsAsExpressionGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.ts.TsAsExpressionProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
@@ -39,69 +40,70 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 public sealed abstract class ByteCodeCompiler permits
         ByteCodeCompiler17 {
-    protected final ArrayLiteralGenerator arrayLiteralGenerator;
-    protected final ArrowExpressionGenerator arrowExpressionGenerator;
-    protected final AssignExpressionGenerator assignExpressionGenerator;
-    protected final BigIntLiteralGenerator bigIntLiteralGenerator;
-    protected final BinaryExpressionGenerator binaryExpressionGenerator;
-    protected final BoolLiteralGenerator boolLiteralGenerator;
-    protected final BreakStatementGenerator breakStatementGenerator;
-    protected final CallExpressionGenerator callExpressionGenerator;
+    protected final ArrayLiteralProcessor arrayLiteralProcessor;
+    protected final ArrowExpressionProcessor arrowExpressionProcessor;
+    protected final AssignExpressionProcessor assignExpressionProcessor;
+    protected final BigIntLiteralProcessor bigIntLiteralProcessor;
+    protected final BinaryExpressionProcessor binaryExpressionProcessor;
+    protected final BoolLiteralProcessor boolLiteralProcessor;
+    protected final BreakStatementProcessor breakStatementProcessor;
+    protected final CallExpressionProcessor callExpressionProcessor;
     protected final ClassCollector classCollector;
-    protected final ClassDeclGenerator classDeclGenerator;
-    protected final ClassMethodGenerator classMethodGenerator;
-    protected final ConditionalExpressionGenerator conditionalExpressionGenerator;
-    protected final ContinueStatementGenerator continueStatementGenerator;
-    protected final DeclGenerator declGenerator;
-    protected final DoWhileStatementGenerator doWhileStatementGenerator;
+    protected final ClassDeclProcessor classDeclProcessor;
+    protected final ClassProcessor classProcessor;
+    protected final ClassMethodProcessor classMethodProcessor;
+    protected final ConditionalExpressionProcessor conditionalExpressionProcessor;
+    protected final ContinueStatementProcessor continueStatementProcessor;
+    protected final DeclProcessor declProcessor;
+    protected final DoWhileStatementProcessor doWhileStatementProcessor;
     protected final EnumCollector enumCollector;
-    protected final ExportDeclGenerator exportDeclGenerator;
-    protected final ExpressionGenerator expressionGenerator;
-    protected final ForInStatementGenerator forInStatementGenerator;
-    protected final ForOfStatementGenerator forOfStatementGenerator;
-    protected final ForStatementGenerator forStatementGenerator;
-    protected final IdentifierGenerator identifierGenerator;
-    protected final IfStatementGenerator ifStatementGenerator;
+    protected final ExportDeclProcessor exportDeclProcessor;
+    protected final ExpressionProcessor expressionProcessor;
+    protected final ForInStatementProcessor forInStatementProcessor;
+    protected final ForOfStatementProcessor forOfStatementProcessor;
+    protected final ForStatementProcessor forStatementProcessor;
+    protected final FunctionDeclarationProcessor functionDeclarationProcessor;
+    protected final IdentifierProcessor identifierProcessor;
+    protected final IfStatementProcessor ifStatementProcessor;
     protected final ImportDeclProcessor importDeclProcessor;
-    protected final LabeledStatementGenerator labeledStatementGenerator;
-    protected final MemberExpressionGenerator memberExpressionGenerator;
+    protected final LabeledStatementProcessor labeledStatementProcessor;
+    protected final MemberExpressionProcessor memberExpressionProcessor;
     protected final ByteCodeCompilerMemory memory;
-    protected final ModuleItemGenerator moduleItemGenerator;
+    protected final ModuleItemProcessor moduleItemProcessor;
     protected final MutableCaptureAnalyzer mutableCaptureAnalyzer;
-    protected final NewExpressionGenerator newExpressionGenerator;
-    protected final NullLiteralGenerator nullLiteralGenerator;
-    protected final NumberLiteralGenerator numberLiteralGenerator;
-    protected final ObjectLiteralGenerator objectLiteralGenerator;
-    protected final OptionalChainExpressionGenerator optionalChainExpressionGenerator;
+    protected final NewExpressionProcessor newExpressionProcessor;
+    protected final NullLiteralProcessor nullLiteralProcessor;
+    protected final NumberLiteralProcessor numberLiteralProcessor;
+    protected final ObjectLiteralProcessor objectLiteralProcessor;
+    protected final OptionalChainExpressionProcessor optionalChainExpressionProcessor;
     protected final ByteCodeCompilerOptions options;
-    protected final ParenExpressionGenerator parenExpressionGenerator;
+    protected final ParenExpressionProcessor parenExpressionProcessor;
     protected final Swc4jParseOptions parseOptions;
-    protected final RegexLiteralGenerator regexLiteralGenerator;
-    protected final SeqExpressionGenerator seqExpressionGenerator;
-    protected final StandaloneFunctionCollector standaloneFunctionCollector;
-    protected final StandaloneFunctionGenerator standaloneFunctionGenerator;
-    protected final StatementGenerator statementGenerator;
-    protected final StmtGenerator stmtGenerator;
-    protected final StringLiteralGenerator stringLiteralGenerator;
+    protected final PrivateMethodProcessor privateMethodProcessor;
+    protected final RegexLiteralProcessor regexLiteralProcessor;
+    protected final SeqExpressionProcessor seqExpressionProcessor;
+    protected final StatementProcessor statementProcessor;
+    protected final StmtProcessor stmtProcessor;
+    protected final StringLiteralProcessor stringLiteralProcessor;
     protected final Swc4j swc4j;
-    protected final SwitchStatementGenerator switchStatementGenerator;
-    protected final TaggedTemplateLiteralGenerator taggedTemplateLiteralGenerator;
-    protected final TemplateLiteralGenerator templateLiteralGenerator;
-    protected final ThisExpressionGenerator thisExpressionGenerator;
-    protected final ThrowStatementGenerator throwStatementGenerator;
-    protected final TryStatementGenerator tryStatementGenerator;
-    protected final TsAsExpressionGenerator tsAsExpressionGenerator;
-    protected final TsEnumDeclGenerator tsEnumDeclGenerator;
+    protected final SwitchStatementProcessor switchStatementProcessor;
+    protected final TaggedTemplateLiteralProcessor taggedTemplateLiteralProcessor;
+    protected final TemplateLiteralProcessor templateLiteralProcessor;
+    protected final ThisExpressionProcessor thisExpressionProcessor;
+    protected final ThrowStatementProcessor throwStatementProcessor;
+    protected final TryStatementProcessor tryStatementProcessor;
+    protected final TsAsExpressionProcessor tsAsExpressionProcessor;
+    protected final TsEnumDeclProcessor tsEnumDeclProcessor;
     protected final TsInterfaceCollector tsInterfaceCollector;
-    protected final TsInterfaceDeclGenerator tsInterfaceDeclGenerator;
-    protected final TsModuleDeclGenerator tsModuleDeclGenerator;
+    protected final TsInterfaceDeclProcessor tsInterfaceDeclProcessor;
+    protected final TsModuleDeclProcessor tsModuleDeclProcessor;
     protected final TypeAliasCollector typeAliasCollector;
     protected final TypeResolver typeResolver;
-    protected final UnaryExpressionGenerator unaryExpressionGenerator;
-    protected final UpdateExpressionGenerator updateExpressionGenerator;
-    protected final VarDeclGenerator varDeclGenerator;
+    protected final UnaryExpressionProcessor unaryExpressionProcessor;
+    protected final UpdateExpressionProcessor updateExpressionProcessor;
+    protected final VarDeclProcessor varDeclProcessor;
     protected final VariableAnalyzer variableAnalyzer;
-    protected final WhileStatementGenerator whileStatementGenerator;
+    protected final WhileStatementProcessor whileStatementProcessor;
 
     ByteCodeCompiler(ByteCodeCompilerOptions options) {
         this.options = AssertionUtils.notNull(options, "options");
@@ -112,65 +114,66 @@ public sealed abstract class ByteCodeCompiler permits
                 .setCaptureAst(true);
         swc4j = new Swc4j();
 
-        arrayLiteralGenerator = new ArrayLiteralGenerator(this);
-        arrowExpressionGenerator = new ArrowExpressionGenerator(this);
-        assignExpressionGenerator = new AssignExpressionGenerator(this);
-        bigIntLiteralGenerator = new BigIntLiteralGenerator(this);
-        binaryExpressionGenerator = new BinaryExpressionGenerator(this);
-        boolLiteralGenerator = new BoolLiteralGenerator(this);
-        breakStatementGenerator = new BreakStatementGenerator(this);
-        callExpressionGenerator = new CallExpressionGenerator(this);
+        arrayLiteralProcessor = new ArrayLiteralProcessor(this);
+        arrowExpressionProcessor = new ArrowExpressionProcessor(this);
+        assignExpressionProcessor = new AssignExpressionProcessor(this);
+        bigIntLiteralProcessor = new BigIntLiteralProcessor(this);
+        binaryExpressionProcessor = new BinaryExpressionProcessor(this);
+        boolLiteralProcessor = new BoolLiteralProcessor(this);
+        breakStatementProcessor = new BreakStatementProcessor(this);
+        callExpressionProcessor = new CallExpressionProcessor(this);
         classCollector = new ClassCollector(this);
-        classDeclGenerator = new ClassDeclGenerator(this);
-        classMethodGenerator = new ClassMethodGenerator(this);
-        conditionalExpressionGenerator = new ConditionalExpressionGenerator(this);
-        continueStatementGenerator = new ContinueStatementGenerator(this);
-        declGenerator = new DeclGenerator(this);
-        doWhileStatementGenerator = new DoWhileStatementGenerator(this);
+        classDeclProcessor = new ClassDeclProcessor(this);
+        classProcessor = new ClassProcessor(this);
+        classMethodProcessor = new ClassMethodProcessor(this);
+        conditionalExpressionProcessor = new ConditionalExpressionProcessor(this);
+        continueStatementProcessor = new ContinueStatementProcessor(this);
+        declProcessor = new DeclProcessor(this);
+        doWhileStatementProcessor = new DoWhileStatementProcessor(this);
         enumCollector = new EnumCollector(this);
-        exportDeclGenerator = new ExportDeclGenerator(this);
-        expressionGenerator = new ExpressionGenerator(this);
-        forInStatementGenerator = new ForInStatementGenerator(this);
-        forOfStatementGenerator = new ForOfStatementGenerator(this);
-        forStatementGenerator = new ForStatementGenerator(this);
-        identifierGenerator = new IdentifierGenerator(this);
-        ifStatementGenerator = new IfStatementGenerator(this);
+        exportDeclProcessor = new ExportDeclProcessor(this);
+        expressionProcessor = new ExpressionProcessor(this);
+        forInStatementProcessor = new ForInStatementProcessor(this);
+        forOfStatementProcessor = new ForOfStatementProcessor(this);
+        forStatementProcessor = new ForStatementProcessor(this);
+        functionDeclarationProcessor = new FunctionDeclarationProcessor(this);
+        identifierProcessor = new IdentifierProcessor(this);
+        ifStatementProcessor = new IfStatementProcessor(this);
         importDeclProcessor = new ImportDeclProcessor(this);
-        labeledStatementGenerator = new LabeledStatementGenerator(this);
-        memberExpressionGenerator = new MemberExpressionGenerator(this);
-        moduleItemGenerator = new ModuleItemGenerator(this);
+        labeledStatementProcessor = new LabeledStatementProcessor(this);
+        memberExpressionProcessor = new MemberExpressionProcessor(this);
+        moduleItemProcessor = new ModuleItemProcessor(this);
         mutableCaptureAnalyzer = new MutableCaptureAnalyzer(this);
-        newExpressionGenerator = new NewExpressionGenerator(this);
-        nullLiteralGenerator = new NullLiteralGenerator(this);
-        numberLiteralGenerator = new NumberLiteralGenerator(this);
-        objectLiteralGenerator = new ObjectLiteralGenerator(this);
-        optionalChainExpressionGenerator = new OptionalChainExpressionGenerator(this);
-        parenExpressionGenerator = new ParenExpressionGenerator(this);
-        regexLiteralGenerator = new RegexLiteralGenerator(this);
-        seqExpressionGenerator = new SeqExpressionGenerator(this);
-        standaloneFunctionCollector = new StandaloneFunctionCollector(this);
-        standaloneFunctionGenerator = new StandaloneFunctionGenerator(this);
-        statementGenerator = new StatementGenerator(this);
-        stmtGenerator = new StmtGenerator(this);
-        stringLiteralGenerator = new StringLiteralGenerator(this);
-        switchStatementGenerator = new SwitchStatementGenerator(this);
-        taggedTemplateLiteralGenerator = new TaggedTemplateLiteralGenerator(this);
-        templateLiteralGenerator = new TemplateLiteralGenerator(this);
-        thisExpressionGenerator = new ThisExpressionGenerator(this);
-        throwStatementGenerator = new ThrowStatementGenerator(this);
-        tryStatementGenerator = new TryStatementGenerator(this);
-        tsAsExpressionGenerator = new TsAsExpressionGenerator(this);
-        tsEnumDeclGenerator = new TsEnumDeclGenerator(this);
+        newExpressionProcessor = new NewExpressionProcessor(this);
+        nullLiteralProcessor = new NullLiteralProcessor(this);
+        numberLiteralProcessor = new NumberLiteralProcessor(this);
+        objectLiteralProcessor = new ObjectLiteralProcessor(this);
+        optionalChainExpressionProcessor = new OptionalChainExpressionProcessor(this);
+        parenExpressionProcessor = new ParenExpressionProcessor(this);
+        privateMethodProcessor = new PrivateMethodProcessor(this);
+        regexLiteralProcessor = new RegexLiteralProcessor(this);
+        seqExpressionProcessor = new SeqExpressionProcessor(this);
+        statementProcessor = new StatementProcessor(this);
+        stmtProcessor = new StmtProcessor(this);
+        stringLiteralProcessor = new StringLiteralProcessor(this);
+        switchStatementProcessor = new SwitchStatementProcessor(this);
+        taggedTemplateLiteralProcessor = new TaggedTemplateLiteralProcessor(this);
+        templateLiteralProcessor = new TemplateLiteralProcessor(this);
+        thisExpressionProcessor = new ThisExpressionProcessor(this);
+        throwStatementProcessor = new ThrowStatementProcessor(this);
+        tryStatementProcessor = new TryStatementProcessor(this);
+        tsAsExpressionProcessor = new TsAsExpressionProcessor(this);
+        tsEnumDeclProcessor = new TsEnumDeclProcessor(this);
         tsInterfaceCollector = new TsInterfaceCollector(this);
-        tsInterfaceDeclGenerator = new TsInterfaceDeclGenerator(this);
-        tsModuleDeclGenerator = new TsModuleDeclGenerator(this);
+        tsInterfaceDeclProcessor = new TsInterfaceDeclProcessor(this);
+        tsModuleDeclProcessor = new TsModuleDeclProcessor(this);
         typeAliasCollector = new TypeAliasCollector(this);
         typeResolver = new TypeResolver(this);
-        unaryExpressionGenerator = new UnaryExpressionGenerator(this);
-        updateExpressionGenerator = new UpdateExpressionGenerator(this);
-        varDeclGenerator = new VarDeclGenerator(this);
+        unaryExpressionProcessor = new UnaryExpressionProcessor(this);
+        updateExpressionProcessor = new UpdateExpressionProcessor(this);
+        varDeclProcessor = new VarDeclProcessor(this);
         variableAnalyzer = new VariableAnalyzer(this);
-        whileStatementGenerator = new WhileStatementGenerator(this);
+        whileStatementProcessor = new WhileStatementProcessor(this);
     }
 
     public static ByteCodeCompiler of(ByteCodeCompilerOptions options) {
@@ -188,220 +191,224 @@ public sealed abstract class ByteCodeCompiler permits
 
     abstract void compileProgram(String code, ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException;
 
-    public ArrayLiteralGenerator getArrayLiteralGenerator() {
-        return arrayLiteralGenerator;
+    public ArrayLiteralProcessor getArrayLiteralProcessor() {
+        return arrayLiteralProcessor;
     }
 
-    public ArrowExpressionGenerator getArrowExpressionGenerator() {
-        return arrowExpressionGenerator;
+    public ArrowExpressionProcessor getArrowExpressionProcessor() {
+        return arrowExpressionProcessor;
     }
 
-    public AssignExpressionGenerator getAssignExpressionGenerator() {
-        return assignExpressionGenerator;
+    public AssignExpressionProcessor getAssignExpressionProcessor() {
+        return assignExpressionProcessor;
     }
 
-    public BigIntLiteralGenerator getBigIntLiteralGenerator() {
-        return bigIntLiteralGenerator;
+    public BigIntLiteralProcessor getBigIntLiteralProcessor() {
+        return bigIntLiteralProcessor;
     }
 
-    public BinaryExpressionGenerator getBinaryExpressionGenerator() {
-        return binaryExpressionGenerator;
+    public BinaryExpressionProcessor getBinaryExpressionProcessor() {
+        return binaryExpressionProcessor;
     }
 
-    public BoolLiteralGenerator getBoolLiteralGenerator() {
-        return boolLiteralGenerator;
+    public BoolLiteralProcessor getBoolLiteralProcessor() {
+        return boolLiteralProcessor;
     }
 
-    public BreakStatementGenerator getBreakStatementGenerator() {
-        return breakStatementGenerator;
+    public BreakStatementProcessor getBreakStatementProcessor() {
+        return breakStatementProcessor;
     }
 
-    public CallExpressionGenerator getCallExpressionGenerator() {
-        return callExpressionGenerator;
+    public CallExpressionProcessor getCallExpressionProcessor() {
+        return callExpressionProcessor;
     }
 
     public ClassCollector getClassCollector() {
         return classCollector;
     }
 
-    public ClassDeclGenerator getClassDeclGenerator() {
-        return classDeclGenerator;
+    public ClassDeclProcessor getClassDeclProcessor() {
+        return classDeclProcessor;
     }
 
-    public ClassMethodGenerator getClassMethodGenerator() {
-        return classMethodGenerator;
+    public ClassProcessor getClassProcessor() {
+        return classProcessor;
     }
 
-    public ConditionalExpressionGenerator getConditionalExpressionGenerator() {
-        return conditionalExpressionGenerator;
+    public ClassMethodProcessor getClassMethodProcessor() {
+        return classMethodProcessor;
     }
 
-    public ContinueStatementGenerator getContinueStatementGenerator() {
-        return continueStatementGenerator;
+    public ConditionalExpressionProcessor getConditionalExpressionProcessor() {
+        return conditionalExpressionProcessor;
     }
 
-    public DeclGenerator getDeclGenerator() {
-        return declGenerator;
+    public ContinueStatementProcessor getContinueStatementProcessor() {
+        return continueStatementProcessor;
     }
 
-    public DoWhileStatementGenerator getDoWhileStatementGenerator() {
-        return doWhileStatementGenerator;
+    public DeclProcessor getDeclProcessor() {
+        return declProcessor;
+    }
+
+    public DoWhileStatementProcessor getDoWhileStatementProcessor() {
+        return doWhileStatementProcessor;
     }
 
     public EnumCollector getEnumCollector() {
         return enumCollector;
     }
 
-    public ExportDeclGenerator getExportDeclGenerator() {
-        return exportDeclGenerator;
+    public ExportDeclProcessor getExportDeclProcessor() {
+        return exportDeclProcessor;
     }
 
-    public ExpressionGenerator getExpressionGenerator() {
-        return expressionGenerator;
+    public ExpressionProcessor getExpressionProcessor() {
+        return expressionProcessor;
     }
 
-    public ForInStatementGenerator getForInStatementGenerator() {
-        return forInStatementGenerator;
+    public ForInStatementProcessor getForInStatementProcessor() {
+        return forInStatementProcessor;
     }
 
-    public ForOfStatementGenerator getForOfStatementGenerator() {
-        return forOfStatementGenerator;
+    public ForOfStatementProcessor getForOfStatementProcessor() {
+        return forOfStatementProcessor;
     }
 
-    public ForStatementGenerator getForStatementGenerator() {
-        return forStatementGenerator;
+    public ForStatementProcessor getForStatementProcessor() {
+        return forStatementProcessor;
     }
 
-    public IdentifierGenerator getIdentifierGenerator() {
-        return identifierGenerator;
+    public FunctionDeclarationProcessor getFunctionDeclarationProcessor() {
+        return functionDeclarationProcessor;
     }
 
-    public IfStatementGenerator getIfStatementGenerator() {
-        return ifStatementGenerator;
+    public IdentifierProcessor getIdentifierProcessor() {
+        return identifierProcessor;
+    }
+
+    public IfStatementProcessor getIfStatementProcessor() {
+        return ifStatementProcessor;
     }
 
     public ImportDeclProcessor getImportDeclProcessor() {
         return importDeclProcessor;
     }
 
-    public LabeledStatementGenerator getLabeledStatementGenerator() {
-        return labeledStatementGenerator;
+    public LabeledStatementProcessor getLabeledStatementProcessor() {
+        return labeledStatementProcessor;
     }
 
-    public MemberExpressionGenerator getMemberExpressionGenerator() {
-        return memberExpressionGenerator;
+    public MemberExpressionProcessor getMemberExpressionProcessor() {
+        return memberExpressionProcessor;
     }
 
     public ByteCodeCompilerMemory getMemory() {
         return memory;
     }
 
-    public ModuleItemGenerator getModuleItemGenerator() {
-        return moduleItemGenerator;
+    public ModuleItemProcessor getModuleItemProcessor() {
+        return moduleItemProcessor;
     }
 
     public MutableCaptureAnalyzer getMutableCaptureAnalyzer() {
         return mutableCaptureAnalyzer;
     }
 
-    public NewExpressionGenerator getNewExpressionGenerator() {
-        return newExpressionGenerator;
+    public NewExpressionProcessor getNewExpressionProcessor() {
+        return newExpressionProcessor;
     }
 
-    public NullLiteralGenerator getNullLiteralGenerator() {
-        return nullLiteralGenerator;
+    public NullLiteralProcessor getNullLiteralProcessor() {
+        return nullLiteralProcessor;
     }
 
-    public NumberLiteralGenerator getNumberLiteralGenerator() {
-        return numberLiteralGenerator;
+    public NumberLiteralProcessor getNumberLiteralProcessor() {
+        return numberLiteralProcessor;
     }
 
-    public ObjectLiteralGenerator getObjectLiteralGenerator() {
-        return objectLiteralGenerator;
+    public ObjectLiteralProcessor getObjectLiteralProcessor() {
+        return objectLiteralProcessor;
     }
 
-    public OptionalChainExpressionGenerator getOptionalChainExpressionGenerator() {
-        return optionalChainExpressionGenerator;
+    public OptionalChainExpressionProcessor getOptionalChainExpressionProcessor() {
+        return optionalChainExpressionProcessor;
     }
 
     public ByteCodeCompilerOptions getOptions() {
         return options;
     }
 
-    public ParenExpressionGenerator getParenExpressionGenerator() {
-        return parenExpressionGenerator;
+    public ParenExpressionProcessor getParenExpressionProcessor() {
+        return parenExpressionProcessor;
     }
 
-    public RegexLiteralGenerator getRegexLiteralGenerator() {
-        return regexLiteralGenerator;
+    public PrivateMethodProcessor getPrivateMethodProcessor() {
+        return privateMethodProcessor;
     }
 
-    public SeqExpressionGenerator getSeqExpressionGenerator() {
-        return seqExpressionGenerator;
+    public RegexLiteralProcessor getRegexLiteralProcessor() {
+        return regexLiteralProcessor;
     }
 
-    public StandaloneFunctionCollector getStandaloneFunctionCollector() {
-        return standaloneFunctionCollector;
+    public SeqExpressionProcessor getSeqExpressionProcessor() {
+        return seqExpressionProcessor;
     }
 
-    public StandaloneFunctionGenerator getStandaloneFunctionGenerator() {
-        return standaloneFunctionGenerator;
+    public StatementProcessor getStatementProcessor() {
+        return statementProcessor;
     }
 
-    public StatementGenerator getStatementGenerator() {
-        return statementGenerator;
+    public StmtProcessor getStmtProcessor() {
+        return stmtProcessor;
     }
 
-    public StmtGenerator getStmtGenerator() {
-        return stmtGenerator;
+    public StringLiteralProcessor getStringLiteralProcessor() {
+        return stringLiteralProcessor;
     }
 
-    public StringLiteralGenerator getStringLiteralGenerator() {
-        return stringLiteralGenerator;
+    public SwitchStatementProcessor getSwitchStatementProcessor() {
+        return switchStatementProcessor;
     }
 
-    public SwitchStatementGenerator getSwitchStatementGenerator() {
-        return switchStatementGenerator;
+    public TaggedTemplateLiteralProcessor getTaggedTemplateLiteralProcessor() {
+        return taggedTemplateLiteralProcessor;
     }
 
-    public TaggedTemplateLiteralGenerator getTaggedTemplateLiteralGenerator() {
-        return taggedTemplateLiteralGenerator;
+    public TemplateLiteralProcessor getTemplateLiteralProcessor() {
+        return templateLiteralProcessor;
     }
 
-    public TemplateLiteralGenerator getTemplateLiteralGenerator() {
-        return templateLiteralGenerator;
+    public ThisExpressionProcessor getThisExpressionProcessor() {
+        return thisExpressionProcessor;
     }
 
-    public ThisExpressionGenerator getThisExpressionGenerator() {
-        return thisExpressionGenerator;
+    public ThrowStatementProcessor getThrowStatementProcessor() {
+        return throwStatementProcessor;
     }
 
-    public ThrowStatementGenerator getThrowStatementGenerator() {
-        return throwStatementGenerator;
+    public TryStatementProcessor getTryStatementProcessor() {
+        return tryStatementProcessor;
     }
 
-    public TryStatementGenerator getTryStatementGenerator() {
-        return tryStatementGenerator;
+    public TsAsExpressionProcessor getTsAsExpressionProcessor() {
+        return tsAsExpressionProcessor;
     }
 
-    public TsAsExpressionGenerator getTsAsExpressionGenerator() {
-        return tsAsExpressionGenerator;
-    }
-
-    public TsEnumDeclGenerator getTsEnumDeclGenerator() {
-        return tsEnumDeclGenerator;
+    public TsEnumDeclProcessor getTsEnumDeclProcessor() {
+        return tsEnumDeclProcessor;
     }
 
     public TsInterfaceCollector getTsInterfaceCollector() {
         return tsInterfaceCollector;
     }
 
-    public TsInterfaceDeclGenerator getTsInterfaceDeclGenerator() {
-        return tsInterfaceDeclGenerator;
+    public TsInterfaceDeclProcessor getTsInterfaceDeclProcessor() {
+        return tsInterfaceDeclProcessor;
     }
 
-    public TsModuleDeclGenerator getTsModuleDeclGenerator() {
-        return tsModuleDeclGenerator;
+    public TsModuleDeclProcessor getTsModuleDeclProcessor() {
+        return tsModuleDeclProcessor;
     }
 
     public TypeAliasCollector getTypeAliasCollector() {
@@ -412,23 +419,23 @@ public sealed abstract class ByteCodeCompiler permits
         return typeResolver;
     }
 
-    public UnaryExpressionGenerator getUnaryExpressionGenerator() {
-        return unaryExpressionGenerator;
+    public UnaryExpressionProcessor getUnaryExpressionProcessor() {
+        return unaryExpressionProcessor;
     }
 
-    public UpdateExpressionGenerator getUpdateExpressionGenerator() {
-        return updateExpressionGenerator;
+    public UpdateExpressionProcessor getUpdateExpressionProcessor() {
+        return updateExpressionProcessor;
     }
 
-    public VarDeclGenerator getVarDeclGenerator() {
-        return varDeclGenerator;
+    public VarDeclProcessor getVarDeclProcessor() {
+        return varDeclProcessor;
     }
 
     public VariableAnalyzer getVariableAnalyzer() {
         return variableAnalyzer;
     }
 
-    public WhileStatementGenerator getWhileStatementGenerator() {
-        return whileStatementGenerator;
+    public WhileStatementProcessor getWhileStatementProcessor() {
+        return whileStatementProcessor;
     }
 }

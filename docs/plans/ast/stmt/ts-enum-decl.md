@@ -53,7 +53,7 @@ enum Computed {
 }
 ```
 
-**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/decl/TsEnumDeclGenerator.java` (to be created)
+**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/decl/TsEnumDeclProcessor.java` (to be created)
 
 **Test Files:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/decl/tsenumtest/TestCompileTsEnumDecl*.java` (to be created)
 
@@ -1598,7 +1598,7 @@ public static Direction fromValue(int value) {
 
 ### Core Files to Create
 
-1. **TsEnumDeclGenerator.java**
+1. **TsEnumDeclProcessor.java**
    - Main generator for TypeScript enum declarations
    - Dispatch to appropriate enum type handler
    - Generate enum class structure
@@ -1638,9 +1638,9 @@ public static Direction fromValue(int value) {
 
 ### Core Files to Modify
 
-1. **DeclGenerator.java** (or equivalent)
+1. **DeclProcessor.java** (or equivalent)
    - Add dispatch for Swc4jAstTsEnumDecl
-   - Route to TsEnumDeclGenerator.generate()
+   - Route to TsEnumDeclProcessor.generate()
 
 2. **TypeResolver.java**
    - Add support for enum types
@@ -1717,8 +1717,8 @@ public static Direction fromValue(int value) {
 - ClassWriter and class generation infrastructure
 - ConstantPool for string/class references
 - TypeResolver for enum types
-- ExpressionGenerator for computed values
-- StatementGenerator for declarations
+- ExpressionProcessor for computed values
+- StatementProcessor for declarations
 - MemberAccessGenerator for enum constant access
 
 ---

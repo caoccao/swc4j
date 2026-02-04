@@ -78,35 +78,35 @@ These need to be addressed so errors always include source snippet, line, column
 - Error propagation does not standardize a single formatter for all thrown `Swc4jByteCodeCompilerException` cases.
 
 ## Feature: Function Expressions and Class Expressions
-- Evidence: `ExpressionGenerator` lacks `Swc4jAstFnExpr` and `Swc4jAstClassExpr` handling.
+- Evidence: `ExpressionProcessor` lacks `Swc4jAstFnExpr` and `Swc4jAstClassExpr` handling.
 - Status: Not implemented.
 - Confidence: 55%.
 - Plan: Emit synthetic classes/methods for anonymous functions/classes with deterministic naming and capture handling.
 - Tests: Inline function/class expressions assigned to variables and passed as arguments.
 
 ## Feature: Debugger and Empty Statements
-- Evidence: `StatementGenerator` lacks `Swc4jAstDebuggerStmt` and `Swc4jAstEmptyStmt` handling.
+- Evidence: `StatementProcessor` lacks `Swc4jAstDebuggerStmt` and `Swc4jAstEmptyStmt` handling.
 - Status: Not implemented.
 - Confidence: 85%.
 - Plan: Treat both as no-ops and ensure they do not affect control flow or line mapping.
 - Tests: Debugger/empty statements within blocks and loops.
 
 ## Feature: With Statement
-- Evidence: `StatementGenerator` lacks `Swc4jAstWithStmt` handling.
+- Evidence: `StatementProcessor` lacks `Swc4jAstWithStmt` handling.
 - Status: Not supported (dynamic scope cannot be safely compiled to JVM bytecode).
 - Confidence: 10%.
 - Plan: Reject with clear compile-time error explaining unsupported dynamic scope.
 - Tests: with-statement rejection diagnostics.
 
 ## Feature: Using Declaration
-- Evidence: `StatementGenerator` lacks `Swc4jAstUsingDecl` handling.
+- Evidence: `StatementProcessor` lacks `Swc4jAstUsingDecl` handling.
 - Status: Not supported; JS `using` relies on `Symbol.dispose` semantics not available on JVM.
 - Confidence: 15%.
 - Plan: Reject with clear compile-time error; document that try-with-resources is not auto-mapped.
 - Tests: using-decl rejection diagnostics.
 
 ## Feature: JSX AST Nodes
-- Evidence: `ExpressionGenerator` lacks `Swc4jAstJsx*` handling; AST includes JSX nodes.
+- Evidence: `ExpressionProcessor` lacks `Swc4jAstJsx*` handling; AST includes JSX nodes.
 - Status: Not supported in bytecode compiler; requires prior JSX transform.
 - Confidence: 20%.
 - Plan: Require JSX-to-JS transform (e.g., via swc transform) before bytecode compilation; add guardrail error if JSX nodes appear.
@@ -120,21 +120,21 @@ These need to be addressed so errors always include source snippet, line, column
 - Tests: Exported functions/classes referenced across files and namespaces.
 
 ## Feature: Meta Property Expressions
-- Evidence: `ExpressionGenerator` lacks `Swc4jAstMetaPropExpr` handling.
+- Evidence: `ExpressionProcessor` lacks `Swc4jAstMetaPropExpr` handling.
 - Status: Not supported; `import.meta` and `new.target` have no direct JVM equivalent.
 - Confidence: 20%.
 - Plan: Reject with clear errors; optionally support `new.target` only inside constructors with synthetic metadata.
 - Tests: `import.meta` and `new.target` diagnostics.
 
 ## Feature: Super Property Expressions
-- Evidence: `ExpressionGenerator` lacks `Swc4jAstSuperPropExpr` handling.
+- Evidence: `ExpressionProcessor` lacks `Swc4jAstSuperPropExpr` handling.
 - Status: Not implemented.
 - Confidence: 40%.
 - Plan: Resolve super field/method access in class hierarchy, emit invokespecial/getfield/putfield as needed.
 - Tests: Super property access in overridden methods and constructors.
 
 ## Feature: TS-Specific Expressions (Type/Assertion Variants)
-- Evidence: `ExpressionGenerator` lacks `Swc4jAstTsNonNullExpr`, `Swc4jAstTsTypeAssertion`, `Swc4jAstTsConstAssertion`, `Swc4jAstTsSatisfiesExpr`, `Swc4jAstTsInstantiation` handling.
+- Evidence: `ExpressionProcessor` lacks `Swc4jAstTsNonNullExpr`, `Swc4jAstTsTypeAssertion`, `Swc4jAstTsConstAssertion`, `Swc4jAstTsSatisfiesExpr`, `Swc4jAstTsInstantiation` handling.
 - Status: Not implemented.
 - Confidence: 70%.
 - Plan: Treat as compile-time only (erase to inner expression) while enforcing type constraints where possible.

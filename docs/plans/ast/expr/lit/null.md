@@ -6,7 +6,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Current Status:** 🟢 **FULLY IMPLEMENTED** (37 passing tests across 4 files)
 
-**Implementation File:** ✅ [NullLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/NullLiteralGenerator.java)
+**Implementation File:** ✅ [NullLiteralProcessor.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/NullLiteralProcessor.java)
 
 **Test Files:** ✅ **37 tests across 4 files** (Phases 1, 2, 3, 5 complete)
 - [TestCompileAstNullBasic.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/nulllit/TestCompileAstNullBasic.java) - 10 tests
@@ -45,7 +45,7 @@ const value = null  // → null reference
 
 ## Current Implementation Review
 
-### NullLiteralGenerator.java Status
+### NullLiteralProcessor.java Status
 
 **✅ Implemented Features:**
 
@@ -756,7 +756,7 @@ This is the **only** bytecode pattern for null literals. The simplicity is becau
 
 ### ✅ All Requirements Met
 
-- [x] **Implementation Complete:** NullLiteralGenerator.java handles all null literal cases
+- [x] **Implementation Complete:** NullLiteralProcessor.java handles all null literal cases
 - [x] **Tests Pass:** All 37 tests passing across 4 test files
 - [x] **Javadoc Passes:** No javadoc warnings or errors
 - [x] **Test Coverage:** Comprehensive coverage of in-scope features (Phases 1, 2, 3, 5)
@@ -775,7 +775,7 @@ This is the **only** bytecode pattern for null literals. The simplicity is becau
 - Created: `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/nulllit/TestCompileAstNullAssignment.java` (8 tests)
 - Created: `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/nulllit/TestCompileAstNullEdgeCases.java` (10 tests)
 - Preserved: `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstNull.java` (6 original tests)
-- No changes: `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/NullLiteralGenerator.java` (already complete)
+- No changes: `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/NullLiteralProcessor.java` (already complete)
 
 **Package Name:**
 - Used `nulllit` instead of `null` (Java keyword conflict)
@@ -788,7 +788,7 @@ This is the **only** bytecode pattern for null literals. The simplicity is becau
 **Verification Status:**
 - ✅ All 37 tests passing (BUILD SUCCESSFUL)
 - ✅ Javadoc verified passing
-- ✅ No implementation changes needed (NullLiteralGenerator already complete)
+- ✅ No implementation changes needed (NullLiteralProcessor already complete)
 - ✅ Full test suite verified (no regressions)
 
 ---

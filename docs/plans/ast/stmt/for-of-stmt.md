@@ -25,7 +25,7 @@ for (let char of string) { console.log(char); }
 for (const [key, value] of map) { console.log(key, value); }
 ```
 
-**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/ForOfStatementGenerator.java`
+**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/ForOfStatementProcessor.java`
 
 **Test Files:**
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/forofstmt/TestCompileAstForOfStmtBasic.java`
@@ -1494,7 +1494,7 @@ private void generateIteratorIteration(
         ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
 
     // 1. Generate right expression (iterable)
-    compiler.getExpressionGenerator().generate(code, cp, forOfStmt.getRight(), null);
+    compiler.getExpressionProcessor().generate(code, cp, forOfStmt.getRight(), null);
 
     // 2. Get iterator
     int iteratorRef = cp.addInterfaceMethodRef(
@@ -1530,7 +1530,7 @@ private void generateIteratorIteration(
     context.pushContinueLabel(labelName, testLabel);
 
     // 9. Generate body
-    compiler.getStatementGenerator().generate(code, cp, forOfStmt.getBody(), returnTypeInfo);
+    compiler.getStatementProcessor().generate(code, cp, forOfStmt.getBody(), returnTypeInfo);
 
     // 10. Pop labels
     context.popContinueLabel();
@@ -1553,11 +1553,11 @@ private void generateIteratorIteration(
 
 ### Statement Generator
 
-Update `StatementGenerator.java` to dispatch ForOfStmt:
+Update `StatementProcessor.java` to dispatch ForOfStmt:
 
 ```java
 if (stmt instanceof Swc4jAstForOfStmt forOfStmt) {
-    ForOfStatementGenerator.generate(code, cp, forOfStmt, labelName, returnTypeInfo, context);
+    ForOfStatementProcessor.generate(code, cp, forOfStmt, labelName, returnTypeInfo, context);
 }
 ```
 
@@ -1635,8 +1635,8 @@ private void storeLoopVariable(CodeBuilder code, ClassWriter.ConstantPool cp, IS
 - **TypeScript Specification:** Section 5.5 - For-Of Statements
 - **Java Collections:** java.util.Iterator interface
 - **Java Collections:** java.lang.Iterable interface
-- **Existing Implementation:** ForInStatementGenerator.java (for control flow patterns)
-- **Existing Implementation:** ForStatementGenerator.java (for loop structure)
+- **Existing Implementation:** ForInStatementProcessor.java (for control flow patterns)
+- **Existing Implementation:** ForStatementProcessor.java (for loop structure)
 
 ---
 

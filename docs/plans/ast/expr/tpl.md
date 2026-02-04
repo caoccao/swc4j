@@ -51,7 +51,7 @@ Breaks down to:
 
 ### ✅ Implemented: Basic Template Literals (Swc4jAstTpl)
 
-**File:** `TemplateLiteralGenerator.java`
+**File:** `TemplateLiteralProcessor.java`
 
 **Strategy:** StringBuilder-based string concatenation
 
@@ -84,7 +84,7 @@ Breaks down to:
 String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
 
 // Generate expression with natural type
-compiler.getExpressionGenerator().generate(code, cp, expr, null);
+compiler.getExpressionProcessor().generate(code, cp, expr, null);
 
 // Box primitives to their wrapper types
 if (TypeConversionUtils.isPrimitiveType(exprType)) {
@@ -137,22 +137,22 @@ All 10 advanced tests passing (100% success rate):
 
 ## Integration Points
 
-### ExpressionGenerator
+### ExpressionProcessor
 ```java
 } else if (expr instanceof Swc4jAstTpl tpl) {
-    compiler.getTemplateLiteralGenerator().generate(code, cp, tpl, returnTypeInfo);
+    compiler.getTemplateLiteralProcessor().generate(code, cp, tpl, returnTypeInfo);
 }
 ```
 
 ### ByteCodeCompiler
 ```java
-protected final TemplateLiteralGenerator templateLiteralGenerator;
+protected final TemplateLiteralProcessor templateLiteralProcessor;
 
 // In constructor:
-templateLiteralGenerator = new TemplateLiteralGenerator(this);
+templateLiteralProcessor = new TemplateLiteralProcessor(this);
 
 // Getter:
-public TemplateLiteralGenerator getTemplateLiteralGenerator() { ... }
+public TemplateLiteralProcessor getTemplateLiteralProcessor() { ... }
 ```
 
 ### TypeResolver
@@ -185,7 +185,7 @@ if (expr instanceof Swc4jAstTpl) {
 ### Current Error Cases
 1. **Empty cooked value** - Falls back to raw value
 2. **Null expression type** - TypeResolver handles gracefully
-3. **Unsupported expression** - Propagates from ExpressionGenerator
+3. **Unsupported expression** - Propagates from ExpressionProcessor
 
 ## Dependencies
 
@@ -194,7 +194,7 @@ if (expr instanceof Swc4jAstTpl) {
 - `TypeConversionUtils.isPrimitiveType()` - Primitive detection
 - `TypeConversionUtils.getWrapperType()` - Wrapper type mapping
 - `TypeConversionUtils.boxPrimitiveType()` - Primitive boxing
-- `ExpressionGenerator.generate()` - Expression bytecode generation
+- `ExpressionProcessor.generate()` - Expression bytecode generation
 
 ## JVM Bytecode Details
 
@@ -283,7 +283,7 @@ INVOKEVIRTUAL java/lang/StringBuilder.toString()Ljava/lang/String;
 
 - **TypeScript Spec:** [Template Literals](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html)
 - **ECMAScript Spec:** [Template Literals](https://tc39.es/ecma262/#sec-template-literals)
-- **Implementation:** `TemplateLiteralGenerator.java`
+- **Implementation:** `TemplateLiteralProcessor.java`
 - **Tests:** `TestCompileAstTplBasic.java`, `TestCompileAstTplAdvanced.java`
 - **Related:** `TypeConversionUtils.java`, `TypeResolver.java`
 - **See also:** [Tagged Template Literals](tagged-tpl.md)

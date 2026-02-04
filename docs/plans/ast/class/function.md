@@ -1251,7 +1251,7 @@ return   // void
 
 **Primitive Array Iteration Fix:**
 - Functions that iterate over primitive arrays (e.g., `int[]`, `double[]`) in for loops now compile correctly
-- The `StackMapGenerator` was missing array operation handlers (`iaload`, `arraylength`, etc.), causing compilation to hang
+- The `StackMapProcessor` was missing array operation handlers (`iaload`, `arraylength`, etc.), causing compilation to hang
 - This enables varargs iteration tests like `testVarargsIteration` and return-in-loop tests like `testReturnInLoop` to pass
 - See `docs/plans/ast/stmt/for-stmt.md` for detailed fix description
 
@@ -1294,7 +1294,7 @@ return   // void
     - If statements: Analyzes both consequent and alternate branches, finding common type when both return
   - `inferTypeFromExpr()`: Extended to support chained member access by resolving object types through the type registry and looking up field types in class hierarchies
   - Null literal handling: Returns `null` from `inferTypeFromExpr` for null literals, which is then defaulted to `Object` type since null is compatible with any reference type
-- **MemberExpressionGenerator Enhancement**: Added general case handling for chained member access (e.g., `this.b.value`) by:
+- **MemberExpressionProcessor Enhancement**: Added general case handling for chained member access (e.g., `this.b.value`) by:
   - Generating code to evaluate the object expression
   - Resolving the object's class type from the type registry
   - Looking up the field in the class hierarchy

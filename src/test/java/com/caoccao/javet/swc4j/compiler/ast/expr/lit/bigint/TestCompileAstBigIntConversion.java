@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.within;
  * Tests for BigInt to primitive type conversions.
  * Phase 2: Conversion to Primitives (12 tests)
  * <p>
- * NOTE: These tests are placeholders. BigIntLiteralGenerator.java needs to be implemented first.
+ * NOTE: These tests are placeholders. BigIntLiteralProcessor.java needs to be implemented first.
  */
 public class TestCompileAstBigIntConversion extends BaseTestCompileSuite {
 

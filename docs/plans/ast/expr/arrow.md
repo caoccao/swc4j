@@ -33,8 +33,8 @@ class Calculator {
 ```
 
 **Implementation Files:**
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/ArrowExpressionGenerator.java`
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/AnonymousInnerClassGenerator.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/ArrowExpressionProcessor.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/AnonymousInnerClassProcessor.java`
 - `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ClosureAnalyzer.java`
 
 **Test Files:**
@@ -1222,7 +1222,7 @@ The `ClosureAnalyzer` class will:
 
 ### Anonymous Inner Class Generation
 
-The `AnonymousInnerClassGenerator` will:
+The `AnonymousInnerClassProcessor` will:
 1. Determine the functional interface to implement
 2. Generate class header with unique name
 3. Generate fields for each captured variable

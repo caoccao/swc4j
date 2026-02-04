@@ -87,7 +87,7 @@ try {
 ```
 
 **Implementation Files:**
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/TryStatementGenerator.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/TryStatementProcessor.java`
 
 **Test Files:**
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/TestCompileAstTryStmt.java`
