@@ -21,10 +21,8 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateMethod;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
@@ -41,8 +39,8 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
 
-public final class MethodGenerator extends BaseAstProcessor {
-    public MethodGenerator(ByteCodeCompiler compiler) {
+public final class ClassMethodGenerator extends BaseAstProcessor<Swc4jAstClassMethod> {
+    public ClassMethodGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
@@ -62,8 +60,8 @@ public final class MethodGenerator extends BaseAstProcessor {
     }
 
     @Override
-    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, ISwc4jAst ast, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        throw new Swc4jByteCodeCompilerException(getSourceCode(), ast, "MethodGenerator does not support generic generate method.");
+    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstClassMethod classMethod, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        throw new Swc4jByteCodeCompilerException(getSourceCode(), classMethod, "Use generate method with ClassWriter for class methods.");
     }
 
     public void generate(
@@ -360,9 +358,7 @@ public final class MethodGenerator extends BaseAstProcessor {
         CodeBuilder code = new CodeBuilder();
 
         // Process statements in the method body
-        for (ISwc4jAstStmt stmt : body.getStmts()) {
-            compiler.getStatementGenerator().generate(code, cp, stmt, returnTypeInfo);
-        }
+        compiler.getStatementGenerator().generate(code, cp, body.getStmts(), returnTypeInfo);
 
         // Add implicit return for void methods if not already present
         if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.VOID) {

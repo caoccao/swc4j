@@ -23,6 +23,8 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+import java.util.List;
+
 public abstract class BaseAstProcessor<AST extends ISwc4jAst> {
     protected final ByteCodeCompiler compiler;
 
@@ -35,6 +37,16 @@ public abstract class BaseAstProcessor<AST extends ISwc4jAst> {
             ClassWriter.ConstantPool cp,
             AST ast,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException;
+
+    public void generate(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            List<AST> ast,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        for (AST item : ast) {
+            generate(code, cp, item, returnTypeInfo);
+        }
+    }
 
     protected String getSourceCode() {
         return compiler.getMemory().getScopedSourceCode().getSourceCode();

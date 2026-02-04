@@ -43,9 +43,7 @@ public final class TsModuleDeclGenerator extends BaseAstProcessor<Swc4jAstTsModu
         try {
             var bodyOpt = tsModuleDecl.getBody();
             if (bodyOpt.isPresent() && bodyOpt.get() instanceof Swc4jAstTsModuleBlock moduleBlock) {
-                for (var moduleItem : moduleBlock.getBody()) {
-                    compiler.getModuleItemGenerator().generate(code, cp, moduleItem, returnTypeInfo);
-                }
+                compiler.getModuleItemGenerator().generate(code, cp, moduleBlock.getBody(), returnTypeInfo);
             }
         } finally {
             // Exit the package scope

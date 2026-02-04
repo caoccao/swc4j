@@ -96,7 +96,7 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
         }
     }
 
-    public byte[] generateBytecode(
+    private byte[] generateBytecode(
             String internalClassName,
             Swc4jAstClass clazz) throws IOException, Swc4jByteCodeCompilerException {
         String qualifiedName = internalClassName.replace('/', '.');
@@ -216,10 +216,10 @@ public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl
             // Generate methods (this may create template cache entries)
             for (ISwc4jAstClassMember member : clazz.getBody()) {
                 if (member instanceof Swc4jAstClassMethod method) {
-                    compiler.getMethodGenerator().generate(classWriter, cp, method);
+                    compiler.getClassMethodGenerator().generate(classWriter, cp, method);
                 } else if (member instanceof Swc4jAstPrivateMethod privateMethod) {
                     // ES2022 private methods (#method)
-                    compiler.getMethodGenerator().generate(classWriter, cp, privateMethod);
+                    compiler.getClassMethodGenerator().generate(classWriter, cp, privateMethod);
                 }
             }
 

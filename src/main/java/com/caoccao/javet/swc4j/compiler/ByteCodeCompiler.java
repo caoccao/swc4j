@@ -20,7 +20,7 @@ import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.compiler.jdk17.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassDeclGenerator;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.MethodGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassMethodGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.StandaloneFunctionGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit.*;
@@ -49,12 +49,12 @@ public sealed abstract class ByteCodeCompiler permits
     protected final CallExpressionGenerator callExpressionGenerator;
     protected final ClassCollector classCollector;
     protected final ClassDeclGenerator classDeclGenerator;
+    protected final ClassMethodGenerator classMethodGenerator;
     protected final ConditionalExpressionGenerator conditionalExpressionGenerator;
     protected final ContinueStatementGenerator continueStatementGenerator;
     protected final DeclGenerator declGenerator;
     protected final DoWhileStatementGenerator doWhileStatementGenerator;
     protected final EnumCollector enumCollector;
-    protected final EnumGenerator enumGenerator;
     protected final ExportDeclGenerator exportDeclGenerator;
     protected final ExpressionGenerator expressionGenerator;
     protected final ForInStatementGenerator forInStatementGenerator;
@@ -66,7 +66,6 @@ public sealed abstract class ByteCodeCompiler permits
     protected final LabeledStatementGenerator labeledStatementGenerator;
     protected final MemberExpressionGenerator memberExpressionGenerator;
     protected final ByteCodeCompilerMemory memory;
-    protected final MethodGenerator methodGenerator;
     protected final ModuleItemGenerator moduleItemGenerator;
     protected final MutableCaptureAnalyzer mutableCaptureAnalyzer;
     protected final NewExpressionGenerator newExpressionGenerator;
@@ -123,12 +122,12 @@ public sealed abstract class ByteCodeCompiler permits
         callExpressionGenerator = new CallExpressionGenerator(this);
         classCollector = new ClassCollector(this);
         classDeclGenerator = new ClassDeclGenerator(this);
+        classMethodGenerator = new ClassMethodGenerator(this);
         conditionalExpressionGenerator = new ConditionalExpressionGenerator(this);
         continueStatementGenerator = new ContinueStatementGenerator(this);
         declGenerator = new DeclGenerator(this);
         doWhileStatementGenerator = new DoWhileStatementGenerator(this);
         enumCollector = new EnumCollector(this);
-        enumGenerator = new EnumGenerator(this);
         exportDeclGenerator = new ExportDeclGenerator(this);
         expressionGenerator = new ExpressionGenerator(this);
         forInStatementGenerator = new ForInStatementGenerator(this);
@@ -139,7 +138,6 @@ public sealed abstract class ByteCodeCompiler permits
         importDeclProcessor = new ImportDeclProcessor(this);
         labeledStatementGenerator = new LabeledStatementGenerator(this);
         memberExpressionGenerator = new MemberExpressionGenerator(this);
-        methodGenerator = new MethodGenerator(this);
         moduleItemGenerator = new ModuleItemGenerator(this);
         mutableCaptureAnalyzer = new MutableCaptureAnalyzer(this);
         newExpressionGenerator = new NewExpressionGenerator(this);
@@ -230,6 +228,10 @@ public sealed abstract class ByteCodeCompiler permits
         return classDeclGenerator;
     }
 
+    public ClassMethodGenerator getClassMethodGenerator() {
+        return classMethodGenerator;
+    }
+
     public ConditionalExpressionGenerator getConditionalExpressionGenerator() {
         return conditionalExpressionGenerator;
     }
@@ -248,10 +250,6 @@ public sealed abstract class ByteCodeCompiler permits
 
     public EnumCollector getEnumCollector() {
         return enumCollector;
-    }
-
-    public EnumGenerator getEnumGenerator() {
-        return enumGenerator;
     }
 
     public ExportDeclGenerator getExportDeclGenerator() {
@@ -296,10 +294,6 @@ public sealed abstract class ByteCodeCompiler permits
 
     public ByteCodeCompilerMemory getMemory() {
         return memory;
-    }
-
-    public MethodGenerator getMethodGenerator() {
-        return methodGenerator;
     }
 
     public ModuleItemGenerator getModuleItemGenerator() {
