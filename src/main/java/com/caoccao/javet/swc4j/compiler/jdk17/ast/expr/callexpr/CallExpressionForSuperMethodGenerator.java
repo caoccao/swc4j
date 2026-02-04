@@ -44,7 +44,7 @@ public final class CallExpressionForSuperMethodGenerator extends BaseAstProcesso
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         if (!(callExpr.getCallee() instanceof Swc4jAstSuperPropExpr superPropExpr)) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "Expected super property expression");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Expected super property expression");
         }
 
         // Get method name from the super property expression
@@ -53,13 +53,13 @@ public final class CallExpressionForSuperMethodGenerator extends BaseAstProcesso
         if (prop instanceof Swc4jAstIdentName identName) {
             methodName = identName.getSym();
         } else {
-            throw new Swc4jByteCodeCompilerException(superPropExpr, "Computed super property expressions not yet supported");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), superPropExpr, "Computed super property expressions not yet supported");
         }
 
         // Get the current class and resolve its superclass
         String currentClassInternalName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
         if (currentClassInternalName == null) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "super.method() call outside of class context");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "super.method() call outside of class context");
         }
 
         // Resolve the superclass
@@ -84,7 +84,7 @@ public final class CallExpressionForSuperMethodGenerator extends BaseAstProcesso
         StringBuilder paramDescriptors = new StringBuilder();
         for (var arg : args) {
             if (arg.getSpread().isPresent()) {
-                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not yet supported in super method calls");
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not yet supported in super method calls");
             }
             compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
@@ -107,7 +107,7 @@ public final class CallExpressionForSuperMethodGenerator extends BaseAstProcesso
                     .resolveClassMethodReturnType(simpleName, methodName, paramDescriptor);
         }
         if (returnType == null) {
-            throw new Swc4jByteCodeCompilerException(callExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                     "Cannot infer return type for super method call " + superClassInternalName + "." + methodName);
         }
 

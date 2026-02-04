@@ -88,7 +88,7 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
     private IterationType determineIterationType(ISwc4jAstExpr astExpr) throws Swc4jByteCodeCompilerException {
         String typeDescriptor = compiler.getTypeResolver().inferTypeFromExpr(astExpr);
         if (typeDescriptor == null) {
-            throw new Swc4jByteCodeCompilerException(astExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), astExpr,
                     "Cannot determine type of for-in expression. Please add explicit type annotation.");
         }
 
@@ -130,7 +130,7 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
             }
         }
 
-        throw new Swc4jByteCodeCompilerException(astExpr,
+        throw new Swc4jByteCodeCompilerException(getSourceCode(), astExpr,
                 "For-in loops require List, Map, or String type, but got: " + typeDescriptor);
     }
 
@@ -488,7 +488,7 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
         if (left instanceof Swc4jAstVarDecl varDecl) {
             // Variable declaration: let key or const key
             if (varDecl.getDecls().isEmpty()) {
-                throw new Swc4jByteCodeCompilerException(varDecl, "For-in variable declaration is empty");
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), varDecl, "For-in variable declaration is empty");
             }
             Swc4jAstVarDeclarator decl = varDecl.getDecls().get(0);
             ISwc4jAstPat name = decl.getName();
@@ -503,20 +503,20 @@ public final class ForInStatementGenerator extends BaseAstProcessor<Swc4jAstForI
                 code.astore(slot);
                 return slot;
             } else {
-                throw new Swc4jByteCodeCompilerException(name, "For-in variable must be a simple identifier");
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), name, "For-in variable must be a simple identifier");
             }
         } else if (left instanceof Swc4jAstBindingIdent bindingIdent) {
             // Existing variable - look it up (do NOT reinitialize - keep existing value)
             String varName = bindingIdent.getId().getSym();
             var variable = context.getLocalVariableTable().getVariable(varName);
             if (variable == null) {
-                throw new Swc4jByteCodeCompilerException(bindingIdent, "Variable not found: " + varName);
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), bindingIdent, "Variable not found: " + varName);
             }
             // Update inferredTypes to String for object keys
             context.getInferredTypes().put(varName, "Ljava/lang/String;");
             return variable.index();
         } else {
-            throw new Swc4jByteCodeCompilerException(left, "Unsupported for-in left type: " + left.getClass().getName());
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), left, "Unsupported for-in left type: " + left.getClass().getName());
         }
     }
 

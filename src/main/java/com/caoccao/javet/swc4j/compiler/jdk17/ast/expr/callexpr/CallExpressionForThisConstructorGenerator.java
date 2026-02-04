@@ -44,7 +44,7 @@ public final class CallExpressionForThisConstructorGenerator extends BaseAstProc
         // Get the current class
         String currentClassInternalName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
         if (currentClassInternalName == null) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "this() call outside of class context");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "this() call outside of class context");
         }
 
         // Load 'this' reference
@@ -55,7 +55,7 @@ public final class CallExpressionForThisConstructorGenerator extends BaseAstProc
         StringBuilder paramDescriptors = new StringBuilder();
         for (var arg : args) {
             if (arg.getSpread().isPresent()) {
-                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not yet supported in this() constructor calls");
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not yet supported in this() constructor calls");
             }
             compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());

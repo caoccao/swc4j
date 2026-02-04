@@ -151,7 +151,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
         } else if (propName instanceof Swc4jAstStr str) {
             return str.getValue();
         } else {
-            throw new Swc4jByteCodeCompilerException(propName,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), propName,
                     "Unsupported property name type: " + propName.getClass().getName());
         }
     }
@@ -173,7 +173,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             } else if (name instanceof Swc4jAstObjectPat objectPat) {
                 generateObjectPatternDecl(code, cp, context, declarator, objectPat, allowShadow);
             } else {
-                throw new Swc4jByteCodeCompilerException(name,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), name,
                         "Unsupported pattern type in variable declaration: " + name.getClass().getName());
             }
         }
@@ -192,7 +192,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             Swc4jAstArrayPat arrayPat,
             boolean allowShadow) throws Swc4jByteCodeCompilerException {
         if (declarator.getInit().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(declarator,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), declarator,
                     "Array destructuring requires an initializer");
         }
 
@@ -618,7 +618,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
             Swc4jAstObjectPat objectPat,
             boolean allowShadow) throws Swc4jByteCodeCompilerException {
         if (declarator.getInit().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(declarator,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), declarator,
                     "Object destructuring requires an initializer");
         }
 
@@ -761,7 +761,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.pop();
             }
         } else {
-            throw new Swc4jByteCodeCompilerException(restPat,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), restPat,
                     "Rest pattern argument must be a binding identifier");
         }
     }
@@ -837,7 +837,7 @@ public final class VarDeclGenerator extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.patchShort(loopExitPatch, (short) exitOffset);
             }
         } else {
-            throw new Swc4jByteCodeCompilerException(restPat,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), restPat,
                     "Rest pattern argument must be a binding identifier");
         }
     }

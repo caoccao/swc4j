@@ -133,7 +133,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
 
         String calleeType = compiler.getTypeResolver().inferTypeFromExpr(nestedChain);
         if (calleeType == null) {
-            throw new Swc4jByteCodeCompilerException(optChainExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), optChainExpr,
                     "Cannot infer callee type for optional call");
         }
         generateFunctionalInterfaceCall(code, cp, optChainExpr, optCall, calleeType);
@@ -154,7 +154,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
         } else if (base instanceof Swc4jAstOptCall optCall) {
             generateOptCall(code, cp, optChainExpr, optCall, nullJumpPositions);
         } else {
-            throw new Swc4jByteCodeCompilerException(optChainExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), optChainExpr,
                     "Unsupported optional chain base: " + base.getClass().getSimpleName());
         }
     }
@@ -170,7 +170,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
         // Infer object type
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
         if (objType == null) {
-            throw new Swc4jByteCodeCompilerException(memberExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr,
                     "Cannot infer object type for optional member access");
         }
 
@@ -289,7 +289,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
         // Get field name
         String fieldName = compiler.getTypeResolver().extractMemberExprPropName(memberExpr);
         if (fieldName == null) {
-            throw new Swc4jByteCodeCompilerException(memberExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr,
                     "Cannot extract field name from optional member access");
         }
 
@@ -318,7 +318,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
             }
         }
 
-        throw new Swc4jByteCodeCompilerException(memberExpr,
+        throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr,
                 "Cannot resolve field '" + fieldName + "' on type " + objType);
     }
 
@@ -329,14 +329,14 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
             Swc4jAstOptCall optCall,
             String calleeType) throws Swc4jByteCodeCompilerException {
         if (!calleeType.startsWith("L") || !calleeType.endsWith(";")) {
-            throw new Swc4jByteCodeCompilerException(optChainExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), optChainExpr,
                     "Cannot infer callee type for optional call");
         }
 
         String interfaceName = calleeType.substring(1, calleeType.length() - 1);
         var samInfo = compiler.getMemory().getScopedFunctionalInterfaceRegistry().getSamMethodInfo(interfaceName);
         if (samInfo == null) {
-            throw new Swc4jByteCodeCompilerException(optChainExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), optChainExpr,
                     "Cannot find SAM method for optional call on type: " + calleeType);
         }
 
@@ -402,14 +402,14 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
         // Get method name
         String methodName = compiler.getTypeResolver().extractMemberExprPropName(memberExpr);
         if (methodName == null) {
-            throw new Swc4jByteCodeCompilerException(memberExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr,
                     "Cannot extract method name for optional call");
         }
 
         // Infer object type
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
         if (objType == null || !objType.startsWith("L") || !objType.endsWith(";")) {
-            throw new Swc4jByteCodeCompilerException(memberExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr,
                     "Cannot infer object type for optional call");
         }
 
@@ -450,7 +450,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
                 methodInfo = typeInfo.getMethod(methodName, boxedArgTypes);
             }
             if (methodInfo == null) {
-                throw new Swc4jByteCodeCompilerException(memberExpr,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr,
                         "Cannot resolve method '" + methodName + "' on type " + objType);
             }
             methodDescriptor = methodInfo.descriptor();
@@ -489,7 +489,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
                 code.invokevirtual(methodRef);
             }
         } else {
-            throw new Swc4jByteCodeCompilerException(memberExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr,
                     "Cannot resolve method '" + methodName + "' on type " + objType);
         }
 
@@ -568,7 +568,7 @@ public final class OptionalChainExpressionGenerator extends BaseAstProcessor<Swc
             // Generate call - this would be for functional interface invocation
             String calleeType = compiler.getTypeResolver().inferTypeFromExpr(callee);
             if (calleeType == null) {
-                throw new Swc4jByteCodeCompilerException(optChainExpr,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), optChainExpr,
                         "Cannot infer callee type for optional call");
             }
             generateFunctionalInterfaceCall(code, cp, optChainExpr, optCall, calleeType);

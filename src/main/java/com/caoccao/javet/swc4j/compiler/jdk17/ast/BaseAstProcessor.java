@@ -35,4 +35,8 @@ public abstract class BaseAstProcessor<AST extends ISwc4jAst> {
             ClassWriter.ConstantPool cp,
             AST ast,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException;
+
+    protected String getSourceCode() {
+        return compiler.getMemory().getScopedSourceCode().getSourceCode();
+    }
 }

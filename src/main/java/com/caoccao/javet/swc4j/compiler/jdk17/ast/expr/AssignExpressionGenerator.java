@@ -59,7 +59,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
         if (TypeConversionUtils.isPrimitiveType(targetType)) {
             String primitiveValueType = TypeConversionUtils.getPrimitiveType(valueType);
             if (!TypeConversionUtils.isPrimitiveType(primitiveValueType)) {
-                throw new Swc4jByteCodeCompilerException(assignExpr,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr,
                         "Cannot assign non-primitive type " + valueType + " to primitive " + targetType);
             }
             TypeConversionUtils.unboxWrapperType(code, cp, valueType);
@@ -88,7 +88,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 TypeConversionUtils.boxPrimitiveType(code, cp, primitiveValueType, wrapperType);
                 return;
             }
-            throw new Swc4jByteCodeCompilerException(assignExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr,
                     "Cannot assign primitive type " + primitiveValueType + " to " + targetType);
         }
 
@@ -112,7 +112,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
         } else if (propName instanceof Swc4jAstStr str) {
             return str.getValue();
         } else {
-            throw new Swc4jByteCodeCompilerException(propName,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), propName,
                     "Unsupported property name type: " + propName.getClass().getName());
         }
     }
@@ -329,7 +329,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
                     if ("length".equals(propName)) {
-                        throw new Swc4jByteCodeCompilerException(assignExpr, "Cannot set length on Java array - array size is fixed");
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr, "Cannot set length on Java array - array size is fixed");
                     }
                 }
             } else if ("Ljava/util/ArrayList;".equals(objType) || "Ljava/util/List;".equals(objType)) {
@@ -411,7 +411,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         }
 
                         // For non-constant expressions, we need more complex handling
-                        throw new Swc4jByteCodeCompilerException(assignExpr, "Setting array length to non-constant values not yet supported");
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr, "Setting array length to non-constant values not yet supported");
                     }
                 }
             } else if ("Ljava/util/LinkedHashMap;".equals(objType)) {
@@ -483,7 +483,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
             LocalVariable var = context.getLocalVariableTable().getVariable(varName);
 
             if (var == null) {
-                throw new Swc4jByteCodeCompilerException(assignExpr, "Undefined variable: " + varName);
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr, "Undefined variable: " + varName);
             }
 
             String varType = var.type();
@@ -618,7 +618,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
             generateObjectPatternAssign(code, cp, context, assignExpr, objectPat);
             return;
         }
-        throw new Swc4jByteCodeCompilerException(assignExpr, "Assignment expression not yet supported: " + left);
+        throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr, "Assignment expression not yet supported: " + left);
     }
 
     /**
@@ -674,7 +674,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
 
                 if (localVar == null) {
-                    throw new Swc4jByteCodeCompilerException(bindingIdent,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), bindingIdent,
                             "Undefined variable in array destructuring assignment: " + varName);
                 }
 
@@ -692,7 +692,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                     LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
 
                     if (localVar == null) {
-                        throw new Swc4jByteCodeCompilerException(bindingIdent,
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), bindingIdent,
                                 "Undefined variable in array destructuring rest assignment: " + varName);
                     }
 
@@ -742,7 +742,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                     int exitOffset = loopEnd - (loopExitPatch - 1);
                     code.patchShort(loopExitPatch, (short) exitOffset);
                 } else {
-                    throw new Swc4jByteCodeCompilerException(restPat,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), restPat,
                             "Rest pattern argument must be a binding identifier");
                 }
             }
@@ -994,7 +994,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                 LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
 
                 if (localVar == null) {
-                    throw new Swc4jByteCodeCompilerException(assignProp,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), assignProp,
                             "Undefined variable in object destructuring assignment: " + varName);
                 }
 
@@ -1029,7 +1029,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                     LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
 
                     if (localVar == null) {
-                        throw new Swc4jByteCodeCompilerException(bindingIdent,
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), bindingIdent,
                                 "Undefined variable in object destructuring assignment: " + varName);
                     }
 
@@ -1048,7 +1048,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                     LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
 
                     if (localVar == null) {
-                        throw new Swc4jByteCodeCompilerException(bindingIdent,
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), bindingIdent,
                                 "Undefined variable in object destructuring rest assignment: " + varName);
                     }
 
@@ -1071,7 +1071,7 @@ public final class AssignExpressionGenerator extends BaseAstProcessor<Swc4jAstAs
                         code.pop();
                     }
                 } else {
-                    throw new Swc4jByteCodeCompilerException(restPat,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), restPat,
                             "Rest pattern argument must be a binding identifier");
                 }
             }

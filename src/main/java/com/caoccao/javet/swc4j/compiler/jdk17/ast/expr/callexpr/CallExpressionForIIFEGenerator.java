@@ -322,20 +322,20 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
         // Extract arrow expression from parenthesized expression
         var callee = callExpr.getCallee();
         if (!(callee instanceof ISwc4jAstExpr calleeExpr)) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "IIFE callee must be an expression");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "IIFE callee must be an expression");
         }
 
         Swc4jAstArrowExpr arrowExpr = extractArrowExpr(calleeExpr);
         if (arrowExpr == null) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "IIFE callee must be an arrow expression");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "IIFE callee must be an arrow expression");
         }
 
         // Check for unsupported features
         if (arrowExpr.isAsync()) {
-            throw new Swc4jByteCodeCompilerException(arrowExpr, "Async IIFE are not supported");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr, "Async IIFE are not supported");
         }
         if (arrowExpr.isGenerator()) {
-            throw new Swc4jByteCodeCompilerException(arrowExpr, "Generator IIFE are not supported");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr, "Generator IIFE are not supported");
         }
 
         try {
@@ -357,7 +357,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
             // Generate code to instantiate, invoke, and get result
             generateInvocation(code, cp, implClassName, capturedVariables, typeInfo, callExpr.getArgs());
         } catch (IOException e) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "Failed to generate IIFE", e);
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Failed to generate IIFE", e);
         }
     }
 
@@ -575,7 +575,7 @@ public final class CallExpressionForIIFEGenerator extends BaseAstProcessor<Swc4j
         for (int i = 0; i < callArgs.size(); i++) {
             var arg = callArgs.get(i);
             if (arg.getSpread().isPresent()) {
-                throw new Swc4jByteCodeCompilerException(arg, "Spread operator in IIFE arguments not yet supported");
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread operator in IIFE arguments not yet supported");
             }
             // Create return type info for the argument based on the parameter type
             String paramType = typeInfo.paramTypes().get(i);

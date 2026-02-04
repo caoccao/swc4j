@@ -26,7 +26,7 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor, G
 
     public static ReturnTypeInfo of(ISwc4jAst ast, String type, GenericTypeInfo genericTypeInfo) throws Swc4jByteCodeCompilerException {
         if (type == null || type.isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(ast, "Missing type info.");
+            throw new Swc4jByteCodeCompilerException(null, ast, "Missing type info.");
         }
         if (type.length() == 1) {
             return switch (type) {
@@ -39,7 +39,7 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor, G
                 case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null, genericTypeInfo);
                 case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null, genericTypeInfo);
                 case "V" -> new ReturnTypeInfo(ReturnType.VOID, 0, null, genericTypeInfo);
-                default -> throw new Swc4jByteCodeCompilerException(ast, "Unsupported primitive type: " + type);
+                default -> throw new Swc4jByteCodeCompilerException(null, ast, "Unsupported primitive type: " + type);
             };
         }
         if (type.equals("Ljava/lang/String;")) {
@@ -53,7 +53,7 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor, G
         if (type.startsWith("L") && type.endsWith(";")) {
             return new ReturnTypeInfo(ReturnType.OBJECT, 1, type, genericTypeInfo);
         }
-        throw new Swc4jByteCodeCompilerException(ast, "Unsupported object type: " + type);
+        throw new Swc4jByteCodeCompilerException(null, ast, "Unsupported object type: " + type);
     }
 
     public String getPrimitiveTypeDescriptor() {

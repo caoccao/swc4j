@@ -76,7 +76,7 @@ public final class CallExpressionForStringGenerator extends BaseAstProcessor<Swc
                 case "trimEnd", "trimRight" -> generateTrimEnd(code, cp);
                 case "trimStart", "trimLeft" -> generateTrimStart(code, cp);
                 default ->
-                        throw new Swc4jByteCodeCompilerException(memberExpr, "Method '" + methodName + "()' not supported on String");
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "Method '" + methodName + "()' not supported on String");
             }
         }
     }

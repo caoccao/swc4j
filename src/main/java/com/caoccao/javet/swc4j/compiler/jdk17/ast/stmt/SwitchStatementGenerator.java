@@ -65,7 +65,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
             if (switchCase.getTest().isEmpty()) {
                 // Default case
                 if (hasDefault) {
-                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate default case in switch statement");
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), switchCase, "Duplicate default case in switch statement");
                 }
                 hasDefault = true;
                 cases.add(new CaseInfo(null, switchCase.getCons(), true));
@@ -74,12 +74,12 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                 ISwc4jAstExpr testExpr = switchCase.getTest().get();
                 Integer caseValue = extractConstantIntValue(testExpr);
                 if (caseValue == null) {
-                    throw new Swc4jByteCodeCompilerException(testExpr,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), testExpr,
                             "Switch case value must be a constant integer: " + testExpr.getClass().getSimpleName());
                 }
 
                 if (seenValues.contains(caseValue)) {
-                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate case value: " + caseValue);
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), switchCase, "Duplicate case value: " + caseValue);
                 }
                 seenValues.add(caseValue);
 
@@ -98,7 +98,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         for (Swc4jAstSwitchCase switchCase : switchStmt.getCases()) {
             if (switchCase.getTest().isEmpty()) {
                 if (hasDefault) {
-                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate default case in switch statement");
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), switchCase, "Duplicate default case in switch statement");
                 }
                 hasDefault = true;
                 cases.add(new DoubleCaseInfo(null, switchCase.getCons(), true));
@@ -106,7 +106,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                 ISwc4jAstExpr testExpr = switchCase.getTest().get();
                 Double caseValue = extractConstantDoubleValue(testExpr);
                 if (caseValue == null) {
-                    throw new Swc4jByteCodeCompilerException(testExpr,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), testExpr,
                             "Switch case value must be a constant double: " + testExpr.getClass().getSimpleName());
                 }
                 double normalized = caseValue == 0.0d ? 0.0d : caseValue;
@@ -115,7 +115,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                 }
                 long key = Double.doubleToLongBits(normalized);
                 if (seenValues.contains(key)) {
-                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate case value: " + caseValue);
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), switchCase, "Duplicate case value: " + caseValue);
                 }
                 seenValues.add(key);
                 cases.add(new DoubleCaseInfo(caseValue, switchCase.getCons(), false));
@@ -133,7 +133,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         for (Swc4jAstSwitchCase switchCase : switchStmt.getCases()) {
             if (switchCase.getTest().isEmpty()) {
                 if (hasDefault) {
-                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate default case in switch statement");
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), switchCase, "Duplicate default case in switch statement");
                 }
                 hasDefault = true;
                 cases.add(new FloatCaseInfo(null, switchCase.getCons(), true));
@@ -141,7 +141,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                 ISwc4jAstExpr testExpr = switchCase.getTest().get();
                 Float caseValue = extractConstantFloatValue(testExpr);
                 if (caseValue == null) {
-                    throw new Swc4jByteCodeCompilerException(testExpr,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), testExpr,
                             "Switch case value must be a constant float: " + testExpr.getClass().getSimpleName());
                 }
                 float normalized = caseValue == 0.0f ? 0.0f : caseValue;
@@ -150,7 +150,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                 }
                 int key = Float.floatToIntBits(normalized);
                 if (seenValues.contains(key)) {
-                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate case value: " + caseValue);
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), switchCase, "Duplicate case value: " + caseValue);
                 }
                 seenValues.add(key);
                 cases.add(new FloatCaseInfo(caseValue, switchCase.getCons(), false));
@@ -168,7 +168,7 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
         for (Swc4jAstSwitchCase switchCase : switchStmt.getCases()) {
             if (switchCase.getTest().isEmpty()) {
                 if (hasDefault) {
-                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate default case in switch statement");
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), switchCase, "Duplicate default case in switch statement");
                 }
                 hasDefault = true;
                 cases.add(new LongCaseInfo(null, switchCase.getCons(), true));
@@ -176,11 +176,11 @@ public final class SwitchStatementGenerator extends BaseAstProcessor<Swc4jAstSwi
                 ISwc4jAstExpr testExpr = switchCase.getTest().get();
                 Long caseValue = extractConstantLongValue(testExpr);
                 if (caseValue == null) {
-                    throw new Swc4jByteCodeCompilerException(testExpr,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), testExpr,
                             "Switch case value must be a constant long: " + testExpr.getClass().getSimpleName());
                 }
                 if (seenValues.contains(caseValue)) {
-                    throw new Swc4jByteCodeCompilerException(switchCase, "Duplicate case value: " + caseValue);
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), switchCase, "Duplicate case value: " + caseValue);
                 }
                 seenValues.add(caseValue);
                 cases.add(new LongCaseInfo(caseValue, switchCase.getCons(), false));

@@ -28,6 +28,8 @@ public final class ByteCodeCompilerMemory {
     private final ScopedCompilationContext scopedCompilationContext;
     private final ScopedFunctionalInterfaceRegistry scopedFunctionalInterfaceRegistry;
     private final ScopedJavaTypeRegistry scopedJavaTypeRegistry;
+    private final ScopedPackage scopedPackage;
+    private final ScopedSourceCode scopedSourceCode;
     private final ScopedStandaloneFunctionRegistry scopedStandaloneFunctionRegistry;
     private final ScopedTemplateCacheRegistry scopedTemplateCacheRegistry;
     private final ScopedTypeAliasRegistry scopedTypeAliasRegistry;
@@ -38,6 +40,8 @@ public final class ByteCodeCompilerMemory {
         scopedCompilationContext = new ScopedCompilationContext();
         scopedFunctionalInterfaceRegistry = new ScopedFunctionalInterfaceRegistry();
         scopedJavaTypeRegistry = new ScopedJavaTypeRegistry();
+        scopedPackage = new ScopedPackage();
+        scopedSourceCode = new ScopedSourceCode();
         scopedStandaloneFunctionRegistry = new ScopedStandaloneFunctionRegistry();
         scopedTemplateCacheRegistry = new ScopedTemplateCacheRegistry();
         scopedTypeAliasRegistry = new ScopedTypeAliasRegistry();
@@ -46,12 +50,14 @@ public final class ByteCodeCompilerMemory {
 
     public void enterScope() {
         scopedFunctionalInterfaceRegistry.enterScope();
+        scopedSourceCode.enterScope();
         scopedStandaloneFunctionRegistry.enterScope();
         scopedTypeAliasRegistry.enterScope();
     }
 
     public void exitScope() {
         scopedFunctionalInterfaceRegistry.exitScope();
+        scopedSourceCode.exitScope();
         scopedStandaloneFunctionRegistry.exitScope();
         scopedTypeAliasRegistry.exitScope();
     }
@@ -93,6 +99,24 @@ public final class ByteCodeCompilerMemory {
 
     public ScopedJavaTypeRegistry getScopedJavaTypeRegistry() {
         return scopedJavaTypeRegistry;
+    }
+
+    /**
+     * Get the scoped package storage.
+     *
+     * @return the scoped package
+     */
+    public ScopedPackage getScopedPackage() {
+        return scopedPackage;
+    }
+
+    /**
+     * Get the scoped source code storage.
+     *
+     * @return the scoped source code
+     */
+    public ScopedSourceCode getScopedSourceCode() {
+        return scopedSourceCode;
     }
 
     public ScopedStandaloneFunctionRegistry getScopedStandaloneFunctionRegistry() {
@@ -139,6 +163,8 @@ public final class ByteCodeCompilerMemory {
         scopedCompilationContext.clear();
         scopedFunctionalInterfaceRegistry.clear();
         scopedJavaTypeRegistry.clear();
+        scopedPackage.clear();
+        scopedSourceCode.clear();
         scopedStandaloneFunctionRegistry.clear();
         scopedTemplateCacheRegistry.clear();
         scopedTypeAliasRegistry.clear();
@@ -182,7 +208,9 @@ public final class ByteCodeCompilerMemory {
             return javaTypeInfo;
         }
 
-        throw new Swc4jByteCodeCompilerException(ast,
+        throw new Swc4jByteCodeCompilerException(
+                scopedSourceCode.getSourceCode(),
+                ast,
                 "Type '" + className + "' not found. Did you forget to import it?");
     }
 }

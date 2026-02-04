@@ -76,7 +76,7 @@ public final class BreakStatementGenerator extends BaseAstProcessor<Swc4jAstBrea
             breakLabel = context.getLabeledBreakLabel(labelName);
 
             if (breakLabel == null) {
-                throw new Swc4jByteCodeCompilerException(breakStmt,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), breakStmt,
                         "Label '" + labelName + "' not found for break statement");
             }
         } else {
@@ -84,7 +84,7 @@ public final class BreakStatementGenerator extends BaseAstProcessor<Swc4jAstBrea
             breakLabel = context.getCurrentBreakLabel();
 
             if (breakLabel == null) {
-                throw new Swc4jByteCodeCompilerException(breakStmt,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), breakStmt,
                         "Break statement outside of loop or switch");
             }
         }

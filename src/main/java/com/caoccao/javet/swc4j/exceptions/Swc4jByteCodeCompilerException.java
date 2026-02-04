@@ -20,134 +20,24 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 
 public final class Swc4jByteCodeCompilerException extends Swc4jException {
     private final ISwc4jAst ast;
+    private final String sourceCode;
 
-    public Swc4jByteCodeCompilerException(ISwc4jAst ast, String message) {
+    public Swc4jByteCodeCompilerException(String sourceCode, ISwc4jAst ast, String message) {
         super(message);
+        this.sourceCode = sourceCode;
         this.ast = ast;
     }
 
-    public Swc4jByteCodeCompilerException(ISwc4jAst ast, String message, Throwable cause) {
+    public Swc4jByteCodeCompilerException(String sourceCode, ISwc4jAst ast, String message, Throwable cause) {
         super(message, cause);
+        this.sourceCode = sourceCode;
         this.ast = ast;
     }
 
-    public Swc4jByteCodeCompilerException(ISwc4jAst ast, Throwable cause) {
+    public Swc4jByteCodeCompilerException(String sourceCode, ISwc4jAst ast, Throwable cause) {
         super(cause);
+        this.sourceCode = sourceCode;
         this.ast = ast;
-    }
-
-    /**
-     * Gets the AST node that caused the exception.
-     *
-     * @return the AST node, or null if not available
-     */
-    public ISwc4jAst getAst() {
-        return ast;
-    }
-
-    /**
-     * Create a type mismatch exception for object literal properties.
-     * <p>
-     * Generates clear, actionable error messages like:
-     * - "Property 'name' has type String, but Record requires double"
-     * - "Key 'count' has type String, but Record requires Integer"
-     * - "Nested property 'outer.inner' has type String, but Record requires double"
-     *
-     * @param ast          the AST node that caused the exception
-     * @param propertyName Property name (or nested path like "outer.inner")
-     * @param expectedType JVM type descriptor of expected type (e.g., "D", "Ljava/lang/Integer;")
-     * @param actualType   JVM type descriptor of actual type (e.g., "Ljava/lang/String;")
-     * @param isKey        true if this is a key type mismatch, false for value type mismatch
-     * @return Swc4jByteCodeCompilerException with formatted error message
-     */
-    public static Swc4jByteCodeCompilerException typeMismatch(
-            ISwc4jAst ast,
-            String propertyName,
-            String expectedType,
-            String actualType,
-            boolean isKey) {
-        String propertyKind = isKey ? "Key" : "Property";
-        String expectedTypeName = descriptorToTypeName(expectedType);
-        String actualTypeName = descriptorToTypeName(actualType);
-
-        // Determine if this is a nested property
-        boolean isNested = propertyName != null && propertyName.contains(".");
-
-        String message;
-        if (isNested) {
-            message = String.format(
-                    "Nested property '%s' has type %s, but Record requires %s",
-                    propertyName,
-                    actualTypeName,
-                    expectedTypeName
-            );
-        } else {
-            message = String.format(
-                    "%s '%s' has type %s, but Record requires %s",
-                    propertyKind,
-                    propertyName != null ? propertyName : "<unknown>",
-                    actualTypeName,
-                    expectedTypeName
-            );
-        }
-
-        return new Swc4jByteCodeCompilerException(ast, message);
-    }
-
-    /**
-     * Create a type mismatch exception with TypeScript Record type context.
-     * <p>
-     * Generates messages that reference the TypeScript type annotation:
-     * - "Property 'age' has type String, but {@code Record<string, number>} requires double"
-     * - "Key 'id' has type String, but {@code Record<number, string>} requires Integer"
-     *
-     * @param ast                 the AST node that caused the exception
-     * @param propertyName        Property name
-     * @param expectedType        JVM type descriptor of expected type
-     * @param actualType          JVM type descriptor of actual type
-     * @param isKey               true for key mismatch, false for value mismatch
-     * @param recordKeyTypeName   TypeScript type name for key (e.g., "string", "number")
-     * @param recordValueTypeName TypeScript type name for value (e.g., "number", "string")
-     * @return Swc4jByteCodeCompilerException with formatted error message including Record type
-     */
-    public static Swc4jByteCodeCompilerException typeMismatchWithRecordType(
-            ISwc4jAst ast,
-            String propertyName,
-            String expectedType,
-            String actualType,
-            boolean isKey,
-            String recordKeyTypeName,
-            String recordValueTypeName) {
-        String propertyKind = isKey ? "Key" : "Property";
-        String expectedTypeName = descriptorToTypeName(expectedType);
-        String actualTypeName = descriptorToTypeName(actualType);
-
-        // Determine if this is a nested property
-        boolean isNested = propertyName != null && propertyName.contains(".");
-
-        String recordTypeStr = String.format("Record<%s, %s>", recordKeyTypeName, recordValueTypeName);
-
-        String message;
-        if (isNested) {
-            message = String.format(
-                    "Nested property '%s' has type %s, but %s requires %s",
-                    propertyName,
-                    actualTypeName,
-                    recordTypeStr,
-                    expectedTypeName
-            );
-        } else {
-            message = String.format(
-                    "%s '%s' has type %s, but %s requires %s",
-                    propertyKind,
-                    propertyName != null ? propertyName : "<unknown>",
-                    actualTypeName,
-                    recordTypeStr,
-                    expectedTypeName
-            );
-        }
-
-        return new Swc4jByteCodeCompilerException(ast, message);
     }
 
     /**
@@ -199,5 +89,132 @@ public final class Swc4jByteCodeCompilerException extends Swc4jException {
                 yield descriptor;
             }
         };
+    }
+
+    /**
+     * Create a type mismatch exception for object literal properties.
+     * <p>
+     * Generates clear, actionable error messages like:
+     * - "Property 'name' has type String, but Record requires double"
+     * - "Key 'count' has type String, but Record requires Integer"
+     * - "Nested property 'outer.inner' has type String, but Record requires double"
+     *
+     * @param sourceCode   the source code being compiled
+     * @param ast          the AST node that caused the exception
+     * @param propertyName Property name (or nested path like "outer.inner")
+     * @param expectedType JVM type descriptor of expected type (e.g., "D", "Ljava/lang/Integer;")
+     * @param actualType   JVM type descriptor of actual type (e.g., "Ljava/lang/String;")
+     * @param isKey        true if this is a key type mismatch, false for value type mismatch
+     * @return Swc4jByteCodeCompilerException with formatted error message
+     */
+    public static Swc4jByteCodeCompilerException typeMismatch(
+            String sourceCode,
+            ISwc4jAst ast,
+            String propertyName,
+            String expectedType,
+            String actualType,
+            boolean isKey) {
+        String propertyKind = isKey ? "Key" : "Property";
+        String expectedTypeName = descriptorToTypeName(expectedType);
+        String actualTypeName = descriptorToTypeName(actualType);
+
+        // Determine if this is a nested property
+        boolean isNested = propertyName != null && propertyName.contains(".");
+
+        String message;
+        if (isNested) {
+            message = String.format(
+                    "Nested property '%s' has type %s, but Record requires %s",
+                    propertyName,
+                    actualTypeName,
+                    expectedTypeName
+            );
+        } else {
+            message = String.format(
+                    "%s '%s' has type %s, but Record requires %s",
+                    propertyKind,
+                    propertyName != null ? propertyName : "<unknown>",
+                    actualTypeName,
+                    expectedTypeName
+            );
+        }
+
+        return new Swc4jByteCodeCompilerException(sourceCode, ast, message);
+    }
+
+    /**
+     * Create a type mismatch exception with TypeScript Record type context.
+     * <p>
+     * Generates messages that reference the TypeScript type annotation:
+     * - "Property 'age' has type String, but {@code Record<string, number>} requires double"
+     * - "Key 'id' has type String, but {@code Record<number, string>} requires Integer"
+     *
+     * @param sourceCode          the source code being compiled
+     * @param ast                 the AST node that caused the exception
+     * @param propertyName        Property name
+     * @param expectedType        JVM type descriptor of expected type
+     * @param actualType          JVM type descriptor of actual type
+     * @param isKey               true for key mismatch, false for value mismatch
+     * @param recordKeyTypeName   TypeScript type name for key (e.g., "string", "number")
+     * @param recordValueTypeName TypeScript type name for value (e.g., "number", "string")
+     * @return Swc4jByteCodeCompilerException with formatted error message including Record type
+     */
+    public static Swc4jByteCodeCompilerException typeMismatchWithRecordType(
+            String sourceCode,
+            ISwc4jAst ast,
+            String propertyName,
+            String expectedType,
+            String actualType,
+            boolean isKey,
+            String recordKeyTypeName,
+            String recordValueTypeName) {
+        String propertyKind = isKey ? "Key" : "Property";
+        String expectedTypeName = descriptorToTypeName(expectedType);
+        String actualTypeName = descriptorToTypeName(actualType);
+
+        // Determine if this is a nested property
+        boolean isNested = propertyName != null && propertyName.contains(".");
+
+        String recordTypeStr = String.format("Record<%s, %s>", recordKeyTypeName, recordValueTypeName);
+
+        String message;
+        if (isNested) {
+            message = String.format(
+                    "Nested property '%s' has type %s, but %s requires %s",
+                    propertyName,
+                    actualTypeName,
+                    recordTypeStr,
+                    expectedTypeName
+            );
+        } else {
+            message = String.format(
+                    "%s '%s' has type %s, but %s requires %s",
+                    propertyKind,
+                    propertyName != null ? propertyName : "<unknown>",
+                    actualTypeName,
+                    recordTypeStr,
+                    expectedTypeName
+            );
+        }
+
+        return new Swc4jByteCodeCompilerException(sourceCode, ast, message);
+    }
+
+    /**
+     * Gets the AST node that caused the exception.
+     *
+     * @return the AST node, or null if not available
+     */
+    public ISwc4jAst getAst() {
+        return ast;
+    }
+
+    /**
+     * Gets the source code that was being compiled when the exception occurred.
+     *
+     * @return the source code, or null if not available
+     */
+    public String getSourceCode() {
+        return sourceCode;
     }
 }

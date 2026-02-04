@@ -44,7 +44,7 @@ public final class CallExpressionForSuperConstructorGenerator extends BaseAstPro
         // Get the current class and resolve its superclass
         String currentClassInternalName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
         if (currentClassInternalName == null) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "super() call outside of class context");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "super() call outside of class context");
         }
 
         // Resolve the superclass
@@ -69,7 +69,7 @@ public final class CallExpressionForSuperConstructorGenerator extends BaseAstPro
         StringBuilder paramDescriptors = new StringBuilder();
         for (var arg : args) {
             if (arg.getSpread().isPresent()) {
-                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not yet supported in super constructor calls");
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not yet supported in super constructor calls");
             }
             compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());

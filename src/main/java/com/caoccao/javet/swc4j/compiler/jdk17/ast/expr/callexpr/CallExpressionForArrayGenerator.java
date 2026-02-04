@@ -76,14 +76,14 @@ public final class CallExpressionForArrayGenerator extends BaseAstProcessor<Swc4
                 case "toReversed" -> generateToReversed(code, cp, elementType);
                 case "toSorted" -> generateToSorted(code, cp, elementType);
                 case "toString" -> generateToString(code, cp, elementType);
-                default -> throw new Swc4jByteCodeCompilerException(callExpr,
+                default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                         "Method '" + methodName + "()' is not supported on Java arrays (" + arrayTypeName + "). " +
                                 "Java arrays only support: .length property and index access arr[i].");
             }
             return;
         }
 
-        throw new Swc4jByteCodeCompilerException(callExpr, "Invalid call expression on Java array");
+        throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Invalid call expression on Java array");
     }
 
     private void generateFill(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr, String elementType) throws Swc4jByteCodeCompilerException {

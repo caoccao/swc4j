@@ -53,7 +53,7 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         var callee = callExpr.getCallee();
         if (!(callee instanceof Swc4jAstIdent ident)) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "Expected identifier callee for functional interface call");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Expected identifier callee for functional interface call");
         }
 
         String varName = ident.getSym();
@@ -69,7 +69,7 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
         }
 
         if (varType == null || !varType.startsWith("L") || !varType.endsWith(";")) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "Cannot determine type of callee: " + varName);
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Cannot determine type of callee: " + varName);
         }
 
         // Get SAM method info for the functional interface using reflection
@@ -77,7 +77,7 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
         var registry = compiler.getMemory().getScopedFunctionalInterfaceRegistry();
         SamMethodInfo samInfo = registry.getSamMethodInfo(interfaceName);
         if (samInfo == null) {
-            throw new Swc4jByteCodeCompilerException(callExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                     "Type " + interfaceName + " is not a functional interface");
         }
 
@@ -92,18 +92,18 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
             syntheticRestType = "[Ljava/lang/Object;";
         }
         if (args.size() > paramCount && !hasArrayRest) {
-            throw new Swc4jByteCodeCompilerException(callExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                     "Expected " + paramCount + " arguments but got " + args.size());
         }
         if (hasArrayRest && args.size() < paramCount - 1) {
-            throw new Swc4jByteCodeCompilerException(callExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                     "Expected at least " + (paramCount - 1) + " arguments but got " + args.size());
         }
         if (!hasArrayRest && args.size() < paramCount) {
             for (int i = args.size(); i < paramCount; i++) {
                 String expectedType = samInfo.paramTypes().get(i);
                 if (TypeConversionUtils.isPrimitiveType(expectedType)) {
-                    throw new Swc4jByteCodeCompilerException(callExpr,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                             "Missing primitive argument at index " + i + " for " + interfaceName);
                 }
             }
@@ -122,7 +122,7 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
             int fieldRef = cp.addFieldRef(currentClass, capturedVar.fieldName(), capturedVar.type());
             code.getfield(fieldRef);
         } else {
-            throw new Swc4jByteCodeCompilerException(callExpr, "Variable not found: " + varName);
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Variable not found: " + varName);
         }
 
         // Generate arguments (with rest packing / optional padding)
@@ -136,7 +136,7 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
             if (i < args.size()) {
                 var arg = args.get(i);
                 if (arg.getSpread().isPresent()) {
-                    throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported");
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported");
                 }
                 ReturnTypeInfo argTypeInfo = ReturnTypeInfo.of(arg.getExpr(), expectedType);
                 compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), argTypeInfo);
@@ -176,7 +176,7 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
                 case "S" -> 9;
                 case "I" -> 10;
                 case "J" -> 11;
-                default -> throw new Swc4jByteCodeCompilerException(null,
+                default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), null,
                         "Unsupported rest primitive type: " + componentType);
             };
             code.newarray(typeCode);
@@ -188,7 +188,7 @@ public final class CallExpressionForFunctionalInterfaceGenerator extends BaseAst
         for (int i = 0; i < restCount; i++) {
             var arg = args.get(startIndex + i);
             if (arg.getSpread().isPresent()) {
-                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported");
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported");
             }
             code.dup();
             code.iconst(i);

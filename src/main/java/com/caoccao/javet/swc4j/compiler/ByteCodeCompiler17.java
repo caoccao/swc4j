@@ -31,7 +31,14 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
     }
 
     @Override
-    void compileProgram(ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException {
+    void compileProgram(String code, ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException {
+        // Store source code for error reporting
+        memory.getScopedSourceCode().setSourceCode(code);
+        // Initialize package scope with package prefix if present
+        String packagePrefix = options.packagePrefix();
+        if (packagePrefix != null && !packagePrefix.isEmpty()) {
+            memory.getScopedPackage().enterScope(packagePrefix);
+        }
         // Enter a new scope for this file
         memory.enterScope();
         try {
@@ -40,15 +47,15 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 importDeclProcessor.processImports(module.getBody());
                 // Second pass: collect type aliases and type declarations
                 typeAliasCollector.collectFromModuleItems(module.getBody());
-                classCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
-                enumCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
-                tsInterfaceCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
+                classCollector.collectFromModuleItems(module.getBody(), packagePrefix);
+                enumCollector.collectFromModuleItems(module.getBody(), packagePrefix);
+                tsInterfaceCollector.collectFromModuleItems(module.getBody(), packagePrefix);
                 // Collect standalone functions
-                standaloneFunctionCollector.collectFromModuleItems(module.getBody(), options.packagePrefix());
+                standaloneFunctionCollector.collectFromModuleItems(module.getBody(), packagePrefix);
                 // Determine dummy class names after all class names are known
                 standaloneFunctionCollector.determineDummyClassNames();
                 // Third pass: generate bytecode for classes/enums
-                astProcessor.processModuleItems(module.getBody(), options.packagePrefix());
+                astProcessor.processModuleItems(module.getBody());
                 // Generate bytecode for standalone functions
                 generateStandaloneFunctions();
             } else if (program instanceof Swc4jAstScript script) {
@@ -56,21 +63,25 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 importDeclProcessor.processImports(script.getBody());
                 // Second pass: collect type aliases and type declarations
                 typeAliasCollector.collectFromStmts(script.getBody());
-                classCollector.collectFromStmts(script.getBody(), options.packagePrefix());
-                enumCollector.collectFromStmts(script.getBody(), options.packagePrefix());
-                tsInterfaceCollector.collectFromStmts(script.getBody(), options.packagePrefix());
+                classCollector.collectFromStmts(script.getBody(), packagePrefix);
+                enumCollector.collectFromStmts(script.getBody(), packagePrefix);
+                tsInterfaceCollector.collectFromStmts(script.getBody(), packagePrefix);
                 // Collect standalone functions
-                standaloneFunctionCollector.collectFromStmts(script.getBody(), options.packagePrefix());
+                standaloneFunctionCollector.collectFromStmts(script.getBody(), packagePrefix);
                 // Determine dummy class names after all class names are known
                 standaloneFunctionCollector.determineDummyClassNames();
                 // Third pass: generate bytecode for classes/enums
-                astProcessor.processStmts(script.getBody(), options.packagePrefix());
+                astProcessor.processStmts(script.getBody());
                 // Generate bytecode for standalone functions
                 generateStandaloneFunctions();
             }
         } finally {
             // Always exit the scope, even if an exception occurs
             memory.exitScope();
+            // Exit package prefix scope if it was entered
+            if (packagePrefix != null && !packagePrefix.isEmpty()) {
+                memory.getScopedPackage().exitScope();
+            }
         }
     }
 
@@ -95,7 +106,9 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 byte[] bytecode = standaloneFunctionGenerator.generateBytecode(internalClassName, functions);
                 memory.getByteCodeMap().put(fullClassName, bytecode);
             } catch (IOException e) {
-                throw new Swc4jByteCodeCompilerException(functions.get(0),
+                throw new Swc4jByteCodeCompilerException(
+                        memory.getScopedSourceCode().getSourceCode(),
+                        functions.get(0),
                         "Failed to generate bytecode for standalone functions in: " + fullClassName, e);
             }
         }

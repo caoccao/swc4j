@@ -56,6 +56,10 @@ public final class TsInterfaceGenerator {
         this.compiler = compiler;
     }
 
+    private String getSourceCode() {
+        return compiler.getMemory().getScopedSourceCode().getSourceCode();
+    }
+
     /**
      * Builds a generic class signature for Java bytecode.
      * For example: {@code <T:Ljava/lang/Object;>Ljava/lang/Object;} or
@@ -197,7 +201,7 @@ public final class TsInterfaceGenerator {
         try {
             return classWriter.toByteArray();
         } catch (IOException e) {
-            throw new Swc4jByteCodeCompilerException(interfaceDecl, "Failed to generate bytecode for interface", e);
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), interfaceDecl, "Failed to generate bytecode for interface", e);
         }
     }
 

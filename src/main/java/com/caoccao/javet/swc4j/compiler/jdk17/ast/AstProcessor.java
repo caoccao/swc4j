@@ -40,6 +40,14 @@ public final class AstProcessor {
         this.compiler = compiler;
     }
 
+    private String getCurrentPackage() {
+        return compiler.getMemory().getScopedPackage().getCurrentPackage();
+    }
+
+    private String getSourceCode() {
+        return compiler.getMemory().getScopedSourceCode().getSourceCode();
+    }
+
     public String getModuleName(ISwc4jAstTsModuleName moduleName) {
         if (moduleName instanceof Swc4jAstStr str) {
             return str.getValue();
@@ -47,24 +55,8 @@ public final class AstProcessor {
         return moduleName.toString();
     }
 
-    public void processClassDecl(
-            Swc4jAstClassDecl classDecl,
-            String currentPackage) throws Swc4jByteCodeCompilerException {
-        String className = classDecl.getIdent().getSym();
-        String fullClassName = currentPackage.isEmpty() ? className : currentPackage + "." + className;
-        String internalClassName = fullClassName.replace('.', '/');
-
-        try {
-            byte[] bytecode = compiler.getClassGenerator().generateBytecode(internalClassName, classDecl.getClazz());
-            compiler.getMemory().getByteCodeMap().put(fullClassName, bytecode);
-        } catch (IOException e) {
-            throw new Swc4jByteCodeCompilerException(classDecl, "Failed to generate bytecode for class: " + fullClassName, e);
-        }
-    }
-
-    public void processEnumDecl(
-            Swc4jAstTsEnumDecl enumDecl,
-            String currentPackage) throws Swc4jByteCodeCompilerException {
+    public void processEnumDecl(Swc4jAstTsEnumDecl enumDecl) throws Swc4jByteCodeCompilerException {
+        String currentPackage = getCurrentPackage();
         String enumName = enumDecl.getId().getSym();
         String fullClassName = currentPackage.isEmpty() ? enumName : currentPackage + "." + enumName;
         String internalClassName = fullClassName.replace('.', '/');
@@ -75,13 +67,12 @@ public final class AstProcessor {
                 compiler.getMemory().getByteCodeMap().put(fullClassName, bytecode);
             }
         } catch (IOException e) {
-            throw new Swc4jByteCodeCompilerException(enumDecl, "Failed to generate bytecode for enum: " + fullClassName, e);
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), enumDecl, "Failed to generate bytecode for enum: " + fullClassName, e);
         }
     }
 
-    public void processInterfaceDecl(
-            Swc4jAstTsInterfaceDecl interfaceDecl,
-            String currentPackage) throws Swc4jByteCodeCompilerException {
+    public void processInterfaceDecl(Swc4jAstTsInterfaceDecl interfaceDecl) throws Swc4jByteCodeCompilerException {
+        String currentPackage = getCurrentPackage();
         String interfaceName = interfaceDecl.getId().getSym();
         String fullClassName = currentPackage.isEmpty() ? interfaceName : currentPackage + "." + interfaceName;
         String internalClassName = fullClassName.replace('.', '/');
@@ -92,62 +83,60 @@ public final class AstProcessor {
         }
     }
 
-    public void processModuleItems(
-            List<ISwc4jAstModuleItem> items,
-            String currentPackage) throws Swc4jByteCodeCompilerException {
+    public void processModuleItems(List<ISwc4jAstModuleItem> items) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstModuleItem item : items) {
             if (item instanceof Swc4jAstTsModuleDecl moduleDecl) {
-                processTsModuleDecl(moduleDecl, currentPackage);
+                processTsModuleDecl(moduleDecl);
             } else if (item instanceof Swc4jAstExportDecl exportDecl) {
                 ISwc4jAstDecl decl = exportDecl.getDecl();
                 if (decl instanceof Swc4jAstClassDecl classDecl) {
-                    processClassDecl(classDecl, currentPackage);
+                    compiler.getClassDeclGenerator().generate(null, null, classDecl, null);
                 } else if (decl instanceof Swc4jAstTsModuleDecl tsModuleDecl) {
-                    processTsModuleDecl(tsModuleDecl, currentPackage);
+                    processTsModuleDecl(tsModuleDecl);
                 } else if (decl instanceof Swc4jAstTsEnumDecl enumDecl) {
-                    processEnumDecl(enumDecl, currentPackage);
+                    processEnumDecl(enumDecl);
                 } else if (decl instanceof Swc4jAstTsInterfaceDecl interfaceDecl) {
-                    processInterfaceDecl(interfaceDecl, currentPackage);
+                    processInterfaceDecl(interfaceDecl);
                 }
             } else if (item instanceof ISwc4jAstStmt stmt) {
-                processStmt(stmt, currentPackage);
+                processStmt(stmt);
             }
         }
     }
 
-    public void processStmt(
-            ISwc4jAstStmt stmt,
-            String currentPackage) throws Swc4jByteCodeCompilerException {
+    public void processStmt(ISwc4jAstStmt stmt) throws Swc4jByteCodeCompilerException {
         if (stmt instanceof Swc4jAstTsModuleDecl moduleDecl) {
-            processTsModuleDecl(moduleDecl, currentPackage);
+            processTsModuleDecl(moduleDecl);
         } else if (stmt instanceof Swc4jAstClassDecl classDecl) {
-            processClassDecl(classDecl, currentPackage);
+            compiler.getClassDeclGenerator().generate(null, null, classDecl, null);
         } else if (stmt instanceof Swc4jAstTsEnumDecl enumDecl) {
-            processEnumDecl(enumDecl, currentPackage);
+            processEnumDecl(enumDecl);
         } else if (stmt instanceof Swc4jAstTsInterfaceDecl interfaceDecl) {
-            processInterfaceDecl(interfaceDecl, currentPackage);
+            processInterfaceDecl(interfaceDecl);
         }
     }
 
-    public void processStmts(
-            List<ISwc4jAstStmt> stmts,
-            String currentPackage) throws Swc4jByteCodeCompilerException {
+    public void processStmts(List<ISwc4jAstStmt> stmts) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstStmt stmt : stmts) {
-            processStmt(stmt, currentPackage);
+            processStmt(stmt);
         }
     }
 
-    public void processTsModuleDecl(
-            Swc4jAstTsModuleDecl moduleDecl,
-            String currentPackage) throws Swc4jByteCodeCompilerException {
+    public void processTsModuleDecl(Swc4jAstTsModuleDecl moduleDecl) throws Swc4jByteCodeCompilerException {
         ISwc4jAstTsModuleName moduleName = moduleDecl.getId();
         String namespaceName = getModuleName(moduleName);
 
-        String newPackage = currentPackage.isEmpty() ? namespaceName : currentPackage + "." + namespaceName;
+        // Enter the new package scope
+        compiler.getMemory().getScopedPackage().enterScope(namespaceName);
 
-        var bodyOpt = moduleDecl.getBody();
-        if (bodyOpt.isPresent() && bodyOpt.get() instanceof Swc4jAstTsModuleBlock moduleBlock) {
-            processModuleItems(moduleBlock.getBody(), newPackage);
+        try {
+            var bodyOpt = moduleDecl.getBody();
+            if (bodyOpt.isPresent() && bodyOpt.get() instanceof Swc4jAstTsModuleBlock moduleBlock) {
+                processModuleItems(moduleBlock.getBody());
+            }
+        } finally {
+            // Exit the package scope
+            compiler.getMemory().getScopedPackage().exitScope();
         }
     }
 }

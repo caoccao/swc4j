@@ -186,21 +186,21 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                 // Note: putAll returns void, so no need to pop
             } else if (prop instanceof Swc4jAstMethodProp methodProp) {
                 // Method properties are not supported - requires function compilation
-                throw new Swc4jByteCodeCompilerException(
+                throw new Swc4jByteCodeCompilerException(getSourceCode(),
                         methodProp,
                         "Method properties are not supported in object literals. " +
                                 "Object literals compile to LinkedHashMap which cannot store executable methods. " +
                                 "Consider using a class with methods instead.");
             } else if (prop instanceof Swc4jAstGetterProp getterProp) {
                 // Getter properties are not supported - incompatible with Map semantics
-                throw new Swc4jByteCodeCompilerException(
+                throw new Swc4jByteCodeCompilerException(getSourceCode(),
                         getterProp,
                         "Getter properties are not supported in object literals. " +
                                 "LinkedHashMap cannot implement property descriptors. " +
                                 "Consider storing the computed value directly or using a class with getter methods.");
             } else if (prop instanceof Swc4jAstSetterProp setterProp) {
                 // Setter properties are not supported - incompatible with Map semantics
-                throw new Swc4jByteCodeCompilerException(
+                throw new Swc4jByteCodeCompilerException(getSourceCode(),
                         setterProp,
                         "Setter properties are not supported in object literals. " +
                                 "LinkedHashMap cannot implement property descriptors. " +
@@ -248,7 +248,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
 
             // Check if the computed key is Symbol-related - reject with clear error
             if (isSymbolExpression(expr)) {
-                throw new Swc4jByteCodeCompilerException(
+                throw new Swc4jByteCodeCompilerException(getSourceCode(),
                         computed,
                         "Symbol keys are not supported in object literals. " +
                                 "Java Map keys must be Objects with proper equals()/hashCode() implementations. " +
@@ -300,7 +300,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                 }
             }
         } else {
-            throw new Swc4jByteCodeCompilerException(
+            throw new Swc4jByteCodeCompilerException(getSourceCode(),
                     key,
                     "Unsupported property key type: " + key.getClass().getSimpleName() +
                             ". Supported types: Identifier, String literal, Number, and Computed property names.");
@@ -513,6 +513,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                 if (!TypeResolver.isAssignable(actualElementType, expectedElementType)) {
                     String keyName = getPropertyName(kvProp.getKey());
                     throw Swc4jByteCodeCompilerException.typeMismatch(
+                            getSourceCode(),
                             elemExpr,
                             keyName + " (array element)",
                             expectedElementType,
@@ -534,7 +535,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
         if (key instanceof Swc4jAstComputedPropName computed) {
             ISwc4jAstExpr expr = computed.getExpr();
             if (isSymbolExpression(expr)) {
-                throw new Swc4jByteCodeCompilerException(
+                throw new Swc4jByteCodeCompilerException(getSourceCode(),
                         computed,
                         "Symbol keys are not supported in object literals. " +
                                 "Java Map keys must be Objects with proper equals()/hashCode() implementations. " +
@@ -559,6 +560,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
             } else {
                 String keyName = getPropertyName(key);
                 throw Swc4jByteCodeCompilerException.typeMismatch(
+                        getSourceCode(),
                         key,
                         keyName,
                         expectedKeyType,
@@ -604,6 +606,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
         if (!TypeResolver.isAssignable(actualValueType, expectedValueType)) {
             String keyName = getPropertyName(key);
             throw Swc4jByteCodeCompilerException.typeMismatch(
+                    getSourceCode(),
                     valueExpr,
                     keyName,
                     expectedValueType,
@@ -624,6 +627,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
 
         if (!TypeResolver.isAssignable(actualKeyType, expectedKeyType)) {
             throw Swc4jByteCodeCompilerException.typeMismatch(
+                    getSourceCode(),
                     ident,
                     propertyName,
                     expectedKeyType,
@@ -642,6 +646,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
 
         if (!TypeResolver.isAssignable(actualValueType, expectedValueType)) {
             throw Swc4jByteCodeCompilerException.typeMismatch(
+                    getSourceCode(),
                     ident,
                     propertyName,
                     expectedValueType,
@@ -670,7 +675,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
         if (!"Ljava/util/LinkedHashMap;".equals(spreadType) &&
                 !"Ljava/util/Map;".equals(spreadType) &&
                 !"Ljava/lang/Object;".equals(spreadType)) {
-            throw new Swc4jByteCodeCompilerException(
+            throw new Swc4jByteCodeCompilerException(getSourceCode(),
                     spread,
                     "Spread source must be a Map type, got: " + spreadType);
         }
@@ -690,7 +695,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
 
             // Validate key types match
             if (!TypeResolver.isAssignable(actualKeyType, expectedKeyType)) {
-                throw new Swc4jByteCodeCompilerException(
+                throw new Swc4jByteCodeCompilerException(getSourceCode(),
                         spread,
                         "Spread source has incompatible key type: expected " +
                                 expectedKeyType + ", got " + actualKeyType);
@@ -709,7 +714,7 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                 String actualNestedKeyType = actualNestedInfo.getKeyType();
 
                 if (!TypeResolver.isAssignable(actualNestedKeyType, expectedNestedKeyType)) {
-                    throw new Swc4jByteCodeCompilerException(
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(),
                             spread,
                             "Spread source has incompatible nested key type: expected " +
                                     expectedNestedKeyType + ", got " + actualNestedKeyType);
@@ -719,21 +724,21 @@ public final class ObjectLiteralGenerator extends BaseAstProcessor<Swc4jAstObjec
                 String actualNestedValueType = actualNestedInfo.getValueType();
 
                 if (!TypeResolver.isAssignable(actualNestedValueType, expectedNestedValueType)) {
-                    throw new Swc4jByteCodeCompilerException(
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(),
                             spread,
                             "Spread source has incompatible value type: expected " +
                                     expectedNestedValueType + ", got " + actualNestedValueType);
                 }
             } else if (genericTypeInfo.isNested() != spreadGenericInfo.isNested()) {
                 // One is nested, the other is not - incompatible
-                throw new Swc4jByteCodeCompilerException(
+                throw new Swc4jByteCodeCompilerException(getSourceCode(),
                         spread,
                         "Spread source has incompatible nesting: expected nested=" +
                                 genericTypeInfo.isNested() + ", got nested=" + spreadGenericInfo.isNested());
             } else {
                 // Neither is nested - validate value types match
                 if (!TypeResolver.isAssignable(actualValueType, expectedValueType)) {
-                    throw new Swc4jByteCodeCompilerException(
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(),
                             spread,
                             "Spread source has incompatible value type: expected " +
                                     expectedValueType + ", got " + actualValueType);

@@ -63,7 +63,7 @@ public final class MethodGenerator extends BaseAstProcessor {
 
     @Override
     public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, ISwc4jAst ast, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        throw new Swc4jByteCodeCompilerException(ast, "MethodGenerator does not support generic generate method.");
+        throw new Swc4jByteCodeCompilerException(getSourceCode(), ast, "MethodGenerator does not support generic generate method.");
     }
 
     public void generate(
@@ -164,7 +164,7 @@ public final class MethodGenerator extends BaseAstProcessor {
                 // Generate overloaded methods for default parameters
                 generateDefaultParameterOverloads(classWriter, cp, method, methodName, function, returnTypeInfo, accessFlags);
             } catch (Exception e) {
-                throw new Swc4jByteCodeCompilerException(method, "Failed to generate method: " + methodName, e);
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), method, "Failed to generate method: " + methodName, e);
             } finally {
                 // Pop the method type parameter scope when done
                 if (methodTypeParamScope != null) {
@@ -270,7 +270,7 @@ public final class MethodGenerator extends BaseAstProcessor {
                 // Generate overloaded methods for default parameters
                 generateDefaultParameterOverloadsForPrivateMethod(classWriter, cp, method, methodName, function, returnTypeInfo, accessFlags);
             } catch (Exception e) {
-                throw new Swc4jByteCodeCompilerException(method, "Failed to generate private method: " + methodName, e);
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), method, "Failed to generate private method: " + methodName, e);
             } finally {
                 if (methodTypeParamScope != null) {
                     compiler.getMemory().getCompilationContext().popTypeParameterScope();
@@ -535,7 +535,7 @@ public final class MethodGenerator extends BaseAstProcessor {
                 compiler.getExpressionGenerator().generate(code, cp, defaultValue, expectedType);
             } else {
                 // This shouldn't happen if firstDefaultIndex is correct
-                throw new Swc4jByteCodeCompilerException(params.get(i),
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), params.get(i),
                         "Expected default value for parameter at index " + i);
             }
         }
@@ -611,7 +611,7 @@ public final class MethodGenerator extends BaseAstProcessor {
                 ReturnTypeInfo expectedType = createReturnTypeInfoFromDescriptor(paramType);
                 compiler.getExpressionGenerator().generate(code, cp, defaultValue, expectedType);
             } else {
-                throw new Swc4jByteCodeCompilerException(params.get(i),
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), params.get(i),
                         "Expected default value for parameter at index " + i);
             }
         }

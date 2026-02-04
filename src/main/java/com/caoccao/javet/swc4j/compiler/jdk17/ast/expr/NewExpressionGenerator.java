@@ -67,7 +67,7 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
 
         // Only support simple class name constructors for now
         if (!(callee instanceof Swc4jAstIdent ident)) {
-            throw new Swc4jByteCodeCompilerException(newExpr, "Only simple class names supported in new expressions");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), newExpr, "Only simple class names supported in new expressions");
         }
 
         String className = ident.getSym();
@@ -95,7 +95,7 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
         List<String> argTypes = new ArrayList<>();
         for (Swc4jAstExprOrSpread arg : args) {
             if (arg.getSpread().isPresent()) {
-                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported in constructor calls");
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported in constructor calls");
             }
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType == null) {
@@ -180,7 +180,7 @@ public final class NewExpressionGenerator extends BaseAstProcessor<Swc4jAstNewEx
                 case "I" -> 10;
                 case "J" -> 11;
                 default ->
-                        throw new Swc4jByteCodeCompilerException(null, "Unsupported vararg primitive type: " + componentType);
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), null, "Unsupported vararg primitive type: " + componentType);
             };
             code.newarray(typeCode);
         } else {

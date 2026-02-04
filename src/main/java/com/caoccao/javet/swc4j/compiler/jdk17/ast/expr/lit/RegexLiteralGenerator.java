@@ -71,17 +71,17 @@ public final class RegexLiteralGenerator extends BaseAstProcessor<Swc4jAstRegex>
                     // Silently ignore for now
                     break;
                 case 'y':
-                    throw new Swc4jByteCodeCompilerException(
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(),
                             regex,
                             "Sticky flag 'y' is not supported in Java regex. " +
                                     "Java Pattern does not have an equivalent to JavaScript's sticky matching.");
                 case 'd':
-                    throw new Swc4jByteCodeCompilerException(
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(),
                             regex,
                             "Indices flag 'd' is not supported in Java regex. " +
                                     "Java Pattern does not generate match indices in the same way.");
                 default:
-                    throw new Swc4jByteCodeCompilerException(regex, "Unknown regex flag: " + flag);
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), regex, "Unknown regex flag: " + flag);
             }
         }
 

@@ -49,6 +49,10 @@ public final class TypeResolver {
         this.compiler = compiler;
     }
 
+    private String getSourceCode() {
+        return compiler.getMemory().getScopedSourceCode().getSourceCode();
+    }
+
     /**
      * Find the common type between two types for conditional expressions.
      * Implements JVM type widening rules.
@@ -1419,7 +1423,7 @@ public final class TypeResolver {
                         StringBuilder paramDescriptors = new StringBuilder();
                         for (var arg : callExpr.getArgs()) {
                             if (arg.getSpread().isPresent()) {
-                                throw new Swc4jByteCodeCompilerException(arg.getExpr(),
+                                throw new Swc4jByteCodeCompilerException(getSourceCode(), arg.getExpr(),
                                         "Spread arguments not supported in class method calls");
                             }
                             String argType = inferTypeFromExpr(arg.getExpr());
@@ -1437,7 +1441,7 @@ public final class TypeResolver {
                         }
                         // For non-Java types, require explicit annotation
                         if (!objType.startsWith("Ljava/") && !objType.startsWith("Ljavax/")) {
-                            throw new Swc4jByteCodeCompilerException(callExpr,
+                            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                                     "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
                                             ". Please add explicit return type annotation to the method.");
                         }

@@ -20,7 +20,7 @@ import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.compiler.jdk17.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.AstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassDeclGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.MethodGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.StandaloneFunctionGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.*;
@@ -46,7 +46,7 @@ public sealed abstract class ByteCodeCompiler permits
     protected final BreakStatementGenerator breakStatementGenerator;
     protected final CallExpressionGenerator callExpressionGenerator;
     protected final ClassCollector classCollector;
-    protected final ClassGenerator classGenerator;
+    protected final ClassDeclGenerator classDeclGenerator;
     protected final ConditionalExpressionGenerator conditionalExpressionGenerator;
     protected final ContinueStatementGenerator continueStatementGenerator;
     protected final DoWhileStatementGenerator doWhileStatementGenerator;
@@ -116,7 +116,7 @@ public sealed abstract class ByteCodeCompiler permits
         breakStatementGenerator = new BreakStatementGenerator(this);
         callExpressionGenerator = new CallExpressionGenerator(this);
         classCollector = new ClassCollector(this);
-        classGenerator = new ClassGenerator(this);
+        classDeclGenerator = new ClassDeclGenerator(this);
         conditionalExpressionGenerator = new ConditionalExpressionGenerator(this);
         continueStatementGenerator = new ContinueStatementGenerator(this);
         doWhileStatementGenerator = new DoWhileStatementGenerator(this);
@@ -172,11 +172,11 @@ public sealed abstract class ByteCodeCompiler permits
 
     public ByteCodeRunner compile(String code) throws Swc4jCoreException, Swc4jByteCodeCompilerException {
         Swc4jParseOutput output = swc4j.parse(code, parseOptions);
-        compileProgram(output.getProgram());
+        compileProgram(code, output.getProgram());
         return new ByteCodeRunner(memory.getByteCodeMap(), options.optionalParentClassLoader().orElse(getClass().getClassLoader()));
     }
 
-    abstract void compileProgram(ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException;
+    abstract void compileProgram(String code, ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException;
 
     public ArrayLiteralGenerator getArrayLiteralGenerator() {
         return arrayLiteralGenerator;
@@ -218,8 +218,8 @@ public sealed abstract class ByteCodeCompiler permits
         return classCollector;
     }
 
-    public ClassGenerator getClassGenerator() {
-        return classGenerator;
+    public ClassDeclGenerator getClassDeclGenerator() {
+        return classDeclGenerator;
     }
 
     public ConditionalExpressionGenerator getConditionalExpressionGenerator() {

@@ -115,7 +115,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
     private IterationType determineIterationType(ISwc4jAstExpr astExpr) throws Swc4jByteCodeCompilerException {
         String typeDescriptor = compiler.getTypeResolver().inferTypeFromExpr(astExpr);
         if (typeDescriptor == null) {
-            throw new Swc4jByteCodeCompilerException(astExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), astExpr,
                     "Cannot determine type of for-of expression. Please add explicit type annotation.");
         }
 
@@ -164,7 +164,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
             }
         }
 
-        throw new Swc4jByteCodeCompilerException(astExpr,
+        throw new Swc4jByteCodeCompilerException(getSourceCode(), astExpr,
                 "For-of loops require List, Set, Map, String, or Array type, but got: " + typeDescriptor);
     }
 
@@ -181,7 +181,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         } else if (propName instanceof Swc4jAstStr str) {
             return str.getValue();
         } else {
-            throw new Swc4jByteCodeCompilerException(propName,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), propName,
                     "Unsupported property name type in object destructuring: " + propName.getClass().getName());
         }
     }
@@ -276,7 +276,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                 String varName = bindingIdent.getId().getSym();
                 var variable = context.getLocalVariableTable().getVariable(varName);
                 if (variable == null) {
-                    throw new Swc4jByteCodeCompilerException(bindingIdent, "Variable not found: " + varName);
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), bindingIdent, "Variable not found: " + varName);
                 }
 
                 // Load list and call get(index)
@@ -296,7 +296,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                     String varName = bindingIdent.getId().getSym();
                     var variable = context.getLocalVariableTable().getVariable(varName);
                     if (variable == null) {
-                        throw new Swc4jByteCodeCompilerException(restPat, "Variable not found: " + varName);
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), restPat, "Variable not found: " + varName);
                     }
 
                     // Create new ArrayList
@@ -348,7 +348,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                     int exitOffset = loopEnd - (loopExitPatch - 1);
                     code.patchShort(loopExitPatch, (short) exitOffset);
                 } else {
-                    throw new Swc4jByteCodeCompilerException(restPat,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), restPat,
                             "Rest pattern argument must be a binding identifier");
                 }
             }
@@ -399,7 +399,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         // Get array type descriptor
         String arrayTypeDescriptor = compiler.getTypeResolver().inferTypeFromExpr(forOfStmt.getRight());
         if (arrayTypeDescriptor == null || !arrayTypeDescriptor.startsWith("[")) {
-            throw new Swc4jByteCodeCompilerException(forOfStmt.getRight(),
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), forOfStmt.getRight(),
                     "Cannot determine array type");
         }
 
@@ -854,7 +854,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                 String varName = assignProp.getKey().getId().getSym();
                 var variable = context.getLocalVariableTable().getVariable(varName);
                 if (variable == null) {
-                    throw new Swc4jByteCodeCompilerException(assignProp, "Variable not found: " + varName);
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), assignProp, "Variable not found: " + varName);
                 }
 
                 // Load map and call get(key)
@@ -894,7 +894,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                     String varName = bindingIdent.getId().getSym();
                     var variable = context.getLocalVariableTable().getVariable(varName);
                     if (variable == null) {
-                        throw new Swc4jByteCodeCompilerException(keyValueProp, "Variable not found: " + varName);
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), keyValueProp, "Variable not found: " + varName);
                     }
 
                     // Load map and call get(key)
@@ -906,7 +906,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                     // Store the value
                     code.astore(variable.index());
                 } else {
-                    throw new Swc4jByteCodeCompilerException(keyValueProp,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), keyValueProp,
                             "Unsupported value pattern type in object destructuring: " + valuePat.getClass().getName());
                 }
 
@@ -918,7 +918,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                     String varName = bindingIdent.getId().getSym();
                     var variable = context.getLocalVariableTable().getVariable(varName);
                     if (variable == null) {
-                        throw new Swc4jByteCodeCompilerException(restPat, "Variable not found: " + varName);
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), restPat, "Variable not found: " + varName);
                     }
 
                     // Create new LinkedHashMap as copy of source map
@@ -943,11 +943,11 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                         code.pop(); // Discard removed value
                     }
                 } else {
-                    throw new Swc4jByteCodeCompilerException(restPat,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), restPat,
                             "Rest pattern argument must be a binding identifier");
                 }
             } else {
-                throw new Swc4jByteCodeCompilerException(prop,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), prop,
                         "Unsupported property type in object destructuring: " + prop.getClass().getName());
             }
         }
@@ -1108,11 +1108,11 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                     code.astore(slot);
                     // Don't increment restStartIndex - rest doesn't count
                 } else {
-                    throw new Swc4jByteCodeCompilerException(restPat,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), restPat,
                             "Rest pattern argument must be a binding identifier");
                 }
             } else {
-                throw new Swc4jByteCodeCompilerException(elem,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), elem,
                         "Unsupported element type in array destructuring: " + elem.getClass().getName());
             }
         }
@@ -1135,7 +1135,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
         if (left instanceof Swc4jAstVarDecl varDecl) {
             // Variable declaration: let value or const value
             if (varDecl.getDecls().isEmpty()) {
-                throw new Swc4jByteCodeCompilerException(varDecl, "For-of variable declaration is empty");
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), varDecl, "For-of variable declaration is empty");
             }
             Swc4jAstVarDeclarator decl = varDecl.getDecls().get(0);
             ISwc4jAstPat name = decl.getName();
@@ -1170,7 +1170,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                 }
                 return slot;
             } else {
-                throw new Swc4jByteCodeCompilerException(name,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), name,
                         "For-of variable must be a simple identifier or array pattern");
             }
         } else if (left instanceof Swc4jAstBindingIdent bindingIdent) {
@@ -1178,13 +1178,13 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
             String varName = bindingIdent.getId().getSym();
             var variable = context.getLocalVariableTable().getVariable(varName);
             if (variable == null) {
-                throw new Swc4jByteCodeCompilerException(bindingIdent, "Variable not found: " + varName);
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), bindingIdent, "Variable not found: " + varName);
             }
             // Update inferredTypes
             context.getInferredTypes().put(varName, defaultType);
             return variable.index();
         } else {
-            throw new Swc4jByteCodeCompilerException(left,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), left,
                     "Unsupported for-of left type: " + left.getClass().getName());
         }
     }
@@ -1227,7 +1227,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                     code.aconst_null();
                     code.astore(slot);
                 } else {
-                    throw new Swc4jByteCodeCompilerException(keyValueProp,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), keyValueProp,
                             "Unsupported value pattern type in object destructuring: " + valuePat.getClass().getName());
                 }
 
@@ -1242,7 +1242,7 @@ public final class ForOfStatementGenerator extends BaseAstProcessor<Swc4jAstForO
                     code.aconst_null();
                     code.astore(slot);
                 } else {
-                    throw new Swc4jByteCodeCompilerException(restPat,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), restPat,
                             "Rest pattern argument must be a binding identifier");
                 }
             }

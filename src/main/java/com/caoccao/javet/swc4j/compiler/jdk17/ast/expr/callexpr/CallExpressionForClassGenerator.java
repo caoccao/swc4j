@@ -79,13 +79,13 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         if (!(callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr)) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "Class method call must be a member expression");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Class method call must be a member expression");
         }
 
         // Get method name
         String methodName = getMethodName(memberExpr.getProp());
         if (methodName == null) {
-            throw new Swc4jByteCodeCompilerException(memberExpr, "Could not determine method name");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "Could not determine method name");
         }
 
         // Determine if it's a Java class static method call or TS class instance method call
@@ -106,7 +106,7 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
         List<String> argTypes = new ArrayList<>();
         for (var arg : args) {
             if (arg.getSpread().isPresent()) {
-                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not yet supported in class method calls");
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not yet supported in class method calls");
             }
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType == null) {
@@ -123,13 +123,13 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             // Java class static method call
             MethodInfo methodInfo = javaTypeInfo.getMethod(methodName, argTypes);
             if (methodInfo == null) {
-                throw new Swc4jByteCodeCompilerException(callExpr,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                         "Method not found: " + javaTypeInfo.getAlias() + "." + methodName +
                                 " with argument types " + argTypes);
             }
 
             if (!methodInfo.isStatic()) {
-                throw new Swc4jByteCodeCompilerException(callExpr,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                         "Method is not static: " + javaTypeInfo.getAlias() + "." + methodName);
             }
 
@@ -175,12 +175,12 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             if (instanceJavaTypeInfo != null && !instanceJavaTypeInfo.getMethods().isEmpty()) {
                 MethodInfo methodInfo = instanceJavaTypeInfo.getMethod(methodName, argTypes);
                 if (methodInfo == null) {
-                    throw new Swc4jByteCodeCompilerException(callExpr,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                             "Method not found: " + instanceJavaTypeInfo.getAlias() + "." + methodName +
                                     " with argument types " + argTypes);
                 }
                 if (methodInfo.isStatic()) {
-                    throw new Swc4jByteCodeCompilerException(callExpr,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                             "Method is static: " + instanceJavaTypeInfo.getAlias() + "." + methodName);
                 }
 
@@ -229,7 +229,7 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             }
 
             if (objType == null || !objType.startsWith("L") || !objType.endsWith(";")) {
-                throw new Swc4jByteCodeCompilerException(memberExpr, "Invalid object type for TS class method call: " + objType);
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "Invalid object type for TS class method call: " + objType);
             }
 
             // Generate the object reference for instance calls
@@ -254,7 +254,7 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             returnType = compiler.getMemory().getScopedJavaTypeRegistry()
                     .resolveClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
             if (returnType == null) {
-                throw new Swc4jByteCodeCompilerException(callExpr,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                         "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
                                 ". Please add explicit return type annotation to the method.");
             }
@@ -359,7 +359,7 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
                 case "I" -> 10;
                 case "J" -> 11;
                 default ->
-                        throw new Swc4jByteCodeCompilerException(null, "Unsupported vararg primitive type: " + componentType);
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), null, "Unsupported vararg primitive type: " + componentType);
             };
             code.newarray(typeCode);
         } else {
@@ -373,7 +373,7 @@ public final class CallExpressionForClassGenerator extends BaseAstProcessor<Swc4
             code.iconst(i);
             Swc4jAstExprOrSpread arg = args.get(startIndex + i);
             if (arg.getSpread().isPresent()) {
-                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported in varargs calls");
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported in varargs calls");
             }
             compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
             String argType = argTypes.get(startIndex + i);

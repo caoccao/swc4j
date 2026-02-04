@@ -21,8 +21,12 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
@@ -53,8 +57,8 @@ sealed interface StaticInitItem permits StaticInitItem.FieldInit, StaticInitItem
     }
 }
 
-public final class ClassGenerator extends BaseAstProcessor {
-    public ClassGenerator(ByteCodeCompiler compiler) {
+public final class ClassDeclGenerator extends BaseAstProcessor<Swc4jAstClassDecl> {
+    public ClassDeclGenerator(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
@@ -78,8 +82,18 @@ public final class ClassGenerator extends BaseAstProcessor {
     }
 
     @Override
-    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, ISwc4jAst ast, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        throw new Swc4jByteCodeCompilerException(ast, "ClassGenerator does not support generic generate method.");
+    public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstClassDecl classDecl, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        String currentPackage = compiler.getMemory().getScopedPackage().getCurrentPackage();
+        String className = classDecl.getIdent().getSym();
+        String fullClassName = currentPackage.isEmpty() ? className : currentPackage + "." + className;
+        String internalClassName = fullClassName.replace('.', '/');
+
+        try {
+            byte[] bytecode = generateBytecode(internalClassName, classDecl.getClazz());
+            compiler.getMemory().getByteCodeMap().put(fullClassName, bytecode);
+        } catch (IOException e) {
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), classDecl, "Failed to generate bytecode for class: " + fullClassName, e);
+        }
     }
 
     public byte[] generateBytecode(
@@ -599,4 +613,5 @@ public final class ClassGenerator extends BaseAstProcessor {
         // For fully qualified names or unresolved simple names, convert to internal name
         return qualifiedName.replace('.', '/');
     }
+
 }

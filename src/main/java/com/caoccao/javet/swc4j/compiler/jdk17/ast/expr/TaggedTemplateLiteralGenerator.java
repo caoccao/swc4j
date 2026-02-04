@@ -89,7 +89,7 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         } else if (tag instanceof Swc4jAstIdent ident) {
             generateStandaloneFunctionTagCall(code, cp, taggedTpl, ident, quasis, exprs, returnTypeInfo);
         } else {
-            throw new Swc4jByteCodeCompilerException(taggedTpl,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), taggedTpl,
                     "Unsupported tag expression type: " + tag.getClass().getSimpleName());
         }
     }
@@ -109,14 +109,14 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         } else if (memberExpr.getProp() instanceof Swc4jAstIdent propIdent) {
             methodName = propIdent.getSym();
         } else {
-            throw new Swc4jByteCodeCompilerException(taggedTpl,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), taggedTpl,
                     "Unsupported tag property type: " + memberExpr.getProp().getClass().getSimpleName());
         }
 
         // Infer object type
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
         if (objType == null || !objType.startsWith("L") || !objType.endsWith(";")) {
-            throw new Swc4jByteCodeCompilerException(taggedTpl,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), taggedTpl,
                     "Cannot infer object type for tagged template tag: " + objType);
         }
 
@@ -157,7 +157,7 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
             methodReturnType = compiler.getMemory().getScopedJavaTypeRegistry()
                     .resolveClassMethodReturnType(qualifiedClassName, methodName, stringArrayParamDescriptor);
             if (methodReturnType == null) {
-                throw new Swc4jByteCodeCompilerException(taggedTpl,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), taggedTpl,
                         "Cannot infer return type for tagged template tag function " +
                                 qualifiedClassName + "." + methodName);
             }
@@ -208,14 +208,14 @@ public final class TaggedTemplateLiteralGenerator extends BaseAstProcessor<Swc4j
         // Look up the standalone function in the registry
         Swc4jAstFnDecl fnDecl = findStandaloneFunction(packageName, functionName);
         if (fnDecl == null) {
-            throw new Swc4jByteCodeCompilerException(taggedTpl,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), taggedTpl,
                     "Standalone function not found: " + functionName);
         }
 
         // Get the dummy class name for this package
         String dummyClassName = compiler.getMemory().getScopedStandaloneFunctionRegistry().getDummyClassName(packageName);
         if (dummyClassName == null) {
-            throw new Swc4jByteCodeCompilerException(taggedTpl,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), taggedTpl,
                     "Dummy class not found for package: " + packageName);
         }
 

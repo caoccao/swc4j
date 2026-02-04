@@ -69,7 +69,7 @@ public final class StandaloneFunctionGenerator extends BaseAstProcessor {
 
     @Override
     public void generate(CodeBuilder code, ClassWriter.ConstantPool cp, ISwc4jAst ast, ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        throw new Swc4jByteCodeCompilerException(ast, "StandaloneFunctionGenerator does not support generic generate method.");
+        throw new Swc4jByteCodeCompilerException(getSourceCode(), ast, "StandaloneFunctionGenerator does not support generic generate method.");
     }
 
     /**
@@ -84,7 +84,7 @@ public final class StandaloneFunctionGenerator extends BaseAstProcessor {
         ClassWriter.ConstantPool cp = classWriter.getConstantPool();
 
         // Generate default constructor
-        ClassGenerator.generateDefaultConstructor(classWriter, cp, "java/lang/Object");
+        ClassDeclGenerator.generateDefaultConstructor(classWriter, cp, "java/lang/Object");
 
         // Generate each function as a static method
         for (Swc4jAstFnDecl fnDecl : functions) {

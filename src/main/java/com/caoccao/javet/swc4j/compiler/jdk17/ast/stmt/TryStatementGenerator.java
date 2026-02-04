@@ -82,7 +82,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         } else if (propName instanceof Swc4jAstStr str) {
             return str.getValue();
         } else {
-            throw new Swc4jByteCodeCompilerException(propName,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), propName,
                     "Unsupported property name type in catch destructuring: " + propName.getClass().getName());
         }
     }
@@ -107,7 +107,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
         boolean hasFinally = tryStmt.getFinalizer().isPresent();
 
         if (!hasCatch && !hasFinally) {
-            throw new Swc4jByteCodeCompilerException(tryStmt,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), tryStmt,
                     "Try statement must have at least a catch or finally block");
         }
 
@@ -211,11 +211,11 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
                     // Generate code to extract the property
                     generatePropertyExtraction(code, cp, exceptionSlot, exceptionClassName, propertyName, variable);
                 } else {
-                    throw new Swc4jByteCodeCompilerException(keyValueProp,
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), keyValueProp,
                             "Unsupported value pattern type in catch destructuring: " + valuePat.getClass().getName());
                 }
             } else {
-                throw new Swc4jByteCodeCompilerException(prop,
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), prop,
                         "Unsupported property type in catch destructuring: " + prop.getClass().getName());
             }
         }
@@ -316,7 +316,7 @@ public final class TryStatementGenerator extends BaseAstProcessor<Swc4jAstTryStm
                 int endLabel = code.getCurrentOffset();
                 code.patchShort(endJumpPos, endLabel - endJumpOpcodePos);
             }
-            default -> throw new Swc4jByteCodeCompilerException(null,
+            default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), null,
                     "Unsupported property in catch destructuring: " + propertyName +
                             ". Supported properties: message, stack, cause, name");
         }

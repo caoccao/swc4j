@@ -68,7 +68,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             // Phase 2: Member access (obj.prop++ or arr[i]++)
             handleMemberAccess(code, cp, updateExpr, memberExpr, returnTypeInfo);
         } else {
-            throw new Swc4jByteCodeCompilerException(updateExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
                     "Update expressions only support identifiers and member expressions, got: " + updateExpr.getArg().getClass().getSimpleName());
         }
     }
@@ -331,14 +331,14 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         } else if (memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
             fieldName = privateName.getName();
         } else {
-            throw new Swc4jByteCodeCompilerException(memberExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr,
                     "Unsupported instance field update target: " + memberExpr.getProp().getClass().getSimpleName());
         }
 
         CompilationContext context = compiler.getMemory().getCompilationContext();
         String currentClassName = context.getCurrentClassInternalName();
         if (currentClassName == null) {
-            throw new Swc4jByteCodeCompilerException(memberExpr, "No current class context for instance field update");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "No current class context for instance field update");
         }
 
         String ownerInternalName = currentClassName;
@@ -384,7 +384,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         }
 
         if (fieldInfo == null) {
-            throw new Swc4jByteCodeCompilerException(memberExpr, "Field not found: " + fieldName);
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "Field not found: " + fieldName);
         }
 
         updateInstanceField(code, cp, updateExpr, ownerInternalName, fieldName, fieldInfo.descriptor());
@@ -411,7 +411,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             // obj[key] - computed property
             isComputedKey = true;
         } else {
-            throw new Swc4jByteCodeCompilerException(memberExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr,
                     "Unsupported property type for update expression: " + memberExpr.getProp().getClass().getSimpleName());
         }
 
@@ -548,7 +548,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
 
         if (localVar == null) {
-            throw new Swc4jByteCodeCompilerException(ident, "Variable '" + varName + "' not found in local scope");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), ident, "Variable '" + varName + "' not found in local scope");
         }
 
         String varType = localVar.type();
@@ -563,11 +563,11 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
                  "Ljava/lang/Double;", "Ljava/lang/Byte;", "Ljava/lang/Short;" -> {
                 // Valid numeric type
             }
-            case "Z", "Ljava/lang/Boolean;" -> throw new Swc4jByteCodeCompilerException(updateExpr,
+            case "Z", "Ljava/lang/Boolean;" -> throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
                     "Cannot apply " + updateExpr.getOp().getName() + " operator to boolean type");
-            case "Ljava/lang/String;" -> throw new Swc4jByteCodeCompilerException(updateExpr,
+            case "Ljava/lang/String;" -> throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
                     "Cannot apply " + updateExpr.getOp().getName() + " operator to string type");
-            default -> throw new Swc4jByteCodeCompilerException(updateExpr,
+            default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
                     "Cannot apply " + updateExpr.getOp().getName() + " operator to type: " + varType);
         }
 
@@ -637,7 +637,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
             return;
         }
 
-        throw new Swc4jByteCodeCompilerException(updateExpr,
+        throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
                 "Update expressions on member access not yet supported for type: " + objType);
     }
 
@@ -660,7 +660,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
 
         // Only support primitive element types for now
         if (!TypeConversionUtils.isPrimitiveType(elementType)) {
-            throw new Swc4jByteCodeCompilerException(memberExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr,
                     "Update expressions on arrays currently only support primitive element types, got: " + elementType);
         }
 
@@ -803,7 +803,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         } else if (memberExpr.getProp() instanceof Swc4jAstPrivateName privateName) {
             fieldName = privateName.getName();
         } else {
-            throw new Swc4jByteCodeCompilerException(memberExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr,
                     "Unsupported static field update target: " + memberExpr.getProp().getClass().getSimpleName());
         }
 
@@ -895,7 +895,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         boolean isWrapper = TypeConversionUtils.isPrimitiveType(primitiveType) && !isPrimitive;
 
         if (!TypeConversionUtils.isPrimitiveType(primitiveType) || "Z".equals(primitiveType)) {
-            throw new Swc4jByteCodeCompilerException(updateExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
                     "Cannot apply " + updateExpr.getOp().getName() + " operator to type: " + fieldType);
         }
 
@@ -973,7 +973,7 @@ public final class UpdateExpressionGenerator extends BaseAstProcessor<Swc4jAstUp
         boolean isWrapper = TypeConversionUtils.isPrimitiveType(primitiveType) && !isPrimitive;
 
         if (!TypeConversionUtils.isPrimitiveType(primitiveType) || "Z".equals(primitiveType)) {
-            throw new Swc4jByteCodeCompilerException(updateExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
                     "Cannot apply " + updateExpr.getOp().getName() + " operator to type: " + fieldType);
         }
 

@@ -272,7 +272,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             if (hasTypeParams) {
                 context.popTypeParameterScope();
             }
-            throw new Swc4jByteCodeCompilerException(arrowExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr,
                     "Arrow functions with more than 2 parameters are not yet supported");
         }
 
@@ -607,10 +607,10 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             String selfReferenceName) throws Swc4jByteCodeCompilerException {
         // Check for unsupported features
         if (arrowExpr.isAsync()) {
-            throw new Swc4jByteCodeCompilerException(arrowExpr, "Async arrow functions are not supported");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr, "Async arrow functions are not supported");
         }
         if (arrowExpr.isGenerator()) {
-            throw new Swc4jByteCodeCompilerException(arrowExpr, "Generator arrow functions are not supported");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr, "Generator arrow functions are not supported");
         }
 
         try {
@@ -641,7 +641,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
             }
             return null;
         } catch (IOException e) {
-            throw new Swc4jByteCodeCompilerException(arrowExpr, "Failed to generate lambda class", e);
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr, "Failed to generate lambda class", e);
         }
     }
 
@@ -1124,7 +1124,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
 
         ISwc4jAstPat arg = restPat.getArg();
         if (!(arg instanceof Swc4jAstBindingIdent bindingIdent)) {
-            throw new Swc4jByteCodeCompilerException(restPat, "Rest pattern argument must be a binding identifier");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), restPat, "Rest pattern argument must be a binding identifier");
         }
 
         String restVarName = bindingIdent.getId().getSym();
@@ -1237,7 +1237,7 @@ public final class ArrowExpressionGenerator extends BaseAstProcessor<Swc4jAstArr
 
         ISwc4jAstPat arg = restPat.getArg();
         if (!(arg instanceof Swc4jAstBindingIdent bindingIdent)) {
-            throw new Swc4jByteCodeCompilerException(restPat, "Rest pattern argument must be a binding identifier");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), restPat, "Rest pattern argument must be a binding identifier");
         }
 
         String restVarName = bindingIdent.getId().getSym();

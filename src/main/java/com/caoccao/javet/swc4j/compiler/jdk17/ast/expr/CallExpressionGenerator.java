@@ -131,6 +131,6 @@ public final class CallExpressionGenerator extends BaseAstProcessor<Swc4jAstCall
             }
         }
         // For unsupported call expressions, throw an error for now
-        throw new Swc4jByteCodeCompilerException(callExpr, "Call expression not yet supported");
+        throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Call expression not yet supported");
     }
 }

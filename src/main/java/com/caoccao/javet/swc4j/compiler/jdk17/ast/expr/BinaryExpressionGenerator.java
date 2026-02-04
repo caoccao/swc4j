@@ -66,7 +66,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
     private InContainerType determineInContainerType(ISwc4jAstExpr astExpr, String typeDescriptor)
             throws Swc4jByteCodeCompilerException {
         if (typeDescriptor == null) {
-            throw new Swc4jByteCodeCompilerException(astExpr,
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), astExpr,
                     "Cannot determine type of 'in' right operand. Please add explicit type annotation.");
         }
 
@@ -107,7 +107,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
             }
         }
 
-        throw new Swc4jByteCodeCompilerException(astExpr,
+        throw new Swc4jByteCodeCompilerException(getSourceCode(), astExpr,
                 "The 'in' operator requires List, Map, or String type, but got: " + typeDescriptor);
     }
 
@@ -1124,7 +1124,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         }
                     } else {
                         // Object comparison: not supported for < or <=
-                        throw new Swc4jByteCodeCompilerException(binExpr,
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), binExpr,
                                 "Less than comparison not supported for non-primitive types. " +
                                         "Use comparable types or implement Comparable interface.");
                     }
@@ -1263,7 +1263,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                         }
                     } else {
                         // Object comparison: not supported for > or >=
-                        throw new Swc4jByteCodeCompilerException(binExpr,
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), binExpr,
                                 "Greater than comparison not supported for non-primitive types. " +
                                         "Use comparable types or implement Comparable interface.");
                     }
@@ -1341,7 +1341,7 @@ public final class BinaryExpressionGenerator extends BaseAstProcessor<Swc4jAstBi
                 if (rightExpr instanceof Swc4jAstIdent ident) {
                     className = ident.getSym();
                 } else {
-                    throw new Swc4jByteCodeCompilerException(binExpr.getRight(),
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), binExpr.getRight(),
                             "Right operand of instanceof must be a type identifier, got: " + rightExpr.getClass().getSimpleName());
                 }
 

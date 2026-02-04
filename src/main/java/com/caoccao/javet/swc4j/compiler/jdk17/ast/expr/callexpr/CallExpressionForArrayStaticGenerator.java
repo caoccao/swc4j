@@ -48,13 +48,13 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
             methodName = propIdent.getSym();
         }
         if (methodName == null) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "Array static method name not supported");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Array static method name not supported");
         }
         switch (methodName) {
             case "isArray" -> generateIsArray(code, cp, callExpr);
             case "from" -> generateFrom(code, cp, callExpr);
             case "of" -> generateOf(code, cp, callExpr);
-            default -> throw new Swc4jByteCodeCompilerException(callExpr, "Array." + methodName + "() not supported");
+            default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Array." + methodName + "() not supported");
         }
     }
 
@@ -63,14 +63,14 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
             ClassWriter.ConstantPool cp,
             Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "Array.from() requires an argument");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Array.from() requires an argument");
         }
         if (callExpr.getArgs().size() > 1) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "Array.from() with mapping function not supported");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Array.from() with mapping function not supported");
         }
         var arg = callExpr.getArgs().get(0);
         if (arg.getSpread().isPresent()) {
-            throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported");
         }
         compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
         String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
@@ -94,7 +94,7 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
         }
         var arg = callExpr.getArgs().get(0);
         if (arg.getSpread().isPresent()) {
-            throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported");
         }
         compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);
         String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
@@ -122,7 +122,7 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
 
         for (var arg : callExpr.getArgs()) {
             if (arg.getSpread().isPresent()) {
-                throw new Swc4jByteCodeCompilerException(arg, "Spread arguments not supported");
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported");
             }
             code.dup();
             compiler.getExpressionGenerator().generate(code, cp, arg.getExpr(), null);

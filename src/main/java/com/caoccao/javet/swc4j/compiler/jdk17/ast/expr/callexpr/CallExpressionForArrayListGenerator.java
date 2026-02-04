@@ -87,7 +87,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
                 case "unshift" -> generateUnshift(code, cp, callExpr);
                 case "with" -> generateWith(code, cp, callExpr);
                 default ->
-                        throw new Swc4jByteCodeCompilerException(callExpr, "Method '" + methodName + "()' not supported on ArrayList");
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Method '" + methodName + "()' not supported on ArrayList");
             }
         }
     }
@@ -123,7 +123,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
         if (argCount < 2) {
             // Need at least target and start
-            throw new Swc4jByteCodeCompilerException(callExpr, "copyWithin() requires at least two arguments (target, start)");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "copyWithin() requires at least two arguments (target, start)");
         }
 
         // Generate the target argument
@@ -175,7 +175,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
     private void generateEntries(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (!callExpr.getArgs().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "entries() does not accept arguments");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "entries() does not accept arguments");
         }
         int entriesMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "entries",
                 "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
@@ -184,7 +184,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
     private void generateEvery(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "every() requires a callback");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "every() requires a callback");
         }
         String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
         generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
@@ -200,7 +200,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
         if (argCount == 0) {
             // No value provided - throw error
-            throw new Swc4jByteCodeCompilerException(callExpr, "fill() requires at least one argument (value)");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "fill() requires at least one argument (value)");
         }
 
         // Generate the value argument
@@ -267,7 +267,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
     private void generateFilter(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "filter() requires a callback");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "filter() requires a callback");
         }
         String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
         generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
@@ -278,7 +278,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
     private void generateFind(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "find() requires a callback");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "find() requires a callback");
         }
         String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
         generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
@@ -289,7 +289,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
     private void generateFindIndex(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "findIndex() requires a callback");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "findIndex() requires a callback");
         }
         String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
         generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
@@ -322,7 +322,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
     private void generateFlatMap(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "flatMap() requires a callback");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "flatMap() requires a callback");
         }
         String interfaceDescriptor = resolveMapInterfaceDescriptor(callExpr, 0);
         generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
@@ -333,7 +333,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
     private void generateForEach(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "forEach() requires a callback");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "forEach() requires a callback");
         }
         String interfaceDescriptor = selectConsumerInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
         generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
@@ -424,7 +424,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
     private void generateKeys(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (!callExpr.getArgs().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "keys() does not accept arguments");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "keys() does not accept arguments");
         }
         int keysMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "keys",
                 "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
@@ -454,7 +454,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
     private void generateMap(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "map() requires a callback");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "map() requires a callback");
         }
         String interfaceDescriptor = resolveMapInterfaceDescriptor(callExpr, 0);
         generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
@@ -497,7 +497,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
     private void generateReduce(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         int argCount = callExpr.getArgs().size();
         if (argCount == 0) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "reduce() requires a callback");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "reduce() requires a callback");
         }
         String initType = null;
         if (argCount > 1) {
@@ -531,7 +531,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
     private void generateReduceRight(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         int argCount = callExpr.getArgs().size();
         if (argCount == 0) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "reduceRight() requires a callback");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "reduceRight() requires a callback");
         }
         String initType = null;
         if (argCount > 1) {
@@ -668,7 +668,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
     private void generateSome(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (callExpr.getArgs().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "some() requires a callback");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "some() requires a callback");
         }
         String interfaceDescriptor = selectPredicateInterfaceDescriptor(resolvePrimitiveElementType(callExpr));
         generateFunctionalArg(code, cp, callExpr, 0, interfaceDescriptor);
@@ -922,7 +922,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
 
     private void generateValues(CodeBuilder code, ClassWriter.ConstantPool cp, Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         if (!callExpr.getArgs().isEmpty()) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "values() does not accept arguments");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "values() does not accept arguments");
         }
         int valuesMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "values",
                 "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
@@ -933,7 +933,7 @@ public final class CallExpressionForArrayListGenerator extends BaseAstProcessor<
         // arr.with(index, value) -> ArrayListApiUtils.with(arr, index, value)
         // Returns new array with one element changed (ES2023)
         if (callExpr.getArgs().size() < 2) {
-            throw new Swc4jByteCodeCompilerException(callExpr, "with() requires two arguments (index, value)");
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "with() requires two arguments (index, value)");
         }
 
         // Generate index argument
