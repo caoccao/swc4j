@@ -196,7 +196,7 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
      * - String: iterate over characters
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param forOfStmt      the for-of statement AST node
      * @param labelName      the label name (null for unlabeled loops)
      * @param returnTypeInfo return type information for the enclosing method
@@ -225,7 +225,7 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
      * Generate bytecode for a for-of statement (unlabeled).
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param forOfStmt      the for-of statement AST node
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails

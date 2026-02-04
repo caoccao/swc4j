@@ -54,7 +54,7 @@ public final class BreakStatementProcessor extends BaseAstProcessor<Swc4jAstBrea
      * Generate bytecode for a break statement.
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param breakStmt      the break statement AST node
      * @param returnTypeInfo return type information (unused for break statements)
      * @throws Swc4jByteCodeCompilerException if code generation fails

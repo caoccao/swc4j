@@ -143,7 +143,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
      * - String: iterate over character indices (0, 1, 2, ...)
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param forInStmt      the for-in statement AST node
      * @param labelName      the label name (null for unlabeled loops)
      * @param returnTypeInfo return type information for the enclosing method
@@ -170,7 +170,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
      * Generate bytecode for a for-in statement (unlabeled).
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param forInStmt      the for-in statement AST node
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails

@@ -44,7 +44,7 @@ public final class ThrowStatementProcessor extends BaseAstProcessor<Swc4jAstThro
      * Generate bytecode for a throw statement.
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param throwStmt      the throw statement AST node
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails

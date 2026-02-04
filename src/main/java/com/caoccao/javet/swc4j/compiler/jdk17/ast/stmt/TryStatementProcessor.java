@@ -91,7 +91,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
      * Generate bytecode for a try statement.
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param tryStmt        the try statement AST node
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails

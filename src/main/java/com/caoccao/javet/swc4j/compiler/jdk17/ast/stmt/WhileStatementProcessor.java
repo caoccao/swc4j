@@ -100,7 +100,7 @@ public final class WhileStatementProcessor extends BaseAstProcessor<Swc4jAstWhil
      * Generate bytecode for a while statement (unlabeled).
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param whileStmt      the while statement AST node
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
@@ -118,7 +118,7 @@ public final class WhileStatementProcessor extends BaseAstProcessor<Swc4jAstWhil
      * Generate bytecode for a while statement (potentially labeled).
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param whileStmt      the while statement AST node
      * @param labelName      the label name (null for unlabeled loops)
      * @param returnTypeInfo return type information for the enclosing method

@@ -55,7 +55,7 @@ public final class ContinueStatementProcessor extends BaseAstProcessor<Swc4jAstC
      * Generate bytecode for a continue statement.
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param continueStmt   the continue statement AST node
      * @param returnTypeInfo return type information (unused for continue statements)
      * @throws Swc4jByteCodeCompilerException if code generation fails

@@ -47,7 +47,7 @@ public final class LabeledStatementProcessor extends BaseAstProcessor<Swc4jAstLa
      * Generate bytecode for a labeled statement.
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param labeledStmt    the labeled statement AST node
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails

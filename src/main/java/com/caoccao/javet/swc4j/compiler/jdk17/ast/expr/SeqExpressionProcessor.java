@@ -39,7 +39,7 @@ public final class SeqExpressionProcessor extends BaseAstProcessor<Swc4jAstSeqEx
      * Evaluates all expressions in sequence, leaving only the last value on the stack.
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param seqExpr        the sequence expression AST node
      * @param returnTypeInfo return type information
      * @throws Swc4jByteCodeCompilerException if code generation fails

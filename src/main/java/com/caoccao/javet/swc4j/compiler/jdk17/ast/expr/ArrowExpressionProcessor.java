@@ -594,11 +594,12 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
      * Generate bytecode for an arrow expression with optional self-reference support.
      *
      * @param code              the code builder
-     * @param cp                the constant pool
+     * @param classWriter       the class writer
      * @param arrowExpr         the arrow expression
      * @param returnTypeInfo    return type info for type inference
      * @param selfReferenceName the variable name for recursive arrows (or null)
      * @return information about self-references that need post-processing (or null)
+     * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     public SelfReferenceInfo generate(
             CodeBuilder code,

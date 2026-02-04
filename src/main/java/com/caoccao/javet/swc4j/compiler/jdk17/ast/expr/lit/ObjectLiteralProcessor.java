@@ -58,7 +58,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
      * Phase 2: Type validation for {@code Record<K, V>} types
      *
      * @param code           code builder for bytecode generation
-     * @param cp             constant pool
+     * @param classWriter    the class writer
      * @param objectLit      object literal AST node
      * @param returnTypeInfo return type information (used for Record type validation in Phase 2)
      * @throws Swc4jByteCodeCompilerException if generation fails or type validation fails

@@ -54,7 +54,7 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
      * Generate bytecode for a statement.
      *
      * @param code           the code builder
-     * @param cp             the constant pool
+     * @param classWriter    the class writer
      * @param stmt           the statement to generate code for
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
