@@ -19,12 +19,15 @@ package com.caoccao.javet.swc4j.compiler;
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.compiler.jdk17.*;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.AstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassDeclGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.MethodGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.StandaloneFunctionGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit.*;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.interfaces.DeclGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.interfaces.ModuleItemGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.interfaces.StmtGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ExportDeclGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ImportDeclProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.ts.TsAsExpressionGenerator;
@@ -39,7 +42,6 @@ public sealed abstract class ByteCodeCompiler permits
     protected final ArrayLiteralGenerator arrayLiteralGenerator;
     protected final ArrowExpressionGenerator arrowExpressionGenerator;
     protected final AssignExpressionGenerator assignExpressionGenerator;
-    protected final AstProcessor astProcessor;
     protected final BigIntLiteralGenerator bigIntLiteralGenerator;
     protected final BinaryExpressionGenerator binaryExpressionGenerator;
     protected final BoolLiteralGenerator boolLiteralGenerator;
@@ -49,9 +51,11 @@ public sealed abstract class ByteCodeCompiler permits
     protected final ClassDeclGenerator classDeclGenerator;
     protected final ConditionalExpressionGenerator conditionalExpressionGenerator;
     protected final ContinueStatementGenerator continueStatementGenerator;
+    protected final DeclGenerator declGenerator;
     protected final DoWhileStatementGenerator doWhileStatementGenerator;
     protected final EnumCollector enumCollector;
     protected final EnumGenerator enumGenerator;
+    protected final ExportDeclGenerator exportDeclGenerator;
     protected final ExpressionGenerator expressionGenerator;
     protected final ForInStatementGenerator forInStatementGenerator;
     protected final ForOfStatementGenerator forOfStatementGenerator;
@@ -63,6 +67,7 @@ public sealed abstract class ByteCodeCompiler permits
     protected final MemberExpressionGenerator memberExpressionGenerator;
     protected final ByteCodeCompilerMemory memory;
     protected final MethodGenerator methodGenerator;
+    protected final ModuleItemGenerator moduleItemGenerator;
     protected final MutableCaptureAnalyzer mutableCaptureAnalyzer;
     protected final NewExpressionGenerator newExpressionGenerator;
     protected final NullLiteralGenerator nullLiteralGenerator;
@@ -77,6 +82,7 @@ public sealed abstract class ByteCodeCompiler permits
     protected final StandaloneFunctionCollector standaloneFunctionCollector;
     protected final StandaloneFunctionGenerator standaloneFunctionGenerator;
     protected final StatementGenerator statementGenerator;
+    protected final StmtGenerator stmtGenerator;
     protected final StringLiteralGenerator stringLiteralGenerator;
     protected final Swc4j swc4j;
     protected final SwitchStatementGenerator switchStatementGenerator;
@@ -86,8 +92,10 @@ public sealed abstract class ByteCodeCompiler permits
     protected final ThrowStatementGenerator throwStatementGenerator;
     protected final TryStatementGenerator tryStatementGenerator;
     protected final TsAsExpressionGenerator tsAsExpressionGenerator;
+    protected final TsEnumDeclGenerator tsEnumDeclGenerator;
     protected final TsInterfaceCollector tsInterfaceCollector;
-    protected final TsInterfaceGenerator tsInterfaceGenerator;
+    protected final TsInterfaceDeclGenerator tsInterfaceDeclGenerator;
+    protected final TsModuleDeclGenerator tsModuleDeclGenerator;
     protected final TypeAliasCollector typeAliasCollector;
     protected final TypeResolver typeResolver;
     protected final UnaryExpressionGenerator unaryExpressionGenerator;
@@ -95,7 +103,6 @@ public sealed abstract class ByteCodeCompiler permits
     protected final VarDeclGenerator varDeclGenerator;
     protected final VariableAnalyzer variableAnalyzer;
     protected final WhileStatementGenerator whileStatementGenerator;
-
 
     ByteCodeCompiler(ByteCodeCompilerOptions options) {
         this.options = AssertionUtils.notNull(options, "options");
@@ -109,9 +116,8 @@ public sealed abstract class ByteCodeCompiler permits
         arrayLiteralGenerator = new ArrayLiteralGenerator(this);
         arrowExpressionGenerator = new ArrowExpressionGenerator(this);
         assignExpressionGenerator = new AssignExpressionGenerator(this);
-        astProcessor = new AstProcessor(this);
-        binaryExpressionGenerator = new BinaryExpressionGenerator(this);
         bigIntLiteralGenerator = new BigIntLiteralGenerator(this);
+        binaryExpressionGenerator = new BinaryExpressionGenerator(this);
         boolLiteralGenerator = new BoolLiteralGenerator(this);
         breakStatementGenerator = new BreakStatementGenerator(this);
         callExpressionGenerator = new CallExpressionGenerator(this);
@@ -119,9 +125,11 @@ public sealed abstract class ByteCodeCompiler permits
         classDeclGenerator = new ClassDeclGenerator(this);
         conditionalExpressionGenerator = new ConditionalExpressionGenerator(this);
         continueStatementGenerator = new ContinueStatementGenerator(this);
+        declGenerator = new DeclGenerator(this);
         doWhileStatementGenerator = new DoWhileStatementGenerator(this);
         enumCollector = new EnumCollector(this);
         enumGenerator = new EnumGenerator(this);
+        exportDeclGenerator = new ExportDeclGenerator(this);
         expressionGenerator = new ExpressionGenerator(this);
         forInStatementGenerator = new ForInStatementGenerator(this);
         forOfStatementGenerator = new ForOfStatementGenerator(this);
@@ -132,6 +140,7 @@ public sealed abstract class ByteCodeCompiler permits
         labeledStatementGenerator = new LabeledStatementGenerator(this);
         memberExpressionGenerator = new MemberExpressionGenerator(this);
         methodGenerator = new MethodGenerator(this);
+        moduleItemGenerator = new ModuleItemGenerator(this);
         mutableCaptureAnalyzer = new MutableCaptureAnalyzer(this);
         newExpressionGenerator = new NewExpressionGenerator(this);
         nullLiteralGenerator = new NullLiteralGenerator(this);
@@ -144,16 +153,19 @@ public sealed abstract class ByteCodeCompiler permits
         standaloneFunctionCollector = new StandaloneFunctionCollector(this);
         standaloneFunctionGenerator = new StandaloneFunctionGenerator(this);
         statementGenerator = new StatementGenerator(this);
+        stmtGenerator = new StmtGenerator(this);
         stringLiteralGenerator = new StringLiteralGenerator(this);
+        switchStatementGenerator = new SwitchStatementGenerator(this);
         taggedTemplateLiteralGenerator = new TaggedTemplateLiteralGenerator(this);
         templateLiteralGenerator = new TemplateLiteralGenerator(this);
-        switchStatementGenerator = new SwitchStatementGenerator(this);
         thisExpressionGenerator = new ThisExpressionGenerator(this);
         throwStatementGenerator = new ThrowStatementGenerator(this);
         tryStatementGenerator = new TryStatementGenerator(this);
-        tsInterfaceCollector = new TsInterfaceCollector(this);
-        tsInterfaceGenerator = new TsInterfaceGenerator(this);
         tsAsExpressionGenerator = new TsAsExpressionGenerator(this);
+        tsEnumDeclGenerator = new TsEnumDeclGenerator(this);
+        tsInterfaceCollector = new TsInterfaceCollector(this);
+        tsInterfaceDeclGenerator = new TsInterfaceDeclGenerator(this);
+        tsModuleDeclGenerator = new TsModuleDeclGenerator(this);
         typeAliasCollector = new TypeAliasCollector(this);
         typeResolver = new TypeResolver(this);
         unaryExpressionGenerator = new UnaryExpressionGenerator(this);
@@ -188,10 +200,6 @@ public sealed abstract class ByteCodeCompiler permits
 
     public AssignExpressionGenerator getAssignExpressionGenerator() {
         return assignExpressionGenerator;
-    }
-
-    public AstProcessor getAstProcessor() {
-        return astProcessor;
     }
 
     public BigIntLiteralGenerator getBigIntLiteralGenerator() {
@@ -230,6 +238,10 @@ public sealed abstract class ByteCodeCompiler permits
         return continueStatementGenerator;
     }
 
+    public DeclGenerator getDeclGenerator() {
+        return declGenerator;
+    }
+
     public DoWhileStatementGenerator getDoWhileStatementGenerator() {
         return doWhileStatementGenerator;
     }
@@ -240,6 +252,10 @@ public sealed abstract class ByteCodeCompiler permits
 
     public EnumGenerator getEnumGenerator() {
         return enumGenerator;
+    }
+
+    public ExportDeclGenerator getExportDeclGenerator() {
+        return exportDeclGenerator;
     }
 
     public ExpressionGenerator getExpressionGenerator() {
@@ -284,6 +300,10 @@ public sealed abstract class ByteCodeCompiler permits
 
     public MethodGenerator getMethodGenerator() {
         return methodGenerator;
+    }
+
+    public ModuleItemGenerator getModuleItemGenerator() {
+        return moduleItemGenerator;
     }
 
     public MutableCaptureAnalyzer getMutableCaptureAnalyzer() {
@@ -338,6 +358,10 @@ public sealed abstract class ByteCodeCompiler permits
         return statementGenerator;
     }
 
+    public StmtGenerator getStmtGenerator() {
+        return stmtGenerator;
+    }
+
     public StringLiteralGenerator getStringLiteralGenerator() {
         return stringLiteralGenerator;
     }
@@ -370,12 +394,20 @@ public sealed abstract class ByteCodeCompiler permits
         return tsAsExpressionGenerator;
     }
 
+    public TsEnumDeclGenerator getTsEnumDeclGenerator() {
+        return tsEnumDeclGenerator;
+    }
+
     public TsInterfaceCollector getTsInterfaceCollector() {
         return tsInterfaceCollector;
     }
 
-    public TsInterfaceGenerator getTsInterfaceGenerator() {
-        return tsInterfaceGenerator;
+    public TsInterfaceDeclGenerator getTsInterfaceDeclGenerator() {
+        return tsInterfaceDeclGenerator;
+    }
+
+    public TsModuleDeclGenerator getTsModuleDeclGenerator() {
+        return tsModuleDeclGenerator;
     }
 
     public TypeAliasCollector getTypeAliasCollector() {

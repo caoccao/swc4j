@@ -16,7 +16,9 @@
 
 package com.caoccao.javet.swc4j.compiler;
 
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstFnDecl;
@@ -55,7 +57,9 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 // Determine dummy class names after all class names are known
                 standaloneFunctionCollector.determineDummyClassNames();
                 // Third pass: generate bytecode for classes/enums
-                astProcessor.processModuleItems(module.getBody());
+                for (ISwc4jAstModuleItem moduleItem : module.getBody()) {
+                    moduleItemGenerator.generate(null, null, moduleItem, null);
+                }
                 // Generate bytecode for standalone functions
                 generateStandaloneFunctions();
             } else if (program instanceof Swc4jAstScript script) {
@@ -71,7 +75,9 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
                 // Determine dummy class names after all class names are known
                 standaloneFunctionCollector.determineDummyClassNames();
                 // Third pass: generate bytecode for classes/enums
-                astProcessor.processStmts(script.getBody());
+                for (ISwc4jAstStmt stmt : script.getBody()) {
+                    stmtGenerator.generate(null, null, stmt, null);
+                }
                 // Generate bytecode for standalone functions
                 generateStandaloneFunctions();
             }

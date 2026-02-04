@@ -90,13 +90,15 @@ public final class StringApiUtils {
                     case "Ljava/lang/Byte;" -> "byteValue";
                     case "Ljava/lang/Short;" -> "shortValue";
                     case "Ljava/lang/Integer;" -> "intValue";
-                    default -> throw new Swc4jByteCodeCompilerException(null, operand, "Unexpected type: " + operandType);
+                    default ->
+                            throw new Swc4jByteCodeCompilerException(null, operand, "Unexpected type: " + operandType);
                 };
                 String returnType = switch (operandType) {
                     case "Ljava/lang/Byte;" -> "B";
                     case "Ljava/lang/Short;" -> "S";
                     case "Ljava/lang/Integer;" -> "I";
-                    default -> throw new Swc4jByteCodeCompilerException(null, operand, "Unexpected type: " + operandType);
+                    default ->
+                            throw new Swc4jByteCodeCompilerException(null, operand, "Unexpected type: " + operandType);
                 };
                 int unboxRef = cp.addMethodRef(wrapperClass, methodName, "()" + returnType);
                 code.invokevirtual(unboxRef);

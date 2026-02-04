@@ -49,10 +49,6 @@ public final class TypeResolver {
         this.compiler = compiler;
     }
 
-    private String getSourceCode() {
-        return compiler.getMemory().getScopedSourceCode().getSourceCode();
-    }
-
     /**
      * Find the common type between two types for conditional expressions.
      * Implements JVM type widening rules.
@@ -637,6 +633,10 @@ public final class TypeResolver {
         );
 
         return "L" + interfaceName + ";";
+    }
+
+    private String getSourceCode() {
+        return compiler.getMemory().getScopedSourceCode().getSourceCode();
     }
 
     /**

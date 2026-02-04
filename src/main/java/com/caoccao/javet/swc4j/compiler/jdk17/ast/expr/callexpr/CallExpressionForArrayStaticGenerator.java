@@ -54,7 +54,8 @@ public final class CallExpressionForArrayStaticGenerator extends BaseAstProcesso
             case "isArray" -> generateIsArray(code, cp, callExpr);
             case "from" -> generateFrom(code, cp, callExpr);
             case "of" -> generateOf(code, cp, callExpr);
-            default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Array." + methodName + "() not supported");
+            default ->
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Array." + methodName + "() not supported");
         }
     }
 

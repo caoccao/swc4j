@@ -40,10 +40,6 @@ public final class EnumGenerator {
         this.compiler = compiler;
     }
 
-    private String getSourceCode() {
-        return compiler.getMemory().getScopedSourceCode().getSourceCode();
-    }
-
     private EnumInfo analyzeEnumMembers(List<Swc4jAstTsEnumMember> members)
             throws Swc4jByteCodeCompilerException {
         List<EnumMemberInfo> memberInfos = new ArrayList<>();
@@ -635,6 +631,10 @@ public final class EnumGenerator {
                 2, // max stack
                 0  // max locals
         );
+    }
+
+    private String getSourceCode() {
+        return compiler.getMemory().getScopedSourceCode().getSourceCode();
     }
 
     private int parseIntValue(Swc4jAstNumber numLit) throws Swc4jByteCodeCompilerException {
