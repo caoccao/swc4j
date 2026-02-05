@@ -33,6 +33,11 @@ import java.util.List;
 public final class ImportDeclProcessor {
     private final ByteCodeCompiler compiler;
 
+    /**
+     * Constructs an ImportDeclProcessor.
+     *
+     * @param compiler the bytecode compiler
+     */
     public ImportDeclProcessor(ByteCodeCompiler compiler) {
         this.compiler = compiler;
     }

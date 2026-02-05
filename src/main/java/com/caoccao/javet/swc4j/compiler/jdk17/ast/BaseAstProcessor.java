@@ -79,6 +79,11 @@ public abstract class BaseAstProcessor<AST extends ISwc4jAst> {
         }
     }
 
+    /**
+     * Gets the source code being compiled.
+     *
+     * @return the source code
+     */
     protected String getSourceCode() {
         return compiler.getMemory().getScopedSourceCode().getSourceCode();
     }

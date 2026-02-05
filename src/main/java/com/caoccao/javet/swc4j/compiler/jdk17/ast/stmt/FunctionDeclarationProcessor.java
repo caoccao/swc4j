@@ -51,6 +51,11 @@ import java.util.List;
  */
 public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAstFnDecl> {
 
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public FunctionDeclarationProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -79,6 +84,12 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
         }
     }
 
+    /**
+     * Collects function declarations from module items and registers them in the function registry.
+     *
+     * @param items          the list of module items to process
+     * @param currentPackage the current package context
+     */
     public void collectFromModuleItems(List<ISwc4jAstModuleItem> items, String currentPackage) {
         for (ISwc4jAstModuleItem item : items) {
             if (item instanceof Swc4jAstTsModuleDecl moduleDecl) {
@@ -108,6 +119,12 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
         }
     }
 
+    /**
+     * Collects function declarations from statements and registers them in the function registry.
+     *
+     * @param stmts          the list of statements to process
+     * @param currentPackage the current package context
+     */
     public void collectFromStmts(List<ISwc4jAstStmt> stmts, String currentPackage) {
         for (ISwc4jAstStmt stmt : stmts) {
             if (stmt instanceof Swc4jAstFnDecl fnDecl) {

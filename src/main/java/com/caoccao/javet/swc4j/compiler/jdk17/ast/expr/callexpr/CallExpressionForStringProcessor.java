@@ -26,7 +26,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * Processes call expressions for String instance methods.
+ */
 public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc4jAstCallExpr> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public CallExpressionForStringProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -683,6 +691,12 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
         code.invokestatic(trimStartMethod);
     }
 
+    /**
+     * Checks if the given type is supported by this processor.
+     *
+     * @param type the JVM type descriptor to check
+     * @return true if the type is String
+     */
     public boolean isTypeSupported(String type) {
         return "Ljava/lang/String;".equals(type);
     }

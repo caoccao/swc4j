@@ -20,14 +20,32 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 
 import java.lang.annotation.*;
 
+/**
+ * Annotation for mapping enum variants to Java types in JNI code generation.
+ */
 @Documented
 @Inherited
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Jni2RustEnumMapping {
+    /**
+     * Whether the enum variant should be boxed.
+     *
+     * @return true if boxed
+     */
     boolean box() default false;
 
+    /**
+     * The name of the enum variant in Rust.
+     *
+     * @return the variant name
+     */
     String name();
 
+    /**
+     * The Java type this variant maps to.
+     *
+     * @return the Java type
+     */
     Class<? extends ISwc4jAst> type();
 }

@@ -20,7 +20,10 @@ package com.caoccao.javet.swc4j.compiler.memory;
  * Represents the type of a Java type (class, interface, or enum).
  */
 public enum JavaType {
+    /** Java class type */
     CLASS,
+    /** Java interface type */
     INTERFACE,
+    /** Java enum type */
     ENUM
 }

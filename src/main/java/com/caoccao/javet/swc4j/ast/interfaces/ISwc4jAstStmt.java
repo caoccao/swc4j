@@ -20,6 +20,9 @@ import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * Marker interface for statement AST nodes.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "Block", type = Swc4jAstBlockStmt.class),
@@ -44,6 +47,11 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
         }
 )
 public interface ISwc4jAstStmt extends ISwc4jAstModuleItem {
+    /**
+     * Creates a default statement (empty statement).
+     *
+     * @return the default statement
+     */
     static ISwc4jAstStmt createDefault() {
         return Swc4jAstEmptyStmt.create();
     }

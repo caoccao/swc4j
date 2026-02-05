@@ -39,10 +39,22 @@ import java.util.Map;
 public final class EnumCollector {
     private final ByteCodeCompiler compiler;
 
+    /**
+     * Constructs an EnumCollector with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public EnumCollector(ByteCodeCompiler compiler) {
         this.compiler = compiler;
     }
 
+    /**
+     * Collects enum declarations from module items and registers them in the enum registry.
+     *
+     * @param items          the list of module items to process
+     * @param currentPackage the current package context
+     * @throws Swc4jByteCodeCompilerException if collection fails
+     */
     public void collectFromModuleItems(List<ISwc4jAstModuleItem> items, String currentPackage)
             throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstModuleItem item : items) {
@@ -69,6 +81,13 @@ public final class EnumCollector {
         }
     }
 
+    /**
+     * Collects enum declarations from statements and registers them in the enum registry.
+     *
+     * @param stmts          the list of statements to process
+     * @param currentPackage the current package context
+     * @throws Swc4jByteCodeCompilerException if collection fails
+     */
     public void collectFromStmts(List<ISwc4jAstStmt> stmts, String currentPackage)
             throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstStmt stmt : stmts) {

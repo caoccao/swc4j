@@ -41,6 +41,11 @@ import java.util.List;
  */
 public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAstProcessor<Swc4jAstCallExpr> {
 
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public CallExpressionForFunctionalInterfaceProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

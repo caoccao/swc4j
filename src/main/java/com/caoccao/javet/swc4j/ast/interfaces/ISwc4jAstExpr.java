@@ -24,6 +24,9 @@ import com.caoccao.javet.swc4j.ast.pat.Swc4jAstInvalid;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * Marker interface for expression AST nodes.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "Array", type = Swc4jAstArrayLit.class),
@@ -69,6 +72,11 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 public interface ISwc4jAstExpr
         extends ISwc4jAstVarDeclOrExpr, ISwc4jAstPat, ISwc4jAstJsxExpr, ISwc4jAstCallee, ISwc4jAstBlockStmtOrExpr,
         ISwc4jAstAssignTarget {
+    /**
+     * Unwraps parenthesized and sequence expressions to get the inner expression.
+     *
+     * @return the unwrapped expression
+     */
     default ISwc4jAstExpr unParenExpr() {
         ISwc4jAstExpr expr = this;
         while (true) {

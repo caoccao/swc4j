@@ -18,6 +18,15 @@ package com.caoccao.javet.swc4j.plugins;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 
+/**
+ * Interface for plugins that can process AST programs.
+ */
 public interface ISwc4jPlugin {
+    /**
+     * Processes the given AST program.
+     *
+     * @param program the AST program
+     * @return the plugin response
+     */
     Swc4jPluginResponse process(ISwc4jAstProgram<?> program);
 }

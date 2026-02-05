@@ -19,6 +19,14 @@ package com.caoccao.javet.sanitizer.visitors;
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 
+/**
+ * Interface for sanitizer visitors that validate and sanitize AST nodes.
+ */
 public interface IJavetSanitizerVisitor extends ISwc4jAstVisitor {
+    /**
+     * Gets the exception if validation failed.
+     *
+     * @return the exception, or null if no error occurred
+     */
     JavetSanitizerException getException();
 }

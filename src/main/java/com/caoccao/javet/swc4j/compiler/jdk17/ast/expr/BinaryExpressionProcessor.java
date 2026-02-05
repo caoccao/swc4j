@@ -32,7 +32,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * Processor for binary expressions in bytecode compilation.
+ */
 public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBinExpr> {
+    /**
+     * Constructs a new binary expression processor.
+     *
+     * @param compiler the bytecode compiler
+     */
     public BinaryExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -112,6 +120,15 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 "The 'in' operator requires List, Map, or String type, but got: " + typeDescriptor);
     }
 
+    /**
+     * Generates bytecode for a binary expression.
+     *
+     * @param code           the code builder
+     * @param classWriter    the class writer
+     * @param binExpr        the binary expression AST node
+     * @param returnTypeInfo the expected return type information
+     * @throws Swc4jByteCodeCompilerException if code generation fails
+     */
     @Override
     public void generate(
             CodeBuilder code,

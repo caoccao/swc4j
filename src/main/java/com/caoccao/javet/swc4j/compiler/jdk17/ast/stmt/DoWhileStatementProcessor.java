@@ -54,6 +54,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * - Continue jumps to test label (before condition evaluation)
  */
 public final class DoWhileStatementProcessor extends BaseAstProcessor<Swc4jAstDoWhileStmt> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public DoWhileStatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

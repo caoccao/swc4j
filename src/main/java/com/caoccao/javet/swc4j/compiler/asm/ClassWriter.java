@@ -38,16 +38,34 @@ public class ClassWriter {
     private int accessFlags = 0x0021; // ACC_PUBLIC | ACC_SUPER (default)
     private String classSignature; // Generic signature for the class
 
+    /**
+     * Constructs a ClassWriter with the specified class name and default superclass (Object).
+     *
+     * @param className the internal name of the class to generate
+     */
     public ClassWriter(String className) {
         this(className, "java/lang/Object");
     }
 
+    /**
+     * Constructs a ClassWriter with the specified class name and superclass.
+     *
+     * @param className      the internal name of the class to generate
+     * @param superClassName the internal name of the superclass
+     */
     public ClassWriter(String className, String superClassName) {
         this.className = className;
         this.superClassName = superClassName;
         this.constantPool = new ConstantPool();
     }
 
+    /**
+     * Constructs a ClassWriter with the specified class name, superclass, and interfaces.
+     *
+     * @param className      the internal name of the class to generate
+     * @param superClassName the internal name of the superclass
+     * @param interfaces     the internal names of interfaces this class implements
+     */
     public ClassWriter(String className, String superClassName, String[] interfaces) {
         this.className = className;
         this.superClassName = superClassName;
@@ -57,48 +75,130 @@ public class ClassWriter {
         }
     }
 
+    /**
+     * Adds an abstract method to the class.
+     *
+     * @param name       the method name
+     * @param descriptor the method descriptor
+     */
     public void addAbstractMethod(String name, String descriptor) {
         // Abstract methods in interfaces: ACC_PUBLIC | ACC_ABSTRACT
         addMethod(0x0401, name, descriptor, null, 0, 0, null, null, null, null);
     }
 
+    /**
+     * Adds a field to the class.
+     *
+     * @param accessFlags the access flags for the field
+     * @param name        the field name
+     * @param descriptor  the field descriptor
+     */
     public void addField(int accessFlags, String name, String descriptor) {
         fields.add(new FieldInfo(accessFlags, name, descriptor));
     }
 
+    /**
+     * Adds an interface to the class.
+     *
+     * @param interfaceInternalName the internal name of the interface
+     */
     public void addInterface(String interfaceInternalName) {
         interfaces.add(interfaceInternalName);
     }
 
+    /**
+     * Adds a method to the class with basic code attributes.
+     *
+     * @param accessFlags the access flags for the method
+     * @param name        the method name
+     * @param descriptor  the method descriptor
+     * @param code        the method bytecode
+     * @param maxStack    the maximum stack size
+     * @param maxLocals   the maximum local variables
+     */
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals) {
         addMethod(accessFlags, name, descriptor, code, maxStack, maxLocals, null, null, null);
     }
 
+    /**
+     * Adds a method to the class with debug information.
+     *
+     * @param accessFlags         the access flags for the method
+     * @param name                the method name
+     * @param descriptor          the method descriptor
+     * @param code                the method bytecode
+     * @param maxStack            the maximum stack size
+     * @param maxLocals           the maximum local variables
+     * @param lineNumberTable     the line number table for debugging
+     * @param localVariableTable  the local variable table for debugging
+     */
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals,
                           List<LineNumberEntry> lineNumberTable, List<LocalVariableEntry> localVariableTable) {
         addMethod(accessFlags, name, descriptor, code, maxStack, maxLocals, lineNumberTable, localVariableTable, null, null);
     }
 
+    /**
+     * Adds a method to the class with debug information and stack map table.
+     *
+     * @param accessFlags         the access flags for the method
+     * @param name                the method name
+     * @param descriptor          the method descriptor
+     * @param code                the method bytecode
+     * @param maxStack            the maximum stack size
+     * @param maxLocals           the maximum local variables
+     * @param lineNumberTable     the line number table for debugging
+     * @param localVariableTable  the local variable table for debugging
+     * @param stackMapTable       the stack map table for verification
+     */
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals,
                           List<LineNumberEntry> lineNumberTable, List<LocalVariableEntry> localVariableTable,
                           List<StackMapEntry> stackMapTable) {
         addMethod(accessFlags, name, descriptor, code, maxStack, maxLocals, lineNumberTable, localVariableTable, stackMapTable, null);
     }
 
+    /**
+     * Adds a method to the class with full debug information, stack map table, and exception handling.
+     *
+     * @param accessFlags         the access flags for the method
+     * @param name                the method name
+     * @param descriptor          the method descriptor
+     * @param code                the method bytecode
+     * @param maxStack            the maximum stack size
+     * @param maxLocals           the maximum local variables
+     * @param lineNumberTable     the line number table for debugging
+     * @param localVariableTable  the local variable table for debugging
+     * @param stackMapTable       the stack map table for verification
+     * @param exceptionTable      the exception table for try-catch blocks
+     */
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals,
                           List<LineNumberEntry> lineNumberTable, List<LocalVariableEntry> localVariableTable,
                           List<StackMapEntry> stackMapTable, List<ExceptionTableEntry> exceptionTable) {
         methods.add(new MethodInfo(accessFlags, name, descriptor, code, maxStack, maxLocals, lineNumberTable, localVariableTable, stackMapTable, exceptionTable));
     }
 
+    /**
+     * Gets the class name.
+     *
+     * @return the internal name of the class
+     */
     public String getClassName() {
         return className;
     }
 
+    /**
+     * Gets the constant pool for this class.
+     *
+     * @return the constant pool
+     */
     public ConstantPool getConstantPool() {
         return constantPool;
     }
 
+    /**
+     * Sets the access flags for the class.
+     *
+     * @param accessFlags the access flags (e.g., ACC_PUBLIC, ACC_INTERFACE)
+     */
     public void setAccessFlags(int accessFlags) {
         this.accessFlags = accessFlags;
     }
@@ -113,6 +213,12 @@ public class ClassWriter {
         this.classSignature = signature;
     }
 
+    /**
+     * Converts the class to a byte array in standard JVM class file format.
+     *
+     * @return the class file bytes
+     * @throws IOException if an I/O error occurs during writing
+     */
     public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(baos);
@@ -427,6 +533,10 @@ public class ClassWriter {
         // Other types (INTEGER, LONG, FLOAT, DOUBLE, etc.) don't need additional data
     }
 
+    /**
+     * Represents the constant pool section of a class file.
+     * The constant pool stores various types of constants used by the class.
+     */
     public static class ConstantPool {
         private final Map<String, Integer> classCache = new HashMap<>();
         private final List<Object> constants = new ArrayList<>();
@@ -439,11 +549,20 @@ public class ClassWriter {
         private final Map<String, Integer> stringCache = new HashMap<>();
         private final Map<String, Integer> utf8Cache = new HashMap<>();
 
+        /**
+         * Constructs a new ConstantPool with index 0 reserved.
+         */
         public ConstantPool() {
             // Index 0 is reserved
             constants.add(null);
         }
 
+        /**
+         * Adds a class reference to the constant pool.
+         *
+         * @param className the internal name of the class
+         * @return the constant pool index of the class reference
+         */
         public int addClass(String className) {
             return classCache.computeIfAbsent(className, c -> {
                 int nameIndex = addUtf8(c);
@@ -453,6 +572,12 @@ public class ClassWriter {
             });
         }
 
+        /**
+         * Adds a double constant to the constant pool.
+         *
+         * @param value the double value
+         * @return the constant pool index of the double constant
+         */
         public int addDouble(double value) {
             return doubleCache.computeIfAbsent(value, v -> {
                 int index = constants.size();
@@ -463,6 +588,14 @@ public class ClassWriter {
             });
         }
 
+        /**
+         * Adds a field reference to the constant pool.
+         *
+         * @param className  the internal name of the class containing the field
+         * @param fieldName  the name of the field
+         * @param descriptor the field descriptor
+         * @return the constant pool index of the field reference
+         */
         public int addFieldRef(String className, String fieldName, String descriptor) {
             String key = "field:" + className + "." + fieldName + ":" + descriptor;
             return methodRefCache.computeIfAbsent(key, k -> {
@@ -474,6 +607,12 @@ public class ClassWriter {
             });
         }
 
+        /**
+         * Adds a float constant to the constant pool.
+         *
+         * @param value the float value
+         * @return the constant pool index of the float constant
+         */
         public int addFloat(float value) {
             return floatCache.computeIfAbsent(value, v -> {
                 int index = constants.size();
@@ -482,6 +621,12 @@ public class ClassWriter {
             });
         }
 
+        /**
+         * Adds an integer constant to the constant pool.
+         *
+         * @param value the integer value
+         * @return the constant pool index of the integer constant
+         */
         public int addInteger(int value) {
             return integerCache.computeIfAbsent(value, v -> {
                 int index = constants.size();
@@ -490,6 +635,14 @@ public class ClassWriter {
             });
         }
 
+        /**
+         * Adds an interface method reference to the constant pool.
+         *
+         * @param interfaceName the internal name of the interface
+         * @param methodName    the name of the method
+         * @param descriptor    the method descriptor
+         * @return the constant pool index of the interface method reference
+         */
         public int addInterfaceMethodRef(String interfaceName, String methodName, String descriptor) {
             String key = "interface:" + interfaceName + "." + methodName + ":" + descriptor;
             return methodRefCache.computeIfAbsent(key, k -> {
@@ -501,6 +654,12 @@ public class ClassWriter {
             });
         }
 
+        /**
+         * Adds a long constant to the constant pool.
+         *
+         * @param value the long value
+         * @return the constant pool index of the long constant
+         */
         public int addLong(long value) {
             return longCache.computeIfAbsent(value, v -> {
                 int index = constants.size();
@@ -511,6 +670,14 @@ public class ClassWriter {
             });
         }
 
+        /**
+         * Adds a method reference to the constant pool.
+         *
+         * @param className  the internal name of the class containing the method
+         * @param methodName the name of the method
+         * @param descriptor the method descriptor
+         * @return the constant pool index of the method reference
+         */
         public int addMethodRef(String className, String methodName, String descriptor) {
             String key = className + "." + methodName + ":" + descriptor;
             return methodRefCache.computeIfAbsent(key, k -> {
@@ -522,6 +689,13 @@ public class ClassWriter {
             });
         }
 
+        /**
+         * Adds a name and type descriptor to the constant pool.
+         *
+         * @param name       the name
+         * @param descriptor the type descriptor
+         * @return the constant pool index of the name and type entry
+         */
         public int addNameAndType(String name, String descriptor) {
             String key = name + ":" + descriptor;
             return nameAndTypeCache.computeIfAbsent(key, k -> {
@@ -533,6 +707,12 @@ public class ClassWriter {
             });
         }
 
+        /**
+         * Adds a string constant to the constant pool.
+         *
+         * @param value the string value
+         * @return the constant pool index of the string constant
+         */
         public int addString(String value) {
             return stringCache.computeIfAbsent(value, v -> {
                 int utf8Index = addUtf8(v);
@@ -542,6 +722,12 @@ public class ClassWriter {
             });
         }
 
+        /**
+         * Adds a UTF8 string to the constant pool.
+         *
+         * @param value the UTF8 string value
+         * @return the constant pool index of the UTF8 entry
+         */
         public int addUtf8(String value) {
             return utf8Cache.computeIfAbsent(value, v -> {
                 int index = constants.size();
@@ -676,6 +862,12 @@ public class ClassWriter {
             return null;
         }
 
+        /**
+         * Gets the constant pool index for a UTF8 string, adding it if necessary.
+         *
+         * @param value the UTF8 string value
+         * @return the constant pool index of the UTF8 entry
+         */
         public int getUtf8Index(String value) {
             Integer index = utf8Cache.get(value);
             return index != null ? index : addUtf8(value);
@@ -779,9 +971,24 @@ public class ClassWriter {
     private record FieldInfo(int accessFlags, String name, String descriptor) {
     }
 
+    /**
+     * Represents a line number table entry for debugging.
+     *
+     * @param startPc    the bytecode offset where this line begins
+     * @param lineNumber the source code line number
+     */
     public record LineNumberEntry(int startPc, int lineNumber) {
     }
 
+    /**
+     * Represents a local variable table entry for debugging.
+     *
+     * @param startPc    the bytecode offset where the variable scope begins
+     * @param length     the length of the variable scope
+     * @param name       the variable name
+     * @param descriptor the variable type descriptor
+     * @param index      the local variable index
+     */
     public record LocalVariableEntry(int startPc, int length, String name, String descriptor, int index) {
     }
 
@@ -791,9 +998,26 @@ public class ClassWriter {
                               List<ExceptionTableEntry> exceptionTable) {
     }
 
+    /**
+     * Represents a stack map table entry for bytecode verification.
+     *
+     * @param offset          the bytecode offset for this frame
+     * @param frameType       the stack map frame type
+     * @param locals          the local variable types
+     * @param stack           the operand stack types
+     * @param localClassNames the class names for object-typed local variables
+     * @param stackClassNames the class names for object-typed stack items
+     */
     public record StackMapEntry(int offset, int frameType, List<Integer> locals, List<Integer> stack,
                                 List<String> localClassNames, List<String> stackClassNames) {
-        // Backwards-compatible constructor
+        /**
+         * Backwards-compatible constructor without class names.
+         *
+         * @param offset    the bytecode offset for this frame
+         * @param frameType the stack map frame type
+         * @param locals    the local variable types
+         * @param stack     the operand stack types
+         */
         public StackMapEntry(int offset, int frameType, List<Integer> locals, List<Integer> stack) {
             this(offset, frameType, locals, stack, null, null);
         }

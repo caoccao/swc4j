@@ -25,10 +25,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * Runner for invoking methods on compiled bytecode classes.
+ */
 public final class ByteCodeClassRunner {
+    /** The compiled class. */
     private final Class<?> clazz;
+    /** The instance of the class (null for static access). */
     private final Object instance;
+    /** Cache mapping method names to method arrays. */
     private final Map<String, Method[]> methodNameToMethodsMap;
+    /** All public methods of the class. */
     private final Method[] methods;
 
     private ByteCodeClassRunner(Class<?> clazz, Object instance) {
@@ -38,6 +45,13 @@ public final class ByteCodeClassRunner {
         methodNameToMethodsMap = new HashMap<>();
     }
 
+    /**
+     * Creates a runner for an instance of the given class.
+     *
+     * @param clazz           the class to instantiate
+     * @param constructorArgs constructor arguments
+     * @return a new class runner with an instance
+     */
     public static ByteCodeClassRunner createInstance(Class<?> clazz, Object... constructorArgs) {
         Constructor<?> constructor = ScoreUtils.findBestConstructor(clazz.getConstructors(), constructorArgs);
         if (constructor == null) {
@@ -50,14 +64,30 @@ public final class ByteCodeClassRunner {
         }
     }
 
+    /**
+     * Creates a runner for static access to the given class.
+     *
+     * @param clazz the class for static access
+     * @return a new class runner without an instance
+     */
     public static ByteCodeClassRunner createStatic(Class<?> clazz) {
         return new ByteCodeClassRunner(clazz, null);
     }
 
+    /**
+     * Gets the compiled class.
+     *
+     * @return the class
+     */
     public Class<?> getClazz() {
         return clazz;
     }
 
+    /**
+     * Gets the instance of the class.
+     *
+     * @return the instance, or null for static access
+     */
     public Object getInstance() {
         return instance;
     }
@@ -68,6 +98,16 @@ public final class ByteCodeClassRunner {
                 .toArray(Method[]::new));
     }
 
+    /**
+     * Invokes a method on the class instance.
+     *
+     * @param methodName the name of the method to invoke
+     * @param args       method arguments
+     * @param <T>        the return type
+     * @return the method result
+     * @throws InvocationTargetException if the method throws an exception
+     * @throws IllegalAccessException    if the method cannot be accessed
+     */
     public <T> T invoke(String methodName, Object... args) throws InvocationTargetException, IllegalAccessException {
         Method method = ScoreUtils.findBestMethod(getMethods(methodName), args);
         if (method == null) {

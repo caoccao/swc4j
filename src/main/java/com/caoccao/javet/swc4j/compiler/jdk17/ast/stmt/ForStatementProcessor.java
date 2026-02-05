@@ -51,6 +51,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * </pre>
  */
 public final class ForStatementProcessor extends BaseAstProcessor<Swc4jAstForStmt> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public ForStatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

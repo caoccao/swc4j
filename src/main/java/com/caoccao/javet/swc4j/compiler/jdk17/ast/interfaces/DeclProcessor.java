@@ -28,7 +28,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * Processes declaration AST nodes (classes, interfaces, enums, modules).
+ */
 public final class DeclProcessor extends BaseAstProcessor<ISwc4jAstDecl> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public DeclProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

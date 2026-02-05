@@ -41,7 +41,15 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Processor for assignment expressions in bytecode compilation.
+ */
 public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAssignExpr> {
+    /**
+     * Constructs a new assignment expression processor.
+     *
+     * @param compiler the bytecode compiler
+     */
     public AssignExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -105,6 +113,10 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
     /**
      * Extract property name from ISwc4jAstPropName.
+     *
+     * @param propName the property name AST node
+     * @return the extracted property name string
+     * @throws Swc4jByteCodeCompilerException if the property name type is unsupported
      */
     private String extractPropertyName(ISwc4jAstPropName propName) throws Swc4jByteCodeCompilerException {
         if (propName instanceof Swc4jAstIdentName identName) {
@@ -117,6 +129,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         }
     }
 
+    /**
+     * Generates bytecode for an assignment expression.
+     *
+     * @param code           the code builder
+     * @param classWriter    the class writer
+     * @param assignExpr     the assignment expression AST node
+     * @param returnTypeInfo the expected return type information
+     * @throws Swc4jByteCodeCompilerException if code generation fails
+     */
     @Override
     public void generate(
             CodeBuilder code,

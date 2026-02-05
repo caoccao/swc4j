@@ -42,6 +42,9 @@ public class CompilationContext {
     private final Stack<TypeParameterScope> typeParameterScopes;
     private int tempIdCounter;
 
+    /**
+     * Constructs a new CompilationContext with empty state.
+     */
     public CompilationContext() {
         breakLabels = new Stack<>();
         capturedVariables = new HashMap<>();
@@ -86,6 +89,11 @@ public class CompilationContext {
         return capturedVariables;
     }
 
+    /**
+     * Gets the current break label (innermost loop).
+     *
+     * @return the current break label, or null if not in a loop
+     */
     public LoopLabelInfo getCurrentBreakLabel() {
         if (breakLabels.isEmpty()) {
             return null;
@@ -103,6 +111,11 @@ public class CompilationContext {
         return classStack.isEmpty() ? null : classStack.peek();
     }
 
+    /**
+     * Gets the current continue label (innermost loop).
+     *
+     * @return the current continue label, or null if not in a loop
+     */
     public LoopLabelInfo getCurrentContinueLabel() {
         if (continueLabels.isEmpty()) {
             return null;
@@ -110,6 +123,11 @@ public class CompilationContext {
         return continueLabels.peek();
     }
 
+    /**
+     * Gets the generic type information map.
+     *
+     * @return the generic type information map
+     */
     public Map<String, GenericTypeInfo> getGenericTypeInfoMap() {
         return genericTypeInfoMap;
     }
@@ -173,6 +191,11 @@ public class CompilationContext {
         return null;
     }
 
+    /**
+     * Gets the local variable table for tracking variables and their slots.
+     *
+     * @return the local variable table
+     */
     public LocalVariableTable getLocalVariableTable() {
         return localVariableTable;
     }
@@ -257,6 +280,9 @@ public class CompilationContext {
         inlineExecutingFinallyBlocks.add(block);
     }
 
+    /**
+     * Pops the current break label from the stack.
+     */
     public void popBreakLabel() {
         if (!breakLabels.isEmpty()) {
             breakLabels.pop();
@@ -273,6 +299,9 @@ public class CompilationContext {
         }
     }
 
+    /**
+     * Pops the current continue label from the stack.
+     */
     public void popContinueLabel() {
         if (!continueLabels.isEmpty()) {
             continueLabels.pop();
@@ -310,6 +339,11 @@ public class CompilationContext {
         }
     }
 
+    /**
+     * Pushes a break label onto the stack.
+     *
+     * @param labelInfo the loop label information
+     */
     public void pushBreakLabel(LoopLabelInfo labelInfo) {
         breakLabels.push(labelInfo);
     }
@@ -324,6 +358,11 @@ public class CompilationContext {
         classStack.push(internalName);
     }
 
+    /**
+     * Pushes a continue label onto the stack.
+     *
+     * @param labelInfo the loop label information
+     */
     public void pushContinueLabel(LoopLabelInfo labelInfo) {
         continueLabels.push(labelInfo);
     }
@@ -363,6 +402,9 @@ public class CompilationContext {
         }
     }
 
+    /**
+     * Resets the compilation context to its initial state.
+     */
     public void reset() {
         reset(false);
     }

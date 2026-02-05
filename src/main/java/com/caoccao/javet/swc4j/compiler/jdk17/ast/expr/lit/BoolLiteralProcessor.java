@@ -25,11 +25,28 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * Processor for boolean literal expressions in bytecode compilation.
+ */
 public final class BoolLiteralProcessor extends BaseAstProcessor<Swc4jAstBool> {
+    /**
+     * Constructs a new boolean literal processor.
+     *
+     * @param compiler the bytecode compiler
+     */
     public BoolLiteralProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
 
+    /**
+     * Generates bytecode for a boolean literal expression.
+     *
+     * @param code           the code builder
+     * @param classWriter    the class writer
+     * @param bool           the boolean literal AST node
+     * @param returnTypeInfo the expected return type information
+     * @throws Swc4jByteCodeCompilerException if code generation fails
+     */
     @Override
     public void generate(
             CodeBuilder code,

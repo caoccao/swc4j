@@ -30,18 +30,36 @@ import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
+/**
+ * Visitor that validates AST nodes against sanitizer rules.
+ */
 public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSanitizerVisitor {
+    /** Keyword constant: "async" */
     protected static final String ASYNC = "async";
+    /** Keyword constant: "await" */
     protected static final String AWAIT = "await";
+    /** Keyword constant: "debugger" */
     protected static final String DEBUGGER = "debugger";
+    /** Keyword constant: "export" */
     protected static final String EXPORT = "export";
+    /** Keyword constant: "import" */
     protected static final String IMPORT = "import";
+    /** Keyword constant: "var" */
     protected static final String VAR = "var";
+    /** Keyword constant: "with" */
     protected static final String WITH = "with";
+    /** Keyword constant: "yield" */
     protected static final String YIELD = "yield";
+    /** The exception if validation fails */
     protected JavetSanitizerException exception;
+    /** The sanitizer options */
     protected JavetSanitizerOptions options;
 
+    /**
+     * Constructs a visitor with the given options.
+     *
+     * @param options the sanitizer options
+     */
     public JavetSanitizerVisitor(JavetSanitizerOptions options) {
         this.options = AssertionUtils.notNull(options, "options");
     }
@@ -51,15 +69,32 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
         return exception;
     }
 
+    /**
+     * Gets the sanitizer options.
+     *
+     * @return the sanitizer options
+     */
     public JavetSanitizerOptions getOptions() {
         return options;
     }
 
+    /**
+     * Raises an error and stores it in this visitor.
+     *
+     * @param exception the exception
+     * @param node      the AST node
+     */
     protected void raiseError(JavetSanitizerException exception, ISwc4jAst node) {
         this.exception = AssertionUtils.notNull(exception, "Exception").setNode(node);
         throw new RuntimeException("Sanity check error.", exception);
     }
 
+    /**
+     * Validates that the node doesn't reference a disallowed built-in object.
+     *
+     * @param options the sanitizer options
+     * @param node    the AST node
+     */
     protected void validateBuiltInObject(JavetSanitizerOptions options, ISwc4jAst node) {
         ISwc4jAst matchedNode = JavetSanitizerBuiltInObjectMatcher.getInstance().matches(options, node);
         if (matchedNode != null) {
@@ -67,6 +102,11 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
         }
     }
 
+    /**
+     * Validates that the identifier is allowed.
+     *
+     * @param node the AST node
+     */
     protected void validateIdentifier(ISwc4jAst node) {
         ISwc4jAst matchedNode = JavetSanitizerIdentifierMatcher.getInstance().matches(options, node);
         if (matchedNode != null) {
@@ -74,6 +114,11 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
         }
     }
 
+    /**
+     * Validates that the identifier name is allowed.
+     *
+     * @param node the AST node
+     */
     protected void validateIdentifierName(ISwc4jAst node) {
         ISwc4jAst matchedNode = JavetSanitizerIdentifierMatcher.getInstance().matches(options, node);
         if (matchedNode != null) {

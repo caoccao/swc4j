@@ -29,7 +29,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * Processes call expressions for ArrayList instance methods.
+ */
 public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<Swc4jAstCallExpr> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public CallExpressionForArrayListProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -1029,6 +1037,12 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         return "I".equals(type) || "J".equals(type) || "D".equals(type);
     }
 
+    /**
+     * Checks if the given type is supported by this processor.
+     *
+     * @param type the JVM type descriptor to check
+     * @return true if the type is ArrayList
+     */
     public boolean isTypeSupported(String type) {
         return "Ljava/util/ArrayList;".equals(type);
     }

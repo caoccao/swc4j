@@ -26,7 +26,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * Processes conditional (ternary) expressions (test ? consequent : alternate).
+ */
 public final class ConditionalExpressionProcessor extends BaseAstProcessor<Swc4jAstCondExpr> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public ConditionalExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

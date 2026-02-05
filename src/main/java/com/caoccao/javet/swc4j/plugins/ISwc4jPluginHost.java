@@ -21,8 +21,17 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 
+/**
+ * Interface for plugin hosts that can process AST programs.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.PluginUtils)
 public interface ISwc4jPluginHost {
+    /**
+     * Processes the given AST program.
+     *
+     * @param program the AST program
+     * @return true if processing succeeded
+     */
     @Jni2RustMethod
     boolean process(ISwc4jAstProgram<?> program);
 }

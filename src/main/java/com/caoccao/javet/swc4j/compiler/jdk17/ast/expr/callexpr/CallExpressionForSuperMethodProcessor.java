@@ -33,6 +33,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * Uses invokespecial to call the parent class method.
  */
 public final class CallExpressionForSuperMethodProcessor extends BaseAstProcessor<Swc4jAstCallExpr> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public CallExpressionForSuperMethodProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

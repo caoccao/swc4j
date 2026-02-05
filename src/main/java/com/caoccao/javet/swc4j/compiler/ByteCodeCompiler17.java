@@ -22,6 +22,9 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstFnDecl;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * JDK 17+ implementation of the bytecode compiler.
+ */
 public final class ByteCodeCompiler17 extends ByteCodeCompiler {
     ByteCodeCompiler17(ByteCodeCompilerOptions options) {
         super(options);

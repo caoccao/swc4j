@@ -16,20 +16,63 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+/**
+ * Interface for AST nodes that can be coerced to primitive types.
+ */
 public interface ISwc4jAstCoercionPrimitive {
+    /**
+     * Converts this node to a boolean value.
+     *
+     * @return the boolean value
+     */
     boolean asBoolean();
 
+    /**
+     * Converts this node to a byte value.
+     *
+     * @return the byte value
+     */
     byte asByte();
 
+    /**
+     * Converts this node to a double value.
+     *
+     * @return the double value
+     */
     double asDouble();
 
+    /**
+     * Converts this node to a float value.
+     *
+     * @return the float value
+     */
     float asFloat();
 
+    /**
+     * Converts this node to an int value.
+     *
+     * @return the int value
+     */
     int asInt();
 
+    /**
+     * Converts this node to a long value.
+     *
+     * @return the long value
+     */
     long asLong();
 
+    /**
+     * Converts this node to a short value.
+     *
+     * @return the short value
+     */
     short asShort();
 
+    /**
+     * Converts this node to a string value.
+     *
+     * @return the string value
+     */
     String asString();
 }

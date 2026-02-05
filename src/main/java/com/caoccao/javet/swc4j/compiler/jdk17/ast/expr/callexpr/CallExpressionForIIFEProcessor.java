@@ -45,6 +45,11 @@ import java.util.*;
 public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4jAstCallExpr> {
     private int interfaceCounter = 0;
 
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public CallExpressionForIIFEProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -629,6 +634,9 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
 
     /**
      * Check if the callee is an IIFE pattern (parenthesized arrow expression).
+     *
+     * @param callee the callee to check
+     * @return true if the callee is an IIFE
      */
     public boolean isCalleeSupported(ISwc4jAstCallee callee) {
         if (callee instanceof ISwc4jAstExpr expr) {

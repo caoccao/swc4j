@@ -34,6 +34,11 @@ import java.math.BigInteger;
  * Supports conversions to primitive types via BigInteger's intValue(), longValue(), etc.
  */
 public final class BigIntLiteralProcessor extends BaseAstProcessor<Swc4jAstBigInt> {
+    /**
+     * Constructs a new BigInt literal processor.
+     *
+     * @param compiler the bytecode compiler
+     */
     public BigIntLiteralProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

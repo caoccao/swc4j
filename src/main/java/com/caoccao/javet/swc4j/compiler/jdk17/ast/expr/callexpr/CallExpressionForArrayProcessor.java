@@ -40,6 +40,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * For dynamic arrays with these methods, use ArrayList instead.
  */
 public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4jAstCallExpr> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public CallExpressionForArrayProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

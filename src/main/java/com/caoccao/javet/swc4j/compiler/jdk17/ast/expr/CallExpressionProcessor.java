@@ -26,6 +26,9 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.*;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * Main processor for call expressions, delegates to specialized processors.
+ */
 public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCallExpr> {
     private final CallExpressionForArrayProcessor arrayGenerator;
     private final CallExpressionForArrayListProcessor arrayListGenerator;
@@ -38,6 +41,11 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
     private final CallExpressionForSuperMethodProcessor superMethodGenerator;
     private final CallExpressionForThisConstructorProcessor thisConstructorGenerator;
 
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public CallExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
         arrayGenerator = new CallExpressionForArrayProcessor(compiler);

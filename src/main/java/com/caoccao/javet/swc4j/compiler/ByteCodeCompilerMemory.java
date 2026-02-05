@@ -23,6 +23,9 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Memory management for the bytecode compiler, tracking all scoped registries and compilation state.
+ */
 public final class ByteCodeCompilerMemory {
     private final Map<String, byte[]> byteCodeMap;
     private final ScopedCompilationContext scopedCompilationContext;
@@ -35,6 +38,9 @@ public final class ByteCodeCompilerMemory {
     private final ScopedTypeAliasRegistry scopedTypeAliasRegistry;
     private int fnInterfaceCounter;
 
+    /**
+     * Constructs a new ByteCodeCompilerMemory instance.
+     */
     public ByteCodeCompilerMemory() {
         byteCodeMap = new HashMap<>();
         scopedCompilationContext = new ScopedCompilationContext();
@@ -48,6 +54,9 @@ public final class ByteCodeCompilerMemory {
         fnInterfaceCounter = 0;
     }
 
+    /**
+     * Enters a new scope for all scoped registries.
+     */
     public void enterScope() {
         scopedFunctionalInterfaceRegistry.enterScope();
         scopedSourceCode.enterScope();
@@ -55,6 +64,9 @@ public final class ByteCodeCompilerMemory {
         scopedTypeAliasRegistry.enterScope();
     }
 
+    /**
+     * Exits the current scope for all scoped registries.
+     */
     public void exitScope() {
         scopedFunctionalInterfaceRegistry.exitScope();
         scopedSourceCode.exitScope();
@@ -89,14 +101,29 @@ public final class ByteCodeCompilerMemory {
         return ++fnInterfaceCounter;
     }
 
+    /**
+     * Gets the scoped compilation context storage.
+     *
+     * @return the scoped compilation context
+     */
     public ScopedCompilationContext getScopedCompilationContext() {
         return scopedCompilationContext;
     }
 
+    /**
+     * Gets the scoped functional interface registry.
+     *
+     * @return the scoped functional interface registry
+     */
     public ScopedFunctionalInterfaceRegistry getScopedFunctionalInterfaceRegistry() {
         return scopedFunctionalInterfaceRegistry;
     }
 
+    /**
+     * Gets the scoped Java type registry.
+     *
+     * @return the scoped Java type registry
+     */
     public ScopedJavaTypeRegistry getScopedJavaTypeRegistry() {
         return scopedJavaTypeRegistry;
     }
@@ -119,6 +146,11 @@ public final class ByteCodeCompilerMemory {
         return scopedSourceCode;
     }
 
+    /**
+     * Gets the scoped standalone function registry.
+     *
+     * @return the scoped standalone function registry
+     */
     public ScopedStandaloneFunctionRegistry getScopedStandaloneFunctionRegistry() {
         return scopedStandaloneFunctionRegistry;
     }
@@ -132,6 +164,11 @@ public final class ByteCodeCompilerMemory {
         return scopedTemplateCacheRegistry;
     }
 
+    /**
+     * Gets the scoped type alias registry.
+     *
+     * @return the scoped type alias registry
+     */
     public ScopedTypeAliasRegistry getScopedTypeAliasRegistry() {
         return scopedTypeAliasRegistry;
     }
@@ -157,6 +194,9 @@ public final class ByteCodeCompilerMemory {
         return scopedCompilationContext.enterScope(isStatic);
     }
 
+    /**
+     * Resets all compiler memory state including all registries and bytecode.
+     */
     public void reset() {
         byteCodeMap.clear();
         fnInterfaceCounter = 0;
@@ -170,6 +210,9 @@ public final class ByteCodeCompilerMemory {
         scopedTypeAliasRegistry.clear();
     }
 
+    /**
+     * Resets the current compilation context to its initial state.
+     */
     public void resetCompilationContext() {
         scopedCompilationContext.resetCurrent();
     }

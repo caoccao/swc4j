@@ -30,6 +30,10 @@ public record CapturedVariable(String name, String fieldName, String type, boole
 
     /**
      * Creates a simple captured variable (backward compatible constructor).
+     *
+     * @param name      the variable name in source code
+     * @param fieldName the field name in the lambda class
+     * @param type      the JVM type descriptor
      */
     public CapturedVariable(String name, String fieldName, String type) {
         this(name, fieldName, type, false, type);

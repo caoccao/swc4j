@@ -19,17 +19,36 @@ package com.caoccao.javet.swc4j.compiler;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Custom class loader that loads classes from in-memory bytecode.
+ */
 public class ByteArrayClassLoader extends ClassLoader {
+    /** Map of class names to bytecode. */
     protected final Map<String, byte[]> byteCodeMap;
+    /** Cache of loaded classes. */
     protected final Map<String, Class<?>> classMap;
+    /** Lock for thread-safe class loading. */
     protected final Object lock = new Object();
 
+    /**
+     * Constructs a new bytecode class loader.
+     *
+     * @param byteCodeMap map of class names to bytecode
+     * @param parent      the parent class loader
+     */
     public ByteArrayClassLoader(Map<String, byte[]> byteCodeMap, ClassLoader parent) {
         super(parent);
         this.byteCodeMap = new HashMap<>(byteCodeMap);
         classMap = new HashMap<>();
     }
 
+    /**
+     * Finds and loads a class by name.
+     *
+     * @param name the fully qualified class name
+     * @return the loaded class
+     * @throws ClassNotFoundException if the class cannot be found
+     */
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
         if (classMap.containsKey(name)) {
@@ -52,6 +71,13 @@ public class ByteArrayClassLoader extends ClassLoader {
         return clazz;
     }
 
+    /**
+     * Gets a class by name.
+     *
+     * @param name the fully qualified class name
+     * @return the loaded class
+     * @throws ClassNotFoundException if the class cannot be found
+     */
     public Class<?> getClass(String name) throws ClassNotFoundException {
         return findClass(name);
     }

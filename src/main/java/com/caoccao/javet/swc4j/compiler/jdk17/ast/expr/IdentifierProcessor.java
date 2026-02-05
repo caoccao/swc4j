@@ -27,7 +27,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * Processes identifier expressions (variable references).
+ */
 public final class IdentifierProcessor extends BaseAstProcessor<Swc4jAstIdent> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public IdentifierProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

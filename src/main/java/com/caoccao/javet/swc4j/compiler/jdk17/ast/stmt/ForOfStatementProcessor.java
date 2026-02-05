@@ -108,6 +108,11 @@ import java.util.List;
  * </pre>
  */
 public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForOfStmt> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public ForOfStatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

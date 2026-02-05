@@ -47,6 +47,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * </pre>
  */
 public final class ContinueStatementProcessor extends BaseAstProcessor<Swc4jAstContinueStmt> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public ContinueStatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

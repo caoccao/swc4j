@@ -18,6 +18,9 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import java.util.*;
 
+/**
+ * Manages local variables and their scope in bytecode generation.
+ */
 public class LocalVariableTable {
     // All allocated variables for maxLocals calculation
     private final List<LocalVariable> allVariables;
@@ -26,6 +29,9 @@ public class LocalVariableTable {
     private final List<Map<String, LocalVariable>> scopes;
     private int nextIndex; // 0 is reserved for 'this'
 
+    /**
+     * Constructs a new LocalVariableTable.
+     */
     public LocalVariableTable() {
         allVariables = new ArrayList<>();
         scopes = new ArrayList<>();
@@ -34,6 +40,13 @@ public class LocalVariableTable {
         nextIndex = 1;
     }
 
+    /**
+     * Adds an existing variable to the current scope.
+     *
+     * @param name the variable name
+     * @param type the JVM type descriptor
+     * @return the local variable, or null if not found
+     */
     public LocalVariable addExistingVariableToCurrentScope(String name, String type) {
         // Find matching variable from allVariables (reverse order for shadowing)
         for (int i = allVariables.size() - 1; i >= 0; i--) {
@@ -72,6 +85,13 @@ public class LocalVariableTable {
         return holderIndex;
     }
 
+    /**
+     * Allocates a variable with default mutability (immutable).
+     *
+     * @param name the variable name
+     * @param type the JVM type descriptor
+     * @return the allocated slot index
+     */
     public int allocateVariable(String name, String type) {
         return allocateVariable(name, type, false);
     }
@@ -94,24 +114,46 @@ public class LocalVariableTable {
         return index;
     }
 
+    /**
+     * Enters a new scope.
+     */
     public void enterScope() {
         scopes.add(new HashMap<>());
     }
 
+    /**
+     * Exits the current scope.
+     */
     public void exitScope() {
         if (scopes.size() > 1) {
             scopes.remove(scopes.size() - 1);
         }
     }
 
+    /**
+     * Gets all allocated variables.
+     *
+     * @return collection of all variables
+     */
     public Collection<LocalVariable> getAllVariables() {
         return allVariables;
     }
 
+    /**
+     * Gets the maximum number of local variable slots needed.
+     *
+     * @return the max locals count
+     */
     public int getMaxLocals() {
         return nextIndex;
     }
 
+    /**
+     * Gets a variable by name, searching from innermost to outermost scope.
+     *
+     * @param name the variable name
+     * @return the local variable, or null if not found
+     */
     public LocalVariable getVariable(String name) {
         // Search from innermost scope to outermost
         for (int i = scopes.size() - 1; i >= 0; i--) {
@@ -123,10 +165,19 @@ public class LocalVariableTable {
         return null;
     }
 
+    /**
+     * Gets a variable in the current scope only.
+     *
+     * @param name the variable name
+     * @return the local variable in current scope, or null if not found
+     */
     public LocalVariable getVariableInCurrentScope(String name) {
         return scopes.get(scopes.size() - 1).get(name);
     }
 
+    /**
+     * Resets the table for instance methods (slot 0 is 'this').
+     */
     public void reset() {
         reset(false);
     }

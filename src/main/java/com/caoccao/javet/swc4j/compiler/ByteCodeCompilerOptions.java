@@ -20,6 +20,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Represents compilation options for the bytecode compiler.
+ *
+ * @param jdkVersion                the target JDK version
+ * @param typeAliasMap              a map of type aliases for resolving JavaScript/TypeScript types to Java types
+ * @param packagePrefix             the package prefix for generated classes
+ * @param optionalParentClassLoader the optional parent class loader
+ * @param debug                     whether to enable debug mode
+ */
 public record ByteCodeCompilerOptions(
         JdkVersion jdkVersion,
         Map<String, String> typeAliasMap,
@@ -75,18 +84,37 @@ public record ByteCodeCompilerOptions(
         ));
     }
 
+    /**
+     * Constructs compiler options with JDK version and type alias map.
+     *
+     * @param jdkVersion   the target JDK version
+     * @param typeAliasMap the type alias map
+     */
     public ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap) {
         this(jdkVersion, typeAliasMap, "", Optional.empty(), false);
     }
 
+    /**
+     * Constructs compiler options with JDK version and default type aliases.
+     *
+     * @param jdkVersion the target JDK version
+     */
     public ByteCodeCompilerOptions(JdkVersion jdkVersion) {
         this(jdkVersion, new HashMap<>(DEFAULT_TYPE_ALIAS_MAP));
     }
 
+    /**
+     * Creates a new builder for ByteCodeCompilerOptions.
+     *
+     * @return a new Builder instance
+     */
     public static Builder builder() {
         return new Builder();
     }
 
+    /**
+     * Builder class for constructing ByteCodeCompilerOptions.
+     */
     public static class Builder {
         private boolean debug = false;
         private JdkVersion jdkVersion = JdkVersion.JDK_17;
@@ -94,30 +122,71 @@ public record ByteCodeCompilerOptions(
         private ClassLoader parentClassLoader = null;
         private Map<String, String> typeAliasMap = new HashMap<>(DEFAULT_TYPE_ALIAS_MAP);
 
+        /**
+         * Constructs a new Builder with default settings.
+         */
+        public Builder() {
+        }
+
+        /**
+         * Builds the ByteCodeCompilerOptions instance.
+         *
+         * @return a new ByteCodeCompilerOptions instance
+         */
         public ByteCodeCompilerOptions build() {
             return new ByteCodeCompilerOptions(jdkVersion, typeAliasMap, packagePrefix, Optional.ofNullable(parentClassLoader), debug);
         }
 
+        /**
+         * Sets the debug mode.
+         *
+         * @param debug whether to enable debug mode
+         * @return this Builder instance
+         */
         public Builder debug(boolean debug) {
             this.debug = debug;
             return this;
         }
 
+        /**
+         * Sets the JDK version.
+         *
+         * @param jdkVersion the target JDK version
+         * @return this Builder instance
+         */
         public Builder jdkVersion(JdkVersion jdkVersion) {
             this.jdkVersion = jdkVersion;
             return this;
         }
 
+        /**
+         * Sets the package prefix for generated classes.
+         *
+         * @param packagePrefix the package prefix
+         * @return this Builder instance
+         */
         public Builder packagePrefix(String packagePrefix) {
             this.packagePrefix = packagePrefix;
             return this;
         }
 
+        /**
+         * Sets the parent class loader.
+         *
+         * @param parentClassLoader the parent class loader
+         * @return this Builder instance
+         */
         public Builder parentClassLoader(ClassLoader parentClassLoader) {
             this.parentClassLoader = parentClassLoader;
             return this;
         }
 
+        /**
+         * Sets the type alias map.
+         *
+         * @param typeAliasMap the type alias map
+         * @return this Builder instance
+         */
         public Builder typeAliasMap(Map<String, String> typeAliasMap) {
             this.typeAliasMap = typeAliasMap;
             return this;

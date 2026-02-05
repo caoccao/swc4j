@@ -22,6 +22,9 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 
+/**
+ * Utility class for code generation helpers.
+ */
 public final class CodeGeneratorUtils {
     private CodeGeneratorUtils() {
     }
@@ -64,6 +67,12 @@ public final class CodeGeneratorUtils {
         }
     }
 
+    /**
+     * Gets the method name from a property name AST node.
+     *
+     * @param propName the property name AST node
+     * @return the method name as a string
+     */
     public static String getMethodName(ISwc4jAstPropName propName) {
         if (propName instanceof Swc4jAstStr str) {
             return str.getValue();

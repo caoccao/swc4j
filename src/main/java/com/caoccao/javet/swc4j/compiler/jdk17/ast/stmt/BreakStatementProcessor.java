@@ -46,6 +46,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * </pre>
  */
 public final class BreakStatementProcessor extends BaseAstProcessor<Swc4jAstBreakStmt> {
+    /**
+     * Constructs a new break statement processor.
+     *
+     * @param compiler the bytecode compiler
+     */
     public BreakStatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

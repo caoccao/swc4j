@@ -45,8 +45,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Processes class definitions, generating bytecode for class files.
+ */
 public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
 
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public ClassProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

@@ -34,10 +34,23 @@ public record FieldInfo(
         boolean isStatic,
         Optional<ISwc4jAstExpr> initializer
 ) {
+    /**
+     * Constructs field info without template cache.
+     *
+     * @param name       the field name
+     * @param descriptor the field type descriptor
+     * @param isStatic   whether the field is static
+     */
     public FieldInfo(String name, String descriptor, boolean isStatic) {
         this(name, descriptor, isStatic, Optional.empty());
     }
 
+    /**
+     * Constructs non-static field info without template cache.
+     *
+     * @param name       the field name
+     * @param descriptor the field type descriptor
+     */
     public FieldInfo(String name, String descriptor) {
         this(name, descriptor, false, Optional.empty());
     }

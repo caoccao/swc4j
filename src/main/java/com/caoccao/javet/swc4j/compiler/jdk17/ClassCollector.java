@@ -39,10 +39,21 @@ import java.util.List;
 public final class ClassCollector {
     private final ByteCodeCompiler compiler;
 
+    /**
+     * Constructs a ClassCollector with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public ClassCollector(ByteCodeCompiler compiler) {
         this.compiler = compiler;
     }
 
+    /**
+     * Collects class declarations from module items and registers them in the type alias registry.
+     *
+     * @param items          the list of module items to process
+     * @param currentPackage the current package context
+     */
     public void collectFromModuleItems(List<ISwc4jAstModuleItem> items, String currentPackage) {
         for (ISwc4jAstModuleItem item : items) {
             if (item instanceof Swc4jAstTsModuleDecl moduleDecl) {
@@ -68,6 +79,12 @@ public final class ClassCollector {
         }
     }
 
+    /**
+     * Collects class declarations from statements and registers them in the type alias registry.
+     *
+     * @param stmts          the list of statements to process
+     * @param currentPackage the current package context
+     */
     public void collectFromStmts(List<ISwc4jAstStmt> stmts, String currentPackage) {
         for (ISwc4jAstStmt stmt : stmts) {
             if (stmt instanceof Swc4jAstClassDecl classDecl) {

@@ -29,7 +29,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * Processes call expressions for Array static methods.
+ */
 public final class CallExpressionForArrayStaticProcessor extends BaseAstProcessor<Swc4jAstCallExpr> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public CallExpressionForArrayStaticProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -140,6 +148,12 @@ public final class CallExpressionForArrayStaticProcessor extends BaseAstProcesso
         }
     }
 
+    /**
+     * Checks if the given callee is supported by this processor.
+     *
+     * @param callee the callee to check
+     * @return true if the callee is an Array static method call
+     */
     public boolean isCalleeSupported(ISwc4jAstCallee callee) {
         if (!(callee instanceof Swc4jAstMemberExpr memberExpr)) {
             return false;

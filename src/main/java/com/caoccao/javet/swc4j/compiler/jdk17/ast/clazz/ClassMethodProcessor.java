@@ -38,7 +38,15 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
 
+/**
+ * Processes class method declarations.
+ */
 public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMethod> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public ClassMethodProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -251,6 +259,13 @@ public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMe
         }
     }
 
+    /**
+     * Generates a method descriptor string for the given function.
+     *
+     * @param function       the function to generate a descriptor for
+     * @param returnTypeInfo the return type information
+     * @return the method descriptor string
+     */
     public String generateDescriptor(
             Swc4jAstFunction function,
             ReturnTypeInfo returnTypeInfo) {

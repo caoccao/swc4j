@@ -18,6 +18,9 @@ package com.caoccao.javet.swc4j.utils;
 
 import com.caoccao.javet.swc4j.interfaces.ISwc4jLogger;
 
+/**
+ * Utility class for assertion checks with logging support.
+ */
 public final class AssertionUtils {
     private static final ISwc4jLogger LOGGER = new Swc4jDefaultLogger(AssertionUtils.class.getName());
 
@@ -26,10 +29,27 @@ public final class AssertionUtils {
     private AssertionUtils() {
     }
 
+    /**
+     * Asserts that a value is not null.
+     *
+     * @param value the value to check
+     * @param <T>   the type of the value
+     * @return the value if not null
+     * @throws NullPointerException if value is null
+     */
     public static <T> T notNull(T value) {
         return notNull(value, VALUE);
     }
 
+    /**
+     * Asserts that a value is not null.
+     *
+     * @param value the value to check
+     * @param name  the name of the value for error messages
+     * @param <T>   the type of the value
+     * @return the value if not null
+     * @throws NullPointerException if value is null
+     */
     public static <T> T notNull(T value, String name) {
         if (value == null) {
             String message = name + " should not be null";
@@ -40,6 +60,13 @@ public final class AssertionUtils {
         return value;
     }
 
+    /**
+     * Asserts that a boolean condition is true.
+     *
+     * @param b       the condition to check
+     * @param message the error message if condition is false
+     * @throws IllegalArgumentException if condition is false
+     */
     public static void notTrue(boolean b, String message) {
         if (!b) {
             IllegalArgumentException exception = new IllegalArgumentException(message);

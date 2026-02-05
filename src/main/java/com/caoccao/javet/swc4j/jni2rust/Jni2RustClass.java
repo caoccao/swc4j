@@ -18,22 +18,60 @@ package com.caoccao.javet.swc4j.jni2rust;
 
 import java.lang.annotation.*;
 
+/**
+ * Annotation for marking classes to be converted to Rust JNI bindings.
+ */
 @Documented
 @Inherited
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Jni2RustClass {
+    /**
+     * Whether to use custom fromJava conversion.
+     *
+     * @return true if custom conversion is used
+     */
     boolean customFromJava() default false;
 
+    /**
+     * Whether to use custom toJava conversion.
+     *
+     * @return true if custom conversion is used
+     */
     boolean customToJava() default false;
 
+    /**
+     * The Rust file path for this class.
+     *
+     * @return the file path
+     */
     Jni2RustFilePath filePath() default Jni2RustFilePath.None;
 
+    /**
+     * Whether to ignore this class during code generation.
+     *
+     * @return true if ignored
+     */
     boolean ignore() default false;
 
+    /**
+     * Enum variant mappings for this class.
+     *
+     * @return the enum mappings
+     */
     Jni2RustEnumMapping[] mappings() default {};
 
+    /**
+     * The name of this class in Rust.
+     *
+     * @return the Rust name
+     */
     String name() default "";
 
+    /**
+     * Whether to include span information.
+     *
+     * @return true if span is included
+     */
     boolean span() default true;
 }

@@ -48,6 +48,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * </pre>
  */
 public final class IfStatementProcessor extends BaseAstProcessor<Swc4jAstIfStmt> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public IfStatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

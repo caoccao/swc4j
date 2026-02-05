@@ -16,15 +16,29 @@
 
 package com.caoccao.javet.swc4j.compiler;
 
+/**
+ * Enum representing supported JDK versions for bytecode compilation.
+ */
 public enum JdkVersion {
+    /** JDK 17 version */
     JDK_17(17);
 
     private final int version;
 
+    /**
+     * Constructs a JdkVersion with the given version number.
+     *
+     * @param version the version number
+     */
     JdkVersion(int version) {
         this.version = version;
     }
 
+    /**
+     * Gets the version number.
+     *
+     * @return the version number
+     */
     public int getVersion() {
         return version;
     }

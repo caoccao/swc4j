@@ -39,6 +39,11 @@ import java.util.List;
  * - TypeScript/JavaScript class instance method calls
  */
 public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4jAstCallExpr> {
+    /**
+     * Constructs a processor with the specified compiler.
+     *
+     * @param compiler the bytecode compiler
+     */
     public CallExpressionForClassProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -433,6 +438,9 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
 
     /**
      * Checks if the given object type is a TypeScript/JavaScript class.
+     *
+     * @param objType the JVM type descriptor to check
+     * @return true if the type is a TypeScript/JavaScript class
      */
     public boolean isTypeSupported(String objType) {
         // A TS class type is an object type (starts with L and ends with ;)

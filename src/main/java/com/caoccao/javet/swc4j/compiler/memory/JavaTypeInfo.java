@@ -52,10 +52,25 @@ public final class JavaTypeInfo {
     private final List<JavaTypeInfo> parentTypeInfos;
     private final JavaType type;
 
+    /**
+     * Constructs a JavaTypeInfo for a class type.
+     *
+     * @param alias        the import alias
+     * @param packageName  the package name
+     * @param internalName the internal JVM name
+     */
     public JavaTypeInfo(String alias, String packageName, String internalName) {
         this(alias, packageName, internalName, JavaType.CLASS);
     }
 
+    /**
+     * Constructs a JavaTypeInfo with a specific type.
+     *
+     * @param alias        the import alias
+     * @param packageName  the package name
+     * @param internalName the internal JVM name
+     * @param type         the Java type (class, interface, or enum)
+     */
     public JavaTypeInfo(String alias, String packageName, String internalName, JavaType type) {
         this.alias = alias;
         this.packageName = packageName;
@@ -67,10 +82,22 @@ public final class JavaTypeInfo {
         this.enumValues = new HashMap<>();
     }
 
+    /**
+     * Adds a field to this type.
+     *
+     * @param fieldName the field name
+     * @param fieldInfo the field info
+     */
     public void addField(String fieldName, FieldInfo fieldInfo) {
         fields.put(fieldName, fieldInfo);
     }
 
+    /**
+     * Adds a method to this type.
+     *
+     * @param methodName the method name
+     * @param methodInfo the method info
+     */
     public void addMethod(String methodName, MethodInfo methodInfo) {
         methods.computeIfAbsent(methodName, k -> new ArrayList<>()).add(methodInfo);
     }
@@ -84,6 +111,11 @@ public final class JavaTypeInfo {
         parentTypeInfos.add(parentTypeInfo);
     }
 
+    /**
+     * Gets the import alias for this type.
+     *
+     * @return the alias
+     */
     public String getAlias() {
         return alias;
     }
@@ -98,14 +130,30 @@ public final class JavaTypeInfo {
         return enumValues.get(memberName);
     }
 
+    /**
+     * Gets a specific field by name.
+     *
+     * @param fieldName the field name
+     * @return the field info, or null if not found
+     */
     public FieldInfo getField(String fieldName) {
         return fields.get(fieldName);
     }
 
+    /**
+     * Gets all fields in this type.
+     *
+     * @return the map of field names to field infos
+     */
     public Map<String, FieldInfo> getFields() {
         return fields;
     }
 
+    /**
+     * Gets the internal JVM name of this type.
+     *
+     * @return the internal name
+     */
     public String getInternalName() {
         return internalName;
     }
@@ -144,6 +192,9 @@ public final class JavaTypeInfo {
      * Gets the first method with the given name.
      * This is a fallback when exact type information is not available.
      * Prefer using {@code getMethod(String, List<String>)} for proper overload resolution.
+     *
+     * @param methodName the method name
+     * @return the first method, or null if not found
      */
     public MethodInfo getMethod(String methodName) {
         List<MethodInfo> overloads = methods.get(methodName);
@@ -152,15 +203,28 @@ public final class JavaTypeInfo {
 
     /**
      * Gets all method overloads for the given method name.
+     *
+     * @param methodName the method name
+     * @return the list of method overloads
      */
     public List<MethodInfo> getMethodOverloads(String methodName) {
         return methods.getOrDefault(methodName, new ArrayList<>());
     }
 
+    /**
+     * Gets all methods in this type.
+     *
+     * @return the map of method names to method lists
+     */
     public Map<String, List<MethodInfo>> getMethods() {
         return methods;
     }
 
+    /**
+     * Gets the package name of this type.
+     *
+     * @return the package name
+     */
     public String getPackageName() {
         return packageName;
     }
@@ -198,6 +262,12 @@ public final class JavaTypeInfo {
         }
     }
 
+    /**
+     * Checks if this type is assignable to the given class.
+     *
+     * @param clazz the target class
+     * @return true if assignable
+     */
     public boolean isAssignableTo(Class<?> clazz) {
         try {
             return clazz.isAssignableFrom(Class.forName(internalName.replace('/', '.')));
@@ -216,6 +286,13 @@ public final class JavaTypeInfo {
         }
     }
 
+    /**
+     * Checks if this type is assignable to the given type descriptor.
+     *
+     * @param typeDescriptor      the type descriptor
+     * @param ignoreClassForName  whether to ignore ClassForName lookup
+     * @return true if assignable
+     */
     public boolean isAssignableTo(String typeDescriptor, boolean ignoreClassForName) {
         // Check direct match
         String thisDescriptor = "L" + internalName + ";";
