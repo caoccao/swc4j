@@ -34,16 +34,21 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testComputedEnumRejection(JdkVersion jdkVersion) {
-        assertThatThrownBy(() -> {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export enum Computed {
-                        A = 1,
-                        B = A * 2
-                      }
-                    }""");
-        }).isInstanceOf(Swc4jByteCodeCompilerException.class);
+    public void testComputedEnumWorks(JdkVersion jdkVersion) throws Exception {
+        // Computed enums are now supported
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export enum Computed {
+                    A = 1,
+                    B = A * 2
+                  }
+                }""");
+        Class<?> enumClass = runner.getClass("com.Computed");
+        var getValueMethod = enumClass.getMethod("getValue");
+        Object[] constants = enumClass.getEnumConstants();
+
+        assertThat(getValueMethod.invoke(constants[0])).isEqualTo(1);
+        assertThat(getValueMethod.invoke(constants[1])).isEqualTo(2);
     }
 
     @ParameterizedTest

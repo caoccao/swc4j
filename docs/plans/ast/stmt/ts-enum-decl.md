@@ -11,10 +11,11 @@ This document outlines the implementation plan for supporting TypeScript enums i
 - String enums
 - Const enums (treated as regular enums)
 - Mixed explicit/implicit values
+- ✅ **Computed Enums** - Members with expressions referencing previously defined members (e.g., `B = A * 2`)
 
 **Unsupported Features:**
-- ❌ **Computed Enums** - Members with expressions referencing other members (e.g., `B = A * 2`)
 - ❌ **Heterogeneous Enums** - Mixed numeric and string values in the same enum
+- ❌ **Forward References** - Members cannot reference members defined later in the enum
 
 **Syntax:**
 ```typescript
@@ -45,11 +46,17 @@ enum Mixed {
   Yes = "YES"  // ERROR: Cannot mix numeric and string values
 }
 
-// Computed enum - NOT SUPPORTED
+// Computed enum - SUPPORTED (references to previous members)
 enum Computed {
   A = 1,
-  B = A * 2,   // ERROR: Computed values not supported
-  C = B + A
+  B = A * 2,   // OK: B = 2
+  C = B + A    // OK: C = 3
+}
+
+// Forward reference - NOT SUPPORTED
+enum Forward {
+  A = B,       // ERROR: Cannot reference B before it is defined
+  B = 1
 }
 ```
 
@@ -132,20 +139,26 @@ const enum Directions {
 - Cannot be used in runtime type checks
 - More efficient but less flexible
 
-#### 5. Computed Enums - NOT SUPPORTED
+#### 5. Computed Enums - SUPPORTED (with restrictions)
 ```typescript
 enum Computed {
   A = 1,
-  B = A * 2,        // ERROR: Computed from A - not supported
-  C = B + A,        // ERROR: Computed from A and B - not supported
+  B = A * 2,        // OK: B = 2 (references previously defined A)
+  C = B + A,        // OK: C = 3 (references previously defined A and B)
   D = Math.random() // ERROR: Runtime computation - not supported
+}
+
+enum Forward {
+  A = B,            // ERROR: Cannot reference B before it is defined
+  B = 1
 }
 ```
 
 **Behavior:**
-- Members that reference other members in expressions
-- **NOT SUPPORTED** in swc4j - Will produce compilation error
-- Use explicit constant values instead
+- Members can reference **previously defined** members in expressions
+- Supports arithmetic (+, -, *, /, %, **), bitwise (&, |, ^, <<, >>, >>>), and unary (-, +, ~) operators
+- **Forward references** are NOT supported - members can only reference earlier members
+- **Runtime computations** (e.g., Math.random()) are NOT supported
 
 ### TypeScript Enum Features
 
@@ -425,22 +438,31 @@ Two options:
 
 **Recommended:** Option A initially (simpler), Option B later (optimization)
 
-### 5. Computed Enum Handling - NOT SUPPORTED
+### 5. Computed Enum Handling - SUPPORTED
 
 **TypeScript:**
 ```typescript
 enum Computed {
   A = 1,
-  B = A * 2,      // ERROR: References another member
-  C = B + A       // ERROR: Computed expression
+  B = A * 2,      // OK: B = 2 (evaluated at compile time)
+  C = B + A       // OK: C = 3 (evaluated at compile time)
+}
+
+enum Forward {
+  A = B,          // ERROR: Forward reference - B not yet defined
+  B = 1
 }
 ```
 
 **Strategy:**
-- **NOT SUPPORTED** in swc4j
-- Compilation error: "Computed enum values (expressions referencing other members) are not supported"
-- Rationale: Requires complex constant expression evaluation and dependency resolution
-- Recommendation: Use explicit constant values instead of computed expressions
+- **SUPPORTED** for references to previously defined members
+- Compile-time evaluation of constant expressions
+- Supported operators:
+  - Arithmetic: `+`, `-`, `*`, `/`, `%`, `**`
+  - Bitwise: `&`, `|`, `^`, `<<`, `>>`, `>>>`
+  - Unary: `-`, `+`, `~`
+  - Parentheses for grouping
+- **NOT SUPPORTED:** Forward references (referencing members defined later)
 
 ---
 
@@ -1426,31 +1448,31 @@ public static Direction fromValue(int value) {
     ```
     **Strategy:** Support (value != ordinal)
 
-### Computed Value Edge Cases - NOT SUPPORTED
+### Computed Value Edge Cases
 
 16. **Forward References - NOT SUPPORTED**
     ```typescript
     enum Forward { A = B, B = 1 }
     ```
-    **Strategy:** Error (computed values not supported)
+    **Strategy:** Error - cannot reference B before it is defined
 
 17. **Circular References - NOT SUPPORTED**
     ```typescript
     enum Circular { A = B + 1, B = A + 1 }
     ```
-    **Strategy:** Error (computed values not supported)
+    **Strategy:** Error - first member references undefined member
 
-18. **Member Reference Expressions - NOT SUPPORTED**
+18. **Member Reference Expressions - SUPPORTED**
     ```typescript
     enum Computed { A = 1, B = A * 2 }
     ```
-    **Strategy:** Error (computed values not supported)
+    **Strategy:** Evaluated at compile time - B = 2
 
-19. **Complex Expressions - NOT SUPPORTED**
+19. **Complex Expressions - SUPPORTED**
     ```typescript
     enum Complex { A = 1 << 10, B = 0xFF & ~0x0F }
     ```
-    **Strategy:** Error (computed values not supported unless literal constants)
+    **Strategy:** Evaluated at compile time - A = 1024, B = 240
 
 ### Declaration Edge Cases
 

@@ -16,7 +16,11 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstParenExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
@@ -33,7 +37,9 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDecl> {
     public TsEnumDeclProcessor(ByteCodeCompiler compiler) {
@@ -43,6 +49,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
     private EnumInfo analyzeEnumMembers(List<Swc4jAstTsEnumMember> members)
             throws Swc4jByteCodeCompilerException {
         List<EnumMemberInfo> memberInfos = new ArrayList<>();
+        Map<String, Integer> definedMembers = new HashMap<>(); // Track defined members for computed values
         Boolean isStringEnum = null;
         int autoIncrementValue = 0;
 
@@ -57,37 +64,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
             if (initOpt.isPresent()) {
                 ISwc4jAstExpr initExpr = initOpt.get();
 
-                if (initExpr instanceof Swc4jAstNumber numLit) {
-                    // Numeric value
-                    if (isStringEnum != null && isStringEnum) {
-                        throw new Swc4jByteCodeCompilerException(getSourceCode(), numLit,
-                                "Heterogeneous enums (mixed numeric and string values) are not supported");
-                    }
-                    isStringEnum = false;
-
-                    int intValue = parseIntValue(numLit);
-                    autoIncrementValue = intValue + 1;
-
-                    memberInfo = new EnumMemberInfo(tsName, javaName, intValue, null);
-                } else if (initExpr instanceof Swc4jAstUnaryExpr unaryExpr) {
-                    // Handle negative numbers (e.g., -10)
-                    if (unaryExpr.getOp().name().equals("Minus") && unaryExpr.getArg() instanceof Swc4jAstNumber numLit) {
-                        if (isStringEnum != null && isStringEnum) {
-                            throw new Swc4jByteCodeCompilerException(getSourceCode(), unaryExpr,
-                                    "Heterogeneous enums (mixed numeric and string values) are not supported");
-                        }
-                        isStringEnum = false;
-
-                        int intValue = -parseIntValue(numLit); // Negate the value
-                        autoIncrementValue = intValue + 1;
-
-                        memberInfo = new EnumMemberInfo(tsName, javaName, intValue, null);
-                    } else {
-                        throw new Swc4jByteCodeCompilerException(getSourceCode(), unaryExpr,
-                                "Computed enum values (expressions referencing other members) are not supported. " +
-                                        "Use explicit constant values instead.");
-                    }
-                } else if (initExpr instanceof Swc4jAstStr strLit) {
+                if (initExpr instanceof Swc4jAstStr strLit) {
                     // String value
                     if (isStringEnum != null && !isStringEnum) {
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), strLit,
@@ -98,10 +75,17 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
                     String stringValue = strLit.getValue();
                     memberInfo = new EnumMemberInfo(tsName, javaName, 0, stringValue);
                 } else {
-                    // Computed or other unsupported expression
-                    throw new Swc4jByteCodeCompilerException(getSourceCode(), initExpr,
-                            "Computed enum values (expressions referencing other members) are not supported. " +
-                                    "Use explicit constant values instead.");
+                    // Try to evaluate as a constant numeric expression
+                    if (isStringEnum != null && isStringEnum) {
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), initExpr,
+                                "Heterogeneous enums (mixed numeric and string values) are not supported");
+                    }
+                    isStringEnum = false;
+
+                    int intValue = evaluateConstantExpression(initExpr, definedMembers);
+                    autoIncrementValue = intValue + 1;
+
+                    memberInfo = new EnumMemberInfo(tsName, javaName, intValue, null);
                 }
             } else {
                 // No explicit value - use auto-increment (only valid for numeric enums)
@@ -115,6 +99,10 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
                 autoIncrementValue++;
             }
 
+            // Track this member for computed references
+            if (!Boolean.TRUE.equals(isStringEnum)) {
+                definedMembers.put(tsName, memberInfo.intValue);
+            }
             memberInfos.add(memberInfo);
         }
 
@@ -125,6 +113,94 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         // Convert TypeScript enum member names to Java enum constant naming convention
         // TypeScript: Up, Down → Java: UP, DOWN
         return tsName.toUpperCase();
+    }
+
+    private int evaluateBinaryExpression(Swc4jAstBinExpr binExpr, Map<String, Integer> definedMembers)
+            throws Swc4jByteCodeCompilerException {
+        Swc4jAstBinaryOp op = binExpr.getOp();
+        int left = evaluateConstantExpression(binExpr.getLeft(), definedMembers);
+        int right = evaluateConstantExpression(binExpr.getRight(), definedMembers);
+
+        return switch (op) {
+            case Add -> left + right;
+            case Sub -> left - right;
+            case Mul -> left * right;
+            case Div -> {
+                if (right == 0) {
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), binExpr,
+                            "Division by zero in enum initializer");
+                }
+                yield left / right;
+            }
+            case Mod -> {
+                if (right == 0) {
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), binExpr,
+                            "Division by zero in enum initializer");
+                }
+                yield left % right;
+            }
+            case Exp -> (int) Math.pow(left, right);
+            case BitAnd -> left & right;
+            case BitOr -> left | right;
+            case BitXor -> left ^ right;
+            case LShift -> left << right;
+            case RShift -> left >> right;
+            case ZeroFillRShift -> left >>> right;
+            default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), binExpr,
+                    "Unsupported binary operator '" + op.getName() + "' in enum initializer. " +
+                            "Only arithmetic (+, -, *, /, %, **) and bitwise (&, |, ^, <<, >>, >>>) operators are supported.");
+        };
+    }
+
+    /**
+     * Evaluates a constant expression at compile time.
+     * Supports: numeric literals, unary operations (-, +, ~), binary operations (+, -, *, /, %, **, &, |, ^, <<, >>, >>>),
+     * parenthesized expressions, and references to previously defined enum members.
+     *
+     * @param expr           the expression to evaluate
+     * @param definedMembers map of already defined enum member names to their values
+     * @return the evaluated integer value
+     * @throws Swc4jByteCodeCompilerException if the expression cannot be evaluated at compile time
+     */
+    private int evaluateConstantExpression(ISwc4jAstExpr expr, Map<String, Integer> definedMembers)
+            throws Swc4jByteCodeCompilerException {
+        if (expr instanceof Swc4jAstNumber numLit) {
+            return parseIntValue(numLit);
+        } else if (expr instanceof Swc4jAstIdent ident) {
+            // Reference to another enum member
+            String refName = ident.getSym();
+            if (definedMembers.containsKey(refName)) {
+                return definedMembers.get(refName);
+            }
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), ident,
+                    "Cannot reference enum member '" + refName + "' before it is defined. " +
+                            "Enum members can only reference previously defined members.");
+        } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
+            return evaluateConstantExpression(parenExpr.getExpr(), definedMembers);
+        } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
+            return evaluateUnaryExpression(unaryExpr, definedMembers);
+        } else if (expr instanceof Swc4jAstBinExpr binExpr) {
+            return evaluateBinaryExpression(binExpr, definedMembers);
+        } else {
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), expr,
+                    "Unsupported expression type in enum initializer: " + expr.getClass().getSimpleName() +
+                            ". Only constant expressions (literals, arithmetic, bitwise, and references to previous members) are supported.");
+        }
+    }
+
+    private int evaluateUnaryExpression(Swc4jAstUnaryExpr unaryExpr, Map<String, Integer> definedMembers)
+            throws Swc4jByteCodeCompilerException {
+        Swc4jAstUnaryOp op = unaryExpr.getOp();
+        int operand = evaluateConstantExpression(unaryExpr.getArg(), definedMembers);
+
+        return switch (op) {
+            case Minus -> -operand;
+            case Plus -> operand;
+            case Tilde -> ~operand;
+            default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), unaryExpr,
+                    "Unsupported unary operator '" + op.getName() + "' in enum initializer. " +
+                            "Only -, +, and ~ are supported.");
+        };
     }
 
     @Override

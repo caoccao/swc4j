@@ -51,13 +51,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Generate catch-all then branch on `instanceof`, or emit multi-catch table entries with type guards.
 - Tests: Multiple type guards inside a single catch block.
 
-## Feature: TypeScript Enums - Computed and Heterogeneous
-- Evidence: `docs/plans/ast/stmt/ts-enum-decl.md`.
-- Status: Computed values and mixed string/number enums unsupported.
-- Confidence: 50%.
-- Plan: Decide on compile-time evaluation rules for computed values and either support or reject heterogeneous enums with clear errors.
-- Tests: Computed with constants, forward/circular references, mixed enum values.
-
 ## Feature: TypeScript Project -> Jar Entry Point
 - Evidence: New requirement for `java -jar swc4j-<version>.jar <main-entry> -i <root-to-ts-project> -o <output-jar-file-path>`.
 - Status: Not implemented.
