@@ -32,13 +32,29 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast param.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstParam
         extends Swc4jAst
         implements ISwc4jAstParamOrTsParamProp {
+    /**
+     * The Decorators.
+     */
     protected final List<Swc4jAstDecorator> decorators;
+    /**
+     * The Pat.
+     */
     protected ISwc4jAstPat pat;
 
+    /**
+     * Instantiates a new swc4j ast param.
+     *
+     * @param decorators the decorators
+     * @param pat        the pat
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstParam(
             List<Swc4jAstDecorator> decorators,
@@ -50,10 +66,23 @@ public class Swc4jAstParam
         this.decorators.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast param.
+     *
+     * @param pat the pat
+     * @return the swc4j ast param
+     */
     public static Swc4jAstParam create(ISwc4jAstPat pat) {
         return create(SimpleList.of(), pat);
     }
 
+    /**
+     * Create swc4j ast param.
+     *
+     * @param decorators the decorators
+     * @param pat        the pat
+     * @return the swc4j ast param
+     */
     public static Swc4jAstParam create(List<Swc4jAstDecorator> decorators, ISwc4jAstPat pat) {
         return new Swc4jAstParam(decorators, pat, Swc4jSpan.DUMMY);
     }
@@ -65,11 +94,21 @@ public class Swc4jAstParam
         return childNodes;
     }
 
+    /**
+     * Gets decorators.
+     *
+     * @return the decorators
+     */
     @Jni2RustMethod
     public List<Swc4jAstDecorator> getDecorators() {
         return decorators;
     }
 
+    /**
+     * Gets pat.
+     *
+     * @return the pat
+     */
     @Jni2RustMethod
     public ISwc4jAstPat getPat() {
         return pat;
@@ -99,6 +138,12 @@ public class Swc4jAstParam
         return false;
     }
 
+    /**
+     * Sets pat.
+     *
+     * @param pat the pat
+     * @return the pat
+     */
     public Swc4jAstParam setPat(ISwc4jAstPat pat) {
         this.pat = AssertionUtils.notNull(pat, "Pat");
         this.pat.setParent(this);

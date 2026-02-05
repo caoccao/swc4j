@@ -20,19 +20,61 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j es version.
+ */
 public enum Swc4jEsVersion implements ISwc4jEnumIdName {
+    /**
+     * Es 3 swc4j es version.
+     */
     ES3(1, "es3"),
+    /**
+     * Es 5 swc4j es version.
+     */
     ES5(2, "es5"),
+    /**
+     * Es 2015 swc4j es version.
+     */
     ES2015(3, "es2015"),
+    /**
+     * Es 2016 swc4j es version.
+     */
     ES2016(4, "es2016"),
+    /**
+     * Es 2017 swc4j es version.
+     */
     ES2017(5, "es2017"),
+    /**
+     * Es 2018 swc4j es version.
+     */
     ES2018(6, "es2018"),
+    /**
+     * Es 2019 swc4j es version.
+     */
     ES2019(7, "es2019"),
+    /**
+     * Es 2020 swc4j es version.
+     */
     ES2020(8, "es2020"),
+    /**
+     * Es 2021 swc4j es version.
+     */
     ES2021(9, "es2021"),
+    /**
+     * Es 2022 swc4j es version.
+     */
     ES2022(10, "es2022"),
+    /**
+     * Es 2023 swc4j es version.
+     */
     ES2023(11, "es2023"),
+    /**
+     * Es 2024 swc4j es version.
+     */
     ES2024(12, "es2024"),
+    /**
+     * Es next swc4j es version.
+     */
     ESNext(0, "esnext"),
     ;
 
@@ -51,6 +93,12 @@ public enum Swc4jEsVersion implements ISwc4jEnumIdName {
         this.name = name;
     }
 
+    /**
+     * Parse swc4j es version.
+     *
+     * @param id the id
+     * @return the swc4j es version
+     */
     public static Swc4jEsVersion parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : ESNext;
     }

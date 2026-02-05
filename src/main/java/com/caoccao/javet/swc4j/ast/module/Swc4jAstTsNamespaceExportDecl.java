@@ -32,12 +32,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts namespace export decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsNamespaceExportDecl
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
+    /**
+     * The Id.
+     */
     protected Swc4jAstIdent id;
 
+    /**
+     * Instantiates a new swc4j ast ts namespace export decl.
+     *
+     * @param id   the id
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsNamespaceExportDecl(
             Swc4jAstIdent id,
@@ -46,6 +58,12 @@ public class Swc4jAstTsNamespaceExportDecl
         setId(id);
     }
 
+    /**
+     * Create swc4j ast ts namespace export decl.
+     *
+     * @param id the id
+     * @return the swc4j ast ts namespace export decl
+     */
     public static Swc4jAstTsNamespaceExportDecl create(Swc4jAstIdent id) {
         return new Swc4jAstTsNamespaceExportDecl(id, Swc4jSpan.DUMMY);
     }
@@ -55,6 +73,11 @@ public class Swc4jAstTsNamespaceExportDecl
         return SimpleList.of(id);
     }
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
@@ -74,6 +97,12 @@ public class Swc4jAstTsNamespaceExportDecl
         return false;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     * @return the id
+     */
     public Swc4jAstTsNamespaceExportDecl setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
         this.id.setParent(this);

@@ -39,6 +39,17 @@ public class StackMapProcessor {
     private final boolean isStatic;
     private final int maxLocals;
 
+    /**
+     * Instantiates a new Stack map processor.
+     *
+     * @param bytecode       the bytecode
+     * @param maxLocals      the max locals
+     * @param isStatic       the is static
+     * @param className      the class name
+     * @param descriptor     the descriptor
+     * @param constantPool   the constant pool
+     * @param exceptionTable the exception table
+     */
     public StackMapProcessor(byte[] bytecode, int maxLocals, boolean isStatic, String className, String descriptor, ClassWriter.ConstantPool constantPool, List<ClassWriter.ExceptionTableEntry> exceptionTable) {
         this.bytecode = bytecode;
         this.maxLocals = maxLocals;
@@ -375,6 +386,11 @@ public class StackMapProcessor {
         return frame1.locals.equals(frame2.locals) && frame1.stack.equals(frame2.stack);
     }
 
+    /**
+     * Generate list.
+     *
+     * @return the list
+     */
     public List<ClassWriter.StackMapEntry> generate() {
         // Find branch targets
         Set<Integer> branchTargets = findBranchTargets();
@@ -1143,6 +1159,11 @@ public class StackMapProcessor {
 
     private record Frame(List<VerificationType> locals, List<VerificationType> stack) {
 
+        /**
+         * Copy frame.
+         *
+         * @return the frame
+         */
         Frame copy() {
             return new Frame(new ArrayList<>(locals), new ArrayList<>(stack));
         }
@@ -1159,47 +1180,105 @@ public class StackMapProcessor {
      * Can be a primitive type (int, float, etc.) or an object type with class name.
      */
     private static class VerificationType {
+        /**
+         * The Class name.
+         */
         final String className; // For OBJECT types, the internal class name (e.g., "java/lang/String")
+        /**
+         * The Tag.
+         */
         final int tag; // TOP, INTEGER, FLOAT, LONG, DOUBLE, NULL, UNINITIALIZED_THIS, OBJECT, etc.
 
+        /**
+         * Instantiates a new Verification type.
+         *
+         * @param tag the tag
+         */
         VerificationType(int tag) {
             this.tag = tag;
             this.className = null;
         }
 
+        /**
+         * Instantiates a new Verification type.
+         *
+         * @param tag       the tag
+         * @param className the class name
+         */
         VerificationType(int tag, String className) {
             this.tag = tag;
             this.className = className;
         }
 
+        /**
+         * Double verification type.
+         *
+         * @return the verification type
+         */
         static VerificationType double_() {
             return new VerificationType(DOUBLE);
         }
 
+        /**
+         * Float verification type.
+         *
+         * @return the verification type
+         */
         static VerificationType float_() {
             return new VerificationType(FLOAT);
         }
 
+        /**
+         * Integer verification type.
+         *
+         * @return the verification type
+         */
         static VerificationType integer() {
             return new VerificationType(INTEGER);
         }
 
+        /**
+         * Long verification type.
+         *
+         * @return the verification type
+         */
         static VerificationType long_() {
             return new VerificationType(LONG);
         }
 
+        /**
+         * Null verification type.
+         *
+         * @return the verification type
+         */
         static VerificationType null_() {
             return new VerificationType(NULL);
         }
 
+        /**
+         * Object verification type.
+         *
+         * @param className the class name
+         * @return the verification type
+         */
         static VerificationType object(String className) {
             return new VerificationType(OBJECT, className);
         }
 
+        /**
+         * Top verification type.
+         *
+         * @return the verification type
+         */
         static VerificationType top() {
             return new VerificationType(TOP);
         }
 
+        /**
+         * Uninitialized this verification type.
+         *
+         * @return the verification type
+         */
         static VerificationType uninitializedThis() {
             return new VerificationType(UNINITIALIZED_THIS);
         }

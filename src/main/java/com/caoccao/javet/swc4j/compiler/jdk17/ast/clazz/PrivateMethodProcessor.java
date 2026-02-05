@@ -36,7 +36,15 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
 
+/**
+ * The type Private method processor.
+ */
 public final class PrivateMethodProcessor extends BaseAstProcessor<Swc4jAstPrivateMethod> {
+    /**
+     * Instantiates a new Private method processor.
+     *
+     * @param compiler the compiler
+     */
     public PrivateMethodProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -225,6 +233,13 @@ public final class PrivateMethodProcessor extends BaseAstProcessor<Swc4jAstPriva
         }
     }
 
+    /**
+     * Generate descriptor string.
+     *
+     * @param function       the function
+     * @param returnTypeInfo the return type info
+     * @return the string
+     */
     public String generateDescriptor(
             Swc4jAstFunction function,
             ReturnTypeInfo returnTypeInfo) {

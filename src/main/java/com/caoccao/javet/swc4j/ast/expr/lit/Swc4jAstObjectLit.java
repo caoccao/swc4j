@@ -33,12 +33,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast object lit.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstObjectLit
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstCoercionPrimitive {
+    /**
+     * The Props.
+     */
     protected final List<ISwc4jAstPropOrSpread> props;
 
+    /**
+     * Instantiates a new swc4j ast object lit.
+     *
+     * @param props the props
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstObjectLit(
             List<ISwc4jAstPropOrSpread> props,
@@ -48,10 +60,21 @@ public class Swc4jAstObjectLit
         props.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast object lit.
+     *
+     * @return the swc4j ast object lit
+     */
     public static Swc4jAstObjectLit create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast object lit.
+     *
+     * @param props the props
+     * @return the swc4j ast object lit
+     */
     public static Swc4jAstObjectLit create(List<ISwc4jAstPropOrSpread> props) {
         return new Swc4jAstObjectLit(props, Swc4jSpan.DUMMY);
     }
@@ -101,6 +124,11 @@ public class Swc4jAstObjectLit
         return SimpleList.copyOf(props);
     }
 
+    /**
+     * Gets props.
+     *
+     * @return the props
+     */
     @Jni2RustMethod
     public List<ISwc4jAstPropOrSpread> getProps() {
         return props;

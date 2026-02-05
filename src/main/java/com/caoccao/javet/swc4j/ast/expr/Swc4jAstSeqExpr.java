@@ -33,13 +33,25 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast seq expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstSeqExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstDefaultDecl {
+    /**
+     * The Exprs.
+     */
     @Jni2RustField(componentBox = true)
     protected final List<ISwc4jAstExpr> exprs;
 
+    /**
+     * Instantiates a new swc4j ast seq expr.
+     *
+     * @param exprs the exprs
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstSeqExpr(
             List<ISwc4jAstExpr> exprs,
@@ -49,10 +61,21 @@ public class Swc4jAstSeqExpr
         this.exprs.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast seq expr.
+     *
+     * @return the swc4j ast seq expr
+     */
     public static Swc4jAstSeqExpr create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast seq expr.
+     *
+     * @param exprs the exprs
+     * @return the swc4j ast seq expr
+     */
     public static Swc4jAstSeqExpr create(List<ISwc4jAstExpr> exprs) {
         return new Swc4jAstSeqExpr(exprs, Swc4jSpan.DUMMY);
     }
@@ -62,6 +85,11 @@ public class Swc4jAstSeqExpr
         return SimpleList.copyOf(exprs);
     }
 
+    /**
+     * Gets exprs.
+     *
+     * @return the exprs
+     */
     @Jni2RustMethod
     public List<ISwc4jAstExpr> getExprs() {
         return exprs;

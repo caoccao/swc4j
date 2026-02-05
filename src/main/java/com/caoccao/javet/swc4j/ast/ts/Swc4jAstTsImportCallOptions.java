@@ -32,13 +32,25 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts import call options.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsImportCallOptions
         extends Swc4jAst
         implements ISwc4jAst {
+    /**
+     * The With.
+     */
     @Jni2RustField(box = true)
     protected Swc4jAstObjectLit with;
 
+    /**
+     * Instantiates a new swc4j ast ts import call options.
+     *
+     * @param with the with
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsImportCallOptions(
             Swc4jAstObjectLit with,
@@ -47,6 +59,12 @@ public class Swc4jAstTsImportCallOptions
         setWith(with);
     }
 
+    /**
+     * Create swc4j ast ts import call options.
+     *
+     * @param with the with
+     * @return the swc4j ast ts import call options
+     */
     public static Swc4jAstTsImportCallOptions create(Swc4jAstObjectLit with) {
         return new Swc4jAstTsImportCallOptions(with, Swc4jSpan.DUMMY);
     }
@@ -61,6 +79,11 @@ public class Swc4jAstTsImportCallOptions
         return Swc4jAstType.TsImportCallOptions;
     }
 
+    /**
+     * Gets with.
+     *
+     * @return the with
+     */
     @Jni2RustMethod
     public Swc4jAstObjectLit getWith() {
         return with;
@@ -75,6 +98,12 @@ public class Swc4jAstTsImportCallOptions
         return false;
     }
 
+    /**
+     * Sets with.
+     *
+     * @param with the with
+     * @return the with
+     */
     public Swc4jAstTsImportCallOptions setWith(Swc4jAstObjectLit with) {
         this.with = AssertionUtils.notNull(with, "With");
         this.with.setParent(this);

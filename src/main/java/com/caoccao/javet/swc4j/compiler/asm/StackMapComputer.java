@@ -27,6 +27,12 @@ public class StackMapComputer {
     private static final int OBJECT_TYPE = 7;
 
     /**
+     * Constructs a new StackMapComputer.
+     */
+    public StackMapComputer() {
+    }
+
+    /**
      * Compute stack map frames for bytecode with branch instructions.
      *
      * @param bytecode  the method bytecode

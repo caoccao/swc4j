@@ -607,9 +607,15 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
      * Can be either a static field initializer or a static block.
      */
     sealed interface StaticInitItem permits StaticInitItem.FieldInit, StaticInitItem.BlockInit {
+        /**
+         * The type Block init.
+         */
         record BlockInit(Swc4jAstStaticBlock staticBlock) implements StaticInitItem {
         }
 
+        /**
+         * The type Field init.
+         */
         record FieldInit(FieldInfo fieldInfo) implements StaticInitItem {
         }
     }

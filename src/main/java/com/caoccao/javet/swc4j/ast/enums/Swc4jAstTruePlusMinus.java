@@ -20,9 +20,21 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast true plus minus.
+ */
 public enum Swc4jAstTruePlusMinus implements ISwc4jEnumIdName {
+    /**
+     * True swc4j ast true plus minus.
+     */
     True(0, "true"),
+    /**
+     * Plus swc4j ast true plus minus.
+     */
     Plus(1, "+"),
+    /**
+     * Minus swc4j ast true plus minus.
+     */
     Minus(2, "-"),
     ;
 
@@ -41,6 +53,12 @@ public enum Swc4jAstTruePlusMinus implements ISwc4jEnumIdName {
         this.name = name;
     }
 
+    /**
+     * Parse swc4j ast true plus minus.
+     *
+     * @param id the id
+     * @return the swc4j ast true plus minus
+     */
     public static Swc4jAstTruePlusMinus parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : True;
     }

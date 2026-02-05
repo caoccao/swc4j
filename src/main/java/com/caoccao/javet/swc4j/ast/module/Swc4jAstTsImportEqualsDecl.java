@@ -34,17 +34,41 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts import equals decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsImportEqualsDecl
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
+    /**
+     * The Export.
+     */
     @Jni2RustField(name = "is_export")
     protected boolean export;
+    /**
+     * The Id.
+     */
     protected Swc4jAstIdent id;
+    /**
+     * The Module ref.
+     */
     protected ISwc4jAstTsModuleRef moduleRef;
+    /**
+     * The Type only.
+     */
     @Jni2RustField(name = "is_type_only")
     protected boolean typeOnly;
 
+    /**
+     * Instantiates a new swc4j ast ts import equals decl.
+     *
+     * @param export    the export
+     * @param typeOnly  the type only
+     * @param id        the id
+     * @param moduleRef the module ref
+     * @param span      the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsImportEqualsDecl(
             boolean export,
@@ -59,14 +83,38 @@ public class Swc4jAstTsImportEqualsDecl
         setTypeOnly(typeOnly);
     }
 
+    /**
+     * Create swc4j ast ts import equals decl.
+     *
+     * @param id        the id
+     * @param moduleRef the module ref
+     * @return the swc4j ast ts import equals decl
+     */
     public static Swc4jAstTsImportEqualsDecl create(Swc4jAstIdent id, ISwc4jAstTsModuleRef moduleRef) {
         return create(false, id, moduleRef);
     }
 
+    /**
+     * Create swc4j ast ts import equals decl.
+     *
+     * @param export    the export
+     * @param id        the id
+     * @param moduleRef the module ref
+     * @return the swc4j ast ts import equals decl
+     */
     public static Swc4jAstTsImportEqualsDecl create(boolean export, Swc4jAstIdent id, ISwc4jAstTsModuleRef moduleRef) {
         return create(export, false, id, moduleRef);
     }
 
+    /**
+     * Create swc4j ast ts import equals decl.
+     *
+     * @param export    the export
+     * @param typeOnly  the type only
+     * @param id        the id
+     * @param moduleRef the module ref
+     * @return the swc4j ast ts import equals decl
+     */
     public static Swc4jAstTsImportEqualsDecl create(
             boolean export,
             boolean typeOnly,
@@ -80,11 +128,21 @@ public class Swc4jAstTsImportEqualsDecl
         return SimpleList.of(id, moduleRef);
     }
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
     }
 
+    /**
+     * Gets module ref.
+     *
+     * @return the module ref
+     */
     @Jni2RustMethod
     public ISwc4jAstTsModuleRef getModuleRef() {
         return moduleRef;
@@ -95,11 +153,21 @@ public class Swc4jAstTsImportEqualsDecl
         return Swc4jAstType.TsImportEqualsDecl;
     }
 
+    /**
+     * Is export boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isExport() {
         return export;
     }
 
+    /**
+     * Is type only boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isTypeOnly() {
         return typeOnly;
@@ -118,23 +186,47 @@ public class Swc4jAstTsImportEqualsDecl
         return false;
     }
 
+    /**
+     * Sets export.
+     *
+     * @param export the export
+     * @return the export
+     */
     public Swc4jAstTsImportEqualsDecl setExport(boolean export) {
         this.export = export;
         return this;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     * @return the id
+     */
     public Swc4jAstTsImportEqualsDecl setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
         this.id.setParent(this);
         return this;
     }
 
+    /**
+     * Sets module ref.
+     *
+     * @param moduleRef the module ref
+     * @return the module ref
+     */
     public Swc4jAstTsImportEqualsDecl setModuleRef(ISwc4jAstTsModuleRef moduleRef) {
         this.moduleRef = AssertionUtils.notNull(moduleRef, "Module ref");
         this.moduleRef.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type only.
+     *
+     * @param typeOnly the type only
+     * @return the type only
+     */
     public Swc4jAstTsImportEqualsDecl setTypeOnly(boolean typeOnly) {
         this.typeOnly = typeOnly;
         return this;

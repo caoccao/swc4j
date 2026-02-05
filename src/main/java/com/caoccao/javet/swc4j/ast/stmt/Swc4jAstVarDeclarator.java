@@ -32,15 +32,35 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast var declarator.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstVarDeclarator
         extends Swc4jAst
         implements ISwc4jAstDecl {
+    /**
+     * The Definite.
+     */
     protected boolean definite;
+    /**
+     * The Init.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> init;
+    /**
+     * The Name.
+     */
     protected ISwc4jAstPat name;
 
+    /**
+     * Instantiates a new swc4j ast var declarator.
+     *
+     * @param name     the name
+     * @param init     the init
+     * @param definite the definite
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstVarDeclarator(
             ISwc4jAstPat name,
@@ -53,14 +73,35 @@ public class Swc4jAstVarDeclarator
         setName(name);
     }
 
+    /**
+     * Create swc4j ast var declarator.
+     *
+     * @param name the name
+     * @return the swc4j ast var declarator
+     */
     public static Swc4jAstVarDeclarator create(ISwc4jAstPat name) {
         return create(name, null);
     }
 
+    /**
+     * Create swc4j ast var declarator.
+     *
+     * @param name the name
+     * @param init the init
+     * @return the swc4j ast var declarator
+     */
     public static Swc4jAstVarDeclarator create(ISwc4jAstPat name, ISwc4jAstExpr init) {
         return create(name, init, false);
     }
 
+    /**
+     * Create swc4j ast var declarator.
+     *
+     * @param name     the name
+     * @param init     the init
+     * @param definite the definite
+     * @return the swc4j ast var declarator
+     */
     public static Swc4jAstVarDeclarator create(ISwc4jAstPat name, ISwc4jAstExpr init, boolean definite) {
         return new Swc4jAstVarDeclarator(name, init, definite, Swc4jSpan.DUMMY);
     }
@@ -72,11 +113,21 @@ public class Swc4jAstVarDeclarator
         return childNodes;
     }
 
+    /**
+     * Gets init.
+     *
+     * @return the init
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getInit() {
         return init;
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     @Jni2RustMethod
     public ISwc4jAstPat getName() {
         return name;
@@ -87,6 +138,11 @@ public class Swc4jAstVarDeclarator
         return Swc4jAstType.VarDeclarator;
     }
 
+    /**
+     * Is definite boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isDefinite() {
         return definite;
@@ -106,17 +162,35 @@ public class Swc4jAstVarDeclarator
         return false;
     }
 
+    /**
+     * Sets definite.
+     *
+     * @param definite the definite
+     * @return the definite
+     */
     public Swc4jAstVarDeclarator setDefinite(boolean definite) {
         this.definite = definite;
         return this;
     }
 
+    /**
+     * Sets init.
+     *
+     * @param init the init
+     * @return the init
+     */
     public Swc4jAstVarDeclarator setInit(ISwc4jAstExpr init) {
         this.init = Optional.ofNullable(init);
         this.init.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     * @return the name
+     */
     public Swc4jAstVarDeclarator setName(ISwc4jAstPat name) {
         this.name = AssertionUtils.notNull(name, "Name");
         this.name.setParent(this);

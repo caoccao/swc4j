@@ -39,6 +39,11 @@ import java.util.List;
  */
 public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewExpr> {
 
+    /**
+     * Instantiates a new New expression processor.
+     *
+     * @param compiler the compiler
+     */
     public NewExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

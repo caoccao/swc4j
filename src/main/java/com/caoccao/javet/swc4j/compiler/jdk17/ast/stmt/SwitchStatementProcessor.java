@@ -49,6 +49,11 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
     private static final double DENSITY_THRESHOLD = 0.5;
     private static final int MAX_TABLE_SWITCH_RANGE = 10000;
 
+    /**
+     * Instantiates a new Switch statement processor.
+     *
+     * @param compiler the compiler
+     */
     public SwitchStatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -549,6 +554,16 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
         generate(code, classWriter, switchStmt, null, returnTypeInfo);
     }
 
+    /**
+     * Generate.
+     *
+     * @param code           the code
+     * @param classWriter    the class writer
+     * @param switchStmt     the switch stmt
+     * @param labelName      the label name
+     * @param returnTypeInfo the return type info
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
+     */
     public void generate(
             CodeBuilder code,
             ClassWriter classWriter,
@@ -1693,11 +1708,30 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
      * Case information for integer switch generation.
      */
     private static class CaseInfo {
+        /**
+         * The Case value.
+         */
         Integer caseValue;       // null for default case
+        /**
+         * The Is default.
+         */
         boolean isDefault;
+        /**
+         * The Label offset.
+         */
         int labelOffset;         // bytecode offset for this case label (set during generation)
+        /**
+         * The Statements.
+         */
         List<ISwc4jAstStmt> statements;
 
+        /**
+         * Instantiates a new Case info.
+         *
+         * @param caseValue  the case value
+         * @param statements the statements
+         * @param isDefault  the is default
+         */
         CaseInfo(Integer caseValue, List<ISwc4jAstStmt> statements, boolean isDefault) {
             this.caseValue = caseValue;
             this.statements = statements;
@@ -1710,11 +1744,30 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
     }
 
     private static class DoubleCaseInfo {
+        /**
+         * The Case value.
+         */
         Double caseValue;
+        /**
+         * The Is default.
+         */
         boolean isDefault;
+        /**
+         * The Label offset.
+         */
         int labelOffset;
+        /**
+         * The Statements.
+         */
         List<ISwc4jAstStmt> statements;
 
+        /**
+         * Instantiates a new Double case info.
+         *
+         * @param caseValue  the case value
+         * @param statements the statements
+         * @param isDefault  the is default
+         */
         DoubleCaseInfo(Double caseValue, List<ISwc4jAstStmt> statements, boolean isDefault) {
             this.caseValue = caseValue;
             this.statements = statements;
@@ -1724,11 +1777,30 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
     }
 
     private static class FloatCaseInfo {
+        /**
+         * The Case value.
+         */
         Float caseValue;
+        /**
+         * The Is default.
+         */
         boolean isDefault;
+        /**
+         * The Label offset.
+         */
         int labelOffset;
+        /**
+         * The Statements.
+         */
         List<ISwc4jAstStmt> statements;
 
+        /**
+         * Instantiates a new Float case info.
+         *
+         * @param caseValue  the case value
+         * @param statements the statements
+         * @param isDefault  the is default
+         */
         FloatCaseInfo(Float caseValue, List<ISwc4jAstStmt> statements, boolean isDefault) {
             this.caseValue = caseValue;
             this.statements = statements;
@@ -1738,11 +1810,30 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
     }
 
     private static class LongCaseInfo {
+        /**
+         * The Case value.
+         */
         Long caseValue;
+        /**
+         * The Is default.
+         */
         boolean isDefault;
+        /**
+         * The Label offset.
+         */
         int labelOffset;
+        /**
+         * The Statements.
+         */
         List<ISwc4jAstStmt> statements;
 
+        /**
+         * Instantiates a new Long case info.
+         *
+         * @param caseValue  the case value
+         * @param statements the statements
+         * @param isDefault  the is default
+         */
         LongCaseInfo(Long caseValue, List<ISwc4jAstStmt> statements, boolean isDefault) {
             this.caseValue = caseValue;
             this.statements = statements;
@@ -1755,11 +1846,29 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
      * Information about a string case.
      */
     private static class StringCaseInfo {
+        /**
+         * The Body offset.
+         */
         int bodyOffset;          // offset of the case body
+        /**
+         * The Case value.
+         */
         String caseValue;        // null for default case
+        /**
+         * The Goto position.
+         */
         int gotoPosition;        // position of the conditional jump instruction
+        /**
+         * The Statements.
+         */
         List<ISwc4jAstStmt> statements;
 
+        /**
+         * Instantiates a new String case info.
+         *
+         * @param caseValue  the case value
+         * @param statements the statements
+         */
         StringCaseInfo(String caseValue, List<ISwc4jAstStmt> statements) {
             this.caseValue = caseValue;
             this.statements = statements;

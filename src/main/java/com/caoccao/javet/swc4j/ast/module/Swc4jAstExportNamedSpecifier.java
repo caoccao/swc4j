@@ -31,15 +31,35 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast export named specifier.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstExportNamedSpecifier
         extends Swc4jAst
         implements ISwc4jAstExportSpecifier {
+    /**
+     * The Exported.
+     */
     protected Optional<ISwc4jAstModuleExportName> exported;
+    /**
+     * The Orig.
+     */
     protected ISwc4jAstModuleExportName orig;
+    /**
+     * The Type only.
+     */
     @Jni2RustField(name = "is_type_only")
     protected boolean typeOnly;
 
+    /**
+     * Instantiates a new swc4j ast export named specifier.
+     *
+     * @param orig     the orig
+     * @param exported the exported
+     * @param typeOnly the type only
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstExportNamedSpecifier(
             ISwc4jAstModuleExportName orig,
@@ -52,16 +72,37 @@ public class Swc4jAstExportNamedSpecifier
         setTypeOnly(typeOnly);
     }
 
+    /**
+     * Create swc4j ast export named specifier.
+     *
+     * @param orig the orig
+     * @return the swc4j ast export named specifier
+     */
     public static Swc4jAstExportNamedSpecifier create(ISwc4jAstModuleExportName orig) {
         return create(orig, null);
     }
 
+    /**
+     * Create swc4j ast export named specifier.
+     *
+     * @param orig     the orig
+     * @param exported the exported
+     * @return the swc4j ast export named specifier
+     */
     public static Swc4jAstExportNamedSpecifier create(
             ISwc4jAstModuleExportName orig,
             ISwc4jAstModuleExportName exported) {
         return create(orig, exported, false);
     }
 
+    /**
+     * Create swc4j ast export named specifier.
+     *
+     * @param orig     the orig
+     * @param exported the exported
+     * @param typeOnly the type only
+     * @return the swc4j ast export named specifier
+     */
     public static Swc4jAstExportNamedSpecifier create(
             ISwc4jAstModuleExportName orig,
             ISwc4jAstModuleExportName exported,
@@ -76,11 +117,21 @@ public class Swc4jAstExportNamedSpecifier
         return childNodes;
     }
 
+    /**
+     * Gets exported.
+     *
+     * @return the exported
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstModuleExportName> getExported() {
         return exported;
     }
 
+    /**
+     * Gets orig.
+     *
+     * @return the orig
+     */
     @Jni2RustMethod
     public ISwc4jAstModuleExportName getOrig() {
         return orig;
@@ -91,6 +142,11 @@ public class Swc4jAstExportNamedSpecifier
         return Swc4jAstType.ExportNamedSpecifier;
     }
 
+    /**
+     * Is type only boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isTypeOnly() {
         return typeOnly;
@@ -110,18 +166,36 @@ public class Swc4jAstExportNamedSpecifier
         return false;
     }
 
+    /**
+     * Sets exported.
+     *
+     * @param exported the exported
+     * @return the exported
+     */
     public Swc4jAstExportNamedSpecifier setExported(ISwc4jAstModuleExportName exported) {
         this.exported = Optional.ofNullable(exported);
         this.exported.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets orig.
+     *
+     * @param orig the orig
+     * @return the orig
+     */
     public Swc4jAstExportNamedSpecifier setOrig(ISwc4jAstModuleExportName orig) {
         this.orig = AssertionUtils.notNull(orig, "Orig");
         this.orig.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type only.
+     *
+     * @param typeOnly the type only
+     * @return the type only
+     */
     public Swc4jAstExportNamedSpecifier setTypeOnly(boolean typeOnly) {
         this.typeOnly = typeOnly;
         return this;

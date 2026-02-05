@@ -1266,10 +1266,25 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
      * Enum representing the type of iteration to perform.
      */
     private enum IterationType {
+        /**
+         * List iteration type.
+         */
         LIST,
+        /**
+         * Set iteration type.
+         */
         SET,
+        /**
+         * Map iteration type.
+         */
         MAP,
+        /**
+         * String iteration type.
+         */
         STRING,
+        /**
+         * Array iteration type.
+         */
         ARRAY
     }
 }

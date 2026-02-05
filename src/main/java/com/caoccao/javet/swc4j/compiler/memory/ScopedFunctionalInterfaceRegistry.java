@@ -28,6 +28,9 @@ import java.util.*;
 public final class ScopedFunctionalInterfaceRegistry {
     private final Stack<Map<String, SamMethodInfo>> scopeStack;
 
+    /**
+     * Instantiates a new Scoped functional interface registry.
+     */
     public ScopedFunctionalInterfaceRegistry() {
         scopeStack = new Stack<>();
         // Push global scope

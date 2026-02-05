@@ -41,6 +41,18 @@ import java.util.Optional;
  * @since 0.8.0
  */
 public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
+    /**
+     * Constructs a new Swc4jPluginVisitorEs2015TransformSpread.
+     */
+    public Swc4jPluginVisitorEs2015TransformSpread() {
+    }
+
+    /**
+     * Convert arguments swc4j ast expr.
+     *
+     * @param expr the expr
+     * @return the swc4j ast expr
+     */
     protected ISwc4jAstExpr convertArguments(ISwc4jAstExpr expr) {
         ISwc4jAstExpr innerExpr = expr.unParenExpr();
         if (innerExpr instanceof Swc4jAstIdent &&
@@ -57,6 +69,12 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
         return expr;
     }
 
+    /**
+     * Gets concat node.
+     *
+     * @param args the args
+     * @return the concat node
+     */
     protected Swc4jAstExprOrSpread getConcatNode(List<Swc4jAstExprOrSpread> args) {
         final int length = args.size();
         Swc4jAstExprOrSpread arg;

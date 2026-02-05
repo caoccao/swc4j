@@ -25,6 +25,12 @@ import java.util.List;
  */
 public abstract class Swc4jJsxRuntimeOption {
     /**
+     * Constructs a new Swc4jJsxRuntimeOption.
+     */
+    public Swc4jJsxRuntimeOption() {
+    }
+
+    /**
      * Automatic swc4j jsx runtime option automatic.
      *
      * @return the swc4j jsx runtime option automatic

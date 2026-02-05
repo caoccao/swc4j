@@ -35,6 +35,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * Delegates to specialized generators based on statement type.
  */
 public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
+    /**
+     * Instantiates a new Statement processor.
+     *
+     * @param compiler the compiler
+     */
     public StatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

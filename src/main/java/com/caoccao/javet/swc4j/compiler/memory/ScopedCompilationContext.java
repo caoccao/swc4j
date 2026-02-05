@@ -26,6 +26,9 @@ import java.util.Stack;
 public final class ScopedCompilationContext {
     private final Stack<CompilationContext> scopeStack;
 
+    /**
+     * Instantiates a new Scoped compilation context.
+     */
     public ScopedCompilationContext() {
         scopeStack = new Stack<>();
         // Push global scope

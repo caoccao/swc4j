@@ -18,22 +18,53 @@ package com.caoccao.javet.swc4j.exceptions;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 
+/**
+ * The type swc4j byte code compiler exception.
+ */
 public final class Swc4jByteCodeCompilerException extends Swc4jException {
+    /**
+     * The AST node that caused the exception.
+     */
     private final ISwc4jAst ast;
+    /**
+     * The source code being compiled.
+     */
     private final String sourceCode;
 
+    /**
+     * Instantiates a new swc4j byte code compiler exception.
+     *
+     * @param sourceCode the source code
+     * @param ast        the ast
+     * @param message    the message
+     */
     public Swc4jByteCodeCompilerException(String sourceCode, ISwc4jAst ast, String message) {
         super(message);
         this.sourceCode = sourceCode;
         this.ast = ast;
     }
 
+    /**
+     * Instantiates a new swc4j byte code compiler exception.
+     *
+     * @param sourceCode the source code
+     * @param ast        the ast
+     * @param message    the message
+     * @param cause      the cause
+     */
     public Swc4jByteCodeCompilerException(String sourceCode, ISwc4jAst ast, String message, Throwable cause) {
         super(message, cause);
         this.sourceCode = sourceCode;
         this.ast = ast;
     }
 
+    /**
+     * Instantiates a new swc4j byte code compiler exception.
+     *
+     * @param sourceCode the source code
+     * @param ast        the ast
+     * @param cause      the cause
+     */
     public Swc4jByteCodeCompilerException(String sourceCode, ISwc4jAst ast, Throwable cause) {
         super(cause);
         this.sourceCode = sourceCode;

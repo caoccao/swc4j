@@ -33,17 +33,45 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts param prop.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsParamProp
         extends Swc4jAst
         implements ISwc4jAstParamOrTsParamProp {
+    /**
+     * The Decorators.
+     */
     protected final List<Swc4jAstDecorator> decorators;
+    /**
+     * The Override.
+     */
     @Jni2RustField(name = "is_override")
     protected boolean _override;
+    /**
+     * The Accessibility.
+     */
     protected Optional<Swc4jAstAccessibility> accessibility;
+    /**
+     * The Param.
+     */
     protected ISwc4jAstTsParamPropParam param;
+    /**
+     * The Readonly.
+     */
     protected boolean readonly;
 
+    /**
+     * Instantiates a new swc4j ast ts param prop.
+     *
+     * @param decorators    the decorators
+     * @param accessibility the accessibility
+     * @param _override     the override
+     * @param readonly      the readonly
+     * @param param         the param
+     * @param span          the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsParamProp(
             List<Swc4jAstDecorator> decorators,
@@ -61,14 +89,35 @@ public class Swc4jAstTsParamProp
         this.decorators.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts param prop.
+     *
+     * @param param the param
+     * @return the swc4j ast ts param prop
+     */
     public static Swc4jAstTsParamProp create(ISwc4jAstTsParamPropParam param) {
         return create(SimpleList.of(), param);
     }
 
+    /**
+     * Create swc4j ast ts param prop.
+     *
+     * @param decorators the decorators
+     * @param param      the param
+     * @return the swc4j ast ts param prop
+     */
     public static Swc4jAstTsParamProp create(List<Swc4jAstDecorator> decorators, ISwc4jAstTsParamPropParam param) {
         return create(decorators, null, param);
     }
 
+    /**
+     * Create swc4j ast ts param prop.
+     *
+     * @param decorators    the decorators
+     * @param accessibility the accessibility
+     * @param param         the param
+     * @return the swc4j ast ts param prop
+     */
     public static Swc4jAstTsParamProp create(
             List<Swc4jAstDecorator> decorators,
             Swc4jAstAccessibility accessibility,
@@ -76,6 +125,15 @@ public class Swc4jAstTsParamProp
         return create(decorators, accessibility, false, param);
     }
 
+    /**
+     * Create swc4j ast ts param prop.
+     *
+     * @param decorators    the decorators
+     * @param accessibility the accessibility
+     * @param _override     the override
+     * @param param         the param
+     * @return the swc4j ast ts param prop
+     */
     public static Swc4jAstTsParamProp create(
             List<Swc4jAstDecorator> decorators,
             Swc4jAstAccessibility accessibility,
@@ -84,6 +142,16 @@ public class Swc4jAstTsParamProp
         return create(decorators, accessibility, _override, false, param);
     }
 
+    /**
+     * Create swc4j ast ts param prop.
+     *
+     * @param decorators    the decorators
+     * @param accessibility the accessibility
+     * @param _override     the override
+     * @param readonly      the readonly
+     * @param param         the param
+     * @return the swc4j ast ts param prop
+     */
     public static Swc4jAstTsParamProp create(
             List<Swc4jAstDecorator> decorators,
             Swc4jAstAccessibility accessibility,
@@ -93,6 +161,11 @@ public class Swc4jAstTsParamProp
         return new Swc4jAstTsParamProp(decorators, accessibility, _override, readonly, param, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets accessibility.
+     *
+     * @return the accessibility
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
@@ -105,11 +178,21 @@ public class Swc4jAstTsParamProp
         return childNodes;
     }
 
+    /**
+     * Gets decorators.
+     *
+     * @return the decorators
+     */
     @Jni2RustMethod
     public List<Swc4jAstDecorator> getDecorators() {
         return decorators;
     }
 
+    /**
+     * Gets param.
+     *
+     * @return the param
+     */
     @Jni2RustMethod
     public ISwc4jAstTsParamPropParam getParam() {
         return param;
@@ -120,11 +203,21 @@ public class Swc4jAstTsParamProp
         return Swc4jAstType.TsParamProp;
     }
 
+    /**
+     * Is override boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isOverride() {
         return _override;
     }
 
+    /**
+     * Is readonly boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isReadonly() {
         return readonly;
@@ -149,22 +242,46 @@ public class Swc4jAstTsParamProp
         return false;
     }
 
+    /**
+     * Sets accessibility.
+     *
+     * @param accessibility the accessibility
+     * @return the accessibility
+     */
     public Swc4jAstTsParamProp setAccessibility(Swc4jAstAccessibility accessibility) {
         this.accessibility = Optional.ofNullable(accessibility);
         return this;
     }
 
+    /**
+     * Sets override.
+     *
+     * @param _override the override
+     * @return the override
+     */
     public Swc4jAstTsParamProp setOverride(boolean _override) {
         this._override = _override;
         return this;
     }
 
+    /**
+     * Sets param.
+     *
+     * @param param the param
+     * @return the param
+     */
     public Swc4jAstTsParamProp setParam(ISwc4jAstTsParamPropParam param) {
         this.param = AssertionUtils.notNull(param, "Param");
         this.param.setParent(this);
         return this;
     }
 
+    /**
+     * Sets readonly.
+     *
+     * @param readonly the readonly
+     * @return the readonly
+     */
     public Swc4jAstTsParamProp setReadonly(boolean readonly) {
         this.readonly = readonly;
         return this;

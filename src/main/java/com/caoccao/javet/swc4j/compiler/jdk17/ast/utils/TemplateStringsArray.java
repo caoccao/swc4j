@@ -27,7 +27,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
  *   strings.raw[0]; // raw string (escape sequences preserved)
  * }
  * tag`Hello\nWorld`;
- * }</pre>
+ * }**</pre>
  * <p>
  * This class provides the Java equivalent, with:
  * <ul>
@@ -41,7 +41,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
  * // For template: tag`Hello\nWorld`
  * // Cooked: "Hello" + newline + "World" (actual newline character)
  * // Raw: "Hello\\nWorld" (backslash-n as two characters)
- * }</pre>
+ * }**</pre>
  */
 public final class TemplateStringsArray {
     /**

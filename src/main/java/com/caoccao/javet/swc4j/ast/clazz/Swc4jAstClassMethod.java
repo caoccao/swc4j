@@ -33,24 +33,64 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast class method.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstClassMethod
         extends Swc4jAst
         implements ISwc4jAstClassMember {
+    /**
+     * The Abstract.
+     */
     @Jni2RustField(name = "is_abstract")
     protected boolean _abstract;
+    /**
+     * The Override.
+     */
     @Jni2RustField(name = "is_override")
     protected boolean _override;
+    /**
+     * The constant _static.
+     */
     @Jni2RustField(name = "is_static")
     protected boolean _static;
+    /**
+     * The Accessibility.
+     */
     protected Optional<Swc4jAstAccessibility> accessibility;
+    /**
+     * The Function.
+     */
     @Jni2RustField(box = true)
     protected Swc4jAstFunction function;
+    /**
+     * The Key.
+     */
     protected ISwc4jAstPropName key;
+    /**
+     * The Kind.
+     */
     protected Swc4jAstMethodKind kind;
+    /**
+     * The Optional.
+     */
     @Jni2RustField(name = "is_optional")
     protected boolean optional;
 
+    /**
+     * Instantiates a new swc4j ast class method.
+     *
+     * @param key           the key
+     * @param function      the function
+     * @param kind          the kind
+     * @param _static       the static
+     * @param accessibility the accessibility
+     * @param _abstract     the abstract
+     * @param optional      the optional
+     * @param _override     the override
+     * @param span          the span
+     */
     @Jni2RustMethod
     public Swc4jAstClassMethod(
             ISwc4jAstPropName key,
@@ -73,6 +113,14 @@ public class Swc4jAstClassMethod
         setStatic(_static);
     }
 
+    /**
+     * Create swc4j ast class method.
+     *
+     * @param key      the key
+     * @param function the function
+     * @param kind     the kind
+     * @return the swc4j ast class method
+     */
     public static Swc4jAstClassMethod create(
             ISwc4jAstPropName key,
             Swc4jAstFunction function,
@@ -80,6 +128,15 @@ public class Swc4jAstClassMethod
         return create(key, function, kind, false);
     }
 
+    /**
+     * Create swc4j ast class method.
+     *
+     * @param key      the key
+     * @param function the function
+     * @param kind     the kind
+     * @param _static  the static
+     * @return the swc4j ast class method
+     */
     public static Swc4jAstClassMethod create(
             ISwc4jAstPropName key,
             Swc4jAstFunction function,
@@ -88,6 +145,16 @@ public class Swc4jAstClassMethod
         return create(key, function, kind, _static, null);
     }
 
+    /**
+     * Create swc4j ast class method.
+     *
+     * @param key           the key
+     * @param function      the function
+     * @param kind          the kind
+     * @param _static       the static
+     * @param accessibility the accessibility
+     * @return the swc4j ast class method
+     */
     public static Swc4jAstClassMethod create(
             ISwc4jAstPropName key,
             Swc4jAstFunction function,
@@ -97,6 +164,17 @@ public class Swc4jAstClassMethod
         return create(key, function, kind, _static, accessibility, false);
     }
 
+    /**
+     * Create swc4j ast class method.
+     *
+     * @param key           the key
+     * @param function      the function
+     * @param kind          the kind
+     * @param _static       the static
+     * @param accessibility the accessibility
+     * @param _abstract     the abstract
+     * @return the swc4j ast class method
+     */
     public static Swc4jAstClassMethod create(
             ISwc4jAstPropName key,
             Swc4jAstFunction function,
@@ -107,6 +185,18 @@ public class Swc4jAstClassMethod
         return create(key, function, kind, _static, accessibility, _abstract, false);
     }
 
+    /**
+     * Create swc4j ast class method.
+     *
+     * @param key           the key
+     * @param function      the function
+     * @param kind          the kind
+     * @param _static       the static
+     * @param accessibility the accessibility
+     * @param _abstract     the abstract
+     * @param optional      the optional
+     * @return the swc4j ast class method
+     */
     public static Swc4jAstClassMethod create(
             ISwc4jAstPropName key,
             Swc4jAstFunction function,
@@ -118,6 +208,19 @@ public class Swc4jAstClassMethod
         return create(key, function, kind, _static, accessibility, _abstract, optional, false);
     }
 
+    /**
+     * Create swc4j ast class method.
+     *
+     * @param key           the key
+     * @param function      the function
+     * @param kind          the kind
+     * @param _static       the static
+     * @param accessibility the accessibility
+     * @param _abstract     the abstract
+     * @param optional      the optional
+     * @param _override     the override
+     * @return the swc4j ast class method
+     */
     public static Swc4jAstClassMethod create(
             ISwc4jAstPropName key,
             Swc4jAstFunction function,
@@ -132,6 +235,11 @@ public class Swc4jAstClassMethod
                 _abstract, optional, _override, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets accessibility.
+     *
+     * @return the accessibility
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
@@ -142,16 +250,31 @@ public class Swc4jAstClassMethod
         return SimpleList.of(key, function);
     }
 
+    /**
+     * Gets function.
+     *
+     * @return the function
+     */
     @Jni2RustMethod
     public Swc4jAstFunction getFunction() {
         return function;
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
     }
 
+    /**
+     * Gets kind.
+     *
+     * @return the kind
+     */
     @Jni2RustMethod
     public Swc4jAstMethodKind getKind() {
         return kind;
@@ -162,21 +285,41 @@ public class Swc4jAstClassMethod
         return Swc4jAstType.ClassMethod;
     }
 
+    /**
+     * Is abstract boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isAbstract() {
         return _abstract;
     }
 
+    /**
+     * Is optional boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isOptional() {
         return optional;
     }
 
+    /**
+     * Is override boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isOverride() {
         return _override;
     }
 
+    /**
+     * Is static boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isStatic() {
         return _static;
@@ -195,43 +338,91 @@ public class Swc4jAstClassMethod
         return false;
     }
 
+    /**
+     * Sets abstract.
+     *
+     * @param _abstract the abstract
+     * @return the abstract
+     */
     public Swc4jAstClassMethod setAbstract(boolean _abstract) {
         this._abstract = _abstract;
         return this;
     }
 
+    /**
+     * Sets accessibility.
+     *
+     * @param accessibility the accessibility
+     * @return the accessibility
+     */
     public Swc4jAstClassMethod setAccessibility(Swc4jAstAccessibility accessibility) {
         this.accessibility = Optional.ofNullable(accessibility);
         return this;
     }
 
+    /**
+     * Sets function.
+     *
+     * @param function the function
+     * @return the function
+     */
     public Swc4jAstClassMethod setFunction(Swc4jAstFunction function) {
         this.function = AssertionUtils.notNull(function, "Function");
         this.function.setParent(this);
         return this;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstClassMethod setKey(ISwc4jAstPropName key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
         return this;
     }
 
+    /**
+     * Sets kind.
+     *
+     * @param kind the kind
+     * @return the kind
+     */
     public Swc4jAstClassMethod setKind(Swc4jAstMethodKind kind) {
         this.kind = AssertionUtils.notNull(kind, "Kind");
         return this;
     }
 
+    /**
+     * Sets optional.
+     *
+     * @param optional the optional
+     * @return the optional
+     */
     public Swc4jAstClassMethod setOptional(boolean optional) {
         this.optional = optional;
         return this;
     }
 
+    /**
+     * Sets override.
+     *
+     * @param _override the override
+     * @return the override
+     */
     public Swc4jAstClassMethod setOverride(boolean _override) {
         this._override = _override;
         return this;
     }
 
+    /**
+     * Sets static.
+     *
+     * @param _static the static
+     * @return the static
+     */
     public Swc4jAstClassMethod setStatic(boolean _static) {
         this._static = _static;
         return this;

@@ -35,16 +35,44 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts module decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsModuleDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
+    /**
+     * The Body.
+     */
     protected Optional<ISwc4jAstTsNamespaceBody> body;
+    /**
+     * The Declare.
+     */
     protected boolean declare;
+    /**
+     * The Global.
+     */
     protected boolean global;
+    /**
+     * The Id.
+     */
     protected ISwc4jAstTsModuleName id;
+    /**
+     * The Namespace.
+     */
     protected boolean namespace;
 
+    /**
+     * Instantiates a new swc4j ast ts module decl.
+     *
+     * @param declare   the declare
+     * @param global    the global
+     * @param namespace the namespace
+     * @param id        the id
+     * @param body      the body
+     * @param span      the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsModuleDecl(
             boolean declare,
@@ -61,14 +89,35 @@ public class Swc4jAstTsModuleDecl
         setNamespace(namespace);
     }
 
+    /**
+     * Create swc4j ast ts module decl.
+     *
+     * @param id the id
+     * @return the swc4j ast ts module decl
+     */
     public static Swc4jAstTsModuleDecl create(ISwc4jAstTsModuleName id) {
         return create(id, null);
     }
 
+    /**
+     * Create swc4j ast ts module decl.
+     *
+     * @param id   the id
+     * @param body the body
+     * @return the swc4j ast ts module decl
+     */
     public static Swc4jAstTsModuleDecl create(ISwc4jAstTsModuleName id, ISwc4jAstTsNamespaceBody body) {
         return create(false, id, body);
     }
 
+    /**
+     * Create swc4j ast ts module decl.
+     *
+     * @param declare the declare
+     * @param id      the id
+     * @param body    the body
+     * @return the swc4j ast ts module decl
+     */
     public static Swc4jAstTsModuleDecl create(
             boolean declare,
             ISwc4jAstTsModuleName id,
@@ -76,6 +125,15 @@ public class Swc4jAstTsModuleDecl
         return create(declare, false, id, body);
     }
 
+    /**
+     * Create swc4j ast ts module decl.
+     *
+     * @param declare the declare
+     * @param global  the global
+     * @param id      the id
+     * @param body    the body
+     * @return the swc4j ast ts module decl
+     */
     public static Swc4jAstTsModuleDecl create(
             boolean declare,
             boolean global,
@@ -84,6 +142,16 @@ public class Swc4jAstTsModuleDecl
         return create(declare, global, false, id, body);
     }
 
+    /**
+     * Create swc4j ast ts module decl.
+     *
+     * @param declare   the declare
+     * @param global    the global
+     * @param namespace the namespace
+     * @param id        the id
+     * @param body      the body
+     * @return the swc4j ast ts module decl
+     */
     public static Swc4jAstTsModuleDecl create(
             boolean declare,
             boolean global,
@@ -93,6 +161,11 @@ public class Swc4jAstTsModuleDecl
         return new Swc4jAstTsModuleDecl(declare, global, namespace, id, body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstTsNamespaceBody> getBody() {
         return body;
@@ -105,6 +178,11 @@ public class Swc4jAstTsModuleDecl
         return childNodes;
     }
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     @Jni2RustMethod
     public ISwc4jAstTsModuleName getId() {
         return id;
@@ -115,16 +193,31 @@ public class Swc4jAstTsModuleDecl
         return Swc4jAstType.TsModuleDecl;
     }
 
+    /**
+     * Is declare boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
     }
 
+    /**
+     * Is global boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isGlobal() {
         return global;
     }
 
+    /**
+     * Is namespace boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isNamespace() {
         return namespace;
@@ -144,28 +237,58 @@ public class Swc4jAstTsModuleDecl
         return false;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstTsModuleDecl setBody(ISwc4jAstTsNamespaceBody body) {
         this.body = Optional.ofNullable(body);
         this.body.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets declare.
+     *
+     * @param declare the declare
+     * @return the declare
+     */
     public Swc4jAstTsModuleDecl setDeclare(boolean declare) {
         this.declare = declare;
         return this;
     }
 
+    /**
+     * Sets global.
+     *
+     * @param global the global
+     * @return the global
+     */
     public Swc4jAstTsModuleDecl setGlobal(boolean global) {
         this.global = global;
         return this;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     * @return the id
+     */
     public Swc4jAstTsModuleDecl setId(ISwc4jAstTsModuleName id) {
         this.id = AssertionUtils.notNull(id, "Id");
         this.id.setParent(this);
         return this;
     }
 
+    /**
+     * Sets namespace.
+     *
+     * @param namespace the namespace
+     * @return the namespace
+     */
     public Swc4jAstTsModuleDecl setNamespace(boolean namespace) {
         this.namespace = namespace;
         return this;

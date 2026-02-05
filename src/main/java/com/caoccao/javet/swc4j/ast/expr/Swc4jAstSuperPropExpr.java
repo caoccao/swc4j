@@ -34,13 +34,29 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast super prop expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstSuperPropExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstSimpleAssignTarget {
+    /**
+     * The Obj.
+     */
     protected Swc4jAstSuper obj;
+    /**
+     * The Prop.
+     */
     protected ISwc4jAstSuperProp prop;
 
+    /**
+     * Instantiates a new swc4j ast super prop expr.
+     *
+     * @param obj  the obj
+     * @param prop the prop
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstSuperPropExpr(
             Swc4jAstSuper obj,
@@ -51,6 +67,13 @@ public class Swc4jAstSuperPropExpr
         setProp(prop);
     }
 
+    /**
+     * Create swc4j ast super prop expr.
+     *
+     * @param obj  the obj
+     * @param prop the prop
+     * @return the swc4j ast super prop expr
+     */
     public static Swc4jAstSuperPropExpr create(Swc4jAstSuper obj, ISwc4jAstSuperProp prop) {
         return new Swc4jAstSuperPropExpr(obj, prop, Swc4jSpan.DUMMY);
     }
@@ -60,11 +83,21 @@ public class Swc4jAstSuperPropExpr
         return SimpleList.of(obj, prop);
     }
 
+    /**
+     * Gets obj.
+     *
+     * @return the obj
+     */
     @Jni2RustMethod
     public Swc4jAstSuper getObj() {
         return obj;
     }
 
+    /**
+     * Gets prop.
+     *
+     * @return the prop
+     */
     @Jni2RustMethod
     public ISwc4jAstSuperProp getProp() {
         return prop;
@@ -88,12 +121,24 @@ public class Swc4jAstSuperPropExpr
         return false;
     }
 
+    /**
+     * Sets obj.
+     *
+     * @param obj the obj
+     * @return the obj
+     */
     public Swc4jAstSuperPropExpr setObj(Swc4jAstSuper obj) {
         this.obj = AssertionUtils.notNull(obj, "Obj");
         this.obj.setParent(this);
         return this;
     }
 
+    /**
+     * Sets prop.
+     *
+     * @param prop the prop
+     * @return the prop
+     */
     public Swc4jAstSuperPropExpr setProp(ISwc4jAstSuperProp prop) {
         this.prop = AssertionUtils.notNull(prop, "Prop");
         this.prop.setParent(this);

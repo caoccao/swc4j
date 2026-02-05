@@ -33,15 +33,35 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast getter prop.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstGetterProp
         extends Swc4jAst
         implements ISwc4jAstProp {
+    /**
+     * The Body.
+     */
     protected Optional<Swc4jAstBlockStmt> body;
+    /**
+     * The Key.
+     */
     protected ISwc4jAstPropName key;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
+    /**
+     * Instantiates a new swc4j ast getter prop.
+     *
+     * @param key     the key
+     * @param typeAnn the type ann
+     * @param body    the body
+     * @param span    the span
+     */
     @Jni2RustMethod
     public Swc4jAstGetterProp(
             ISwc4jAstPropName key,
@@ -54,14 +74,35 @@ public class Swc4jAstGetterProp
         setTypeAnn(typeAnn);
     }
 
+    /**
+     * Create swc4j ast getter prop.
+     *
+     * @param key the key
+     * @return the swc4j ast getter prop
+     */
     public static Swc4jAstGetterProp create(ISwc4jAstPropName key) {
         return create(key, null);
     }
 
+    /**
+     * Create swc4j ast getter prop.
+     *
+     * @param key  the key
+     * @param body the body
+     * @return the swc4j ast getter prop
+     */
     public static Swc4jAstGetterProp create(ISwc4jAstPropName key, Swc4jAstBlockStmt body) {
         return create(key, null, body);
     }
 
+    /**
+     * Create swc4j ast getter prop.
+     *
+     * @param key     the key
+     * @param typeAnn the type ann
+     * @param body    the body
+     * @return the swc4j ast getter prop
+     */
     public static Swc4jAstGetterProp create(
             ISwc4jAstPropName key,
             Swc4jAstTsTypeAnn typeAnn,
@@ -69,6 +110,11 @@ public class Swc4jAstGetterProp
         return new Swc4jAstGetterProp(key, typeAnn, body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
@@ -82,6 +128,11 @@ public class Swc4jAstGetterProp
         return childNodes;
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
@@ -92,6 +143,11 @@ public class Swc4jAstGetterProp
         return Swc4jAstType.GetterProp;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
@@ -116,18 +172,36 @@ public class Swc4jAstGetterProp
         return false;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstGetterProp setBody(Swc4jAstBlockStmt body) {
         this.body = Optional.ofNullable(body);
         this.body.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstGetterProp setKey(ISwc4jAstPropName key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstGetterProp setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));

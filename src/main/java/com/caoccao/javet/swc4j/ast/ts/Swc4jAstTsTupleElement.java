@@ -31,13 +31,29 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts tuple element.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTupleElement
         extends Swc4jAst {
+    /**
+     * The Label.
+     */
     protected Optional<ISwc4jAstPat> label;
+    /**
+     * The Ty.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstTsType ty;
 
+    /**
+     * Instantiates a new swc4j ast ts tuple element.
+     *
+     * @param label the label
+     * @param ty    the ty
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTupleElement(
             @Jni2RustParam(optional = true) ISwc4jAstPat label,
@@ -48,10 +64,23 @@ public class Swc4jAstTsTupleElement
         setTy(ty);
     }
 
+    /**
+     * Create swc4j ast ts tuple element.
+     *
+     * @param ty the ty
+     * @return the swc4j ast ts tuple element
+     */
     public static Swc4jAstTsTupleElement create(ISwc4jAstTsType ty) {
         return create(null, ty);
     }
 
+    /**
+     * Create swc4j ast ts tuple element.
+     *
+     * @param label the label
+     * @param ty    the ty
+     * @return the swc4j ast ts tuple element
+     */
     public static Swc4jAstTsTupleElement create(ISwc4jAstPat label, ISwc4jAstTsType ty) {
         return new Swc4jAstTsTupleElement(label, ty, Swc4jSpan.DUMMY);
     }
@@ -63,11 +92,21 @@ public class Swc4jAstTsTupleElement
         return childNodes;
     }
 
+    /**
+     * Gets label.
+     *
+     * @return the label
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstPat> getLabel() {
         return label;
     }
 
+    /**
+     * Gets ty.
+     *
+     * @return the ty
+     */
     @Jni2RustMethod
     public ISwc4jAstTsType getTy() {
         return ty;
@@ -92,12 +131,24 @@ public class Swc4jAstTsTupleElement
         return false;
     }
 
+    /**
+     * Sets label.
+     *
+     * @param label the label
+     * @return the label
+     */
     public Swc4jAstTsTupleElement setLabel(ISwc4jAstPat label) {
         this.label = Optional.ofNullable(label);
         this.label.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets ty.
+     *
+     * @param ty the ty
+     * @return the ty
+     */
     public Swc4jAstTsTupleElement setTy(ISwc4jAstTsType ty) {
         this.ty = AssertionUtils.notNull(ty, "Ty");
         this.ty.setParent(this);

@@ -289,8 +289,8 @@ public final class JavaTypeInfo {
     /**
      * Checks if this type is assignable to the given type descriptor.
      *
-     * @param typeDescriptor      the type descriptor
-     * @param ignoreClassForName  whether to ignore ClassForName lookup
+     * @param typeDescriptor     the type descriptor
+     * @param ignoreClassForName whether to ignore ClassForName lookup
      * @return true if assignable
      */
     public boolean isAssignableTo(String typeDescriptor, boolean ignoreClassForName) {

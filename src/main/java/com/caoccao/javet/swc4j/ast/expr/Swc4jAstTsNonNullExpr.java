@@ -33,13 +33,25 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts non null expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsNonNullExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstSimpleAssignTarget {
+    /**
+     * The Expr.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr expr;
 
+    /**
+     * Instantiates a new swc4j ast ts non null expr.
+     *
+     * @param expr the expr
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsNonNullExpr(
             ISwc4jAstExpr expr,
@@ -48,6 +60,12 @@ public class Swc4jAstTsNonNullExpr
         setExpr(expr);
     }
 
+    /**
+     * Create swc4j ast ts non null expr.
+     *
+     * @param expr the expr
+     * @return the swc4j ast ts non null expr
+     */
     public static Swc4jAstTsNonNullExpr create(ISwc4jAstExpr expr) {
         return new Swc4jAstTsNonNullExpr(expr, Swc4jSpan.DUMMY);
     }
@@ -57,6 +75,11 @@ public class Swc4jAstTsNonNullExpr
         return SimpleList.of(expr);
     }
 
+    /**
+     * Gets expr.
+     *
+     * @return the expr
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
@@ -76,6 +99,12 @@ public class Swc4jAstTsNonNullExpr
         return false;
     }
 
+    /**
+     * Sets expr.
+     *
+     * @param expr the expr
+     * @return the expr
+     */
     public Swc4jAstTsNonNullExpr setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
         this.expr.setParent(this);

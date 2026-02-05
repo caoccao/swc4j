@@ -34,29 +34,85 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast class prop.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstClassProp
         extends Swc4jAst
         implements ISwc4jAstClassMember {
+    /**
+     * The Decorators.
+     */
     protected final List<Swc4jAstDecorator> decorators;
+    /**
+     * The Abstract.
+     */
     @Jni2RustField(name = "is_abstract")
     protected boolean _abstract;
+    /**
+     * The Override.
+     */
     @Jni2RustField(name = "is_override")
     protected boolean _override;
+    /**
+     * The constant _static.
+     */
     @Jni2RustField(name = "is_static")
     protected boolean _static;
+    /**
+     * The Accessibility.
+     */
     protected Optional<Swc4jAstAccessibility> accessibility;
+    /**
+     * The Declare.
+     */
     protected boolean declare;
+    /**
+     * The Definite.
+     */
     protected boolean definite;
+    /**
+     * The Key.
+     */
     protected ISwc4jAstPropName key;
+    /**
+     * The Optional.
+     */
     @Jni2RustField(name = "is_optional")
     protected boolean optional;
+    /**
+     * The Readonly.
+     */
     protected boolean readonly;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
+    /**
+     * The Value.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> value;
 
+    /**
+     * Instantiates a new swc4j ast class prop.
+     *
+     * @param key           the key
+     * @param value         the value
+     * @param typeAnn       the type ann
+     * @param _static       the static
+     * @param decorators    the decorators
+     * @param accessibility the accessibility
+     * @param _abstract     the abstract
+     * @param optional      the optional
+     * @param _override     the override
+     * @param readonly      the readonly
+     * @param declare       the declare
+     * @param definite      the definite
+     * @param span          the span
+     */
     @Jni2RustMethod
     public Swc4jAstClassProp(
             ISwc4jAstPropName key,
@@ -88,14 +144,35 @@ public class Swc4jAstClassProp
         this.decorators.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast class prop.
+     *
+     * @param key the key
+     * @return the swc4j ast class prop
+     */
     public static Swc4jAstClassProp create(ISwc4jAstPropName key) {
         return create(key, null);
     }
 
+    /**
+     * Create swc4j ast class prop.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return the swc4j ast class prop
+     */
     public static Swc4jAstClassProp create(ISwc4jAstPropName key, ISwc4jAstExpr value) {
         return create(key, value, null);
     }
 
+    /**
+     * Create swc4j ast class prop.
+     *
+     * @param key     the key
+     * @param value   the value
+     * @param typeAnn the type ann
+     * @return the swc4j ast class prop
+     */
     public static Swc4jAstClassProp create(
             ISwc4jAstPropName key,
             ISwc4jAstExpr value,
@@ -103,6 +180,15 @@ public class Swc4jAstClassProp
         return create(key, value, typeAnn, false);
     }
 
+    /**
+     * Create swc4j ast class prop.
+     *
+     * @param key     the key
+     * @param value   the value
+     * @param typeAnn the type ann
+     * @param _static the static
+     * @return the swc4j ast class prop
+     */
     public static Swc4jAstClassProp create(
             ISwc4jAstPropName key,
             ISwc4jAstExpr value,
@@ -111,6 +197,16 @@ public class Swc4jAstClassProp
         return create(key, value, typeAnn, _static, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast class prop.
+     *
+     * @param key        the key
+     * @param value      the value
+     * @param typeAnn    the type ann
+     * @param _static    the static
+     * @param decorators the decorators
+     * @return the swc4j ast class prop
+     */
     public static Swc4jAstClassProp create(
             ISwc4jAstPropName key,
             ISwc4jAstExpr value,
@@ -120,6 +216,17 @@ public class Swc4jAstClassProp
         return create(key, value, typeAnn, _static, decorators, null);
     }
 
+    /**
+     * Create swc4j ast class prop.
+     *
+     * @param key           the key
+     * @param value         the value
+     * @param typeAnn       the type ann
+     * @param _static       the static
+     * @param decorators    the decorators
+     * @param accessibility the accessibility
+     * @return the swc4j ast class prop
+     */
     public static Swc4jAstClassProp create(
             ISwc4jAstPropName key,
             ISwc4jAstExpr value,
@@ -130,6 +237,18 @@ public class Swc4jAstClassProp
         return create(key, value, typeAnn, _static, decorators, accessibility, false);
     }
 
+    /**
+     * Create swc4j ast class prop.
+     *
+     * @param key           the key
+     * @param value         the value
+     * @param typeAnn       the type ann
+     * @param _static       the static
+     * @param decorators    the decorators
+     * @param accessibility the accessibility
+     * @param _abstract     the abstract
+     * @return the swc4j ast class prop
+     */
     public static Swc4jAstClassProp create(
             ISwc4jAstPropName key,
             ISwc4jAstExpr value,
@@ -141,6 +260,19 @@ public class Swc4jAstClassProp
         return create(key, value, typeAnn, _static, decorators, accessibility, _abstract, false);
     }
 
+    /**
+     * Create swc4j ast class prop.
+     *
+     * @param key           the key
+     * @param value         the value
+     * @param typeAnn       the type ann
+     * @param _static       the static
+     * @param decorators    the decorators
+     * @param accessibility the accessibility
+     * @param _abstract     the abstract
+     * @param optional      the optional
+     * @return the swc4j ast class prop
+     */
     public static Swc4jAstClassProp create(
             ISwc4jAstPropName key,
             ISwc4jAstExpr value,
@@ -153,6 +285,20 @@ public class Swc4jAstClassProp
         return create(key, value, typeAnn, _static, decorators, accessibility, _abstract, optional, false);
     }
 
+    /**
+     * Create swc4j ast class prop.
+     *
+     * @param key           the key
+     * @param value         the value
+     * @param typeAnn       the type ann
+     * @param _static       the static
+     * @param decorators    the decorators
+     * @param accessibility the accessibility
+     * @param _abstract     the abstract
+     * @param optional      the optional
+     * @param _override     the override
+     * @return the swc4j ast class prop
+     */
     public static Swc4jAstClassProp create(
             ISwc4jAstPropName key,
             ISwc4jAstExpr value,
@@ -168,6 +314,21 @@ public class Swc4jAstClassProp
                 accessibility, _abstract, optional, _override, false);
     }
 
+    /**
+     * Create swc4j ast class prop.
+     *
+     * @param key           the key
+     * @param value         the value
+     * @param typeAnn       the type ann
+     * @param _static       the static
+     * @param decorators    the decorators
+     * @param accessibility the accessibility
+     * @param _abstract     the abstract
+     * @param optional      the optional
+     * @param _override     the override
+     * @param readonly      the readonly
+     * @return the swc4j ast class prop
+     */
     public static Swc4jAstClassProp create(
             ISwc4jAstPropName key,
             ISwc4jAstExpr value,
@@ -185,6 +346,22 @@ public class Swc4jAstClassProp
                 false);
     }
 
+    /**
+     * Create swc4j ast class prop.
+     *
+     * @param key           the key
+     * @param value         the value
+     * @param typeAnn       the type ann
+     * @param _static       the static
+     * @param decorators    the decorators
+     * @param accessibility the accessibility
+     * @param _abstract     the abstract
+     * @param optional      the optional
+     * @param _override     the override
+     * @param readonly      the readonly
+     * @param declare       the declare
+     * @return the swc4j ast class prop
+     */
     public static Swc4jAstClassProp create(
             ISwc4jAstPropName key,
             ISwc4jAstExpr value,
@@ -203,6 +380,23 @@ public class Swc4jAstClassProp
                 declare, false);
     }
 
+    /**
+     * Create swc4j ast class prop.
+     *
+     * @param key           the key
+     * @param value         the value
+     * @param typeAnn       the type ann
+     * @param _static       the static
+     * @param decorators    the decorators
+     * @param accessibility the accessibility
+     * @param _abstract     the abstract
+     * @param optional      the optional
+     * @param _override     the override
+     * @param readonly      the readonly
+     * @param declare       the declare
+     * @param definite      the definite
+     * @return the swc4j ast class prop
+     */
     public static Swc4jAstClassProp create(
             ISwc4jAstPropName key,
             ISwc4jAstExpr value,
@@ -222,6 +416,11 @@ public class Swc4jAstClassProp
                 declare, definite, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets accessibility.
+     *
+     * @return the accessibility
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
@@ -236,11 +435,21 @@ public class Swc4jAstClassProp
         return childNodes;
     }
 
+    /**
+     * Gets decorators.
+     *
+     * @return the decorators
+     */
     @Jni2RustMethod
     public List<Swc4jAstDecorator> getDecorators() {
         return decorators;
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
@@ -251,46 +460,91 @@ public class Swc4jAstClassProp
         return Swc4jAstType.ClassProp;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    /**
+     * Gets value.
+     *
+     * @return the value
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getValue() {
         return value;
     }
 
+    /**
+     * Is abstract boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isAbstract() {
         return _abstract;
     }
 
+    /**
+     * Is declare boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
     }
 
+    /**
+     * Is definite boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isDefinite() {
         return definite;
     }
 
+    /**
+     * Is optional boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isOptional() {
         return optional;
     }
 
+    /**
+     * Is override boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isOverride() {
         return _override;
     }
 
+    /**
+     * Is readonly boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isReadonly() {
         return readonly;
     }
 
+    /**
+     * Is static boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isStatic() {
         return _static;
@@ -325,58 +579,124 @@ public class Swc4jAstClassProp
         return false;
     }
 
+    /**
+     * Sets abstract.
+     *
+     * @param _abstract the abstract
+     * @return the abstract
+     */
     public Swc4jAstClassProp setAbstract(boolean _abstract) {
         this._abstract = _abstract;
         return this;
     }
 
+    /**
+     * Sets accessibility.
+     *
+     * @param accessibility the accessibility
+     * @return the accessibility
+     */
     public Swc4jAstClassProp setAccessibility(Swc4jAstAccessibility accessibility) {
         this.accessibility = Optional.ofNullable(accessibility);
         return this;
     }
 
+    /**
+     * Sets declare.
+     *
+     * @param declare the declare
+     * @return the declare
+     */
     public Swc4jAstClassProp setDeclare(boolean declare) {
         this.declare = declare;
         return this;
     }
 
+    /**
+     * Sets definite.
+     *
+     * @param definite the definite
+     * @return the definite
+     */
     public Swc4jAstClassProp setDefinite(boolean definite) {
         this.definite = definite;
         return this;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstClassProp setKey(ISwc4jAstPropName key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
         return this;
     }
 
+    /**
+     * Sets optional.
+     *
+     * @param optional the optional
+     * @return the optional
+     */
     public Swc4jAstClassProp setOptional(boolean optional) {
         this.optional = optional;
         return this;
     }
 
+    /**
+     * Sets override.
+     *
+     * @param _override the override
+     * @return the override
+     */
     public Swc4jAstClassProp setOverride(boolean _override) {
         this._override = _override;
         return this;
     }
 
+    /**
+     * Sets readonly.
+     *
+     * @param readonly the readonly
+     * @return the readonly
+     */
     public Swc4jAstClassProp setReadonly(boolean readonly) {
         this.readonly = readonly;
         return this;
     }
 
+    /**
+     * Sets static.
+     *
+     * @param _static the static
+     * @return the static
+     */
     public Swc4jAstClassProp setStatic(boolean _static) {
         this._static = _static;
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstClassProp setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets value.
+     *
+     * @param value the value
+     * @return the value
+     */
     public Swc4jAstClassProp setValue(ISwc4jAstExpr value) {
         this.value = Optional.ofNullable(value);
         this.value.ifPresent(node -> node.setParent(this));

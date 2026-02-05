@@ -446,8 +446,7 @@ public class CompilationContext {
      * Searches from innermost to outermost scope.
      *
      * @param typeName the type parameter name
-     * @return the constraint type, or null if it's a type parameter with no constraint (erases to Object),
-     * or empty if not a type parameter at all
+     * @return the constraint type, or null if it's a type parameter with no constraint (erases to Object), or empty if not a type parameter at all
      */
     public Optional<ISwc4jAstTsType> resolveTypeParameter(String typeName) {
         for (int i = typeParameterScopes.size() - 1; i >= 0; i--) {

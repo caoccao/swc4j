@@ -31,14 +31,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast binding ident.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false, customToJava = true)
 public class Swc4jAstBindingIdent
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstTsFnParam, ISwc4jAstTsParamPropParam, ISwc4jAstSimpleAssignTarget {
+    /**
+     * The Id.
+     */
     protected Swc4jAstIdent id;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
+    /**
+     * Instantiates a new swc4j ast binding ident.
+     *
+     * @param id      the id
+     * @param typeAnn the type ann
+     * @param span    the span
+     */
     @Jni2RustMethod
     public Swc4jAstBindingIdent(
             Swc4jAstIdent id,
@@ -49,10 +65,23 @@ public class Swc4jAstBindingIdent
         setTypeAnn(typeAnn);
     }
 
+    /**
+     * Create swc4j ast binding ident.
+     *
+     * @param id the id
+     * @return the swc4j ast binding ident
+     */
     public static Swc4jAstBindingIdent create(Swc4jAstIdent id) {
         return create(id, null);
     }
 
+    /**
+     * Create swc4j ast binding ident.
+     *
+     * @param id      the id
+     * @param typeAnn the type ann
+     * @return the swc4j ast binding ident
+     */
     public static Swc4jAstBindingIdent create(Swc4jAstIdent id, Swc4jAstTsTypeAnn typeAnn) {
         return new Swc4jAstBindingIdent(id, typeAnn, Swc4jSpan.DUMMY);
     }
@@ -64,6 +93,11 @@ public class Swc4jAstBindingIdent
         return childNodes;
     }
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
@@ -74,6 +108,11 @@ public class Swc4jAstBindingIdent
         return Swc4jAstType.BindingIdent;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
@@ -93,12 +132,24 @@ public class Swc4jAstBindingIdent
         return false;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     * @return the id
+     */
     public Swc4jAstBindingIdent setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
         this.id.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstBindingIdent setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));

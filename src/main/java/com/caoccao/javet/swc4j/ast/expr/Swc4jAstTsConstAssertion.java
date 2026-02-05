@@ -32,13 +32,25 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts const assertion.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsConstAssertion
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    /**
+     * The Expr.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr expr;
 
+    /**
+     * Instantiates a new swc4j ast ts const assertion.
+     *
+     * @param expr the expr
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsConstAssertion(
             ISwc4jAstExpr expr,
@@ -47,6 +59,12 @@ public class Swc4jAstTsConstAssertion
         setExpr(expr);
     }
 
+    /**
+     * Create swc4j ast ts const assertion.
+     *
+     * @param expr the expr
+     * @return the swc4j ast ts const assertion
+     */
     public static Swc4jAstTsConstAssertion create(ISwc4jAstExpr expr) {
         return new Swc4jAstTsConstAssertion(expr, Swc4jSpan.DUMMY);
     }
@@ -56,6 +74,11 @@ public class Swc4jAstTsConstAssertion
         return SimpleList.of(expr);
     }
 
+    /**
+     * Gets expr.
+     *
+     * @return the expr
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
@@ -75,6 +98,12 @@ public class Swc4jAstTsConstAssertion
         return false;
     }
 
+    /**
+     * Sets expr.
+     *
+     * @param expr the expr
+     * @return the expr
+     */
     public Swc4jAstTsConstAssertion setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
         this.expr.setParent(this);

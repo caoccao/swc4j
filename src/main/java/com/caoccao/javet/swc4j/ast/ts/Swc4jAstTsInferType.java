@@ -31,12 +31,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts infer type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsInferType
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Type param.
+     */
     protected Swc4jAstTsTypeParam typeParam;
 
+    /**
+     * Instantiates a new swc4j ast ts infer type.
+     *
+     * @param typeParam the type param
+     * @param span      the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsInferType(
             Swc4jAstTsTypeParam typeParam,
@@ -45,6 +57,12 @@ public class Swc4jAstTsInferType
         setTypeParam(typeParam);
     }
 
+    /**
+     * Create swc4j ast ts infer type.
+     *
+     * @param typeParam the type param
+     * @return the swc4j ast ts infer type
+     */
     public static Swc4jAstTsInferType create(Swc4jAstTsTypeParam typeParam) {
         return new Swc4jAstTsInferType(typeParam, Swc4jSpan.DUMMY);
     }
@@ -59,6 +77,11 @@ public class Swc4jAstTsInferType
         return Swc4jAstType.TsInferType;
     }
 
+    /**
+     * Gets type param.
+     *
+     * @return the type param
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeParam getTypeParam() {
         return typeParam;
@@ -73,6 +96,12 @@ public class Swc4jAstTsInferType
         return false;
     }
 
+    /**
+     * Sets type param.
+     *
+     * @param typeParam the type param
+     * @return the type param
+     */
     public Swc4jAstTsInferType setTypeParam(Swc4jAstTsTypeParam typeParam) {
         this.typeParam = AssertionUtils.notNull(typeParam, "TypeParam");
         this.typeParam.setParent(this);

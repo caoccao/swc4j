@@ -22,6 +22,9 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstJsxNamespacedName;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast jsx element name.
+ */
 @Jni2RustClass(
         name = "JSXElementName",
         mappings = {

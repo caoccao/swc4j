@@ -32,17 +32,37 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast cond expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstCondExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    /**
+     * The Alt.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr alt;
+    /**
+     * The Cons.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr cons;
+    /**
+     * The Test.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr test;
 
+    /**
+     * Instantiates a new swc4j ast cond expr.
+     *
+     * @param test the test
+     * @param cons the cons
+     * @param alt  the alt
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstCondExpr(
             ISwc4jAstExpr test,
@@ -55,10 +75,23 @@ public class Swc4jAstCondExpr
         setTest(test);
     }
 
+    /**
+     * Create swc4j ast cond expr.
+     *
+     * @param test the test
+     * @param cons the cons
+     * @param alt  the alt
+     * @return the swc4j ast cond expr
+     */
     public static Swc4jAstCondExpr create(ISwc4jAstExpr test, ISwc4jAstExpr cons, ISwc4jAstExpr alt) {
         return new Swc4jAstCondExpr(test, cons, alt, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets alt.
+     *
+     * @return the alt
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getAlt() {
         return alt;
@@ -69,11 +102,21 @@ public class Swc4jAstCondExpr
         return SimpleList.of(alt, cons, test);
     }
 
+    /**
+     * Gets cons.
+     *
+     * @return the cons
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getCons() {
         return cons;
     }
 
+    /**
+     * Gets test.
+     *
+     * @return the test
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getTest() {
         return test;
@@ -101,18 +144,36 @@ public class Swc4jAstCondExpr
         return false;
     }
 
+    /**
+     * Sets alt.
+     *
+     * @param alt the alt
+     * @return the alt
+     */
     public Swc4jAstCondExpr setAlt(ISwc4jAstExpr alt) {
         this.alt = AssertionUtils.notNull(alt, "Alt");
         this.alt.setParent(this);
         return this;
     }
 
+    /**
+     * Sets cons.
+     *
+     * @param cons the cons
+     * @return the cons
+     */
     public Swc4jAstCondExpr setCons(ISwc4jAstExpr cons) {
         this.cons = AssertionUtils.notNull(cons, "Cons");
         this.cons.setParent(this);
         return this;
     }
 
+    /**
+     * Sets test.
+     *
+     * @param test the test
+     * @return the test
+     */
     public Swc4jAstCondExpr setTest(ISwc4jAstExpr test) {
         this.test = AssertionUtils.notNull(test, "Test");
         this.test.setParent(this);

@@ -33,15 +33,31 @@ import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast regex.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstRegex
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstCoercionPrimitive {
+    /**
+     * The Exp.
+     */
     @Jni2RustField(atom = true)
     protected String exp;
+    /**
+     * The Flags.
+     */
     @Jni2RustField(atom = true)
     protected String flags;
 
+    /**
+     * Instantiates a new swc4j ast regex.
+     *
+     * @param exp   the exp
+     * @param flags the flags
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstRegex(
             String exp,
@@ -52,18 +68,42 @@ public class Swc4jAstRegex
         setFlags(flags);
     }
 
+    /**
+     * Create swc4j ast regex.
+     *
+     * @return the swc4j ast regex
+     */
     public static Swc4jAstRegex create() {
         return create("(?:)");
     }
 
+    /**
+     * Create swc4j ast regex.
+     *
+     * @param exp the exp
+     * @return the swc4j ast regex
+     */
     public static Swc4jAstRegex create(String exp) {
         return create(exp, StringUtils.EMPTY);
     }
 
+    /**
+     * Create swc4j ast regex.
+     *
+     * @param exp   the exp
+     * @param flags the flags
+     * @return the swc4j ast regex
+     */
     public static Swc4jAstRegex create(String exp, String flags) {
         return new Swc4jAstRegex(exp, flags, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Escape string.
+     *
+     * @param str the str
+     * @return the string
+     */
     public static String escape(String str) {
         StringBuilder sb = new StringBuilder();
         for (char c : str.toCharArray()) {
@@ -127,11 +167,21 @@ public class Swc4jAstRegex
         return EMPTY_CHILD_NODES;
     }
 
+    /**
+     * Gets exp.
+     *
+     * @return the exp
+     */
     @Jni2RustMethod
     public String getExp() {
         return exp;
     }
 
+    /**
+     * Gets flags.
+     *
+     * @return the flags
+     */
     @Jni2RustMethod
     public String getFlags() {
         return flags;
@@ -147,11 +197,23 @@ public class Swc4jAstRegex
         return false;
     }
 
+    /**
+     * Sets exp.
+     *
+     * @param exp the exp
+     * @return the exp
+     */
     public Swc4jAstRegex setExp(String exp) {
         this.exp = AssertionUtils.notNull(exp, "Exp");
         return this;
     }
 
+    /**
+     * Sets flags.
+     *
+     * @param flags the flags
+     * @return the flags
+     */
     public Swc4jAstRegex setFlags(String flags) {
         this.flags = AssertionUtils.notNull(flags, "Flags");
         return this;

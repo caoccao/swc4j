@@ -42,9 +42,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Type resolver.
+ */
 public final class TypeResolver {
     private final ByteCodeCompiler compiler;
 
+    /**
+     * Instantiates a new Type resolver.
+     *
+     * @param compiler the compiler
+     */
     public TypeResolver(ByteCodeCompiler compiler) {
         this.compiler = compiler;
     }
@@ -104,6 +112,13 @@ public final class TypeResolver {
         };
     }
 
+    /**
+     * Gets widened type.
+     *
+     * @param leftType  the left type
+     * @param rightType the right type
+     * @return the widened type
+     */
     public static String getWidenedType(String leftType, String rightType) {
         // Get primitive types (unwrap if needed)
         String left = getPrimitiveType(leftType);
@@ -308,6 +323,14 @@ public final class TypeResolver {
         };
     }
 
+    /**
+     * Analyze return type return type info.
+     *
+     * @param function the function
+     * @param body     the body
+     * @return the return type info
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
+     */
     public ReturnTypeInfo analyzeReturnType(
             Swc4jAstFunction function,
             Swc4jAstBlockStmt body) throws Swc4jByteCodeCompilerException {
@@ -428,6 +451,12 @@ public final class TypeResolver {
         return parseRecordType(tsType);
     }
 
+    /**
+     * Extract member expr prop name string.
+     *
+     * @param memberExpr the member expr
+     * @return the string
+     */
     public String extractMemberExprPropName(Swc4jAstMemberExpr memberExpr) {
         if (memberExpr.getProp() instanceof Swc4jAstIdentName identName) {
             return identName.getSym();
@@ -466,6 +495,9 @@ public final class TypeResolver {
 
     /**
      * Extract type from parameter pattern (regular param or varargs).
+     *
+     * @param pat the pat
+     * @return the string
      */
     public String extractParameterType(
             ISwc4jAstPat pat) {
@@ -496,6 +528,14 @@ public final class TypeResolver {
         return "Ljava/lang/Object;";
     }
 
+    /**
+     * Extract type string.
+     *
+     * @param bindingIdent the binding ident
+     * @param init         the init
+     * @return the string
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
+     */
     public String extractType(
             Swc4jAstBindingIdent bindingIdent,
             Optional<ISwc4jAstExpr> init) throws Swc4jByteCodeCompilerException {
@@ -654,6 +694,7 @@ public final class TypeResolver {
      *
      * @param arrayLit array literal
      * @return element type descriptor, or Object if unknown
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
     public String inferArrayElementType(Swc4jAstArrayLit arrayLit) throws Swc4jByteCodeCompilerException {
         if (arrayLit == null) {
@@ -697,6 +738,7 @@ public final class TypeResolver {
      *
      * @param key Property name AST node
      * @return JVM type descriptor (e.g., "Ljava/lang/String;", "Ljava/lang/Integer;", "D")
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
     public String inferKeyType(
             ISwc4jAstPropName key) throws Swc4jByteCodeCompilerException {
@@ -771,6 +813,13 @@ public final class TypeResolver {
         return null;
     }
 
+    /**
+     * Infer type from expr string.
+     *
+     * @param expr the expr
+     * @return the string
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
+     */
     public String inferTypeFromExpr(
             ISwc4jAstExpr expr) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
@@ -1514,6 +1563,12 @@ public final class TypeResolver {
         return null;
     }
 
+    /**
+     * Map ts type to descriptor string.
+     *
+     * @param tsType the ts type
+     * @return the string
+     */
     public String mapTsTypeToDescriptor(
             ISwc4jAstTsType tsType) {
         if (tsType instanceof Swc4jAstTsOptionalType optionalType) {
@@ -1557,6 +1612,12 @@ public final class TypeResolver {
         return "Ljava/lang/Object;";
     }
 
+    /**
+     * Map type name to descriptor string.
+     *
+     * @param typeName the type name
+     * @return the string
+     */
     public String mapTypeNameToDescriptor(
             String typeName) {
         // First check if this is a type parameter (for generics support)

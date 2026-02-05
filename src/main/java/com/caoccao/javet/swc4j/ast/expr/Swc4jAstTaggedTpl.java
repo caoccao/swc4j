@@ -31,19 +31,43 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast tagged tpl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTaggedTpl
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    /**
+     * The Ctxt.
+     */
     @Jni2RustField(syntaxContext = true)
     protected int ctxt;
+    /**
+     * The Tag.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr tag;
+    /**
+     * The Tpl.
+     */
     @Jni2RustField(box = true)
     protected Swc4jAstTpl tpl;
+    /**
+     * The Type params.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeParams;
 
+    /**
+     * Instantiates a new swc4j ast tagged tpl.
+     *
+     * @param ctxt       the ctxt
+     * @param tag        the tag
+     * @param typeParams the type params
+     * @param tpl        the tpl
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstTaggedTpl(
             @Jni2RustParam(syntaxContext = true) int ctxt,
@@ -58,10 +82,25 @@ public class Swc4jAstTaggedTpl
         setTypeParams(typeParams);
     }
 
+    /**
+     * Create swc4j ast tagged tpl.
+     *
+     * @param tag the tag
+     * @param tpl the tpl
+     * @return the swc4j ast tagged tpl
+     */
     public static Swc4jAstTaggedTpl create(ISwc4jAstExpr tag, Swc4jAstTpl tpl) {
         return create(tag, null, tpl);
     }
 
+    /**
+     * Create swc4j ast tagged tpl.
+     *
+     * @param tag        the tag
+     * @param typeParams the type params
+     * @param tpl        the tpl
+     * @return the swc4j ast tagged tpl
+     */
     public static Swc4jAstTaggedTpl create(
             ISwc4jAstExpr tag,
             Swc4jAstTsTypeParamInstantiation typeParams,
@@ -69,6 +108,15 @@ public class Swc4jAstTaggedTpl
         return create(0, tag, typeParams, tpl);
     }
 
+    /**
+     * Create swc4j ast tagged tpl.
+     *
+     * @param ctxt       the ctxt
+     * @param tag        the tag
+     * @param typeParams the type params
+     * @param tpl        the tpl
+     * @return the swc4j ast tagged tpl
+     */
     public static Swc4jAstTaggedTpl create(
             int ctxt,
             ISwc4jAstExpr tag,
@@ -84,16 +132,31 @@ public class Swc4jAstTaggedTpl
         return childNodes;
     }
 
+    /**
+     * Gets ctxt.
+     *
+     * @return the ctxt
+     */
     @Jni2RustMethod
     public int getCtxt() {
         return ctxt;
     }
 
+    /**
+     * Gets tag.
+     *
+     * @return the tag
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getTag() {
         return tag;
     }
 
+    /**
+     * Gets tpl.
+     *
+     * @return the tpl
+     */
     @Jni2RustMethod
     public Swc4jAstTpl getTpl() {
         return tpl;
@@ -104,6 +167,11 @@ public class Swc4jAstTaggedTpl
         return Swc4jAstType.TaggedTpl;
     }
 
+    /**
+     * Gets type params.
+     *
+     * @return the type params
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeParams() {
         return typeParams;
@@ -127,23 +195,47 @@ public class Swc4jAstTaggedTpl
         return false;
     }
 
+    /**
+     * Sets ctxt.
+     *
+     * @param ctxt the ctxt
+     * @return the ctxt
+     */
     public Swc4jAstTaggedTpl setCtxt(int ctxt) {
         this.ctxt = ctxt;
         return this;
     }
 
+    /**
+     * Sets tag.
+     *
+     * @param tag the tag
+     * @return the tag
+     */
     public Swc4jAstTaggedTpl setTag(ISwc4jAstExpr tag) {
         this.tag = AssertionUtils.notNull(tag, "Tag");
         this.tag.setParent(this);
         return this;
     }
 
+    /**
+     * Sets tpl.
+     *
+     * @param tpl the tpl
+     * @return the tpl
+     */
     public Swc4jAstTaggedTpl setTpl(Swc4jAstTpl tpl) {
         this.tpl = AssertionUtils.notNull(tpl, "Tag");
         this.tpl.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type params.
+     *
+     * @param typeParams the type params
+     * @return the type params
+     */
     public Swc4jAstTaggedTpl setTypeParams(Swc4jAstTsTypeParamInstantiation typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
         this.typeParams.ifPresent(node -> node.setParent(this));

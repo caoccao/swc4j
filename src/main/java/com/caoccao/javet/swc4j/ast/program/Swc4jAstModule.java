@@ -73,14 +73,32 @@ public class Swc4jAstModule
         this.body.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast module.
+     *
+     * @return the swc4j ast module
+     */
     public static Swc4jAstModule create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast module.
+     *
+     * @param body the body
+     * @return the swc4j ast module
+     */
     public static Swc4jAstModule create(List<ISwc4jAstModuleItem> body) {
         return create(body, null);
     }
 
+    /**
+     * Create swc4j ast module.
+     *
+     * @param body    the body
+     * @param shebang the shebang
+     * @return the swc4j ast module
+     */
     public static Swc4jAstModule create(List<ISwc4jAstModuleItem> body, String shebang) {
         return new Swc4jAstModule(body, shebang, Swc4jSpan.DUMMY);
     }
@@ -122,6 +140,12 @@ public class Swc4jAstModule
         return false;
     }
 
+    /**
+     * Sets shebang.
+     *
+     * @param shebang the shebang
+     * @return the shebang
+     */
     public Swc4jAstModule setShebang(String shebang) {
         this.shebang = Optional.ofNullable(shebang);
         return this;

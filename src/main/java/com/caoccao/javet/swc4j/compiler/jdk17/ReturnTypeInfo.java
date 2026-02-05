@@ -19,11 +19,38 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type Return type info.
+ *
+ * @param type            the return type
+ * @param maxStack        the maximum stack size
+ * @param descriptor      the type descriptor
+ * @param genericTypeInfo the generic type information
+ */
 public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor, GenericTypeInfo genericTypeInfo) {
+    /**
+     * Of return type info.
+     *
+     * @param sourceCode the source code
+     * @param ast        the ast
+     * @param type       the type
+     * @return the return type info
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
+     */
     public static ReturnTypeInfo of(String sourceCode, ISwc4jAst ast, String type) throws Swc4jByteCodeCompilerException {
         return of(sourceCode, ast, type, null);
     }
 
+    /**
+     * Of return type info.
+     *
+     * @param sourceCode      the source code
+     * @param ast             the ast
+     * @param type            the type
+     * @param genericTypeInfo the generic type info
+     * @return the return type info
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
+     */
     public static ReturnTypeInfo of(String sourceCode, ISwc4jAst ast, String type, GenericTypeInfo genericTypeInfo) throws Swc4jByteCodeCompilerException {
         if (type == null || type.isEmpty()) {
             throw new Swc4jByteCodeCompilerException(sourceCode, ast, "Missing type info.");
@@ -39,7 +66,8 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor, G
                 case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null, genericTypeInfo);
                 case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null, genericTypeInfo);
                 case "V" -> new ReturnTypeInfo(ReturnType.VOID, 0, null, genericTypeInfo);
-                default -> throw new Swc4jByteCodeCompilerException(sourceCode, ast, "Unsupported primitive type: " + type);
+                default ->
+                        throw new Swc4jByteCodeCompilerException(sourceCode, ast, "Unsupported primitive type: " + type);
             };
         }
         if (type.equals("Ljava/lang/String;")) {
@@ -56,6 +84,11 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor, G
         throw new Swc4jByteCodeCompilerException(sourceCode, ast, "Unsupported object type: " + type);
     }
 
+    /**
+     * Gets primitive type descriptor.
+     *
+     * @return the primitive type descriptor
+     */
     public String getPrimitiveTypeDescriptor() {
         return switch (type) {
             case INT -> "I";

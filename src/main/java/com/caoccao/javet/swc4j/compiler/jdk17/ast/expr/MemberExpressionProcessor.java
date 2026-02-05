@@ -32,7 +32,15 @@ import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type Member expression processor.
+ */
 public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMemberExpr> {
+    /**
+     * Instantiates a new Member expression processor.
+     *
+     * @param compiler the compiler
+     */
     public MemberExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

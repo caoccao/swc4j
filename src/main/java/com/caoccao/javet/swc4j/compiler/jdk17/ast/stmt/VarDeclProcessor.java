@@ -44,7 +44,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * The type Var decl processor.
+ */
 public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
+    /**
+     * Instantiates a new Var decl processor.
+     *
+     * @param compiler the compiler
+     */
     public VarDeclProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

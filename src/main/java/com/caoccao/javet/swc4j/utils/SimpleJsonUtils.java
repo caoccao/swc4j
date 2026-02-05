@@ -29,6 +29,12 @@ public final class SimpleJsonUtils {
     private static final Pattern PATTERN_NUMBER = Pattern.compile("^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?");
 
     /**
+     * Private constructor to prevent instantiation.
+     */
+    private SimpleJsonUtils() {
+    }
+
+    /**
      * Escape the string.
      *
      * @param str the string
@@ -210,6 +216,12 @@ public final class SimpleJsonUtils {
         return JsonToken.fromString(sb.toString());
     }
 
+    /**
+     * Parse json node.
+     *
+     * @param jsonString the json string
+     * @return the json node
+     */
     public static JsonNode parse(String jsonString) {
         return parse(Objects.requireNonNull(jsonString), new JsonParserContext());
     }
@@ -313,70 +325,172 @@ public final class SimpleJsonUtils {
         }
     }
 
+    /**
+     * The enum Json token type.
+     */
     public enum JsonTokenType {
+        /**
+         * Array end json token type.
+         */
         ArrayEnd,
+        /**
+         * Array start json token type.
+         */
         ArrayStart,
+        /**
+         * Boolean json token type.
+         */
         Boolean,
+        /**
+         * Comma json token type.
+         */
         Comma,
+        /**
+         * Colon json token type.
+         */
         Colon,
+        /**
+         * End of file json token type.
+         */
         EndOfFile,
+        /**
+         * Null json token type.
+         */
         Null,
+        /**
+         * Number json token type.
+         */
         Number,
+        /**
+         * Object end json token type.
+         */
         ObjectEnd,
+        /**
+         * Object start json token type.
+         */
         ObjectStart,
+        /**
+         * Text json token type.
+         */
         Text,
     }
 
+    /**
+     * The interface Json node.
+     */
     public interface JsonNode {
+        /**
+         * As array json array node.
+         *
+         * @return the json array node
+         */
         default JsonArrayNode asArray() {
             return isArray() ? (JsonArrayNode) this : null;
         }
 
+        /**
+         * As boolean json boolean node.
+         *
+         * @return the json boolean node
+         */
         default JsonBooleanNode asBoolean() {
             return isBoolean() ? (JsonBooleanNode) this : null;
         }
 
+        /**
+         * As null json null node.
+         *
+         * @return the json null node
+         */
         default JsonNullNode asNull() {
             return isNull() ? (JsonNullNode) this : null;
         }
 
+        /**
+         * As number json number node.
+         *
+         * @return the json number node
+         */
         default JsonNumberNode asNumber() {
             return isNumber() ? (JsonNumberNode) this : null;
         }
 
+        /**
+         * As object json object node.
+         *
+         * @return the json object node
+         */
         default JsonObjectNode asObject() {
             return isObject() ? (JsonObjectNode) this : null;
         }
 
+        /**
+         * As text json text node.
+         *
+         * @return the json text node
+         */
         default JsonTextNode asText() {
             return isText() ? (JsonTextNode) this : null;
         }
 
+        /**
+         * Is array boolean.
+         *
+         * @return the boolean
+         */
         default boolean isArray() {
             return this instanceof JsonArrayNode;
         }
 
+        /**
+         * Is boolean boolean.
+         *
+         * @return the boolean
+         */
         default boolean isBoolean() {
             return this instanceof JsonBooleanNode;
         }
 
+        /**
+         * Is null boolean.
+         *
+         * @return the boolean
+         */
         default boolean isNull() {
             return this instanceof JsonNullNode;
         }
 
+        /**
+         * Is number boolean.
+         *
+         * @return the boolean
+         */
         default boolean isNumber() {
             return this instanceof JsonNumberNode;
         }
 
+        /**
+         * Is object boolean.
+         *
+         * @return the boolean
+         */
         default boolean isObject() {
             return this instanceof JsonObjectNode;
         }
 
+        /**
+         * Is text boolean.
+         *
+         * @return the boolean
+         */
         default boolean isText() {
             return this instanceof JsonTextNode;
         }
     }
 
+    /**
+     * The type Json array node.
+     */
     public static class JsonArrayNode implements JsonNode {
         private final List<JsonNode> nodes;
 
@@ -384,10 +498,21 @@ public final class SimpleJsonUtils {
             nodes = new ArrayList<>();
         }
 
+        /**
+         * Of json array node.
+         *
+         * @return the json array node
+         */
         public static JsonArrayNode of() {
             return new JsonArrayNode();
         }
 
+        /**
+         * Of json array node.
+         *
+         * @param nodes the nodes
+         * @return the json array node
+         */
         public static JsonArrayNode of(JsonNode... nodes) {
             JsonArrayNode jsonArrayNode = of();
             Collections.addAll(jsonArrayNode.getNodes(), nodes);
@@ -401,6 +526,11 @@ public final class SimpleJsonUtils {
             return Objects.equals(nodes, that.nodes);
         }
 
+        /**
+         * Gets nodes.
+         *
+         * @return the nodes
+         */
         public List<JsonNode> getNodes() {
             return nodes;
         }
@@ -411,6 +541,9 @@ public final class SimpleJsonUtils {
         }
     }
 
+    /**
+     * The type Json boolean node.
+     */
     public static class JsonBooleanNode implements JsonNode {
         private boolean value;
 
@@ -418,10 +551,22 @@ public final class SimpleJsonUtils {
             setValue(value);
         }
 
+        /**
+         * Of json boolean node.
+         *
+         * @param value the value
+         * @return the json boolean node
+         */
         public static JsonBooleanNode of(boolean value) {
             return new JsonBooleanNode(value);
         }
 
+        /**
+         * Of json boolean node.
+         *
+         * @param jsonToken the json token
+         * @return the json boolean node
+         */
         public static JsonBooleanNode of(JsonToken jsonToken) {
             if (JsonToken.BOOLEAN_FALSE == jsonToken) {
                 return new JsonBooleanNode(false);
@@ -440,6 +585,11 @@ public final class SimpleJsonUtils {
             return value == that.value;
         }
 
+        /**
+         * Gets value.
+         *
+         * @return the value
+         */
         public boolean getValue() {
             return value;
         }
@@ -449,18 +599,32 @@ public final class SimpleJsonUtils {
             return Objects.hashCode(value);
         }
 
+        /**
+         * Sets value.
+         *
+         * @param value the value
+         * @return the value
+         */
         public JsonBooleanNode setValue(boolean value) {
             this.value = value;
             return this;
         }
     }
 
+    /**
+     * The type Json null node.
+     */
     public static class JsonNullNode implements JsonNode {
         private static final JsonNullNode INSTANCE = new JsonNullNode();
 
         private JsonNullNode() {
         }
 
+        /**
+         * Of json null node.
+         *
+         * @return the json null node
+         */
         public static JsonNullNode of() {
             return INSTANCE;
         }
@@ -476,6 +640,9 @@ public final class SimpleJsonUtils {
         }
     }
 
+    /**
+     * The type Json number node.
+     */
     public static class JsonNumberNode implements JsonNode {
         private Double doubleValue;
         private Integer intValue;
@@ -501,18 +668,42 @@ public final class SimpleJsonUtils {
             setValue(value);
         }
 
+        /**
+         * Of json number node.
+         *
+         * @param value the value
+         * @return the json number node
+         */
         public static JsonNumberNode of(double value) {
             return new JsonNumberNode(value);
         }
 
+        /**
+         * Of json number node.
+         *
+         * @param value the value
+         * @return the json number node
+         */
         public static JsonNumberNode of(int value) {
             return new JsonNumberNode(value);
         }
 
+        /**
+         * Of json number node.
+         *
+         * @param value the value
+         * @return the json number node
+         */
         public static JsonNumberNode of(long value) {
             return new JsonNumberNode(value);
         }
 
+        /**
+         * Of json number node.
+         *
+         * @param value the value
+         * @return the json number node
+         */
         public static JsonNumberNode of(String value) {
             return new JsonNumberNode(value);
         }
@@ -524,6 +715,11 @@ public final class SimpleJsonUtils {
             return Objects.equals(value, that.value);
         }
 
+        /**
+         * Gets double.
+         *
+         * @return the double
+         */
         public double getDouble() {
             if (isDouble()) {
                 return doubleValue;
@@ -537,6 +733,11 @@ public final class SimpleJsonUtils {
             throw new IllegalArgumentException("Invalid JSON number");
         }
 
+        /**
+         * Gets integer.
+         *
+         * @return the integer
+         */
         public int getInteger() {
             if (isDouble()) {
                 return doubleValue.intValue();
@@ -550,6 +751,11 @@ public final class SimpleJsonUtils {
             throw new IllegalArgumentException("Invalid JSON number");
         }
 
+        /**
+         * Gets long.
+         *
+         * @return the long
+         */
         public long getLong() {
             if (isDouble()) {
                 return doubleValue.longValue();
@@ -563,6 +769,11 @@ public final class SimpleJsonUtils {
             throw new IllegalArgumentException("Invalid JSON number");
         }
 
+        /**
+         * Gets value.
+         *
+         * @return the value
+         */
         public String getValue() {
             return value;
         }
@@ -572,18 +783,39 @@ public final class SimpleJsonUtils {
             return Objects.hashCode(value);
         }
 
+        /**
+         * Is double boolean.
+         *
+         * @return the boolean
+         */
         public boolean isDouble() {
             return doubleValue != null;
         }
 
+        /**
+         * Is integer boolean.
+         *
+         * @return the boolean
+         */
         public boolean isInteger() {
             return intValue != null;
         }
 
+        /**
+         * Is long boolean.
+         *
+         * @return the boolean
+         */
         public boolean isLong() {
             return longValue != null;
         }
 
+        /**
+         * Sets value.
+         *
+         * @param value the value
+         * @return the value
+         */
         public JsonNumberNode setValue(String value) {
             this.value = Objects.requireNonNull(value);
             if (value.contains(".") || value.contains("e") || value.contains("E")) {
@@ -599,6 +831,9 @@ public final class SimpleJsonUtils {
         }
     }
 
+    /**
+     * The type Json object node.
+     */
     public static class JsonObjectNode implements JsonNode {
         private final Map<String, JsonNode> nodeMap;
 
@@ -606,10 +841,21 @@ public final class SimpleJsonUtils {
             nodeMap = new LinkedHashMap<>();
         }
 
+        /**
+         * Of json object node.
+         *
+         * @return the json object node
+         */
         public static JsonObjectNode of() {
             return new JsonObjectNode();
         }
 
+        /**
+         * Of json object node.
+         *
+         * @param nodeMap the node map
+         * @return the json object node
+         */
         public static JsonObjectNode of(Map<String, JsonNode> nodeMap) {
             JsonObjectNode jsonObjectNode = JsonObjectNode.of();
             jsonObjectNode.getNodeMap().putAll(nodeMap);
@@ -623,6 +869,11 @@ public final class SimpleJsonUtils {
             return Objects.equals(nodeMap, that.nodeMap);
         }
 
+        /**
+         * Gets node map.
+         *
+         * @return the node map
+         */
         public Map<String, JsonNode> getNodeMap() {
             return nodeMap;
         }
@@ -636,20 +887,37 @@ public final class SimpleJsonUtils {
     private static class JsonParserContext {
         private int offset;
 
+        /**
+         * Instantiates a new Json parser context.
+         */
         public JsonParserContext() {
             offset = 0;
         }
 
+        /**
+         * Add offset json parser context.
+         *
+         * @param delta the delta
+         * @return the json parser context
+         */
         public JsonParserContext addOffset(int delta) {
             offset += delta;
             return this;
         }
 
+        /**
+         * Gets offset.
+         *
+         * @return the offset
+         */
         public int getOffset() {
             return offset;
         }
     }
 
+    /**
+     * The type Json text node.
+     */
     public static class JsonTextNode implements JsonNode {
         private String value;
 
@@ -657,10 +925,21 @@ public final class SimpleJsonUtils {
             setValue(value);
         }
 
+        /**
+         * Of json text node.
+         *
+         * @return the json text node
+         */
         public static JsonTextNode of() {
             return new JsonTextNode(StringUtils.EMPTY);
         }
 
+        /**
+         * Of json text node.
+         *
+         * @param value the value
+         * @return the json text node
+         */
         public static JsonTextNode of(String value) {
             return new JsonTextNode(value);
         }
@@ -672,6 +951,11 @@ public final class SimpleJsonUtils {
             return Objects.equals(value, that.value);
         }
 
+        /**
+         * Gets value.
+         *
+         * @return the value
+         */
         public String getValue() {
             return value;
         }
@@ -681,22 +965,61 @@ public final class SimpleJsonUtils {
             return Objects.hashCode(value);
         }
 
+        /**
+         * Sets value.
+         *
+         * @param value the value
+         * @return the value
+         */
         public JsonTextNode setValue(String value) {
             this.value = Objects.requireNonNull(value);
             return this;
         }
     }
 
+    /**
+     * The type Json token.
+     */
     public static final class JsonToken {
+        /**
+         * The constant ARRAY_END.
+         */
         public static final JsonToken ARRAY_END = new JsonToken("]", JsonTokenType.ArrayEnd);
+        /**
+         * The constant ARRAY_START.
+         */
         public static final JsonToken ARRAY_START = new JsonToken("[", JsonTokenType.ArrayStart);
+        /**
+         * The constant BOOLEAN_FALSE.
+         */
         public static final JsonToken BOOLEAN_FALSE = new JsonToken("false", JsonTokenType.Boolean);
+        /**
+         * The constant BOOLEAN_TRUE.
+         */
         public static final JsonToken BOOLEAN_TRUE = new JsonToken("true", JsonTokenType.Boolean);
+        /**
+         * The constant COMMA.
+         */
         public static final JsonToken COMMA = new JsonToken(",", JsonTokenType.Comma);
+        /**
+         * The constant COLON.
+         */
         public static final JsonToken COLON = new JsonToken(":", JsonTokenType.Colon);
+        /**
+         * The constant END_OF_FILE.
+         */
         public static final JsonToken END_OF_FILE = new JsonToken("", JsonTokenType.EndOfFile);
+        /**
+         * The constant NULL.
+         */
         public static final JsonToken NULL = new JsonToken("null", JsonTokenType.Null);
+        /**
+         * The constant OBJECT_END.
+         */
         public static final JsonToken OBJECT_END = new JsonToken("}", JsonTokenType.ObjectEnd);
+        /**
+         * The constant OBJECT_START.
+         */
         public static final JsonToken OBJECT_START = new JsonToken("{", JsonTokenType.ObjectStart);
         private final String rawString;
         private final JsonTokenType type;
@@ -706,22 +1029,49 @@ public final class SimpleJsonUtils {
             this.type = type;
         }
 
+        /**
+         * From number json token.
+         *
+         * @param rawString the raw string
+         * @return the json token
+         */
         public static JsonToken fromNumber(String rawString) {
             return new JsonToken(rawString, JsonTokenType.Number);
         }
 
+        /**
+         * From string json token.
+         *
+         * @param rawString the raw string
+         * @return the json token
+         */
         public static JsonToken fromString(String rawString) {
             return new JsonToken(rawString, JsonTokenType.Text);
         }
 
+        /**
+         * Gets length.
+         *
+         * @return the length
+         */
         public int getLength() {
             return rawString.length();
         }
 
+        /**
+         * Gets raw string.
+         *
+         * @return the raw string
+         */
         public String getRawString() {
             return rawString;
         }
 
+        /**
+         * Gets type.
+         *
+         * @return the type
+         */
         public JsonTokenType getType() {
             return type;
         }

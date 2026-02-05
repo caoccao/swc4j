@@ -32,13 +32,25 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts rest type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsRestType
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstTsType typeAnn;
 
+    /**
+     * Instantiates a new swc4j ast ts rest type.
+     *
+     * @param typeAnn the type ann
+     * @param span    the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsRestType(
             ISwc4jAstTsType typeAnn,
@@ -47,6 +59,12 @@ public class Swc4jAstTsRestType
         setTypeAnn(typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts rest type.
+     *
+     * @param typeAnn the type ann
+     * @return the swc4j ast ts rest type
+     */
     public static Swc4jAstTsRestType create(ISwc4jAstTsType typeAnn) {
         return new Swc4jAstTsRestType(typeAnn, Swc4jSpan.DUMMY);
     }
@@ -61,6 +79,11 @@ public class Swc4jAstTsRestType
         return Swc4jAstType.TsRestType;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public ISwc4jAstTsType getTypeAnn() {
         return typeAnn;
@@ -75,6 +98,12 @@ public class Swc4jAstTsRestType
         return false;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstTsRestType setTypeAnn(ISwc4jAstTsType typeAnn) {
         this.typeAnn = AssertionUtils.notNull(typeAnn, "Type ann");
         this.typeAnn.setParent(this);

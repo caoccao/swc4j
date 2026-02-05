@@ -18,20 +18,53 @@ package com.caoccao.javet.swc4j.jni2rust;
 
 import java.lang.annotation.*;
 
+/**
+ * The interface Jni 2 rust param.
+ */
 @Documented
 @Inherited
 @Target({ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Jni2RustParam {
+    /**
+     * Name string.
+     *
+     * @return the string
+     */
     String name() default "";
 
+    /**
+     * Optional boolean.
+     *
+     * @return the boolean
+     */
     boolean optional() default false;
 
+    /**
+     * Post calls string [ ].
+     *
+     * @return the string [ ]
+     */
     String[] postCalls() default {};
 
+    /**
+     * Pre calls string [ ].
+     *
+     * @return the string [ ]
+     */
     String[] preCalls() default {};
 
+    /**
+     * Rust type string.
+     *
+     * @return the string
+     */
     String rustType() default "";
 
+    /**
+     * Syntax context boolean.
+     *
+     * @return the boolean
+     */
     boolean syntaxContext() default false;
 }

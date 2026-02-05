@@ -34,16 +34,36 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast for in stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstForInStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Body.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstStmt body;
+    /**
+     * The Left.
+     */
     protected ISwc4jAstForHead left;
+    /**
+     * The Right.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr right;
 
+    /**
+     * Instantiates a new swc4j ast for in stmt.
+     *
+     * @param left  the left
+     * @param right the right
+     * @param body  the body
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstForInStmt(
             ISwc4jAstForHead left,
@@ -56,14 +76,34 @@ public class Swc4jAstForInStmt
         setRight(right);
     }
 
+    /**
+     * Create swc4j ast for in stmt.
+     *
+     * @param left  the left
+     * @param right the right
+     * @return the swc4j ast for in stmt
+     */
     public static Swc4jAstForInStmt create(ISwc4jAstForHead left, ISwc4jAstExpr right) {
         return create(left, right, ISwc4jAstStmt.createDefault());
     }
 
+    /**
+     * Create swc4j ast for in stmt.
+     *
+     * @param left  the left
+     * @param right the right
+     * @param body  the body
+     * @return the swc4j ast for in stmt
+     */
     public static Swc4jAstForInStmt create(ISwc4jAstForHead left, ISwc4jAstExpr right, ISwc4jAstStmt body) {
         return new Swc4jAstForInStmt(left, right, body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;
@@ -74,11 +114,21 @@ public class Swc4jAstForInStmt
         return SimpleList.of(left, right, body);
     }
 
+    /**
+     * Gets left.
+     *
+     * @return the left
+     */
     @Jni2RustMethod
     public ISwc4jAstForHead getLeft() {
         return left;
     }
 
+    /**
+     * Gets right.
+     *
+     * @return the right
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getRight() {
         return right;
@@ -106,18 +156,36 @@ public class Swc4jAstForInStmt
         return false;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstForInStmt setBody(ISwc4jAstStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
         this.body.setParent(this);
         return this;
     }
 
+    /**
+     * Sets left.
+     *
+     * @param left the left
+     * @return the left
+     */
     public Swc4jAstForInStmt setLeft(ISwc4jAstForHead left) {
         this.left = AssertionUtils.notNull(left, "Left");
         this.left.setParent(this);
         return this;
     }
 
+    /**
+     * Sets right.
+     *
+     * @param right the right
+     * @return the right
+     */
     public Swc4jAstForInStmt setRight(ISwc4jAstExpr right) {
         this.right = AssertionUtils.notNull(right, "Right");
         this.right.setParent(this);

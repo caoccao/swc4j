@@ -22,12 +22,31 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
+/**
+ * The type swc4j comment.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.CommentUtils)
 public class Swc4jComment {
+    /**
+     * The Kind.
+     */
     protected final Swc4jCommentKind kind;
+    /**
+     * The Span.
+     */
     protected final Swc4jSpan span;
+    /**
+     * The Text.
+     */
     protected final String text;
 
+    /**
+     * Instantiates a new swc4j comment.
+     *
+     * @param text the text
+     * @param kind the kind
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jComment(String text, Swc4jCommentKind kind, Swc4jSpan span) {
         this.kind = AssertionUtils.notNull(kind, "Kind");
@@ -35,14 +54,29 @@ public class Swc4jComment {
         this.text = AssertionUtils.notNull(text, "Text");
     }
 
+    /**
+     * Gets kind.
+     *
+     * @return the kind
+     */
     public Swc4jCommentKind getKind() {
         return kind;
     }
 
+    /**
+     * Gets span.
+     *
+     * @return the span
+     */
     public Swc4jSpan getSpan() {
         return span;
     }
 
+    /**
+     * Gets text.
+     *
+     * @return the text
+     */
     public String getText() {
         return text;
     }

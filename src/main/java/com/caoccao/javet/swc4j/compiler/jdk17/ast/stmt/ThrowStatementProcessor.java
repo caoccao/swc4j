@@ -36,6 +36,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * </pre>
  */
 public final class ThrowStatementProcessor extends BaseAstProcessor<Swc4jAstThrowStmt> {
+    /**
+     * Instantiates a new Throw statement processor.
+     *
+     * @param compiler the compiler
+     */
     public ThrowStatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

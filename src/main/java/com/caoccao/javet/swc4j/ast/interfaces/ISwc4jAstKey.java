@@ -20,6 +20,9 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast key.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "Private", type = Swc4jAstPrivateName.class),

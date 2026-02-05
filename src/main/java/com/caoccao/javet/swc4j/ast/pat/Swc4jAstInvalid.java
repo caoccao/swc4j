@@ -28,16 +28,29 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast invalid.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstInvalid
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstAssignTargetPat, ISwc4jAstExpr, ISwc4jAstSimpleAssignTarget {
+    /**
+     * Instantiates a new swc4j ast invalid.
+     *
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstInvalid(
             Swc4jSpan span) {
         super(span);
     }
 
+    /**
+     * Create swc4j ast invalid.
+     *
+     * @return the swc4j ast invalid
+     */
     public static Swc4jAstInvalid create() {
         return new Swc4jAstInvalid(Swc4jSpan.DUMMY);
     }

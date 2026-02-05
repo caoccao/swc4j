@@ -27,6 +27,9 @@ import java.util.Stack;
 public final class ScopedSourceCode {
     private final Stack<String> sourceCodeStack;
 
+    /**
+     * Instantiates a new Scoped source code.
+     */
     public ScopedSourceCode() {
         sourceCodeStack = new Stack<>();
         // Push global scope

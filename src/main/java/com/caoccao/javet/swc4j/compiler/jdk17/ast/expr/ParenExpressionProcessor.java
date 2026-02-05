@@ -24,7 +24,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type Paren expression processor.
+ */
 public final class ParenExpressionProcessor extends BaseAstProcessor<Swc4jAstParenExpr> {
+    /**
+     * Instantiates a new Paren expression processor.
+     *
+     * @param compiler the compiler
+     */
     public ParenExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

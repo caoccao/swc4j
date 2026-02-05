@@ -30,16 +30,29 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast jsx empty expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXEmptyExpr")
 public class Swc4jAstJsxEmptyExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxExpr {
+    /**
+     * Instantiates a new swc4j ast jsx empty expr.
+     *
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstJsxEmptyExpr(
             Swc4jSpan span) {
         super(span);
     }
 
+    /**
+     * Create swc4j ast jsx empty expr.
+     *
+     * @return the swc4j ast jsx empty expr
+     */
     public static Swc4jAstJsxEmptyExpr create() {
         return new Swc4jAstJsxEmptyExpr(Swc4jSpan.DUMMY);
     }

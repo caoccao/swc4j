@@ -46,6 +46,11 @@ import java.util.List;
  * same class are deduplicated to share the same cached field.
  */
 public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4jAstTaggedTpl> {
+    /**
+     * Instantiates a new Tagged template literal processor.
+     *
+     * @param compiler the compiler
+     */
     public TaggedTemplateLiteralProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

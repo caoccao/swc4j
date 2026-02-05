@@ -33,12 +33,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast export default specifier.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
 public class Swc4jAstExportDefaultSpecifier
         extends Swc4jAst
         implements ISwc4jAstModuleDecl, ISwc4jAstExportSpecifier {
+    /**
+     * The Exported.
+     */
     protected Swc4jAstIdent exported;
 
+    /**
+     * Instantiates a new swc4j ast export default specifier.
+     *
+     * @param exported the exported
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstExportDefaultSpecifier(
             Swc4jAstIdent exported,
@@ -47,6 +59,12 @@ public class Swc4jAstExportDefaultSpecifier
         setExported(exported);
     }
 
+    /**
+     * Create swc4j ast export default specifier.
+     *
+     * @param exported the exported
+     * @return the swc4j ast export default specifier
+     */
     public static Swc4jAstExportDefaultSpecifier create(Swc4jAstIdent exported) {
         return new Swc4jAstExportDefaultSpecifier(exported, Swc4jSpan.DUMMY);
     }
@@ -56,6 +74,11 @@ public class Swc4jAstExportDefaultSpecifier
         return SimpleList.of(exported);
     }
 
+    /**
+     * Gets exported.
+     *
+     * @return the exported
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getExported() {
         return exported;
@@ -75,6 +98,12 @@ public class Swc4jAstExportDefaultSpecifier
         return false;
     }
 
+    /**
+     * Sets exported.
+     *
+     * @param exported the exported
+     * @return the exported
+     */
     public Swc4jAstExportDefaultSpecifier setExported(Swc4jAstIdent exported) {
         this.exported = AssertionUtils.notNull(exported, "Exported");
         this.exported.setParent(this);

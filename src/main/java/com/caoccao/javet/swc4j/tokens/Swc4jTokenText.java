@@ -18,9 +18,23 @@ package com.caoccao.javet.swc4j.tokens;
 
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
+/**
+ * The type swc4j token text.
+ */
 public class Swc4jTokenText extends Swc4jToken {
+    /**
+     * The Text.
+     */
     protected final String text;
 
+    /**
+     * Instantiates a new swc4j token text.
+     *
+     * @param type           the type
+     * @param text           the text
+     * @param span           the span
+     * @param lineBreakAhead the line break ahead
+     */
     public Swc4jTokenText(
             Swc4jTokenType type,
             String text,

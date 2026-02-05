@@ -24,22 +24,47 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * The type swc4j plugin visitors.
+ */
 public class Swc4jPluginVisitors implements ISwc4jPlugin {
+    /**
+     * The Visitors.
+     */
     protected final List<ISwc4jAstVisitor> visitors;
 
+    /**
+     * Instantiates a new swc4j plugin visitors.
+     */
     public Swc4jPluginVisitors() {
         this(SimpleList.of());
     }
 
+    /**
+     * Instantiates a new swc4j plugin visitors.
+     *
+     * @param visitors the visitors
+     */
     public Swc4jPluginVisitors(List<ISwc4jAstVisitor> visitors) {
         this.visitors = AssertionUtils.notNull(visitors, "Visitors");
     }
 
+    /**
+     * Add swc4j plugin visitors.
+     *
+     * @param visitors the visitors
+     * @return the swc4j plugin visitors
+     */
     public Swc4jPluginVisitors add(ISwc4jAstVisitor... visitors) {
         Collections.addAll(this.visitors, visitors);
         return this;
     }
 
+    /**
+     * Gets visitors.
+     *
+     * @return the visitors
+     */
     public List<ISwc4jAstVisitor> getVisitors() {
         return visitors;
     }
@@ -59,6 +84,12 @@ public class Swc4jPluginVisitors implements ISwc4jPlugin {
         return Swc4jPluginResponse.OkAndContinue;
     }
 
+    /**
+     * Remove swc4j plugin visitors.
+     *
+     * @param visitors the visitors
+     * @return the swc4j plugin visitors
+     */
     public Swc4jPluginVisitors remove(ISwc4jAstVisitor... visitors) {
         this.visitors.removeAll(SimpleList.of(visitors));
         return this;

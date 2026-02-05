@@ -40,6 +40,9 @@ public final class TypeParameterScope {
      */
     private final Map<String, ISwc4jAstTsType> typeParameterConstraints;
 
+    /**
+     * Instantiates a new Type parameter scope.
+     */
     public TypeParameterScope() {
         this.typeParameterConstraints = new HashMap<>();
     }

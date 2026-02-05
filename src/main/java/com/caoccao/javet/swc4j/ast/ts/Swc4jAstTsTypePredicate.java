@@ -31,15 +31,35 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts type predicate.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTypePredicate
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Asserts.
+     */
     protected boolean asserts;
+    /**
+     * The Param name.
+     */
     protected ISwc4jAstTsThisTypeOrIdent paramName;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
+    /**
+     * Instantiates a new swc4j ast ts type predicate.
+     *
+     * @param asserts   the asserts
+     * @param paramName the param name
+     * @param typeAnn   the type ann
+     * @param span      the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypePredicate(
             boolean asserts,
@@ -52,14 +72,35 @@ public class Swc4jAstTsTypePredicate
         setTypeAnn(typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts type predicate.
+     *
+     * @param paramName the param name
+     * @return the swc4j ast ts type predicate
+     */
     public static Swc4jAstTsTypePredicate create(ISwc4jAstTsThisTypeOrIdent paramName) {
         return create(false, paramName);
     }
 
+    /**
+     * Create swc4j ast ts type predicate.
+     *
+     * @param asserts   the asserts
+     * @param paramName the param name
+     * @return the swc4j ast ts type predicate
+     */
     public static Swc4jAstTsTypePredicate create(boolean asserts, ISwc4jAstTsThisTypeOrIdent paramName) {
         return create(asserts, paramName, null);
     }
 
+    /**
+     * Create swc4j ast ts type predicate.
+     *
+     * @param asserts   the asserts
+     * @param paramName the param name
+     * @param typeAnn   the type ann
+     * @return the swc4j ast ts type predicate
+     */
     public static Swc4jAstTsTypePredicate create(
             boolean asserts,
             ISwc4jAstTsThisTypeOrIdent paramName,
@@ -74,6 +115,11 @@ public class Swc4jAstTsTypePredicate
         return childNodes;
     }
 
+    /**
+     * Gets param name.
+     *
+     * @return the param name
+     */
     @Jni2RustMethod
     public ISwc4jAstTsThisTypeOrIdent getParamName() {
         return paramName;
@@ -84,11 +130,21 @@ public class Swc4jAstTsTypePredicate
         return Swc4jAstType.TsTypePredicate;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    /**
+     * Is asserts boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isAsserts() {
         return asserts;
@@ -108,17 +164,35 @@ public class Swc4jAstTsTypePredicate
         return false;
     }
 
+    /**
+     * Sets asserts.
+     *
+     * @param asserts the asserts
+     * @return the asserts
+     */
     public Swc4jAstTsTypePredicate setAsserts(boolean asserts) {
         this.asserts = asserts;
         return this;
     }
 
+    /**
+     * Sets param name.
+     *
+     * @param paramName the param name
+     * @return the param name
+     */
     public Swc4jAstTsTypePredicate setParamName(ISwc4jAstTsThisTypeOrIdent paramName) {
         this.paramName = AssertionUtils.notNull(paramName, "Param name");
         this.paramName.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstTsTypePredicate setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));

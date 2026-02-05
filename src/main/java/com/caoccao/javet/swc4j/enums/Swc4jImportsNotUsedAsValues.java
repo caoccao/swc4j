@@ -28,8 +28,17 @@ import java.util.stream.Stream;
  * @since 0.1.0
  */
 public enum Swc4jImportsNotUsedAsValues implements ISwc4jEnumId {
+    /**
+     * Remove swc4j imports not used as values.
+     */
     Remove(0),
+    /**
+     * Preserve swc4j imports not used as values.
+     */
     Preserve(1),
+    /**
+     * Error swc4j imports not used as values.
+     */
     Error(2);
 
     private static final int LENGTH = values().length;

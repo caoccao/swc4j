@@ -32,14 +32,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast fn expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
 public class Swc4jAstFnExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstDefaultDecl {
+    /**
+     * The Function.
+     */
     @Jni2RustField(box = true)
     protected Swc4jAstFunction function;
+    /**
+     * The Ident.
+     */
     protected Optional<Swc4jAstIdent> ident;
 
+    /**
+     * Instantiates a new swc4j ast fn expr.
+     *
+     * @param ident    the ident
+     * @param function the function
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstFnExpr(
             @Jni2RustParam(optional = true) Swc4jAstIdent ident,
@@ -50,10 +66,23 @@ public class Swc4jAstFnExpr
         setIdent(ident);
     }
 
+    /**
+     * Create swc4j ast fn expr.
+     *
+     * @param function the function
+     * @return the swc4j ast fn expr
+     */
     public static Swc4jAstFnExpr create(Swc4jAstFunction function) {
         return create(null, function);
     }
 
+    /**
+     * Create swc4j ast fn expr.
+     *
+     * @param ident    the ident
+     * @param function the function
+     * @return the swc4j ast fn expr
+     */
     public static Swc4jAstFnExpr create(Swc4jAstIdent ident, Swc4jAstFunction function) {
         return new Swc4jAstFnExpr(ident, function, Swc4jSpan.DUMMY);
     }
@@ -65,11 +94,21 @@ public class Swc4jAstFnExpr
         return childNodes;
     }
 
+    /**
+     * Gets function.
+     *
+     * @return the function
+     */
     @Jni2RustMethod
     public Swc4jAstFunction getFunction() {
         return function;
     }
 
+    /**
+     * Gets ident.
+     *
+     * @return the ident
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstIdent> getIdent() {
         return ident;
@@ -94,12 +133,24 @@ public class Swc4jAstFnExpr
         return false;
     }
 
+    /**
+     * Sets function.
+     *
+     * @param function the function
+     * @return the function
+     */
     public Swc4jAstFnExpr setFunction(Swc4jAstFunction function) {
         this.function = AssertionUtils.notNull(function, "Function");
         this.function.setParent(this);
         return this;
     }
 
+    /**
+     * Sets ident.
+     *
+     * @param ident the ident
+     * @return the ident
+     */
     public Swc4jAstFnExpr setIdent(Swc4jAstIdent ident) {
         this.ident = Optional.ofNullable(ident);
         this.ident.ifPresent(node -> node.setParent(this));

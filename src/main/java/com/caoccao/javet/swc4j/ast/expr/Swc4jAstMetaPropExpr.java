@@ -31,12 +31,24 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast meta prop expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstMetaPropExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    /**
+     * The Kind.
+     */
     protected Swc4jAstMetaPropKind kind;
 
+    /**
+     * Instantiates a new swc4j ast meta prop expr.
+     *
+     * @param kind the kind
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstMetaPropExpr(
             Swc4jAstMetaPropKind kind,
@@ -45,6 +57,12 @@ public class Swc4jAstMetaPropExpr
         setKind(kind);
     }
 
+    /**
+     * Create swc4j ast meta prop expr.
+     *
+     * @param kind the kind
+     * @return the swc4j ast meta prop expr
+     */
     public static Swc4jAstMetaPropExpr create(Swc4jAstMetaPropKind kind) {
         return new Swc4jAstMetaPropExpr(kind, Swc4jSpan.DUMMY);
     }
@@ -54,6 +72,11 @@ public class Swc4jAstMetaPropExpr
         return EMPTY_CHILD_NODES;
     }
 
+    /**
+     * Gets kind.
+     *
+     * @return the kind
+     */
     @Jni2RustMethod
     public Swc4jAstMetaPropKind getKind() {
         return kind;
@@ -69,6 +92,12 @@ public class Swc4jAstMetaPropExpr
         return false;
     }
 
+    /**
+     * Sets kind.
+     *
+     * @param kind the kind
+     * @return the kind
+     */
     public Swc4jAstMetaPropExpr setKind(Swc4jAstMetaPropKind kind) {
         this.kind = AssertionUtils.notNull(kind, "Kind");
         return this;

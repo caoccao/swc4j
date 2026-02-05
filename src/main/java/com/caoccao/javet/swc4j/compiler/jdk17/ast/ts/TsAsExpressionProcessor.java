@@ -25,7 +25,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type Ts as expression processor.
+ */
 public final class TsAsExpressionProcessor extends BaseAstProcessor<Swc4jAstTsAsExpr> {
+    /**
+     * Instantiates a new Ts as expression processor.
+     *
+     * @param compiler the compiler
+     */
     public TsAsExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

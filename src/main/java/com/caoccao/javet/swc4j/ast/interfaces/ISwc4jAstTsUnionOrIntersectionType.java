@@ -21,6 +21,9 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsUnionType;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast ts union or intersection type.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "TsIntersectionType", type = Swc4jAstTsIntersectionType.class),

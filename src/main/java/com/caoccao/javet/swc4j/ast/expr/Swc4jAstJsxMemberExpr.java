@@ -33,13 +33,29 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast jsx member expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXMemberExpr")
 public class Swc4jAstJsxMemberExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxObject, ISwc4jAstJsxElementName {
+    /**
+     * The Obj.
+     */
     protected ISwc4jAstJsxObject obj;
+    /**
+     * The Prop.
+     */
     protected Swc4jAstIdentName prop;
 
+    /**
+     * Instantiates a new swc4j ast jsx member expr.
+     *
+     * @param obj  the obj
+     * @param prop the prop
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstJsxMemberExpr(
             ISwc4jAstJsxObject obj,
@@ -50,6 +66,13 @@ public class Swc4jAstJsxMemberExpr
         setProp(prop);
     }
 
+    /**
+     * Create swc4j ast jsx member expr.
+     *
+     * @param obj  the obj
+     * @param prop the prop
+     * @return the swc4j ast jsx member expr
+     */
     public static Swc4jAstJsxMemberExpr create(ISwc4jAstJsxObject obj, Swc4jAstIdentName prop) {
         return new Swc4jAstJsxMemberExpr(obj, prop, Swc4jSpan.DUMMY);
     }
@@ -59,11 +82,21 @@ public class Swc4jAstJsxMemberExpr
         return SimpleList.of(obj, prop);
     }
 
+    /**
+     * Gets obj.
+     *
+     * @return the obj
+     */
     @Jni2RustMethod
     public ISwc4jAstJsxObject getObj() {
         return obj;
     }
 
+    /**
+     * Gets prop.
+     *
+     * @return the prop
+     */
     @Jni2RustMethod
     public Swc4jAstIdentName getProp() {
         return prop;
@@ -87,12 +120,24 @@ public class Swc4jAstJsxMemberExpr
         return false;
     }
 
+    /**
+     * Sets obj.
+     *
+     * @param obj the obj
+     * @return the obj
+     */
     public Swc4jAstJsxMemberExpr setObj(ISwc4jAstJsxObject obj) {
         this.obj = AssertionUtils.notNull(obj, "Obj");
         this.obj.setParent(this);
         return this;
     }
 
+    /**
+     * Sets prop.
+     *
+     * @param prop the prop
+     * @return the prop
+     */
     public Swc4jAstJsxMemberExpr setProp(Swc4jAstIdentName prop) {
         this.prop = AssertionUtils.notNull(prop, "Prop");
         this.prop.setParent(this);

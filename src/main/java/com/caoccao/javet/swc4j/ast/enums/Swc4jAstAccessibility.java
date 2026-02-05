@@ -20,9 +20,21 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast accessibility.
+ */
 public enum Swc4jAstAccessibility implements ISwc4jEnumIdName {
+    /**
+     * Public swc4j ast accessibility.
+     */
     Public(0, "public"),
+    /**
+     * Protected swc4j ast accessibility.
+     */
     Protected(1, "protected"),
+    /**
+     * Private swc4j ast accessibility.
+     */
     Private(2, "private"),
     ;
 
@@ -41,6 +53,12 @@ public enum Swc4jAstAccessibility implements ISwc4jEnumIdName {
         this.name = name;
     }
 
+    /**
+     * Parse swc4j ast accessibility.
+     *
+     * @param id the id
+     * @return the swc4j ast accessibility
+     */
     public static Swc4jAstAccessibility parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : Public;
     }

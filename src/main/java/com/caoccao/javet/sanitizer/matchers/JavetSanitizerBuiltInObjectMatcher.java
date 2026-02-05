@@ -31,6 +31,9 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
 
 import java.util.Optional;
 
+/**
+ * The type Javet sanitizer built in object matcher.
+ */
 public final class JavetSanitizerBuiltInObjectMatcher implements IJavetSanitizerMatcher {
 
     private static final JavetSanitizerBuiltInObjectMatcher INSTANCE = new JavetSanitizerBuiltInObjectMatcher();

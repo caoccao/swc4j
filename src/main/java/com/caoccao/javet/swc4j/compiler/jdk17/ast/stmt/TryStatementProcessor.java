@@ -54,6 +54,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * </ul>
  */
 public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStmt> {
+    /**
+     * Instantiates a new Try statement processor.
+     *
+     * @param compiler the compiler
+     */
     public TryStatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

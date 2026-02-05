@@ -31,18 +31,42 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast new expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstNewExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    /**
+     * The Args.
+     */
     protected Optional<List<Swc4jAstExprOrSpread>> args;
+    /**
+     * The Callee.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr callee;
+    /**
+     * The Ctxt.
+     */
     @Jni2RustField(syntaxContext = true)
     protected int ctxt;
+    /**
+     * The Type args.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
+    /**
+     * Instantiates a new swc4j ast new expr.
+     *
+     * @param ctxt     the ctxt
+     * @param callee   the callee
+     * @param args     the args
+     * @param typeArgs the type args
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstNewExpr(
             @Jni2RustParam(syntaxContext = true) int ctxt,
@@ -57,16 +81,37 @@ public class Swc4jAstNewExpr
         setTypeArgs(typeArgs);
     }
 
+    /**
+     * Create swc4j ast new expr.
+     *
+     * @param callee the callee
+     * @return the swc4j ast new expr
+     */
     public static Swc4jAstNewExpr create(ISwc4jAstExpr callee) {
         return create(callee, null);
     }
 
+    /**
+     * Create swc4j ast new expr.
+     *
+     * @param callee the callee
+     * @param args   the args
+     * @return the swc4j ast new expr
+     */
     public static Swc4jAstNewExpr create(
             ISwc4jAstExpr callee,
             List<Swc4jAstExprOrSpread> args) {
         return create(callee, args, null);
     }
 
+    /**
+     * Create swc4j ast new expr.
+     *
+     * @param callee   the callee
+     * @param args     the args
+     * @param typeArgs the type args
+     * @return the swc4j ast new expr
+     */
     public static Swc4jAstNewExpr create(
             ISwc4jAstExpr callee,
             List<Swc4jAstExprOrSpread> args,
@@ -74,6 +119,15 @@ public class Swc4jAstNewExpr
         return create(0, callee, args, typeArgs);
     }
 
+    /**
+     * Create swc4j ast new expr.
+     *
+     * @param ctxt     the ctxt
+     * @param callee   the callee
+     * @param args     the args
+     * @param typeArgs the type args
+     * @return the swc4j ast new expr
+     */
     public static Swc4jAstNewExpr create(
             int ctxt,
             ISwc4jAstExpr callee,
@@ -82,11 +136,21 @@ public class Swc4jAstNewExpr
         return new Swc4jAstNewExpr(ctxt, callee, args, typeArgs, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets args.
+     *
+     * @return the args
+     */
     @Jni2RustMethod
     public Optional<List<Swc4jAstExprOrSpread>> getArgs() {
         return args;
     }
 
+    /**
+     * Gets callee.
+     *
+     * @return the callee
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getCallee() {
         return callee;
@@ -100,6 +164,11 @@ public class Swc4jAstNewExpr
         return childNodes;
     }
 
+    /**
+     * Gets ctxt.
+     *
+     * @return the ctxt
+     */
     @Jni2RustMethod
     public int getCtxt() {
         return ctxt;
@@ -110,11 +179,21 @@ public class Swc4jAstNewExpr
         return Swc4jAstType.NewExpr;
     }
 
+    /**
+     * Gets type args.
+     *
+     * @return the type args
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
     }
 
+    /**
+     * Is spread present boolean.
+     *
+     * @return the boolean
+     */
     public boolean isSpreadPresent() {
         return args.map(list -> list.stream().anyMatch(arg -> arg.getSpread().isPresent())).orElse(false);
     }
@@ -145,23 +224,47 @@ public class Swc4jAstNewExpr
         return false;
     }
 
+    /**
+     * Sets args.
+     *
+     * @param args the args
+     * @return the args
+     */
     public Swc4jAstNewExpr setArgs(List<Swc4jAstExprOrSpread> args) {
         this.args = Optional.ofNullable(args);
         this.args.ifPresent(nodes -> nodes.forEach(node -> node.setParent(this)));
         return this;
     }
 
+    /**
+     * Sets callee.
+     *
+     * @param callee the callee
+     * @return the callee
+     */
     public Swc4jAstNewExpr setCallee(ISwc4jAstExpr callee) {
         this.callee = AssertionUtils.notNull(callee, "Callee");
         this.callee.setParent(this);
         return this;
     }
 
+    /**
+     * Sets ctxt.
+     *
+     * @param ctxt the ctxt
+     * @return the ctxt
+     */
     public Swc4jAstNewExpr setCtxt(int ctxt) {
         this.ctxt = ctxt;
         return this;
     }
 
+    /**
+     * Sets type args.
+     *
+     * @param typeArgs the type args
+     * @return the type args
+     */
     public Swc4jAstNewExpr setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
         this.typeArgs = Optional.ofNullable(typeArgs);
         this.typeArgs.ifPresent(nodes -> nodes.setParent(this));

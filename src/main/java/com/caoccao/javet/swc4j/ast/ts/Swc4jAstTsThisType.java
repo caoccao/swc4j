@@ -30,16 +30,29 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts this type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsThisType
         extends Swc4jAst
         implements ISwc4jAstTsType, ISwc4jAstTsThisTypeOrIdent {
+    /**
+     * Instantiates a new swc4j ast ts this type.
+     *
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsThisType(
             Swc4jSpan span) {
         super(span);
     }
 
+    /**
+     * Create swc4j ast ts this type.
+     *
+     * @return the swc4j ast ts this type
+     */
     public static Swc4jAstTsThisType create() {
         return new Swc4jAstTsThisType(Swc4jSpan.DUMMY);
     }

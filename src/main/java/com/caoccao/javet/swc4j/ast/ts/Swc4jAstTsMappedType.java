@@ -31,18 +31,46 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts mapped type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsMappedType
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Name type.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstTsType> nameType;
+    /**
+     * The Optional.
+     */
     protected Optional<Swc4jAstTruePlusMinus> optional;
+    /**
+     * The Readonly.
+     */
     protected Optional<Swc4jAstTruePlusMinus> readonly;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstTsType> typeAnn;
+    /**
+     * The Type param.
+     */
     protected Swc4jAstTsTypeParam typeParam;
 
+    /**
+     * Instantiates a new swc4j ast ts mapped type.
+     *
+     * @param readonly  the readonly
+     * @param typeParam the type param
+     * @param nameType  the name type
+     * @param optional  the optional
+     * @param typeAnn   the type ann
+     * @param span      the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsMappedType(
             @Jni2RustParam(optional = true) Swc4jAstTruePlusMinus readonly,
@@ -59,14 +87,35 @@ public class Swc4jAstTsMappedType
         setTypeParam(typeParam);
     }
 
+    /**
+     * Create swc4j ast ts mapped type.
+     *
+     * @param typeParam the type param
+     * @return the swc4j ast ts mapped type
+     */
     public static Swc4jAstTsMappedType create(Swc4jAstTsTypeParam typeParam) {
         return create(null, typeParam);
     }
 
+    /**
+     * Create swc4j ast ts mapped type.
+     *
+     * @param readonly  the readonly
+     * @param typeParam the type param
+     * @return the swc4j ast ts mapped type
+     */
     public static Swc4jAstTsMappedType create(Swc4jAstTruePlusMinus readonly, Swc4jAstTsTypeParam typeParam) {
         return create(readonly, typeParam, null);
     }
 
+    /**
+     * Create swc4j ast ts mapped type.
+     *
+     * @param readonly  the readonly
+     * @param typeParam the type param
+     * @param nameType  the name type
+     * @return the swc4j ast ts mapped type
+     */
     public static Swc4jAstTsMappedType create(
             Swc4jAstTruePlusMinus readonly,
             Swc4jAstTsTypeParam typeParam,
@@ -74,6 +123,15 @@ public class Swc4jAstTsMappedType
         return create(readonly, typeParam, nameType, null);
     }
 
+    /**
+     * Create swc4j ast ts mapped type.
+     *
+     * @param readonly  the readonly
+     * @param typeParam the type param
+     * @param nameType  the name type
+     * @param optional  the optional
+     * @return the swc4j ast ts mapped type
+     */
     public static Swc4jAstTsMappedType create(
             Swc4jAstTruePlusMinus readonly,
             Swc4jAstTsTypeParam typeParam,
@@ -82,6 +140,16 @@ public class Swc4jAstTsMappedType
         return create(readonly, typeParam, nameType, optional, null);
     }
 
+    /**
+     * Create swc4j ast ts mapped type.
+     *
+     * @param readonly  the readonly
+     * @param typeParam the type param
+     * @param nameType  the name type
+     * @param optional  the optional
+     * @param typeAnn   the type ann
+     * @return the swc4j ast ts mapped type
+     */
     public static Swc4jAstTsMappedType create(
             Swc4jAstTruePlusMinus readonly,
             Swc4jAstTsTypeParam typeParam,
@@ -99,16 +167,31 @@ public class Swc4jAstTsMappedType
         return childNodes;
     }
 
+    /**
+     * Gets name type.
+     *
+     * @return the name type
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstTsType> getNameType() {
         return nameType;
     }
 
+    /**
+     * Gets optional.
+     *
+     * @return the optional
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTruePlusMinus> getOptional() {
         return optional;
     }
 
+    /**
+     * Gets readonly.
+     *
+     * @return the readonly
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTruePlusMinus> getReadonly() {
         return readonly;
@@ -119,11 +202,21 @@ public class Swc4jAstTsMappedType
         return Swc4jAstType.TsMappedType;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstTsType> getTypeAnn() {
         return typeAnn;
     }
 
+    /**
+     * Gets type param.
+     *
+     * @return the type param
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeParam getTypeParam() {
         return typeParam;
@@ -148,28 +241,58 @@ public class Swc4jAstTsMappedType
         return false;
     }
 
+    /**
+     * Sets name type.
+     *
+     * @param nameType the name type
+     * @return the name type
+     */
     public Swc4jAstTsMappedType setNameType(ISwc4jAstTsType nameType) {
         this.nameType = Optional.ofNullable(nameType);
         this.nameType.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets optional.
+     *
+     * @param optional the optional
+     * @return the optional
+     */
     public Swc4jAstTsMappedType setOptional(Swc4jAstTruePlusMinus optional) {
         this.optional = Optional.ofNullable(optional);
         return this;
     }
 
+    /**
+     * Sets readonly.
+     *
+     * @param readonly the readonly
+     * @return the readonly
+     */
     public Swc4jAstTsMappedType setReadonly(Swc4jAstTruePlusMinus readonly) {
         this.readonly = Optional.ofNullable(readonly);
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstTsMappedType setTypeAnn(ISwc4jAstTsType typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets type param.
+     *
+     * @param typeParam the type param
+     * @return the type param
+     */
     public Swc4jAstTsMappedType setTypeParam(Swc4jAstTsTypeParam typeParam) {
         this.typeParam = AssertionUtils.notNull(typeParam, "TypeParam");
         this.typeParam.setParent(this);

@@ -26,13 +26,26 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 
 import java.util.List;
 
+/**
+ * The type Type alias collector.
+ */
 public final class TypeAliasCollector {
     private final ByteCodeCompiler compiler;
 
+    /**
+     * Instantiates a new Type alias collector.
+     *
+     * @param compiler the compiler
+     */
     public TypeAliasCollector(ByteCodeCompiler compiler) {
         this.compiler = compiler;
     }
 
+    /**
+     * Collect from module items.
+     *
+     * @param items the items
+     */
     public void collectFromModuleItems(List<ISwc4jAstModuleItem> items) {
         for (ISwc4jAstModuleItem item : items) {
             if (item instanceof Swc4jAstExportDecl exportDecl) {
@@ -46,6 +59,11 @@ public final class TypeAliasCollector {
         }
     }
 
+    /**
+     * Collect from stmts.
+     *
+     * @param stmts the stmts
+     */
     public void collectFromStmts(List<ISwc4jAstStmt> stmts) {
         for (ISwc4jAstStmt stmt : stmts) {
             if (stmt instanceof Swc4jAstTsTypeAliasDecl typeAliasDecl) {

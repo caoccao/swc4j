@@ -21,6 +21,9 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstJsxMemberExpr;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast jsx object.
+ */
 @Jni2RustClass(
         name = "JSXObject",
         mappings = {

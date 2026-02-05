@@ -876,7 +876,7 @@ public class CodeBuilder {
      *
      * @return this CodeBuilder
      */
-    // Type conversion instructions
+// Type conversion instructions
     public CodeBuilder i2l() {
         code.add((byte) (0x85)); // i2l
         return this;

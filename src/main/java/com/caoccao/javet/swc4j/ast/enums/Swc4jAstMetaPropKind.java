@@ -20,8 +20,17 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast meta prop kind.
+ */
 public enum Swc4jAstMetaPropKind implements ISwc4jEnumIdName {
+    /**
+     * New target swc4j ast meta prop kind.
+     */
     NewTarget(0, "new.target"),
+    /**
+     * Import meta swc4j ast meta prop kind.
+     */
     ImportMeta(1, "import.meta"),
     ;
 
@@ -40,6 +49,12 @@ public enum Swc4jAstMetaPropKind implements ISwc4jEnumIdName {
         this.name = name;
     }
 
+    /**
+     * Parse swc4j ast meta prop kind.
+     *
+     * @param id the id
+     * @return the swc4j ast meta prop kind
+     */
     public static Swc4jAstMetaPropKind parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : NewTarget;
     }

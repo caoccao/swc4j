@@ -33,21 +33,49 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The type swc4j ast number.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstNumber
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
+    /**
+     * The constant MAX_EXPONENT.
+     */
     protected static final int MAX_EXPONENT = 308;
+    /**
+     * The constant PATTERN_DECIMAL_ZEROS.
+     */
     protected static final Pattern PATTERN_DECIMAL_ZEROS =
             Pattern.compile("^([+\\-]?)(\\d+)\\.0*$", Pattern.CASE_INSENSITIVE);
+    /**
+     * The constant PATTERN_SCIENTIFIC_NOTATION_WITHOUT_FRACTION.
+     */
     protected static final Pattern PATTERN_SCIENTIFIC_NOTATION_WITHOUT_FRACTION =
             Pattern.compile("^([+\\-]?)(\\d+)e([+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
+    /**
+     * The constant PATTERN_SCIENTIFIC_NOTATION_WITH_FRACTION.
+     */
     protected static final Pattern PATTERN_SCIENTIFIC_NOTATION_WITH_FRACTION =
             Pattern.compile("^([+\\-]?)(\\d+)\\.(\\d*)e([+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
+    /**
+     * The Raw.
+     */
     @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
+    /**
+     * The Value.
+     */
     protected double value;
 
+    /**
+     * Instantiates a new swc4j ast number.
+     *
+     * @param value the value
+     * @param raw   the raw
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstNumber(
             double value,
@@ -58,26 +86,62 @@ public class Swc4jAstNumber
         setValue(value);
     }
 
+    /**
+     * Create swc4j ast number.
+     *
+     * @param value the value
+     * @return the swc4j ast number
+     */
     public static Swc4jAstNumber create(int value) {
         return create(value, Integer.toString(value));
     }
 
+    /**
+     * Create swc4j ast number.
+     *
+     * @param value the value
+     * @return the swc4j ast number
+     */
     public static Swc4jAstNumber create(double value) {
         return create(value, null);
     }
 
+    /**
+     * Create swc4j ast number.
+     *
+     * @param value the value
+     * @param raw   the raw
+     * @return the swc4j ast number
+     */
     public static Swc4jAstNumber create(double value, String raw) {
         return new Swc4jAstNumber(value, raw, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Create infinity swc4j ast number.
+     *
+     * @param positive the positive
+     * @return the swc4j ast number
+     */
     public static Swc4jAstNumber createInfinity(boolean positive) {
         return create(positive ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY, null);
     }
 
+    /**
+     * Create na n swc4j ast number.
+     *
+     * @return the swc4j ast number
+     */
     public static Swc4jAstNumber createNaN() {
         return create(Double.NaN, null);
     }
 
+    /**
+     * Normalize string.
+     *
+     * @param raw the raw
+     * @return the string
+     */
     protected static String normalize(String raw) {
         Matcher matcher = PATTERN_SCIENTIFIC_NOTATION_WITH_FRACTION.matcher(raw);
         if (matcher.matches()) {
@@ -178,6 +242,12 @@ public class Swc4jAstNumber
         return EMPTY_CHILD_NODES;
     }
 
+    /**
+     * Gets minus count.
+     *
+     * @param ast the ast
+     * @return the minus count
+     */
     protected int getMinusCount(ISwc4jAst ast) {
         return switch (ast.getType()) {
             case ParenExpr -> getMinusCount(ast.getParent());
@@ -191,10 +261,20 @@ public class Swc4jAstNumber
         };
     }
 
+    /**
+     * Gets minus count.
+     *
+     * @return the minus count
+     */
     public int getMinusCount() {
         return getMinusCount(getParent());
     }
 
+    /**
+     * Gets raw.
+     *
+     * @return the raw
+     */
     @Jni2RustMethod
     public Optional<String> getRaw() {
         return raw;
@@ -205,6 +285,11 @@ public class Swc4jAstNumber
         return Swc4jAstType.Number;
     }
 
+    /**
+     * Gets value.
+     *
+     * @return the value
+     */
     @Jni2RustMethod
     public double getValue() {
         return value;
@@ -225,11 +310,23 @@ public class Swc4jAstNumber
         return false;
     }
 
+    /**
+     * Sets raw.
+     *
+     * @param raw the raw
+     * @return the raw
+     */
     public Swc4jAstNumber setRaw(String raw) {
         this.raw = Optional.ofNullable(raw);
         return this;
     }
 
+    /**
+     * Sets value.
+     *
+     * @param value the value
+     * @return the value
+     */
     public Swc4jAstNumber setValue(double value) {
         this.value = value;
         return this;
@@ -240,6 +337,12 @@ public class Swc4jAstNumber
         return normalize(raw.orElse(Double.toString(value)));
     }
 
+    /**
+     * To string string.
+     *
+     * @param radix the radix
+     * @return the string
+     */
     public String toString(int radix) {
         return Integer.toString(asInt(), radix);
     }

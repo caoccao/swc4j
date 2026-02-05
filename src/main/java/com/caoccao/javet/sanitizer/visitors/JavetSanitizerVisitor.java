@@ -34,25 +34,45 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
  * Visitor that validates AST nodes against sanitizer rules.
  */
 public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSanitizerVisitor {
-    /** Keyword constant: "async" */
+    /**
+     * Keyword constant: "async"
+     */
     protected static final String ASYNC = "async";
-    /** Keyword constant: "await" */
+    /**
+     * Keyword constant: "await"
+     */
     protected static final String AWAIT = "await";
-    /** Keyword constant: "debugger" */
+    /**
+     * Keyword constant: "debugger"
+     */
     protected static final String DEBUGGER = "debugger";
-    /** Keyword constant: "export" */
+    /**
+     * Keyword constant: "export"
+     */
     protected static final String EXPORT = "export";
-    /** Keyword constant: "import" */
+    /**
+     * Keyword constant: "import"
+     */
     protected static final String IMPORT = "import";
-    /** Keyword constant: "var" */
+    /**
+     * Keyword constant: "var"
+     */
     protected static final String VAR = "var";
-    /** Keyword constant: "with" */
+    /**
+     * Keyword constant: "with"
+     */
     protected static final String WITH = "with";
-    /** Keyword constant: "yield" */
+    /**
+     * Keyword constant: "yield"
+     */
     protected static final String YIELD = "yield";
-    /** The exception if validation fails */
+    /**
+     * The exception if validation fails
+     */
     protected JavetSanitizerException exception;
-    /** The sanitizer options */
+    /**
+     * The sanitizer options
+     */
     protected JavetSanitizerOptions options;
 
     /**

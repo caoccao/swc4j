@@ -33,12 +33,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast continue stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstContinueStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Label.
+     */
     protected Optional<Swc4jAstIdent> label;
 
+    /**
+     * Instantiates a new swc4j ast continue stmt.
+     *
+     * @param label the label
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstContinueStmt(
             @Jni2RustParam(optional = true) Swc4jAstIdent label,
@@ -47,10 +59,21 @@ public class Swc4jAstContinueStmt
         setLabel(label);
     }
 
+    /**
+     * Create swc4j ast continue stmt.
+     *
+     * @return the swc4j ast continue stmt
+     */
     public static Swc4jAstContinueStmt create() {
         return create(null);
     }
 
+    /**
+     * Create swc4j ast continue stmt.
+     *
+     * @param label the label
+     * @return the swc4j ast continue stmt
+     */
     public static Swc4jAstContinueStmt create(Swc4jAstIdent label) {
         return new Swc4jAstContinueStmt(label, Swc4jSpan.DUMMY);
     }
@@ -62,6 +85,11 @@ public class Swc4jAstContinueStmt
         return childNodes;
     }
 
+    /**
+     * Gets label.
+     *
+     * @return the label
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstIdent> getLabel() {
         return label;
@@ -82,6 +110,12 @@ public class Swc4jAstContinueStmt
         return false;
     }
 
+    /**
+     * Sets label.
+     *
+     * @param label the label
+     * @return the label
+     */
     public Swc4jAstContinueStmt setLabel(Swc4jAstIdent label) {
         this.label = Optional.ofNullable(label);
         this.label.ifPresent(node -> node.setParent(this));

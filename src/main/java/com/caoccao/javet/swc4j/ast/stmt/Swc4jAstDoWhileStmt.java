@@ -33,15 +33,31 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast do while stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstDoWhileStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Body.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstStmt body;
+    /**
+     * The Test.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr test;
 
+    /**
+     * Instantiates a new swc4j ast do while stmt.
+     *
+     * @param test the test
+     * @param body the body
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstDoWhileStmt(
             ISwc4jAstExpr test,
@@ -52,14 +68,32 @@ public class Swc4jAstDoWhileStmt
         setTest(test);
     }
 
+    /**
+     * Create swc4j ast do while stmt.
+     *
+     * @param test the test
+     * @return the swc4j ast do while stmt
+     */
     public static Swc4jAstDoWhileStmt create(ISwc4jAstExpr test) {
         return create(test, ISwc4jAstStmt.createDefault());
     }
 
+    /**
+     * Create swc4j ast do while stmt.
+     *
+     * @param test the test
+     * @param body the body
+     * @return the swc4j ast do while stmt
+     */
     public static Swc4jAstDoWhileStmt create(ISwc4jAstExpr test, ISwc4jAstStmt body) {
         return new Swc4jAstDoWhileStmt(test, body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;
@@ -70,6 +104,11 @@ public class Swc4jAstDoWhileStmt
         return SimpleList.of(test, body);
     }
 
+    /**
+     * Gets test.
+     *
+     * @return the test
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getTest() {
         return test;
@@ -93,12 +132,24 @@ public class Swc4jAstDoWhileStmt
         return false;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstDoWhileStmt setBody(ISwc4jAstStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
         this.body.setParent(this);
         return this;
     }
 
+    /**
+     * Sets test.
+     *
+     * @param test the test
+     * @return the test
+     */
     public Swc4jAstDoWhileStmt setTest(ISwc4jAstExpr test) {
         this.test = AssertionUtils.notNull(test, "Test");
         this.test.setParent(this);

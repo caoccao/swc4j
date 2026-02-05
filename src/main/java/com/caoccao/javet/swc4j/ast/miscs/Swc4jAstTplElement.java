@@ -28,15 +28,35 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast tpl element.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTplElement
         extends Swc4jAst {
+    /**
+     * The Cooked.
+     */
     @Jni2RustField(componentAtom = true)
     protected Optional<String> cooked;
+    /**
+     * The Raw.
+     */
     @Jni2RustField(atom = true)
     protected String raw;
+    /**
+     * The Tail.
+     */
     protected boolean tail;
 
+    /**
+     * Instantiates a new swc4j ast tpl element.
+     *
+     * @param tail   the tail
+     * @param cooked the cooked
+     * @param raw    the raw
+     * @param span   the span
+     */
     @Jni2RustMethod
     public Swc4jAstTplElement(
             boolean tail,
@@ -49,14 +69,35 @@ public class Swc4jAstTplElement
         setTail(tail);
     }
 
+    /**
+     * Create swc4j ast tpl element.
+     *
+     * @param raw the raw
+     * @return the swc4j ast tpl element
+     */
     public static Swc4jAstTplElement create(String raw) {
         return create(false, raw);
     }
 
+    /**
+     * Create swc4j ast tpl element.
+     *
+     * @param tail the tail
+     * @param raw  the raw
+     * @return the swc4j ast tpl element
+     */
     public static Swc4jAstTplElement create(boolean tail, String raw) {
         return create(tail, null, raw);
     }
 
+    /**
+     * Create swc4j ast tpl element.
+     *
+     * @param tail   the tail
+     * @param cooked the cooked
+     * @param raw    the raw
+     * @return the swc4j ast tpl element
+     */
     public static Swc4jAstTplElement create(boolean tail, String cooked, String raw) {
         return new Swc4jAstTplElement(tail, cooked, raw, Swc4jSpan.DUMMY);
     }
@@ -66,11 +107,21 @@ public class Swc4jAstTplElement
         return EMPTY_CHILD_NODES;
     }
 
+    /**
+     * Gets cooked.
+     *
+     * @return the cooked
+     */
     @Jni2RustMethod
     public Optional<String> getCooked() {
         return cooked;
     }
 
+    /**
+     * Gets raw.
+     *
+     * @return the raw
+     */
     @Jni2RustMethod
     public String getRaw() {
         return raw;
@@ -81,6 +132,11 @@ public class Swc4jAstTplElement
         return Swc4jAstType.TplElement;
     }
 
+    /**
+     * Is tail boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isTail() {
         return tail;
@@ -91,16 +147,34 @@ public class Swc4jAstTplElement
         return false;
     }
 
+    /**
+     * Sets cooked.
+     *
+     * @param cooked the cooked
+     * @return the cooked
+     */
     public Swc4jAstTplElement setCooked(String cooked) {
         this.cooked = Optional.ofNullable(cooked);
         return this;
     }
 
+    /**
+     * Sets raw.
+     *
+     * @param raw the raw
+     * @return the raw
+     */
     public Swc4jAstTplElement setRaw(String raw) {
         this.raw = AssertionUtils.notNull(raw, "Raw");
         return this;
     }
 
+    /**
+     * Sets tail.
+     *
+     * @param tail the tail
+     * @return the tail
+     */
     public Swc4jAstTplElement setTail(boolean tail) {
         this.tail = tail;
         return this;

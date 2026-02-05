@@ -21,10 +21,22 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast big int sign.
+ */
 @Jni2RustClass(ignore = true)
 public enum Swc4jAstBigIntSign implements ISwc4jEnumIdName {
+    /**
+     * No sign swc4j ast big int sign.
+     */
     NoSign(0, ""),
+    /**
+     * Minus swc4j ast big int sign.
+     */
     Minus(1, "-"),
+    /**
+     * Plus swc4j ast big int sign.
+     */
     Plus(2, "+");
 
     private static final int LENGTH = values().length;
@@ -42,6 +54,12 @@ public enum Swc4jAstBigIntSign implements ISwc4jEnumIdName {
         this.name = name;
     }
 
+    /**
+     * Parse swc4j ast big int sign.
+     *
+     * @param id the id
+     * @return the swc4j ast big int sign
+     */
     public static Swc4jAstBigIntSign parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : NoSign;
     }

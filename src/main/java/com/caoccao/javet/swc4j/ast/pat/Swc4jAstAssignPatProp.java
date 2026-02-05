@@ -31,14 +31,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast assign pat prop.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstAssignPatProp
         extends Swc4jAst
         implements ISwc4jAstObjectPatProp {
+    /**
+     * The Key.
+     */
     protected Swc4jAstBindingIdent key;
+    /**
+     * The Value.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> value;
 
+    /**
+     * Instantiates a new swc4j ast assign pat prop.
+     *
+     * @param key   the key
+     * @param value the value
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstAssignPatProp(
             Swc4jAstBindingIdent key,
@@ -49,10 +65,23 @@ public class Swc4jAstAssignPatProp
         setValue(value);
     }
 
+    /**
+     * Create swc4j ast assign pat prop.
+     *
+     * @param key the key
+     * @return the swc4j ast assign pat prop
+     */
     public static Swc4jAstAssignPatProp create(Swc4jAstBindingIdent key) {
         return create(key, null);
     }
 
+    /**
+     * Create swc4j ast assign pat prop.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return the swc4j ast assign pat prop
+     */
     public static Swc4jAstAssignPatProp create(Swc4jAstBindingIdent key, ISwc4jAstExpr value) {
         return new Swc4jAstAssignPatProp(key, value, Swc4jSpan.DUMMY);
     }
@@ -64,6 +93,11 @@ public class Swc4jAstAssignPatProp
         return childNodes;
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public Swc4jAstBindingIdent getKey() {
         return key;
@@ -74,6 +108,11 @@ public class Swc4jAstAssignPatProp
         return Swc4jAstType.AssignPatProp;
     }
 
+    /**
+     * Gets value.
+     *
+     * @return the value
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getValue() {
         return value;
@@ -93,12 +132,24 @@ public class Swc4jAstAssignPatProp
         return false;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstAssignPatProp setKey(Swc4jAstBindingIdent key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
         return this;
     }
 
+    /**
+     * Sets value.
+     *
+     * @param value the value
+     * @return the value
+     */
     public Swc4jAstAssignPatProp setValue(ISwc4jAstExpr value) {
         this.value = Optional.ofNullable(value);
         this.value.ifPresent(node -> node.setParent(this));

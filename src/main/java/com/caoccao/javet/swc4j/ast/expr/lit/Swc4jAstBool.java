@@ -31,12 +31,24 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast bool.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstBool
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
+    /**
+     * The Value.
+     */
     protected boolean value;
 
+    /**
+     * Instantiates a new swc4j ast bool.
+     *
+     * @param value the value
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstBool(
             boolean value,
@@ -45,10 +57,21 @@ public class Swc4jAstBool
         setValue(value);
     }
 
+    /**
+     * Create swc4j ast bool.
+     *
+     * @return the swc4j ast bool
+     */
     public static Swc4jAstBool create() {
         return create(false);
     }
 
+    /**
+     * Create swc4j ast bool.
+     *
+     * @param value the value
+     * @return the swc4j ast bool
+     */
     public static Swc4jAstBool create(boolean value) {
         return new Swc4jAstBool(value, Swc4jSpan.DUMMY);
     }
@@ -103,6 +126,11 @@ public class Swc4jAstBool
         return Swc4jAstType.Bool;
     }
 
+    /**
+     * Is value boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isValue() {
         return value;
@@ -113,6 +141,12 @@ public class Swc4jAstBool
         return false;
     }
 
+    /**
+     * Sets value.
+     *
+     * @param value the value
+     * @return the value
+     */
     public Swc4jAstBool setValue(boolean value) {
         this.value = value;
         return this;

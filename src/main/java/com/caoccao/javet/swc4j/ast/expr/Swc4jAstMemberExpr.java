@@ -38,14 +38,30 @@ import com.caoccao.javet.swc4j.utils.StringUtils;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast member expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstMemberExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstOptChainBase, ISwc4jAstSimpleAssignTarget {
+    /**
+     * The Obj.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr obj;
+    /**
+     * The Prop.
+     */
     protected ISwc4jAstMemberProp prop;
 
+    /**
+     * Instantiates a new swc4j ast member expr.
+     *
+     * @param obj  the obj
+     * @param prop the prop
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstMemberExpr(
             ISwc4jAstExpr obj,
@@ -56,6 +72,13 @@ public class Swc4jAstMemberExpr
         setProp(prop);
     }
 
+    /**
+     * Create swc4j ast member expr.
+     *
+     * @param obj  the obj
+     * @param prop the prop
+     * @return the swc4j ast member expr
+     */
     public static Swc4jAstMemberExpr create(ISwc4jAstExpr obj, ISwc4jAstMemberProp prop) {
         return new Swc4jAstMemberExpr(obj, prop, Swc4jSpan.DUMMY);
     }
@@ -144,6 +167,11 @@ public class Swc4jAstMemberExpr
         return super.eval();
     }
 
+    /**
+     * Eval as call optional.
+     *
+     * @return the optional
+     */
     public Optional<String> evalAsCall() {
         if (prop instanceof Swc4jAstComputedPropName) {
             Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
@@ -157,6 +185,11 @@ public class Swc4jAstMemberExpr
         return Optional.empty();
     }
 
+    /**
+     * Eval as string optional.
+     *
+     * @return the optional
+     */
     public Optional<String> evalAsString() {
         ISwc4jAstExpr obj = this.obj.unParenExpr();
         Optional<String> call = evalAsCall();
@@ -187,11 +220,21 @@ public class Swc4jAstMemberExpr
         return SimpleList.of(obj, prop);
     }
 
+    /**
+     * Gets obj.
+     *
+     * @return the obj
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getObj() {
         return obj;
     }
 
+    /**
+     * Gets prop.
+     *
+     * @return the prop
+     */
     @Jni2RustMethod
     public ISwc4jAstMemberProp getProp() {
         return prop;
@@ -215,12 +258,24 @@ public class Swc4jAstMemberExpr
         return false;
     }
 
+    /**
+     * Sets obj.
+     *
+     * @param obj the obj
+     * @return the obj
+     */
     public Swc4jAstMemberExpr setObj(ISwc4jAstExpr obj) {
         this.obj = AssertionUtils.notNull(obj, "Obj");
         this.obj.setParent(this);
         return this;
     }
 
+    /**
+     * Sets prop.
+     *
+     * @param prop the prop
+     * @return the prop
+     */
     public Swc4jAstMemberExpr setProp(ISwc4jAstMemberProp prop) {
         this.prop = AssertionUtils.notNull(prop, "Prop");
         this.prop.setParent(this);

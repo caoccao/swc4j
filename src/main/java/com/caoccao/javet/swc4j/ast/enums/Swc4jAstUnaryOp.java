@@ -20,13 +20,37 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast unary op.
+ */
 public enum Swc4jAstUnaryOp implements ISwc4jEnumIdName {
+    /**
+     * Bang swc4j ast unary op.
+     */
     Bang(1, "!"),
+    /**
+     * Delete swc4j ast unary op.
+     */
     Delete(2, "delete"),
+    /**
+     * Minus swc4j ast unary op.
+     */
     Minus(3, "-"),
+    /**
+     * Plus swc4j ast unary op.
+     */
     Plus(4, "+"),
+    /**
+     * Tilde swc4j ast unary op.
+     */
     Tilde(5, "~"),
+    /**
+     * Type of swc4j ast unary op.
+     */
     TypeOf(6, "typeof"),
+    /**
+     * Void swc4j ast unary op.
+     */
     Void(0, "void"),
     ;
 
@@ -45,6 +69,12 @@ public enum Swc4jAstUnaryOp implements ISwc4jEnumIdName {
         this.name = name;
     }
 
+    /**
+     * Parse swc4j ast unary op.
+     *
+     * @param id the id
+     * @return the swc4j ast unary op
+     */
     public static Swc4jAstUnaryOp parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : Void;
     }

@@ -31,21 +31,53 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts type param.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTypeParam
         extends Swc4jAst {
+    /**
+     * The Const.
+     */
     @Jni2RustField(name = "is_const")
     protected boolean _const;
+    /**
+     * The Default.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstTsType> _default;
+    /**
+     * The Constraint.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstTsType> constraint;
+    /**
+     * The In.
+     */
     @Jni2RustField(name = "is_in")
     protected boolean in;
+    /**
+     * The Name.
+     */
     protected Swc4jAstIdent name;
+    /**
+     * The Out.
+     */
     @Jni2RustField(name = "is_out")
     protected boolean out;
 
+    /**
+     * Instantiates a new swc4j ast ts type param.
+     *
+     * @param name       the name
+     * @param in         the in
+     * @param out        the out
+     * @param _const     the const
+     * @param constraint the constraint
+     * @param _default   the default
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeParam(
             Swc4jAstIdent name,
@@ -64,22 +96,62 @@ public class Swc4jAstTsTypeParam
         setOut(out);
     }
 
+    /**
+     * Create swc4j ast ts type param.
+     *
+     * @param name the name
+     * @return the swc4j ast ts type param
+     */
     public static Swc4jAstTsTypeParam create(Swc4jAstIdent name) {
         return create(name, false);
     }
 
+    /**
+     * Create swc4j ast ts type param.
+     *
+     * @param name the name
+     * @param in   the in
+     * @return the swc4j ast ts type param
+     */
     public static Swc4jAstTsTypeParam create(Swc4jAstIdent name, boolean in) {
         return create(name, in, false);
     }
 
+    /**
+     * Create swc4j ast ts type param.
+     *
+     * @param name the name
+     * @param in   the in
+     * @param out  the out
+     * @return the swc4j ast ts type param
+     */
     public static Swc4jAstTsTypeParam create(Swc4jAstIdent name, boolean in, boolean out) {
         return create(name, in, out, false);
     }
 
+    /**
+     * Create swc4j ast ts type param.
+     *
+     * @param name   the name
+     * @param in     the in
+     * @param out    the out
+     * @param _const the const
+     * @return the swc4j ast ts type param
+     */
     public static Swc4jAstTsTypeParam create(Swc4jAstIdent name, boolean in, boolean out, boolean _const) {
         return create(name, in, out, _const, null);
     }
 
+    /**
+     * Create swc4j ast ts type param.
+     *
+     * @param name       the name
+     * @param in         the in
+     * @param out        the out
+     * @param _const     the const
+     * @param constraint the constraint
+     * @return the swc4j ast ts type param
+     */
     public static Swc4jAstTsTypeParam create(
             Swc4jAstIdent name,
             boolean in,
@@ -89,6 +161,17 @@ public class Swc4jAstTsTypeParam
         return create(name, in, out, _const, constraint, null);
     }
 
+    /**
+     * Create swc4j ast ts type param.
+     *
+     * @param name       the name
+     * @param in         the in
+     * @param out        the out
+     * @param _const     the const
+     * @param constraint the constraint
+     * @param _default   the default
+     * @return the swc4j ast ts type param
+     */
     public static Swc4jAstTsTypeParam create(
             Swc4jAstIdent name,
             boolean in,
@@ -107,16 +190,31 @@ public class Swc4jAstTsTypeParam
         return childNodes;
     }
 
+    /**
+     * Gets constraint.
+     *
+     * @return the constraint
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstTsType> getConstraint() {
         return constraint;
     }
 
+    /**
+     * Gets default.
+     *
+     * @return the default
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstTsType> getDefault() {
         return _default;
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getName() {
         return name;
@@ -127,16 +225,31 @@ public class Swc4jAstTsTypeParam
         return Swc4jAstType.TsTypeParam;
     }
 
+    /**
+     * Is const boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isConst() {
         return _const;
     }
 
+    /**
+     * Is in boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isIn() {
         return in;
     }
 
+    /**
+     * Is out boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isOut() {
         return out;
@@ -161,34 +274,70 @@ public class Swc4jAstTsTypeParam
         return false;
     }
 
+    /**
+     * Sets const.
+     *
+     * @param _const the const
+     * @return the const
+     */
     public Swc4jAstTsTypeParam setConst(boolean _const) {
         this._const = _const;
         return this;
     }
 
+    /**
+     * Sets constraint.
+     *
+     * @param constraint the constraint
+     * @return the constraint
+     */
     public Swc4jAstTsTypeParam setConstraint(ISwc4jAstTsType constraint) {
         this.constraint = Optional.ofNullable(constraint);
         this.constraint.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets default.
+     *
+     * @param _default the default
+     * @return the default
+     */
     public Swc4jAstTsTypeParam setDefault(ISwc4jAstTsType _default) {
         this._default = Optional.ofNullable(_default);
         this._default.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets in.
+     *
+     * @param in the in
+     * @return the in
+     */
     public Swc4jAstTsTypeParam setIn(boolean in) {
         this.in = in;
         return this;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     * @return the name
+     */
     public Swc4jAstTsTypeParam setName(Swc4jAstIdent name) {
         this.name = AssertionUtils.notNull(name, "Name");
         this.name.setParent(this);
         return this;
     }
 
+    /**
+     * Sets out.
+     *
+     * @param out the out
+     * @return the out
+     */
     public Swc4jAstTsTypeParam setOut(boolean out) {
         this.out = out;
         return this;

@@ -32,20 +32,52 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts method signature.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsMethodSignature
         extends Swc4jAst
         implements ISwc4jAstTsTypeElement {
+    /**
+     * The Params.
+     */
     protected final List<ISwc4jAstTsFnParam> params;
+    /**
+     * The Computed.
+     */
     protected boolean computed;
+    /**
+     * The Key.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr key;
+    /**
+     * The Optional.
+     */
     protected boolean optional;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
+    /**
+     * The Type params.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
+    /**
+     * Instantiates a new swc4j ast ts method signature.
+     *
+     * @param key        the key
+     * @param computed   the computed
+     * @param optional   the optional
+     * @param params     the params
+     * @param typeAnn    the type ann
+     * @param typeParams the type params
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsMethodSignature(
             ISwc4jAstExpr key,
@@ -65,16 +97,37 @@ public class Swc4jAstTsMethodSignature
         this.params.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts method signature.
+     *
+     * @param key the key
+     * @return the swc4j ast ts method signature
+     */
     public static Swc4jAstTsMethodSignature create(ISwc4jAstExpr key) {
         return create(key, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast ts method signature.
+     *
+     * @param key    the key
+     * @param params the params
+     * @return the swc4j ast ts method signature
+     */
     public static Swc4jAstTsMethodSignature create(
             ISwc4jAstExpr key,
             List<ISwc4jAstTsFnParam> params) {
         return create(key, false, params);
     }
 
+    /**
+     * Create swc4j ast ts method signature.
+     *
+     * @param key      the key
+     * @param computed the computed
+     * @param params   the params
+     * @return the swc4j ast ts method signature
+     */
     public static Swc4jAstTsMethodSignature create(
             ISwc4jAstExpr key,
             boolean computed,
@@ -82,6 +135,15 @@ public class Swc4jAstTsMethodSignature
         return create(key, computed, false, params);
     }
 
+    /**
+     * Create swc4j ast ts method signature.
+     *
+     * @param key      the key
+     * @param computed the computed
+     * @param optional the optional
+     * @param params   the params
+     * @return the swc4j ast ts method signature
+     */
     public static Swc4jAstTsMethodSignature create(
             ISwc4jAstExpr key,
             boolean computed,
@@ -90,6 +152,16 @@ public class Swc4jAstTsMethodSignature
         return create(key, computed, optional, params, null);
     }
 
+    /**
+     * Create swc4j ast ts method signature.
+     *
+     * @param key      the key
+     * @param computed the computed
+     * @param optional the optional
+     * @param params   the params
+     * @param typeAnn  the type ann
+     * @return the swc4j ast ts method signature
+     */
     public static Swc4jAstTsMethodSignature create(
             ISwc4jAstExpr key,
             boolean computed,
@@ -99,6 +171,17 @@ public class Swc4jAstTsMethodSignature
         return create(key, computed, optional, params, typeAnn, null);
     }
 
+    /**
+     * Create swc4j ast ts method signature.
+     *
+     * @param key        the key
+     * @param computed   the computed
+     * @param optional   the optional
+     * @param params     the params
+     * @param typeAnn    the type ann
+     * @param typeParams the type params
+     * @return the swc4j ast ts method signature
+     */
     public static Swc4jAstTsMethodSignature create(
             ISwc4jAstExpr key,
             boolean computed,
@@ -118,11 +201,21 @@ public class Swc4jAstTsMethodSignature
         return childNodes;
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getKey() {
         return key;
     }
 
+    /**
+     * Gets params.
+     *
+     * @return the params
+     */
     @Jni2RustMethod
     public List<ISwc4jAstTsFnParam> getParams() {
         return params;
@@ -133,21 +226,41 @@ public class Swc4jAstTsMethodSignature
         return Swc4jAstType.TsMethodSignature;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    /**
+     * Gets type params.
+     *
+     * @return the type params
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 
+    /**
+     * Is computed boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isComputed() {
         return computed;
     }
 
+    /**
+     * Is optional boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isOptional() {
         return optional;
@@ -182,28 +295,58 @@ public class Swc4jAstTsMethodSignature
         return false;
     }
 
+    /**
+     * Sets computed.
+     *
+     * @param computed the computed
+     * @return the computed
+     */
     public Swc4jAstTsMethodSignature setComputed(boolean computed) {
         this.computed = computed;
         return this;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstTsMethodSignature setKey(ISwc4jAstExpr key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
         return this;
     }
 
+    /**
+     * Sets optional.
+     *
+     * @param optional the optional
+     * @return the optional
+     */
     public Swc4jAstTsMethodSignature setOptional(boolean optional) {
         this.optional = optional;
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstTsMethodSignature setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets type params.
+     *
+     * @param typeParams the type params
+     * @return the type params
+     */
     public Swc4jAstTsMethodSignature setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
         this.typeParams.ifPresent(node -> node.setParent(this));

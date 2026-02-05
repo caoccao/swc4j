@@ -20,6 +20,9 @@ import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsExternalModuleRef;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast ts module ref.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "TsEntityName", type = ISwc4jAstTsEntityName.class),

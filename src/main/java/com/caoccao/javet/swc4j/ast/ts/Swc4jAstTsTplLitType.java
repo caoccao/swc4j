@@ -34,14 +34,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts tpl lit type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTplLitType
         extends Swc4jAst
         implements ISwc4jAstTsLit {
+    /**
+     * The Quasis.
+     */
     protected final List<Swc4jAstTplElement> quasis;
+    /**
+     * The Types.
+     */
     @Jni2RustField(componentBox = true)
     protected final List<ISwc4jAstTsType> types;
 
+    /**
+     * Instantiates a new swc4j ast ts tpl lit type.
+     *
+     * @param types  the types
+     * @param quasis the quasis
+     * @param span   the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTplLitType(
             List<ISwc4jAstTsType> types,
@@ -54,10 +70,23 @@ public class Swc4jAstTsTplLitType
         this.types.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts tpl lit type.
+     *
+     * @param types the types
+     * @return the swc4j ast ts tpl lit type
+     */
     public static Swc4jAstTsTplLitType create(List<ISwc4jAstTsType> types) {
         return create(types, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast ts tpl lit type.
+     *
+     * @param types  the types
+     * @param quasis the quasis
+     * @return the swc4j ast ts tpl lit type
+     */
     public static Swc4jAstTsTplLitType create(List<ISwc4jAstTsType> types, List<Swc4jAstTplElement> quasis) {
         return new Swc4jAstTsTplLitType(types, quasis, Swc4jSpan.DUMMY);
     }
@@ -69,6 +98,11 @@ public class Swc4jAstTsTplLitType
         return childNodes;
     }
 
+    /**
+     * Gets quasis.
+     *
+     * @return the quasis
+     */
     @Jni2RustMethod
     public List<Swc4jAstTplElement> getQuasis() {
         return quasis;
@@ -79,6 +113,11 @@ public class Swc4jAstTsTplLitType
         return Swc4jAstType.TsTplLitType;
     }
 
+    /**
+     * Gets types.
+     *
+     * @return the types
+     */
     @Jni2RustMethod
     public List<ISwc4jAstTsType> getTypes() {
         return types;

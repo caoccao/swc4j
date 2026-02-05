@@ -41,7 +41,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The type Ts enum decl processor.
+ */
 public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDecl> {
+    /**
+     * Instantiates a new Ts enum decl processor.
+     *
+     * @param compiler the compiler
+     */
     public TsEnumDeclProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -100,7 +108,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
             }
 
             // Track this member for computed references
-            if (!Boolean.TRUE.equals(isStringEnum)) {
+            if (!isStringEnum) {
                 definedMembers.put(tsName, memberInfo.intValue);
             }
             memberInfos.add(memberInfo);

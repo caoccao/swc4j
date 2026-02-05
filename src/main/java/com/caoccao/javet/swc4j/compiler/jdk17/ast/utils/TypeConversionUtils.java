@@ -21,12 +21,23 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 
 import java.util.Set;
 
+/**
+ * The type Type conversion utils.
+ */
 public final class TypeConversionUtils {
     private static final Set<String> PRIMITIVE_TYPES = Set.of("I", "Z", "B", "C", "S", "J", "F", "D");
 
     private TypeConversionUtils() {
     }
 
+    /**
+     * Box primitive type.
+     *
+     * @param code          the code
+     * @param classWriter   the class writer
+     * @param primitiveType the primitive type
+     * @param targetType    the target type
+     */
     public static void boxPrimitiveType(CodeBuilder code, ClassWriter classWriter, String primitiveType, String targetType) {
         var cp = classWriter.getConstantPool();
         // Only box if targetType is a wrapper
@@ -86,6 +97,13 @@ public final class TypeConversionUtils {
         }
     }
 
+    /**
+     * Convert primitive type.
+     *
+     * @param code     the code
+     * @param fromType the from type
+     * @param toType   the to type
+     */
     public static void convertPrimitiveType(CodeBuilder code, String fromType, String toType) {
         if (fromType.equals(toType)) {
             return; // No conversion needed
@@ -133,6 +151,12 @@ public final class TypeConversionUtils {
         }
     }
 
+    /**
+     * Gets primitive type.
+     *
+     * @param type the type
+     * @return the primitive type
+     */
     public static String getPrimitiveType(String type) {
         return switch (type) {
             case "Ljava/lang/Byte;" -> "B";
@@ -146,6 +170,12 @@ public final class TypeConversionUtils {
         };
     }
 
+    /**
+     * Gets wrapper type.
+     *
+     * @param primitiveType the primitive type
+     * @return the wrapper type
+     */
     public static String getWrapperType(String primitiveType) {
         return switch (primitiveType) {
             case "B" -> "Ljava/lang/Byte;";
@@ -160,10 +190,23 @@ public final class TypeConversionUtils {
         };
     }
 
+    /**
+     * Is primitive type boolean.
+     *
+     * @param type the type
+     * @return the boolean
+     */
     public static boolean isPrimitiveType(String type) {
         return PRIMITIVE_TYPES.contains(type);
     }
 
+    /**
+     * Unbox wrapper type.
+     *
+     * @param code        the code
+     * @param classWriter the class writer
+     * @param type        the type
+     */
     public static void unboxWrapperType(CodeBuilder code, ClassWriter classWriter, String type) {
         var cp = classWriter.getConstantPool();
         switch (type) {

@@ -20,6 +20,9 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast block stmt or expr.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "BlockStmt", type = Swc4jAstBlockStmt.class),

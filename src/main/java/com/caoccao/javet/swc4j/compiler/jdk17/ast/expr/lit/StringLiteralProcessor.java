@@ -25,7 +25,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type String literal processor.
+ */
 public final class StringLiteralProcessor extends BaseAstProcessor<Swc4jAstStr> {
+    /**
+     * Instantiates a new String literal processor.
+     *
+     * @param compiler the compiler
+     */
     public StringLiteralProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

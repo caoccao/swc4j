@@ -40,6 +40,11 @@ import java.util.List;
  * - Note: quasis.length = exprs.length + 1
  */
 public final class TemplateLiteralProcessor extends BaseAstProcessor<Swc4jAstTpl> {
+    /**
+     * Instantiates a new Template literal processor.
+     *
+     * @param compiler the compiler
+     */
     public TemplateLiteralProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

@@ -31,11 +31,23 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts interface body.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsInterfaceBody
         extends Swc4jAst {
+    /**
+     * The Body.
+     */
     protected final List<ISwc4jAstTsTypeElement> body;
 
+    /**
+     * Instantiates a new swc4j ast ts interface body.
+     *
+     * @param body the body
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsInterfaceBody(
             List<ISwc4jAstTsTypeElement> body,
@@ -45,14 +57,30 @@ public class Swc4jAstTsInterfaceBody
         this.body.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts interface body.
+     *
+     * @return the swc4j ast ts interface body
+     */
     public static Swc4jAstTsInterfaceBody create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast ts interface body.
+     *
+     * @param body the body
+     * @return the swc4j ast ts interface body
+     */
     public static Swc4jAstTsInterfaceBody create(List<ISwc4jAstTsTypeElement> body) {
         return new Swc4jAstTsInterfaceBody(body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public List<ISwc4jAstTsTypeElement> getBody() {
         return body;

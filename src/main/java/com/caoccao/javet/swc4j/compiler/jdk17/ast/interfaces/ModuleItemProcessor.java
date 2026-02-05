@@ -27,7 +27,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type Module item processor.
+ */
 public final class ModuleItemProcessor extends BaseAstProcessor<ISwc4jAstModuleItem> {
+    /**
+     * Instantiates a new Module item processor.
+     *
+     * @param compiler the compiler
+     */
     public ModuleItemProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

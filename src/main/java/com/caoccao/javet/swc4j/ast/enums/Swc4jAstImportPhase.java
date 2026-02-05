@@ -20,9 +20,21 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast import phase.
+ */
 public enum Swc4jAstImportPhase implements ISwc4jEnumIdName {
+    /**
+     * Defer swc4j ast import phase.
+     */
     Defer(0, "defer"),
+    /**
+     * Evaluation swc4j ast import phase.
+     */
     Evaluation(1, "evaluation"),
+    /**
+     * Source swc4j ast import phase.
+     */
     Source(2, "source"),
     ;
 
@@ -41,6 +53,12 @@ public enum Swc4jAstImportPhase implements ISwc4jEnumIdName {
         this.name = name;
     }
 
+    /**
+     * Parse swc4j ast import phase.
+     *
+     * @param id the id
+     * @return the swc4j ast import phase
+     */
     public static Swc4jAstImportPhase parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : Defer;
     }

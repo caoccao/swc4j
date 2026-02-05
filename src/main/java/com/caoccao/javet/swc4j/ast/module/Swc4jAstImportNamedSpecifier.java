@@ -32,15 +32,35 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast import named specifier.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstImportNamedSpecifier
         extends Swc4jAst
         implements ISwc4jAstImportSpecifier {
+    /**
+     * The Imported.
+     */
     protected Optional<ISwc4jAstModuleExportName> imported;
+    /**
+     * The Local.
+     */
     protected Swc4jAstIdent local;
+    /**
+     * The Type only.
+     */
     @Jni2RustField(name = "is_type_only")
     protected boolean typeOnly;
 
+    /**
+     * Instantiates a new swc4j ast import named specifier.
+     *
+     * @param local    the local
+     * @param imported the imported
+     * @param typeOnly the type only
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstImportNamedSpecifier(
             Swc4jAstIdent local,
@@ -53,16 +73,37 @@ public class Swc4jAstImportNamedSpecifier
         setTypeOnly(typeOnly);
     }
 
+    /**
+     * Create swc4j ast import named specifier.
+     *
+     * @param local the local
+     * @return the swc4j ast import named specifier
+     */
     public static Swc4jAstImportNamedSpecifier create(Swc4jAstIdent local) {
         return create(local, null);
     }
 
+    /**
+     * Create swc4j ast import named specifier.
+     *
+     * @param local    the local
+     * @param imported the imported
+     * @return the swc4j ast import named specifier
+     */
     public static Swc4jAstImportNamedSpecifier create(
             Swc4jAstIdent local,
             ISwc4jAstModuleExportName imported) {
         return create(local, imported, false);
     }
 
+    /**
+     * Create swc4j ast import named specifier.
+     *
+     * @param local    the local
+     * @param imported the imported
+     * @param typeOnly the type only
+     * @return the swc4j ast import named specifier
+     */
     public static Swc4jAstImportNamedSpecifier create(
             Swc4jAstIdent local,
             ISwc4jAstModuleExportName imported,
@@ -77,11 +118,21 @@ public class Swc4jAstImportNamedSpecifier
         return childNodes;
     }
 
+    /**
+     * Gets imported.
+     *
+     * @return the imported
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstModuleExportName> getImported() {
         return imported;
     }
 
+    /**
+     * Gets local.
+     *
+     * @return the local
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getLocal() {
         return local;
@@ -92,6 +143,11 @@ public class Swc4jAstImportNamedSpecifier
         return Swc4jAstType.ImportNamedSpecifier;
     }
 
+    /**
+     * Is type only boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isTypeOnly() {
         return typeOnly;
@@ -111,18 +167,36 @@ public class Swc4jAstImportNamedSpecifier
         return false;
     }
 
+    /**
+     * Sets imported.
+     *
+     * @param imported the imported
+     * @return the imported
+     */
     public Swc4jAstImportNamedSpecifier setImported(ISwc4jAstModuleExportName imported) {
         this.imported = Optional.ofNullable(imported);
         this.imported.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets local.
+     *
+     * @param local the local
+     * @return the local
+     */
     public Swc4jAstImportNamedSpecifier setLocal(Swc4jAstIdent local) {
         this.local = AssertionUtils.notNull(local, "Local");
         this.local.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type only.
+     *
+     * @param typeOnly the type only
+     * @return the type only
+     */
     public Swc4jAstImportNamedSpecifier setTypeOnly(boolean typeOnly) {
         this.typeOnly = typeOnly;
         return this;

@@ -20,6 +20,9 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast var decl or expr.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class, box = true),

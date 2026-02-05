@@ -20,6 +20,9 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsImportType;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast ts type query expr.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "Import", type = Swc4jAstTsImportType.class),

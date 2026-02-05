@@ -34,15 +34,35 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast assign expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstAssignExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    /**
+     * The Left.
+     */
     protected ISwc4jAstAssignTarget left;
+    /**
+     * The Op.
+     */
     protected Swc4jAstAssignOp op;
+    /**
+     * The Right.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr right;
 
+    /**
+     * Instantiates a new swc4j ast assign expr.
+     *
+     * @param op    the op
+     * @param left  the left
+     * @param right the right
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstAssignExpr(
             Swc4jAstAssignOp op,
@@ -55,6 +75,14 @@ public class Swc4jAstAssignExpr
         setRight(right);
     }
 
+    /**
+     * Create swc4j ast assign expr.
+     *
+     * @param op    the op
+     * @param left  the left
+     * @param right the right
+     * @return the swc4j ast assign expr
+     */
     public static Swc4jAstAssignExpr create(
             Swc4jAstAssignOp op,
             ISwc4jAstAssignTarget left,
@@ -67,16 +95,31 @@ public class Swc4jAstAssignExpr
         return SimpleList.of(left, right);
     }
 
+    /**
+     * Gets left.
+     *
+     * @return the left
+     */
     @Jni2RustMethod
     public ISwc4jAstAssignTarget getLeft() {
         return left;
     }
 
+    /**
+     * Gets op.
+     *
+     * @return the op
+     */
     @Jni2RustMethod
     public Swc4jAstAssignOp getOp() {
         return op;
     }
 
+    /**
+     * Gets right.
+     *
+     * @return the right
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getRight() {
         return right;
@@ -100,17 +143,35 @@ public class Swc4jAstAssignExpr
         return false;
     }
 
+    /**
+     * Sets left.
+     *
+     * @param left the left
+     * @return the left
+     */
     public Swc4jAstAssignExpr setLeft(ISwc4jAstAssignTarget left) {
         this.left = AssertionUtils.notNull(left, "Left");
         this.left.setParent(this);
         return this;
     }
 
+    /**
+     * Sets op.
+     *
+     * @param op the op
+     * @return the op
+     */
     public Swc4jAstAssignExpr setOp(Swc4jAstAssignOp op) {
         this.op = AssertionUtils.notNull(op, "Op");
         return this;
     }
 
+    /**
+     * Sets right.
+     *
+     * @param right the right
+     * @return the right
+     */
     public Swc4jAstAssignExpr setRight(ISwc4jAstExpr right) {
         this.right = AssertionUtils.notNull(right, "Right");
         this.right.setParent(this);

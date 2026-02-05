@@ -34,15 +34,35 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts setter signature.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsSetterSignature
         extends Swc4jAst
         implements ISwc4jAstTsTypeElement {
+    /**
+     * The Computed.
+     */
     protected boolean computed;
+    /**
+     * The Key.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr key;
+    /**
+     * The Param.
+     */
     protected ISwc4jAstTsFnParam param;
 
+    /**
+     * Instantiates a new swc4j ast ts setter signature.
+     *
+     * @param key      the key
+     * @param computed the computed
+     * @param param    the param
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsSetterSignature(
             ISwc4jAstExpr key,
@@ -55,10 +75,25 @@ public class Swc4jAstTsSetterSignature
         setParam(param);
     }
 
+    /**
+     * Create swc4j ast ts setter signature.
+     *
+     * @param key   the key
+     * @param param the param
+     * @return the swc4j ast ts setter signature
+     */
     public static Swc4jAstTsSetterSignature create(ISwc4jAstExpr key, ISwc4jAstTsFnParam param) {
         return create(key, false, param);
     }
 
+    /**
+     * Create swc4j ast ts setter signature.
+     *
+     * @param key      the key
+     * @param computed the computed
+     * @param param    the param
+     * @return the swc4j ast ts setter signature
+     */
     public static Swc4jAstTsSetterSignature create(
             ISwc4jAstExpr key,
             boolean computed,
@@ -71,11 +106,21 @@ public class Swc4jAstTsSetterSignature
         return SimpleList.of(key, param);
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getKey() {
         return key;
     }
 
+    /**
+     * Gets param.
+     *
+     * @return the param
+     */
     @Jni2RustMethod
     public ISwc4jAstTsFnParam getParam() {
         return param;
@@ -86,6 +131,11 @@ public class Swc4jAstTsSetterSignature
         return Swc4jAstType.TsSetterSignature;
     }
 
+    /**
+     * Is computed boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isComputed() {
         return computed;
@@ -104,17 +154,35 @@ public class Swc4jAstTsSetterSignature
         return false;
     }
 
+    /**
+     * Sets computed.
+     *
+     * @param computed the computed
+     * @return the computed
+     */
     public Swc4jAstTsSetterSignature setComputed(boolean computed) {
         this.computed = computed;
         return this;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstTsSetterSignature setKey(ISwc4jAstExpr key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
         return this;
     }
 
+    /**
+     * Sets param.
+     *
+     * @param param the param
+     * @return the param
+     */
     public Swc4jAstTsSetterSignature setParam(ISwc4jAstTsFnParam param) {
         this.param = AssertionUtils.notNull(param, "Param");
         this.param.setParent(this);

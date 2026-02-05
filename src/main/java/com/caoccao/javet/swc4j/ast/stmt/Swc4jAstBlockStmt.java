@@ -30,14 +30,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast block stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstBlockStmt
         extends Swc4jAst
         implements ISwc4jAstStmt, ISwc4jAstBlockStmtOrExpr {
+    /**
+     * The Stmts.
+     */
     protected final List<ISwc4jAstStmt> stmts;
+    /**
+     * The Ctxt.
+     */
     @Jni2RustField(syntaxContext = true)
     protected int ctxt;
 
+    /**
+     * Instantiates a new swc4j ast block stmt.
+     *
+     * @param ctxt  the ctxt
+     * @param stmts the stmts
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstBlockStmt(
             @Jni2RustParam(syntaxContext = true) int ctxt,
@@ -49,14 +65,32 @@ public class Swc4jAstBlockStmt
         this.stmts.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast block stmt.
+     *
+     * @return the swc4j ast block stmt
+     */
     public static Swc4jAstBlockStmt create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast block stmt.
+     *
+     * @param stmts the stmts
+     * @return the swc4j ast block stmt
+     */
     public static Swc4jAstBlockStmt create(List<ISwc4jAstStmt> stmts) {
         return create(0, stmts);
     }
 
+    /**
+     * Create swc4j ast block stmt.
+     *
+     * @param ctxt  the ctxt
+     * @param stmts the stmts
+     * @return the swc4j ast block stmt
+     */
     public static Swc4jAstBlockStmt create(int ctxt, List<ISwc4jAstStmt> stmts) {
         return new Swc4jAstBlockStmt(ctxt, stmts, Swc4jSpan.DUMMY);
     }
@@ -66,11 +100,21 @@ public class Swc4jAstBlockStmt
         return SimpleList.copyOf(stmts);
     }
 
+    /**
+     * Gets ctxt.
+     *
+     * @return the ctxt
+     */
     @Jni2RustMethod
     public int getCtxt() {
         return ctxt;
     }
 
+    /**
+     * Gets stmts.
+     *
+     * @return the stmts
+     */
     @Jni2RustMethod
     public List<ISwc4jAstStmt> getStmts() {
         return stmts;
@@ -96,6 +140,12 @@ public class Swc4jAstBlockStmt
         return false;
     }
 
+    /**
+     * Sets ctxt.
+     *
+     * @param ctxt the ctxt
+     * @return the ctxt
+     */
     public Swc4jAstBlockStmt setCtxt(int ctxt) {
         this.ctxt = ctxt;
         return this;

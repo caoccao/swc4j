@@ -34,179 +34,698 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast type.
+ */
 @Jni2RustClass(ignore = true)
 public enum Swc4jAstType implements ISwc4jEnumId {
+    /**
+     * Array lit swc4j ast type.
+     */
     ArrayLit(0, Swc4jAstArrayLit.class),
+    /**
+     * Array pat swc4j ast type.
+     */
     ArrayPat(1, Swc4jAstArrayPat.class),
+    /**
+     * Arrow expr swc4j ast type.
+     */
     ArrowExpr(2, Swc4jAstArrowExpr.class),
+    /**
+     * Assign expr swc4j ast type.
+     */
     AssignExpr(3, Swc4jAstAssignExpr.class),
+    /**
+     * Assign pat swc4j ast type.
+     */
     AssignPat(4, Swc4jAstAssignPat.class),
+    /**
+     * Assign pat prop swc4j ast type.
+     */
     AssignPatProp(5, Swc4jAstAssignPatProp.class),
+    /**
+     * Assign prop swc4j ast type.
+     */
     AssignProp(6, Swc4jAstAssignProp.class),
+    /**
+     * Auto accessor swc4j ast type.
+     */
     AutoAccessor(7, Swc4jAstAutoAccessor.class),
+    /**
+     * Await expr swc4j ast type.
+     */
     AwaitExpr(8, Swc4jAstAwaitExpr.class),
+    /**
+     * Big int swc4j ast type.
+     */
     BigInt(9, Swc4jAstBigInt.class),
+    /**
+     * Binding ident swc4j ast type.
+     */
     BindingIdent(10, Swc4jAstBindingIdent.class),
+    /**
+     * Bin expr swc4j ast type.
+     */
     BinExpr(11, Swc4jAstBinExpr.class),
+    /**
+     * Block stmt swc4j ast type.
+     */
     BlockStmt(12, Swc4jAstBlockStmt.class),
+    /**
+     * Bool swc4j ast type.
+     */
     Bool(13, Swc4jAstBool.class),
+    /**
+     * Break stmt swc4j ast type.
+     */
     BreakStmt(14, Swc4jAstBreakStmt.class),
+    /**
+     * Call expr swc4j ast type.
+     */
     CallExpr(15, Swc4jAstCallExpr.class),
+    /**
+     * Catch clause swc4j ast type.
+     */
     CatchClause(16, Swc4jAstCatchClause.class),
+    /**
+     * Class swc4j ast type.
+     */
     Class(17, Swc4jAstClass.class),
+    /**
+     * Class decl swc4j ast type.
+     */
     ClassDecl(18, Swc4jAstClassDecl.class),
+    /**
+     * Class expr swc4j ast type.
+     */
     ClassExpr(19, Swc4jAstClassExpr.class),
+    /**
+     * Class method swc4j ast type.
+     */
     ClassMethod(20, Swc4jAstClassMethod.class),
+    /**
+     * Class prop swc4j ast type.
+     */
     ClassProp(21, Swc4jAstClassProp.class),
+    /**
+     * Computed prop name swc4j ast type.
+     */
     ComputedPropName(22, Swc4jAstComputedPropName.class),
+    /**
+     * Cond expr swc4j ast type.
+     */
     CondExpr(23, Swc4jAstCondExpr.class),
+    /**
+     * Constructor swc4j ast type.
+     */
     Constructor(24, Swc4jAstConstructor.class),
+    /**
+     * Continue stmt swc4j ast type.
+     */
     ContinueStmt(25, Swc4jAstContinueStmt.class),
+    /**
+     * Debugger stmt swc4j ast type.
+     */
     DebuggerStmt(26, Swc4jAstDebuggerStmt.class),
+    /**
+     * Decorator swc4j ast type.
+     */
     Decorator(27, Swc4jAstDecorator.class),
+    /**
+     * Do while stmt swc4j ast type.
+     */
     DoWhileStmt(28, Swc4jAstDoWhileStmt.class),
+    /**
+     * Empty stmt swc4j ast type.
+     */
     EmptyStmt(29, Swc4jAstEmptyStmt.class),
+    /**
+     * Export all swc4j ast type.
+     */
     ExportAll(30, Swc4jAstExportAll.class),
+    /**
+     * Export decl swc4j ast type.
+     */
     ExportDecl(31, Swc4jAstExportDecl.class),
+    /**
+     * Export default decl swc4j ast type.
+     */
     ExportDefaultDecl(32, Swc4jAstExportDefaultDecl.class),
+    /**
+     * Export default expr swc4j ast type.
+     */
     ExportDefaultExpr(33, Swc4jAstExportDefaultExpr.class),
+    /**
+     * Export default specifier swc4j ast type.
+     */
     ExportDefaultSpecifier(34, Swc4jAstExportDefaultSpecifier.class),
+    /**
+     * Export named specifier swc4j ast type.
+     */
     ExportNamedSpecifier(35, Swc4jAstExportNamedSpecifier.class),
+    /**
+     * Export namespace specifier swc4j ast type.
+     */
     ExportNamespaceSpecifier(36, Swc4jAstExportNamespaceSpecifier.class),
+    /**
+     * Expr or spread swc4j ast type.
+     */
     ExprOrSpread(37, Swc4jAstExprOrSpread.class),
+    /**
+     * Expr stmt swc4j ast type.
+     */
     ExprStmt(38, Swc4jAstExprStmt.class),
+    /**
+     * Fn decl swc4j ast type.
+     */
     FnDecl(39, Swc4jAstFnDecl.class),
+    /**
+     * Fn expr swc4j ast type.
+     */
     FnExpr(40, Swc4jAstFnExpr.class),
+    /**
+     * For in stmt swc4j ast type.
+     */
     ForInStmt(41, Swc4jAstForInStmt.class),
+    /**
+     * For of stmt swc4j ast type.
+     */
     ForOfStmt(42, Swc4jAstForOfStmt.class),
+    /**
+     * For stmt swc4j ast type.
+     */
     ForStmt(43, Swc4jAstForStmt.class),
+    /**
+     * Function swc4j ast type.
+     */
     Function(44, Swc4jAstFunction.class),
+    /**
+     * Getter prop swc4j ast type.
+     */
     GetterProp(45, Swc4jAstGetterProp.class),
+    /**
+     * Ident swc4j ast type.
+     */
     Ident(46, Swc4jAstIdent.class),
+    /**
+     * Ident name swc4j ast type.
+     */
     IdentName(47, Swc4jAstIdentName.class),
+    /**
+     * If stmt swc4j ast type.
+     */
     IfStmt(48, Swc4jAstIfStmt.class),
+    /**
+     * Import swc4j ast type.
+     */
     Import(49, Swc4jAstImport.class),
+    /**
+     * Import decl swc4j ast type.
+     */
     ImportDecl(50, Swc4jAstImportDecl.class),
+    /**
+     * Import default specifier swc4j ast type.
+     */
     ImportDefaultSpecifier(51, Swc4jAstImportDefaultSpecifier.class),
+    /**
+     * Import named specifier swc4j ast type.
+     */
     ImportNamedSpecifier(52, Swc4jAstImportNamedSpecifier.class),
+    /**
+     * Import star as specifier swc4j ast type.
+     */
     ImportStarAsSpecifier(53, Swc4jAstImportStarAsSpecifier.class),
+    /**
+     * Invalid swc4j ast type.
+     */
     Invalid(54, Swc4jAstInvalid.class),
+    /**
+     * Jsx attr swc4j ast type.
+     */
     JsxAttr(55, Swc4jAstJsxAttr.class),
+    /**
+     * Jsx closing element swc4j ast type.
+     */
     JsxClosingElement(56, Swc4jAstJsxClosingElement.class),
+    /**
+     * Jsx closing fragment swc4j ast type.
+     */
     JsxClosingFragment(57, Swc4jAstJsxClosingFragment.class),
+    /**
+     * Jsx element swc4j ast type.
+     */
     JsxElement(58, Swc4jAstJsxElement.class),
+    /**
+     * Jsx empty expr swc4j ast type.
+     */
     JsxEmptyExpr(59, Swc4jAstJsxEmptyExpr.class),
+    /**
+     * Jsx expr container swc4j ast type.
+     */
     JsxExprContainer(60, Swc4jAstJsxExprContainer.class),
+    /**
+     * Jsx fragment swc4j ast type.
+     */
     JsxFragment(61, Swc4jAstJsxFragment.class),
+    /**
+     * Jsx member expr swc4j ast type.
+     */
     JsxMemberExpr(62, Swc4jAstJsxMemberExpr.class),
+    /**
+     * Jsx namespaced name swc4j ast type.
+     */
     JsxNamespacedName(63, Swc4jAstJsxNamespacedName.class),
+    /**
+     * Jsx opening element swc4j ast type.
+     */
     JsxOpeningElement(64, Swc4jAstJsxOpeningElement.class),
+    /**
+     * Jsx opening fragment swc4j ast type.
+     */
     JsxOpeningFragment(65, Swc4jAstJsxOpeningFragment.class),
+    /**
+     * Jsx spread child swc4j ast type.
+     */
     JsxSpreadChild(66, Swc4jAstJsxSpreadChild.class),
+    /**
+     * Jsx text swc4j ast type.
+     */
     JsxText(67, Swc4jAstJsxText.class),
+    /**
+     * Key value pat prop swc4j ast type.
+     */
     KeyValuePatProp(68, Swc4jAstKeyValuePatProp.class),
+    /**
+     * Key value prop swc4j ast type.
+     */
     KeyValueProp(69, Swc4jAstKeyValueProp.class),
+    /**
+     * Labeled stmt swc4j ast type.
+     */
     LabeledStmt(70, Swc4jAstLabeledStmt.class),
+    /**
+     * Member expr swc4j ast type.
+     */
     MemberExpr(71, Swc4jAstMemberExpr.class),
+    /**
+     * Meta prop expr swc4j ast type.
+     */
     MetaPropExpr(72, Swc4jAstMetaPropExpr.class),
+    /**
+     * Method prop swc4j ast type.
+     */
     MethodProp(73, Swc4jAstMethodProp.class),
+    /**
+     * Module swc4j ast type.
+     */
     Module(74, Swc4jAstModule.class),
+    /**
+     * Named export swc4j ast type.
+     */
     NamedExport(75, Swc4jAstNamedExport.class),
+    /**
+     * New expr swc4j ast type.
+     */
     NewExpr(76, Swc4jAstNewExpr.class),
+    /**
+     * Null swc4j ast type.
+     */
     Null(77, Swc4jAstNull.class),
+    /**
+     * Number swc4j ast type.
+     */
     Number(78, Swc4jAstNumber.class),
+    /**
+     * Object lit swc4j ast type.
+     */
     ObjectLit(79, Swc4jAstObjectLit.class),
+    /**
+     * Object pat swc4j ast type.
+     */
     ObjectPat(80, Swc4jAstObjectPat.class),
+    /**
+     * Opt call swc4j ast type.
+     */
     OptCall(81, Swc4jAstOptCall.class),
+    /**
+     * Opt chain expr swc4j ast type.
+     */
     OptChainExpr(82, Swc4jAstOptChainExpr.class),
+    /**
+     * Param swc4j ast type.
+     */
     Param(83, Swc4jAstParam.class),
+    /**
+     * Paren expr swc4j ast type.
+     */
     ParenExpr(84, Swc4jAstParenExpr.class),
+    /**
+     * Private method swc4j ast type.
+     */
     PrivateMethod(85, Swc4jAstPrivateMethod.class),
+    /**
+     * Private name swc4j ast type.
+     */
     PrivateName(86, Swc4jAstPrivateName.class),
+    /**
+     * Private prop swc4j ast type.
+     */
     PrivateProp(87, Swc4jAstPrivateProp.class),
+    /**
+     * Regex swc4j ast type.
+     */
     Regex(88, Swc4jAstRegex.class),
+    /**
+     * Rest pat swc4j ast type.
+     */
     RestPat(89, Swc4jAstRestPat.class),
+    /**
+     * Return stmt swc4j ast type.
+     */
     ReturnStmt(90, Swc4jAstReturnStmt.class),
+    /**
+     * Script swc4j ast type.
+     */
     Script(91, Swc4jAstScript.class),
+    /**
+     * Seq expr swc4j ast type.
+     */
     SeqExpr(92, Swc4jAstSeqExpr.class),
+    /**
+     * Setter prop swc4j ast type.
+     */
     SetterProp(93, Swc4jAstSetterProp.class),
+    /**
+     * Spread element swc4j ast type.
+     */
     SpreadElement(94, Swc4jAstSpreadElement.class),
+    /**
+     * Static block swc4j ast type.
+     */
     StaticBlock(95, Swc4jAstStaticBlock.class),
+    /**
+     * Str swc4j ast type.
+     */
     Str(96, Swc4jAstStr.class),
+    /**
+     * Super swc4j ast type.
+     */
     Super(97, Swc4jAstSuper.class),
+    /**
+     * Super prop expr swc4j ast type.
+     */
     SuperPropExpr(98, Swc4jAstSuperPropExpr.class),
+    /**
+     * Switch case swc4j ast type.
+     */
     SwitchCase(99, Swc4jAstSwitchCase.class),
+    /**
+     * Switch stmt swc4j ast type.
+     */
     SwitchStmt(100, Swc4jAstSwitchStmt.class),
+    /**
+     * Tagged tpl swc4j ast type.
+     */
     TaggedTpl(101, Swc4jAstTaggedTpl.class),
+    /**
+     * This expr swc4j ast type.
+     */
     ThisExpr(102, Swc4jAstThisExpr.class),
+    /**
+     * Throw stmt swc4j ast type.
+     */
     ThrowStmt(103, Swc4jAstThrowStmt.class),
+    /**
+     * Tpl swc4j ast type.
+     */
     Tpl(104, Swc4jAstTpl.class),
+    /**
+     * Tpl element swc4j ast type.
+     */
     TplElement(105, Swc4jAstTplElement.class),
+    /**
+     * Try stmt swc4j ast type.
+     */
     TryStmt(106, Swc4jAstTryStmt.class),
+    /**
+     * Ts array type swc4j ast type.
+     */
     TsArrayType(107, Swc4jAstTsArrayType.class),
+    /**
+     * Ts as expr swc4j ast type.
+     */
     TsAsExpr(108, Swc4jAstTsAsExpr.class),
+    /**
+     * Ts call signature decl swc4j ast type.
+     */
     TsCallSignatureDecl(109, Swc4jAstTsCallSignatureDecl.class),
+    /**
+     * Ts conditional type swc4j ast type.
+     */
     TsConditionalType(110, Swc4jAstTsConditionalType.class),
+    /**
+     * Ts const assertion swc4j ast type.
+     */
     TsConstAssertion(111, Swc4jAstTsConstAssertion.class),
+    /**
+     * Ts constructor type swc4j ast type.
+     */
     TsConstructorType(112, Swc4jAstTsConstructorType.class),
+    /**
+     * Ts construct signature decl swc4j ast type.
+     */
     TsConstructSignatureDecl(113, Swc4jAstTsConstructSignatureDecl.class),
+    /**
+     * Ts enum decl swc4j ast type.
+     */
     TsEnumDecl(114, Swc4jAstTsEnumDecl.class),
+    /**
+     * Ts enum member swc4j ast type.
+     */
     TsEnumMember(115, Swc4jAstTsEnumMember.class),
+    /**
+     * Ts export assignment swc4j ast type.
+     */
     TsExportAssignment(116, Swc4jAstTsExportAssignment.class),
+    /**
+     * Ts expr with type args swc4j ast type.
+     */
     TsExprWithTypeArgs(117, Swc4jAstTsExprWithTypeArgs.class),
+    /**
+     * Ts external module ref swc4j ast type.
+     */
     TsExternalModuleRef(118, Swc4jAstTsExternalModuleRef.class),
+    /**
+     * Ts fn type swc4j ast type.
+     */
     TsFnType(119, Swc4jAstTsFnType.class),
+    /**
+     * Ts getter signature swc4j ast type.
+     */
     TsGetterSignature(120, Swc4jAstTsGetterSignature.class),
+    /**
+     * Ts import call options swc4j ast type.
+     */
     TsImportCallOptions(121, Swc4jAstTsImportCallOptions.class),
+    /**
+     * Ts import equals decl swc4j ast type.
+     */
     TsImportEqualsDecl(122, Swc4jAstTsImportEqualsDecl.class),
+    /**
+     * Ts import type swc4j ast type.
+     */
     TsImportType(123, Swc4jAstTsImportType.class),
+    /**
+     * Ts indexed access type swc4j ast type.
+     */
     TsIndexedAccessType(124, Swc4jAstTsIndexedAccessType.class),
+    /**
+     * Ts index signature swc4j ast type.
+     */
     TsIndexSignature(125, Swc4jAstTsIndexSignature.class),
+    /**
+     * Ts infer type swc4j ast type.
+     */
     TsInferType(126, Swc4jAstTsInferType.class),
+    /**
+     * Ts instantiation swc4j ast type.
+     */
     TsInstantiation(127, Swc4jAstTsInstantiation.class),
+    /**
+     * Ts interface body swc4j ast type.
+     */
     TsInterfaceBody(128, Swc4jAstTsInterfaceBody.class),
+    /**
+     * Ts interface decl swc4j ast type.
+     */
     TsInterfaceDecl(129, Swc4jAstTsInterfaceDecl.class),
+    /**
+     * Ts intersection type swc4j ast type.
+     */
     TsIntersectionType(130, Swc4jAstTsIntersectionType.class),
+    /**
+     * Ts keyword type swc4j ast type.
+     */
     TsKeywordType(131, Swc4jAstTsKeywordType.class),
+    /**
+     * Ts lit type swc4j ast type.
+     */
     TsLitType(132, Swc4jAstTsLitType.class),
+    /**
+     * Ts mapped type swc4j ast type.
+     */
     TsMappedType(133, Swc4jAstTsMappedType.class),
+    /**
+     * Ts method signature swc4j ast type.
+     */
     TsMethodSignature(134, Swc4jAstTsMethodSignature.class),
+    /**
+     * Ts module block swc4j ast type.
+     */
     TsModuleBlock(135, Swc4jAstTsModuleBlock.class),
+    /**
+     * Ts module decl swc4j ast type.
+     */
     TsModuleDecl(136, Swc4jAstTsModuleDecl.class),
+    /**
+     * Ts namespace decl swc4j ast type.
+     */
     TsNamespaceDecl(137, Swc4jAstTsNamespaceDecl.class),
+    /**
+     * Ts namespace export decl swc4j ast type.
+     */
     TsNamespaceExportDecl(138, Swc4jAstTsNamespaceExportDecl.class),
+    /**
+     * Ts non null expr swc4j ast type.
+     */
     TsNonNullExpr(139, Swc4jAstTsNonNullExpr.class),
+    /**
+     * Ts optional type swc4j ast type.
+     */
     TsOptionalType(140, Swc4jAstTsOptionalType.class),
+    /**
+     * Ts param prop swc4j ast type.
+     */
     TsParamProp(141, Swc4jAstTsParamProp.class),
+    /**
+     * Ts parenthesized type swc4j ast type.
+     */
     TsParenthesizedType(142, Swc4jAstTsParenthesizedType.class),
+    /**
+     * Ts property signature swc4j ast type.
+     */
     TsPropertySignature(143, Swc4jAstTsPropertySignature.class),
+    /**
+     * Ts qualified name swc4j ast type.
+     */
     TsQualifiedName(144, Swc4jAstTsQualifiedName.class),
+    /**
+     * Ts rest type swc4j ast type.
+     */
     TsRestType(145, Swc4jAstTsRestType.class),
+    /**
+     * Ts satisfies expr swc4j ast type.
+     */
     TsSatisfiesExpr(146, Swc4jAstTsSatisfiesExpr.class),
+    /**
+     * Ts setter signature swc4j ast type.
+     */
     TsSetterSignature(147, Swc4jAstTsSetterSignature.class),
+    /**
+     * Ts this type swc4j ast type.
+     */
     TsThisType(148, Swc4jAstTsThisType.class),
+    /**
+     * Ts tpl lit type swc4j ast type.
+     */
     TsTplLitType(149, Swc4jAstTsTplLitType.class),
+    /**
+     * Ts tuple element swc4j ast type.
+     */
     TsTupleElement(150, Swc4jAstTsTupleElement.class),
+    /**
+     * Ts tuple type swc4j ast type.
+     */
     TsTupleType(151, Swc4jAstTsTupleType.class),
+    /**
+     * Ts type alias decl swc4j ast type.
+     */
     TsTypeAliasDecl(152, Swc4jAstTsTypeAliasDecl.class),
+    /**
+     * Ts type ann swc4j ast type.
+     */
     TsTypeAnn(153, Swc4jAstTsTypeAnn.class),
+    /**
+     * Ts type assertion swc4j ast type.
+     */
     TsTypeAssertion(154, Swc4jAstTsTypeAssertion.class),
+    /**
+     * Ts type lit swc4j ast type.
+     */
     TsTypeLit(155, Swc4jAstTsTypeLit.class),
+    /**
+     * Ts type operator swc4j ast type.
+     */
     TsTypeOperator(156, Swc4jAstTsTypeOperator.class),
+    /**
+     * Ts type param swc4j ast type.
+     */
     TsTypeParam(157, Swc4jAstTsTypeParam.class),
+    /**
+     * Ts type param decl swc4j ast type.
+     */
     TsTypeParamDecl(158, Swc4jAstTsTypeParamDecl.class),
+    /**
+     * Ts type param instantiation swc4j ast type.
+     */
     TsTypeParamInstantiation(159, Swc4jAstTsTypeParamInstantiation.class),
+    /**
+     * Ts type predicate swc4j ast type.
+     */
     TsTypePredicate(160, Swc4jAstTsTypePredicate.class),
+    /**
+     * Ts type query swc4j ast type.
+     */
     TsTypeQuery(161, Swc4jAstTsTypeQuery.class),
+    /**
+     * Ts type ref swc4j ast type.
+     */
     TsTypeRef(162, Swc4jAstTsTypeRef.class),
+    /**
+     * Ts union type swc4j ast type.
+     */
     TsUnionType(163, Swc4jAstTsUnionType.class),
+    /**
+     * Unary expr swc4j ast type.
+     */
     UnaryExpr(164, Swc4jAstUnaryExpr.class),
+    /**
+     * Update expr swc4j ast type.
+     */
     UpdateExpr(165, Swc4jAstUpdateExpr.class),
+    /**
+     * Using decl swc4j ast type.
+     */
     UsingDecl(166, Swc4jAstUsingDecl.class),
+    /**
+     * Var decl swc4j ast type.
+     */
     VarDecl(167, Swc4jAstVarDecl.class),
+    /**
+     * Var declarator swc4j ast type.
+     */
     VarDeclarator(168, Swc4jAstVarDeclarator.class),
+    /**
+     * While stmt swc4j ast type.
+     */
     WhileStmt(169, Swc4jAstWhileStmt.class),
+    /**
+     * With stmt swc4j ast type.
+     */
     WithStmt(170, Swc4jAstWithStmt.class),
+    /**
+     * Yield expr swc4j ast type.
+     */
     YieldExpr(171, Swc4jAstYieldExpr.class),
     ;
 
@@ -450,14 +969,31 @@ public enum Swc4jAstType implements ISwc4jEnumId {
         this.id = id;
     }
 
+    /**
+     * Gets name.
+     *
+     * @param astClass the ast class
+     * @return the name
+     */
     public static String getName(Class<? extends ISwc4jAst> astClass) {
         return TYPE_NAME_MAP.get(astClass);
     }
 
+    /**
+     * Parse swc4j ast type.
+     *
+     * @param id the id
+     * @return the swc4j ast type
+     */
     public static Swc4jAstType parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : Invalid;
     }
 
+    /**
+     * Gets ast class.
+     *
+     * @return the ast class
+     */
     public Class<? extends ISwc4jAst> getAstClass() {
         return astClass;
     }
@@ -467,38 +1003,83 @@ public enum Swc4jAstType implements ISwc4jEnumId {
         return id;
     }
 
+    /**
+     * Is array lit boolean.
+     *
+     * @return the boolean
+     */
     public boolean isArrayLit() {
         return this == ArrayLit;
     }
 
+    /**
+     * Is bool boolean.
+     *
+     * @return the boolean
+     */
     public boolean isBool() {
         return this == Bool;
     }
 
+    /**
+     * Is call expr boolean.
+     *
+     * @return the boolean
+     */
     public boolean isCallExpr() {
         return this == CallExpr;
     }
 
+    /**
+     * Is ident boolean.
+     *
+     * @return the boolean
+     */
     public boolean isIdent() {
         return this == Ident;
     }
 
+    /**
+     * Is member expr boolean.
+     *
+     * @return the boolean
+     */
     public boolean isMemberExpr() {
         return this == MemberExpr;
     }
 
+    /**
+     * Is number boolean.
+     *
+     * @return the boolean
+     */
     public boolean isNumber() {
         return this == Number;
     }
 
+    /**
+     * Is primitive boolean.
+     *
+     * @return the boolean
+     */
     public boolean isPrimitive() {
         return this == Str || this == Number || this == Bool || this == Null || this == BigInt;
     }
 
+    /**
+     * Is regex boolean.
+     *
+     * @return the boolean
+     */
     public boolean isRegex() {
         return this == Regex;
     }
 
+    /**
+     * Is str boolean.
+     *
+     * @return the boolean
+     */
     public boolean isStr() {
         return this == Str;
     }

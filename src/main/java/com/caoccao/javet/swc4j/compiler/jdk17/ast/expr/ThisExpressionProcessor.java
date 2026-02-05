@@ -24,7 +24,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type This expression processor.
+ */
 public final class ThisExpressionProcessor extends BaseAstProcessor<Swc4jAstThisExpr> {
+    /**
+     * Instantiates a new This expression processor.
+     *
+     * @param compiler the compiler
+     */
     public ThisExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

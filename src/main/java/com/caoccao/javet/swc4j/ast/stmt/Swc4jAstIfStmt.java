@@ -31,17 +31,37 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast if stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstIfStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Alt.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstStmt> alt;
+    /**
+     * The Cons.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstStmt cons;
+    /**
+     * The Test.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr test;
 
+    /**
+     * Instantiates a new swc4j ast if stmt.
+     *
+     * @param test the test
+     * @param cons the cons
+     * @param alt  the alt
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstIfStmt(
             ISwc4jAstExpr test,
@@ -54,18 +74,44 @@ public class Swc4jAstIfStmt
         setTest(test);
     }
 
+    /**
+     * Create swc4j ast if stmt.
+     *
+     * @param test the test
+     * @return the swc4j ast if stmt
+     */
     public static Swc4jAstIfStmt create(ISwc4jAstExpr test) {
         return create(test, ISwc4jAstStmt.createDefault());
     }
 
+    /**
+     * Create swc4j ast if stmt.
+     *
+     * @param test the test
+     * @param cons the cons
+     * @return the swc4j ast if stmt
+     */
     public static Swc4jAstIfStmt create(ISwc4jAstExpr test, ISwc4jAstStmt cons) {
         return create(test, cons, null);
     }
 
+    /**
+     * Create swc4j ast if stmt.
+     *
+     * @param test the test
+     * @param cons the cons
+     * @param alt  the alt
+     * @return the swc4j ast if stmt
+     */
     public static Swc4jAstIfStmt create(ISwc4jAstExpr test, ISwc4jAstStmt cons, ISwc4jAstStmt alt) {
         return new Swc4jAstIfStmt(test, cons, alt, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets alt.
+     *
+     * @return the alt
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstStmt> getAlt() {
         return alt;
@@ -78,11 +124,21 @@ public class Swc4jAstIfStmt
         return childNodes;
     }
 
+    /**
+     * Gets cons.
+     *
+     * @return the cons
+     */
     @Jni2RustMethod
     public ISwc4jAstStmt getCons() {
         return cons;
     }
 
+    /**
+     * Gets test.
+     *
+     * @return the test
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getTest() {
         return test;
@@ -111,18 +167,36 @@ public class Swc4jAstIfStmt
         return false;
     }
 
+    /**
+     * Sets alt.
+     *
+     * @param alt the alt
+     * @return the alt
+     */
     public Swc4jAstIfStmt setAlt(ISwc4jAstStmt alt) {
         this.alt = Optional.ofNullable(alt);
         this.alt.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets cons.
+     *
+     * @param cons the cons
+     * @return the cons
+     */
     public Swc4jAstIfStmt setCons(ISwc4jAstStmt cons) {
         this.cons = AssertionUtils.notNull(cons, "Body");
         this.cons.setParent(this);
         return this;
     }
 
+    /**
+     * Sets test.
+     *
+     * @param test the test
+     * @return the test
+     */
     public Swc4jAstIfStmt setTest(ISwc4jAstExpr test) {
         this.test = AssertionUtils.notNull(test, "Right");
         this.test.setParent(this);

@@ -33,13 +33,25 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts intersection type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsIntersectionType
         extends Swc4jAst
         implements ISwc4jAstTsUnionOrIntersectionType {
+    /**
+     * The Types.
+     */
     @Jni2RustField(componentBox = true)
     protected final List<ISwc4jAstTsType> types;
 
+    /**
+     * Instantiates a new swc4j ast ts intersection type.
+     *
+     * @param types the types
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsIntersectionType(
             List<ISwc4jAstTsType> types,
@@ -49,10 +61,21 @@ public class Swc4jAstTsIntersectionType
         this.types.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts intersection type.
+     *
+     * @return the swc4j ast ts intersection type
+     */
     public static Swc4jAstTsIntersectionType create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast ts intersection type.
+     *
+     * @param types the types
+     * @return the swc4j ast ts intersection type
+     */
     public static Swc4jAstTsIntersectionType create(List<ISwc4jAstTsType> types) {
         return new Swc4jAstTsIntersectionType(types, Swc4jSpan.DUMMY);
     }
@@ -67,6 +90,11 @@ public class Swc4jAstTsIntersectionType
         return Swc4jAstType.TsIntersectionType;
     }
 
+    /**
+     * Gets types.
+     *
+     * @return the types
+     */
     @Jni2RustMethod
     public List<ISwc4jAstTsType> getTypes() {
         return types;

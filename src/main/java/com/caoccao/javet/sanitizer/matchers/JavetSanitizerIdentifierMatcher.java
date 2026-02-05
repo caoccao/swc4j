@@ -61,6 +61,13 @@ public final class JavetSanitizerIdentifierMatcher implements IJavetSanitizerMat
                 .orElse(null);
     }
 
+    /**
+     * Matches boolean.
+     *
+     * @param option     the option
+     * @param identifier the identifier
+     * @return the boolean
+     */
     boolean matches(JavetSanitizerOptions option, String identifier) {
         if (StringUtils.isEmpty(identifier)) {
             return false;

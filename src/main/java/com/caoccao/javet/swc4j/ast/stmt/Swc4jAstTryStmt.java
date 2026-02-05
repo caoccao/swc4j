@@ -34,14 +34,34 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast try stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTryStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Block.
+     */
     protected Swc4jAstBlockStmt block;
+    /**
+     * The Finalizer.
+     */
     protected Optional<Swc4jAstBlockStmt> finalizer;
+    /**
+     * The Handler.
+     */
     protected Optional<Swc4jAstCatchClause> handler;
 
+    /**
+     * Instantiates a new swc4j ast try stmt.
+     *
+     * @param block     the block
+     * @param handler   the handler
+     * @param finalizer the finalizer
+     * @param span      the span
+     */
     @Jni2RustMethod
     public Swc4jAstTryStmt(
             Swc4jAstBlockStmt block,
@@ -54,18 +74,46 @@ public class Swc4jAstTryStmt
         setHandler(handler);
     }
 
+    /**
+     * Create swc4j ast try stmt.
+     *
+     * @param block the block
+     * @return the swc4j ast try stmt
+     */
     public static Swc4jAstTryStmt create(Swc4jAstBlockStmt block) {
         return create(block, null, null);
     }
 
+    /**
+     * Create swc4j ast try stmt.
+     *
+     * @param block   the block
+     * @param handler the handler
+     * @return the swc4j ast try stmt
+     */
     public static Swc4jAstTryStmt create(Swc4jAstBlockStmt block, Swc4jAstCatchClause handler) {
         return create(block, handler, null);
     }
 
+    /**
+     * Create swc4j ast try stmt.
+     *
+     * @param block     the block
+     * @param finalizer the finalizer
+     * @return the swc4j ast try stmt
+     */
     public static Swc4jAstTryStmt create(Swc4jAstBlockStmt block, Swc4jAstBlockStmt finalizer) {
         return create(block, null, finalizer);
     }
 
+    /**
+     * Create swc4j ast try stmt.
+     *
+     * @param block     the block
+     * @param handler   the handler
+     * @param finalizer the finalizer
+     * @return the swc4j ast try stmt
+     */
     public static Swc4jAstTryStmt create(
             Swc4jAstBlockStmt block,
             Swc4jAstCatchClause handler,
@@ -73,6 +121,11 @@ public class Swc4jAstTryStmt
         return new Swc4jAstTryStmt(block, handler, finalizer, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets block.
+     *
+     * @return the block
+     */
     @Jni2RustMethod
     public Swc4jAstBlockStmt getBlock() {
         return block;
@@ -86,11 +139,21 @@ public class Swc4jAstTryStmt
         return childNodes;
     }
 
+    /**
+     * Gets finalizer.
+     *
+     * @return the finalizer
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getFinalizer() {
         return finalizer;
     }
 
+    /**
+     * Gets handler.
+     *
+     * @return the handler
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstCatchClause> getHandler() {
         return handler;
@@ -120,18 +183,36 @@ public class Swc4jAstTryStmt
         return false;
     }
 
+    /**
+     * Sets block.
+     *
+     * @param block the block
+     * @return the block
+     */
     public Swc4jAstTryStmt setBlock(Swc4jAstBlockStmt block) {
         this.block = AssertionUtils.notNull(block, "Block");
         this.block.setParent(this);
         return this;
     }
 
+    /**
+     * Sets finalizer.
+     *
+     * @param finalizer the finalizer
+     * @return the finalizer
+     */
     public Swc4jAstTryStmt setFinalizer(Swc4jAstBlockStmt finalizer) {
         this.finalizer = Optional.ofNullable(finalizer);
         this.finalizer.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets handler.
+     *
+     * @param handler the handler
+     * @return the handler
+     */
     public Swc4jAstTryStmt setHandler(Swc4jAstCatchClause handler) {
         this.handler = Optional.ofNullable(handler);
         this.handler.ifPresent(node -> node.setParent(this));

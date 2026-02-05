@@ -20,7 +20,9 @@ package com.caoccao.javet.swc4j.compiler;
  * Enum representing supported JDK versions for bytecode compilation.
  */
 public enum JdkVersion {
-    /** JDK 17 version */
+    /**
+     * JDK 17 version
+     */
     JDK_17(17);
 
     private final int version;

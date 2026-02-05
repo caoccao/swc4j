@@ -34,12 +34,28 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast catch clause.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstCatchClause
         extends Swc4jAst {
+    /**
+     * The Body.
+     */
     protected Swc4jAstBlockStmt body;
+    /**
+     * The Param.
+     */
     protected Optional<ISwc4jAstPat> param;
 
+    /**
+     * Instantiates a new swc4j ast catch clause.
+     *
+     * @param param the param
+     * @param body  the body
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstCatchClause(
             @Jni2RustParam(optional = true) ISwc4jAstPat param,
@@ -50,14 +66,32 @@ public class Swc4jAstCatchClause
         setParam(param);
     }
 
+    /**
+     * Create swc4j ast catch clause.
+     *
+     * @param body the body
+     * @return the swc4j ast catch clause
+     */
     public static Swc4jAstCatchClause create(Swc4jAstBlockStmt body) {
         return create(null, body);
     }
 
+    /**
+     * Create swc4j ast catch clause.
+     *
+     * @param param the param
+     * @param body  the body
+     * @return the swc4j ast catch clause
+     */
     public static Swc4jAstCatchClause create(ISwc4jAstPat param, Swc4jAstBlockStmt body) {
         return new Swc4jAstCatchClause(param, body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public Swc4jAstBlockStmt getBody() {
         return body;
@@ -70,6 +104,11 @@ public class Swc4jAstCatchClause
         return childNodes;
     }
 
+    /**
+     * Gets param.
+     *
+     * @return the param
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstPat> getParam() {
         return param;
@@ -94,12 +133,24 @@ public class Swc4jAstCatchClause
         return false;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstCatchClause setBody(Swc4jAstBlockStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
         this.body.setParent(this);
         return this;
     }
 
+    /**
+     * Sets param.
+     *
+     * @param param the param
+     * @return the param
+     */
     public Swc4jAstCatchClause setParam(ISwc4jAstPat param) {
         this.param = Optional.ofNullable(param);
         this.param.ifPresent(node -> node.setParent(this));

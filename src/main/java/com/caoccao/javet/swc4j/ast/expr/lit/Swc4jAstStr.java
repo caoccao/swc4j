@@ -29,16 +29,32 @@ import com.caoccao.javet.swc4j.utils.StringUtils;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast str.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstStr
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstModuleExportName, ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstTsLit,
         ISwc4jAstTsEnumMemberId, ISwc4jAstCoercionPrimitive {
+    /**
+     * The Raw.
+     */
     @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
+    /**
+     * The Value.
+     */
     @Jni2RustField(atom = true)
     protected String value;
 
+    /**
+     * Instantiates a new swc4j ast str.
+     *
+     * @param value the value
+     * @param raw   the raw
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstStr(
             String value,
@@ -49,10 +65,23 @@ public class Swc4jAstStr
         setValue(value);
     }
 
+    /**
+     * Create swc4j ast str.
+     *
+     * @param value the value
+     * @return the swc4j ast str
+     */
     public static Swc4jAstStr create(String value) {
         return create(value, "\"" + value + "\"");
     }
 
+    /**
+     * Create swc4j ast str.
+     *
+     * @param value the value
+     * @param raw   the raw
+     * @return the swc4j ast str
+     */
     public static Swc4jAstStr create(String value, String raw) {
         return new Swc4jAstStr(value, raw, Swc4jSpan.DUMMY);
     }
@@ -101,6 +130,12 @@ public class Swc4jAstStr
         return toString();
     }
 
+    /**
+     * Fontcolor string.
+     *
+     * @param arg the arg
+     * @return the string
+     */
     public String fontcolor(String arg) {
         String escapeArg = arg.replace("\"", "&quot;");
         return "<font color=\"" + escapeArg + "\">" + value + "</font>";
@@ -111,6 +146,11 @@ public class Swc4jAstStr
         return EMPTY_CHILD_NODES;
     }
 
+    /**
+     * Gets raw.
+     *
+     * @return the raw
+     */
     @Jni2RustMethod
     public Optional<String> getRaw() {
         return raw;
@@ -121,11 +161,21 @@ public class Swc4jAstStr
         return Swc4jAstType.Str;
     }
 
+    /**
+     * Gets value.
+     *
+     * @return the value
+     */
     @Jni2RustMethod
     public String getValue() {
         return value;
     }
 
+    /**
+     * Italics string.
+     *
+     * @return the string
+     */
     public String italics() {
         return "<i>" + value + "</i>";
     }
@@ -135,36 +185,84 @@ public class Swc4jAstStr
         return false;
     }
 
+    /**
+     * Sets raw.
+     *
+     * @param raw the raw
+     * @return the raw
+     */
     public Swc4jAstStr setRaw(String raw) {
         this.raw = Optional.ofNullable(raw);
         return this;
     }
 
+    /**
+     * Sets value.
+     *
+     * @param value the value
+     * @return the value
+     */
     public Swc4jAstStr setValue(String value) {
         this.value = AssertionUtils.notNull(value, "Value");
         return this;
     }
 
+    /**
+     * Slice string.
+     *
+     * @return the string
+     */
     public String slice() {
         return slice(0);
     }
 
+    /**
+     * Slice string.
+     *
+     * @param indexStart the index start
+     * @return the string
+     */
     public String slice(int indexStart) {
         return slice(indexStart, value.length());
     }
 
+    /**
+     * Slice string.
+     *
+     * @param indexStart the index start
+     * @param indexEnd   the index end
+     * @return the string
+     */
     public String slice(int indexStart, int indexEnd) {
         return StringUtils.slice(value, indexStart, indexEnd);
     }
 
+    /**
+     * Split list.
+     *
+     * @return the list
+     */
     public List<String> split() {
         return split(null, 0);
     }
 
+    /**
+     * Split list.
+     *
+     * @param separator the separator
+     * @return the list
+     */
     public List<String> split(String separator) {
         return split(separator, 0);
     }
 
+    /**
+     * Split list.
+     *
+     * @param separator the separator
+     * @param limit     the limit
+     * @return the list
+     */
     public List<String> split(String separator, int limit) {
         return StringUtils.split(value, separator, limit);
     }

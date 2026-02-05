@@ -29,13 +29,21 @@ import java.util.stream.Stream;
  * Runner for invoking methods on compiled bytecode classes.
  */
 public final class ByteCodeClassRunner {
-    /** The compiled class. */
+    /**
+     * The compiled class.
+     */
     private final Class<?> clazz;
-    /** The instance of the class (null for static access). */
+    /**
+     * The instance of the class (null for static access).
+     */
     private final Object instance;
-    /** Cache mapping method names to method arrays. */
+    /**
+     * Cache mapping method names to method arrays.
+     */
     private final Map<String, Method[]> methodNameToMethodsMap;
-    /** All public methods of the class. */
+    /**
+     * All public methods of the class.
+     */
     private final Method[] methods;
 
     private ByteCodeClassRunner(Class<?> clazz, Object instance) {
@@ -101,9 +109,9 @@ public final class ByteCodeClassRunner {
     /**
      * Invokes a method on the class instance.
      *
+     * @param <T>        the return type
      * @param methodName the name of the method to invoke
      * @param args       method arguments
-     * @param <T>        the return type
      * @return the method result
      * @throws InvocationTargetException if the method throws an exception
      * @throws IllegalAccessException    if the method cannot be accessed

@@ -34,14 +34,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast assign prop.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstAssignProp
         extends Swc4jAst
         implements ISwc4jAstProp {
+    /**
+     * The Key.
+     */
     protected Swc4jAstIdent key;
+    /**
+     * The Value.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr value;
 
+    /**
+     * Instantiates a new swc4j ast assign prop.
+     *
+     * @param key   the key
+     * @param value the value
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstAssignProp(
             Swc4jAstIdent key,
@@ -52,6 +68,13 @@ public class Swc4jAstAssignProp
         setValue(value);
     }
 
+    /**
+     * Create swc4j ast assign prop.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return the swc4j ast assign prop
+     */
     public static Swc4jAstAssignProp create(Swc4jAstIdent key, ISwc4jAstExpr value) {
         return new Swc4jAstAssignProp(key, value, Swc4jSpan.DUMMY);
     }
@@ -61,6 +84,11 @@ public class Swc4jAstAssignProp
         return SimpleList.of(key, value);
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getKey() {
         return key;
@@ -71,6 +99,11 @@ public class Swc4jAstAssignProp
         return Swc4jAstType.AssignProp;
     }
 
+    /**
+     * Gets value.
+     *
+     * @return the value
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getValue() {
         return value;
@@ -89,12 +122,24 @@ public class Swc4jAstAssignProp
         return false;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstAssignProp setKey(Swc4jAstIdent key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
         return this;
     }
 
+    /**
+     * Sets value.
+     *
+     * @param value the value
+     * @return the value
+     */
     public Swc4jAstAssignProp setValue(ISwc4jAstExpr value) {
         this.value = AssertionUtils.notNull(value, "Value");
         this.value.setParent(this);

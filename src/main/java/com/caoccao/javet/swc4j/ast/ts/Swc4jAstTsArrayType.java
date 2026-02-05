@@ -32,13 +32,25 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts array type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsArrayType
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Elem type.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstTsType elemType;
 
+    /**
+     * Instantiates a new swc4j ast ts array type.
+     *
+     * @param elemType the elem type
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsArrayType(
             ISwc4jAstTsType elemType,
@@ -47,6 +59,12 @@ public class Swc4jAstTsArrayType
         setElemType(elemType);
     }
 
+    /**
+     * Create swc4j ast ts array type.
+     *
+     * @param elemType the elem type
+     * @return the swc4j ast ts array type
+     */
     public static Swc4jAstTsArrayType create(ISwc4jAstTsType elemType) {
         return new Swc4jAstTsArrayType(elemType, Swc4jSpan.DUMMY);
     }
@@ -56,6 +74,11 @@ public class Swc4jAstTsArrayType
         return SimpleList.of(elemType);
     }
 
+    /**
+     * Gets elem type.
+     *
+     * @return the elem type
+     */
     @Jni2RustMethod
     public ISwc4jAstTsType getElemType() {
         return elemType;
@@ -75,6 +98,12 @@ public class Swc4jAstTsArrayType
         return false;
     }
 
+    /**
+     * Sets elem type.
+     *
+     * @param elemType the elem type
+     * @return the elem type
+     */
     public Swc4jAstTsArrayType setElemType(ISwc4jAstTsType elemType) {
         this.elemType = AssertionUtils.notNull(elemType, "Elem type");
         this.elemType.setParent(this);

@@ -33,17 +33,41 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast named export.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstNamedExport
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
+    /**
+     * The Specifiers.
+     */
     protected final List<ISwc4jAstExportSpecifier> specifiers;
+    /**
+     * The Src.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstStr> src;
+    /**
+     * The Type only.
+     */
     protected boolean typeOnly;
+    /**
+     * The With.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstObjectLit> with;
 
+    /**
+     * Instantiates a new swc4j ast named export.
+     *
+     * @param specifiers the specifiers
+     * @param src        the src
+     * @param typeOnly   the type only
+     * @param with       the with
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstNamedExport(
             List<ISwc4jAstExportSpecifier> specifiers,
@@ -59,18 +83,44 @@ public class Swc4jAstNamedExport
         this.specifiers.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast named export.
+     *
+     * @return the swc4j ast named export
+     */
     public static Swc4jAstNamedExport create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast named export.
+     *
+     * @param specifiers the specifiers
+     * @return the swc4j ast named export
+     */
     public static Swc4jAstNamedExport create(List<ISwc4jAstExportSpecifier> specifiers) {
         return create(specifiers, null);
     }
 
+    /**
+     * Create swc4j ast named export.
+     *
+     * @param specifiers the specifiers
+     * @param src        the src
+     * @return the swc4j ast named export
+     */
     public static Swc4jAstNamedExport create(List<ISwc4jAstExportSpecifier> specifiers, Swc4jAstStr src) {
         return create(specifiers, src, false);
     }
 
+    /**
+     * Create swc4j ast named export.
+     *
+     * @param specifiers the specifiers
+     * @param src        the src
+     * @param typeOnly   the type only
+     * @return the swc4j ast named export
+     */
     public static Swc4jAstNamedExport create(
             List<ISwc4jAstExportSpecifier> specifiers,
             Swc4jAstStr src,
@@ -78,6 +128,15 @@ public class Swc4jAstNamedExport
         return create(specifiers, src, typeOnly, null);
     }
 
+    /**
+     * Create swc4j ast named export.
+     *
+     * @param specifiers the specifiers
+     * @param src        the src
+     * @param typeOnly   the type only
+     * @param with       the with
+     * @return the swc4j ast named export
+     */
     public static Swc4jAstNamedExport create(
             List<ISwc4jAstExportSpecifier> specifiers,
             Swc4jAstStr src,
@@ -94,11 +153,21 @@ public class Swc4jAstNamedExport
         return childNodes;
     }
 
+    /**
+     * Gets specifiers.
+     *
+     * @return the specifiers
+     */
     @Jni2RustMethod
     public List<ISwc4jAstExportSpecifier> getSpecifiers() {
         return specifiers;
     }
 
+    /**
+     * Gets src.
+     *
+     * @return the src
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstStr> getSrc() {
         return src;
@@ -109,11 +178,21 @@ public class Swc4jAstNamedExport
         return Swc4jAstType.NamedExport;
     }
 
+    /**
+     * Gets with.
+     *
+     * @return the with
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstObjectLit> getWith() {
         return with;
     }
 
+    /**
+     * Is type only boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isTypeOnly() {
         return typeOnly;
@@ -144,17 +223,35 @@ public class Swc4jAstNamedExport
         return false;
     }
 
+    /**
+     * Sets src.
+     *
+     * @param src the src
+     * @return the src
+     */
     public Swc4jAstNamedExport setSrc(Swc4jAstStr src) {
         this.src = Optional.ofNullable(src);
         this.src.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets type only.
+     *
+     * @param typeOnly the type only
+     * @return the type only
+     */
     public Swc4jAstNamedExport setTypeOnly(boolean typeOnly) {
         this.typeOnly = typeOnly;
         return this;
     }
 
+    /**
+     * Sets with.
+     *
+     * @param with the with
+     * @return the with
+     */
     public Swc4jAstNamedExport setWith(Swc4jAstObjectLit with) {
         this.with = Optional.ofNullable(with);
         this.with.ifPresent(node -> node.setParent(this));

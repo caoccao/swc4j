@@ -23,6 +23,12 @@ package com.caoccao.javet.swc4j.options;
  */
 public abstract class Swc4jDecoratorsTranspileOption {
     /**
+     * Constructs a new Swc4jDecoratorsTranspileOption.
+     */
+    public Swc4jDecoratorsTranspileOption() {
+    }
+
+    /**
      * Ecma.
      *
      * @return the Ecma

@@ -27,6 +27,9 @@ import java.util.Stack;
 public final class ScopedPackage {
     private final Stack<String> packageStack;
 
+    /**
+     * Instantiates a new Scoped package.
+     */
     public ScopedPackage() {
         packageStack = new Stack<>();
         // Push empty package as global scope

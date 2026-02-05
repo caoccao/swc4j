@@ -32,16 +32,36 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast export all.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstExportAll
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
+    /**
+     * The Src.
+     */
     @Jni2RustField(box = true)
     protected Swc4jAstStr src;
+    /**
+     * The Type only.
+     */
     protected boolean typeOnly;
+    /**
+     * The With.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstObjectLit> with;
 
+    /**
+     * Instantiates a new swc4j ast export all.
+     *
+     * @param src      the src
+     * @param typeOnly the type only
+     * @param with     the with
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstExportAll(
             Swc4jAstStr src,
@@ -54,14 +74,35 @@ public class Swc4jAstExportAll
         setWith(with);
     }
 
+    /**
+     * Create swc4j ast export all.
+     *
+     * @param src the src
+     * @return the swc4j ast export all
+     */
     public static Swc4jAstExportAll create(Swc4jAstStr src) {
         return create(src, false);
     }
 
+    /**
+     * Create swc4j ast export all.
+     *
+     * @param src      the src
+     * @param typeOnly the type only
+     * @return the swc4j ast export all
+     */
     public static Swc4jAstExportAll create(Swc4jAstStr src, boolean typeOnly) {
         return create(src, typeOnly, null);
     }
 
+    /**
+     * Create swc4j ast export all.
+     *
+     * @param src      the src
+     * @param typeOnly the type only
+     * @param with     the with
+     * @return the swc4j ast export all
+     */
     public static Swc4jAstExportAll create(Swc4jAstStr src, boolean typeOnly, Swc4jAstObjectLit with) {
         return new Swc4jAstExportAll(src, typeOnly, with, Swc4jSpan.DUMMY);
     }
@@ -73,6 +114,11 @@ public class Swc4jAstExportAll
         return childNodes;
     }
 
+    /**
+     * Gets src.
+     *
+     * @return the src
+     */
     @Jni2RustMethod
     public Swc4jAstStr getSrc() {
         return src;
@@ -83,11 +129,21 @@ public class Swc4jAstExportAll
         return Swc4jAstType.ExportAll;
     }
 
+    /**
+     * Gets with.
+     *
+     * @return the with
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstObjectLit> getWith() {
         return with;
     }
 
+    /**
+     * Is type only boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isTypeOnly() {
         return typeOnly;
@@ -107,17 +163,35 @@ public class Swc4jAstExportAll
         return false;
     }
 
+    /**
+     * Sets src.
+     *
+     * @param src the src
+     * @return the src
+     */
     public Swc4jAstExportAll setSrc(Swc4jAstStr src) {
         this.src = AssertionUtils.notNull(src, "Src");
         this.src.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type only.
+     *
+     * @param typeOnly the type only
+     * @return the type only
+     */
     public Swc4jAstExportAll setTypeOnly(boolean typeOnly) {
         this.typeOnly = typeOnly;
         return this;
     }
 
+    /**
+     * Sets with.
+     *
+     * @param with the with
+     * @return the with
+     */
     public Swc4jAstExportAll setWith(Swc4jAstObjectLit with) {
         this.with = Optional.ofNullable(with);
         this.with.ifPresent(node -> node.setParent(this));

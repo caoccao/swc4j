@@ -18,9 +18,21 @@ package com.caoccao.javet.swc4j.ast.visitors;
 
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 
+/**
+ * The enum swc4j ast visitor response.
+ */
 @Jni2RustClass(ignore = true)
 public enum Swc4jAstVisitorResponse {
+    /**
+     * Error swc4j ast visitor response.
+     */
     Error,
+    /**
+     * Ok and break swc4j ast visitor response.
+     */
     OkAndBreak,
+    /**
+     * Ok and continue swc4j ast visitor response.
+     */
     OkAndContinue,
 }

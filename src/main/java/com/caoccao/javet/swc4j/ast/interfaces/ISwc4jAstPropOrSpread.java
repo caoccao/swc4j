@@ -20,6 +20,9 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSpreadElement;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast prop or spread.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "Prop", type = ISwc4jAstProp.class, box = true),

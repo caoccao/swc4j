@@ -27,7 +27,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type Ts module decl processor.
+ */
 public final class TsModuleDeclProcessor extends BaseAstProcessor<Swc4jAstTsModuleDecl> {
+    /**
+     * Instantiates a new Ts module decl processor.
+     *
+     * @param compiler the compiler
+     */
     public TsModuleDeclProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

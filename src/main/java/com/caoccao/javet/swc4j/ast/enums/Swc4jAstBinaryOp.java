@@ -20,31 +20,109 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast binary op.
+ */
 public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
+    /**
+     * Add swc4j ast binary op.
+     */
     Add(0, "+"),
+    /**
+     * Bit and swc4j ast binary op.
+     */
     BitAnd(1, "&"),
+    /**
+     * Bit or swc4j ast binary op.
+     */
     BitOr(2, "|"),
+    /**
+     * Bit xor swc4j ast binary op.
+     */
     BitXor(3, "^"),
+    /**
+     * Div swc4j ast binary op.
+     */
     Div(4, "/"),
+    /**
+     * Eq eq swc4j ast binary op.
+     */
     EqEq(5, "=="),
+    /**
+     * Eq eq eq swc4j ast binary op.
+     */
     EqEqEq(6, "==="),
+    /**
+     * Exp swc4j ast binary op.
+     */
     Exp(7, "**"),
+    /**
+     * Gt swc4j ast binary op.
+     */
     Gt(8, ">"),
+    /**
+     * Gt eq swc4j ast binary op.
+     */
     GtEq(9, ">="),
+    /**
+     * In swc4j ast binary op.
+     */
     In(10, "in"),
+    /**
+     * Instance of swc4j ast binary op.
+     */
     InstanceOf(11, "instanceof"),
+    /**
+     * Logical and swc4j ast binary op.
+     */
     LogicalAnd(12, "&&"),
+    /**
+     * Logical or swc4j ast binary op.
+     */
     LogicalOr(13, "||"),
+    /**
+     * L shift swc4j ast binary op.
+     */
     LShift(14, "<<"),
+    /**
+     * Lt swc4j ast binary op.
+     */
     Lt(15, "<"),
+    /**
+     * Lt eq swc4j ast binary op.
+     */
     LtEq(16, "<="),
+    /**
+     * Mod swc4j ast binary op.
+     */
     Mod(17, "%"),
+    /**
+     * Mul swc4j ast binary op.
+     */
     Mul(18, "*"),
+    /**
+     * Not eq swc4j ast binary op.
+     */
     NotEq(19, "!="),
+    /**
+     * Not eq eq swc4j ast binary op.
+     */
     NotEqEq(20, "!=="),
+    /**
+     * Nullish coalescing swc4j ast binary op.
+     */
     NullishCoalescing(21, "??"),
+    /**
+     * R shift swc4j ast binary op.
+     */
     RShift(22, ">>"),
+    /**
+     * Sub swc4j ast binary op.
+     */
     Sub(23, "-"),
+    /**
+     * Zero fill r shift swc4j ast binary op.
+     */
     ZeroFillRShift(24, ">>>"),
     ;
 
@@ -99,6 +177,12 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
         spaceRequired = false;
     }
 
+    /**
+     * Parse swc4j ast binary op.
+     *
+     * @param id the id
+     * @return the swc4j ast binary op
+     */
     public static Swc4jAstBinaryOp parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : Add;
     }
@@ -113,30 +197,65 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
         return name;
     }
 
+    /**
+     * Gets opposite operator.
+     *
+     * @return the opposite operator
+     */
     public Swc4jAstBinaryOp getOppositeOperator() {
         return oppositeOperator;
     }
 
+    /**
+     * Is arithmetic operator boolean.
+     *
+     * @return the boolean
+     */
     public boolean isArithmeticOperator() {
         return arithmeticOperator;
     }
 
+    /**
+     * Is bit operator boolean.
+     *
+     * @return the boolean
+     */
     public boolean isBitOperator() {
         return bitOperator;
     }
 
+    /**
+     * Is logical compare operator boolean.
+     *
+     * @return the boolean
+     */
     public boolean isLogicalCompareOperator() {
         return logicalCompareOperator;
     }
 
+    /**
+     * Is logical condition operator boolean.
+     *
+     * @return the boolean
+     */
     public boolean isLogicalConditionOperator() {
         return logicalConditionOperator;
     }
 
+    /**
+     * Is logical operator boolean.
+     *
+     * @return the boolean
+     */
     public boolean isLogicalOperator() {
         return isLogicalConditionOperator() || isLogicalCompareOperator();
     }
 
+    /**
+     * Is space required boolean.
+     *
+     * @return the boolean
+     */
     public boolean isSpaceRequired() {
         return spaceRequired;
     }

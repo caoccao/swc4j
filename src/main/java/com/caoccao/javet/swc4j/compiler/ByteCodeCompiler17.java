@@ -26,6 +26,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * JDK 17+ implementation of the bytecode compiler.
  */
 public final class ByteCodeCompiler17 extends ByteCodeCompiler {
+    /**
+     * Instantiates a new Byte code compiler 17.
+     *
+     * @param options the options
+     */
     ByteCodeCompiler17(ByteCodeCompilerOptions options) {
         super(options);
     }

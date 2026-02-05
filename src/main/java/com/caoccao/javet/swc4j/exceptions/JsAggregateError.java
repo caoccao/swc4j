@@ -30,6 +30,9 @@ import java.util.List;
  * @since 1.4.0
  */
 public class JsAggregateError extends JsError {
+    /**
+     * The list of aggregated errors.
+     */
     private final List<Throwable> errors;
 
     /**

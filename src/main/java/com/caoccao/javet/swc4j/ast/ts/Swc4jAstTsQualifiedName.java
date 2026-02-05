@@ -32,13 +32,29 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts qualified name.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsQualifiedName
         extends Swc4jAst
         implements ISwc4jAstTsEntityName {
+    /**
+     * The Left.
+     */
     protected ISwc4jAstTsEntityName left;
+    /**
+     * The Right.
+     */
     protected Swc4jAstIdentName right;
 
+    /**
+     * Instantiates a new swc4j ast ts qualified name.
+     *
+     * @param left  the left
+     * @param right the right
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsQualifiedName(
             ISwc4jAstTsEntityName left,
@@ -49,6 +65,13 @@ public class Swc4jAstTsQualifiedName
         setRight(right);
     }
 
+    /**
+     * Create swc4j ast ts qualified name.
+     *
+     * @param left  the left
+     * @param right the right
+     * @return the swc4j ast ts qualified name
+     */
     public static Swc4jAstTsQualifiedName create(ISwc4jAstTsEntityName left, Swc4jAstIdentName right) {
         return new Swc4jAstTsQualifiedName(left, right, Swc4jSpan.DUMMY);
     }
@@ -58,11 +81,21 @@ public class Swc4jAstTsQualifiedName
         return SimpleList.of(left, right);
     }
 
+    /**
+     * Gets left.
+     *
+     * @return the left
+     */
     @Jni2RustMethod
     public ISwc4jAstTsEntityName getLeft() {
         return left;
     }
 
+    /**
+     * Gets right.
+     *
+     * @return the right
+     */
     @Jni2RustMethod
     public Swc4jAstIdentName getRight() {
         return right;
@@ -86,12 +119,24 @@ public class Swc4jAstTsQualifiedName
         return false;
     }
 
+    /**
+     * Sets left.
+     *
+     * @param left the left
+     * @return the left
+     */
     public Swc4jAstTsQualifiedName setLeft(ISwc4jAstTsEntityName left) {
         this.left = AssertionUtils.notNull(left, "Left");
         this.left.setParent(this);
         return this;
     }
 
+    /**
+     * Sets right.
+     *
+     * @param right the right
+     * @return the right
+     */
     public Swc4jAstTsQualifiedName setRight(Swc4jAstIdentName right) {
         this.right = AssertionUtils.notNull(right, "Right");
         this.right.setParent(this);

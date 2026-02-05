@@ -32,9 +32,21 @@ import java.util.Objects;
  */
 public final class JavetSanitizerException extends Exception {
     private static final int MAX_SOURCE_LENGTH = 80;
+    /**
+     * The sanitizer error type.
+     */
     private final JavetSanitizerError error;
+    /**
+     * The error parameters.
+     */
     private final Map<String, Object> parameters;
+    /**
+     * The source code string.
+     */
     private String codeString;
+    /**
+     * The AST node that caused the error.
+     */
     private ISwc4jAst node;
 
     private JavetSanitizerException(JavetSanitizerError error) {

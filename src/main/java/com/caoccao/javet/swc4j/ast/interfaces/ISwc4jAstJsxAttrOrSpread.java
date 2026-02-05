@@ -21,6 +21,9 @@ import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxAttr;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast jsx attr or spread.
+ */
 @Jni2RustClass(
         name = "JSXAttrOrSpread",
         mappings = {

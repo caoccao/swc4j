@@ -33,16 +33,40 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts namespace decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsNamespaceDecl
         extends Swc4jAst
         implements ISwc4jAstTsNamespaceBody {
+    /**
+     * The Body.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstTsNamespaceBody body;
+    /**
+     * The Declare.
+     */
     protected boolean declare;
+    /**
+     * The Global.
+     */
     protected boolean global;
+    /**
+     * The Id.
+     */
     protected Swc4jAstIdent id;
 
+    /**
+     * Instantiates a new swc4j ast ts namespace decl.
+     *
+     * @param declare the declare
+     * @param global  the global
+     * @param id      the id
+     * @param body    the body
+     * @param span    the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsNamespaceDecl(
             boolean declare,
@@ -57,14 +81,38 @@ public class Swc4jAstTsNamespaceDecl
         setId(id);
     }
 
+    /**
+     * Create swc4j ast ts namespace decl.
+     *
+     * @param id   the id
+     * @param body the body
+     * @return the swc4j ast ts namespace decl
+     */
     public static Swc4jAstTsNamespaceDecl create(Swc4jAstIdent id, ISwc4jAstTsNamespaceBody body) {
         return create(false, id, body);
     }
 
+    /**
+     * Create swc4j ast ts namespace decl.
+     *
+     * @param declare the declare
+     * @param id      the id
+     * @param body    the body
+     * @return the swc4j ast ts namespace decl
+     */
     public static Swc4jAstTsNamespaceDecl create(boolean declare, Swc4jAstIdent id, ISwc4jAstTsNamespaceBody body) {
         return create(declare, false, id, body);
     }
 
+    /**
+     * Create swc4j ast ts namespace decl.
+     *
+     * @param declare the declare
+     * @param global  the global
+     * @param id      the id
+     * @param body    the body
+     * @return the swc4j ast ts namespace decl
+     */
     public static Swc4jAstTsNamespaceDecl create(
             boolean declare,
             boolean global,
@@ -73,6 +121,11 @@ public class Swc4jAstTsNamespaceDecl
         return new Swc4jAstTsNamespaceDecl(declare, global, id, body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public ISwc4jAstTsNamespaceBody getBody() {
         return body;
@@ -83,6 +136,11 @@ public class Swc4jAstTsNamespaceDecl
         return SimpleList.of(id, body);
     }
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
@@ -93,11 +151,21 @@ public class Swc4jAstTsNamespaceDecl
         return Swc4jAstType.TsNamespaceDecl;
     }
 
+    /**
+     * Is declare boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
     }
 
+    /**
+     * Is global boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isGlobal() {
         return global;
@@ -116,22 +184,46 @@ public class Swc4jAstTsNamespaceDecl
         return false;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstTsNamespaceDecl setBody(ISwc4jAstTsNamespaceBody body) {
         this.body = AssertionUtils.notNull(body, "Body");
         this.body.setParent(this);
         return this;
     }
 
+    /**
+     * Sets declare.
+     *
+     * @param declare the declare
+     * @return the declare
+     */
     public Swc4jAstTsNamespaceDecl setDeclare(boolean declare) {
         this.declare = declare;
         return this;
     }
 
+    /**
+     * Sets global.
+     *
+     * @param global the global
+     * @return the global
+     */
     public Swc4jAstTsNamespaceDecl setGlobal(boolean global) {
         this.global = global;
         return this;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     * @return the id
+     */
     public Swc4jAstTsNamespaceDecl setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
         this.id.setParent(this);

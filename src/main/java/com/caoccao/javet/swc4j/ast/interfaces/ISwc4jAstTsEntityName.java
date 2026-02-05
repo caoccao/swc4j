@@ -21,6 +21,9 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsQualifiedName;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast ts entity name.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstIdent.class),

@@ -30,11 +30,23 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts type param decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTypeParamDecl
         extends Swc4jAst {
+    /**
+     * The Params.
+     */
     protected final List<Swc4jAstTsTypeParam> params;
 
+    /**
+     * Instantiates a new swc4j ast ts type param decl.
+     *
+     * @param params the params
+     * @param span   the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeParamDecl(
             List<Swc4jAstTsTypeParam> params,
@@ -44,10 +56,21 @@ public class Swc4jAstTsTypeParamDecl
         this.params.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts type param decl.
+     *
+     * @return the swc4j ast ts type param decl
+     */
     public static Swc4jAstTsTypeParamDecl create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast ts type param decl.
+     *
+     * @param params the params
+     * @return the swc4j ast ts type param decl
+     */
     public static Swc4jAstTsTypeParamDecl create(List<Swc4jAstTsTypeParam> params) {
         return new Swc4jAstTsTypeParamDecl(params, Swc4jSpan.DUMMY);
     }
@@ -57,6 +80,11 @@ public class Swc4jAstTsTypeParamDecl
         return SimpleList.copyOf(params);
     }
 
+    /**
+     * Gets params.
+     *
+     * @return the params
+     */
     @Jni2RustMethod
     public List<Swc4jAstTsTypeParam> getParams() {
         return params;

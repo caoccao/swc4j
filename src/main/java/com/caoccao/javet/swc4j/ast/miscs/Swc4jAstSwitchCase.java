@@ -31,13 +31,29 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast switch case.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstSwitchCase
         extends Swc4jAst {
+    /**
+     * The Cons.
+     */
     protected final List<ISwc4jAstStmt> cons;
+    /**
+     * The Test.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> test;
 
+    /**
+     * Instantiates a new swc4j ast switch case.
+     *
+     * @param test the test
+     * @param cons the cons
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstSwitchCase(
             @Jni2RustParam(optional = true) ISwc4jAstExpr test,
@@ -49,18 +65,42 @@ public class Swc4jAstSwitchCase
         this.cons.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast switch case.
+     *
+     * @return the swc4j ast switch case
+     */
     public static Swc4jAstSwitchCase create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast switch case.
+     *
+     * @param test the test
+     * @return the swc4j ast switch case
+     */
     public static Swc4jAstSwitchCase create(ISwc4jAstExpr test) {
         return create(test, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast switch case.
+     *
+     * @param cons the cons
+     * @return the swc4j ast switch case
+     */
     public static Swc4jAstSwitchCase create(List<ISwc4jAstStmt> cons) {
         return create(null, cons);
     }
 
+    /**
+     * Create swc4j ast switch case.
+     *
+     * @param test the test
+     * @param cons the cons
+     * @return the swc4j ast switch case
+     */
     public static Swc4jAstSwitchCase create(ISwc4jAstExpr test, List<ISwc4jAstStmt> cons) {
         return new Swc4jAstSwitchCase(test, cons, Swc4jSpan.DUMMY);
     }
@@ -72,11 +112,21 @@ public class Swc4jAstSwitchCase
         return childNodes;
     }
 
+    /**
+     * Gets cons.
+     *
+     * @return the cons
+     */
     @Jni2RustMethod
     public List<ISwc4jAstStmt> getCons() {
         return cons;
     }
 
+    /**
+     * Gets test.
+     *
+     * @return the test
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getTest() {
         return test;
@@ -106,6 +156,12 @@ public class Swc4jAstSwitchCase
         return false;
     }
 
+    /**
+     * Sets test.
+     *
+     * @param test the test
+     * @return the test
+     */
     public Swc4jAstSwitchCase setTest(ISwc4jAstExpr test) {
         this.test = Optional.ofNullable(test);
         this.test.ifPresent(node -> node.setParent(this));

@@ -655,10 +655,10 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
     /**
      * Generate bytecode for array pattern extraction from a value already on the stack (parameter).
      *
-     * @param code         the code builder
-     * @param classWriter  the class writer
-     * @param context      the compilation context
-     * @param arrayPat     the array pattern to extract
+     * @param code        the code builder
+     * @param classWriter the class writer
+     * @param context     the compilation context
+     * @param arrayPat    the array pattern to extract
      * @throws Swc4jByteCodeCompilerException if bytecode generation fails
      */
     public void generateArrayPatternExtraction(
@@ -1040,10 +1040,10 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
     /**
      * Generate bytecode for object pattern extraction from a value already on the stack (parameter).
      *
-     * @param code         the code builder
-     * @param classWriter  the class writer
-     * @param context      the compilation context
-     * @param objectPat    the object pattern to extract
+     * @param code        the code builder
+     * @param classWriter the class writer
+     * @param context     the compilation context
+     * @param objectPat   the object pattern to extract
      * @throws Swc4jByteCodeCompilerException if bytecode generation fails
      */
     public void generateObjectPatternExtraction(
@@ -1725,10 +1725,25 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
      */
     private record CapturedVariable(String name, String type, int outerSlot, boolean isSelfReference, boolean isHolder,
                                     String originalType) {
+        /**
+         * Instantiates a new Captured variable.
+         *
+         * @param name      the name
+         * @param type      the type
+         * @param outerSlot the outer slot
+         */
         CapturedVariable(String name, String type, int outerSlot) {
             this(name, type, outerSlot, false, false, type);
         }
 
+        /**
+         * Instantiates a new Captured variable.
+         *
+         * @param name            the name
+         * @param type            the type
+         * @param outerSlot       the outer slot
+         * @param isSelfReference the is self reference
+         */
         CapturedVariable(String name, String type, int outerSlot, boolean isSelfReference) {
             this(name, type, outerSlot, isSelfReference, false, type);
         }

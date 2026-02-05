@@ -22,6 +22,9 @@ import com.caoccao.javet.swc4j.ast.module.Swc4jAstImportStarAsSpecifier;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast import specifier.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "Default", type = Swc4jAstImportDefaultSpecifier.class),

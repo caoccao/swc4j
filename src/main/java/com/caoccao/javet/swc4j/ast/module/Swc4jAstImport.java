@@ -31,12 +31,24 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast import.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstImport
         extends Swc4jAst
         implements ISwc4jAstCallee {
+    /**
+     * The Phase.
+     */
     protected Swc4jAstImportPhase phase;
 
+    /**
+     * Instantiates a new swc4j ast import.
+     *
+     * @param phase the phase
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstImport(
             Swc4jAstImportPhase phase,
@@ -45,6 +57,12 @@ public class Swc4jAstImport
         setPhase(phase);
     }
 
+    /**
+     * Create swc4j ast import.
+     *
+     * @param phase the phase
+     * @return the swc4j ast import
+     */
     public static Swc4jAstImport create(Swc4jAstImportPhase phase) {
         return new Swc4jAstImport(phase, Swc4jSpan.DUMMY);
     }
@@ -54,6 +72,11 @@ public class Swc4jAstImport
         return EMPTY_CHILD_NODES;
     }
 
+    /**
+     * Gets phase.
+     *
+     * @return the phase
+     */
     @Jni2RustMethod
     public Swc4jAstImportPhase getPhase() {
         return phase;
@@ -69,6 +92,12 @@ public class Swc4jAstImport
         return false;
     }
 
+    /**
+     * Sets phase.
+     *
+     * @param phase the phase
+     * @return the phase
+     */
     public Swc4jAstImport setPhase(Swc4jAstImportPhase phase) {
         this.phase = AssertionUtils.notNull(phase, "Phase");
         return this;

@@ -32,23 +32,63 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast function.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstFunction
         extends Swc4jAst {
+    /**
+     * The Decorators.
+     */
     protected final List<Swc4jAstDecorator> decorators;
+    /**
+     * The Params.
+     */
     protected final List<Swc4jAstParam> params;
+    /**
+     * The Async.
+     */
     @Jni2RustField(name = "is_async")
     protected boolean _async;
+    /**
+     * The Body.
+     */
     protected Optional<Swc4jAstBlockStmt> body;
+    /**
+     * The Ctxt.
+     */
     @Jni2RustField(syntaxContext = true)
     protected int ctxt;
+    /**
+     * The Generator.
+     */
     @Jni2RustField(name = "is_generator")
     protected boolean generator;
+    /**
+     * The Return type.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> returnType;
+    /**
+     * The Type params.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
+    /**
+     * Instantiates a new swc4j ast function.
+     *
+     * @param ctxt       the ctxt
+     * @param params     the params
+     * @param decorators the decorators
+     * @param body       the body
+     * @param generator  the generator
+     * @param _async     the async
+     * @param typeParams the type params
+     * @param returnType the return type
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstFunction(
             @Jni2RustParam(syntaxContext = true) int ctxt,
@@ -73,18 +113,44 @@ public class Swc4jAstFunction
         this.params.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast function.
+     *
+     * @return the swc4j ast function
+     */
     public static Swc4jAstFunction create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast function.
+     *
+     * @param params the params
+     * @return the swc4j ast function
+     */
     public static Swc4jAstFunction create(List<Swc4jAstParam> params) {
         return create(params, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast function.
+     *
+     * @param params     the params
+     * @param decorators the decorators
+     * @return the swc4j ast function
+     */
     public static Swc4jAstFunction create(List<Swc4jAstParam> params, List<Swc4jAstDecorator> decorators) {
         return create(params, decorators, null);
     }
 
+    /**
+     * Create swc4j ast function.
+     *
+     * @param params     the params
+     * @param decorators the decorators
+     * @param body       the body
+     * @return the swc4j ast function
+     */
     public static Swc4jAstFunction create(
             List<Swc4jAstParam> params,
             List<Swc4jAstDecorator> decorators,
@@ -92,6 +158,15 @@ public class Swc4jAstFunction
         return create(params, decorators, body, false);
     }
 
+    /**
+     * Create swc4j ast function.
+     *
+     * @param params     the params
+     * @param decorators the decorators
+     * @param body       the body
+     * @param generator  the generator
+     * @return the swc4j ast function
+     */
     public static Swc4jAstFunction create(
             List<Swc4jAstParam> params,
             List<Swc4jAstDecorator> decorators,
@@ -100,6 +175,17 @@ public class Swc4jAstFunction
         return create(params, decorators, body, generator, false, null, null);
     }
 
+    /**
+     * Create swc4j ast function.
+     *
+     * @param params     the params
+     * @param decorators the decorators
+     * @param body       the body
+     * @param generator  the generator
+     * @param _async     the async
+     * @param typeParams the type params
+     * @return the swc4j ast function
+     */
     public static Swc4jAstFunction create(
             List<Swc4jAstParam> params,
             List<Swc4jAstDecorator> decorators,
@@ -110,6 +196,17 @@ public class Swc4jAstFunction
         return create(params, decorators, body, generator, _async, typeParams, null);
     }
 
+    /**
+     * Create swc4j ast function.
+     *
+     * @param params     the params
+     * @param decorators the decorators
+     * @param body       the body
+     * @param generator  the generator
+     * @param _async     the async
+     * @param returnType the return type
+     * @return the swc4j ast function
+     */
     public static Swc4jAstFunction create(
             List<Swc4jAstParam> params,
             List<Swc4jAstDecorator> decorators,
@@ -120,6 +217,18 @@ public class Swc4jAstFunction
         return create(params, decorators, body, generator, _async, null, returnType);
     }
 
+    /**
+     * Create swc4j ast function.
+     *
+     * @param params     the params
+     * @param decorators the decorators
+     * @param body       the body
+     * @param generator  the generator
+     * @param _async     the async
+     * @param typeParams the type params
+     * @param returnType the return type
+     * @return the swc4j ast function
+     */
     public static Swc4jAstFunction create(
             List<Swc4jAstParam> params,
             List<Swc4jAstDecorator> decorators,
@@ -131,6 +240,19 @@ public class Swc4jAstFunction
         return create(0, params, decorators, body, generator, _async, typeParams, returnType);
     }
 
+    /**
+     * Create swc4j ast function.
+     *
+     * @param ctxt       the ctxt
+     * @param params     the params
+     * @param decorators the decorators
+     * @param body       the body
+     * @param generator  the generator
+     * @param _async     the async
+     * @param typeParams the type params
+     * @param returnType the return type
+     * @return the swc4j ast function
+     */
     public static Swc4jAstFunction create(
             int ctxt,
             List<Swc4jAstParam> params,
@@ -145,6 +267,11 @@ public class Swc4jAstFunction
                 _async, typeParams, returnType, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
@@ -160,21 +287,41 @@ public class Swc4jAstFunction
         return childNodes;
     }
 
+    /**
+     * Gets ctxt.
+     *
+     * @return the ctxt
+     */
     @Jni2RustMethod
     public int getCtxt() {
         return ctxt;
     }
 
+    /**
+     * Gets decorators.
+     *
+     * @return the decorators
+     */
     @Jni2RustMethod
     public List<Swc4jAstDecorator> getDecorators() {
         return decorators;
     }
 
+    /**
+     * Gets params.
+     *
+     * @return the params
+     */
     @Jni2RustMethod
     public List<Swc4jAstParam> getParams() {
         return params;
     }
 
+    /**
+     * Gets return type.
+     *
+     * @return the return type
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getReturnType() {
         return returnType;
@@ -185,16 +332,31 @@ public class Swc4jAstFunction
         return Swc4jAstType.Function;
     }
 
+    /**
+     * Gets type params.
+     *
+     * @return the type params
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 
+    /**
+     * Is async boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isAsync() {
         return _async;
     }
 
+    /**
+     * Is generator boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isGenerator() {
         return generator;
@@ -240,33 +402,69 @@ public class Swc4jAstFunction
         return false;
     }
 
+    /**
+     * Sets async.
+     *
+     * @param _async the async
+     * @return the async
+     */
     public Swc4jAstFunction setAsync(boolean _async) {
         this._async = _async;
         return this;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstFunction setBody(Swc4jAstBlockStmt body) {
         this.body = Optional.ofNullable(body);
         this.body.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets ctxt.
+     *
+     * @param ctxt the ctxt
+     * @return the ctxt
+     */
     public Swc4jAstFunction setCtxt(int ctxt) {
         this.ctxt = ctxt;
         return this;
     }
 
+    /**
+     * Sets generator.
+     *
+     * @param generator the generator
+     * @return the generator
+     */
     public Swc4jAstFunction setGenerator(boolean generator) {
         this.generator = generator;
         return this;
     }
 
+    /**
+     * Sets return type.
+     *
+     * @param returnType the return type
+     * @return the return type
+     */
     public Swc4jAstFunction setReturnType(Swc4jAstTsTypeAnn returnType) {
         this.returnType = Optional.ofNullable(returnType);
         this.returnType.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets type params.
+     *
+     * @param typeParams the type params
+     * @return the type params
+     */
     public Swc4jAstFunction setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
         this.typeParams.ifPresent(node -> node.setParent(this));

@@ -32,14 +32,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast class expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
 public class Swc4jAstClassExpr
         extends Swc4jAst
         implements ISwc4jAstDefaultDecl, ISwc4jAstExpr {
+    /**
+     * The Clazz.
+     */
     @Jni2RustField(name = "class", box = true)
     protected Swc4jAstClass clazz;
+    /**
+     * The Ident.
+     */
     protected Optional<Swc4jAstIdent> ident;
 
+    /**
+     * Instantiates a new swc4j ast class expr.
+     *
+     * @param ident the ident
+     * @param clazz the clazz
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstClassExpr(
             @Jni2RustParam(optional = true) Swc4jAstIdent ident,
@@ -50,10 +66,23 @@ public class Swc4jAstClassExpr
         setIdent(ident);
     }
 
+    /**
+     * Create swc4j ast class expr.
+     *
+     * @param clazz the clazz
+     * @return the swc4j ast class expr
+     */
     public static Swc4jAstClassExpr create(Swc4jAstClass clazz) {
         return create(null, clazz);
     }
 
+    /**
+     * Create swc4j ast class expr.
+     *
+     * @param ident the ident
+     * @param clazz the clazz
+     * @return the swc4j ast class expr
+     */
     public static Swc4jAstClassExpr create(Swc4jAstIdent ident, Swc4jAstClass clazz) {
         return new Swc4jAstClassExpr(ident, clazz, Swc4jSpan.DUMMY);
     }
@@ -65,11 +94,21 @@ public class Swc4jAstClassExpr
         return childNodes;
     }
 
+    /**
+     * Gets clazz.
+     *
+     * @return the clazz
+     */
     @Jni2RustMethod
     public Swc4jAstClass getClazz() {
         return clazz;
     }
 
+    /**
+     * Gets ident.
+     *
+     * @return the ident
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstIdent> getIdent() {
         return ident;
@@ -94,12 +133,24 @@ public class Swc4jAstClassExpr
         return false;
     }
 
+    /**
+     * Sets clazz.
+     *
+     * @param clazz the clazz
+     * @return the clazz
+     */
     public Swc4jAstClassExpr setClazz(Swc4jAstClass clazz) {
         this.clazz = AssertionUtils.notNull(clazz, "Class");
         this.clazz.setParent(this);
         return this;
     }
 
+    /**
+     * Sets ident.
+     *
+     * @param ident the ident
+     * @return the ident
+     */
     public Swc4jAstClassExpr setIdent(Swc4jAstIdent ident) {
         this.ident = Optional.ofNullable(ident);
         this.ident.ifPresent(node -> node.setParent(this));

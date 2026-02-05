@@ -33,14 +33,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast tpl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTpl
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    /**
+     * The Exprs.
+     */
     @Jni2RustField(componentBox = true)
     protected final List<ISwc4jAstExpr> exprs;
+    /**
+     * The Quasis.
+     */
     protected final List<Swc4jAstTplElement> quasis;
 
+    /**
+     * Instantiates a new swc4j ast tpl.
+     *
+     * @param exprs  the exprs
+     * @param quasis the quasis
+     * @param span   the span
+     */
     @Jni2RustMethod
     public Swc4jAstTpl(
             List<ISwc4jAstExpr> exprs,
@@ -53,14 +69,32 @@ public class Swc4jAstTpl
         this.quasis.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast tpl.
+     *
+     * @return the swc4j ast tpl
+     */
     public static Swc4jAstTpl create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast tpl.
+     *
+     * @param exprs the exprs
+     * @return the swc4j ast tpl
+     */
     public static Swc4jAstTpl create(List<ISwc4jAstExpr> exprs) {
         return create(exprs, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast tpl.
+     *
+     * @param exprs  the exprs
+     * @param quasis the quasis
+     * @return the swc4j ast tpl
+     */
     public static Swc4jAstTpl create(List<ISwc4jAstExpr> exprs, List<Swc4jAstTplElement> quasis) {
         return new Swc4jAstTpl(exprs, quasis, Swc4jSpan.DUMMY);
     }
@@ -72,11 +106,21 @@ public class Swc4jAstTpl
         return childNodes;
     }
 
+    /**
+     * Gets exprs.
+     *
+     * @return the exprs
+     */
     @Jni2RustMethod
     public List<ISwc4jAstExpr> getExprs() {
         return exprs;
     }
 
+    /**
+     * Gets quasis.
+     *
+     * @return the quasis
+     */
     @Jni2RustMethod
     public List<Swc4jAstTplElement> getQuasis() {
         return quasis;

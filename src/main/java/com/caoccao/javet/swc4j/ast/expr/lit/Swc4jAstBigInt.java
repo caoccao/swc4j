@@ -32,17 +32,36 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast big int.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, customFromJava = true, customToJava = true)
 public class Swc4jAstBigInt
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
+    /**
+     * The Raw.
+     */
     @Jni2RustField(atom = true)
     protected Optional<String> raw;
+    /**
+     * The Sign.
+     */
     @Jni2RustField(ignore = true)
     protected Swc4jAstBigIntSign sign;
+    /**
+     * The Value.
+     */
     @Jni2RustField(box = true)
     protected BigInteger value;
 
+    /**
+     * Instantiates a new swc4j ast big int.
+     *
+     * @param sign the sign
+     * @param raw  the raw
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstBigInt(
             Swc4jAstBigIntSign sign,
@@ -53,14 +72,32 @@ public class Swc4jAstBigInt
         setSign(sign);
     }
 
+    /**
+     * Create swc4j ast big int.
+     *
+     * @return the swc4j ast big int
+     */
     public static Swc4jAstBigInt create() {
         return create(Swc4jAstBigIntSign.NoSign, null);
     }
 
+    /**
+     * Create swc4j ast big int.
+     *
+     * @param raw the raw
+     * @return the swc4j ast big int
+     */
     public static Swc4jAstBigInt create(String raw) {
         return create(Swc4jAstBigIntSign.Plus, raw);
     }
 
+    /**
+     * Create swc4j ast big int.
+     *
+     * @param sign the sign
+     * @param raw  the raw
+     * @return the swc4j ast big int
+     */
     public static Swc4jAstBigInt create(Swc4jAstBigIntSign sign, String raw) {
         return new Swc4jAstBigInt(sign, raw, Swc4jSpan.DUMMY);
     }
@@ -110,11 +147,21 @@ public class Swc4jAstBigInt
         return EMPTY_CHILD_NODES;
     }
 
+    /**
+     * Gets raw.
+     *
+     * @return the raw
+     */
     @Jni2RustMethod
     public Optional<String> getRaw() {
         return raw;
     }
 
+    /**
+     * Gets sign.
+     *
+     * @return the sign
+     */
     @Jni2RustMethod
     public Swc4jAstBigIntSign getSign() {
         return sign;
@@ -125,6 +172,11 @@ public class Swc4jAstBigInt
         return Swc4jAstType.BigInt;
     }
 
+    /**
+     * Gets value.
+     *
+     * @return the value
+     */
     @Jni2RustMethod
     public BigInteger getValue() {
         return value;
@@ -135,6 +187,12 @@ public class Swc4jAstBigInt
         return false;
     }
 
+    /**
+     * Sets raw.
+     *
+     * @param raw the raw
+     * @return the raw
+     */
     public Swc4jAstBigInt setRaw(String raw) {
         this.raw = Optional.ofNullable(raw);
         if (StringUtils.isEmpty(raw)) {
@@ -164,11 +222,23 @@ public class Swc4jAstBigInt
         return this;
     }
 
+    /**
+     * Sets sign.
+     *
+     * @param sign the sign
+     * @return the sign
+     */
     public Swc4jAstBigInt setSign(Swc4jAstBigIntSign sign) {
         this.sign = AssertionUtils.notNull(sign, "Sign");
         return this;
     }
 
+    /**
+     * Sets value.
+     *
+     * @param value the value
+     * @return the value
+     */
     public Swc4jAstBigInt setValue(BigInteger value) {
         this.value = AssertionUtils.notNull(value, "Value");
         raw = Optional.of(value.toString() + ISwc4jConstants.N);

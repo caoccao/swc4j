@@ -16,8 +16,20 @@
 
 package com.caoccao.javet.swc4j.plugins;
 
+/**
+ * The enum swc4j plugin response.
+ */
 public enum Swc4jPluginResponse {
+    /**
+     * Error swc4j plugin response.
+     */
     Error,
+    /**
+     * Ok and break swc4j plugin response.
+     */
     OkAndBreak,
+    /**
+     * Ok and continue swc4j plugin response.
+     */
     OkAndContinue,
 }

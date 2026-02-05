@@ -31,13 +31,29 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts enum member.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsEnumMember
         extends Swc4jAst {
+    /**
+     * The Id.
+     */
     protected ISwc4jAstTsEnumMemberId id;
+    /**
+     * The Init.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> init;
 
+    /**
+     * Instantiates a new swc4j ast ts enum member.
+     *
+     * @param id   the id
+     * @param init the init
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsEnumMember(
             ISwc4jAstTsEnumMemberId id,
@@ -48,10 +64,23 @@ public class Swc4jAstTsEnumMember
         setInit(init);
     }
 
+    /**
+     * Create swc4j ast ts enum member.
+     *
+     * @param id the id
+     * @return the swc4j ast ts enum member
+     */
     public static Swc4jAstTsEnumMember create(ISwc4jAstTsEnumMemberId id) {
         return create(id, null);
     }
 
+    /**
+     * Create swc4j ast ts enum member.
+     *
+     * @param id   the id
+     * @param init the init
+     * @return the swc4j ast ts enum member
+     */
     public static Swc4jAstTsEnumMember create(ISwc4jAstTsEnumMemberId id, ISwc4jAstExpr init) {
         return new Swc4jAstTsEnumMember(id, init, Swc4jSpan.DUMMY);
     }
@@ -63,11 +92,21 @@ public class Swc4jAstTsEnumMember
         return childNodes;
     }
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     @Jni2RustMethod
     public ISwc4jAstTsEnumMemberId getId() {
         return id;
     }
 
+    /**
+     * Gets init.
+     *
+     * @return the init
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getInit() {
         return init;
@@ -92,12 +131,24 @@ public class Swc4jAstTsEnumMember
         return false;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     * @return the id
+     */
     public Swc4jAstTsEnumMember setId(ISwc4jAstTsEnumMemberId id) {
         this.id = AssertionUtils.notNull(id, "Id");
         this.id.setParent(this);
         return this;
     }
 
+    /**
+     * Sets init.
+     *
+     * @param init the init
+     * @return the init
+     */
     public Swc4jAstTsEnumMember setInit(ISwc4jAstExpr init) {
         this.init = Optional.ofNullable(init);
         this.init.ifPresent(node -> node.setParent(this));

@@ -20,8 +20,17 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast update op.
+ */
 public enum Swc4jAstUpdateOp implements ISwc4jEnumIdName {
+    /**
+     * Plus plus swc4j ast update op.
+     */
     PlusPlus(0, "++"),
+    /**
+     * Minus minus swc4j ast update op.
+     */
     MinusMinus(1, "--"),
     ;
 
@@ -40,6 +49,12 @@ public enum Swc4jAstUpdateOp implements ISwc4jEnumIdName {
         this.name = name;
     }
 
+    /**
+     * Parse swc4j ast update op.
+     *
+     * @param id the id
+     * @return the swc4j ast update op
+     */
     public static Swc4jAstUpdateOp parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : PlusPlus;
     }

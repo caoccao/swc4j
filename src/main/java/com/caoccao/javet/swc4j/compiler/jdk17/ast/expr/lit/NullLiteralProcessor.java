@@ -24,7 +24,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type Null literal processor.
+ */
 public final class NullLiteralProcessor extends BaseAstProcessor<Swc4jAstNull> {
+    /**
+     * Instantiates a new Null literal processor.
+     *
+     * @param compiler the compiler
+     */
     public NullLiteralProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

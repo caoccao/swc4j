@@ -32,8 +32,8 @@ public final class AssertionUtils {
     /**
      * Asserts that a value is not null.
      *
-     * @param value the value to check
      * @param <T>   the type of the value
+     * @param value the value to check
      * @return the value if not null
      * @throws NullPointerException if value is null
      */
@@ -44,9 +44,9 @@ public final class AssertionUtils {
     /**
      * Asserts that a value is not null.
      *
+     * @param <T>   the type of the value
      * @param value the value to check
      * @param name  the name of the value for error messages
-     * @param <T>   the type of the value
      * @return the value if not null
      * @throws NullPointerException if value is null
      */

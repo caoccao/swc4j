@@ -22,24 +22,69 @@ package com.caoccao.javet.swc4j.utils;
  * @since 0.1.0
  */
 public final class OSUtils {
+    /**
+     * The constant OS_ARCH.
+     */
     public static final String OS_ARCH = System.getProperty("os.arch");
+    /**
+     * The constant OS_NAME.
+     */
     public static final String OS_NAME = System.getProperty("os.name");
+    /**
+     * The constant JAVA_VM_NAME.
+     */
     public static final String JAVA_VM_NAME = System.getProperty("java.vm.name");
+    /**
+     * The constant IS_ANDROID.
+     */
     public static final boolean IS_ANDROID = JAVA_VM_NAME.startsWith("Dalvik");
+    /**
+     * The constant IS_LINUX.
+     */
     public static final boolean IS_LINUX = OS_NAME.startsWith("Linux") && !IS_ANDROID;
+    /**
+     * The constant IS_MACOS.
+     */
     public static final boolean IS_MACOS = OS_NAME.startsWith("Mac OS") && !IS_ANDROID;
+    /**
+     * The constant IS_WINDOWS.
+     */
     public static final boolean IS_WINDOWS = OS_NAME.startsWith("Windows") && !IS_ANDROID;
+    /**
+     * The constant IS_ARM.
+     */
     public static final boolean IS_ARM =
             OS_ARCH.startsWith("armeabi") || OS_ARCH.startsWith("armv7") ||
                     OS_ARCH.startsWith("arm32") || OS_ARCH.equals("arm");
+    /**
+     * The constant IS_ARM64.
+     */
     public static final boolean IS_ARM64 =
             OS_ARCH.startsWith("arm64") || OS_ARCH.startsWith("armv8") ||
                     OS_ARCH.equals("aarch64");
+    /**
+     * The constant IS_X86.
+     */
     public static final boolean IS_X86 = OS_ARCH.matches("^(x86_32|x8632|x86|i[3-6]86|ia32|x32)$");
+    /**
+     * The constant IS_X86_64.
+     */
     public static final boolean IS_X86_64 = OS_ARCH.matches("^(x86_64|x8664|amd64|ia32e|em64t|x64)$");
+    /**
+     * The constant PROCESS_ID.
+     */
     public static final long PROCESS_ID;
+    /**
+     * The constant LINE_SEPARATOR.
+     */
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    /**
+     * The constant TEMP_DIRECTORY.
+     */
     public static final String TEMP_DIRECTORY = System.getProperty("java.io.tmpdir");
+    /**
+     * The constant WORKING_DIRECTORY.
+     */
     public static final String WORKING_DIRECTORY = System.getProperty("user.dir");
 
     static {

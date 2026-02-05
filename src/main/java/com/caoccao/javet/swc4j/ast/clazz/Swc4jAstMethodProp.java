@@ -33,14 +33,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast method prop.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
 public class Swc4jAstMethodProp
         extends Swc4jAst
         implements ISwc4jAstProp {
+    /**
+     * The Function.
+     */
     @Jni2RustField(box = true)
     protected Swc4jAstFunction function;
+    /**
+     * The Key.
+     */
     protected ISwc4jAstPropName key;
 
+    /**
+     * Instantiates a new swc4j ast method prop.
+     *
+     * @param key      the key
+     * @param function the function
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstMethodProp(
             ISwc4jAstPropName key,
@@ -51,6 +67,13 @@ public class Swc4jAstMethodProp
         setKey(key);
     }
 
+    /**
+     * Create swc4j ast method prop.
+     *
+     * @param key      the key
+     * @param function the function
+     * @return the swc4j ast method prop
+     */
     public static Swc4jAstMethodProp create(ISwc4jAstPropName key, Swc4jAstFunction function) {
         return new Swc4jAstMethodProp(key, function, Swc4jSpan.DUMMY);
     }
@@ -60,11 +83,21 @@ public class Swc4jAstMethodProp
         return SimpleList.of(key, function);
     }
 
+    /**
+     * Gets function.
+     *
+     * @return the function
+     */
     @Jni2RustMethod
     public Swc4jAstFunction getFunction() {
         return function;
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
@@ -88,12 +121,24 @@ public class Swc4jAstMethodProp
         return false;
     }
 
+    /**
+     * Sets function.
+     *
+     * @param function the function
+     * @return the function
+     */
     public Swc4jAstMethodProp setFunction(Swc4jAstFunction function) {
         this.function = AssertionUtils.notNull(function, "Function");
         this.function.setParent(this);
         return this;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstMethodProp setKey(ISwc4jAstPropName key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);

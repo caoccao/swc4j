@@ -31,16 +31,36 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts getter signature.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsGetterSignature
         extends Swc4jAst
         implements ISwc4jAstTsTypeElement {
+    /**
+     * The Computed.
+     */
     protected boolean computed;
+    /**
+     * The Key.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr key;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
+    /**
+     * Instantiates a new swc4j ast ts getter signature.
+     *
+     * @param key      the key
+     * @param computed the computed
+     * @param typeAnn  the type ann
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsGetterSignature(
             ISwc4jAstExpr key,
@@ -53,16 +73,37 @@ public class Swc4jAstTsGetterSignature
         setTypeAnn(typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts getter signature.
+     *
+     * @param key the key
+     * @return the swc4j ast ts getter signature
+     */
     public static Swc4jAstTsGetterSignature create(ISwc4jAstExpr key) {
         return create(key, null);
     }
 
+    /**
+     * Create swc4j ast ts getter signature.
+     *
+     * @param key     the key
+     * @param typeAnn the type ann
+     * @return the swc4j ast ts getter signature
+     */
     public static Swc4jAstTsGetterSignature create(
             ISwc4jAstExpr key,
             Swc4jAstTsTypeAnn typeAnn) {
         return create(key, false, typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts getter signature.
+     *
+     * @param key      the key
+     * @param computed the computed
+     * @param typeAnn  the type ann
+     * @return the swc4j ast ts getter signature
+     */
     public static Swc4jAstTsGetterSignature create(
             ISwc4jAstExpr key,
             boolean computed,
@@ -77,6 +118,11 @@ public class Swc4jAstTsGetterSignature
         return childNodes;
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getKey() {
         return key;
@@ -87,11 +133,21 @@ public class Swc4jAstTsGetterSignature
         return Swc4jAstType.TsGetterSignature;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    /**
+     * Is computed boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isComputed() {
         return computed;
@@ -111,17 +167,35 @@ public class Swc4jAstTsGetterSignature
         return false;
     }
 
+    /**
+     * Sets computed.
+     *
+     * @param computed the computed
+     * @return the computed
+     */
     public Swc4jAstTsGetterSignature setComputed(boolean computed) {
         this.computed = computed;
         return this;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstTsGetterSignature setKey(ISwc4jAstExpr key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstTsGetterSignature setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));

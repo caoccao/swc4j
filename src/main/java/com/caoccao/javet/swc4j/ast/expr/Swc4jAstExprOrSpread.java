@@ -31,13 +31,29 @@ import com.caoccao.javet.swc4j.utils.StringUtils;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast expr or spread.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
 public class Swc4jAstExprOrSpread
         extends Swc4jAst {
+    /**
+     * The Expr.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr expr;
+    /**
+     * The Spread.
+     */
     protected Optional<Swc4jSpan> spread;
 
+    /**
+     * Instantiates a new swc4j ast expr or spread.
+     *
+     * @param spread the spread
+     * @param expr   the expr
+     * @param span   the span
+     */
     @Jni2RustMethod
     public Swc4jAstExprOrSpread(
             @Jni2RustParam(optional = true) Swc4jSpan spread,
@@ -48,10 +64,23 @@ public class Swc4jAstExprOrSpread
         setSpread(spread);
     }
 
+    /**
+     * Create swc4j ast expr or spread.
+     *
+     * @param expr the expr
+     * @return the swc4j ast expr or spread
+     */
     public static Swc4jAstExprOrSpread create(ISwc4jAstExpr expr) {
         return create(null, expr);
     }
 
+    /**
+     * Create swc4j ast expr or spread.
+     *
+     * @param spread the spread
+     * @param expr   the expr
+     * @return the swc4j ast expr or spread
+     */
     public static Swc4jAstExprOrSpread create(Swc4jSpan spread, ISwc4jAstExpr expr) {
         return new Swc4jAstExprOrSpread(spread, expr, Swc4jSpan.DUMMY);
     }
@@ -61,11 +90,21 @@ public class Swc4jAstExprOrSpread
         return SimpleList.of(expr);
     }
 
+    /**
+     * Gets expr.
+     *
+     * @return the expr
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
     }
 
+    /**
+     * Gets spread.
+     *
+     * @return the spread
+     */
     @Jni2RustMethod
     public Optional<Swc4jSpan> getSpread() {
         return spread;
@@ -85,12 +124,24 @@ public class Swc4jAstExprOrSpread
         return false;
     }
 
+    /**
+     * Sets expr.
+     *
+     * @param expr the expr
+     * @return the expr
+     */
     public Swc4jAstExprOrSpread setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
         this.expr.setParent(this);
         return this;
     }
 
+    /**
+     * Sets spread.
+     *
+     * @param spread the spread
+     * @return the spread
+     */
     public Swc4jAstExprOrSpread setSpread(Swc4jSpan spread) {
         this.spread = Optional.ofNullable(spread);
         return this;

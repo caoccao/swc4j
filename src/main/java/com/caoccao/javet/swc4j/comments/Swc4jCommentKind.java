@@ -20,8 +20,17 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumId;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j comment kind.
+ */
 public enum Swc4jCommentKind implements ISwc4jEnumId {
+    /**
+     * Line swc4j comment kind.
+     */
     Line(0),
+    /**
+     * Block swc4j comment kind.
+     */
     Block(1),
     ;
 
@@ -38,6 +47,12 @@ public enum Swc4jCommentKind implements ISwc4jEnumId {
         this.id = id;
     }
 
+    /**
+     * Parse swc4j comment kind.
+     *
+     * @param id the id
+     * @return the swc4j comment kind
+     */
     public static Swc4jCommentKind parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : Line;
     }

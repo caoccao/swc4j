@@ -26,30 +26,52 @@ import java.util.Map;
  * @since 0.7.0
  */
 public enum JavetSanitizerError {
-    /** Unknown error */
+    /**
+     * Unknown error
+     */
     UnknownError(1, "Unknown error: ${message}"),
-    /** Empty code string error */
+    /**
+     * Empty code string error
+     */
     EmptyCodeString(2, "The code string is empty."),
-    /** Visitor not found error */
+    /**
+     * Visitor not found error
+     */
     VisitorNotFound(3, "Visitor ${name} is not found."),
-    /** Parsing error */
+    /**
+     * Parsing error
+     */
     ParsingError(4, "${message}"),
 
-    /** Identifier not allowed error */
+    /**
+     * Identifier not allowed error
+     */
     IdentifierNotAllowed(100, "Identifier ${identifier} is not allowed."),
-    /** Keyword not allowed error */
+    /**
+     * Keyword not allowed error
+     */
     KeywordNotAllowed(101, "Keyword ${keyword} is not allowed."),
 
-    /** Invalid node error */
+    /**
+     * Invalid node error
+     */
     InvalidNode(200, "${actualNode} is unexpected. Expecting ${expectedNode} in ${nodeName}."),
-    /** Node count mismatch error */
+    /**
+     * Node count mismatch error
+     */
     NodeCountMismatch(220, "AST node count ${actualCount} mismatches the expected AST node count ${expectedCount}."),
-    /** Node count too small error */
+    /**
+     * Node count too small error
+     */
     NodeCountTooSmall(221, "AST node count ${actualCount} is less than the minimal AST node count ${minCount}."),
-    /** Node count too large error */
+    /**
+     * Node count too large error
+     */
     NodeCountTooLarge(222, "AST node count ${actualCount} is greater than the maximal AST node count ${maxCount}."),
 
-    /** Function not found error */
+    /**
+     * Function not found error
+     */
     FunctionNotFound(300, "Function ${name} is not found."),
     ;
 

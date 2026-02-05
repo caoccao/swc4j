@@ -30,12 +30,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast jsx expr container.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXExprContainer")
 public class Swc4jAstJsxExprContainer
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxElementChild, ISwc4jAstJsxAttrValue {
+    /**
+     * The Expr.
+     */
     protected ISwc4jAstJsxExpr expr;
 
+    /**
+     * Instantiates a new swc4j ast jsx expr container.
+     *
+     * @param expr the expr
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstJsxExprContainer(
             ISwc4jAstJsxExpr expr,
@@ -44,6 +56,12 @@ public class Swc4jAstJsxExprContainer
         setExpr(expr);
     }
 
+    /**
+     * Create swc4j ast jsx expr container.
+     *
+     * @param expr the expr
+     * @return the swc4j ast jsx expr container
+     */
     public static Swc4jAstJsxExprContainer create(ISwc4jAstJsxExpr expr) {
         return new Swc4jAstJsxExprContainer(expr, Swc4jSpan.DUMMY);
     }
@@ -53,6 +71,11 @@ public class Swc4jAstJsxExprContainer
         return SimpleList.of(expr);
     }
 
+    /**
+     * Gets expr.
+     *
+     * @return the expr
+     */
     @Jni2RustMethod
     public ISwc4jAstJsxExpr getExpr() {
         return expr;
@@ -72,6 +95,12 @@ public class Swc4jAstJsxExprContainer
         return false;
     }
 
+    /**
+     * Sets expr.
+     *
+     * @param expr the expr
+     * @return the expr
+     */
     public Swc4jAstJsxExprContainer setExpr(ISwc4jAstJsxExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
         this.expr.setParent(this);

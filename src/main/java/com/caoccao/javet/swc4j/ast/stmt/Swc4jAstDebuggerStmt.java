@@ -29,16 +29,29 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast debugger stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstDebuggerStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * Instantiates a new swc4j ast debugger stmt.
+     *
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstDebuggerStmt(
             Swc4jSpan span) {
         super(span);
     }
 
+    /**
+     * Create swc4j ast debugger stmt.
+     *
+     * @return the swc4j ast debugger stmt
+     */
     public static Swc4jAstDebuggerStmt create() {
         return new Swc4jAstDebuggerStmt(Swc4jSpan.DUMMY);
     }

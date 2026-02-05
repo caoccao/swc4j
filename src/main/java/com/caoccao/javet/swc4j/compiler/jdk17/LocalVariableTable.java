@@ -185,8 +185,7 @@ public class LocalVariableTable {
     /**
      * Reset the local variable table.
      *
-     * @param isStatic true if this is for a static method (slot 0 is first parameter),
-     *                 false for instance methods (slot 0 is 'this')
+     * @param isStatic true if this is for a static method (slot 0 is first parameter),                 false for instance methods (slot 0 is 'this')
      */
     public void reset(boolean isStatic) {
         allVariables.clear();

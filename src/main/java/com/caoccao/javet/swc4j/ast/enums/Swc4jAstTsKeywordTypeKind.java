@@ -20,19 +20,61 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast ts keyword type kind.
+ */
 public enum Swc4jAstTsKeywordTypeKind implements ISwc4jEnumIdName {
+    /**
+     * Ts any keyword swc4j ast ts keyword type kind.
+     */
     TsAnyKeyword(0, "any"),
+    /**
+     * Ts big int keyword swc4j ast ts keyword type kind.
+     */
     TsBigIntKeyword(1, "bigint"),
+    /**
+     * Ts boolean keyword swc4j ast ts keyword type kind.
+     */
     TsBooleanKeyword(2, "boolean"),
+    /**
+     * Ts intrinsic keyword swc4j ast ts keyword type kind.
+     */
     TsIntrinsicKeyword(3, "intrinsic"),
+    /**
+     * Ts never keyword swc4j ast ts keyword type kind.
+     */
     TsNeverKeyword(4, "never"),
+    /**
+     * Ts null keyword swc4j ast ts keyword type kind.
+     */
     TsNullKeyword(5, "null"),
+    /**
+     * Ts number keyword swc4j ast ts keyword type kind.
+     */
     TsNumberKeyword(6, "number"),
+    /**
+     * Ts object keyword swc4j ast ts keyword type kind.
+     */
     TsObjectKeyword(7, "object"),
+    /**
+     * Ts string keyword swc4j ast ts keyword type kind.
+     */
     TsStringKeyword(8, "string"),
+    /**
+     * Ts symbol keyword swc4j ast ts keyword type kind.
+     */
     TsSymbolKeyword(9, "symbol"),
+    /**
+     * Ts undefined keyword swc4j ast ts keyword type kind.
+     */
     TsUndefinedKeyword(10, "undefined"),
+    /**
+     * Ts unknown keyword swc4j ast ts keyword type kind.
+     */
     TsUnknownKeyword(11, "unknown"),
+    /**
+     * Ts void keyword swc4j ast ts keyword type kind.
+     */
     TsVoidKeyword(12, "void"),
     ;
 
@@ -51,6 +93,12 @@ public enum Swc4jAstTsKeywordTypeKind implements ISwc4jEnumIdName {
         this.name = name;
     }
 
+    /**
+     * Parse swc4j ast ts keyword type kind.
+     *
+     * @param id the id
+     * @return the swc4j ast ts keyword type kind
+     */
     public static Swc4jAstTsKeywordTypeKind parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : TsAnyKeyword;
     }

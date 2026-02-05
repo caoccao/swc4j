@@ -28,6 +28,9 @@ import java.util.Stack;
 public final class ScopedTypeAliasRegistry {
     private final Stack<Map<String, String>> scopeStack;
 
+    /**
+     * Instantiates a new Scoped type alias registry.
+     */
     public ScopedTypeAliasRegistry() {
         scopeStack = new Stack<>();
         // Push global scope
@@ -98,6 +101,12 @@ public final class ScopedTypeAliasRegistry {
         scopeStack.peek().putAll(aliases);
     }
 
+    /**
+     * Register alias.
+     *
+     * @param alias              the alias
+     * @param fullyQualifiedName the fully qualified name
+     */
     public void registerAlias(String alias, String fullyQualifiedName) {
         scopeStack.peek().put(alias, fullyQualifiedName);
     }

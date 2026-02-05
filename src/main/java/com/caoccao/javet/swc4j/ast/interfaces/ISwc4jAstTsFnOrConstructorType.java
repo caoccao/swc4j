@@ -21,6 +21,9 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsFnType;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast ts fn or constructor type.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "TsConstructorType", type = Swc4jAstTsConstructorType.class),

@@ -32,16 +32,40 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast var decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstVarDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr, ISwc4jAstForHead {
+    /**
+     * The Decls.
+     */
     protected final List<Swc4jAstVarDeclarator> decls;
+    /**
+     * The Ctxt.
+     */
     @Jni2RustField(syntaxContext = true)
     protected int ctxt;
+    /**
+     * The Declare.
+     */
     protected boolean declare;
+    /**
+     * The Kind.
+     */
     protected Swc4jAstVarDeclKind kind;
 
+    /**
+     * Instantiates a new swc4j ast var decl.
+     *
+     * @param ctxt    the ctxt
+     * @param kind    the kind
+     * @param declare the declare
+     * @param decls   the decls
+     * @param span    the span
+     */
     @Jni2RustMethod
     public Swc4jAstVarDecl(
             @Jni2RustParam(syntaxContext = true) int ctxt,
@@ -57,18 +81,46 @@ public class Swc4jAstVarDecl
         this.decls.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast var decl.
+     *
+     * @param kind the kind
+     * @return the swc4j ast var decl
+     */
     public static Swc4jAstVarDecl create(Swc4jAstVarDeclKind kind) {
         return create(kind, false);
     }
 
+    /**
+     * Create swc4j ast var decl.
+     *
+     * @param kind  the kind
+     * @param decls the decls
+     * @return the swc4j ast var decl
+     */
     public static Swc4jAstVarDecl create(Swc4jAstVarDeclKind kind, List<Swc4jAstVarDeclarator> decls) {
         return create(kind, false, decls);
     }
 
+    /**
+     * Create swc4j ast var decl.
+     *
+     * @param kind    the kind
+     * @param declare the declare
+     * @return the swc4j ast var decl
+     */
     public static Swc4jAstVarDecl create(Swc4jAstVarDeclKind kind, boolean declare) {
         return create(kind, declare, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast var decl.
+     *
+     * @param kind    the kind
+     * @param declare the declare
+     * @param decls   the decls
+     * @return the swc4j ast var decl
+     */
     public static Swc4jAstVarDecl create(
             Swc4jAstVarDeclKind kind,
             boolean declare,
@@ -76,6 +128,15 @@ public class Swc4jAstVarDecl
         return create(0, kind, declare, decls);
     }
 
+    /**
+     * Create swc4j ast var decl.
+     *
+     * @param ctxt    the ctxt
+     * @param kind    the kind
+     * @param declare the declare
+     * @param decls   the decls
+     * @return the swc4j ast var decl
+     */
     public static Swc4jAstVarDecl create(
             int ctxt,
             Swc4jAstVarDeclKind kind,
@@ -89,16 +150,31 @@ public class Swc4jAstVarDecl
         return SimpleList.copyOf(decls);
     }
 
+    /**
+     * Gets ctxt.
+     *
+     * @return the ctxt
+     */
     @Jni2RustMethod
     public int getCtxt() {
         return ctxt;
     }
 
+    /**
+     * Gets decls.
+     *
+     * @return the decls
+     */
     @Jni2RustMethod
     public List<Swc4jAstVarDeclarator> getDecls() {
         return decls;
     }
 
+    /**
+     * Gets kind.
+     *
+     * @return the kind
+     */
     @Jni2RustMethod
     public Swc4jAstVarDeclKind getKind() {
         return kind;
@@ -109,6 +185,11 @@ public class Swc4jAstVarDecl
         return Swc4jAstType.VarDecl;
     }
 
+    /**
+     * Is declare boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
@@ -129,16 +210,34 @@ public class Swc4jAstVarDecl
         return false;
     }
 
+    /**
+     * Sets ctxt.
+     *
+     * @param ctxt the ctxt
+     * @return the ctxt
+     */
     public Swc4jAstVarDecl setCtxt(int ctxt) {
         this.ctxt = ctxt;
         return this;
     }
 
+    /**
+     * Sets declare.
+     *
+     * @param declare the declare
+     * @return the declare
+     */
     public Swc4jAstVarDecl setDeclare(boolean declare) {
         this.declare = declare;
         return this;
     }
 
+    /**
+     * Sets kind.
+     *
+     * @param kind the kind
+     * @return the kind
+     */
     public Swc4jAstVarDecl setKind(Swc4jAstVarDeclKind kind) {
         this.kind = AssertionUtils.notNull(kind, "Kind");
         return this;

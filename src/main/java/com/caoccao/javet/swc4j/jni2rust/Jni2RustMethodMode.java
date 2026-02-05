@@ -16,7 +16,16 @@
 
 package com.caoccao.javet.swc4j.jni2rust;
 
+/**
+ * The enum Jni 2 rust method mode.
+ */
 public enum Jni2RustMethodMode {
+    /**
+     * Auto jni 2 rust method mode.
+     */
     Auto,
+    /**
+     * Manual jni 2 rust method mode.
+     */
     Manual,
 }

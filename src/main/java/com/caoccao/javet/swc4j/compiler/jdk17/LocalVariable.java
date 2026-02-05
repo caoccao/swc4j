@@ -31,6 +31,10 @@ public record LocalVariable(String name, String type, int index, boolean mutable
 
     /**
      * Creates a simple immutable variable (backward compatible constructor).
+     *
+     * @param name  the name
+     * @param type  the type
+     * @param index the index
      */
     public LocalVariable(String name, String type, int index) {
         this(name, type, index, false, false, -1);
@@ -38,6 +42,11 @@ public record LocalVariable(String name, String type, int index, boolean mutable
 
     /**
      * Creates a variable with mutability tracking.
+     *
+     * @param name    the name
+     * @param type    the type
+     * @param index   the index
+     * @param mutable the mutable
      */
     public LocalVariable(String name, String type, int index, boolean mutable) {
         this(name, type, index, mutable, false, -1);

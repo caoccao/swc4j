@@ -34,14 +34,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast opt chain expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstOptChainExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstSimpleAssignTarget {
+    /**
+     * The Base.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstOptChainBase base;
+    /**
+     * The Optional.
+     */
     protected boolean optional;
 
+    /**
+     * Instantiates a new swc4j ast opt chain expr.
+     *
+     * @param optional the optional
+     * @param base     the base
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstOptChainExpr(
             boolean optional,
@@ -52,14 +68,32 @@ public class Swc4jAstOptChainExpr
         setOptional(optional);
     }
 
+    /**
+     * Create swc4j ast opt chain expr.
+     *
+     * @param base the base
+     * @return the swc4j ast opt chain expr
+     */
     public static Swc4jAstOptChainExpr create(ISwc4jAstOptChainBase base) {
         return create(false, base);
     }
 
+    /**
+     * Create swc4j ast opt chain expr.
+     *
+     * @param optional the optional
+     * @param base     the base
+     * @return the swc4j ast opt chain expr
+     */
     public static Swc4jAstOptChainExpr create(boolean optional, ISwc4jAstOptChainBase base) {
         return new Swc4jAstOptChainExpr(optional, base, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets base.
+     *
+     * @return the base
+     */
     @Jni2RustMethod
     public ISwc4jAstOptChainBase getBase() {
         return base;
@@ -75,6 +109,11 @@ public class Swc4jAstOptChainExpr
         return Swc4jAstType.OptChainExpr;
     }
 
+    /**
+     * Is optional boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isOptional() {
         return optional;
@@ -89,12 +128,24 @@ public class Swc4jAstOptChainExpr
         return false;
     }
 
+    /**
+     * Sets base.
+     *
+     * @param base the base
+     * @return the base
+     */
     public Swc4jAstOptChainExpr setBase(ISwc4jAstOptChainBase base) {
         this.base = AssertionUtils.notNull(base, "Base");
         this.base.setParent(this);
         return this;
     }
 
+    /**
+     * Sets optional.
+     *
+     * @param optional the optional
+     * @return the optional
+     */
     public Swc4jAstOptChainExpr setOptional(boolean optional) {
         this.optional = optional;
         return this;

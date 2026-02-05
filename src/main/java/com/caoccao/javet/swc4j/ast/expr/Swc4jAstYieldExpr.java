@@ -29,14 +29,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast yield expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstYieldExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    /**
+     * The Arg.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> arg;
+    /**
+     * The Delegate.
+     */
     protected boolean delegate;
 
+    /**
+     * Instantiates a new swc4j ast yield expr.
+     *
+     * @param arg      the arg
+     * @param delegate the delegate
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstYieldExpr(
             @Jni2RustParam(optional = true) ISwc4jAstExpr arg,
@@ -47,18 +63,41 @@ public class Swc4jAstYieldExpr
         setDelegate(delegate);
     }
 
+    /**
+     * Create swc4j ast yield expr.
+     *
+     * @return the swc4j ast yield expr
+     */
     public static Swc4jAstYieldExpr create() {
         return create(null);
     }
 
+    /**
+     * Create swc4j ast yield expr.
+     *
+     * @param arg the arg
+     * @return the swc4j ast yield expr
+     */
     public static Swc4jAstYieldExpr create(ISwc4jAstExpr arg) {
         return create(arg, false);
     }
 
+    /**
+     * Create swc4j ast yield expr.
+     *
+     * @param arg      the arg
+     * @param delegate the delegate
+     * @return the swc4j ast yield expr
+     */
     public static Swc4jAstYieldExpr create(ISwc4jAstExpr arg, boolean delegate) {
         return new Swc4jAstYieldExpr(arg, delegate, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets arg.
+     *
+     * @return the arg
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getArg() {
         return arg;
@@ -76,6 +115,11 @@ public class Swc4jAstYieldExpr
         return Swc4jAstType.YieldExpr;
     }
 
+    /**
+     * Is delegate boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isDelegate() {
         return delegate;
@@ -91,12 +135,24 @@ public class Swc4jAstYieldExpr
         return false;
     }
 
+    /**
+     * Sets arg.
+     *
+     * @param arg the arg
+     * @return the arg
+     */
     public Swc4jAstYieldExpr setArg(ISwc4jAstExpr arg) {
         this.arg = Optional.ofNullable(arg);
         this.arg.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets delegate.
+     *
+     * @param delegate the delegate
+     * @return the delegate
+     */
     public Swc4jAstYieldExpr setDelegate(boolean delegate) {
         this.delegate = delegate;
         return this;

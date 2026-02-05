@@ -35,17 +35,45 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts interface decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsInterfaceDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstDefaultDecl {
+    /**
+     * The Extends.
+     */
     protected final List<Swc4jAstTsExprWithTypeArgs> _extends;
+    /**
+     * The Body.
+     */
     protected Swc4jAstTsInterfaceBody body;
+    /**
+     * The Declare.
+     */
     protected boolean declare;
+    /**
+     * The Id.
+     */
     protected Swc4jAstIdent id;
+    /**
+     * The Type params.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
+    /**
+     * Instantiates a new swc4j ast ts interface decl.
+     *
+     * @param id         the id
+     * @param declare    the declare
+     * @param typeParams the type params
+     * @param _extends   the extends
+     * @param body       the body
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsInterfaceDecl(
             Swc4jAstIdent id,
@@ -63,10 +91,25 @@ public class Swc4jAstTsInterfaceDecl
         this._extends.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts interface decl.
+     *
+     * @param id   the id
+     * @param body the body
+     * @return the swc4j ast ts interface decl
+     */
     public static Swc4jAstTsInterfaceDecl create(Swc4jAstIdent id, Swc4jAstTsInterfaceBody body) {
         return create(id, SimpleList.of(), body);
     }
 
+    /**
+     * Create swc4j ast ts interface decl.
+     *
+     * @param id       the id
+     * @param _extends the extends
+     * @param body     the body
+     * @return the swc4j ast ts interface decl
+     */
     public static Swc4jAstTsInterfaceDecl create(
             Swc4jAstIdent id,
             List<Swc4jAstTsExprWithTypeArgs> _extends,
@@ -74,6 +117,15 @@ public class Swc4jAstTsInterfaceDecl
         return create(id, null, _extends, body);
     }
 
+    /**
+     * Create swc4j ast ts interface decl.
+     *
+     * @param id         the id
+     * @param typeParams the type params
+     * @param _extends   the extends
+     * @param body       the body
+     * @return the swc4j ast ts interface decl
+     */
     public static Swc4jAstTsInterfaceDecl create(
             Swc4jAstIdent id,
             Swc4jAstTsTypeParamDecl typeParams,
@@ -82,6 +134,16 @@ public class Swc4jAstTsInterfaceDecl
         return create(id, false, typeParams, _extends, body);
     }
 
+    /**
+     * Create swc4j ast ts interface decl.
+     *
+     * @param id         the id
+     * @param declare    the declare
+     * @param typeParams the type params
+     * @param _extends   the extends
+     * @param body       the body
+     * @return the swc4j ast ts interface decl
+     */
     public static Swc4jAstTsInterfaceDecl create(
             Swc4jAstIdent id,
             boolean declare,
@@ -91,6 +153,11 @@ public class Swc4jAstTsInterfaceDecl
         return new Swc4jAstTsInterfaceDecl(id, declare, typeParams, _extends, body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public Swc4jAstTsInterfaceBody getBody() {
         return body;
@@ -105,11 +172,21 @@ public class Swc4jAstTsInterfaceDecl
         return childNodes;
     }
 
+    /**
+     * Gets extends.
+     *
+     * @return the extends
+     */
     @Jni2RustMethod
     public List<Swc4jAstTsExprWithTypeArgs> getExtends() {
         return _extends;
     }
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
@@ -120,11 +197,21 @@ public class Swc4jAstTsInterfaceDecl
         return Swc4jAstType.TsInterfaceDecl;
     }
 
+    /**
+     * Gets type params.
+     *
+     * @return the type params
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 
+    /**
+     * Is declare boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
@@ -158,23 +245,47 @@ public class Swc4jAstTsInterfaceDecl
         return false;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstTsInterfaceDecl setBody(Swc4jAstTsInterfaceBody body) {
         this.body = AssertionUtils.notNull(body, "Body");
         this.body.setParent(this);
         return this;
     }
 
+    /**
+     * Sets declare.
+     *
+     * @param declare the declare
+     * @return the declare
+     */
     public Swc4jAstTsInterfaceDecl setDeclare(boolean declare) {
         this.declare = declare;
         return this;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     * @return the id
+     */
     public Swc4jAstTsInterfaceDecl setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
         this.id.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type params.
+     *
+     * @param typeParams the type params
+     * @return the type params
+     */
     public Swc4jAstTsInterfaceDecl setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
         this.typeParams.ifPresent(node -> node.setParent(this));

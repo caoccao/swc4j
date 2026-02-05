@@ -33,16 +33,40 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast setter prop.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstSetterProp
         extends Swc4jAst
         implements ISwc4jAstProp {
+    /**
+     * The Body.
+     */
     protected Optional<Swc4jAstBlockStmt> body;
+    /**
+     * The Key.
+     */
     protected ISwc4jAstPropName key;
+    /**
+     * The Param.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstPat param;
+    /**
+     * The This param.
+     */
     protected Optional<ISwc4jAstPat> thisParam;
 
+    /**
+     * Instantiates a new swc4j ast setter prop.
+     *
+     * @param key       the key
+     * @param thisParam the this param
+     * @param param     the param
+     * @param body      the body
+     * @param span      the span
+     */
     @Jni2RustMethod
     public Swc4jAstSetterProp(
             ISwc4jAstPropName key,
@@ -57,10 +81,25 @@ public class Swc4jAstSetterProp
         setThisParam(thisParam);
     }
 
+    /**
+     * Create swc4j ast setter prop.
+     *
+     * @param key   the key
+     * @param param the param
+     * @return the swc4j ast setter prop
+     */
     public static Swc4jAstSetterProp create(ISwc4jAstPropName key, ISwc4jAstPat param) {
         return create(key, null, param);
     }
 
+    /**
+     * Create swc4j ast setter prop.
+     *
+     * @param key       the key
+     * @param thisParam the this param
+     * @param param     the param
+     * @return the swc4j ast setter prop
+     */
     public static Swc4jAstSetterProp create(
             ISwc4jAstPropName key,
             ISwc4jAstPat thisParam,
@@ -68,6 +107,15 @@ public class Swc4jAstSetterProp
         return create(key, thisParam, param, null);
     }
 
+    /**
+     * Create swc4j ast setter prop.
+     *
+     * @param key       the key
+     * @param thisParam the this param
+     * @param param     the param
+     * @param body      the body
+     * @return the swc4j ast setter prop
+     */
     public static Swc4jAstSetterProp create(
             ISwc4jAstPropName key,
             ISwc4jAstPat thisParam,
@@ -76,6 +124,11 @@ public class Swc4jAstSetterProp
         return new Swc4jAstSetterProp(key, thisParam, param, body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
@@ -89,16 +142,31 @@ public class Swc4jAstSetterProp
         return childNodes;
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
     }
 
+    /**
+     * Gets param.
+     *
+     * @return the param
+     */
     @Jni2RustMethod
     public ISwc4jAstPat getParam() {
         return param;
     }
 
+    /**
+     * Gets this param.
+     *
+     * @return the this param
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstPat> getThisParam() {
         return thisParam;
@@ -132,24 +200,48 @@ public class Swc4jAstSetterProp
         return false;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstSetterProp setBody(Swc4jAstBlockStmt body) {
         this.body = Optional.ofNullable(body);
         this.body.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstSetterProp setKey(ISwc4jAstPropName key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
         return this;
     }
 
+    /**
+     * Sets param.
+     *
+     * @param param the param
+     * @return the param
+     */
     public Swc4jAstSetterProp setParam(ISwc4jAstPat param) {
         this.param = AssertionUtils.notNull(param, "Param");
         this.param.setParent(this);
         return this;
     }
 
+    /**
+     * Sets this param.
+     *
+     * @param thisParam the this param
+     * @return the this param
+     */
     public Swc4jAstSetterProp setThisParam(ISwc4jAstPat thisParam) {
         this.thisParam = Optional.ofNullable(thisParam);
         this.thisParam.ifPresent(node -> node.setParent(this));

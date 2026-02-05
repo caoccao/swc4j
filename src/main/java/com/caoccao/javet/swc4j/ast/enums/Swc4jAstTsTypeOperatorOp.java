@@ -20,9 +20,21 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast ts type operator op.
+ */
 public enum Swc4jAstTsTypeOperatorOp implements ISwc4jEnumIdName {
+    /**
+     * Key of swc4j ast ts type operator op.
+     */
     KeyOf(0, "keyof"),
+    /**
+     * Read only swc4j ast ts type operator op.
+     */
     ReadOnly(1, "readonly"),
+    /**
+     * Unique swc4j ast ts type operator op.
+     */
     Unique(2, "unique"),
     ;
 
@@ -41,6 +53,12 @@ public enum Swc4jAstTsTypeOperatorOp implements ISwc4jEnumIdName {
         this.name = name;
     }
 
+    /**
+     * Parse swc4j ast ts type operator op.
+     *
+     * @param id the id
+     * @return the swc4j ast ts type operator op
+     */
     public static Swc4jAstTsTypeOperatorOp parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : KeyOf;
     }

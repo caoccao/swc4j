@@ -31,12 +31,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts tuple type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTupleType
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Elem types.
+     */
     protected final List<Swc4jAstTsTupleElement> elemTypes;
 
+    /**
+     * Instantiates a new swc4j ast ts tuple type.
+     *
+     * @param elemTypes the elem types
+     * @param span      the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTupleType(
             List<Swc4jAstTsTupleElement> elemTypes,
@@ -46,10 +58,21 @@ public class Swc4jAstTsTupleType
         this.elemTypes.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts tuple type.
+     *
+     * @return the swc4j ast ts tuple type
+     */
     public static Swc4jAstTsTupleType create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast ts tuple type.
+     *
+     * @param elemTypes the elem types
+     * @return the swc4j ast ts tuple type
+     */
     public static Swc4jAstTsTupleType create(List<Swc4jAstTsTupleElement> elemTypes) {
         return new Swc4jAstTsTupleType(elemTypes, Swc4jSpan.DUMMY);
     }
@@ -59,6 +82,11 @@ public class Swc4jAstTsTupleType
         return SimpleList.copyOf(elemTypes);
     }
 
+    /**
+     * Gets elem types.
+     *
+     * @return the elem types
+     */
     @Jni2RustMethod
     public List<Swc4jAstTsTupleElement> getElemTypes() {
         return elemTypes;

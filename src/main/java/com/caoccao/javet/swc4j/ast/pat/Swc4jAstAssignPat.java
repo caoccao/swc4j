@@ -34,15 +34,31 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast assign pat.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstAssignPat
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstTsParamPropParam {
+    /**
+     * The Left.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstPat left;
+    /**
+     * The Right.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr right;
 
+    /**
+     * Instantiates a new swc4j ast assign pat.
+     *
+     * @param left  the left
+     * @param right the right
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstAssignPat(
             ISwc4jAstPat left,
@@ -53,6 +69,13 @@ public class Swc4jAstAssignPat
         setRight(right);
     }
 
+    /**
+     * Create swc4j ast assign pat.
+     *
+     * @param left  the left
+     * @param right the right
+     * @return the swc4j ast assign pat
+     */
     public static Swc4jAstAssignPat create(ISwc4jAstPat left, ISwc4jAstExpr right) {
         return new Swc4jAstAssignPat(left, right, Swc4jSpan.DUMMY);
     }
@@ -62,11 +85,21 @@ public class Swc4jAstAssignPat
         return SimpleList.of(left, right);
     }
 
+    /**
+     * Gets left.
+     *
+     * @return the left
+     */
     @Jni2RustMethod
     public ISwc4jAstPat getLeft() {
         return left;
     }
 
+    /**
+     * Gets right.
+     *
+     * @return the right
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getRight() {
         return right;
@@ -90,12 +123,24 @@ public class Swc4jAstAssignPat
         return false;
     }
 
+    /**
+     * Sets left.
+     *
+     * @param left the left
+     * @return the left
+     */
     public Swc4jAstAssignPat setLeft(ISwc4jAstPat left) {
         this.left = AssertionUtils.notNull(left, "Left");
         this.left.setParent(this);
         return this;
     }
 
+    /**
+     * Sets right.
+     *
+     * @param right the right
+     * @return the right
+     */
     public Swc4jAstAssignPat setRight(ISwc4jAstExpr right) {
         this.right = AssertionUtils.notNull(right, "Right");
         this.right.setParent(this);

@@ -37,14 +37,34 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast jsx element.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXElement")
 public class Swc4jAstJsxElement
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxElementChild, ISwc4jAstJsxAttrValue {
+    /**
+     * The Children.
+     */
     protected final List<ISwc4jAstJsxElementChild> children;
+    /**
+     * The Closing.
+     */
     protected Optional<Swc4jAstJsxClosingElement> closing;
+    /**
+     * The Opening.
+     */
     protected Swc4jAstJsxOpeningElement opening;
 
+    /**
+     * Instantiates a new swc4j ast jsx element.
+     *
+     * @param opening  the opening
+     * @param children the children
+     * @param closing  the closing
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstJsxElement(
             Swc4jAstJsxOpeningElement opening,
@@ -58,16 +78,37 @@ public class Swc4jAstJsxElement
         this.children.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast jsx element.
+     *
+     * @param opening the opening
+     * @return the swc4j ast jsx element
+     */
     public static Swc4jAstJsxElement create(Swc4jAstJsxOpeningElement opening) {
         return create(opening, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast jsx element.
+     *
+     * @param opening  the opening
+     * @param children the children
+     * @return the swc4j ast jsx element
+     */
     public static Swc4jAstJsxElement create(
             Swc4jAstJsxOpeningElement opening,
             List<ISwc4jAstJsxElementChild> children) {
         return create(opening, children, null);
     }
 
+    /**
+     * Create swc4j ast jsx element.
+     *
+     * @param opening  the opening
+     * @param children the children
+     * @param closing  the closing
+     * @return the swc4j ast jsx element
+     */
     public static Swc4jAstJsxElement create(
             Swc4jAstJsxOpeningElement opening,
             List<ISwc4jAstJsxElementChild> children,
@@ -83,16 +124,31 @@ public class Swc4jAstJsxElement
         return childNodes;
     }
 
+    /**
+     * Gets children.
+     *
+     * @return the children
+     */
     @Jni2RustMethod
     public List<ISwc4jAstJsxElementChild> getChildren() {
         return children;
     }
 
+    /**
+     * Gets closing.
+     *
+     * @return the closing
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstJsxClosingElement> getClosing() {
         return closing;
     }
 
+    /**
+     * Gets opening.
+     *
+     * @return the opening
+     */
     @Jni2RustMethod
     public Swc4jAstJsxOpeningElement getOpening() {
         return opening;
@@ -126,12 +182,24 @@ public class Swc4jAstJsxElement
         return false;
     }
 
+    /**
+     * Sets closing.
+     *
+     * @param closing the closing
+     * @return the closing
+     */
     public Swc4jAstJsxElement setClosing(Swc4jAstJsxClosingElement closing) {
         this.closing = Optional.ofNullable(closing);
         this.closing.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets opening.
+     *
+     * @param opening the opening
+     * @return the opening
+     */
     public Swc4jAstJsxElement setOpening(Swc4jAstJsxOpeningElement opening) {
         this.opening = AssertionUtils.notNull(opening, "Opening");
         this.opening.setParent(this);

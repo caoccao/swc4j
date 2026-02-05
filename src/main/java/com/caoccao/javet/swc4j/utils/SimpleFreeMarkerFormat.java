@@ -24,6 +24,11 @@ import java.util.Map;
  * @since 0.7.0
  */
 public final class SimpleFreeMarkerFormat {
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private SimpleFreeMarkerFormat() {
+    }
 
     /**
      * The constant STRING_NULL.

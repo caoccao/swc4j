@@ -48,6 +48,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * </pre>
  */
 public final class WhileStatementProcessor extends BaseAstProcessor<Swc4jAstWhileStmt> {
+    /**
+     * Instantiates a new While statement processor.
+     *
+     * @param compiler the compiler
+     */
     public WhileStatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

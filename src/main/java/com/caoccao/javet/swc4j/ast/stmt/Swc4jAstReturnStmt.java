@@ -30,13 +30,25 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast return stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstReturnStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Arg.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> arg;
 
+    /**
+     * Instantiates a new swc4j ast return stmt.
+     *
+     * @param arg  the arg
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstReturnStmt(
             @Jni2RustParam(optional = true) ISwc4jAstExpr arg,
@@ -45,14 +57,30 @@ public class Swc4jAstReturnStmt
         setArg(arg);
     }
 
+    /**
+     * Create swc4j ast return stmt.
+     *
+     * @return the swc4j ast return stmt
+     */
     public static Swc4jAstReturnStmt create() {
         return create(null);
     }
 
+    /**
+     * Create swc4j ast return stmt.
+     *
+     * @param arg the arg
+     * @return the swc4j ast return stmt
+     */
     public static Swc4jAstReturnStmt create(ISwc4jAstExpr arg) {
         return new Swc4jAstReturnStmt(arg, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets arg.
+     *
+     * @return the arg
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getArg() {
         return arg;
@@ -80,6 +108,12 @@ public class Swc4jAstReturnStmt
         return false;
     }
 
+    /**
+     * Sets arg.
+     *
+     * @param arg the arg
+     * @return the arg
+     */
     public Swc4jAstReturnStmt setArg(ISwc4jAstExpr arg) {
         this.arg = Optional.ofNullable(arg);
         this.arg.ifPresent(node -> node.setParent(this));

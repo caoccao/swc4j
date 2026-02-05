@@ -31,11 +31,23 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast jsx closing element.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXClosingElement")
 public class Swc4jAstJsxClosingElement
         extends Swc4jAst {
+    /**
+     * The Name.
+     */
     protected ISwc4jAstJsxElementName name;
 
+    /**
+     * Instantiates a new swc4j ast jsx closing element.
+     *
+     * @param name the name
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstJsxClosingElement(
             ISwc4jAstJsxElementName name,
@@ -44,6 +56,12 @@ public class Swc4jAstJsxClosingElement
         setName(name);
     }
 
+    /**
+     * Create swc4j ast jsx closing element.
+     *
+     * @param name the name
+     * @return the swc4j ast jsx closing element
+     */
     public static Swc4jAstJsxClosingElement create(ISwc4jAstJsxElementName name) {
         return new Swc4jAstJsxClosingElement(name, Swc4jSpan.DUMMY);
     }
@@ -53,6 +71,11 @@ public class Swc4jAstJsxClosingElement
         return SimpleList.of(name);
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     @Jni2RustMethod
     public ISwc4jAstJsxElementName getName() {
         return name;
@@ -72,6 +95,12 @@ public class Swc4jAstJsxClosingElement
         return false;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     * @return the name
+     */
     public Swc4jAstJsxClosingElement setName(ISwc4jAstJsxElementName name) {
         this.name = AssertionUtils.notNull(name, "Name");
         this.name.setParent(this);

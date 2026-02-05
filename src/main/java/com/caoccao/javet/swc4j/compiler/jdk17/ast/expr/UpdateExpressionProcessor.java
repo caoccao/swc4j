@@ -32,7 +32,15 @@ import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type Update expression processor.
+ */
 public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUpdateExpr> {
+    /**
+     * Instantiates a new Update expression processor.
+     *
+     * @param compiler the compiler
+     */
     public UpdateExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

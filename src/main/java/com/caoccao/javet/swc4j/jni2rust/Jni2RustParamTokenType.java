@@ -18,6 +18,9 @@ package com.caoccao.javet.swc4j.jni2rust;
 
 import java.lang.annotation.*;
 
+/**
+ * The interface Jni 2 rust param token type.
+ */
 @Documented
 @Inherited
 @Target({ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})

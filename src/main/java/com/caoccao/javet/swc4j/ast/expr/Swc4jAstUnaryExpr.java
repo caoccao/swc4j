@@ -41,14 +41,30 @@ import com.caoccao.javet.swc4j.utils.StringUtils;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast unary expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstUnaryExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    /**
+     * The Arg.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr arg;
+    /**
+     * The Op.
+     */
     protected Swc4jAstUnaryOp op;
 
+    /**
+     * Instantiates a new swc4j ast unary expr.
+     *
+     * @param op   the op
+     * @param arg  the arg
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstUnaryExpr(
             Swc4jAstUnaryOp op,
@@ -59,6 +75,13 @@ public class Swc4jAstUnaryExpr
         setOp(op);
     }
 
+    /**
+     * Create swc4j ast unary expr.
+     *
+     * @param op  the op
+     * @param arg the arg
+     * @return the swc4j ast unary expr
+     */
     public static Swc4jAstUnaryExpr create(Swc4jAstUnaryOp op, ISwc4jAstExpr arg) {
         return new Swc4jAstUnaryExpr(op, arg, Swc4jSpan.DUMMY);
     }
@@ -162,6 +185,11 @@ public class Swc4jAstUnaryExpr
         return super.eval();
     }
 
+    /**
+     * Gets arg.
+     *
+     * @return the arg
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getArg() {
         return arg;
@@ -172,6 +200,11 @@ public class Swc4jAstUnaryExpr
         return SimpleList.of(arg);
     }
 
+    /**
+     * Gets op.
+     *
+     * @return the op
+     */
     @Jni2RustMethod
     public Swc4jAstUnaryOp getOp() {
         return op;
@@ -191,12 +224,24 @@ public class Swc4jAstUnaryExpr
         return false;
     }
 
+    /**
+     * Sets arg.
+     *
+     * @param arg the arg
+     * @return the arg
+     */
     public Swc4jAstUnaryExpr setArg(ISwc4jAstExpr arg) {
         this.arg = AssertionUtils.notNull(arg, "Arg");
         this.arg.setParent(this);
         return this;
     }
 
+    /**
+     * Sets op.
+     *
+     * @param op the op
+     * @return the op
+     */
     public Swc4jAstUnaryExpr setOp(Swc4jAstUnaryOp op) {
         this.op = AssertionUtils.notNull(op, "Op");
         return this;

@@ -32,12 +32,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast static block.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstStaticBlock
         extends Swc4jAst
         implements ISwc4jAstClassMember {
+    /**
+     * The Body.
+     */
     protected Swc4jAstBlockStmt body;
 
+    /**
+     * Instantiates a new swc4j ast static block.
+     *
+     * @param body the body
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstStaticBlock(
             Swc4jAstBlockStmt body,
@@ -46,10 +58,21 @@ public class Swc4jAstStaticBlock
         setBody(body);
     }
 
+    /**
+     * Create swc4j ast static block.
+     *
+     * @param body the body
+     * @return the swc4j ast static block
+     */
     public static Swc4jAstStaticBlock create(Swc4jAstBlockStmt body) {
         return new Swc4jAstStaticBlock(body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public Swc4jAstBlockStmt getBody() {
         return body;
@@ -74,6 +97,12 @@ public class Swc4jAstStaticBlock
         return false;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstStaticBlock setBody(Swc4jAstBlockStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
         this.body.setParent(this);

@@ -32,12 +32,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts external module ref.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsExternalModuleRef
         extends Swc4jAst
         implements ISwc4jAstTsModuleRef {
+    /**
+     * The Expr.
+     */
     protected Swc4jAstStr expr;
 
+    /**
+     * Instantiates a new swc4j ast ts external module ref.
+     *
+     * @param expr the expr
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsExternalModuleRef(
             Swc4jAstStr expr,
@@ -46,6 +58,12 @@ public class Swc4jAstTsExternalModuleRef
         setExpr(expr);
     }
 
+    /**
+     * Create swc4j ast ts external module ref.
+     *
+     * @param expr the expr
+     * @return the swc4j ast ts external module ref
+     */
     public static Swc4jAstTsExternalModuleRef create(Swc4jAstStr expr) {
         return new Swc4jAstTsExternalModuleRef(expr, Swc4jSpan.DUMMY);
     }
@@ -55,6 +73,11 @@ public class Swc4jAstTsExternalModuleRef
         return SimpleList.of(expr);
     }
 
+    /**
+     * Gets expr.
+     *
+     * @return the expr
+     */
     @Jni2RustMethod
     public Swc4jAstStr getExpr() {
         return expr;
@@ -74,6 +97,12 @@ public class Swc4jAstTsExternalModuleRef
         return false;
     }
 
+    /**
+     * Sets expr.
+     *
+     * @param expr the expr
+     * @return the expr
+     */
     public Swc4jAstTsExternalModuleRef setExpr(Swc4jAstStr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
         this.expr.setParent(this);

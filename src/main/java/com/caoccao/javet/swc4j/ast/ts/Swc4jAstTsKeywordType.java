@@ -31,12 +31,24 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts keyword type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsKeywordType
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Kind.
+     */
     protected Swc4jAstTsKeywordTypeKind kind;
 
+    /**
+     * Instantiates a new swc4j ast ts keyword type.
+     *
+     * @param kind the kind
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsKeywordType(
             Swc4jAstTsKeywordTypeKind kind,
@@ -45,6 +57,12 @@ public class Swc4jAstTsKeywordType
         setKind(kind);
     }
 
+    /**
+     * Create swc4j ast ts keyword type.
+     *
+     * @param kind the kind
+     * @return the swc4j ast ts keyword type
+     */
     public static Swc4jAstTsKeywordType create(Swc4jAstTsKeywordTypeKind kind) {
         return new Swc4jAstTsKeywordType(kind, Swc4jSpan.DUMMY);
     }
@@ -54,6 +72,11 @@ public class Swc4jAstTsKeywordType
         return EMPTY_CHILD_NODES;
     }
 
+    /**
+     * Gets kind.
+     *
+     * @return the kind
+     */
     @Jni2RustMethod
     public Swc4jAstTsKeywordTypeKind getKind() {
         return kind;
@@ -69,6 +92,12 @@ public class Swc4jAstTsKeywordType
         return false;
     }
 
+    /**
+     * Sets kind.
+     *
+     * @param kind the kind
+     * @return the kind
+     */
     public Swc4jAstTsKeywordType setKind(Swc4jAstTsKeywordTypeKind kind) {
         this.kind = AssertionUtils.notNull(kind, "Kind");
         return this;

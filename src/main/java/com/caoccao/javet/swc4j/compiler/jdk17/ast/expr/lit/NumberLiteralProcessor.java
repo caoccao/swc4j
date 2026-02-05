@@ -25,7 +25,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type Number literal processor.
+ */
 public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumber> {
+    /**
+     * Instantiates a new Number literal processor.
+     *
+     * @param compiler the compiler
+     */
     public NumberLiteralProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

@@ -1889,8 +1889,17 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
      * Enum representing the container type for the 'in' operator.
      */
     private enum InContainerType {
+        /**
+         * List in container type.
+         */
         LIST,
+        /**
+         * Map in container type.
+         */
         MAP,
+        /**
+         * String in container type.
+         */
         STRING
     }
 }

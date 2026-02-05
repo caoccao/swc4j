@@ -33,13 +33,29 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast jsx namespaced name.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXNamespacedName")
 public class Swc4jAstJsxNamespacedName
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxElementName, ISwc4jAstJsxAttrName {
+    /**
+     * The Name.
+     */
     protected Swc4jAstIdentName name;
+    /**
+     * The Ns.
+     */
     protected Swc4jAstIdentName ns;
 
+    /**
+     * Instantiates a new swc4j ast jsx namespaced name.
+     *
+     * @param ns   the ns
+     * @param name the name
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstJsxNamespacedName(
             Swc4jAstIdentName ns,
@@ -50,6 +66,13 @@ public class Swc4jAstJsxNamespacedName
         setNs(ns);
     }
 
+    /**
+     * Create swc4j ast jsx namespaced name.
+     *
+     * @param ns   the ns
+     * @param name the name
+     * @return the swc4j ast jsx namespaced name
+     */
     public static Swc4jAstJsxNamespacedName create(Swc4jAstIdentName ns, Swc4jAstIdentName name) {
         return new Swc4jAstJsxNamespacedName(ns, name, Swc4jSpan.DUMMY);
     }
@@ -59,11 +82,21 @@ public class Swc4jAstJsxNamespacedName
         return SimpleList.of(ns, name);
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     @Jni2RustMethod
     public Swc4jAstIdentName getName() {
         return name;
     }
 
+    /**
+     * Gets ns.
+     *
+     * @return the ns
+     */
     @Jni2RustMethod
     public Swc4jAstIdentName getNs() {
         return ns;
@@ -87,12 +120,24 @@ public class Swc4jAstJsxNamespacedName
         return false;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     * @return the name
+     */
     public Swc4jAstJsxNamespacedName setName(Swc4jAstIdentName name) {
         this.name = AssertionUtils.notNull(name, "Name");
         this.name.setParent(this);
         return this;
     }
 
+    /**
+     * Sets ns.
+     *
+     * @param ns the ns
+     * @return the ns
+     */
     public Swc4jAstJsxNamespacedName setNs(Swc4jAstIdentName ns) {
         this.ns = AssertionUtils.notNull(ns, "Ns");
         this.ns.setParent(this);

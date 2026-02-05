@@ -40,8 +40,8 @@ public class ByteCodeRunner {
     /**
      * Creates an instance runner for the specified class with constructor arguments.
      *
-     * @param className        the fully qualified class name
-     * @param constructorArgs  the constructor arguments
+     * @param className       the fully qualified class name
+     * @param constructorArgs the constructor arguments
      * @return a ByteCodeClassRunner for instance method invocation
      * @throws ClassNotFoundException if the class cannot be found
      */

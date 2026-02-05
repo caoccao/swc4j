@@ -34,15 +34,31 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts type assertion.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTypeAssertion
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstSimpleAssignTarget {
+    /**
+     * The Expr.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr expr;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstTsType typeAnn;
 
+    /**
+     * Instantiates a new swc4j ast ts type assertion.
+     *
+     * @param expr    the expr
+     * @param typeAnn the type ann
+     * @param span    the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeAssertion(
             ISwc4jAstExpr expr,
@@ -53,6 +69,13 @@ public class Swc4jAstTsTypeAssertion
         setTypeAnn(typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts type assertion.
+     *
+     * @param expr    the expr
+     * @param typeAnn the type ann
+     * @return the swc4j ast ts type assertion
+     */
     public static Swc4jAstTsTypeAssertion create(ISwc4jAstExpr expr, ISwc4jAstTsType typeAnn) {
         return new Swc4jAstTsTypeAssertion(expr, typeAnn, Swc4jSpan.DUMMY);
     }
@@ -62,6 +85,11 @@ public class Swc4jAstTsTypeAssertion
         return SimpleList.of(expr, typeAnn);
     }
 
+    /**
+     * Gets expr.
+     *
+     * @return the expr
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
@@ -72,6 +100,11 @@ public class Swc4jAstTsTypeAssertion
         return Swc4jAstType.TsTypeAssertion;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public ISwc4jAstTsType getTypeAnn() {
         return typeAnn;
@@ -90,12 +123,24 @@ public class Swc4jAstTsTypeAssertion
         return false;
     }
 
+    /**
+     * Sets expr.
+     *
+     * @param expr the expr
+     * @return the expr
+     */
     public Swc4jAstTsTypeAssertion setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
         this.expr.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstTsTypeAssertion setTypeAnn(ISwc4jAstTsType typeAnn) {
         this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
         this.typeAnn.setParent(this);

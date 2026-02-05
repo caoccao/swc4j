@@ -21,6 +21,9 @@ import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstOptCall;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast opt chain base.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "Call", type = Swc4jAstOptCall.class),

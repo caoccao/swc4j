@@ -31,18 +31,46 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts property signature.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsPropertySignature
         extends Swc4jAst
         implements ISwc4jAstTsTypeElement {
+    /**
+     * The Computed.
+     */
     protected boolean computed;
+    /**
+     * The Key.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr key;
+    /**
+     * The Optional.
+     */
     protected boolean optional;
+    /**
+     * The Readonly.
+     */
     protected boolean readonly;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
+    /**
+     * Instantiates a new swc4j ast ts property signature.
+     *
+     * @param readonly the readonly
+     * @param key      the key
+     * @param computed the computed
+     * @param optional the optional
+     * @param typeAnn  the type ann
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsPropertySignature(
             boolean readonly,
@@ -59,14 +87,35 @@ public class Swc4jAstTsPropertySignature
         setTypeAnn(typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts property signature.
+     *
+     * @param key the key
+     * @return the swc4j ast ts property signature
+     */
     public static Swc4jAstTsPropertySignature create(ISwc4jAstExpr key) {
         return create(key, null);
     }
 
+    /**
+     * Create swc4j ast ts property signature.
+     *
+     * @param key     the key
+     * @param typeAnn the type ann
+     * @return the swc4j ast ts property signature
+     */
     public static Swc4jAstTsPropertySignature create(ISwc4jAstExpr key, Swc4jAstTsTypeAnn typeAnn) {
         return create(false, key, typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts property signature.
+     *
+     * @param readonly the readonly
+     * @param key      the key
+     * @param typeAnn  the type ann
+     * @return the swc4j ast ts property signature
+     */
     public static Swc4jAstTsPropertySignature create(
             boolean readonly,
             ISwc4jAstExpr key,
@@ -74,6 +123,15 @@ public class Swc4jAstTsPropertySignature
         return create(readonly, key, false, typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts property signature.
+     *
+     * @param readonly the readonly
+     * @param key      the key
+     * @param computed the computed
+     * @param typeAnn  the type ann
+     * @return the swc4j ast ts property signature
+     */
     public static Swc4jAstTsPropertySignature create(
             boolean readonly,
             ISwc4jAstExpr key,
@@ -82,6 +140,16 @@ public class Swc4jAstTsPropertySignature
         return create(readonly, key, computed, false, typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts property signature.
+     *
+     * @param readonly the readonly
+     * @param key      the key
+     * @param computed the computed
+     * @param optional the optional
+     * @param typeAnn  the type ann
+     * @return the swc4j ast ts property signature
+     */
     public static Swc4jAstTsPropertySignature create(
             boolean readonly,
             ISwc4jAstExpr key,
@@ -98,6 +166,11 @@ public class Swc4jAstTsPropertySignature
         return childNodes;
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getKey() {
         return key;
@@ -108,21 +181,41 @@ public class Swc4jAstTsPropertySignature
         return Swc4jAstType.TsPropertySignature;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    /**
+     * Is computed boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isComputed() {
         return computed;
     }
 
+    /**
+     * Is optional boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isOptional() {
         return optional;
     }
 
+    /**
+     * Is readonly boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isReadonly() {
         return readonly;
@@ -142,27 +235,57 @@ public class Swc4jAstTsPropertySignature
         return false;
     }
 
+    /**
+     * Sets computed.
+     *
+     * @param computed the computed
+     * @return the computed
+     */
     public Swc4jAstTsPropertySignature setComputed(boolean computed) {
         this.computed = computed;
         return this;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstTsPropertySignature setKey(ISwc4jAstExpr key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
         return this;
     }
 
+    /**
+     * Sets optional.
+     *
+     * @param optional the optional
+     * @return the optional
+     */
     public Swc4jAstTsPropertySignature setOptional(boolean optional) {
         this.optional = optional;
         return this;
     }
 
+    /**
+     * Sets readonly.
+     *
+     * @param readonly the readonly
+     * @return the readonly
+     */
     public Swc4jAstTsPropertySignature setReadonly(boolean readonly) {
         this.readonly = readonly;
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstTsPropertySignature setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));

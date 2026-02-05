@@ -45,6 +45,19 @@ public final class StringApiUtils {
     private StringApiUtils() {
     }
 
+    /**
+     * Append operand to string builder.
+     *
+     * @param sourceCode   the source code
+     * @param code         the code
+     * @param classWriter  the class writer
+     * @param operand      the operand
+     * @param operandType  the operand type
+     * @param appendString the append string
+     * @param appendInt    the append int
+     * @param appendChar   the append char
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
+     */
     public static void appendOperandToStringBuilder(
             String sourceCode,
             CodeBuilder code,
@@ -172,6 +185,15 @@ public final class StringApiUtils {
         return str.charAt(index);
     }
 
+    /**
+     * Collect operands.
+     *
+     * @param compiler     the compiler
+     * @param expr         the expr
+     * @param operands     the operands
+     * @param operandTypes the operand types
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
+     */
     public static void collectOperands(
             ByteCodeCompiler compiler,
             ISwc4jAstExpr expr,
@@ -194,6 +216,19 @@ public final class StringApiUtils {
         operandTypes.add(operandType != null ? operandType : "Ljava/lang/Object;");
     }
 
+    /**
+     * Generate concat.
+     *
+     * @param sourceCode  the source code
+     * @param compiler    the compiler
+     * @param code        the code
+     * @param classWriter the class writer
+     * @param left        the left
+     * @param right       the right
+     * @param leftType    the left type
+     * @param rightType   the right type
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
+     */
     public static void generateConcat(
             String sourceCode,
             ByteCodeCompiler compiler,

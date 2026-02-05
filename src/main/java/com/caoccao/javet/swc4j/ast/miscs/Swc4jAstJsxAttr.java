@@ -35,13 +35,29 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast jsx attr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXAttr")
 public class Swc4jAstJsxAttr
         extends Swc4jAst
         implements ISwc4jAstJsxAttrOrSpread {
+    /**
+     * The Name.
+     */
     protected ISwc4jAstJsxAttrName name;
+    /**
+     * The Value.
+     */
     protected Optional<ISwc4jAstJsxAttrValue> value;
 
+    /**
+     * Instantiates a new swc4j ast jsx attr.
+     *
+     * @param name  the name
+     * @param value the value
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstJsxAttr(
             ISwc4jAstJsxAttrName name,
@@ -52,10 +68,23 @@ public class Swc4jAstJsxAttr
         setValue(value);
     }
 
+    /**
+     * Create swc4j ast jsx attr.
+     *
+     * @param name the name
+     * @return the swc4j ast jsx attr
+     */
     public static Swc4jAstJsxAttr create(ISwc4jAstJsxAttrName name) {
         return create(name, null);
     }
 
+    /**
+     * Create swc4j ast jsx attr.
+     *
+     * @param name  the name
+     * @param value the value
+     * @return the swc4j ast jsx attr
+     */
     public static Swc4jAstJsxAttr create(ISwc4jAstJsxAttrName name, ISwc4jAstJsxAttrValue value) {
         return new Swc4jAstJsxAttr(name, value, Swc4jSpan.DUMMY);
     }
@@ -67,6 +96,11 @@ public class Swc4jAstJsxAttr
         return childNodes;
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     @Jni2RustMethod
     public ISwc4jAstJsxAttrName getName() {
         return name;
@@ -77,6 +111,11 @@ public class Swc4jAstJsxAttr
         return Swc4jAstType.JsxAttr;
     }
 
+    /**
+     * Gets value.
+     *
+     * @return the value
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstJsxAttrValue> getValue() {
         return value;
@@ -96,12 +135,24 @@ public class Swc4jAstJsxAttr
         return false;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     * @return the name
+     */
     public Swc4jAstJsxAttr setName(ISwc4jAstJsxAttrName name) {
         this.name = AssertionUtils.notNull(name, "Name");
         this.name.setParent(this);
         return this;
     }
 
+    /**
+     * Sets value.
+     *
+     * @param value the value
+     * @return the value
+     */
     public Swc4jAstJsxAttr setValue(ISwc4jAstJsxAttrValue value) {
         this.value = Optional.ofNullable(value);
         this.value.ifPresent(node -> node.setParent(this));

@@ -32,6 +32,11 @@ import java.util.regex.Pattern;
  * Supports compatible flags and performs pattern conversion for known incompatibilities.
  */
 public final class RegexLiteralProcessor extends BaseAstProcessor<Swc4jAstRegex> {
+    /**
+     * Instantiates a new Regex literal processor.
+     *
+     * @param compiler the compiler
+     */
     public RegexLiteralProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

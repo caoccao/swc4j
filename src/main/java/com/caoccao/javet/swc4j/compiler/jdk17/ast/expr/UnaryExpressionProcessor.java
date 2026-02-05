@@ -35,7 +35,15 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.math.BigInteger;
 
+/**
+ * The type Unary expression processor.
+ */
 public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUnaryExpr> {
+    /**
+     * Instantiates a new Unary expression processor.
+     *
+     * @param compiler the compiler
+     */
     public UnaryExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

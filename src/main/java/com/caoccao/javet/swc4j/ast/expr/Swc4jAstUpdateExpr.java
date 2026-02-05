@@ -33,15 +33,35 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast update expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstUpdateExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    /**
+     * The Arg.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr arg;
+    /**
+     * The Op.
+     */
     protected Swc4jAstUpdateOp op;
+    /**
+     * The Prefix.
+     */
     protected boolean prefix;
 
+    /**
+     * Instantiates a new swc4j ast update expr.
+     *
+     * @param op     the op
+     * @param prefix the prefix
+     * @param arg    the arg
+     * @param span   the span
+     */
     @Jni2RustMethod
     public Swc4jAstUpdateExpr(
             Swc4jAstUpdateOp op,
@@ -54,14 +74,34 @@ public class Swc4jAstUpdateExpr
         setPrefix(prefix);
     }
 
+    /**
+     * Create swc4j ast update expr.
+     *
+     * @param op  the op
+     * @param arg the arg
+     * @return the swc4j ast update expr
+     */
     public static Swc4jAstUpdateExpr create(Swc4jAstUpdateOp op, ISwc4jAstExpr arg) {
         return create(op, false, arg);
     }
 
+    /**
+     * Create swc4j ast update expr.
+     *
+     * @param op     the op
+     * @param prefix the prefix
+     * @param arg    the arg
+     * @return the swc4j ast update expr
+     */
     public static Swc4jAstUpdateExpr create(Swc4jAstUpdateOp op, boolean prefix, ISwc4jAstExpr arg) {
         return new Swc4jAstUpdateExpr(op, prefix, arg, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets arg.
+     *
+     * @return the arg
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getArg() {
         return arg;
@@ -72,6 +112,11 @@ public class Swc4jAstUpdateExpr
         return SimpleList.of(arg);
     }
 
+    /**
+     * Gets op.
+     *
+     * @return the op
+     */
     @Jni2RustMethod
     public Swc4jAstUpdateOp getOp() {
         return op;
@@ -82,6 +127,11 @@ public class Swc4jAstUpdateExpr
         return Swc4jAstType.UpdateExpr;
     }
 
+    /**
+     * Is prefix boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isPrefix() {
         return prefix;
@@ -96,17 +146,35 @@ public class Swc4jAstUpdateExpr
         return false;
     }
 
+    /**
+     * Sets arg.
+     *
+     * @param arg the arg
+     * @return the arg
+     */
     public Swc4jAstUpdateExpr setArg(ISwc4jAstExpr arg) {
         this.arg = AssertionUtils.notNull(arg, "Arg");
         this.arg.setParent(this);
         return this;
     }
 
+    /**
+     * Sets op.
+     *
+     * @param op the op
+     * @return the op
+     */
     public Swc4jAstUpdateExpr setOp(Swc4jAstUpdateOp op) {
         this.op = AssertionUtils.notNull(op, "Op");
         return this;
     }
 
+    /**
+     * Sets prefix.
+     *
+     * @param prefix the prefix
+     * @return the prefix
+     */
     public Swc4jAstUpdateExpr setPrefix(boolean prefix) {
         this.prefix = prefix;
         return this;

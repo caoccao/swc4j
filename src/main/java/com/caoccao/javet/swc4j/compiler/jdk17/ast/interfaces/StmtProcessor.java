@@ -28,7 +28,15 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type Stmt processor.
+ */
 public final class StmtProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
+    /**
+     * Instantiates a new Stmt processor.
+     *
+     * @param compiler the compiler
+     */
     public StmtProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

@@ -25,6 +25,12 @@ import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
  */
 public final class JavetSanitizerFridge {
     /**
+     * Private constructor to prevent instantiation.
+     */
+    private JavetSanitizerFridge() {
+    }
+
+    /**
      * Generate JS code to delete the objects and freeze .
      *
      * @param option the option

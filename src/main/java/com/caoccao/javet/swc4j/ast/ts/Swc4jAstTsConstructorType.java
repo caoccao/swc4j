@@ -31,18 +31,42 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts constructor type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsConstructorType
         extends Swc4jAst
         implements ISwc4jAstTsFnOrConstructorType {
+    /**
+     * The Params.
+     */
     protected final List<ISwc4jAstTsFnParam> params;
+    /**
+     * The Abstract.
+     */
     @Jni2RustField(name = "is_abstract")
     protected boolean _abstract;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(box = true)
     protected Swc4jAstTsTypeAnn typeAnn;
+    /**
+     * The Type params.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
+    /**
+     * Instantiates a new swc4j ast ts constructor type.
+     *
+     * @param params     the params
+     * @param typeParams the type params
+     * @param typeAnn    the type ann
+     * @param _abstract  the abstract
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsConstructorType(
             List<ISwc4jAstTsFnParam> params,
@@ -58,14 +82,35 @@ public class Swc4jAstTsConstructorType
         this.params.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts constructor type.
+     *
+     * @param typeAnn the type ann
+     * @return the swc4j ast ts constructor type
+     */
     public static Swc4jAstTsConstructorType create(Swc4jAstTsTypeAnn typeAnn) {
         return create(SimpleList.of(), typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts constructor type.
+     *
+     * @param params  the params
+     * @param typeAnn the type ann
+     * @return the swc4j ast ts constructor type
+     */
     public static Swc4jAstTsConstructorType create(List<ISwc4jAstTsFnParam> params, Swc4jAstTsTypeAnn typeAnn) {
         return create(params, null, typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts constructor type.
+     *
+     * @param params     the params
+     * @param typeParams the type params
+     * @param typeAnn    the type ann
+     * @return the swc4j ast ts constructor type
+     */
     public static Swc4jAstTsConstructorType create(
             List<ISwc4jAstTsFnParam> params,
             Swc4jAstTsTypeParamDecl typeParams,
@@ -73,6 +118,15 @@ public class Swc4jAstTsConstructorType
         return create(params, typeParams, typeAnn, false);
     }
 
+    /**
+     * Create swc4j ast ts constructor type.
+     *
+     * @param params     the params
+     * @param typeParams the type params
+     * @param typeAnn    the type ann
+     * @param _abstract  the abstract
+     * @return the swc4j ast ts constructor type
+     */
     public static Swc4jAstTsConstructorType create(
             List<ISwc4jAstTsFnParam> params,
             Swc4jAstTsTypeParamDecl typeParams,
@@ -89,6 +143,11 @@ public class Swc4jAstTsConstructorType
         return childNodes;
     }
 
+    /**
+     * Gets params.
+     *
+     * @return the params
+     */
     @Jni2RustMethod
     public List<ISwc4jAstTsFnParam> getParams() {
         return params;
@@ -99,16 +158,31 @@ public class Swc4jAstTsConstructorType
         return Swc4jAstType.TsConstructorType;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeAnn getTypeAnn() {
         return typeAnn;
     }
 
+    /**
+     * Gets type params.
+     *
+     * @return the type params
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 
+    /**
+     * Is abstract boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isAbstract() {
         return _abstract;
@@ -138,17 +212,35 @@ public class Swc4jAstTsConstructorType
         return false;
     }
 
+    /**
+     * Sets abstract.
+     *
+     * @param _abstract the abstract
+     * @return the abstract
+     */
     public Swc4jAstTsConstructorType setAbstract(boolean _abstract) {
         this._abstract = _abstract;
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstTsConstructorType setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = AssertionUtils.notNull(typeAnn, "Type ann");
         this.typeAnn.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type params.
+     *
+     * @param typeParams the type params
+     * @return the type params
+     */
     public Swc4jAstTsConstructorType setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
         this.typeParams.ifPresent(node -> node.setParent(this));

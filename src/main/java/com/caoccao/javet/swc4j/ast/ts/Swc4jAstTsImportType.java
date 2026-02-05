@@ -33,16 +33,40 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts import type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsImportType
         extends Swc4jAst
         implements ISwc4jAstTsType, ISwc4jAstTsTypeQueryExpr {
+    /**
+     * The Arg.
+     */
     protected Swc4jAstStr arg;
+    /**
+     * The Attributes.
+     */
     protected Optional<Swc4jAstTsImportCallOptions> attributes;
+    /**
+     * The Qualifier.
+     */
     protected Optional<ISwc4jAstTsEntityName> qualifier;
+    /**
+     * The Type args.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
+    /**
+     * Instantiates a new swc4j ast ts import type.
+     *
+     * @param arg        the arg
+     * @param qualifier  the qualifier
+     * @param typeArgs   the type args
+     * @param attributes the attributes
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsImportType(
             Swc4jAstStr arg,
@@ -57,18 +81,46 @@ public class Swc4jAstTsImportType
         setTypeArgs(typeArgs);
     }
 
+    /**
+     * Create swc4j ast ts import type.
+     *
+     * @param arg the arg
+     * @return the swc4j ast ts import type
+     */
     public static Swc4jAstTsImportType create(Swc4jAstStr arg) {
         return create(arg, null, null);
     }
 
+    /**
+     * Create swc4j ast ts import type.
+     *
+     * @param arg       the arg
+     * @param qualifier the qualifier
+     * @return the swc4j ast ts import type
+     */
     public static Swc4jAstTsImportType create(Swc4jAstStr arg, ISwc4jAstTsEntityName qualifier) {
         return create(arg, qualifier, null);
     }
 
+    /**
+     * Create swc4j ast ts import type.
+     *
+     * @param arg      the arg
+     * @param typeArgs the type args
+     * @return the swc4j ast ts import type
+     */
     public static Swc4jAstTsImportType create(Swc4jAstStr arg, Swc4jAstTsTypeParamInstantiation typeArgs) {
         return create(arg, null, typeArgs);
     }
 
+    /**
+     * Create swc4j ast ts import type.
+     *
+     * @param arg       the arg
+     * @param qualifier the qualifier
+     * @param typeArgs  the type args
+     * @return the swc4j ast ts import type
+     */
     public static Swc4jAstTsImportType create(
             Swc4jAstStr arg,
             ISwc4jAstTsEntityName qualifier,
@@ -76,6 +128,15 @@ public class Swc4jAstTsImportType
         return create(arg, qualifier, typeArgs, null);
     }
 
+    /**
+     * Create swc4j ast ts import type.
+     *
+     * @param arg        the arg
+     * @param qualifier  the qualifier
+     * @param typeArgs   the type args
+     * @param attributes the attributes
+     * @return the swc4j ast ts import type
+     */
     public static Swc4jAstTsImportType create(
             Swc4jAstStr arg,
             ISwc4jAstTsEntityName qualifier,
@@ -84,11 +145,21 @@ public class Swc4jAstTsImportType
         return new Swc4jAstTsImportType(arg, qualifier, typeArgs, attributes, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets arg.
+     *
+     * @return the arg
+     */
     @Jni2RustMethod
     public Swc4jAstStr getArg() {
         return arg;
     }
 
+    /**
+     * Gets attributes.
+     *
+     * @return the attributes
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsImportCallOptions> getAttributes() {
         return attributes;
@@ -103,6 +174,11 @@ public class Swc4jAstTsImportType
         return childNodes;
     }
 
+    /**
+     * Gets qualifier.
+     *
+     * @return the qualifier
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstTsEntityName> getQualifier() {
         return qualifier;
@@ -113,6 +189,11 @@ public class Swc4jAstTsImportType
         return Swc4jAstType.TsImportType;
     }
 
+    /**
+     * Gets type args.
+     *
+     * @return the type args
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
@@ -142,24 +223,48 @@ public class Swc4jAstTsImportType
         return false;
     }
 
+    /**
+     * Sets arg.
+     *
+     * @param arg the arg
+     * @return the arg
+     */
     public Swc4jAstTsImportType setArg(Swc4jAstStr arg) {
         this.arg = AssertionUtils.notNull(arg, "Arg");
         this.arg.setParent(this);
         return this;
     }
 
+    /**
+     * Sets attributes.
+     *
+     * @param attributes the attributes
+     * @return the attributes
+     */
     public Swc4jAstTsImportType setAttributes(Swc4jAstTsImportCallOptions attributes) {
         this.attributes = Optional.ofNullable(attributes);
         this.attributes.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets qualifier.
+     *
+     * @param qualifier the qualifier
+     * @return the qualifier
+     */
     public Swc4jAstTsImportType setQualifier(ISwc4jAstTsEntityName qualifier) {
         this.qualifier = Optional.ofNullable(qualifier);
         this.qualifier.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets type args.
+     *
+     * @param typeArgs the type args
+     * @return the type args
+     */
     public Swc4jAstTsImportType setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
         this.typeArgs = Optional.ofNullable(typeArgs);
         this.typeArgs.ifPresent(node -> node.setParent(this));

@@ -29,6 +29,9 @@ public final class ScopedJavaTypeRegistry {
     private final Stack<Map<String, String>> classMethodToReturnTypeMap;
     private final Stack<Map<String, JavaTypeInfo>> scopeStack;
 
+    /**
+     * Instantiates a new Scoped java type registry.
+     */
     public ScopedJavaTypeRegistry() {
         scopeStack = new Stack<>();
         classMethodToReturnTypeMap = new Stack<>();

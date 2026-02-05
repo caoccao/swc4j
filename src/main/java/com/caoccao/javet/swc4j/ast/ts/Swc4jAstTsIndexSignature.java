@@ -32,17 +32,41 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts index signature.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsIndexSignature
         extends Swc4jAst
         implements ISwc4jAstClassMember, ISwc4jAstTsTypeElement {
+    /**
+     * The Params.
+     */
     protected final List<ISwc4jAstTsFnParam> params;
+    /**
+     * The constant _static.
+     */
     @Jni2RustField(name = "is_static")
     protected boolean _static;
+    /**
+     * The Readonly.
+     */
     protected boolean readonly;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
+    /**
+     * Instantiates a new swc4j ast ts index signature.
+     *
+     * @param params   the params
+     * @param typeAnn  the type ann
+     * @param readonly the readonly
+     * @param _static  the static
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsIndexSignature(
             List<ISwc4jAstTsFnParam> params,
@@ -58,18 +82,44 @@ public class Swc4jAstTsIndexSignature
         this.params.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts index signature.
+     *
+     * @return the swc4j ast ts index signature
+     */
     public static Swc4jAstTsIndexSignature create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast ts index signature.
+     *
+     * @param params the params
+     * @return the swc4j ast ts index signature
+     */
     public static Swc4jAstTsIndexSignature create(List<ISwc4jAstTsFnParam> params) {
         return create(params, null);
     }
 
+    /**
+     * Create swc4j ast ts index signature.
+     *
+     * @param params  the params
+     * @param typeAnn the type ann
+     * @return the swc4j ast ts index signature
+     */
     public static Swc4jAstTsIndexSignature create(List<ISwc4jAstTsFnParam> params, Swc4jAstTsTypeAnn typeAnn) {
         return create(params, typeAnn, false);
     }
 
+    /**
+     * Create swc4j ast ts index signature.
+     *
+     * @param params   the params
+     * @param typeAnn  the type ann
+     * @param readonly the readonly
+     * @return the swc4j ast ts index signature
+     */
     public static Swc4jAstTsIndexSignature create(
             List<ISwc4jAstTsFnParam> params,
             Swc4jAstTsTypeAnn typeAnn,
@@ -77,6 +127,15 @@ public class Swc4jAstTsIndexSignature
         return create(params, typeAnn, readonly, false);
     }
 
+    /**
+     * Create swc4j ast ts index signature.
+     *
+     * @param params   the params
+     * @param typeAnn  the type ann
+     * @param readonly the readonly
+     * @param _static  the static
+     * @return the swc4j ast ts index signature
+     */
     public static Swc4jAstTsIndexSignature create(
             List<ISwc4jAstTsFnParam> params,
             Swc4jAstTsTypeAnn typeAnn,
@@ -92,6 +151,11 @@ public class Swc4jAstTsIndexSignature
         return childNodes;
     }
 
+    /**
+     * Gets params.
+     *
+     * @return the params
+     */
     @Jni2RustMethod
     public List<ISwc4jAstTsFnParam> getParams() {
         return params;
@@ -102,16 +166,31 @@ public class Swc4jAstTsIndexSignature
         return Swc4jAstType.TsIndexSignature;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    /**
+     * Is readonly boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isReadonly() {
         return readonly;
     }
 
+    /**
+     * Is static boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isStatic() {
         return _static;
@@ -136,16 +215,34 @@ public class Swc4jAstTsIndexSignature
         return false;
     }
 
+    /**
+     * Sets readonly.
+     *
+     * @param readonly the readonly
+     * @return the readonly
+     */
     public Swc4jAstTsIndexSignature setReadonly(boolean readonly) {
         this.readonly = readonly;
         return this;
     }
 
+    /**
+     * Sets static.
+     *
+     * @param _static the static
+     * @return the static
+     */
     public Swc4jAstTsIndexSignature setStatic(boolean _static) {
         this._static = _static;
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstTsIndexSignature setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));

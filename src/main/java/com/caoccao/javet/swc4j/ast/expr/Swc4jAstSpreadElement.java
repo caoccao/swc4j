@@ -34,14 +34,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast spread element.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
 public class Swc4jAstSpreadElement
         extends Swc4jAst
         implements ISwc4jAstPropOrSpread, ISwc4jAstJsxAttrOrSpread {
+    /**
+     * The Dot 3 token.
+     */
     protected Swc4jSpan dot3Token;
+    /**
+     * The Expr.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr expr;
 
+    /**
+     * Instantiates a new swc4j ast spread element.
+     *
+     * @param dot3Token the dot 3 token
+     * @param expr      the expr
+     * @param span      the span
+     */
     @Jni2RustMethod
     public Swc4jAstSpreadElement(
             Swc4jSpan dot3Token,
@@ -52,10 +68,23 @@ public class Swc4jAstSpreadElement
         setExpr(expr);
     }
 
+    /**
+     * Create swc4j ast spread element.
+     *
+     * @param expr the expr
+     * @return the swc4j ast spread element
+     */
     public static Swc4jAstSpreadElement create(ISwc4jAstExpr expr) {
         return create(Swc4jSpan.DUMMY, expr);
     }
 
+    /**
+     * Create swc4j ast spread element.
+     *
+     * @param dot3Token the dot 3 token
+     * @param expr      the expr
+     * @return the swc4j ast spread element
+     */
     public static Swc4jAstSpreadElement create(Swc4jSpan dot3Token, ISwc4jAstExpr expr) {
         return new Swc4jAstSpreadElement(dot3Token, expr, Swc4jSpan.DUMMY);
     }
@@ -65,11 +94,21 @@ public class Swc4jAstSpreadElement
         return SimpleList.of(expr);
     }
 
+    /**
+     * Gets dot 3 token.
+     *
+     * @return the dot 3 token
+     */
     @Jni2RustMethod
     public Swc4jSpan getDot3Token() {
         return dot3Token;
     }
 
+    /**
+     * Gets expr.
+     *
+     * @return the expr
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
@@ -89,11 +128,23 @@ public class Swc4jAstSpreadElement
         return false;
     }
 
+    /**
+     * Sets dot 3 token.
+     *
+     * @param dot3Token the dot 3 token
+     * @return the dot 3 token
+     */
     public Swc4jAstSpreadElement setDot3Token(Swc4jSpan dot3Token) {
         this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
         return this;
     }
 
+    /**
+     * Sets expr.
+     *
+     * @param expr the expr
+     * @return the expr
+     */
     public Swc4jAstSpreadElement setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
         this.expr.setParent(this);

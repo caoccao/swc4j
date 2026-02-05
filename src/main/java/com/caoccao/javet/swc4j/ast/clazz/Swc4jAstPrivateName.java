@@ -33,13 +33,25 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast private name.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstPrivateName
         extends Swc4jAst
         implements ISwc4jAstKey, ISwc4jAstExpr, ISwc4jAstMemberProp {
+    /**
+     * The Name.
+     */
     @Jni2RustField(atom = true)
     protected String name;
 
+    /**
+     * Instantiates a new swc4j ast private name.
+     *
+     * @param name the name
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstPrivateName(
             String name,
@@ -48,6 +60,12 @@ public class Swc4jAstPrivateName
         setName(name);
     }
 
+    /**
+     * Create swc4j ast private name.
+     *
+     * @param name the name
+     * @return the swc4j ast private name
+     */
     public static Swc4jAstPrivateName create(String name) {
         return new Swc4jAstPrivateName(name, Swc4jSpan.DUMMY);
     }
@@ -57,6 +75,11 @@ public class Swc4jAstPrivateName
         return EMPTY_CHILD_NODES;
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     @Jni2RustMethod
     public String getName() {
         return name;
@@ -72,6 +95,12 @@ public class Swc4jAstPrivateName
         return false;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     * @return the name
+     */
     public Swc4jAstPrivateName setName(String name) {
         this.name = AssertionUtils.notNull(name, "Name");
         return this;

@@ -32,12 +32,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast import default specifier.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstImportDefaultSpecifier
         extends Swc4jAst
         implements ISwc4jAstImportSpecifier {
+    /**
+     * The Local.
+     */
     protected Swc4jAstIdent local;
 
+    /**
+     * Instantiates a new swc4j ast import default specifier.
+     *
+     * @param local the local
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstImportDefaultSpecifier(
             Swc4jAstIdent local,
@@ -46,6 +58,12 @@ public class Swc4jAstImportDefaultSpecifier
         setLocal(local);
     }
 
+    /**
+     * Create swc4j ast import default specifier.
+     *
+     * @param local the local
+     * @return the swc4j ast import default specifier
+     */
     public static Swc4jAstImportDefaultSpecifier create(Swc4jAstIdent local) {
         return new Swc4jAstImportDefaultSpecifier(local, Swc4jSpan.DUMMY);
     }
@@ -55,6 +73,11 @@ public class Swc4jAstImportDefaultSpecifier
         return SimpleList.of(local);
     }
 
+    /**
+     * Gets local.
+     *
+     * @return the local
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getLocal() {
         return local;
@@ -74,6 +97,12 @@ public class Swc4jAstImportDefaultSpecifier
         return false;
     }
 
+    /**
+     * Sets local.
+     *
+     * @param local the local
+     * @return the local
+     */
     public Swc4jAstImportDefaultSpecifier setLocal(Swc4jAstIdent local) {
         this.local = AssertionUtils.notNull(local, "Local");
         this.local.setParent(this);

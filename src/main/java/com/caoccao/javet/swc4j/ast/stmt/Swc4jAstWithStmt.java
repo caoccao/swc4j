@@ -33,15 +33,31 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast with stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstWithStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Body.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstStmt body;
+    /**
+     * The Obj.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr obj;
 
+    /**
+     * Instantiates a new swc4j ast with stmt.
+     *
+     * @param obj  the obj
+     * @param body the body
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstWithStmt(
             ISwc4jAstExpr obj,
@@ -52,14 +68,32 @@ public class Swc4jAstWithStmt
         setObj(obj);
     }
 
+    /**
+     * Create swc4j ast with stmt.
+     *
+     * @param obj the obj
+     * @return the swc4j ast with stmt
+     */
     public static Swc4jAstWithStmt create(ISwc4jAstExpr obj) {
         return create(obj, ISwc4jAstStmt.createDefault());
     }
 
+    /**
+     * Create swc4j ast with stmt.
+     *
+     * @param obj  the obj
+     * @param body the body
+     * @return the swc4j ast with stmt
+     */
     public static Swc4jAstWithStmt create(ISwc4jAstExpr obj, ISwc4jAstStmt body) {
         return new Swc4jAstWithStmt(obj, body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;
@@ -70,6 +104,11 @@ public class Swc4jAstWithStmt
         return SimpleList.of(obj, body);
     }
 
+    /**
+     * Gets obj.
+     *
+     * @return the obj
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getObj() {
         return obj;
@@ -93,12 +132,24 @@ public class Swc4jAstWithStmt
         return false;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstWithStmt setBody(ISwc4jAstStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
         this.body.setParent(this);
         return this;
     }
 
+    /**
+     * Sets obj.
+     *
+     * @param obj the obj
+     * @return the obj
+     */
     public Swc4jAstWithStmt setObj(ISwc4jAstExpr obj) {
         this.obj = AssertionUtils.notNull(obj, "Obj");
         this.obj.setParent(this);

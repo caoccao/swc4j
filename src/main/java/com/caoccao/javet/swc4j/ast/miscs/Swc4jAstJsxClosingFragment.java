@@ -28,15 +28,28 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast jsx closing fragment.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXClosingFragment")
 public class Swc4jAstJsxClosingFragment
         extends Swc4jAst {
+    /**
+     * Instantiates a new swc4j ast jsx closing fragment.
+     *
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstJsxClosingFragment(
             Swc4jSpan span) {
         super(span);
     }
 
+    /**
+     * Create swc4j ast jsx closing fragment.
+     *
+     * @return the swc4j ast jsx closing fragment
+     */
     public static Swc4jAstJsxClosingFragment create() {
         return new Swc4jAstJsxClosingFragment(Swc4jSpan.DUMMY);
     }

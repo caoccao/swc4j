@@ -32,12 +32,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts lit type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsLitType
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Lit.
+     */
     protected ISwc4jAstTsLit lit;
 
+    /**
+     * Instantiates a new swc4j ast ts lit type.
+     *
+     * @param lit  the lit
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsLitType(
             ISwc4jAstTsLit lit,
@@ -46,6 +58,12 @@ public class Swc4jAstTsLitType
         setLit(lit);
     }
 
+    /**
+     * Create swc4j ast ts lit type.
+     *
+     * @param lit the lit
+     * @return the swc4j ast ts lit type
+     */
     public static Swc4jAstTsLitType create(ISwc4jAstTsLit lit) {
         return new Swc4jAstTsLitType(lit, Swc4jSpan.DUMMY);
     }
@@ -55,6 +73,11 @@ public class Swc4jAstTsLitType
         return SimpleList.of(lit);
     }
 
+    /**
+     * Gets lit.
+     *
+     * @return the lit
+     */
     @Jni2RustMethod
     public ISwc4jAstTsLit getLit() {
         return lit;
@@ -74,6 +97,12 @@ public class Swc4jAstTsLitType
         return false;
     }
 
+    /**
+     * Sets lit.
+     *
+     * @param lit the lit
+     * @return the lit
+     */
     public Swc4jAstTsLitType setLit(ISwc4jAstTsLit lit) {
         this.lit = AssertionUtils.notNull(lit, "Lit");
         this.lit.setParent(this);

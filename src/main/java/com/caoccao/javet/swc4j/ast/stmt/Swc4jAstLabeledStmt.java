@@ -33,14 +33,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast labeled stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstLabeledStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Body.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstStmt body;
+    /**
+     * The Label.
+     */
     protected Swc4jAstIdent label;
 
+    /**
+     * Instantiates a new swc4j ast labeled stmt.
+     *
+     * @param label the label
+     * @param body  the body
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstLabeledStmt(
             Swc4jAstIdent label,
@@ -51,14 +67,32 @@ public class Swc4jAstLabeledStmt
         setLabel(label);
     }
 
+    /**
+     * Create swc4j ast labeled stmt.
+     *
+     * @param label the label
+     * @return the swc4j ast labeled stmt
+     */
     public static Swc4jAstLabeledStmt create(Swc4jAstIdent label) {
         return create(label, ISwc4jAstStmt.createDefault());
     }
 
+    /**
+     * Create swc4j ast labeled stmt.
+     *
+     * @param label the label
+     * @param body  the body
+     * @return the swc4j ast labeled stmt
+     */
     public static Swc4jAstLabeledStmt create(Swc4jAstIdent label, ISwc4jAstStmt body) {
         return new Swc4jAstLabeledStmt(label, body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;
@@ -69,6 +103,11 @@ public class Swc4jAstLabeledStmt
         return SimpleList.of(label, body);
     }
 
+    /**
+     * Gets label.
+     *
+     * @return the label
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getLabel() {
         return label;
@@ -92,12 +131,24 @@ public class Swc4jAstLabeledStmt
         return false;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstLabeledStmt setBody(ISwc4jAstStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
         this.body.setParent(this);
         return this;
     }
 
+    /**
+     * Sets label.
+     *
+     * @param label the label
+     * @return the label
+     */
     public Swc4jAstLabeledStmt setLabel(Swc4jAstIdent label) {
         this.label = AssertionUtils.notNull(label, "Label");
         this.label.setParent(this);

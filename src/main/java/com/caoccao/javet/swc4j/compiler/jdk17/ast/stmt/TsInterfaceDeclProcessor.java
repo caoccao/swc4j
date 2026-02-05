@@ -53,6 +53,11 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
      */
     private static final int METHOD_ACCESS_FLAGS = 0x0001 | 0x0400;
 
+    /**
+     * Instantiates a new Ts interface decl processor.
+     *
+     * @param compiler the compiler
+     */
     public TsInterfaceDeclProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

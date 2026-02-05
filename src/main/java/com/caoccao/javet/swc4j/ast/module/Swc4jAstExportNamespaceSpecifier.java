@@ -32,12 +32,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast export namespace specifier.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstExportNamespaceSpecifier
         extends Swc4jAst
         implements ISwc4jAstExportSpecifier {
+    /**
+     * The Name.
+     */
     protected ISwc4jAstModuleExportName name;
 
+    /**
+     * Instantiates a new swc4j ast export namespace specifier.
+     *
+     * @param name the name
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstExportNamespaceSpecifier(
             ISwc4jAstModuleExportName name,
@@ -46,6 +58,12 @@ public class Swc4jAstExportNamespaceSpecifier
         setName(name);
     }
 
+    /**
+     * Create swc4j ast export namespace specifier.
+     *
+     * @param name the name
+     * @return the swc4j ast export namespace specifier
+     */
     public static Swc4jAstExportNamespaceSpecifier create(ISwc4jAstModuleExportName name) {
         return new Swc4jAstExportNamespaceSpecifier(name, Swc4jSpan.DUMMY);
     }
@@ -55,6 +73,11 @@ public class Swc4jAstExportNamespaceSpecifier
         return SimpleList.of(name);
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     @Jni2RustMethod
     public ISwc4jAstModuleExportName getName() {
         return name;
@@ -74,6 +97,12 @@ public class Swc4jAstExportNamespaceSpecifier
         return false;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     * @return the name
+     */
     public Swc4jAstExportNamespaceSpecifier setName(ISwc4jAstModuleExportName name) {
         this.name = AssertionUtils.notNull(name, "Name");
         this.name.setParent(this);

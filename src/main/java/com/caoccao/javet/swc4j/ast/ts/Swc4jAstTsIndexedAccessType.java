@@ -32,16 +32,36 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts indexed access type.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsIndexedAccessType
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Index type.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstTsType indexType;
+    /**
+     * The Obj type.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstTsType objType;
+    /**
+     * The Readonly.
+     */
     protected boolean readonly;
 
+    /**
+     * Instantiates a new swc4j ast ts indexed access type.
+     *
+     * @param readonly  the readonly
+     * @param objType   the obj type
+     * @param indexType the index type
+     * @param span      the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsIndexedAccessType(
             boolean readonly,
@@ -54,10 +74,25 @@ public class Swc4jAstTsIndexedAccessType
         setReadonly(readonly);
     }
 
+    /**
+     * Create swc4j ast ts indexed access type.
+     *
+     * @param objType   the obj type
+     * @param indexType the index type
+     * @return the swc4j ast ts indexed access type
+     */
     public static Swc4jAstTsIndexedAccessType create(ISwc4jAstTsType objType, ISwc4jAstTsType indexType) {
         return create(false, objType, indexType);
     }
 
+    /**
+     * Create swc4j ast ts indexed access type.
+     *
+     * @param readonly  the readonly
+     * @param objType   the obj type
+     * @param indexType the index type
+     * @return the swc4j ast ts indexed access type
+     */
     public static Swc4jAstTsIndexedAccessType create(
             boolean readonly,
             ISwc4jAstTsType objType,
@@ -70,11 +105,21 @@ public class Swc4jAstTsIndexedAccessType
         return SimpleList.of(objType, indexType);
     }
 
+    /**
+     * Gets index type.
+     *
+     * @return the index type
+     */
     @Jni2RustMethod
     public ISwc4jAstTsType getIndexType() {
         return indexType;
     }
 
+    /**
+     * Gets obj type.
+     *
+     * @return the obj type
+     */
     @Jni2RustMethod
     public ISwc4jAstTsType getObjType() {
         return objType;
@@ -85,6 +130,11 @@ public class Swc4jAstTsIndexedAccessType
         return Swc4jAstType.TsIndexedAccessType;
     }
 
+    /**
+     * Is readonly boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isReadonly() {
         return readonly;
@@ -103,18 +153,36 @@ public class Swc4jAstTsIndexedAccessType
         return false;
     }
 
+    /**
+     * Sets index type.
+     *
+     * @param indexType the index type
+     * @return the index type
+     */
     public Swc4jAstTsIndexedAccessType setIndexType(ISwc4jAstTsType indexType) {
         this.indexType = AssertionUtils.notNull(indexType, "IndexType");
         this.indexType.setParent(this);
         return this;
     }
 
+    /**
+     * Sets obj type.
+     *
+     * @param objType the obj type
+     * @return the obj type
+     */
     public Swc4jAstTsIndexedAccessType setObjType(ISwc4jAstTsType objType) {
         this.objType = AssertionUtils.notNull(objType, "ObjType");
         this.objType.setParent(this);
         return this;
     }
 
+    /**
+     * Sets readonly.
+     *
+     * @param readonly the readonly
+     * @return the readonly
+     */
     public Swc4jAstTsIndexedAccessType setReadonly(boolean readonly) {
         this.readonly = readonly;
         return this;

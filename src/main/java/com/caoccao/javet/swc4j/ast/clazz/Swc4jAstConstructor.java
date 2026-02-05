@@ -34,19 +34,51 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast constructor.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstConstructor
         extends Swc4jAst
         implements ISwc4jAstClassMember {
+    /**
+     * The Params.
+     */
     protected final List<ISwc4jAstParamOrTsParamProp> params;
+    /**
+     * The Accessibility.
+     */
     protected Optional<Swc4jAstAccessibility> accessibility;
+    /**
+     * The Body.
+     */
     protected Optional<Swc4jAstBlockStmt> body;
+    /**
+     * The Ctxt.
+     */
     @Jni2RustField(syntaxContext = true)
     protected int ctxt;
+    /**
+     * The Key.
+     */
     protected ISwc4jAstPropName key;
+    /**
+     * The Optional.
+     */
     @Jni2RustField(name = "is_optional")
     protected boolean optional;
 
+    /**
+     * Instantiates a new swc4j ast constructor.
+     *
+     * @param ctxt          the ctxt
+     * @param key           the key
+     * @param params        the params
+     * @param body          the body
+     * @param accessibility the accessibility
+     * @param optional      the optional
+     * @param span          the span
+     */
     @Jni2RustMethod
     public Swc4jAstConstructor(
             @Jni2RustParam(syntaxContext = true) int ctxt,
@@ -66,16 +98,37 @@ public class Swc4jAstConstructor
         this.params.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast constructor.
+     *
+     * @param key the key
+     * @return the swc4j ast constructor
+     */
     public static Swc4jAstConstructor create(ISwc4jAstPropName key) {
         return create(key, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast constructor.
+     *
+     * @param key    the key
+     * @param params the params
+     * @return the swc4j ast constructor
+     */
     public static Swc4jAstConstructor create(
             ISwc4jAstPropName key,
             List<ISwc4jAstParamOrTsParamProp> params) {
         return create(key, params, null);
     }
 
+    /**
+     * Create swc4j ast constructor.
+     *
+     * @param key    the key
+     * @param params the params
+     * @param body   the body
+     * @return the swc4j ast constructor
+     */
     public static Swc4jAstConstructor create(
             ISwc4jAstPropName key,
             List<ISwc4jAstParamOrTsParamProp> params,
@@ -83,6 +136,15 @@ public class Swc4jAstConstructor
         return create(key, params, body, null);
     }
 
+    /**
+     * Create swc4j ast constructor.
+     *
+     * @param key           the key
+     * @param params        the params
+     * @param body          the body
+     * @param accessibility the accessibility
+     * @return the swc4j ast constructor
+     */
     public static Swc4jAstConstructor create(
             ISwc4jAstPropName key,
             List<ISwc4jAstParamOrTsParamProp> params,
@@ -91,6 +153,16 @@ public class Swc4jAstConstructor
         return create(key, params, body, accessibility, false);
     }
 
+    /**
+     * Create swc4j ast constructor.
+     *
+     * @param key           the key
+     * @param params        the params
+     * @param body          the body
+     * @param accessibility the accessibility
+     * @param optional      the optional
+     * @return the swc4j ast constructor
+     */
     public static Swc4jAstConstructor create(
             ISwc4jAstPropName key,
             List<ISwc4jAstParamOrTsParamProp> params,
@@ -100,6 +172,17 @@ public class Swc4jAstConstructor
         return create(0, key, params, body, accessibility, optional);
     }
 
+    /**
+     * Create swc4j ast constructor.
+     *
+     * @param ctxt          the ctxt
+     * @param key           the key
+     * @param params        the params
+     * @param body          the body
+     * @param accessibility the accessibility
+     * @param optional      the optional
+     * @return the swc4j ast constructor
+     */
     public static Swc4jAstConstructor create(
             int ctxt,
             ISwc4jAstPropName key,
@@ -110,11 +193,21 @@ public class Swc4jAstConstructor
         return new Swc4jAstConstructor(ctxt, key, params, body, accessibility, optional, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets accessibility.
+     *
+     * @return the accessibility
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
@@ -128,16 +221,31 @@ public class Swc4jAstConstructor
         return childNodes;
     }
 
+    /**
+     * Gets ctxt.
+     *
+     * @return the ctxt
+     */
     @Jni2RustMethod
     public int getCtxt() {
         return ctxt;
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
     }
 
+    /**
+     * Gets params.
+     *
+     * @return the params
+     */
     @Jni2RustMethod
     public List<ISwc4jAstParamOrTsParamProp> getParams() {
         return params;
@@ -148,6 +256,11 @@ public class Swc4jAstConstructor
         return Swc4jAstType.Constructor;
     }
 
+    /**
+     * Is optional boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isOptional() {
         return optional;
@@ -177,28 +290,58 @@ public class Swc4jAstConstructor
         return false;
     }
 
+    /**
+     * Sets accessibility.
+     *
+     * @param accessibility the accessibility
+     * @return the accessibility
+     */
     public Swc4jAstConstructor setAccessibility(Swc4jAstAccessibility accessibility) {
         this.accessibility = Optional.ofNullable(accessibility);
         return this;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstConstructor setBody(Swc4jAstBlockStmt body) {
         this.body = Optional.ofNullable(body);
         this.body.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets ctxt.
+     *
+     * @param ctxt the ctxt
+     * @return the ctxt
+     */
     public Swc4jAstConstructor setCtxt(int ctxt) {
         this.ctxt = ctxt;
         return this;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstConstructor setKey(ISwc4jAstPropName key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
         return this;
     }
 
+    /**
+     * Sets optional.
+     *
+     * @param optional the optional
+     * @return the optional
+     */
     public Swc4jAstConstructor setOptional(boolean optional) {
         this.optional = optional;
         return this;

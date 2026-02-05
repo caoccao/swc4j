@@ -90,6 +90,7 @@ public class Swc4jTransformOptions extends Swc4jOptions {
      * @since 0.5.0
      */
     protected Swc4jEsVersion target;
+
     /**
      * Instantiates a new Swc4j transform options.
      *

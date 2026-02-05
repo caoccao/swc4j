@@ -34,18 +34,46 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast import decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstImportDecl
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
+    /**
+     * The Specifiers.
+     */
     protected final List<ISwc4jAstImportSpecifier> specifiers;
+    /**
+     * The Phase.
+     */
     protected Swc4jAstImportPhase phase;
+    /**
+     * The Src.
+     */
     @Jni2RustField(box = true)
     protected Swc4jAstStr src;
+    /**
+     * The Type only.
+     */
     protected boolean typeOnly;
+    /**
+     * The With.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstObjectLit> with;
 
+    /**
+     * Instantiates a new swc4j ast import decl.
+     *
+     * @param specifiers the specifiers
+     * @param src        the src
+     * @param typeOnly   the type only
+     * @param with       the with
+     * @param phase      the phase
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstImportDecl(
             List<ISwc4jAstImportSpecifier> specifiers,
@@ -63,10 +91,25 @@ public class Swc4jAstImportDecl
         this.specifiers.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast import decl.
+     *
+     * @param src   the src
+     * @param phase the phase
+     * @return the swc4j ast import decl
+     */
     public static Swc4jAstImportDecl create(Swc4jAstStr src, Swc4jAstImportPhase phase) {
         return create(SimpleList.of(), src, phase);
     }
 
+    /**
+     * Create swc4j ast import decl.
+     *
+     * @param specifiers the specifiers
+     * @param src        the src
+     * @param phase      the phase
+     * @return the swc4j ast import decl
+     */
     public static Swc4jAstImportDecl create(
             List<ISwc4jAstImportSpecifier> specifiers,
             Swc4jAstStr src,
@@ -74,6 +117,15 @@ public class Swc4jAstImportDecl
         return create(specifiers, src, false, phase);
     }
 
+    /**
+     * Create swc4j ast import decl.
+     *
+     * @param specifiers the specifiers
+     * @param src        the src
+     * @param typeOnly   the type only
+     * @param phase      the phase
+     * @return the swc4j ast import decl
+     */
     public static Swc4jAstImportDecl create(
             List<ISwc4jAstImportSpecifier> specifiers,
             Swc4jAstStr src,
@@ -82,6 +134,16 @@ public class Swc4jAstImportDecl
         return create(specifiers, src, typeOnly, null, phase);
     }
 
+    /**
+     * Create swc4j ast import decl.
+     *
+     * @param specifiers the specifiers
+     * @param src        the src
+     * @param typeOnly   the type only
+     * @param with       the with
+     * @param phase      the phase
+     * @return the swc4j ast import decl
+     */
     public static Swc4jAstImportDecl create(
             List<ISwc4jAstImportSpecifier> specifiers,
             Swc4jAstStr src,
@@ -99,16 +161,31 @@ public class Swc4jAstImportDecl
         return childNodes;
     }
 
+    /**
+     * Gets phase.
+     *
+     * @return the phase
+     */
     @Jni2RustMethod
     public Swc4jAstImportPhase getPhase() {
         return phase;
     }
 
+    /**
+     * Gets specifiers.
+     *
+     * @return the specifiers
+     */
     @Jni2RustMethod
     public List<ISwc4jAstImportSpecifier> getSpecifiers() {
         return specifiers;
     }
 
+    /**
+     * Gets src.
+     *
+     * @return the src
+     */
     @Jni2RustMethod
     public Swc4jAstStr getSrc() {
         return src;
@@ -119,11 +196,21 @@ public class Swc4jAstImportDecl
         return Swc4jAstType.ImportDecl;
     }
 
+    /**
+     * Gets with.
+     *
+     * @return the with
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstObjectLit> getWith() {
         return with;
     }
 
+    /**
+     * Is type only boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isTypeOnly() {
         return typeOnly;
@@ -153,22 +240,46 @@ public class Swc4jAstImportDecl
         return false;
     }
 
+    /**
+     * Sets phase.
+     *
+     * @param phase the phase
+     * @return the phase
+     */
     public Swc4jAstImportDecl setPhase(Swc4jAstImportPhase phase) {
         this.phase = AssertionUtils.notNull(phase, "Phase");
         return this;
     }
 
+    /**
+     * Sets src.
+     *
+     * @param src the src
+     * @return the src
+     */
     public Swc4jAstImportDecl setSrc(Swc4jAstStr src) {
         this.src = AssertionUtils.notNull(src, "Src");
         this.src.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type only.
+     *
+     * @param typeOnly the type only
+     * @return the type only
+     */
     public Swc4jAstImportDecl setTypeOnly(boolean typeOnly) {
         this.typeOnly = typeOnly;
         return this;
     }
 
+    /**
+     * Sets with.
+     *
+     * @param with the with
+     * @return the with
+     */
     public Swc4jAstImportDecl setWith(Swc4jAstObjectLit with) {
         this.with = Optional.ofNullable(with);
         this.with.ifPresent(node -> node.setParent(this));

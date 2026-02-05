@@ -34,15 +34,35 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast fn decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
 public class Swc4jAstFnDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
+    /**
+     * The Declare.
+     */
     protected boolean declare;
+    /**
+     * The Function.
+     */
     @Jni2RustField(box = true)
     protected Swc4jAstFunction function;
+    /**
+     * The Ident.
+     */
     protected Swc4jAstIdent ident;
 
+    /**
+     * Instantiates a new swc4j ast fn decl.
+     *
+     * @param ident    the ident
+     * @param declare  the declare
+     * @param function the function
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstFnDecl(
             Swc4jAstIdent ident,
@@ -55,10 +75,25 @@ public class Swc4jAstFnDecl
         setIdent(ident);
     }
 
+    /**
+     * Create swc4j ast fn decl.
+     *
+     * @param ident    the ident
+     * @param function the function
+     * @return the swc4j ast fn decl
+     */
     public static Swc4jAstFnDecl create(Swc4jAstIdent ident, Swc4jAstFunction function) {
         return create(ident, false, function);
     }
 
+    /**
+     * Create swc4j ast fn decl.
+     *
+     * @param ident    the ident
+     * @param declare  the declare
+     * @param function the function
+     * @return the swc4j ast fn decl
+     */
     public static Swc4jAstFnDecl create(Swc4jAstIdent ident, boolean declare, Swc4jAstFunction function) {
         return new Swc4jAstFnDecl(ident, declare, function, Swc4jSpan.DUMMY);
     }
@@ -68,11 +103,21 @@ public class Swc4jAstFnDecl
         return SimpleList.of(function, ident);
     }
 
+    /**
+     * Gets function.
+     *
+     * @return the function
+     */
     @Jni2RustMethod
     public Swc4jAstFunction getFunction() {
         return function;
     }
 
+    /**
+     * Gets ident.
+     *
+     * @return the ident
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getIdent() {
         return ident;
@@ -83,6 +128,11 @@ public class Swc4jAstFnDecl
         return Swc4jAstType.FnDecl;
     }
 
+    /**
+     * Is declare boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
@@ -101,17 +151,35 @@ public class Swc4jAstFnDecl
         return false;
     }
 
+    /**
+     * Sets declare.
+     *
+     * @param declare the declare
+     * @return the declare
+     */
     public Swc4jAstFnDecl setDeclare(boolean declare) {
         this.declare = declare;
         return this;
     }
 
+    /**
+     * Sets function.
+     *
+     * @param function the function
+     * @return the function
+     */
     public Swc4jAstFnDecl setFunction(Swc4jAstFunction function) {
         this.function = AssertionUtils.notNull(function, "Function");
         this.function.setParent(this);
         return this;
     }
 
+    /**
+     * Sets ident.
+     *
+     * @param ident the ident
+     * @return the ident
+     */
     public Swc4jAstFnDecl setIdent(Swc4jAstIdent ident) {
         this.ident = AssertionUtils.notNull(ident, "Ident");
         this.ident.setParent(this);

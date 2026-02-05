@@ -32,12 +32,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast export default decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstExportDefaultDecl
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
+    /**
+     * The Decl.
+     */
     protected ISwc4jAstDefaultDecl decl;
 
+    /**
+     * Instantiates a new swc4j ast export default decl.
+     *
+     * @param decl the decl
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstExportDefaultDecl(
             ISwc4jAstDefaultDecl decl,
@@ -46,6 +58,12 @@ public class Swc4jAstExportDefaultDecl
         setDecl(decl);
     }
 
+    /**
+     * Create swc4j ast export default decl.
+     *
+     * @param decl the decl
+     * @return the swc4j ast export default decl
+     */
     public static Swc4jAstExportDefaultDecl create(ISwc4jAstDefaultDecl decl) {
         return new Swc4jAstExportDefaultDecl(decl, Swc4jSpan.DUMMY);
     }
@@ -55,6 +73,11 @@ public class Swc4jAstExportDefaultDecl
         return SimpleList.of(decl);
     }
 
+    /**
+     * Gets decl.
+     *
+     * @return the decl
+     */
     @Jni2RustMethod
     public ISwc4jAstDefaultDecl getDecl() {
         return decl;
@@ -74,6 +97,12 @@ public class Swc4jAstExportDefaultDecl
         return false;
     }
 
+    /**
+     * Sets decl.
+     *
+     * @param decl the decl
+     * @return the decl
+     */
     public Swc4jAstExportDefaultDecl setDecl(ISwc4jAstDefaultDecl decl) {
         this.decl = AssertionUtils.notNull(decl, "Decl");
         this.decl.setParent(this);

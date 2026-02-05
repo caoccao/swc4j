@@ -27,6 +27,9 @@ import java.util.*;
 public final class ScopedStandaloneFunctionRegistry {
     private final Stack<ScopeData> scopeStack;
 
+    /**
+     * Instantiates a new Scoped standalone function registry.
+     */
     public ScopedStandaloneFunctionRegistry() {
         scopeStack = new Stack<>();
         // Push global scope
@@ -124,9 +127,18 @@ public final class ScopedStandaloneFunctionRegistry {
      * Internal class to hold scope-specific data.
      */
     private static final class ScopeData {
+        /**
+         * The Dummy class names.
+         */
         final Map<String, String> dummyClassNames = new HashMap<>();
+        /**
+         * The Functions by package.
+         */
         final Map<String, List<Swc4jAstFnDecl>> functionsByPackage = new HashMap<>();
 
+        /**
+         * Clear.
+         */
         void clear() {
             dummyClassNames.clear();
             functionsByPackage.clear();

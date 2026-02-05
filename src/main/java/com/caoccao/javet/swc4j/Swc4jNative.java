@@ -16,16 +16,45 @@
 
 package com.caoccao.javet.swc4j;
 
+/**
+ * The type swc4j native.
+ */
 final class Swc4jNative {
 
     private Swc4jNative() {
     }
 
+    /**
+     * Core get version string.
+     *
+     * @return the string
+     */
     static native String coreGetVersion();
 
+    /**
+     * Core parse object.
+     *
+     * @param code    the code
+     * @param options the options
+     * @return the object
+     */
     static native Object coreParse(String code, Object options);
 
+    /**
+     * Core transform object.
+     *
+     * @param code    the code
+     * @param options the options
+     * @return the object
+     */
     static native Object coreTransform(String code, Object options);
 
+    /**
+     * Core transpile object.
+     *
+     * @param code    the code
+     * @param options the options
+     * @return the object
+     */
     static native Object coreTranspile(String code, Object options);
 }

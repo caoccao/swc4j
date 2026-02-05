@@ -34,24 +34,64 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast class.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstClass
         extends Swc4jAst {
+    /**
+     * The Implements.
+     */
     @Jni2RustField(name = "implements")
     protected final List<Swc4jAstTsExprWithTypeArgs> _implements;
+    /**
+     * The Body.
+     */
     protected final List<ISwc4jAstClassMember> body;
+    /**
+     * The Decorators.
+     */
     protected final List<Swc4jAstDecorator> decorators;
+    /**
+     * The Abstract.
+     */
     @Jni2RustField(name = "is_abstract")
     protected boolean _abstract;
+    /**
+     * The Ctxt.
+     */
     @Jni2RustField(syntaxContext = true)
     protected int ctxt;
+    /**
+     * The Super class.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> superClass;
+    /**
+     * The Super type params.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> superTypeParams;
+    /**
+     * The Type params.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
+    /**
+     * Instantiates a new swc4j ast class.
+     *
+     * @param ctxt            the ctxt
+     * @param decorators      the decorators
+     * @param body            the body
+     * @param superClass      the super class
+     * @param _abstract       the abstract
+     * @param typeParams      the type params
+     * @param superTypeParams the super type params
+     * @param _implements     the implements
+     * @param span            the span
+     */
     @Jni2RustMethod
     public Swc4jAstClass(
             @Jni2RustParam(syntaxContext = true) int ctxt,
@@ -77,18 +117,44 @@ public class Swc4jAstClass
         this.decorators.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast class.
+     *
+     * @return the swc4j ast class
+     */
     public static Swc4jAstClass create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast class.
+     *
+     * @param body the body
+     * @return the swc4j ast class
+     */
     public static Swc4jAstClass create(List<ISwc4jAstClassMember> body) {
         return create(SimpleList.of(), body);
     }
 
+    /**
+     * Create swc4j ast class.
+     *
+     * @param decorators the decorators
+     * @param body       the body
+     * @return the swc4j ast class
+     */
     public static Swc4jAstClass create(List<Swc4jAstDecorator> decorators, List<ISwc4jAstClassMember> body) {
         return create(decorators, body, null);
     }
 
+    /**
+     * Create swc4j ast class.
+     *
+     * @param decorators the decorators
+     * @param body       the body
+     * @param superClass the super class
+     * @return the swc4j ast class
+     */
     public static Swc4jAstClass create(
             List<Swc4jAstDecorator> decorators,
             List<ISwc4jAstClassMember> body,
@@ -96,6 +162,15 @@ public class Swc4jAstClass
         return create(decorators, body, superClass, false);
     }
 
+    /**
+     * Create swc4j ast class.
+     *
+     * @param decorators the decorators
+     * @param body       the body
+     * @param superClass the super class
+     * @param _abstract  the abstract
+     * @return the swc4j ast class
+     */
     public static Swc4jAstClass create(
             List<Swc4jAstDecorator> decorators,
             List<ISwc4jAstClassMember> body,
@@ -104,6 +179,16 @@ public class Swc4jAstClass
         return create(decorators, body, superClass, _abstract, null);
     }
 
+    /**
+     * Create swc4j ast class.
+     *
+     * @param decorators the decorators
+     * @param body       the body
+     * @param superClass the super class
+     * @param _abstract  the abstract
+     * @param typeParams the type params
+     * @return the swc4j ast class
+     */
     public static Swc4jAstClass create(
             List<Swc4jAstDecorator> decorators,
             List<ISwc4jAstClassMember> body,
@@ -113,6 +198,17 @@ public class Swc4jAstClass
         return create(decorators, body, superClass, _abstract, typeParams, null);
     }
 
+    /**
+     * Create swc4j ast class.
+     *
+     * @param decorators      the decorators
+     * @param body            the body
+     * @param superClass      the super class
+     * @param _abstract       the abstract
+     * @param typeParams      the type params
+     * @param superTypeParams the super type params
+     * @return the swc4j ast class
+     */
     public static Swc4jAstClass create(
             List<Swc4jAstDecorator> decorators,
             List<ISwc4jAstClassMember> body,
@@ -123,6 +219,18 @@ public class Swc4jAstClass
         return create(decorators, body, superClass, _abstract, typeParams, superTypeParams, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast class.
+     *
+     * @param decorators      the decorators
+     * @param body            the body
+     * @param superClass      the super class
+     * @param _abstract       the abstract
+     * @param typeParams      the type params
+     * @param superTypeParams the super type params
+     * @param _implements     the implements
+     * @return the swc4j ast class
+     */
     public static Swc4jAstClass create(
             List<Swc4jAstDecorator> decorators,
             List<ISwc4jAstClassMember> body,
@@ -134,6 +242,19 @@ public class Swc4jAstClass
         return create(0, decorators, body, superClass, _abstract, typeParams, superTypeParams, _implements);
     }
 
+    /**
+     * Create swc4j ast class.
+     *
+     * @param ctxt            the ctxt
+     * @param decorators      the decorators
+     * @param body            the body
+     * @param superClass      the super class
+     * @param _abstract       the abstract
+     * @param typeParams      the type params
+     * @param superTypeParams the super type params
+     * @param _implements     the implements
+     * @return the swc4j ast class
+     */
     public static Swc4jAstClass create(
             int ctxt,
             List<Swc4jAstDecorator> decorators,
@@ -148,6 +269,11 @@ public class Swc4jAstClass
                 typeParams, superTypeParams, _implements, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public List<ISwc4jAstClassMember> getBody() {
         return body;
@@ -164,26 +290,51 @@ public class Swc4jAstClass
         return childNodes;
     }
 
+    /**
+     * Gets ctxt.
+     *
+     * @return the ctxt
+     */
     @Jni2RustMethod
     public int getCtxt() {
         return ctxt;
     }
 
+    /**
+     * Gets decorators.
+     *
+     * @return the decorators
+     */
     @Jni2RustMethod
     public List<Swc4jAstDecorator> getDecorators() {
         return decorators;
     }
 
+    /**
+     * Gets implements.
+     *
+     * @return the implements
+     */
     @Jni2RustMethod
     public List<Swc4jAstTsExprWithTypeArgs> getImplements() {
         return _implements;
     }
 
+    /**
+     * Gets super class.
+     *
+     * @return the super class
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getSuperClass() {
         return superClass;
     }
 
+    /**
+     * Gets super type params.
+     *
+     * @return the super type params
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getSuperTypeParams() {
         return superTypeParams;
@@ -194,11 +345,21 @@ public class Swc4jAstClass
         return Swc4jAstType.Class;
     }
 
+    /**
+     * Gets type params.
+     *
+     * @return the type params
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 
+    /**
+     * Is abstract boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isAbstract() {
         return _abstract;
@@ -251,28 +412,58 @@ public class Swc4jAstClass
         return false;
     }
 
+    /**
+     * Sets abstract.
+     *
+     * @param _abstract the abstract
+     * @return the abstract
+     */
     public Swc4jAstClass setAbstract(boolean _abstract) {
         this._abstract = _abstract;
         return this;
     }
 
+    /**
+     * Sets ctxt.
+     *
+     * @param ctxt the ctxt
+     * @return the ctxt
+     */
     public Swc4jAstClass setCtxt(int ctxt) {
         this.ctxt = ctxt;
         return this;
     }
 
+    /**
+     * Sets super class.
+     *
+     * @param superClass the super class
+     * @return the super class
+     */
     public Swc4jAstClass setSuperClass(ISwc4jAstExpr superClass) {
         this.superClass = Optional.ofNullable(superClass);
         this.superClass.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets super type params.
+     *
+     * @param superTypeParams the super type params
+     * @return the super type params
+     */
     public Swc4jAstClass setSuperTypeParams(Swc4jAstTsTypeParamInstantiation superTypeParams) {
         this.superTypeParams = Optional.ofNullable(superTypeParams);
         this.superTypeParams.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets type params.
+     *
+     * @param typeParams the type params
+     * @return the type params
+     */
     public Swc4jAstClass setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
         this.typeParams.ifPresent(node -> node.setParent(this));

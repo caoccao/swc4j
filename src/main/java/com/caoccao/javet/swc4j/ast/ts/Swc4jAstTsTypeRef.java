@@ -31,14 +31,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts type ref.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTypeRef
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Type name.
+     */
     protected ISwc4jAstTsEntityName typeName;
+    /**
+     * The Type params.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeParams;
 
+    /**
+     * Instantiates a new swc4j ast ts type ref.
+     *
+     * @param typeName   the type name
+     * @param typeParams the type params
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeRef(
             ISwc4jAstTsEntityName typeName,
@@ -49,10 +65,23 @@ public class Swc4jAstTsTypeRef
         setTypeParams(typeParams);
     }
 
+    /**
+     * Create swc4j ast ts type ref.
+     *
+     * @param typeName the type name
+     * @return the swc4j ast ts type ref
+     */
     public static Swc4jAstTsTypeRef create(ISwc4jAstTsEntityName typeName) {
         return create(typeName, null);
     }
 
+    /**
+     * Create swc4j ast ts type ref.
+     *
+     * @param typeName   the type name
+     * @param typeParams the type params
+     * @return the swc4j ast ts type ref
+     */
     public static Swc4jAstTsTypeRef create(
             ISwc4jAstTsEntityName typeName,
             Swc4jAstTsTypeParamInstantiation typeParams) {
@@ -71,11 +100,21 @@ public class Swc4jAstTsTypeRef
         return Swc4jAstType.TsTypeRef;
     }
 
+    /**
+     * Gets type name.
+     *
+     * @return the type name
+     */
     @Jni2RustMethod
     public ISwc4jAstTsEntityName getTypeName() {
         return typeName;
     }
 
+    /**
+     * Gets type params.
+     *
+     * @return the type params
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeParams() {
         return typeParams;
@@ -95,12 +134,24 @@ public class Swc4jAstTsTypeRef
         return false;
     }
 
+    /**
+     * Sets type name.
+     *
+     * @param typeName the type name
+     * @return the type name
+     */
     public Swc4jAstTsTypeRef setTypeName(ISwc4jAstTsEntityName typeName) {
         this.typeName = AssertionUtils.notNull(typeName, "ExprName");
         this.typeName.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type params.
+     *
+     * @param typeParams the type params
+     * @return the type params
+     */
     public Swc4jAstTsTypeRef setTypeParams(Swc4jAstTsTypeParamInstantiation typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
         this.typeParams.ifPresent(node -> node.setParent(this));

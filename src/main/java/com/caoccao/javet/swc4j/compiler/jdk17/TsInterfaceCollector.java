@@ -39,6 +39,11 @@ import java.util.List;
 public final class TsInterfaceCollector {
     private final ByteCodeCompiler compiler;
 
+    /**
+     * Instantiates a new Ts interface collector.
+     *
+     * @param compiler the compiler
+     */
     public TsInterfaceCollector(ByteCodeCompiler compiler) {
         this.compiler = compiler;
     }

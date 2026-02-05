@@ -33,13 +33,25 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast throw stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstThrowStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Arg.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr arg;
 
+    /**
+     * Instantiates a new swc4j ast throw stmt.
+     *
+     * @param arg  the arg
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstThrowStmt(
             ISwc4jAstExpr arg,
@@ -48,10 +60,21 @@ public class Swc4jAstThrowStmt
         setArg(arg);
     }
 
+    /**
+     * Create swc4j ast throw stmt.
+     *
+     * @param arg the arg
+     * @return the swc4j ast throw stmt
+     */
     public static Swc4jAstThrowStmt create(ISwc4jAstExpr arg) {
         return new Swc4jAstThrowStmt(arg, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets arg.
+     *
+     * @return the arg
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getArg() {
         return arg;
@@ -76,6 +99,12 @@ public class Swc4jAstThrowStmt
         return false;
     }
 
+    /**
+     * Sets arg.
+     *
+     * @param arg the arg
+     * @return the arg
+     */
     public Swc4jAstThrowStmt setArg(ISwc4jAstExpr arg) {
         this.arg = AssertionUtils.notNull(arg, "Discriminant");
         this.arg.setParent(this);

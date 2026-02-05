@@ -32,12 +32,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts type param instantiation.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTypeParamInstantiation
         extends Swc4jAst {
+    /**
+     * The Params.
+     */
     @Jni2RustField(componentBox = true)
     protected final List<ISwc4jAstTsType> params;
 
+    /**
+     * Instantiates a new swc4j ast ts type param instantiation.
+     *
+     * @param params the params
+     * @param span   the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeParamInstantiation(
             List<ISwc4jAstTsType> params,
@@ -47,10 +59,21 @@ public class Swc4jAstTsTypeParamInstantiation
         this.params.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts type param instantiation.
+     *
+     * @return the swc4j ast ts type param instantiation
+     */
     public static Swc4jAstTsTypeParamInstantiation create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast ts type param instantiation.
+     *
+     * @param params the params
+     * @return the swc4j ast ts type param instantiation
+     */
     public static Swc4jAstTsTypeParamInstantiation create(List<ISwc4jAstTsType> params) {
         return new Swc4jAstTsTypeParamInstantiation(params, Swc4jSpan.DUMMY);
     }
@@ -60,6 +83,11 @@ public class Swc4jAstTsTypeParamInstantiation
         return SimpleList.copyOf(params);
     }
 
+    /**
+     * Gets params.
+     *
+     * @return the params
+     */
     @Jni2RustMethod
     public List<ISwc4jAstTsType> getParams() {
         return params;

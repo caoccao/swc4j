@@ -48,6 +48,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * Java: {@code LinkedHashMap<String, Object>} with key-value pairs
  */
 public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjectLit> {
+    /**
+     * Instantiates a new Object literal processor.
+     *
+     * @param compiler the compiler
+     */
     public ObjectLiteralProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

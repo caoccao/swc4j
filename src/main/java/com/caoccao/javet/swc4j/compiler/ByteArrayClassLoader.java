@@ -23,11 +23,17 @@ import java.util.Map;
  * Custom class loader that loads classes from in-memory bytecode.
  */
 public class ByteArrayClassLoader extends ClassLoader {
-    /** Map of class names to bytecode. */
+    /**
+     * Map of class names to bytecode.
+     */
     protected final Map<String, byte[]> byteCodeMap;
-    /** Cache of loaded classes. */
+    /**
+     * Cache of loaded classes.
+     */
     protected final Map<String, Class<?>> classMap;
-    /** Lock for thread-safe class loading. */
+    /**
+     * Lock for thread-safe class loading.
+     */
     protected final Object lock = new Object();
 
     /**

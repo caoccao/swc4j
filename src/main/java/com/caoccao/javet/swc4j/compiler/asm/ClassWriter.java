@@ -123,14 +123,14 @@ public class ClassWriter {
     /**
      * Adds a method to the class with debug information.
      *
-     * @param accessFlags         the access flags for the method
-     * @param name                the method name
-     * @param descriptor          the method descriptor
-     * @param code                the method bytecode
-     * @param maxStack            the maximum stack size
-     * @param maxLocals           the maximum local variables
-     * @param lineNumberTable     the line number table for debugging
-     * @param localVariableTable  the local variable table for debugging
+     * @param accessFlags        the access flags for the method
+     * @param name               the method name
+     * @param descriptor         the method descriptor
+     * @param code               the method bytecode
+     * @param maxStack           the maximum stack size
+     * @param maxLocals          the maximum local variables
+     * @param lineNumberTable    the line number table for debugging
+     * @param localVariableTable the local variable table for debugging
      */
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals,
                           List<LineNumberEntry> lineNumberTable, List<LocalVariableEntry> localVariableTable) {
@@ -140,15 +140,15 @@ public class ClassWriter {
     /**
      * Adds a method to the class with debug information and stack map table.
      *
-     * @param accessFlags         the access flags for the method
-     * @param name                the method name
-     * @param descriptor          the method descriptor
-     * @param code                the method bytecode
-     * @param maxStack            the maximum stack size
-     * @param maxLocals           the maximum local variables
-     * @param lineNumberTable     the line number table for debugging
-     * @param localVariableTable  the local variable table for debugging
-     * @param stackMapTable       the stack map table for verification
+     * @param accessFlags        the access flags for the method
+     * @param name               the method name
+     * @param descriptor         the method descriptor
+     * @param code               the method bytecode
+     * @param maxStack           the maximum stack size
+     * @param maxLocals          the maximum local variables
+     * @param lineNumberTable    the line number table for debugging
+     * @param localVariableTable the local variable table for debugging
+     * @param stackMapTable      the stack map table for verification
      */
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals,
                           List<LineNumberEntry> lineNumberTable, List<LocalVariableEntry> localVariableTable,
@@ -159,16 +159,16 @@ public class ClassWriter {
     /**
      * Adds a method to the class with full debug information, stack map table, and exception handling.
      *
-     * @param accessFlags         the access flags for the method
-     * @param name                the method name
-     * @param descriptor          the method descriptor
-     * @param code                the method bytecode
-     * @param maxStack            the maximum stack size
-     * @param maxLocals           the maximum local variables
-     * @param lineNumberTable     the line number table for debugging
-     * @param localVariableTable  the local variable table for debugging
-     * @param stackMapTable       the stack map table for verification
-     * @param exceptionTable      the exception table for try-catch blocks
+     * @param accessFlags        the access flags for the method
+     * @param name               the method name
+     * @param descriptor         the method descriptor
+     * @param code               the method bytecode
+     * @param maxStack           the maximum stack size
+     * @param maxLocals          the maximum local variables
+     * @param lineNumberTable    the line number table for debugging
+     * @param localVariableTable the local variable table for debugging
+     * @param stackMapTable      the stack map table for verification
+     * @param exceptionTable     the exception table for try-catch blocks
      */
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals,
                           List<LineNumberEntry> lineNumberTable, List<LocalVariableEntry> localVariableTable,
@@ -873,6 +873,12 @@ public class ClassWriter {
             return index != null ? index : addUtf8(value);
         }
 
+        /**
+         * Write.
+         *
+         * @param out the out
+         * @throws IOException the io exception
+         */
         void write(DataOutputStream out) throws IOException {
             out.writeShort(constants.size());
             for (int i = 1; i < constants.size(); i++) {

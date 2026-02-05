@@ -31,18 +31,42 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast for of stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstForOfStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Await.
+     */
     @Jni2RustField(name = "is_await")
     protected boolean _await;
+    /**
+     * The Body.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstStmt body;
+    /**
+     * The Left.
+     */
     protected ISwc4jAstForHead left;
+    /**
+     * The Right.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr right;
 
+    /**
+     * Instantiates a new swc4j ast for of stmt.
+     *
+     * @param _await the await
+     * @param left   the left
+     * @param right  the right
+     * @param body   the body
+     * @param span   the span
+     */
     @Jni2RustMethod
     public Swc4jAstForOfStmt(
             @Jni2RustParam(name = "is_await") boolean _await,
@@ -57,14 +81,38 @@ public class Swc4jAstForOfStmt
         setRight(right);
     }
 
+    /**
+     * Create swc4j ast for of stmt.
+     *
+     * @param left  the left
+     * @param right the right
+     * @return the swc4j ast for of stmt
+     */
     public static Swc4jAstForOfStmt create(ISwc4jAstForHead left, ISwc4jAstExpr right) {
         return create(false, left, right, ISwc4jAstStmt.createDefault());
     }
 
+    /**
+     * Create swc4j ast for of stmt.
+     *
+     * @param left  the left
+     * @param right the right
+     * @param body  the body
+     * @return the swc4j ast for of stmt
+     */
     public static Swc4jAstForOfStmt create(ISwc4jAstForHead left, ISwc4jAstExpr right, ISwc4jAstStmt body) {
         return create(false, left, right, body);
     }
 
+    /**
+     * Create swc4j ast for of stmt.
+     *
+     * @param _await the await
+     * @param left   the left
+     * @param right  the right
+     * @param body   the body
+     * @return the swc4j ast for of stmt
+     */
     public static Swc4jAstForOfStmt create(
             boolean _await,
             ISwc4jAstForHead left,
@@ -73,6 +121,11 @@ public class Swc4jAstForOfStmt
         return new Swc4jAstForOfStmt(_await, left, right, body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;
@@ -83,11 +136,21 @@ public class Swc4jAstForOfStmt
         return SimpleList.of(left, right, body);
     }
 
+    /**
+     * Gets left.
+     *
+     * @return the left
+     */
     @Jni2RustMethod
     public ISwc4jAstForHead getLeft() {
         return left;
     }
 
+    /**
+     * Gets right.
+     *
+     * @return the right
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getRight() {
         return right;
@@ -98,6 +161,11 @@ public class Swc4jAstForOfStmt
         return Swc4jAstType.ForOfStmt;
     }
 
+    /**
+     * Is await boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isAwait() {
         return _await;
@@ -120,23 +188,47 @@ public class Swc4jAstForOfStmt
         return false;
     }
 
+    /**
+     * Sets await.
+     *
+     * @param _await the await
+     * @return the await
+     */
     public Swc4jAstForOfStmt setAwait(boolean _await) {
         this._await = _await;
         return this;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstForOfStmt setBody(ISwc4jAstStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
         this.body.setParent(this);
         return this;
     }
 
+    /**
+     * Sets left.
+     *
+     * @param left the left
+     * @return the left
+     */
     public Swc4jAstForOfStmt setLeft(ISwc4jAstForHead left) {
         this.left = AssertionUtils.notNull(left, "Left");
         this.left.setParent(this);
         return this;
     }
 
+    /**
+     * Sets right.
+     *
+     * @param right the right
+     * @return the right
+     */
     public Swc4jAstForOfStmt setRight(ISwc4jAstExpr right) {
         this.right = AssertionUtils.notNull(right, "Right");
         this.right.setParent(this);

@@ -40,6 +40,9 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast bin expr.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstBinExpr
         extends Swc4jAst
@@ -51,6 +54,9 @@ public class Swc4jAstBinExpr
      */
     @Jni2RustField(ignore = true)
     protected Optional<Integer> bangCount;
+    /**
+     * The Left.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr left;
     /**
@@ -60,10 +66,24 @@ public class Swc4jAstBinExpr
      */
     @Jni2RustField(ignore = true)
     protected Optional<Integer> logicalOperatorCount;
+    /**
+     * The Op.
+     */
     protected Swc4jAstBinaryOp op;
+    /**
+     * The Right.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr right;
 
+    /**
+     * Instantiates a new swc4j ast bin expr.
+     *
+     * @param op    the op
+     * @param left  the left
+     * @param right the right
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstBinExpr(
             Swc4jAstBinaryOp op,
@@ -78,6 +98,14 @@ public class Swc4jAstBinExpr
         setRight(right);
     }
 
+    /**
+     * Create swc4j ast bin expr.
+     *
+     * @param op    the op
+     * @param left  the left
+     * @param right the right
+     * @return the swc4j ast bin expr
+     */
     public static Swc4jAstBinExpr create(Swc4jAstBinaryOp op, ISwc4jAstExpr left, ISwc4jAstExpr right) {
         return new Swc4jAstBinExpr(op, left, right, Swc4jSpan.DUMMY);
     }
@@ -227,6 +255,12 @@ public class Swc4jAstBinExpr
         return super.eval();
     }
 
+    /**
+     * Gets bang count.
+     *
+     * @param ast the ast
+     * @return the bang count
+     */
     protected int getBangCount(ISwc4jAst ast) {
         switch (ast.getType()) {
             case BinExpr:
@@ -247,6 +281,11 @@ public class Swc4jAstBinExpr
         }
     }
 
+    /**
+     * Gets bang count.
+     *
+     * @return the bang count
+     */
     public int getBangCount() {
         if (bangCount.isEmpty()) {
             bangCount = Optional.of(getBangCount(getParent()));
@@ -259,11 +298,21 @@ public class Swc4jAstBinExpr
         return SimpleList.of(left, right);
     }
 
+    /**
+     * Gets left.
+     *
+     * @return the left
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getLeft() {
         return left;
     }
 
+    /**
+     * Gets logical operator count.
+     *
+     * @return the logical operator count
+     */
     public int getLogicalOperatorCount() {
         if (logicalOperatorCount.isEmpty()) {
             logicalOperatorCount = Optional.of(getLogicalOperatorCount(getParent()));
@@ -271,6 +320,12 @@ public class Swc4jAstBinExpr
         return logicalOperatorCount.get();
     }
 
+    /**
+     * Gets logical operator count.
+     *
+     * @param ast the ast
+     * @return the logical operator count
+     */
     protected int getLogicalOperatorCount(ISwc4jAst ast) {
         switch (ast.getType()) {
             case BinExpr:
@@ -286,15 +341,31 @@ public class Swc4jAstBinExpr
         }
     }
 
+    /**
+     * Gets op.
+     *
+     * @return the op
+     */
     @Jni2RustMethod
     public Swc4jAstBinaryOp getOp() {
         return op;
     }
 
+    /**
+     * Gets parent bin expr.
+     *
+     * @return the parent bin expr
+     */
     public Swc4jAstBinExpr getParentBinExpr() {
         return getParentBinExpr(getParent());
     }
 
+    /**
+     * Gets parent bin expr.
+     *
+     * @param ast the ast
+     * @return the parent bin expr
+     */
     protected Swc4jAstBinExpr getParentBinExpr(ISwc4jAst ast) {
         return switch (ast.getType()) {
             case BinExpr -> ast.as(Swc4jAstBinExpr.class);
@@ -303,6 +374,11 @@ public class Swc4jAstBinExpr
         };
     }
 
+    /**
+     * Gets right.
+     *
+     * @return the right
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getRight() {
         return right;
@@ -326,27 +402,55 @@ public class Swc4jAstBinExpr
         return false;
     }
 
+    /**
+     * Reset bang count swc4j ast bin expr.
+     *
+     * @return the swc4j ast bin expr
+     */
     public Swc4jAstBinExpr resetBangCount() {
         bangCount = Optional.empty();
         return this;
     }
 
+    /**
+     * Reset logical operator count swc4j ast bin expr.
+     *
+     * @return the swc4j ast bin expr
+     */
     public Swc4jAstBinExpr resetLogicalOperatorCount() {
         logicalOperatorCount = Optional.empty();
         return this;
     }
 
+    /**
+     * Sets left.
+     *
+     * @param left the left
+     * @return the left
+     */
     public Swc4jAstBinExpr setLeft(ISwc4jAstExpr left) {
         this.left = AssertionUtils.notNull(left, "Left");
         this.left.setParent(this);
         return this;
     }
 
+    /**
+     * Sets op.
+     *
+     * @param op the op
+     * @return the op
+     */
     public Swc4jAstBinExpr setOp(Swc4jAstBinaryOp op) {
         this.op = AssertionUtils.notNull(op, "Op");
         return this;
     }
 
+    /**
+     * Sets right.
+     *
+     * @param right the right
+     * @return the right
+     */
     public Swc4jAstBinExpr setRight(ISwc4jAstExpr right) {
         this.right = AssertionUtils.notNull(right, "Right");
         this.right.setParent(this);

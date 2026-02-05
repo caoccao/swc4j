@@ -20,8 +20,8 @@ import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.compiler.jdk17.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassDeclProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassMethodProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.PrivateMethodProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit.*;
@@ -43,135 +43,268 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
  */
 public sealed abstract class ByteCodeCompiler permits
         ByteCodeCompiler17 {
-    /** Processor for array literal expressions. */
+    /**
+     * Processor for array literal expressions.
+     */
     protected final ArrayLiteralProcessor arrayLiteralProcessor;
-    /** Processor for arrow function expressions. */
+    /**
+     * Processor for arrow function expressions.
+     */
     protected final ArrowExpressionProcessor arrowExpressionProcessor;
-    /** Processor for assignment expressions. */
+    /**
+     * Processor for assignment expressions.
+     */
     protected final AssignExpressionProcessor assignExpressionProcessor;
-    /** Processor for BigInt literal expressions. */
+    /**
+     * Processor for BigInt literal expressions.
+     */
     protected final BigIntLiteralProcessor bigIntLiteralProcessor;
-    /** Processor for binary expressions. */
+    /**
+     * Processor for binary expressions.
+     */
     protected final BinaryExpressionProcessor binaryExpressionProcessor;
-    /** Processor for boolean literal expressions. */
+    /**
+     * Processor for boolean literal expressions.
+     */
     protected final BoolLiteralProcessor boolLiteralProcessor;
-    /** Processor for break statements. */
+    /**
+     * Processor for break statements.
+     */
     protected final BreakStatementProcessor breakStatementProcessor;
-    /** Processor for call expressions. */
+    /**
+     * Processor for call expressions.
+     */
     protected final CallExpressionProcessor callExpressionProcessor;
-    /** Collector for class declarations. */
+    /**
+     * Collector for class declarations.
+     */
     protected final ClassCollector classCollector;
-    /** Processor for class declarations. */
+    /**
+     * Processor for class declarations.
+     */
     protected final ClassDeclProcessor classDeclProcessor;
-    /** Processor for class expressions. */
-    protected final ClassProcessor classProcessor;
-    /** Processor for class methods. */
+    /**
+     * Processor for class methods.
+     */
     protected final ClassMethodProcessor classMethodProcessor;
-    /** Processor for conditional (ternary) expressions. */
+    /**
+     * Processor for class expressions.
+     */
+    protected final ClassProcessor classProcessor;
+    /**
+     * Processor for conditional (ternary) expressions.
+     */
     protected final ConditionalExpressionProcessor conditionalExpressionProcessor;
-    /** Processor for continue statements. */
+    /**
+     * Processor for continue statements.
+     */
     protected final ContinueStatementProcessor continueStatementProcessor;
-    /** Processor for declarations. */
+    /**
+     * Processor for declarations.
+     */
     protected final DeclProcessor declProcessor;
-    /** Processor for do-while statements. */
+    /**
+     * Processor for do-while statements.
+     */
     protected final DoWhileStatementProcessor doWhileStatementProcessor;
-    /** Collector for enum declarations. */
+    /**
+     * Collector for enum declarations.
+     */
     protected final EnumCollector enumCollector;
-    /** Processor for export declarations. */
+    /**
+     * Processor for export declarations.
+     */
     protected final ExportDeclProcessor exportDeclProcessor;
-    /** Processor for general expressions. */
+    /**
+     * Processor for general expressions.
+     */
     protected final ExpressionProcessor expressionProcessor;
-    /** Processor for for-in statements. */
+    /**
+     * Processor for for-in statements.
+     */
     protected final ForInStatementProcessor forInStatementProcessor;
-    /** Processor for for-of statements. */
+    /**
+     * Processor for for-of statements.
+     */
     protected final ForOfStatementProcessor forOfStatementProcessor;
-    /** Processor for for statements. */
+    /**
+     * Processor for for statements.
+     */
     protected final ForStatementProcessor forStatementProcessor;
-    /** Processor for function declarations. */
+    /**
+     * Processor for function declarations.
+     */
     protected final FunctionDeclarationProcessor functionDeclarationProcessor;
-    /** Processor for identifier expressions. */
+    /**
+     * Processor for identifier expressions.
+     */
     protected final IdentifierProcessor identifierProcessor;
-    /** Processor for if statements. */
+    /**
+     * Processor for if statements.
+     */
     protected final IfStatementProcessor ifStatementProcessor;
-    /** Processor for import declarations. */
+    /**
+     * Processor for import declarations.
+     */
     protected final ImportDeclProcessor importDeclProcessor;
-    /** Processor for labeled statements. */
+    /**
+     * Processor for labeled statements.
+     */
     protected final LabeledStatementProcessor labeledStatementProcessor;
-    /** Processor for member access expressions. */
+    /**
+     * Processor for member access expressions.
+     */
     protected final MemberExpressionProcessor memberExpressionProcessor;
-    /** Memory manager for compilation state. */
+    /**
+     * Memory manager for compilation state.
+     */
     protected final ByteCodeCompilerMemory memory;
-    /** Processor for module items. */
+    /**
+     * Processor for module items.
+     */
     protected final ModuleItemProcessor moduleItemProcessor;
-    /** Analyzer for mutable variable captures in closures. */
+    /**
+     * Analyzer for mutable variable captures in closures.
+     */
     protected final MutableCaptureAnalyzer mutableCaptureAnalyzer;
-    /** Processor for new expressions. */
+    /**
+     * Processor for new expressions.
+     */
     protected final NewExpressionProcessor newExpressionProcessor;
-    /** Processor for null literal expressions. */
+    /**
+     * Processor for null literal expressions.
+     */
     protected final NullLiteralProcessor nullLiteralProcessor;
-    /** Processor for number literal expressions. */
+    /**
+     * Processor for number literal expressions.
+     */
     protected final NumberLiteralProcessor numberLiteralProcessor;
-    /** Processor for object literal expressions. */
+    /**
+     * Processor for object literal expressions.
+     */
     protected final ObjectLiteralProcessor objectLiteralProcessor;
-    /** Processor for optional chaining expressions. */
+    /**
+     * Processor for optional chaining expressions.
+     */
     protected final OptionalChainExpressionProcessor optionalChainExpressionProcessor;
-    /** Compiler options. */
+    /**
+     * Compiler options.
+     */
     protected final ByteCodeCompilerOptions options;
-    /** Processor for parenthesized expressions. */
+    /**
+     * Processor for parenthesized expressions.
+     */
     protected final ParenExpressionProcessor parenExpressionProcessor;
-    /** Parse options for SWC parser. */
+    /**
+     * Parse options for SWC parser.
+     */
     protected final Swc4jParseOptions parseOptions;
-    /** Processor for private methods. */
+    /**
+     * Processor for private methods.
+     */
     protected final PrivateMethodProcessor privateMethodProcessor;
-    /** Processor for regex literal expressions. */
+    /**
+     * Processor for regex literal expressions.
+     */
     protected final RegexLiteralProcessor regexLiteralProcessor;
-    /** Processor for sequence expressions. */
+    /**
+     * Processor for sequence expressions.
+     */
     protected final SeqExpressionProcessor seqExpressionProcessor;
-    /** Processor for general statements. */
+    /**
+     * Processor for general statements.
+     */
     protected final StatementProcessor statementProcessor;
-    /** Processor for statement nodes. */
+    /**
+     * Processor for statement nodes.
+     */
     protected final StmtProcessor stmtProcessor;
-    /** Processor for string literal expressions. */
+    /**
+     * Processor for string literal expressions.
+     */
     protected final StringLiteralProcessor stringLiteralProcessor;
-    /** SWC4J instance for parsing. */
+    /**
+     * SWC4J instance for parsing.
+     */
     protected final Swc4j swc4j;
-    /** Processor for switch statements. */
+    /**
+     * Processor for switch statements.
+     */
     protected final SwitchStatementProcessor switchStatementProcessor;
-    /** Processor for tagged template literal expressions. */
+    /**
+     * Processor for tagged template literal expressions.
+     */
     protected final TaggedTemplateLiteralProcessor taggedTemplateLiteralProcessor;
-    /** Processor for template literal expressions. */
+    /**
+     * Processor for template literal expressions.
+     */
     protected final TemplateLiteralProcessor templateLiteralProcessor;
-    /** Processor for this expressions. */
+    /**
+     * Processor for this expressions.
+     */
     protected final ThisExpressionProcessor thisExpressionProcessor;
-    /** Processor for throw statements. */
+    /**
+     * Processor for throw statements.
+     */
     protected final ThrowStatementProcessor throwStatementProcessor;
-    /** Processor for try statements. */
+    /**
+     * Processor for try statements.
+     */
     protected final TryStatementProcessor tryStatementProcessor;
-    /** Processor for TypeScript as expressions. */
+    /**
+     * Processor for TypeScript as expressions.
+     */
     protected final TsAsExpressionProcessor tsAsExpressionProcessor;
-    /** Processor for TypeScript enum declarations. */
+    /**
+     * Processor for TypeScript enum declarations.
+     */
     protected final TsEnumDeclProcessor tsEnumDeclProcessor;
-    /** Collector for TypeScript interface declarations. */
+    /**
+     * Collector for TypeScript interface declarations.
+     */
     protected final TsInterfaceCollector tsInterfaceCollector;
-    /** Processor for TypeScript interface declarations. */
+    /**
+     * Processor for TypeScript interface declarations.
+     */
     protected final TsInterfaceDeclProcessor tsInterfaceDeclProcessor;
-    /** Processor for TypeScript module declarations. */
+    /**
+     * Processor for TypeScript module declarations.
+     */
     protected final TsModuleDeclProcessor tsModuleDeclProcessor;
-    /** Collector for type alias declarations. */
+    /**
+     * Collector for type alias declarations.
+     */
     protected final TypeAliasCollector typeAliasCollector;
-    /** Type resolver for inferring types. */
+    /**
+     * Type resolver for inferring types.
+     */
     protected final TypeResolver typeResolver;
-    /** Processor for unary expressions. */
+    /**
+     * Processor for unary expressions.
+     */
     protected final UnaryExpressionProcessor unaryExpressionProcessor;
-    /** Processor for update expressions. */
+    /**
+     * Processor for update expressions.
+     */
     protected final UpdateExpressionProcessor updateExpressionProcessor;
-    /** Processor for variable declarations. */
+    /**
+     * Processor for variable declarations.
+     */
     protected final VarDeclProcessor varDeclProcessor;
-    /** Analyzer for variable scoping. */
+    /**
+     * Analyzer for variable scoping.
+     */
     protected final VariableAnalyzer variableAnalyzer;
-    /** Processor for while statements. */
+    /**
+     * Processor for while statements.
+     */
     protected final WhileStatementProcessor whileStatementProcessor;
 
+    /**
+     * Instantiates a new Byte code compiler.
+     *
+     * @param options the options
+     */
     ByteCodeCompiler(ByteCodeCompilerOptions options) {
         this.options = AssertionUtils.notNull(options, "options");
         memory = new ByteCodeCompilerMemory();
@@ -261,7 +394,7 @@ public sealed abstract class ByteCodeCompiler permits
      *
      * @param code the source code to compile
      * @return a bytecode runner for executing the compiled code
-     * @throws Swc4jCoreException               if parsing fails
+     * @throws Swc4jCoreException             if parsing fails
      * @throws Swc4jByteCodeCompilerException if compilation fails
      */
     public ByteCodeRunner compile(String code) throws Swc4jCoreException, Swc4jByteCodeCompilerException {
@@ -270,6 +403,13 @@ public sealed abstract class ByteCodeCompiler permits
         return new ByteCodeRunner(memory.getByteCodeMap(), options.optionalParentClassLoader().orElse(getClass().getClassLoader()));
     }
 
+    /**
+     * Compile program.
+     *
+     * @param code    the code
+     * @param program the program
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
+     */
     abstract void compileProgram(String code, ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException;
 
     /**
@@ -363,21 +503,21 @@ public sealed abstract class ByteCodeCompiler permits
     }
 
     /**
-     * Gets the class processor.
-     *
-     * @return the class processor
-     */
-    public ClassProcessor getClassProcessor() {
-        return classProcessor;
-    }
-
-    /**
      * Gets the class method processor.
      *
      * @return the class method processor
      */
     public ClassMethodProcessor getClassMethodProcessor() {
         return classMethodProcessor;
+    }
+
+    /**
+     * Gets the class processor.
+     *
+     * @return the class processor
+     */
+    public ClassProcessor getClassProcessor() {
+        return classProcessor;
     }
 
     /**

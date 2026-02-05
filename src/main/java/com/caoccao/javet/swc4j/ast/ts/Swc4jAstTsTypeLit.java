@@ -32,12 +32,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts type lit.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTypeLit
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Members.
+     */
     protected final List<ISwc4jAstTsTypeElement> members;
 
+    /**
+     * Instantiates a new swc4j ast ts type lit.
+     *
+     * @param members the members
+     * @param span    the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeLit(
             List<ISwc4jAstTsTypeElement> members,
@@ -47,10 +59,21 @@ public class Swc4jAstTsTypeLit
         this.members.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts type lit.
+     *
+     * @return the swc4j ast ts type lit
+     */
     public static Swc4jAstTsTypeLit create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast ts type lit.
+     *
+     * @param members the members
+     * @return the swc4j ast ts type lit
+     */
     public static Swc4jAstTsTypeLit create(List<ISwc4jAstTsTypeElement> members) {
         return new Swc4jAstTsTypeLit(members, Swc4jSpan.DUMMY);
     }
@@ -60,6 +83,11 @@ public class Swc4jAstTsTypeLit
         return SimpleList.copyOf(members);
     }
 
+    /**
+     * Gets members.
+     *
+     * @return the members
+     */
     @Jni2RustMethod
     public List<ISwc4jAstTsTypeElement> getMembers() {
         return members;

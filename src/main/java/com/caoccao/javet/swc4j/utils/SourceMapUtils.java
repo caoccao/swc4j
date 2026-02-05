@@ -19,6 +19,9 @@ package com.caoccao.javet.swc4j.utils;
 import java.util.*;
 import java.util.stream.IntStream;
 
+/**
+ * The type Source map utils.
+ */
 public final class SourceMapUtils {
     private static final String BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     private static final int[] BASE64_DECODE_TABLE = new int[123];
@@ -44,6 +47,14 @@ public final class SourceMapUtils {
     private final List<String> sourceFilePaths;
     private int segmentOffset;
 
+    /**
+     * Instantiates a new Source map utils.
+     *
+     * @param sourceFilePaths the source file paths
+     * @param sourceContents  the source contents
+     * @param names           the names
+     * @param mappings        the mappings
+     */
     public SourceMapUtils(
             List<String> sourceFilePaths,
             List<String> sourceContents,
@@ -57,6 +68,12 @@ public final class SourceMapUtils {
         this.sourceFilePaths = SimpleList.immutableCopyOf(Objects.requireNonNull(sourceFilePaths));
     }
 
+    /**
+     * Of source map utils.
+     *
+     * @param sourceMapString the source map string
+     * @return the source map utils
+     */
     public static SourceMapUtils of(String sourceMapString) {
         SimpleJsonUtils.JsonNode jsonNode = SimpleJsonUtils.parse(sourceMapString);
         if (!jsonNode.isObject()) {
@@ -199,10 +216,20 @@ public final class SourceMapUtils {
         nodesInLines.add(nodes);
     }
 
+    /**
+     * Gets mappings.
+     *
+     * @return the mappings
+     */
     public String getMappings() {
         return mappings;
     }
 
+    /**
+     * Gets names.
+     *
+     * @return the names
+     */
     public List<String> getNames() {
         return names;
     }
@@ -257,10 +284,20 @@ public final class SourceMapUtils {
         return node;
     }
 
+    /**
+     * Gets source contents.
+     *
+     * @return the source contents
+     */
     public List<String> getSourceContents() {
         return sourceContents;
     }
 
+    /**
+     * Gets source file paths.
+     *
+     * @return the source file paths
+     */
     public List<String> getSourceFilePaths() {
         return sourceFilePaths;
     }
@@ -284,12 +321,27 @@ public final class SourceMapUtils {
         segmentOffset = endOffset + 1;
     }
 
+    /**
+     * The type Source node.
+     */
     public static class SourceNode {
+        /**
+         * The Generated position.
+         */
         public SourcePosition generatedPosition;
+        /**
+         * The Original position.
+         */
         public SourcePosition originalPosition;
-        // Zero-based index into the source code array.
+        /**
+         * The Source file index.
+         */
+// Zero-based index into the source code array.
         public int sourceFileIndex;
-        // Zero-based index into the names array, -1 if not set.
+        /**
+         * The Name index.
+         */
+// Zero-based index into the names array, -1 if not set.
         public int nameIndex;
 
         private SourceNode(
@@ -303,18 +355,44 @@ public final class SourceMapUtils {
             this.nameIndex = nameIndex;
         }
 
+        /**
+         * Of source node.
+         *
+         * @return the source node
+         */
         public static SourceNode of() {
             return of(SourcePosition.of(), SourcePosition.of(), 0, -1);
         }
 
+        /**
+         * Of source node.
+         *
+         * @param node the node
+         * @return the source node
+         */
         public static SourceNode of(SourceNode node) {
             return of(node.originalPosition, node.generatedPosition, node.sourceFileIndex, node.nameIndex);
         }
 
+        /**
+         * Of source node.
+         *
+         * @param originalPosition  the original position
+         * @param generatedPosition the generated position
+         * @return the source node
+         */
         public static SourceNode of(SourcePosition originalPosition, SourcePosition generatedPosition) {
             return new SourceNode(originalPosition, generatedPosition, 0, -1);
         }
 
+        /**
+         * Of source node.
+         *
+         * @param originalPosition  the original position
+         * @param generatedPosition the generated position
+         * @param sourceFileIndex   the source file index
+         * @return the source node
+         */
         public static SourceNode of(
                 SourcePosition originalPosition,
                 SourcePosition generatedPosition,
@@ -322,6 +400,15 @@ public final class SourceMapUtils {
             return new SourceNode(originalPosition, generatedPosition, sourceFileIndex, -1);
         }
 
+        /**
+         * Of source node.
+         *
+         * @param originalPosition  the original position
+         * @param generatedPosition the generated position
+         * @param sourceFileIndex   the source file index
+         * @param nameIndex         the name index
+         * @return the source node
+         */
         public static SourceNode of(
                 SourcePosition originalPosition,
                 SourcePosition generatedPosition,
@@ -356,10 +443,19 @@ public final class SourceMapUtils {
         }
     }
 
+    /**
+     * The type Source position.
+     */
     public static class SourcePosition {
-        // Zero-based
+        /**
+         * The Column.
+         */
+// Zero-based
         public int column;
-        // Zero-based
+        /**
+         * The Line.
+         */
+// Zero-based
         public int line;
 
         private SourcePosition(int line, int column) {
@@ -367,14 +463,32 @@ public final class SourceMapUtils {
             this.line = line;
         }
 
+        /**
+         * Of source position.
+         *
+         * @return the source position
+         */
         public static SourcePosition of() {
             return of(0, 0);
         }
 
+        /**
+         * Of source position.
+         *
+         * @param line   the line
+         * @param column the column
+         * @return the source position
+         */
         public static SourcePosition of(int line, int column) {
             return new SourcePosition(line, column);
         }
 
+        /**
+         * Of source position.
+         *
+         * @param position the position
+         * @return the source position
+         */
         public static SourcePosition of(SourcePosition position) {
             return new SourcePosition(position.line, position.column);
         }

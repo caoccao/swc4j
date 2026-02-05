@@ -26,25 +26,85 @@ import java.util.stream.Stream;
  * @since 0.1.0
  */
 public enum Swc4jMediaType implements ISwc4jEnumId {
+    /**
+     * Java script swc4j media type.
+     */
     JavaScript(0),
+    /**
+     * Jsx swc4j media type.
+     */
     Jsx(1),
+    /**
+     * Mjs swc4j media type.
+     */
     Mjs(2),
+    /**
+     * Cjs swc4j media type.
+     */
     Cjs(3),
+    /**
+     * Type script swc4j media type.
+     */
     TypeScript(4),
+    /**
+     * Mts swc4j media type.
+     */
     Mts(5),
+    /**
+     * Cts swc4j media type.
+     */
     Cts(6),
+    /**
+     * Dts swc4j media type.
+     */
     Dts(7),
+    /**
+     * Dmts swc4j media type.
+     */
     Dmts(8),
+    /**
+     * Dcts swc4j media type.
+     */
     Dcts(9),
+    /**
+     * Tsx swc4j media type.
+     */
     Tsx(10),
+    /**
+     * Css swc4j media type.
+     */
     Css(11),
+    /**
+     * Json swc4j media type.
+     */
     Json(12),
+    /**
+     * Jsonc swc4j media type.
+     */
     Jsonc(13),
+    /**
+     * Json 5 swc4j media type.
+     */
     Json5(14),
+    /**
+     * Html swc4j media type.
+     */
     Html(15),
+    /**
+     * Sql swc4j media type.
+     */
     Sql(16),
+    /**
+     * Wasm swc4j media type.
+     */
     Wasm(17),
+    /**
+     * Source map swc4j media type.
+     */
     SourceMap(18),
+    /**
+     * Unknown swc4j media type.
+     */
     Unknown(19),
     ;
 

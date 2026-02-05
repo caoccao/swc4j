@@ -33,12 +33,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast break stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstBreakStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Label.
+     */
     protected Optional<Swc4jAstIdent> label;
 
+    /**
+     * Instantiates a new swc4j ast break stmt.
+     *
+     * @param label the label
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstBreakStmt(
             @Jni2RustParam(optional = true) Swc4jAstIdent label,
@@ -47,10 +59,21 @@ public class Swc4jAstBreakStmt
         setLabel(label);
     }
 
+    /**
+     * Create swc4j ast break stmt.
+     *
+     * @return the swc4j ast break stmt
+     */
     public static Swc4jAstBreakStmt create() {
         return create(null);
     }
 
+    /**
+     * Create swc4j ast break stmt.
+     *
+     * @param label the label
+     * @return the swc4j ast break stmt
+     */
     public static Swc4jAstBreakStmt create(Swc4jAstIdent label) {
         return new Swc4jAstBreakStmt(label, Swc4jSpan.DUMMY);
     }
@@ -62,6 +85,11 @@ public class Swc4jAstBreakStmt
         return childNodes;
     }
 
+    /**
+     * Gets label.
+     *
+     * @return the label
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstIdent> getLabel() {
         return label;
@@ -82,6 +110,12 @@ public class Swc4jAstBreakStmt
         return false;
     }
 
+    /**
+     * Sets label.
+     *
+     * @param label the label
+     * @return the label
+     */
     public Swc4jAstBreakStmt setLabel(Swc4jAstIdent label) {
         this.label = Optional.ofNullable(label);
         this.label.ifPresent(node -> node.setParent(this));

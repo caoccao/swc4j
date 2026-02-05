@@ -32,15 +32,39 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast jsx opening element.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXOpeningElement")
 public class Swc4jAstJsxOpeningElement
         extends Swc4jAst {
+    /**
+     * The Attrs.
+     */
     protected final List<ISwc4jAstJsxAttrOrSpread> attrs;
+    /**
+     * The Name.
+     */
     protected ISwc4jAstJsxElementName name;
+    /**
+     * The Self closing.
+     */
     protected boolean selfClosing;
+    /**
+     * The Type args.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
+    /**
+     * Instantiates a new swc4j ast jsx opening element.
+     *
+     * @param name        the name
+     * @param attrs       the attrs
+     * @param selfClosing the self closing
+     * @param typeArgs    the type args
+     * @param span        the span
+     */
     @Jni2RustMethod
     public Swc4jAstJsxOpeningElement(
             ISwc4jAstJsxElementName name,
@@ -56,16 +80,37 @@ public class Swc4jAstJsxOpeningElement
         this.attrs.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast jsx opening element.
+     *
+     * @param name the name
+     * @return the swc4j ast jsx opening element
+     */
     public static Swc4jAstJsxOpeningElement create(ISwc4jAstJsxElementName name) {
         return create(name, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast jsx opening element.
+     *
+     * @param name  the name
+     * @param attrs the attrs
+     * @return the swc4j ast jsx opening element
+     */
     public static Swc4jAstJsxOpeningElement create(
             ISwc4jAstJsxElementName name,
             List<ISwc4jAstJsxAttrOrSpread> attrs) {
         return create(name, attrs, false);
     }
 
+    /**
+     * Create swc4j ast jsx opening element.
+     *
+     * @param name        the name
+     * @param attrs       the attrs
+     * @param selfClosing the self closing
+     * @return the swc4j ast jsx opening element
+     */
     public static Swc4jAstJsxOpeningElement create(
             ISwc4jAstJsxElementName name,
             List<ISwc4jAstJsxAttrOrSpread> attrs,
@@ -73,6 +118,15 @@ public class Swc4jAstJsxOpeningElement
         return create(name, attrs, selfClosing, null);
     }
 
+    /**
+     * Create swc4j ast jsx opening element.
+     *
+     * @param name        the name
+     * @param attrs       the attrs
+     * @param selfClosing the self closing
+     * @param typeArgs    the type args
+     * @return the swc4j ast jsx opening element
+     */
     public static Swc4jAstJsxOpeningElement create(
             ISwc4jAstJsxElementName name,
             List<ISwc4jAstJsxAttrOrSpread> attrs,
@@ -81,6 +135,11 @@ public class Swc4jAstJsxOpeningElement
         return new Swc4jAstJsxOpeningElement(name, attrs, selfClosing, typeArgs, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets attrs.
+     *
+     * @return the attrs
+     */
     @Jni2RustMethod
     public List<ISwc4jAstJsxAttrOrSpread> getAttrs() {
         return attrs;
@@ -94,6 +153,11 @@ public class Swc4jAstJsxOpeningElement
         return childNodes;
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     @Jni2RustMethod
     public ISwc4jAstJsxElementName getName() {
         return name;
@@ -104,11 +168,21 @@ public class Swc4jAstJsxOpeningElement
         return Swc4jAstType.JsxOpeningElement;
     }
 
+    /**
+     * Gets type args.
+     *
+     * @return the type args
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
     }
 
+    /**
+     * Is self closing boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isSelfClosing() {
         return selfClosing;
@@ -138,17 +212,35 @@ public class Swc4jAstJsxOpeningElement
         return false;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     * @return the name
+     */
     public Swc4jAstJsxOpeningElement setName(ISwc4jAstJsxElementName name) {
         this.name = AssertionUtils.notNull(name, "Name");
         this.name.setParent(this);
         return this;
     }
 
+    /**
+     * Sets self closing.
+     *
+     * @param selfClosing the self closing
+     * @return the self closing
+     */
     public Swc4jAstJsxOpeningElement setSelfClosing(boolean selfClosing) {
         this.selfClosing = selfClosing;
         return this;
     }
 
+    /**
+     * Sets type args.
+     *
+     * @param typeArgs the type args
+     * @return the type args
+     */
     public Swc4jAstJsxOpeningElement setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
         this.typeArgs = Optional.ofNullable(typeArgs);
         this.typeArgs.ifPresent(node -> node.setParent(this));

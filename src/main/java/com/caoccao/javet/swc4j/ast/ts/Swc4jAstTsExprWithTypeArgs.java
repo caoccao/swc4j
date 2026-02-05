@@ -30,14 +30,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts expr with type args.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsExprWithTypeArgs
         extends Swc4jAst {
+    /**
+     * The Expr.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr expr;
+    /**
+     * The Type args.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
+    /**
+     * Instantiates a new swc4j ast ts expr with type args.
+     *
+     * @param expr     the expr
+     * @param typeArgs the type args
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsExprWithTypeArgs(
             ISwc4jAstExpr expr,
@@ -48,10 +64,23 @@ public class Swc4jAstTsExprWithTypeArgs
         setTypeArgs(typeArgs);
     }
 
+    /**
+     * Create swc4j ast ts expr with type args.
+     *
+     * @param expr the expr
+     * @return the swc4j ast ts expr with type args
+     */
     public static Swc4jAstTsExprWithTypeArgs create(ISwc4jAstExpr expr) {
         return create(expr, null);
     }
 
+    /**
+     * Create swc4j ast ts expr with type args.
+     *
+     * @param expr     the expr
+     * @param typeArgs the type args
+     * @return the swc4j ast ts expr with type args
+     */
     public static Swc4jAstTsExprWithTypeArgs create(ISwc4jAstExpr expr, Swc4jAstTsTypeParamInstantiation typeArgs) {
         return new Swc4jAstTsExprWithTypeArgs(expr, typeArgs, Swc4jSpan.DUMMY);
     }
@@ -63,6 +92,11 @@ public class Swc4jAstTsExprWithTypeArgs
         return childNodes;
     }
 
+    /**
+     * Gets expr.
+     *
+     * @return the expr
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
@@ -73,6 +107,11 @@ public class Swc4jAstTsExprWithTypeArgs
         return Swc4jAstType.TsExprWithTypeArgs;
     }
 
+    /**
+     * Gets type args.
+     *
+     * @return the type args
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
@@ -92,12 +131,24 @@ public class Swc4jAstTsExprWithTypeArgs
         return false;
     }
 
+    /**
+     * Sets expr.
+     *
+     * @param expr the expr
+     * @return the expr
+     */
     public Swc4jAstTsExprWithTypeArgs setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
         this.expr.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type args.
+     *
+     * @param typeArgs the type args
+     * @return the type args
+     */
     public Swc4jAstTsExprWithTypeArgs setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
         this.typeArgs = Optional.ofNullable(typeArgs);
         this.typeArgs.ifPresent(node -> node.setParent(this));

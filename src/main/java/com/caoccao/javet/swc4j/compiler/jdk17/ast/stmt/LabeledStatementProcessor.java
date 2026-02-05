@@ -39,6 +39,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * </pre>
  */
 public final class LabeledStatementProcessor extends BaseAstProcessor<Swc4jAstLabeledStmt> {
+    /**
+     * Instantiates a new Labeled statement processor.
+     *
+     * @param compiler the compiler
+     */
     public LabeledStatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

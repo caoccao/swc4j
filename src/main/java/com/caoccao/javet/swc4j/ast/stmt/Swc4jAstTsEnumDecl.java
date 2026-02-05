@@ -31,16 +31,40 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts enum decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsEnumDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
+    /**
+     * The Members.
+     */
     protected final List<Swc4jAstTsEnumMember> members;
+    /**
+     * The Const.
+     */
     @Jni2RustField(name = "is_const")
     protected boolean _const;
+    /**
+     * The Declare.
+     */
     protected boolean declare;
+    /**
+     * The Id.
+     */
     protected Swc4jAstIdent id;
 
+    /**
+     * Instantiates a new swc4j ast ts enum decl.
+     *
+     * @param declare the declare
+     * @param _const  the const
+     * @param id      the id
+     * @param members the members
+     * @param span    the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsEnumDecl(
             boolean declare,
@@ -56,14 +80,35 @@ public class Swc4jAstTsEnumDecl
         this.members.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts enum decl.
+     *
+     * @param id the id
+     * @return the swc4j ast ts enum decl
+     */
     public static Swc4jAstTsEnumDecl create(Swc4jAstIdent id) {
         return create(id, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast ts enum decl.
+     *
+     * @param id      the id
+     * @param members the members
+     * @return the swc4j ast ts enum decl
+     */
     public static Swc4jAstTsEnumDecl create(Swc4jAstIdent id, List<Swc4jAstTsEnumMember> members) {
         return create(false, id, members);
     }
 
+    /**
+     * Create swc4j ast ts enum decl.
+     *
+     * @param declare the declare
+     * @param id      the id
+     * @param members the members
+     * @return the swc4j ast ts enum decl
+     */
     public static Swc4jAstTsEnumDecl create(
             boolean declare,
             Swc4jAstIdent id,
@@ -71,6 +116,15 @@ public class Swc4jAstTsEnumDecl
         return create(declare, false, id, members);
     }
 
+    /**
+     * Create swc4j ast ts enum decl.
+     *
+     * @param declare the declare
+     * @param _const  the const
+     * @param id      the id
+     * @param members the members
+     * @return the swc4j ast ts enum decl
+     */
     public static Swc4jAstTsEnumDecl create(
             boolean declare,
             boolean _const,
@@ -86,11 +140,21 @@ public class Swc4jAstTsEnumDecl
         return childNodes;
     }
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
     }
 
+    /**
+     * Gets members.
+     *
+     * @return the members
+     */
     @Jni2RustMethod
     public List<Swc4jAstTsEnumMember> getMembers() {
         return members;
@@ -101,11 +165,21 @@ public class Swc4jAstTsEnumDecl
         return Swc4jAstType.TsEnumDecl;
     }
 
+    /**
+     * Is const boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isConst() {
         return _const;
     }
 
+    /**
+     * Is declare boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
@@ -130,16 +204,34 @@ public class Swc4jAstTsEnumDecl
         return false;
     }
 
+    /**
+     * Sets const.
+     *
+     * @param _const the const
+     * @return the const
+     */
     public Swc4jAstTsEnumDecl setConst(boolean _const) {
         this._const = _const;
         return this;
     }
 
+    /**
+     * Sets declare.
+     *
+     * @param declare the declare
+     * @return the declare
+     */
     public Swc4jAstTsEnumDecl setDeclare(boolean declare) {
         this.declare = declare;
         return this;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     * @return the id
+     */
     public Swc4jAstTsEnumDecl setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
         this.id.setParent(this);

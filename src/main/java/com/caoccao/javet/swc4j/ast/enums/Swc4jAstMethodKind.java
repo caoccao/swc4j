@@ -20,9 +20,21 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumId;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast method kind.
+ */
 public enum Swc4jAstMethodKind implements ISwc4jEnumId {
+    /**
+     * Method swc4j ast method kind.
+     */
     Method(0),
+    /**
+     * Getter swc4j ast method kind.
+     */
     Getter(1),
+    /**
+     * Setter swc4j ast method kind.
+     */
     Setter(2);
 
     private static final int LENGTH = values().length;
@@ -38,6 +50,12 @@ public enum Swc4jAstMethodKind implements ISwc4jEnumId {
         this.id = id;
     }
 
+    /**
+     * Parse swc4j ast method kind.
+     *
+     * @param id the id
+     * @return the swc4j ast method kind
+     */
     public static Swc4jAstMethodKind parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : Method;
     }

@@ -34,15 +34,31 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts instantiation.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsInstantiation
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstSimpleAssignTarget {
+    /**
+     * The Expr.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr expr;
+    /**
+     * The Type args.
+     */
     @Jni2RustField(box = true)
     protected Swc4jAstTsTypeParamInstantiation typeArgs;
 
+    /**
+     * Instantiates a new swc4j ast ts instantiation.
+     *
+     * @param expr     the expr
+     * @param typeArgs the type args
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsInstantiation(
             ISwc4jAstExpr expr,
@@ -53,6 +69,13 @@ public class Swc4jAstTsInstantiation
         setTypeArgs(typeArgs);
     }
 
+    /**
+     * Create swc4j ast ts instantiation.
+     *
+     * @param expr     the expr
+     * @param typeArgs the type args
+     * @return the swc4j ast ts instantiation
+     */
     public static Swc4jAstTsInstantiation create(ISwc4jAstExpr expr, Swc4jAstTsTypeParamInstantiation typeArgs) {
         return new Swc4jAstTsInstantiation(expr, typeArgs, Swc4jSpan.DUMMY);
     }
@@ -62,6 +85,11 @@ public class Swc4jAstTsInstantiation
         return SimpleList.of(expr, typeArgs);
     }
 
+    /**
+     * Gets expr.
+     *
+     * @return the expr
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
@@ -72,6 +100,11 @@ public class Swc4jAstTsInstantiation
         return Swc4jAstType.TsInstantiation;
     }
 
+    /**
+     * Gets type args.
+     *
+     * @return the type args
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeParamInstantiation getTypeArgs() {
         return typeArgs;
@@ -90,12 +123,24 @@ public class Swc4jAstTsInstantiation
         return false;
     }
 
+    /**
+     * Sets expr.
+     *
+     * @param expr the expr
+     * @return the expr
+     */
     public Swc4jAstTsInstantiation setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
         this.expr.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type args.
+     *
+     * @param typeArgs the type args
+     * @return the type args
+     */
     public Swc4jAstTsInstantiation setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
         this.typeArgs = AssertionUtils.notNull(typeArgs, "TypeArgs");
         this.typeArgs.setParent(this);

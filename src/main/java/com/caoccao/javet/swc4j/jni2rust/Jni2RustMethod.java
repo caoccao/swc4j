@@ -18,12 +18,25 @@ package com.caoccao.javet.swc4j.jni2rust;
 
 import java.lang.annotation.*;
 
+/**
+ * The interface Jni 2 rust method.
+ */
 @Documented
 @Inherited
 @Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Jni2RustMethod {
+    /**
+     * Mode jni 2 rust method mode.
+     *
+     * @return the jni 2 rust method mode
+     */
     Jni2RustMethodMode mode() default Jni2RustMethodMode.Auto;
 
+    /**
+     * Optional boolean.
+     *
+     * @return the boolean
+     */
     boolean optional() default false;
 }

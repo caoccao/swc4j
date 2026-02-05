@@ -34,14 +34,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast switch stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstSwitchStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Cases.
+     */
     protected final List<Swc4jAstSwitchCase> cases;
+    /**
+     * The Discriminant.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr discriminant;
 
+    /**
+     * Instantiates a new swc4j ast switch stmt.
+     *
+     * @param discriminant the discriminant
+     * @param cases        the cases
+     * @param span         the span
+     */
     @Jni2RustMethod
     public Swc4jAstSwitchStmt(
             ISwc4jAstExpr discriminant,
@@ -53,14 +69,32 @@ public class Swc4jAstSwitchStmt
         this.cases.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast switch stmt.
+     *
+     * @param discriminant the discriminant
+     * @return the swc4j ast switch stmt
+     */
     public static Swc4jAstSwitchStmt create(ISwc4jAstExpr discriminant) {
         return create(discriminant, SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast switch stmt.
+     *
+     * @param discriminant the discriminant
+     * @param cases        the cases
+     * @return the swc4j ast switch stmt
+     */
     public static Swc4jAstSwitchStmt create(ISwc4jAstExpr discriminant, List<Swc4jAstSwitchCase> cases) {
         return new Swc4jAstSwitchStmt(discriminant, cases, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets cases.
+     *
+     * @return the cases
+     */
     @Jni2RustMethod
     public List<Swc4jAstSwitchCase> getCases() {
         return cases;
@@ -73,6 +107,11 @@ public class Swc4jAstSwitchStmt
         return childNodes;
     }
 
+    /**
+     * Gets discriminant.
+     *
+     * @return the discriminant
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getDiscriminant() {
         return discriminant;
@@ -102,6 +141,12 @@ public class Swc4jAstSwitchStmt
         return false;
     }
 
+    /**
+     * Sets discriminant.
+     *
+     * @param discriminant the discriminant
+     * @return the discriminant
+     */
     public Swc4jAstSwitchStmt setDiscriminant(ISwc4jAstExpr discriminant) {
         this.discriminant = AssertionUtils.notNull(discriminant, "Discriminant");
         this.discriminant.setParent(this);

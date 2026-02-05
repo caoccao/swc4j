@@ -43,6 +43,11 @@ import java.util.Set;
 public final class MutableCaptureAnalyzer {
     private final ByteCodeCompiler compiler;
 
+    /**
+     * Instantiates a new Mutable capture analyzer.
+     *
+     * @param compiler the compiler
+     */
     public MutableCaptureAnalyzer(ByteCodeCompiler compiler) {
         this.compiler = compiler;
     }

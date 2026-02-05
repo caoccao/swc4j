@@ -32,16 +32,30 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 0.8.0
  */
 public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
+    /**
+     * The Counter.
+     */
     protected AtomicInteger counter;
 
+    /**
+     * Instantiates a new swc4j plugin visitor js fuck decoder.
+     */
     public Swc4jPluginVisitorJsFuckDecoder() {
         counter = new AtomicInteger();
     }
 
+    /**
+     * Gets count.
+     *
+     * @return the count
+     */
     public int getCount() {
         return counter.get();
     }
 
+    /**
+     * Reset.
+     */
     public void reset() {
         counter.set(0);
     }

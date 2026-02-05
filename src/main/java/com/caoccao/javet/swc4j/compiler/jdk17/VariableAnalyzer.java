@@ -33,9 +33,17 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+/**
+ * The type Variable analyzer.
+ */
 public final class VariableAnalyzer {
     private final ByteCodeCompiler compiler;
 
+    /**
+     * Instantiates a new Variable analyzer.
+     *
+     * @param compiler the compiler
+     */
     public VariableAnalyzer(ByteCodeCompiler compiler) {
         this.compiler = compiler;
     }
@@ -43,6 +51,8 @@ public final class VariableAnalyzer {
     /**
      * Analyze function parameters and allocate local variable slots for them.
      * Parameters start at index 1 (index 0 is reserved for 'this' in instance methods).
+     *
+     * @param function the function
      */
     public void analyzeParameters(Swc4jAstFunction function) {
         CompilationContext context = compiler.getMemory().getCompilationContext();
@@ -232,6 +242,12 @@ public final class VariableAnalyzer {
         }
     }
 
+    /**
+     * Analyze variable declarations.
+     *
+     * @param body the body
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
+     */
     public void analyzeVariableDeclarations(Swc4jAstBlockStmt body) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstStmt stmt : body.getStmts()) {
             analyzeStatement(stmt);

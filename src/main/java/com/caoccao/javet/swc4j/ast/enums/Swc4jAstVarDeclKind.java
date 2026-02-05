@@ -20,9 +20,21 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
 
 import java.util.stream.Stream;
 
+/**
+ * The enum swc4j ast var decl kind.
+ */
 public enum Swc4jAstVarDeclKind implements ISwc4jEnumIdName {
+    /**
+     * Const swc4j ast var decl kind.
+     */
     Const(0, "const"),
+    /**
+     * Let swc4j ast var decl kind.
+     */
     Let(1, "let"),
+    /**
+     * Var swc4j ast var decl kind.
+     */
     Var(2, "var");
 
     private static final int LENGTH = values().length;
@@ -40,6 +52,12 @@ public enum Swc4jAstVarDeclKind implements ISwc4jEnumIdName {
         this.name = name;
     }
 
+    /**
+     * Parse swc4j ast var decl kind.
+     *
+     * @param id the id
+     * @return the swc4j ast var decl kind
+     */
     public static Swc4jAstVarDeclKind parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : Const;
     }

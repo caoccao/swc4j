@@ -33,14 +33,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts type operator.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTypeOperator
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Op.
+     */
     protected Swc4jAstTsTypeOperatorOp op;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstTsType typeAnn;
 
+    /**
+     * Instantiates a new swc4j ast ts type operator.
+     *
+     * @param op      the op
+     * @param typeAnn the type ann
+     * @param span    the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeOperator(
             Swc4jAstTsTypeOperatorOp op,
@@ -51,6 +67,13 @@ public class Swc4jAstTsTypeOperator
         setTypeAnn(typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts type operator.
+     *
+     * @param op      the op
+     * @param typeAnn the type ann
+     * @return the swc4j ast ts type operator
+     */
     public static Swc4jAstTsTypeOperator create(Swc4jAstTsTypeOperatorOp op, ISwc4jAstTsType typeAnn) {
         return new Swc4jAstTsTypeOperator(op, typeAnn, Swc4jSpan.DUMMY);
     }
@@ -60,6 +83,11 @@ public class Swc4jAstTsTypeOperator
         return SimpleList.of(typeAnn);
     }
 
+    /**
+     * Gets op.
+     *
+     * @return the op
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeOperatorOp getOp() {
         return op;
@@ -70,6 +98,11 @@ public class Swc4jAstTsTypeOperator
         return Swc4jAstType.TsTypeOperator;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public ISwc4jAstTsType getTypeAnn() {
         return typeAnn;
@@ -84,11 +117,23 @@ public class Swc4jAstTsTypeOperator
         return false;
     }
 
+    /**
+     * Sets op.
+     *
+     * @param op the op
+     * @return the op
+     */
     public Swc4jAstTsTypeOperator setOp(Swc4jAstTsTypeOperatorOp op) {
         this.op = AssertionUtils.notNull(op, "Op");
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstTsTypeOperator setTypeAnn(ISwc4jAstTsType typeAnn) {
         this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
         this.typeAnn.setParent(this);

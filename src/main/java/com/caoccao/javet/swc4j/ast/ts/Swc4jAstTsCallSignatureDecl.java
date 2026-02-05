@@ -31,16 +31,36 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts call signature decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsCallSignatureDecl
         extends Swc4jAst
         implements ISwc4jAstTsTypeElement {
+    /**
+     * The Params.
+     */
     protected final List<ISwc4jAstTsFnParam> params;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
+    /**
+     * The Type params.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
+    /**
+     * Instantiates a new swc4j ast ts call signature decl.
+     *
+     * @param params     the params
+     * @param typeAnn    the type ann
+     * @param typeParams the type params
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsCallSignatureDecl(
             List<ISwc4jAstTsFnParam> params,
@@ -54,22 +74,55 @@ public class Swc4jAstTsCallSignatureDecl
         this.params.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts call signature decl.
+     *
+     * @return the swc4j ast ts call signature decl
+     */
     public static Swc4jAstTsCallSignatureDecl create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast ts call signature decl.
+     *
+     * @param params the params
+     * @return the swc4j ast ts call signature decl
+     */
     public static Swc4jAstTsCallSignatureDecl create(List<ISwc4jAstTsFnParam> params) {
         return create(params, null, null);
     }
 
+    /**
+     * Create swc4j ast ts call signature decl.
+     *
+     * @param params  the params
+     * @param typeAnn the type ann
+     * @return the swc4j ast ts call signature decl
+     */
     public static Swc4jAstTsCallSignatureDecl create(List<ISwc4jAstTsFnParam> params, Swc4jAstTsTypeAnn typeAnn) {
         return create(params, typeAnn, null);
     }
 
+    /**
+     * Create swc4j ast ts call signature decl.
+     *
+     * @param params     the params
+     * @param typeParams the type params
+     * @return the swc4j ast ts call signature decl
+     */
     public static Swc4jAstTsCallSignatureDecl create(List<ISwc4jAstTsFnParam> params, Swc4jAstTsTypeParamDecl typeParams) {
         return create(params, null, typeParams);
     }
 
+    /**
+     * Create swc4j ast ts call signature decl.
+     *
+     * @param params     the params
+     * @param typeAnn    the type ann
+     * @param typeParams the type params
+     * @return the swc4j ast ts call signature decl
+     */
     public static Swc4jAstTsCallSignatureDecl create(
             List<ISwc4jAstTsFnParam> params,
             Swc4jAstTsTypeAnn typeAnn,
@@ -85,6 +138,11 @@ public class Swc4jAstTsCallSignatureDecl
         return childNodes;
     }
 
+    /**
+     * Gets params.
+     *
+     * @return the params
+     */
     @Jni2RustMethod
     public List<ISwc4jAstTsFnParam> getParams() {
         return params;
@@ -95,11 +153,21 @@ public class Swc4jAstTsCallSignatureDecl
         return Swc4jAstType.TsCallSignatureDecl;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    /**
+     * Gets type params.
+     *
+     * @return the type params
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
@@ -130,12 +198,24 @@ public class Swc4jAstTsCallSignatureDecl
         return false;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstTsCallSignatureDecl setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets type params.
+     *
+     * @param typeParams the type params
+     * @return the type params
+     */
     public Swc4jAstTsCallSignatureDecl setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
         this.typeParams.ifPresent(node -> node.setParent(this));

@@ -28,8 +28,17 @@ import java.util.stream.Stream;
  * @since 0.1.0
  */
 public enum Swc4jParseMode implements ISwc4jEnumId {
+    /**
+     * Program swc4j parse mode.
+     */
     Program(0),
+    /**
+     * Module swc4j parse mode.
+     */
     Module(1),
+    /**
+     * Script swc4j parse mode.
+     */
     Script(2),
     ;
 

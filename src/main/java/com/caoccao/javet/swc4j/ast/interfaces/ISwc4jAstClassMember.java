@@ -22,6 +22,9 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsIndexSignature;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
+/**
+ * The interface swc4j ast class member.
+ */
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "AutoAccessor", type = Swc4jAstAutoAccessor.class),

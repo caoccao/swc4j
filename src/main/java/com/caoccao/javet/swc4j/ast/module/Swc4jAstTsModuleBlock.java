@@ -32,12 +32,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ts module block.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsModuleBlock
         extends Swc4jAst
         implements ISwc4jAstTsNamespaceBody {
+    /**
+     * The Body.
+     */
     protected final List<ISwc4jAstModuleItem> body;
 
+    /**
+     * Instantiates a new swc4j ast ts module block.
+     *
+     * @param body the body
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsModuleBlock(
             List<ISwc4jAstModuleItem> body,
@@ -47,14 +59,30 @@ public class Swc4jAstTsModuleBlock
         this.body.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast ts module block.
+     *
+     * @return the swc4j ast ts module block
+     */
     public static Swc4jAstTsModuleBlock create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast ts module block.
+     *
+     * @param body the body
+     * @return the swc4j ast ts module block
+     */
     public static Swc4jAstTsModuleBlock create(List<ISwc4jAstModuleItem> body) {
         return new Swc4jAstTsModuleBlock(body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public List<ISwc4jAstModuleItem> getBody() {
         return body;

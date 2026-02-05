@@ -31,14 +31,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast using decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstUsingDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr, ISwc4jAstForHead {
+    /**
+     * The Decls.
+     */
     protected final List<Swc4jAstVarDeclarator> decls;
+    /**
+     * The Await.
+     */
     @Jni2RustField(name = "is_await")
     protected boolean _await;
 
+    /**
+     * Instantiates a new swc4j ast using decl.
+     *
+     * @param _await the await
+     * @param decls  the decls
+     * @param span   the span
+     */
     @Jni2RustMethod
     public Swc4jAstUsingDecl(
             @Jni2RustParam(name = "is_await") boolean _await,
@@ -50,14 +66,32 @@ public class Swc4jAstUsingDecl
         this.decls.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast using decl.
+     *
+     * @return the swc4j ast using decl
+     */
     public static Swc4jAstUsingDecl create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast using decl.
+     *
+     * @param decls the decls
+     * @return the swc4j ast using decl
+     */
     public static Swc4jAstUsingDecl create(List<Swc4jAstVarDeclarator> decls) {
         return create(false, decls);
     }
 
+    /**
+     * Create swc4j ast using decl.
+     *
+     * @param _await the await
+     * @param decls  the decls
+     * @return the swc4j ast using decl
+     */
     public static Swc4jAstUsingDecl create(boolean _await, List<Swc4jAstVarDeclarator> decls) {
         return new Swc4jAstUsingDecl(_await, decls, Swc4jSpan.DUMMY);
     }
@@ -67,6 +101,11 @@ public class Swc4jAstUsingDecl
         return SimpleList.copyOf(decls);
     }
 
+    /**
+     * Gets decls.
+     *
+     * @return the decls
+     */
     @Jni2RustMethod
     public List<Swc4jAstVarDeclarator> getDecls() {
         return decls;
@@ -77,6 +116,11 @@ public class Swc4jAstUsingDecl
         return Swc4jAstType.UsingDecl;
     }
 
+    /**
+     * Is await boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isAwait() {
         return _await;
@@ -97,6 +141,12 @@ public class Swc4jAstUsingDecl
         return false;
     }
 
+    /**
+     * Sets await.
+     *
+     * @param _await the await
+     * @return the await
+     */
     public Swc4jAstUsingDecl setAwait(boolean _await) {
         this._await = _await;
         return this;

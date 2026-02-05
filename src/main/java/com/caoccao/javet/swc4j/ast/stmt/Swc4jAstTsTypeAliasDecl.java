@@ -33,17 +33,41 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts type alias decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTypeAliasDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
+    /**
+     * The Declare.
+     */
     protected boolean declare;
+    /**
+     * The Id.
+     */
     protected Swc4jAstIdent id;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstTsType typeAnn;
+    /**
+     * The Type params.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
+    /**
+     * Instantiates a new swc4j ast ts type alias decl.
+     *
+     * @param id         the id
+     * @param declare    the declare
+     * @param typeParams the type params
+     * @param typeAnn    the type ann
+     * @param span       the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeAliasDecl(
             Swc4jAstIdent id,
@@ -58,10 +82,25 @@ public class Swc4jAstTsTypeAliasDecl
         setTypeParams(typeParams);
     }
 
+    /**
+     * Create swc4j ast ts type alias decl.
+     *
+     * @param id      the id
+     * @param typeAnn the type ann
+     * @return the swc4j ast ts type alias decl
+     */
     public static Swc4jAstTsTypeAliasDecl create(Swc4jAstIdent id, ISwc4jAstTsType typeAnn) {
         return create(id, null, typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts type alias decl.
+     *
+     * @param id         the id
+     * @param typeParams the type params
+     * @param typeAnn    the type ann
+     * @return the swc4j ast ts type alias decl
+     */
     public static Swc4jAstTsTypeAliasDecl create(
             Swc4jAstIdent id,
             Swc4jAstTsTypeParamDecl typeParams,
@@ -69,6 +108,15 @@ public class Swc4jAstTsTypeAliasDecl
         return create(id, false, typeParams, typeAnn);
     }
 
+    /**
+     * Create swc4j ast ts type alias decl.
+     *
+     * @param id         the id
+     * @param declare    the declare
+     * @param typeParams the type params
+     * @param typeAnn    the type ann
+     * @return the swc4j ast ts type alias decl
+     */
     public static Swc4jAstTsTypeAliasDecl create(
             Swc4jAstIdent id,
             boolean declare,
@@ -84,6 +132,11 @@ public class Swc4jAstTsTypeAliasDecl
         return childNodes;
     }
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
@@ -94,16 +147,31 @@ public class Swc4jAstTsTypeAliasDecl
         return Swc4jAstType.TsTypeAliasDecl;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public ISwc4jAstTsType getTypeAnn() {
         return typeAnn;
     }
 
+    /**
+     * Gets type params.
+     *
+     * @return the type params
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 
+    /**
+     * Is declare boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
@@ -127,23 +195,47 @@ public class Swc4jAstTsTypeAliasDecl
         return false;
     }
 
+    /**
+     * Sets declare.
+     *
+     * @param declare the declare
+     * @return the declare
+     */
     public Swc4jAstTsTypeAliasDecl setDeclare(boolean declare) {
         this.declare = declare;
         return this;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     * @return the id
+     */
     public Swc4jAstTsTypeAliasDecl setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
         this.id.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstTsTypeAliasDecl setTypeAnn(ISwc4jAstTsType typeAnn) {
         this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
         this.typeAnn.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type params.
+     *
+     * @param typeParams the type params
+     * @return the type params
+     */
     public Swc4jAstTsTypeAliasDecl setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
         this.typeParams.ifPresent(node -> node.setParent(this));

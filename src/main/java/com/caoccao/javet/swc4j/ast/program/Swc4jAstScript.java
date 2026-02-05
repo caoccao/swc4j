@@ -73,14 +73,32 @@ public class Swc4jAstScript
         this.body.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast script.
+     *
+     * @return the swc4j ast script
+     */
     public static Swc4jAstScript create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast script.
+     *
+     * @param body the body
+     * @return the swc4j ast script
+     */
     public static Swc4jAstScript create(List<ISwc4jAstStmt> body) {
         return create(body, null);
     }
 
+    /**
+     * Create swc4j ast script.
+     *
+     * @param body    the body
+     * @param shebang the shebang
+     * @return the swc4j ast script
+     */
     public static Swc4jAstScript create(List<ISwc4jAstStmt> body, String shebang) {
         return new Swc4jAstScript(body, shebang, Swc4jSpan.DUMMY);
     }
@@ -122,6 +140,12 @@ public class Swc4jAstScript
         return false;
     }
 
+    /**
+     * Sets shebang.
+     *
+     * @param shebang the shebang
+     * @return the shebang
+     */
     public Swc4jAstScript setShebang(String shebang) {
         this.shebang = Optional.ofNullable(shebang);
         return this;

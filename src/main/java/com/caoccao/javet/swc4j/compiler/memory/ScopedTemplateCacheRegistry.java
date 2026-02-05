@@ -37,6 +37,9 @@ import java.util.Stack;
 public final class ScopedTemplateCacheRegistry {
     private final Stack<ClassTemplateCaches> scopeStack;
 
+    /**
+     * Instantiates a new Scoped template cache registry.
+     */
     public ScopedTemplateCacheRegistry() {
         scopeStack = new Stack<>();
     }
@@ -141,15 +144,30 @@ public final class ScopedTemplateCacheRegistry {
         private final List<TemplateCacheEntry> caches;
         private int counter;
 
+        /**
+         * Instantiates a new Class template caches.
+         */
         ClassTemplateCaches() {
             this.caches = new ArrayList<>();
             this.counter = 0;
         }
 
+        /**
+         * Gets caches.
+         *
+         * @return the caches
+         */
         List<TemplateCacheEntry> getCaches() {
             return caches;
         }
 
+        /**
+         * Gets or create cache.
+         *
+         * @param cooked the cooked
+         * @param raw    the raw
+         * @return the or create cache
+         */
         String getOrCreateCache(List<String> cooked, List<String> raw) {
             // Check for existing cache with identical content (deduplication)
             for (TemplateCacheEntry entry : caches) {

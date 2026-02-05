@@ -30,15 +30,35 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast object pat.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstObjectPat
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstAssignTargetPat, ISwc4jAstTsFnParam, ISwc4jAstSimpleAssignTarget {
+    /**
+     * The Props.
+     */
     protected final List<ISwc4jAstObjectPatProp> props;
+    /**
+     * The Optional.
+     */
     protected boolean optional;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
+    /**
+     * Instantiates a new swc4j ast object pat.
+     *
+     * @param props    the props
+     * @param optional the optional
+     * @param typeAnn  the type ann
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstObjectPat(
             List<ISwc4jAstObjectPatProp> props,
@@ -52,18 +72,44 @@ public class Swc4jAstObjectPat
         this.props.forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast object pat.
+     *
+     * @return the swc4j ast object pat
+     */
     public static Swc4jAstObjectPat create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast object pat.
+     *
+     * @param props the props
+     * @return the swc4j ast object pat
+     */
     public static Swc4jAstObjectPat create(List<ISwc4jAstObjectPatProp> props) {
         return create(props, false);
     }
 
+    /**
+     * Create swc4j ast object pat.
+     *
+     * @param props    the props
+     * @param optional the optional
+     * @return the swc4j ast object pat
+     */
     public static Swc4jAstObjectPat create(List<ISwc4jAstObjectPatProp> props, boolean optional) {
         return create(props, optional, null);
     }
 
+    /**
+     * Create swc4j ast object pat.
+     *
+     * @param props    the props
+     * @param optional the optional
+     * @param typeAnn  the type ann
+     * @return the swc4j ast object pat
+     */
     public static Swc4jAstObjectPat create(
             List<ISwc4jAstObjectPatProp> props,
             boolean optional,
@@ -78,6 +124,11 @@ public class Swc4jAstObjectPat
         return childNodes;
     }
 
+    /**
+     * Gets props.
+     *
+     * @return the props
+     */
     @Jni2RustMethod
     public List<ISwc4jAstObjectPatProp> getProps() {
         return props;
@@ -88,11 +139,21 @@ public class Swc4jAstObjectPat
         return Swc4jAstType.ObjectPat;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    /**
+     * Is optional boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isOptional() {
         return optional;
@@ -118,11 +179,23 @@ public class Swc4jAstObjectPat
         return false;
     }
 
+    /**
+     * Sets optional.
+     *
+     * @param optional the optional
+     * @return the optional
+     */
     public Swc4jAstObjectPat setOptional(boolean optional) {
         this.optional = optional;
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstObjectPat setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));

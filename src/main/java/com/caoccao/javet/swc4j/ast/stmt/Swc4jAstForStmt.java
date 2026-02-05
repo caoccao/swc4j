@@ -32,18 +32,42 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast for stmt.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstForStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    /**
+     * The Body.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstStmt body;
+    /**
+     * The Init.
+     */
     protected Optional<ISwc4jAstVarDeclOrExpr> init;
+    /**
+     * The Test.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> test;
+    /**
+     * The Update.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> update;
 
+    /**
+     * Instantiates a new swc4j ast for stmt.
+     *
+     * @param init   the init
+     * @param test   the test
+     * @param update the update
+     * @param body   the body
+     * @param span   the span
+     */
     @Jni2RustMethod
     public Swc4jAstForStmt(
             @Jni2RustParam(optional = true) ISwc4jAstVarDeclOrExpr init,
@@ -58,22 +82,57 @@ public class Swc4jAstForStmt
         setUpdate(update);
     }
 
+    /**
+     * Create swc4j ast for stmt.
+     *
+     * @return the swc4j ast for stmt
+     */
     public static Swc4jAstForStmt create() {
         return create(ISwc4jAstStmt.createDefault());
     }
 
+    /**
+     * Create swc4j ast for stmt.
+     *
+     * @param body the body
+     * @return the swc4j ast for stmt
+     */
     public static Swc4jAstForStmt create(ISwc4jAstStmt body) {
         return create(null, body);
     }
 
+    /**
+     * Create swc4j ast for stmt.
+     *
+     * @param init the init
+     * @param body the body
+     * @return the swc4j ast for stmt
+     */
     public static Swc4jAstForStmt create(ISwc4jAstVarDeclOrExpr init, ISwc4jAstStmt body) {
         return create(init, null, body);
     }
 
+    /**
+     * Create swc4j ast for stmt.
+     *
+     * @param init the init
+     * @param test the test
+     * @param body the body
+     * @return the swc4j ast for stmt
+     */
     public static Swc4jAstForStmt create(ISwc4jAstVarDeclOrExpr init, ISwc4jAstExpr test, ISwc4jAstStmt body) {
         return create(init, test, null, body);
     }
 
+    /**
+     * Create swc4j ast for stmt.
+     *
+     * @param init   the init
+     * @param test   the test
+     * @param update the update
+     * @param body   the body
+     * @return the swc4j ast for stmt
+     */
     public static Swc4jAstForStmt create(
             ISwc4jAstVarDeclOrExpr init,
             ISwc4jAstExpr test,
@@ -82,6 +141,11 @@ public class Swc4jAstForStmt
         return new Swc4jAstForStmt(init, test, update, body, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;
@@ -96,11 +160,21 @@ public class Swc4jAstForStmt
         return childNodes;
     }
 
+    /**
+     * Gets init.
+     *
+     * @return the init
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstVarDeclOrExpr> getInit() {
         return init;
     }
 
+    /**
+     * Gets test.
+     *
+     * @return the test
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getTest() {
         return test;
@@ -111,6 +185,11 @@ public class Swc4jAstForStmt
         return Swc4jAstType.ForStmt;
     }
 
+    /**
+     * Gets update.
+     *
+     * @return the update
+     */
     @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getUpdate() {
         return update;
@@ -140,24 +219,48 @@ public class Swc4jAstForStmt
         return false;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     * @return the body
+     */
     public Swc4jAstForStmt setBody(ISwc4jAstStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
         this.body.setParent(this);
         return this;
     }
 
+    /**
+     * Sets init.
+     *
+     * @param init the init
+     * @return the init
+     */
     public Swc4jAstForStmt setInit(ISwc4jAstVarDeclOrExpr init) {
         this.init = Optional.ofNullable(init);
         this.init.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets test.
+     *
+     * @param test the test
+     * @return the test
+     */
     public Swc4jAstForStmt setTest(ISwc4jAstExpr test) {
         this.test = Optional.ofNullable(test);
         this.test.ifPresent(node -> node.setParent(this));
         return this;
     }
 
+    /**
+     * Sets update.
+     *
+     * @param update the update
+     * @return the update
+     */
     public Swc4jAstForStmt setUpdate(ISwc4jAstExpr update) {
         this.update = Optional.ofNullable(update);
         this.update.ifPresent(node -> node.setParent(this));

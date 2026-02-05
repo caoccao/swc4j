@@ -52,6 +52,11 @@ import java.util.List;
  * </pre>
  */
 public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc4jAstOptChainExpr> {
+    /**
+     * Instantiates a new Optional chain expression processor.
+     *
+     * @param compiler the compiler
+     */
     public OptionalChainExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

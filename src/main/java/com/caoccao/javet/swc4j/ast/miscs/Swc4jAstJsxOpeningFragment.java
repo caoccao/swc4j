@@ -28,15 +28,28 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast jsx opening fragment.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXOpeningFragment")
 public class Swc4jAstJsxOpeningFragment
         extends Swc4jAst {
+    /**
+     * Instantiates a new swc4j ast jsx opening fragment.
+     *
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstJsxOpeningFragment(
             Swc4jSpan span) {
         super(span);
     }
 
+    /**
+     * Create swc4j ast jsx opening fragment.
+     *
+     * @return the swc4j ast jsx opening fragment
+     */
     public static Swc4jAstJsxOpeningFragment create() {
         return new Swc4jAstJsxOpeningFragment(Swc4jSpan.DUMMY);
     }

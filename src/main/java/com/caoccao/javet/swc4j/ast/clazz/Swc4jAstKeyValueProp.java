@@ -34,14 +34,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast key value prop.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
 public class Swc4jAstKeyValueProp
         extends Swc4jAst
         implements ISwc4jAstProp {
+    /**
+     * The Key.
+     */
     protected ISwc4jAstPropName key;
+    /**
+     * The Value.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr value;
 
+    /**
+     * Instantiates a new swc4j ast key value prop.
+     *
+     * @param key   the key
+     * @param value the value
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstKeyValueProp(
             ISwc4jAstPropName key,
@@ -52,6 +68,13 @@ public class Swc4jAstKeyValueProp
         setValue(value);
     }
 
+    /**
+     * Create swc4j ast key value prop.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return the swc4j ast key value prop
+     */
     public static Swc4jAstKeyValueProp create(ISwc4jAstPropName key, ISwc4jAstExpr value) {
         return new Swc4jAstKeyValueProp(key, value, Swc4jSpan.DUMMY);
     }
@@ -61,6 +84,11 @@ public class Swc4jAstKeyValueProp
         return SimpleList.of(key, value);
     }
 
+    /**
+     * Gets key.
+     *
+     * @return the key
+     */
     @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
@@ -71,6 +99,11 @@ public class Swc4jAstKeyValueProp
         return Swc4jAstType.KeyValueProp;
     }
 
+    /**
+     * Gets value.
+     *
+     * @return the value
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getValue() {
         return value;
@@ -89,12 +122,24 @@ public class Swc4jAstKeyValueProp
         return false;
     }
 
+    /**
+     * Sets key.
+     *
+     * @param key the key
+     * @return the key
+     */
     public Swc4jAstKeyValueProp setKey(ISwc4jAstPropName key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
         return this;
     }
 
+    /**
+     * Sets value.
+     *
+     * @param value the value
+     * @return the value
+     */
     public Swc4jAstKeyValueProp setValue(ISwc4jAstExpr value) {
         this.value = AssertionUtils.notNull(value, "Value");
         this.value.setParent(this);

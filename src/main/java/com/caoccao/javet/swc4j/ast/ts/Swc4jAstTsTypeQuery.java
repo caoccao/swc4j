@@ -31,14 +31,30 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast ts type query.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTypeQuery
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    /**
+     * The Expr name.
+     */
     protected ISwc4jAstTsTypeQueryExpr exprName;
+    /**
+     * The Type args.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
+    /**
+     * Instantiates a new swc4j ast ts type query.
+     *
+     * @param exprName the expr name
+     * @param typeArgs the type args
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstTsTypeQuery(
             ISwc4jAstTsTypeQueryExpr exprName,
@@ -49,10 +65,23 @@ public class Swc4jAstTsTypeQuery
         setTypeArgs(typeArgs);
     }
 
+    /**
+     * Create swc4j ast ts type query.
+     *
+     * @param exprName the expr name
+     * @return the swc4j ast ts type query
+     */
     public static Swc4jAstTsTypeQuery create(ISwc4jAstTsTypeQueryExpr exprName) {
         return create(exprName, null);
     }
 
+    /**
+     * Create swc4j ast ts type query.
+     *
+     * @param exprName the expr name
+     * @param typeArgs the type args
+     * @return the swc4j ast ts type query
+     */
     public static Swc4jAstTsTypeQuery create(
             ISwc4jAstTsTypeQueryExpr exprName,
             Swc4jAstTsTypeParamInstantiation typeArgs) {
@@ -66,6 +95,11 @@ public class Swc4jAstTsTypeQuery
         return childNodes;
     }
 
+    /**
+     * Gets expr name.
+     *
+     * @return the expr name
+     */
     @Jni2RustMethod
     public ISwc4jAstTsTypeQueryExpr getExprName() {
         return exprName;
@@ -76,6 +110,11 @@ public class Swc4jAstTsTypeQuery
         return Swc4jAstType.TsTypeQuery;
     }
 
+    /**
+     * Gets type args.
+     *
+     * @return the type args
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
@@ -95,12 +134,24 @@ public class Swc4jAstTsTypeQuery
         return false;
     }
 
+    /**
+     * Sets expr name.
+     *
+     * @param exprName the expr name
+     * @return the expr name
+     */
     public Swc4jAstTsTypeQuery setExprName(ISwc4jAstTsTypeQueryExpr exprName) {
         this.exprName = AssertionUtils.notNull(exprName, "Expr name");
         this.exprName.setParent(this);
         return this;
     }
 
+    /**
+     * Sets type args.
+     *
+     * @param typeArgs the type args
+     * @return the type args
+     */
     public Swc4jAstTsTypeQuery setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
         this.typeArgs = Optional.ofNullable(typeArgs);
         this.typeArgs.ifPresent(node -> node.setParent(this));

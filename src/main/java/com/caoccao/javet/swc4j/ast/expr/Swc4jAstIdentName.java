@@ -31,13 +31,25 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ident name.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstIdentName
         extends Swc4jAst
         implements ISwc4jAstSuperProp, ISwc4jAstPropName, ISwc4jAstMemberProp, ISwc4jAstJsxAttrName {
+    /**
+     * The Sym.
+     */
     @Jni2RustField(atom = true)
     protected String sym;
 
+    /**
+     * Instantiates a new swc4j ast ident name.
+     *
+     * @param sym  the sym
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstIdentName(
             String sym,
@@ -46,30 +58,66 @@ public class Swc4jAstIdentName
         setSym(sym);
     }
 
+    /**
+     * Create swc4j ast ident name.
+     *
+     * @param sym the sym
+     * @return the swc4j ast ident name
+     */
     public static Swc4jAstIdentName create(String sym) {
         return new Swc4jAstIdentName(sym, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Create apply swc4j ast ident name.
+     *
+     * @return the swc4j ast ident name
+     */
     public static Swc4jAstIdentName createApply() {
         return create(ISwc4jConstants.APPLY);
     }
 
+    /**
+     * Create array swc4j ast ident name.
+     *
+     * @return the swc4j ast ident name
+     */
     public static Swc4jAstIdentName createArray() {
         return create(ISwc4jConstants.ARRAY);
     }
 
+    /**
+     * Create concat swc4j ast ident name.
+     *
+     * @return the swc4j ast ident name
+     */
     public static Swc4jAstIdentName createConcat() {
         return create(ISwc4jConstants.CONCAT);
     }
 
+    /**
+     * Create dummy swc4j ast ident name.
+     *
+     * @return the swc4j ast ident name
+     */
     public static Swc4jAstIdentName createDummy() {
         return create(ISwc4jConstants.DUMMY);
     }
 
+    /**
+     * Create function swc4j ast ident name.
+     *
+     * @return the swc4j ast ident name
+     */
     public static Swc4jAstIdentName createFunction() {
         return create(ISwc4jConstants.FUNCTION);
     }
 
+    /**
+     * Create undefined swc4j ast ident name.
+     *
+     * @return the swc4j ast ident name
+     */
     public static Swc4jAstIdentName createUndefined() {
         return create(ISwc4jConstants.UNDEFINED);
     }
@@ -79,6 +127,11 @@ public class Swc4jAstIdentName
         return EMPTY_CHILD_NODES;
     }
 
+    /**
+     * Gets sym.
+     *
+     * @return the sym
+     */
     @Jni2RustMethod
     public String getSym() {
         return sym;
@@ -109,6 +162,12 @@ public class Swc4jAstIdentName
         return false;
     }
 
+    /**
+     * Sets sym.
+     *
+     * @param sym the sym
+     * @return the sym
+     */
     public Swc4jAstIdentName setSym(String sym) {
         this.sym = AssertionUtils.notNull(sym, "Sym");
         return this;

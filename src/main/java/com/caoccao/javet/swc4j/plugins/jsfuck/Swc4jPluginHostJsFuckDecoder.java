@@ -19,17 +19,36 @@ package com.caoccao.javet.swc4j.plugins.jsfuck;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 
+/**
+ * The type swc4j plugin host js fuck decoder.
+ */
 public class Swc4jPluginHostJsFuckDecoder implements ISwc4jPluginHost {
+    /**
+     * The Max iteration.
+     */
     protected int maxIteration;
 
+    /**
+     * Instantiates a new swc4j plugin host js fuck decoder.
+     */
     public Swc4jPluginHostJsFuckDecoder() {
         this(Integer.MAX_VALUE);
     }
 
+    /**
+     * Instantiates a new swc4j plugin host js fuck decoder.
+     *
+     * @param maxIteration the max iteration
+     */
     public Swc4jPluginHostJsFuckDecoder(int maxIteration) {
         this.maxIteration = maxIteration;
     }
 
+    /**
+     * Gets max iteration.
+     *
+     * @return the max iteration
+     */
     public int getMaxIteration() {
         return maxIteration;
     }
@@ -47,6 +66,11 @@ public class Swc4jPluginHostJsFuckDecoder implements ISwc4jPluginHost {
         return true;
     }
 
+    /**
+     * Sets max iteration.
+     *
+     * @param maxIteration the max iteration
+     */
     public void setMaxIteration(int maxIteration) {
         this.maxIteration = maxIteration;
     }

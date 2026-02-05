@@ -33,16 +33,36 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type swc4j ast rest pat.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstRestPat
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstObjectPatProp, ISwc4jAstTsFnParam {
+    /**
+     * The Arg.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstPat arg;
+    /**
+     * The Dot 3 token.
+     */
     protected Swc4jSpan dot3Token;
+    /**
+     * The Type ann.
+     */
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
+    /**
+     * Instantiates a new swc4j ast rest pat.
+     *
+     * @param dot3Token the dot 3 token
+     * @param arg       the arg
+     * @param typeAnn   the type ann
+     * @param span      the span
+     */
     @Jni2RustMethod
     public Swc4jAstRestPat(
             Swc4jSpan dot3Token,
@@ -55,18 +75,44 @@ public class Swc4jAstRestPat
         setTypeAnn(typeAnn);
     }
 
+    /**
+     * Create swc4j ast rest pat.
+     *
+     * @param arg the arg
+     * @return the swc4j ast rest pat
+     */
     public static Swc4jAstRestPat create(ISwc4jAstPat arg) {
         return create(Swc4jSpan.DUMMY, arg);
     }
 
+    /**
+     * Create swc4j ast rest pat.
+     *
+     * @param dot3Token the dot 3 token
+     * @param arg       the arg
+     * @return the swc4j ast rest pat
+     */
     public static Swc4jAstRestPat create(Swc4jSpan dot3Token, ISwc4jAstPat arg) {
         return create(dot3Token, arg, null);
     }
 
+    /**
+     * Create swc4j ast rest pat.
+     *
+     * @param dot3Token the dot 3 token
+     * @param arg       the arg
+     * @param typeAnn   the type ann
+     * @return the swc4j ast rest pat
+     */
     public static Swc4jAstRestPat create(Swc4jSpan dot3Token, ISwc4jAstPat arg, Swc4jAstTsTypeAnn typeAnn) {
         return new Swc4jAstRestPat(dot3Token, arg, typeAnn, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Gets arg.
+     *
+     * @return the arg
+     */
     @Jni2RustMethod
     public ISwc4jAstPat getArg() {
         return arg;
@@ -79,6 +125,11 @@ public class Swc4jAstRestPat
         return childNodes;
     }
 
+    /**
+     * Gets dot 3 token.
+     *
+     * @return the dot 3 token
+     */
     @Jni2RustMethod
     public Swc4jSpan getDot3Token() {
         return dot3Token;
@@ -89,6 +140,11 @@ public class Swc4jAstRestPat
         return Swc4jAstType.RestPat;
     }
 
+    /**
+     * Gets type ann.
+     *
+     * @return the type ann
+     */
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
@@ -108,17 +164,35 @@ public class Swc4jAstRestPat
         return false;
     }
 
+    /**
+     * Sets arg.
+     *
+     * @param arg the arg
+     * @return the arg
+     */
     public Swc4jAstRestPat setArg(ISwc4jAstPat arg) {
         this.arg = AssertionUtils.notNull(arg, "Expr");
         this.arg.setParent(this);
         return this;
     }
 
+    /**
+     * Sets dot 3 token.
+     *
+     * @param dot3Token the dot 3 token
+     * @return the dot 3 token
+     */
     public Swc4jAstRestPat setDot3Token(Swc4jSpan dot3Token) {
         this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
         return this;
     }
 
+    /**
+     * Sets type ann.
+     *
+     * @param typeAnn the type ann
+     * @return the type ann
+     */
     public Swc4jAstRestPat setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));

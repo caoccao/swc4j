@@ -32,15 +32,31 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast jsx text.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXText")
 public class Swc4jAstJsxText
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstJsxElementChild {
+    /**
+     * The Raw.
+     */
     @Jni2RustField(atom = true)
     protected String raw;
+    /**
+     * The Value.
+     */
     @Jni2RustField(atom = true)
     protected String value;
 
+    /**
+     * Instantiates a new swc4j ast jsx text.
+     *
+     * @param value the value
+     * @param raw   the raw
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstJsxText(
             String value,
@@ -51,6 +67,13 @@ public class Swc4jAstJsxText
         setValue(value);
     }
 
+    /**
+     * Create swc4j ast jsx text.
+     *
+     * @param value the value
+     * @param raw   the raw
+     * @return the swc4j ast jsx text
+     */
     public static Swc4jAstJsxText create(String value, String raw) {
         return new Swc4jAstJsxText(value, raw, Swc4jSpan.DUMMY);
     }
@@ -60,6 +83,11 @@ public class Swc4jAstJsxText
         return EMPTY_CHILD_NODES;
     }
 
+    /**
+     * Gets raw.
+     *
+     * @return the raw
+     */
     @Jni2RustMethod
     public String getRaw() {
         return raw;
@@ -70,6 +98,11 @@ public class Swc4jAstJsxText
         return Swc4jAstType.JsxText;
     }
 
+    /**
+     * Gets value.
+     *
+     * @return the value
+     */
     @Jni2RustMethod
     public String getValue() {
         return value;
@@ -80,11 +113,23 @@ public class Swc4jAstJsxText
         return false;
     }
 
+    /**
+     * Sets raw.
+     *
+     * @param raw the raw
+     * @return the raw
+     */
     public Swc4jAstJsxText setRaw(String raw) {
         this.raw = AssertionUtils.notNull(raw, "Raw");
         return this;
     }
 
+    /**
+     * Sets value.
+     *
+     * @param value the value
+     * @return the value
+     */
     public Swc4jAstJsxText setValue(String value) {
         this.value = AssertionUtils.notNull(value, "Value");
         return this;

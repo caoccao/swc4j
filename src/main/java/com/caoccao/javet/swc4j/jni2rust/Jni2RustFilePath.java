@@ -20,21 +20,37 @@ package com.caoccao.javet.swc4j.jni2rust;
  * Enum for Rust file paths used in JNI code generation.
  */
 public enum Jni2RustFilePath {
-    /** AST utilities file path */
+    /**
+     * AST utilities file path
+     */
     AstUtils("rust/src/ast_utils.rs"),
-    /** Comment utilities file path */
+    /**
+     * Comment utilities file path
+     */
     CommentUtils("rust/src/comment_utils.rs"),
-    /** No file path */
+    /**
+     * No file path
+     */
     None(null),
-    /** Options file path */
+    /**
+     * Options file path
+     */
     Options("rust/src/options.rs"),
-    /** Outputs file path */
+    /**
+     * Outputs file path
+     */
     Outputs("rust/src/outputs.rs"),
-    /** Plugin utilities file path */
+    /**
+     * Plugin utilities file path
+     */
     PluginUtils("rust/src/plugin_utils.rs"),
-    /** Span utilities file path */
+    /**
+     * Span utilities file path
+     */
     SpanUtils("rust/src/span_utils.rs"),
-    /** Token utilities file path */
+    /**
+     * Token utilities file path
+     */
     TokenUtils("rust/src/token_utils.rs"),
     ;
 

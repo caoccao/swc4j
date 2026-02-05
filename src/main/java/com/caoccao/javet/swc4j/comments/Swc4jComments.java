@@ -29,17 +29,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * The type swc4j comments.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.CommentUtils)
 public class Swc4jComments {
+    /**
+     * The Leading.
+     */
     protected final Map<Integer, List<Swc4jComment>> leading;
+    /**
+     * The Trailing.
+     */
     protected final Map<Integer, List<Swc4jComment>> trailing;
 
+    /**
+     * Instantiates a new swc4j comments.
+     *
+     * @param leading  the leading
+     * @param trailing the trailing
+     */
     @Jni2RustMethod
     public Swc4jComments(Map<Integer, List<Swc4jComment>> leading, Map<Integer, List<Swc4jComment>> trailing) {
         this.leading = SimpleMap.immutable(AssertionUtils.notNull(leading, "Leading"));
         this.trailing = SimpleMap.immutable(AssertionUtils.notNull(trailing, "Trailing"));
     }
 
+    /**
+     * Gets comments.
+     *
+     * @return the comments
+     */
     public List<Swc4jComment> getComments() {
         List<Swc4jComment> comments = new ArrayList<>();
         leading.values().forEach(comments::addAll);
@@ -48,42 +68,100 @@ public class Swc4jComments {
         return comments;
     }
 
+    /**
+     * Gets leading.
+     *
+     * @return the leading
+     */
     public Map<Integer, List<Swc4jComment>> getLeading() {
         return leading;
     }
 
+    /**
+     * Gets leading.
+     *
+     * @param span the span
+     * @return the leading
+     */
     public List<Swc4jComment> getLeading(Swc4jSpan span) {
         return getLeading(span.getStart());
     }
 
+    /**
+     * Gets leading.
+     *
+     * @param start the start
+     * @return the leading
+     */
     public List<Swc4jComment> getLeading(int start) {
         return leading.get(start);
     }
 
+    /**
+     * Gets trailing.
+     *
+     * @return the trailing
+     */
     public Map<Integer, List<Swc4jComment>> getTrailing() {
         return trailing;
     }
 
+    /**
+     * Gets trailing.
+     *
+     * @param span the span
+     * @return the trailing
+     */
     public List<Swc4jComment> getTrailing(Swc4jSpan span) {
         return getTrailing(span.getEnd());
     }
 
+    /**
+     * Gets trailing.
+     *
+     * @param end the end
+     * @return the trailing
+     */
     public List<Swc4jComment> getTrailing(int end) {
         return trailing.get(end);
     }
 
+    /**
+     * Has leading boolean.
+     *
+     * @param span the span
+     * @return the boolean
+     */
     public boolean hasLeading(Swc4jSpan span) {
         return hasLeading(span.getStart());
     }
 
+    /**
+     * Has leading boolean.
+     *
+     * @param start the start
+     * @return the boolean
+     */
     public boolean hasLeading(int start) {
         return leading.containsKey(start);
     }
 
+    /**
+     * Has trailing boolean.
+     *
+     * @param span the span
+     * @return the boolean
+     */
     public boolean hasTrailing(Swc4jSpan span) {
         return hasTrailing(span.getEnd());
     }
 
+    /**
+     * Has trailing boolean.
+     *
+     * @param end the end
+     * @return the boolean
+     */
     public boolean hasTrailing(int end) {
         return trailing.containsKey(end);
     }

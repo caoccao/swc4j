@@ -31,13 +31,25 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast computed prop name.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstComputedPropName
         extends Swc4jAst
         implements ISwc4jAstPropName, ISwc4jAstMemberProp, ISwc4jAstSuperProp {
+    /**
+     * The Expr.
+     */
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr expr;
 
+    /**
+     * Instantiates a new swc4j ast computed prop name.
+     *
+     * @param expr the expr
+     * @param span the span
+     */
     @Jni2RustMethod
     public Swc4jAstComputedPropName(
             ISwc4jAstExpr expr,
@@ -46,6 +58,12 @@ public class Swc4jAstComputedPropName
         setExpr(expr);
     }
 
+    /**
+     * Create swc4j ast computed prop name.
+     *
+     * @param expr the expr
+     * @return the swc4j ast computed prop name
+     */
     public static Swc4jAstComputedPropName create(ISwc4jAstExpr expr) {
         return new Swc4jAstComputedPropName(expr, Swc4jSpan.DUMMY);
     }
@@ -55,6 +73,11 @@ public class Swc4jAstComputedPropName
         return SimpleList.of(expr);
     }
 
+    /**
+     * Gets expr.
+     *
+     * @return the expr
+     */
     @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
@@ -74,6 +97,12 @@ public class Swc4jAstComputedPropName
         return false;
     }
 
+    /**
+     * Sets expr.
+     *
+     * @param expr the expr
+     * @return the expr
+     */
     public Swc4jAstComputedPropName setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
         this.expr.setParent(this);

@@ -33,10 +33,16 @@ import com.caoccao.javet.swc4j.utils.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * The type swc4j ast array lit.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstArrayLit
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstCoercionPrimitive {
+    /**
+     * The constant ARRAY_FUNCTION_SET.
+     */
     public static final Set<String> ARRAY_FUNCTION_SET = Set.of(
             "at",
             "concat",
@@ -76,6 +82,9 @@ public class Swc4jAstArrayLit
             "unshift",
             "values",
             "with");
+    /**
+     * The constant ARRAY_FUNCTION_STRING_MAP.
+     */
     public static final Map<String, String> ARRAY_FUNCTION_STRING_MAP = SimpleMap.immutableOf(
             "concat", "",
             "copyWithin", "",
@@ -98,8 +107,17 @@ public class Swc4jAstArrayLit
             "toString", "",
             "unshift", "0",
             "values", "[object Array Iterator]");
+    /**
+     * The Elems.
+     */
     protected final List<Optional<Swc4jAstExprOrSpread>> elems;
 
+    /**
+     * Instantiates a new swc4j ast array lit.
+     *
+     * @param elems the elems
+     * @param span  the span
+     */
     @Jni2RustMethod
     public Swc4jAstArrayLit(
             List<Swc4jAstExprOrSpread> elems,
@@ -111,10 +129,21 @@ public class Swc4jAstArrayLit
         this.elems.stream().filter(Optional::isPresent).map(Optional::get).forEach(node -> node.setParent(this));
     }
 
+    /**
+     * Create swc4j ast array lit.
+     *
+     * @return the swc4j ast array lit
+     */
     public static Swc4jAstArrayLit create() {
         return create(SimpleList.of());
     }
 
+    /**
+     * Create swc4j ast array lit.
+     *
+     * @param elems the elems
+     * @return the swc4j ast array lit
+     */
     public static Swc4jAstArrayLit create(List<Swc4jAstExprOrSpread> elems) {
         return new Swc4jAstArrayLit(elems, Swc4jSpan.DUMMY);
     }
@@ -168,6 +197,11 @@ public class Swc4jAstArrayLit
         return toString();
     }
 
+    /**
+     * Concat.
+     *
+     * @param arrayLits the array lits
+     */
     public void concat(Swc4jAstArrayLit... arrayLits) {
         if (ArrayUtils.isNotEmpty(AssertionUtils.notNull(arrayLits, "Array lits"))) {
             for (Swc4jAstArrayLit arrayLit : arrayLits) {
@@ -189,6 +223,11 @@ public class Swc4jAstArrayLit
         return childNodes;
     }
 
+    /**
+     * Gets elems.
+     *
+     * @return the elems
+     */
     @Jni2RustMethod
     public List<Optional<Swc4jAstExprOrSpread>> getElems() {
         return elems;
@@ -199,6 +238,12 @@ public class Swc4jAstArrayLit
         return Swc4jAstType.ArrayLit;
     }
 
+    /**
+     * Index of int.
+     *
+     * @param node the node
+     * @return the int
+     */
     public int indexOf(Swc4jAstExprOrSpread node) {
         if (!elems.isEmpty()) {
             final int length = elems.size();
@@ -211,6 +256,11 @@ public class Swc4jAstArrayLit
         return -1;
     }
 
+    /**
+     * Is all primitive boolean.
+     *
+     * @return the boolean
+     */
     public boolean isAllPrimitive() {
         return elems.stream()
                 .filter(Optional::isPresent)
@@ -228,10 +278,21 @@ public class Swc4jAstArrayLit
                 });
     }
 
+    /**
+     * Is spread present boolean.
+     *
+     * @return the boolean
+     */
     public boolean isSpreadPresent() {
         return elems.stream().anyMatch(elem -> elem.map(e -> e.getSpread().isPresent()).orElse(false));
     }
 
+    /**
+     * Join string.
+     *
+     * @param separator the separator
+     * @return the string
+     */
     public String join(String separator) {
         if (separator == null) {
             separator = ",";

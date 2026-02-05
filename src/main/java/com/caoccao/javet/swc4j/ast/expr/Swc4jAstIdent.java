@@ -28,18 +28,38 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast ident.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstIdent
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstProp, ISwc4jAstTsModuleRef, ISwc4jAstModuleExportName, ISwc4jAstTsEntityName,
         ISwc4jAstTsModuleName, ISwc4jAstJsxObject, ISwc4jAstJsxElementName, ISwc4jAstTsThisTypeOrIdent,
         ISwc4jAstTsEnumMemberId {
+    /**
+     * The Ctxt.
+     */
     @Jni2RustField(syntaxContext = true)
     protected int ctxt;
+    /**
+     * The Optional.
+     */
     protected boolean optional;
+    /**
+     * The Sym.
+     */
     @Jni2RustField(atom = true)
     protected String sym;
 
+    /**
+     * Instantiates a new swc4j ast ident.
+     *
+     * @param ctxt     the ctxt
+     * @param sym      the sym
+     * @param optional the optional
+     * @param span     the span
+     */
     @Jni2RustMethod
     public Swc4jAstIdent(
             @Jni2RustParam(syntaxContext = true) int ctxt,
@@ -52,38 +72,89 @@ public class Swc4jAstIdent
         setSym(sym);
     }
 
+    /**
+     * Create swc4j ast ident.
+     *
+     * @param sym the sym
+     * @return the swc4j ast ident
+     */
     public static Swc4jAstIdent create(String sym) {
         return create(sym, false);
     }
 
+    /**
+     * Create swc4j ast ident.
+     *
+     * @param sym      the sym
+     * @param optional the optional
+     * @return the swc4j ast ident
+     */
     public static Swc4jAstIdent create(String sym, boolean optional) {
         return create(0, sym, optional);
     }
 
+    /**
+     * Create swc4j ast ident.
+     *
+     * @param ctxt     the ctxt
+     * @param sym      the sym
+     * @param optional the optional
+     * @return the swc4j ast ident
+     */
     public static Swc4jAstIdent create(int ctxt, String sym, boolean optional) {
         return new Swc4jAstIdent(ctxt, sym, optional, Swc4jSpan.DUMMY);
     }
 
+    /**
+     * Create apply swc4j ast ident.
+     *
+     * @return the swc4j ast ident
+     */
     public static Swc4jAstIdent createApply() {
         return create(ISwc4jConstants.APPLY);
     }
 
+    /**
+     * Create array swc4j ast ident.
+     *
+     * @return the swc4j ast ident
+     */
     public static Swc4jAstIdent createArray() {
         return create(ISwc4jConstants.ARRAY);
     }
 
+    /**
+     * Create concat swc4j ast ident.
+     *
+     * @return the swc4j ast ident
+     */
     public static Swc4jAstIdent createConcat() {
         return create(ISwc4jConstants.CONCAT);
     }
 
+    /**
+     * Create dummy swc4j ast ident.
+     *
+     * @return the swc4j ast ident
+     */
     public static Swc4jAstIdent createDummy() {
         return create(ISwc4jConstants.DUMMY);
     }
 
+    /**
+     * Create function swc4j ast ident.
+     *
+     * @return the swc4j ast ident
+     */
     public static Swc4jAstIdent createFunction() {
         return create(ISwc4jConstants.FUNCTION);
     }
 
+    /**
+     * Create undefined swc4j ast ident.
+     *
+     * @return the swc4j ast ident
+     */
     public static Swc4jAstIdent createUndefined() {
         return create(ISwc4jConstants.UNDEFINED);
     }
@@ -93,11 +164,21 @@ public class Swc4jAstIdent
         return EMPTY_CHILD_NODES;
     }
 
+    /**
+     * Gets ctxt.
+     *
+     * @return the ctxt
+     */
     @Jni2RustMethod
     public int getCtxt() {
         return ctxt;
     }
 
+    /**
+     * Gets sym.
+     *
+     * @return the sym
+     */
     @Jni2RustMethod
     public String getSym() {
         return sym;
@@ -118,6 +199,11 @@ public class Swc4jAstIdent
         return !optional && ISwc4jConstants.NAN.equals(sym);
     }
 
+    /**
+     * Is optional boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isOptional() {
         return optional;
@@ -133,16 +219,34 @@ public class Swc4jAstIdent
         return false;
     }
 
+    /**
+     * Sets ctxt.
+     *
+     * @param ctxt the ctxt
+     * @return the ctxt
+     */
     public Swc4jAstIdent setCtxt(int ctxt) {
         this.ctxt = ctxt;
         return this;
     }
 
+    /**
+     * Sets optional.
+     *
+     * @param optional the optional
+     * @return the optional
+     */
     public Swc4jAstIdent setOptional(boolean optional) {
         this.optional = optional;
         return this;
     }
 
+    /**
+     * Sets sym.
+     *
+     * @param sym the sym
+     * @return the sym
+     */
     public Swc4jAstIdent setSym(String sym) {
         this.sym = AssertionUtils.notNull(sym, "Sym");
         return this;

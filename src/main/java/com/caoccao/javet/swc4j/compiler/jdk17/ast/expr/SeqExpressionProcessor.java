@@ -30,6 +30,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * Evaluates all expressions in sequence, leaving only the last value on the stack.
  */
 public final class SeqExpressionProcessor extends BaseAstProcessor<Swc4jAstSeqExpr> {
+    /**
+     * Instantiates a new Seq expression processor.
+     *
+     * @param compiler the compiler
+     */
     public SeqExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

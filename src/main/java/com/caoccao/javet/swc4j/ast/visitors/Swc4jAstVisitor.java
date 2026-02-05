@@ -27,7 +27,16 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.ast.ts.*;
 
+/**
+ * The type swc4j ast visitor.
+ */
 public abstract class Swc4jAstVisitor implements ISwc4jAstVisitor {
+    /**
+     * Constructs a new Swc4jAstVisitor.
+     */
+    public Swc4jAstVisitor() {
+    }
+
     @Override
     public Swc4jAstVisitorResponse visitArrayLit(Swc4jAstArrayLit node) {
         return Swc4jAstVisitorResponse.OkAndContinue;

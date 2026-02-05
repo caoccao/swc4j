@@ -34,15 +34,35 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+/**
+ * The type swc4j ast class decl.
+ */
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
 public class Swc4jAstClassDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
+    /**
+     * The Clazz.
+     */
     @Jni2RustField(name = "class", box = true)
     protected Swc4jAstClass clazz;
+    /**
+     * The Declare.
+     */
     protected boolean declare;
+    /**
+     * The Ident.
+     */
     protected Swc4jAstIdent ident;
 
+    /**
+     * Instantiates a new swc4j ast class decl.
+     *
+     * @param ident   the ident
+     * @param declare the declare
+     * @param clazz   the clazz
+     * @param span    the span
+     */
     @Jni2RustMethod
     public Swc4jAstClassDecl(
             Swc4jAstIdent ident,
@@ -55,10 +75,25 @@ public class Swc4jAstClassDecl
         setIdent(ident);
     }
 
+    /**
+     * Create swc4j ast class decl.
+     *
+     * @param ident the ident
+     * @param clazz the clazz
+     * @return the swc4j ast class decl
+     */
     public static Swc4jAstClassDecl create(Swc4jAstIdent ident, Swc4jAstClass clazz) {
         return create(ident, false, clazz);
     }
 
+    /**
+     * Create swc4j ast class decl.
+     *
+     * @param ident   the ident
+     * @param declare the declare
+     * @param clazz   the clazz
+     * @return the swc4j ast class decl
+     */
     public static Swc4jAstClassDecl create(Swc4jAstIdent ident, boolean declare, Swc4jAstClass clazz) {
         return new Swc4jAstClassDecl(ident, declare, clazz, Swc4jSpan.DUMMY);
     }
@@ -68,11 +103,21 @@ public class Swc4jAstClassDecl
         return SimpleList.of(clazz, ident);
     }
 
+    /**
+     * Gets clazz.
+     *
+     * @return the clazz
+     */
     @Jni2RustMethod
     public Swc4jAstClass getClazz() {
         return clazz;
     }
 
+    /**
+     * Gets ident.
+     *
+     * @return the ident
+     */
     @Jni2RustMethod
     public Swc4jAstIdent getIdent() {
         return ident;
@@ -83,6 +128,11 @@ public class Swc4jAstClassDecl
         return Swc4jAstType.ClassDecl;
     }
 
+    /**
+     * Is declare boolean.
+     *
+     * @return the boolean
+     */
     @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
@@ -101,17 +151,35 @@ public class Swc4jAstClassDecl
         return false;
     }
 
+    /**
+     * Sets clazz.
+     *
+     * @param clazz the clazz
+     * @return the clazz
+     */
     public Swc4jAstClassDecl setClazz(Swc4jAstClass clazz) {
         this.clazz = AssertionUtils.notNull(clazz, "Class");
         this.clazz.setParent(this);
         return this;
     }
 
+    /**
+     * Sets declare.
+     *
+     * @param declare the declare
+     * @return the declare
+     */
     public Swc4jAstClassDecl setDeclare(boolean declare) {
         this.declare = declare;
         return this;
     }
 
+    /**
+     * Sets ident.
+     *
+     * @param ident the ident
+     * @return the ident
+     */
     public Swc4jAstClassDecl setIdent(Swc4jAstIdent ident) {
         this.ident = AssertionUtils.notNull(ident, "Ident");
         this.ident.setParent(this);
