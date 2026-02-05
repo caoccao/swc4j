@@ -154,6 +154,13 @@ public final class ArrayListApiUtils {
         return list;
     }
 
+    /**
+     * Return an ArrayList of index-value pairs from the ArrayList.
+     * JavaScript equivalent: arr.entries()
+     *
+     * @param list the ArrayList to get entries from
+     * @return a new ArrayList containing [index, value] pairs
+     */
     public static ArrayList<Object> entries(ArrayList<?> list) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null) {
@@ -171,6 +178,10 @@ public final class ArrayListApiUtils {
     /**
      * Determine if every element matches a predicate.
      * JavaScript equivalent: arr.every(callback)
+     *
+     * @param list     the ArrayList to test
+     * @param callback the predicate to test each element
+     * @return true if all elements match the predicate, false otherwise
      */
     public static boolean every(ArrayList<?> list, Predicate<Object> callback) {
         if (callback == null) {
@@ -187,6 +198,14 @@ public final class ArrayListApiUtils {
         return true;
     }
 
+    /**
+     * Determine if every element (converted to int) matches a predicate.
+     * JavaScript equivalent: arr.every(callback)
+     *
+     * @param list     the ArrayList to test
+     * @param callback the int predicate to test each element
+     * @return true if all elements match the predicate, false otherwise
+     */
     public static boolean every(ArrayList<?> list, IntPredicate callback) {
         if (callback == null) {
             return false;
@@ -202,6 +221,14 @@ public final class ArrayListApiUtils {
         return true;
     }
 
+    /**
+     * Determine if every element (converted to long) matches a predicate.
+     * JavaScript equivalent: arr.every(callback)
+     *
+     * @param list     the ArrayList to test
+     * @param callback the long predicate to test each element
+     * @return true if all elements match the predicate, false otherwise
+     */
     public static boolean every(ArrayList<?> list, LongPredicate callback) {
         if (callback == null) {
             return false;
@@ -217,6 +244,14 @@ public final class ArrayListApiUtils {
         return true;
     }
 
+    /**
+     * Determine if every element (converted to double) matches a predicate.
+     * JavaScript equivalent: arr.every(callback)
+     *
+     * @param list     the ArrayList to test
+     * @param callback the double predicate to test each element
+     * @return true if all elements match the predicate, false otherwise
+     */
     public static boolean every(ArrayList<?> list, DoublePredicate callback) {
         if (callback == null) {
             return false;
@@ -290,6 +325,10 @@ public final class ArrayListApiUtils {
     /**
      * Filter elements based on a predicate.
      * JavaScript equivalent: arr.filter(callback)
+     *
+     * @param list     the ArrayList to filter
+     * @param callback the predicate to test each element
+     * @return a new ArrayList containing only elements that match the predicate
      */
     public static ArrayList<Object> filter(ArrayList<?> list, Predicate<Object> callback) {
         ArrayList<Object> result = new ArrayList<>();
@@ -304,6 +343,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Filter elements (converted to int) based on a predicate.
+     * JavaScript equivalent: arr.filter(callback)
+     *
+     * @param list     the ArrayList to filter
+     * @param callback the int predicate to test each element
+     * @return a new ArrayList containing only elements that match the predicate
+     */
     public static ArrayList<Object> filter(ArrayList<?> list, IntPredicate callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -317,6 +364,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Filter elements (converted to long) based on a predicate.
+     * JavaScript equivalent: arr.filter(callback)
+     *
+     * @param list     the ArrayList to filter
+     * @param callback the long predicate to test each element
+     * @return a new ArrayList containing only elements that match the predicate
+     */
     public static ArrayList<Object> filter(ArrayList<?> list, LongPredicate callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -330,6 +385,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Filter elements (converted to double) based on a predicate.
+     * JavaScript equivalent: arr.filter(callback)
+     *
+     * @param list     the ArrayList to filter
+     * @param callback the double predicate to test each element
+     * @return a new ArrayList containing only elements that match the predicate
+     */
     public static ArrayList<Object> filter(ArrayList<?> list, DoublePredicate callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -346,6 +409,10 @@ public final class ArrayListApiUtils {
     /**
      * Find the first element matching a predicate.
      * JavaScript equivalent: arr.find(callback)
+     *
+     * @param list     the ArrayList to search
+     * @param callback the predicate to test each element
+     * @return the first element that matches the predicate, or null if none found
      */
     public static Object find(ArrayList<?> list, Predicate<Object> callback) {
         if (list == null || callback == null) {
@@ -359,6 +426,14 @@ public final class ArrayListApiUtils {
         return null;
     }
 
+    /**
+     * Find the first element (converted to int) matching a predicate.
+     * JavaScript equivalent: arr.find(callback)
+     *
+     * @param list     the ArrayList to search
+     * @param callback the int predicate to test each element
+     * @return the first element that matches the predicate, or null if none found
+     */
     public static Object find(ArrayList<?> list, IntPredicate callback) {
         if (list == null || callback == null) {
             return null;
@@ -371,6 +446,14 @@ public final class ArrayListApiUtils {
         return null;
     }
 
+    /**
+     * Find the first element (converted to long) matching a predicate.
+     * JavaScript equivalent: arr.find(callback)
+     *
+     * @param list     the ArrayList to search
+     * @param callback the long predicate to test each element
+     * @return the first element that matches the predicate, or null if none found
+     */
     public static Object find(ArrayList<?> list, LongPredicate callback) {
         if (list == null || callback == null) {
             return null;
@@ -383,6 +466,14 @@ public final class ArrayListApiUtils {
         return null;
     }
 
+    /**
+     * Find the first element (converted to double) matching a predicate.
+     * JavaScript equivalent: arr.find(callback)
+     *
+     * @param list     the ArrayList to search
+     * @param callback the double predicate to test each element
+     * @return the first element that matches the predicate, or null if none found
+     */
     public static Object find(ArrayList<?> list, DoublePredicate callback) {
         if (list == null || callback == null) {
             return null;
@@ -398,6 +489,10 @@ public final class ArrayListApiUtils {
     /**
      * Find the index of the first element matching a predicate.
      * JavaScript equivalent: arr.findIndex(callback)
+     *
+     * @param list     the ArrayList to search
+     * @param callback the predicate to test each element
+     * @return the index of the first matching element, or -1 if none found
      */
     public static int findIndex(ArrayList<?> list, Predicate<Object> callback) {
         if (list == null || callback == null) {
@@ -411,6 +506,14 @@ public final class ArrayListApiUtils {
         return -1;
     }
 
+    /**
+     * Find the index of the first element (converted to int) matching a predicate.
+     * JavaScript equivalent: arr.findIndex(callback)
+     *
+     * @param list     the ArrayList to search
+     * @param callback the int predicate to test each element
+     * @return the index of the first matching element, or -1 if none found
+     */
     public static int findIndex(ArrayList<?> list, IntPredicate callback) {
         if (list == null || callback == null) {
             return -1;
@@ -423,6 +526,14 @@ public final class ArrayListApiUtils {
         return -1;
     }
 
+    /**
+     * Find the index of the first element (converted to long) matching a predicate.
+     * JavaScript equivalent: arr.findIndex(callback)
+     *
+     * @param list     the ArrayList to search
+     * @param callback the long predicate to test each element
+     * @return the index of the first matching element, or -1 if none found
+     */
     public static int findIndex(ArrayList<?> list, LongPredicate callback) {
         if (list == null || callback == null) {
             return -1;
@@ -435,6 +546,14 @@ public final class ArrayListApiUtils {
         return -1;
     }
 
+    /**
+     * Find the index of the first element (converted to double) matching a predicate.
+     * JavaScript equivalent: arr.findIndex(callback)
+     *
+     * @param list     the ArrayList to search
+     * @param callback the double predicate to test each element
+     * @return the index of the first matching element, or -1 if none found
+     */
     public static int findIndex(ArrayList<?> list, DoublePredicate callback) {
         if (list == null || callback == null) {
             return -1;
@@ -450,6 +569,10 @@ public final class ArrayListApiUtils {
     /**
      * Flatten nested arrays by a given depth.
      * JavaScript equivalent: arr.flat(depth)
+     *
+     * @param list  the ArrayList to flatten
+     * @param depth the depth level specifying how deep a nested array structure should be flattened
+     * @return a new ArrayList with all nested arrays flattened to the specified depth
      */
     public static ArrayList<Object> flat(ArrayList<?> list, int depth) {
         ArrayList<Object> result = new ArrayList<>();
@@ -463,6 +586,9 @@ public final class ArrayListApiUtils {
     /**
      * Flatten nested arrays by one level.
      * JavaScript equivalent: arr.flat()
+     *
+     * @param list the ArrayList to flatten
+     * @return a new ArrayList with all nested arrays flattened by one level
      */
     public static ArrayList<Object> flat(ArrayList<?> list) {
         return flat(list, 1);
@@ -471,6 +597,10 @@ public final class ArrayListApiUtils {
     /**
      * Map and flatten one level.
      * JavaScript equivalent: arr.flatMap(callback)
+     *
+     * @param list     the ArrayList to map and flatten
+     * @param callback the function to apply to each element
+     * @return a new ArrayList with mapped elements flattened by one level
      */
     public static ArrayList<Object> flatMap(ArrayList<?> list, Function<Object, Object> callback) {
         ArrayList<Object> result = new ArrayList<>();
@@ -488,6 +618,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Map elements (converted to int) and flatten one level.
+     * JavaScript equivalent: arr.flatMap(callback)
+     *
+     * @param list     the ArrayList to map and flatten
+     * @param callback the int function to apply to each element
+     * @return a new ArrayList with mapped elements flattened by one level
+     */
     public static ArrayList<Object> flatMap(ArrayList<?> list, IntFunction<?> callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -504,6 +642,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Map elements (converted to int) using a unary operator.
+     * JavaScript equivalent: arr.flatMap(callback)
+     *
+     * @param list     the ArrayList to map
+     * @param callback the int unary operator to apply to each element
+     * @return a new ArrayList with mapped int values
+     */
     public static ArrayList<Object> flatMap(ArrayList<?> list, IntUnaryOperator callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -515,6 +661,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Map elements (converted to long) and flatten one level.
+     * JavaScript equivalent: arr.flatMap(callback)
+     *
+     * @param list     the ArrayList to map and flatten
+     * @param callback the long function to apply to each element
+     * @return a new ArrayList with mapped elements flattened by one level
+     */
     public static ArrayList<Object> flatMap(ArrayList<?> list, LongFunction<?> callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -531,6 +685,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Map elements (converted to long) using a unary operator.
+     * JavaScript equivalent: arr.flatMap(callback)
+     *
+     * @param list     the ArrayList to map
+     * @param callback the long unary operator to apply to each element
+     * @return a new ArrayList with mapped long values
+     */
     public static ArrayList<Object> flatMap(ArrayList<?> list, LongUnaryOperator callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -542,6 +704,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Map elements (converted to double) and flatten one level.
+     * JavaScript equivalent: arr.flatMap(callback)
+     *
+     * @param list     the ArrayList to map and flatten
+     * @param callback the double function to apply to each element
+     * @return a new ArrayList with mapped elements flattened by one level
+     */
     public static ArrayList<Object> flatMap(ArrayList<?> list, DoubleFunction<?> callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -558,6 +728,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Map elements (converted to double) using a unary operator.
+     * JavaScript equivalent: arr.flatMap(callback)
+     *
+     * @param list     the ArrayList to map
+     * @param callback the double unary operator to apply to each element
+     * @return a new ArrayList with mapped double values
+     */
     public static ArrayList<Object> flatMap(ArrayList<?> list, DoubleUnaryOperator callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -598,6 +776,13 @@ public final class ArrayListApiUtils {
         }
     }
 
+    /**
+     * Execute a callback for each element (converted to int).
+     * JavaScript equivalent: arr.forEach(callback)
+     *
+     * @param list     the ArrayList to iterate
+     * @param callback the int consumer to invoke
+     */
     public static void forEach(ArrayList<?> list, IntConsumer callback) {
         if (list == null || callback == null) {
             return;
@@ -607,6 +792,13 @@ public final class ArrayListApiUtils {
         }
     }
 
+    /**
+     * Execute a callback for each element (converted to long).
+     * JavaScript equivalent: arr.forEach(callback)
+     *
+     * @param list     the ArrayList to iterate
+     * @param callback the long consumer to invoke
+     */
     public static void forEach(ArrayList<?> list, LongConsumer callback) {
         if (list == null || callback == null) {
             return;
@@ -616,6 +808,13 @@ public final class ArrayListApiUtils {
         }
     }
 
+    /**
+     * Execute a callback for each element (converted to double).
+     * JavaScript equivalent: arr.forEach(callback)
+     *
+     * @param list     the ArrayList to iterate
+     * @param callback the double consumer to invoke
+     */
     public static void forEach(ArrayList<?> list, DoubleConsumer callback) {
         if (list == null || callback == null) {
             return;
@@ -653,6 +852,13 @@ public final class ArrayListApiUtils {
         return sb.toString();
     }
 
+    /**
+     * Return an ArrayList of indices from the ArrayList.
+     * JavaScript equivalent: arr.keys()
+     *
+     * @param list the ArrayList to get keys from
+     * @return a new ArrayList containing all indices
+     */
     public static ArrayList<Object> keys(ArrayList<?> list) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null) {
@@ -667,6 +873,10 @@ public final class ArrayListApiUtils {
     /**
      * Map elements to a new array.
      * JavaScript equivalent: arr.map(callback)
+     *
+     * @param list     the ArrayList to map
+     * @param callback the function to apply to each element
+     * @return a new ArrayList with transformed elements
      */
     public static ArrayList<Object> map(ArrayList<?> list, Function<Object, Object> callback) {
         ArrayList<Object> result = new ArrayList<>();
@@ -679,6 +889,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Map elements (converted to int) to a new array.
+     * JavaScript equivalent: arr.map(callback)
+     *
+     * @param list     the ArrayList to map
+     * @param callback the int function to apply to each element
+     * @return a new ArrayList with transformed elements
+     */
     public static ArrayList<Object> map(ArrayList<?> list, IntFunction<?> callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -690,6 +908,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Map elements (converted to int) using a unary operator.
+     * JavaScript equivalent: arr.map(callback)
+     *
+     * @param list     the ArrayList to map
+     * @param callback the int unary operator to apply to each element
+     * @return a new ArrayList with transformed int values
+     */
     public static ArrayList<Object> map(ArrayList<?> list, IntUnaryOperator callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -701,6 +927,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Map elements (converted to long) to a new array.
+     * JavaScript equivalent: arr.map(callback)
+     *
+     * @param list     the ArrayList to map
+     * @param callback the long function to apply to each element
+     * @return a new ArrayList with transformed elements
+     */
     public static ArrayList<Object> map(ArrayList<?> list, LongFunction<?> callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -712,6 +946,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Map elements (converted to long) using a unary operator.
+     * JavaScript equivalent: arr.map(callback)
+     *
+     * @param list     the ArrayList to map
+     * @param callback the long unary operator to apply to each element
+     * @return a new ArrayList with transformed long values
+     */
     public static ArrayList<Object> map(ArrayList<?> list, LongUnaryOperator callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -723,6 +965,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Map elements (converted to double) to a new array.
+     * JavaScript equivalent: arr.map(callback)
+     *
+     * @param list     the ArrayList to map
+     * @param callback the double function to apply to each element
+     * @return a new ArrayList with transformed elements
+     */
     public static ArrayList<Object> map(ArrayList<?> list, DoubleFunction<?> callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -734,6 +984,14 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Map elements (converted to double) using a unary operator.
+     * JavaScript equivalent: arr.map(callback)
+     *
+     * @param list     the ArrayList to map
+     * @param callback the double unary operator to apply to each element
+     * @return a new ArrayList with transformed double values
+     */
     public static ArrayList<Object> map(ArrayList<?> list, DoubleUnaryOperator callback) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null || callback == null) {
@@ -748,6 +1006,11 @@ public final class ArrayListApiUtils {
     /**
      * Reduce elements with an accumulator.
      * JavaScript equivalent: arr.reduce(callback)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the function to combine elements
+     * @return the reduced value
+     * @throws IllegalArgumentException if the list is empty
      */
     public static Object reduce(ArrayList<?> list, BiFunction<Object, Object, Object> callback) {
         if (list == null || list.isEmpty()) {
@@ -763,6 +1026,15 @@ public final class ArrayListApiUtils {
         return accumulator;
     }
 
+    /**
+     * Reduce elements (converted to int) with an accumulator.
+     * JavaScript equivalent: arr.reduce(callback)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the int binary operator to combine elements
+     * @return the reduced int value
+     * @throws IllegalArgumentException if the list is empty
+     */
     public static Object reduce(ArrayList<?> list, IntBinaryOperator callback) {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("reduce() requires a non-empty array when no initial value is provided");
@@ -777,6 +1049,15 @@ public final class ArrayListApiUtils {
         return accumulator;
     }
 
+    /**
+     * Reduce elements (converted to long) with an accumulator.
+     * JavaScript equivalent: arr.reduce(callback)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the long binary operator to combine elements
+     * @return the reduced long value
+     * @throws IllegalArgumentException if the list is empty
+     */
     public static Object reduce(ArrayList<?> list, LongBinaryOperator callback) {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("reduce() requires a non-empty array when no initial value is provided");
@@ -791,6 +1072,15 @@ public final class ArrayListApiUtils {
         return accumulator;
     }
 
+    /**
+     * Reduce elements (converted to double) with an accumulator.
+     * JavaScript equivalent: arr.reduce(callback)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the double binary operator to combine elements
+     * @return the reduced double value
+     * @throws IllegalArgumentException if the list is empty
+     */
     public static Object reduce(ArrayList<?> list, DoubleBinaryOperator callback) {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("reduce() requires a non-empty array when no initial value is provided");
@@ -808,6 +1098,11 @@ public final class ArrayListApiUtils {
     /**
      * Reduce elements with an accumulator and initial value.
      * JavaScript equivalent: arr.reduce(callback, initialValue)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the function to combine elements
+     * @param initial  the initial accumulator value
+     * @return the reduced value
      */
     public static Object reduce(ArrayList<?> list, BiFunction<Object, Object, Object> callback, Object initial) {
         if (callback == null) {
@@ -822,6 +1117,15 @@ public final class ArrayListApiUtils {
         return accumulator;
     }
 
+    /**
+     * Reduce elements (converted to int) with an accumulator and initial value.
+     * JavaScript equivalent: arr.reduce(callback, initialValue)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the int binary operator to combine elements
+     * @param initial  the initial int accumulator value
+     * @return the reduced int value
+     */
     public static Object reduce(ArrayList<?> list, IntBinaryOperator callback, int initial) {
         if (callback == null) {
             return null;
@@ -835,6 +1139,15 @@ public final class ArrayListApiUtils {
         return accumulator;
     }
 
+    /**
+     * Reduce elements (converted to long) with an accumulator and initial value.
+     * JavaScript equivalent: arr.reduce(callback, initialValue)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the long binary operator to combine elements
+     * @param initial  the initial long accumulator value
+     * @return the reduced long value
+     */
     public static Object reduce(ArrayList<?> list, LongBinaryOperator callback, long initial) {
         if (callback == null) {
             return null;
@@ -848,6 +1161,15 @@ public final class ArrayListApiUtils {
         return accumulator;
     }
 
+    /**
+     * Reduce elements (converted to double) with an accumulator and initial value.
+     * JavaScript equivalent: arr.reduce(callback, initialValue)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the double binary operator to combine elements
+     * @param initial  the initial double accumulator value
+     * @return the reduced double value
+     */
     public static Object reduce(ArrayList<?> list, DoubleBinaryOperator callback, double initial) {
         if (callback == null) {
             return null;
@@ -864,6 +1186,11 @@ public final class ArrayListApiUtils {
     /**
      * Reduce elements from right to left.
      * JavaScript equivalent: arr.reduceRight(callback)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the function to combine elements
+     * @return the reduced value
+     * @throws IllegalArgumentException if the list is empty
      */
     public static Object reduceRight(ArrayList<?> list, BiFunction<Object, Object, Object> callback) {
         if (list == null || list.isEmpty()) {
@@ -880,6 +1207,15 @@ public final class ArrayListApiUtils {
         return accumulator;
     }
 
+    /**
+     * Reduce elements (converted to int) from right to left.
+     * JavaScript equivalent: arr.reduceRight(callback)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the int binary operator to combine elements
+     * @return the reduced int value
+     * @throws IllegalArgumentException if the list is empty
+     */
     public static Object reduceRight(ArrayList<?> list, IntBinaryOperator callback) {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("reduceRight() requires a non-empty array when no initial value is provided");
@@ -895,6 +1231,15 @@ public final class ArrayListApiUtils {
         return accumulator;
     }
 
+    /**
+     * Reduce elements (converted to long) from right to left.
+     * JavaScript equivalent: arr.reduceRight(callback)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the long binary operator to combine elements
+     * @return the reduced long value
+     * @throws IllegalArgumentException if the list is empty
+     */
     public static Object reduceRight(ArrayList<?> list, LongBinaryOperator callback) {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("reduceRight() requires a non-empty array when no initial value is provided");
@@ -910,6 +1255,15 @@ public final class ArrayListApiUtils {
         return accumulator;
     }
 
+    /**
+     * Reduce elements (converted to double) from right to left.
+     * JavaScript equivalent: arr.reduceRight(callback)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the double binary operator to combine elements
+     * @return the reduced double value
+     * @throws IllegalArgumentException if the list is empty
+     */
     public static Object reduceRight(ArrayList<?> list, DoubleBinaryOperator callback) {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("reduceRight() requires a non-empty array when no initial value is provided");
@@ -928,6 +1282,11 @@ public final class ArrayListApiUtils {
     /**
      * Reduce elements from right to left with an initial value.
      * JavaScript equivalent: arr.reduceRight(callback, initialValue)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the function to combine elements
+     * @param initial  the initial accumulator value
+     * @return the reduced value
      */
     public static Object reduceRight(ArrayList<?> list, BiFunction<Object, Object, Object> callback, Object initial) {
         if (callback == null) {
@@ -942,6 +1301,15 @@ public final class ArrayListApiUtils {
         return accumulator;
     }
 
+    /**
+     * Reduce elements (converted to int) from right to left with an initial value.
+     * JavaScript equivalent: arr.reduceRight(callback, initialValue)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the int binary operator to combine elements
+     * @param initial  the initial int accumulator value
+     * @return the reduced int value
+     */
     public static Object reduceRight(ArrayList<?> list, IntBinaryOperator callback, int initial) {
         if (callback == null) {
             return null;
@@ -955,6 +1323,15 @@ public final class ArrayListApiUtils {
         return accumulator;
     }
 
+    /**
+     * Reduce elements (converted to long) from right to left with an initial value.
+     * JavaScript equivalent: arr.reduceRight(callback, initialValue)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the long binary operator to combine elements
+     * @param initial  the initial long accumulator value
+     * @return the reduced long value
+     */
     public static Object reduceRight(ArrayList<?> list, LongBinaryOperator callback, long initial) {
         if (callback == null) {
             return null;
@@ -968,6 +1345,15 @@ public final class ArrayListApiUtils {
         return accumulator;
     }
 
+    /**
+     * Reduce elements (converted to double) from right to left with an initial value.
+     * JavaScript equivalent: arr.reduceRight(callback, initialValue)
+     *
+     * @param list     the ArrayList to reduce
+     * @param callback the double binary operator to combine elements
+     * @param initial  the initial double accumulator value
+     * @return the reduced double value
+     */
     public static Object reduceRight(ArrayList<?> list, DoubleBinaryOperator callback, double initial) {
         if (callback == null) {
             return null;
@@ -1014,6 +1400,10 @@ public final class ArrayListApiUtils {
     /**
      * Determine if any element matches a predicate.
      * JavaScript equivalent: arr.some(callback)
+     *
+     * @param list     the ArrayList to test
+     * @param callback the predicate to test each element
+     * @return true if any element matches the predicate, false otherwise
      */
     public static boolean some(ArrayList<?> list, Predicate<Object> callback) {
         if (list == null || callback == null) {
@@ -1027,6 +1417,14 @@ public final class ArrayListApiUtils {
         return false;
     }
 
+    /**
+     * Determine if any element (converted to int) matches a predicate.
+     * JavaScript equivalent: arr.some(callback)
+     *
+     * @param list     the ArrayList to test
+     * @param callback the int predicate to test each element
+     * @return true if any element matches the predicate, false otherwise
+     */
     public static boolean some(ArrayList<?> list, IntPredicate callback) {
         if (list == null || callback == null) {
             return false;
@@ -1039,6 +1437,14 @@ public final class ArrayListApiUtils {
         return false;
     }
 
+    /**
+     * Determine if any element (converted to long) matches a predicate.
+     * JavaScript equivalent: arr.some(callback)
+     *
+     * @param list     the ArrayList to test
+     * @param callback the long predicate to test each element
+     * @return true if any element matches the predicate, false otherwise
+     */
     public static boolean some(ArrayList<?> list, LongPredicate callback) {
         if (list == null || callback == null) {
             return false;
@@ -1051,6 +1457,14 @@ public final class ArrayListApiUtils {
         return false;
     }
 
+    /**
+     * Determine if any element (converted to double) matches a predicate.
+     * JavaScript equivalent: arr.some(callback)
+     *
+     * @param list     the ArrayList to test
+     * @param callback the double predicate to test each element
+     * @return true if any element matches the predicate, false otherwise
+     */
     public static boolean some(ArrayList<?> list, DoublePredicate callback) {
         if (list == null || callback == null) {
             return false;
@@ -1221,6 +1635,13 @@ public final class ArrayListApiUtils {
         return result;
     }
 
+    /**
+     * Return a shallow copy of all values from the ArrayList.
+     * JavaScript equivalent: arr.values()
+     *
+     * @param list the ArrayList to get values from
+     * @return a new ArrayList containing all values
+     */
     public static ArrayList<Object> values(ArrayList<?> list) {
         ArrayList<Object> result = new ArrayList<>();
         if (list == null) {

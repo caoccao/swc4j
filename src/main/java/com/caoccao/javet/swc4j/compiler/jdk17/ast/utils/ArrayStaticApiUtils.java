@@ -21,11 +21,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Utility class for Array static methods matching JavaScript Array API semantics.
+ * <p>
+ * Provides static helper methods that correspond to JavaScript's Array constructor methods.
+ */
 public final class ArrayStaticApiUtils {
     private ArrayStaticApiUtils() {
         // Prevent instantiation
     }
 
+    /**
+     * JavaScript-compatible Array.from() that creates an ArrayList from an array-like or iterable object.
+     * <p>
+     * Supports:
+     * - CharSequence (strings) - converts each character to a string
+     * - Map - converts entries to [key, value] pairs
+     * - Iterable - copies all elements
+     * - Java arrays - copies all elements
+     *
+     * @param value the object to convert to an ArrayList
+     * @return ArrayList containing elements from the source, or empty list if null/unsupported
+     */
     public static ArrayList<Object> from(Object value) {
         ArrayList<Object> result = new ArrayList<>();
         if (value == null) {
@@ -63,6 +80,16 @@ public final class ArrayStaticApiUtils {
         return result;
     }
 
+    /**
+     * JavaScript-compatible Array.isArray() that checks if an object is an array.
+     * <p>
+     * Returns true for:
+     * - List instances (including ArrayList)
+     * - Java native arrays (e.g., int[], Object[])
+     *
+     * @param value the object to check
+     * @return true if the value is an array or List, false otherwise
+     */
     public static boolean isArray(Object value) {
         if (value == null) {
             return false;

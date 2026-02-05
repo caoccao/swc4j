@@ -28,7 +28,17 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.Optional;
 
+/**
+ * Processor for array literal expressions.
+ * <p>
+ * Handles JavaScript array literals like [1, 2, 3] and compiles them to ArrayList instances.
+ */
 public final class ArrayLiteralProcessor extends BaseAstProcessor<Swc4jAstArrayLit> {
+    /**
+     * Constructs a new ArrayLiteralProcessor.
+     *
+     * @param compiler the bytecode compiler instance
+     */
     public ArrayLiteralProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }

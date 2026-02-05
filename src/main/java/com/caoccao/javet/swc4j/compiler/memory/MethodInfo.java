@@ -18,6 +18,12 @@ package com.caoccao.javet.swc4j.compiler.memory;
 
 /**
  * Stores metadata about a Java method.
+ *
+ * @param methodName the name of the method
+ * @param descriptor the JVM method descriptor (e.g., "(I)V")
+ * @param returnType the JVM return type descriptor (e.g., "I", "Ljava/lang/String;")
+ * @param isStatic   true if the method is static
+ * @param isVarArgs  true if the method accepts variable arguments
  */
 public record MethodInfo(String methodName, String descriptor, String returnType, boolean isStatic, boolean isVarArgs) {
 }

@@ -25,19 +25,50 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
 
+/**
+ * Base class for AST node processors that generate JVM bytecode.
+ *
+ * @param <AST> the type of AST node this processor handles
+ */
 public abstract class BaseAstProcessor<AST extends ISwc4jAst> {
+    /**
+     * The bytecode compiler instance.
+     */
     protected final ByteCodeCompiler compiler;
 
+    /**
+     * Constructs a new BaseAstProcessor.
+     *
+     * @param compiler the bytecode compiler instance
+     */
     public BaseAstProcessor(ByteCodeCompiler compiler) {
         this.compiler = compiler;
     }
 
+    /**
+     * Generates bytecode for the given AST node.
+     *
+     * @param code           the code builder for generating bytecode
+     * @param classWriter    the class writer for constant pool access
+     * @param ast            the AST node to process
+     * @param returnTypeInfo type hint for the expected return type (nullable)
+     * @throws Swc4jByteCodeCompilerException if bytecode generation fails
+     */
     public abstract void generate(
             CodeBuilder code,
             ClassWriter classWriter,
             AST ast,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException;
 
+    /**
+     * Generates bytecode for a list of AST nodes.
+     *
+     * @param code           the code builder for generating bytecode
+     * @param classWriter    the class writer for constant pool access
+     * @param asts           the list of AST nodes to process
+     * @param returnTypeInfo type hint for the expected return type (nullable)
+     * @throws Swc4jByteCodeCompilerException if bytecode generation fails
+     */
     public void generate(
             CodeBuilder code,
             ClassWriter classWriter,

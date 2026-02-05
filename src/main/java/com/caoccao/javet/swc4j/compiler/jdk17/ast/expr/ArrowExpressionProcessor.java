@@ -49,6 +49,11 @@ import java.util.*;
 public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArrowExpr> {
     private int lambdaCounter = 0;
 
+    /**
+     * Constructs a new ArrowExpressionProcessor.
+     *
+     * @param compiler the bytecode compiler instance
+     */
     public ArrowExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
     }
@@ -649,6 +654,12 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     /**
      * Generate bytecode for array pattern extraction from a value already on the stack (parameter).
+     *
+     * @param code         the code builder
+     * @param classWriter  the class writer
+     * @param context      the compilation context
+     * @param arrayPat     the array pattern to extract
+     * @throws Swc4jByteCodeCompilerException if bytecode generation fails
      */
     public void generateArrayPatternExtraction(
             CodeBuilder code,
@@ -1028,6 +1039,12 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     /**
      * Generate bytecode for object pattern extraction from a value already on the stack (parameter).
+     *
+     * @param code         the code builder
+     * @param classWriter  the class writer
+     * @param context      the compilation context
+     * @param objectPat    the object pattern to extract
+     * @throws Swc4jByteCodeCompilerException if bytecode generation fails
      */
     public void generateObjectPatternExtraction(
             CodeBuilder code,
@@ -1725,6 +1742,10 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     /**
      * Information about a self-referencing capture that needs post-processing.
+     *
+     * @param lambdaClassName the internal name of the lambda class
+     * @param fieldName       the name of the self-reference field
+     * @param fieldType       the JVM type descriptor of the field
      */
     public record SelfReferenceInfo(String lambdaClassName, String fieldName, String fieldType) {
     }
