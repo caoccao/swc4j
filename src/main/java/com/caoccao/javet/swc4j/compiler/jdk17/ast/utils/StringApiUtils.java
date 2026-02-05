@@ -46,6 +46,7 @@ public final class StringApiUtils {
     }
 
     public static void appendOperandToStringBuilder(
+            String sourceCode,
             CodeBuilder code,
             ClassWriter classWriter,
             ISwc4jAstExpr operand,
@@ -92,14 +93,14 @@ public final class StringApiUtils {
                     case "Ljava/lang/Short;" -> "shortValue";
                     case "Ljava/lang/Integer;" -> "intValue";
                     default ->
-                            throw new Swc4jByteCodeCompilerException(null, operand, "Unexpected type: " + operandType);
+                            throw new Swc4jByteCodeCompilerException(sourceCode, operand, "Unexpected type: " + operandType);
                 };
                 String returnType = switch (operandType) {
                     case "Ljava/lang/Byte;" -> "B";
                     case "Ljava/lang/Short;" -> "S";
                     case "Ljava/lang/Integer;" -> "I";
                     default ->
-                            throw new Swc4jByteCodeCompilerException(null, operand, "Unexpected type: " + operandType);
+                            throw new Swc4jByteCodeCompilerException(sourceCode, operand, "Unexpected type: " + operandType);
                 };
                 int unboxRef = cp.addMethodRef(wrapperClass, methodName, "()" + returnType);
                 code.invokevirtual(unboxRef);
@@ -194,6 +195,7 @@ public final class StringApiUtils {
     }
 
     public static void generateConcat(
+            String sourceCode,
             ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter classWriter,
@@ -230,7 +232,7 @@ public final class StringApiUtils {
         for (int i = 0; i < operands.size(); i++) {
             ISwc4jAstExpr operand = operands.get(i);
             compiler.getExpressionProcessor().generate(code, classWriter, operand, null);
-            appendOperandToStringBuilder(code, classWriter, operand, operandTypes.get(i), appendString, appendInt, appendChar);
+            appendOperandToStringBuilder(sourceCode, code, classWriter, operand, operandTypes.get(i), appendString, appendInt, appendChar);
         }
 
         // Call toString()

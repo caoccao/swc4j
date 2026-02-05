@@ -944,7 +944,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                     int ifnonnullOffsetPos = code.getCurrentOffset() - 2;
                     int ifnonnullOpcodePos = code.getCurrentOffset() - 3;
 
-                    ReturnTypeInfo defaultTypeInfo = ReturnTypeInfo.of(assignPat, paramType);
+                    ReturnTypeInfo defaultTypeInfo = ReturnTypeInfo.of(getSourceCode(), assignPat, paramType);
                     compiler.getExpressionProcessor().generate(code, classWriter, assignPat.getRight(), defaultTypeInfo);
                     storeValueByType(code, paramVar.index(), paramType);
 

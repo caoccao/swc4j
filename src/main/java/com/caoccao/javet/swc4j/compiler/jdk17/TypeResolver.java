@@ -350,7 +350,7 @@ public final class TypeResolver {
             throws Swc4jByteCodeCompilerException {
         var tsType = typeAnn.getTypeAnn();
         String descriptor = mapTsTypeToDescriptor(tsType);
-        return ReturnTypeInfo.of(tsType, descriptor);
+        return ReturnTypeInfo.of(getSourceCode(), tsType, descriptor);
     }
 
     /**

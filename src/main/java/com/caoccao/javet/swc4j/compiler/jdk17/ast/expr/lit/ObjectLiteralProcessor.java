@@ -112,7 +112,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
                 ReturnTypeInfo valueReturnType = null;
                 if (genericTypeInfo != null && genericTypeInfo.isNested() && valueExpr instanceof Swc4jAstObjectLit) {
                     // Create ReturnTypeInfo with nested GenericTypeInfo for recursive validation
-                    valueReturnType = ReturnTypeInfo.of(valueExpr, "Ljava/util/LinkedHashMap;", genericTypeInfo.getNestedTypeInfo());
+                    valueReturnType = ReturnTypeInfo.of(getSourceCode(), valueExpr, "Ljava/util/LinkedHashMap;", genericTypeInfo.getNestedTypeInfo());
                 }
 
                 compiler.getExpressionProcessor().generate(code, classWriter, valueExpr, valueReturnType);

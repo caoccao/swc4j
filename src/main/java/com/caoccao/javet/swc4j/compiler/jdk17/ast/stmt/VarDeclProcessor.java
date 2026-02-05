@@ -335,7 +335,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
 
             // Phase 2: Get GenericTypeInfo from context if available (for Record types)
             GenericTypeInfo genericTypeInfo = context.getGenericTypeInfoMap().get(varName);
-            ReturnTypeInfo varTypeInfo = ReturnTypeInfo.of(declarator, localVar.type(), genericTypeInfo);
+            ReturnTypeInfo varTypeInfo = ReturnTypeInfo.of(getSourceCode(), declarator, localVar.type(), genericTypeInfo);
 
             // Check if this variable needs a holder (mutable variable captured by lambda)
             if (localVar.needsHolder()) {

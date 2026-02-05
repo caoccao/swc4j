@@ -361,7 +361,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             int index,
             String interfaceDescriptor) throws Swc4jByteCodeCompilerException {
         var arg = callExpr.getArgs().get(index);
-        ReturnTypeInfo targetTypeInfo = ReturnTypeInfo.of(callExpr, interfaceDescriptor);
+        ReturnTypeInfo targetTypeInfo = ReturnTypeInfo.of(getSourceCode(), callExpr, interfaceDescriptor);
         compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), targetTypeInfo);
     }
 
@@ -535,7 +535,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         }
         var initArg = callExpr.getArgs().get(1);
         if (primitiveType != null) {
-            ReturnTypeInfo initTypeInfo = ReturnTypeInfo.of(initArg.getExpr(), primitiveType);
+            ReturnTypeInfo initTypeInfo = ReturnTypeInfo.of(getSourceCode(), initArg.getExpr(), primitiveType);
             compiler.getExpressionProcessor().generate(code, classWriter, initArg.getExpr(), initTypeInfo);
         } else {
             compiler.getExpressionProcessor().generate(code, classWriter, initArg.getExpr(), null);
@@ -570,7 +570,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         }
         var initArg = callExpr.getArgs().get(1);
         if (primitiveType != null) {
-            ReturnTypeInfo initTypeInfo = ReturnTypeInfo.of(initArg.getExpr(), primitiveType);
+            ReturnTypeInfo initTypeInfo = ReturnTypeInfo.of(getSourceCode(), initArg.getExpr(), primitiveType);
             compiler.getExpressionProcessor().generate(code, classWriter, initArg.getExpr(), initTypeInfo);
         } else {
             compiler.getExpressionProcessor().generate(code, classWriter, initArg.getExpr(), null);

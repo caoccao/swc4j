@@ -139,7 +139,7 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
                 if (arg.getSpread().isPresent()) {
                     throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported");
                 }
-                ReturnTypeInfo argTypeInfo = ReturnTypeInfo.of(arg.getExpr(), expectedType);
+                ReturnTypeInfo argTypeInfo = ReturnTypeInfo.of(getSourceCode(), arg.getExpr(), expectedType);
                 compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), argTypeInfo);
             } else {
                 pushMissingArg(code, classWriter, expectedType);
@@ -194,7 +194,7 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
             }
             code.dup();
             code.iconst(i);
-            ReturnTypeInfo argTypeInfo = ReturnTypeInfo.of(arg.getExpr(), componentType);
+            ReturnTypeInfo argTypeInfo = ReturnTypeInfo.of(getSourceCode(), arg.getExpr(), componentType);
             compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), argTypeInfo);
             if ("Ljava/lang/Object;".equals(componentType)) {
                 String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());

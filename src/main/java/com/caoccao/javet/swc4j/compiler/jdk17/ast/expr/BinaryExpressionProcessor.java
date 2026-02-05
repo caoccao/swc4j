@@ -134,6 +134,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)
                         || "Ljava/lang/Object;".equals(leftType) || "Ljava/lang/Object;".equals(rightType)) {
                     StringApiUtils.generateConcat(
+                            getSourceCode(),
                             compiler,
                             code,
                             classWriter,
@@ -791,7 +792,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                     if (isPrimitiveComparison) {
                         // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
-                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(binExpr, comparisonType);
+                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(getSourceCode(), binExpr, comparisonType);
 
                         // Generate left operand with type hint
                         compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), compTypeInfo);
@@ -914,7 +915,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                     if (isPrimitiveComparison) {
                         // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
-                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(binExpr, comparisonType);
+                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(getSourceCode(), binExpr, comparisonType);
 
                         // Generate left operand with type hint
                         compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), compTypeInfo);
@@ -1054,7 +1055,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                     if (isPrimitiveComparison) {
                         // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
-                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(binExpr, comparisonType);
+                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(getSourceCode(), binExpr, comparisonType);
 
                         // Generate left operand with type hint
                         compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), compTypeInfo);
@@ -1193,7 +1194,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                     if (isPrimitiveComparison) {
                         // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
-                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(binExpr, comparisonType);
+                        ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(getSourceCode(), binExpr, comparisonType);
 
                         // Generate left operand with type hint
                         compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), compTypeInfo);
