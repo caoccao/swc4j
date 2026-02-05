@@ -30,13 +30,6 @@ This report consolidates gaps found in `docs/plans/**` and cross-checked against
 - Plan: Add union coercion strategy (Object return + tagging), update TypeResolver, and ensure boxing rules.
 - Tests: Union returns with numeric/object/string branches and nested arrows.
 
-## Feature: Arrow Capture Leak Audit
-- Evidence: `docs/plans/ast/expr/arrow.md` quality gate unchecked.
-- Status: Not verified.
-- Confidence: 40%.
-- Plan: Track capture holder lifetime, ensure no retained references beyond scope; add cleanup if needed.
-- Tests: Stress tests for nested closures and large capture sets.
-
 ## Feature: Array Literal Semantics (Holes, Bounds, Length Growth)
 - Evidence: `docs/plans/ast/expr/lit/array-lit.md`.
 - Status: Holes untested, out-of-bounds behavior JS-incompatible, length grow not verified.

@@ -51,6 +51,7 @@ class Calculator {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowMutableCapture.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowGeneric.java` ✓
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowFnType.java` ✓
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/arrow/TestCompileAstArrowCaptureLeak.java` ✓
 
 **AST Definition:** [Swc4jAstArrowExpr.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr.java)
 
@@ -1335,7 +1336,7 @@ Use primitive specializations to avoid boxing:
 - [x] Captured variables correctly accessible in lambda body
 - [x] Functional interfaces correctly implemented
 - [x] Stack map frames generated correctly
-- [ ] No memory leaks from captures
+- [x] No memory leaks from captures (verified with TestCompileAstArrowCaptureLeak)
 
 ---
 
@@ -1514,8 +1515,29 @@ The following edge cases are now covered by tests:
 - Generic arrow chained calls ✓
 - Generic arrow with block body ✓
 
+**Capture Leak Audit (TestCompileAstArrowCaptureLeak.java):**
+- Multiple captures (5 variables) ✓
+- Mixed-type captures (int, long, double) ✓
+- Multiple mutable holders ✓
+- This capture with field modification ✓
+- Multiple lambdas same this reference ✓
+- Returned lambda multiple invocations ✓
+- Multiple lambdas independent captures ✓
+- Mutable object holder capture ✓
+- Shared mutable capture (reader/writer pattern) ✓
+- Mixed this and mutable capture ✓
+- Closure over loop variable ✓
+- Static method capture ✓
+- Curried function capture ✓
+- Pure function no capture ✓
+- Holder lifetime beyond scope ✓
+- Multiple long mutable captures ✓
+- Multiple double mutable captures ✓
+- Lambda in loop stable capture ✓
+- Mixed immutable and mutable captures ✓
+
 ---
 
-*Last Updated: January 27, 2026*
-*Status: COMPLETE (Phase 1-6 implemented with IIFE support, recursive arrows, Phase 5 parameter type inference, mutable captures, generic type parameters)*
+*Last Updated: February 5, 2026*
+*Status: COMPLETE (Phase 1-6 implemented with IIFE support, recursive arrows, Phase 5 parameter type inference, mutable captures, generic type parameters, capture leak audit verified)*
 *Note: Async and generator arrows are intentionally not supported due to complexity*
