@@ -18,6 +18,8 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstClassExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstParenExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstNewExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
@@ -72,23 +74,30 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
         ISwc4jAstExpr callee = newExpr.getCallee();
 
         // Only support simple class name constructors for now
-        if (!(callee instanceof Swc4jAstIdent ident)) {
-            throw new Swc4jByteCodeCompilerException(getSourceCode(), newExpr, "Only simple class names supported in new expressions");
+        String internalClassName;
+        String className;
+        Swc4jAstClassExpr classExpr = extractClassExpr(callee);
+        if (classExpr != null) {
+            var info = compiler.getClassExpressionProcessor().ensureClassGenerated(classExpr, classWriter);
+            className = info.className();
+            internalClassName = info.internalName();
+        } else if (callee instanceof Swc4jAstIdent ident) {
+            className = ident.getSym();
+
+            // Resolve the class name using type alias registry
+            String resolvedType = compiler.getMemory().getScopedTypeAliasRegistry().resolve(className);
+            if (resolvedType == null) {
+                // If not found in type alias registry, assume it's in the current package
+                resolvedType = compiler.getOptions().packagePrefix().isEmpty()
+                        ? className
+                        : compiler.getOptions().packagePrefix() + "." + className;
+            }
+
+            // Convert qualified name to internal name: com.example.Foo -> com/example/Foo
+            internalClassName = resolvedType.replace('.', '/');
+        } else {
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), newExpr, "Only simple class names or class expressions supported in new expressions");
         }
-
-        String className = ident.getSym();
-
-        // Resolve the class name using type alias registry
-        String resolvedType = compiler.getMemory().getScopedTypeAliasRegistry().resolve(className);
-        if (resolvedType == null) {
-            // If not found in type alias registry, assume it's in the current package
-            resolvedType = compiler.getOptions().packagePrefix().isEmpty()
-                    ? className
-                    : compiler.getOptions().packagePrefix() + "." + className;
-        }
-
-        // Convert qualified name to internal name: com.example.Foo -> com/example/Foo
-        String internalClassName = resolvedType.replace('.', '/');
 
         // Generate: new <class>
         int classRef = cp.addClass(internalClassName);
@@ -157,9 +166,9 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
                 paramDescriptors.append(argTypes.get(i));
             }
             String constructorDescriptor = "(" + paramDescriptors + ")V";
-            int constructorRef = cp.addMethodRef(internalClassName, "<init>", constructorDescriptor);
-            code.invokespecial(constructorRef);
-        }
+        int constructorRef = cp.addMethodRef(internalClassName, "<init>", constructorDescriptor);
+        code.invokespecial(constructorRef);
+    }
 
         // After this, the new object reference is on the stack
     }
@@ -215,5 +224,15 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
                 default -> code.aastore();
             }
         }
+    }
+
+    private Swc4jAstClassExpr extractClassExpr(ISwc4jAstExpr callee) {
+        if (callee instanceof Swc4jAstClassExpr classExpr) {
+            return classExpr;
+        }
+        if (callee instanceof Swc4jAstParenExpr parenExpr) {
+            return extractClassExpr(parenExpr.getExpr());
+        }
+        return null;
     }
 }

@@ -63,13 +63,6 @@ These need to be addressed so errors always include source snippet, line, column
 - Compiler pathways pass only code strings; there is no centralized source map to resolve span offsets to line/column and snippet.
 - Error propagation does not standardize a single formatter for all thrown `Swc4jByteCodeCompilerException` cases.
 
-## Feature: Function Expressions and Class Expressions
-- Evidence: `ExpressionProcessor` lacks `Swc4jAstFnExpr` and `Swc4jAstClassExpr` handling.
-- Status: Not implemented.
-- Confidence: 55%.
-- Plan: Emit synthetic classes/methods for anonymous functions/classes with deterministic naming and capture handling.
-- Tests: Inline function/class expressions assigned to variables and passed as arguments.
-
 ## Feature: Debugger and Empty Statements
 - Evidence: `StatementProcessor` lacks `Swc4jAstDebuggerStmt` and `Swc4jAstEmptyStmt` handling.
 - Status: Not implemented.

@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstFunction` in TypeScript to JVM bytecode compilation. Functions are the core executable units containing parameters, body statements, and return types.
 
-**Current Status:** PARTIAL - Basic function with parameters, return types, overloading, and standalone functions working
+**Current Status:** PARTIAL - Basic function with parameters, return types, overloading, standalone functions working; function expressions are supported via FunctionExpressionProcessor
 
 **Syntax:**
 ```typescript
@@ -57,6 +57,7 @@ class A {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionGenerator.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionDecorators.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionEdgeCases.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/fnexpr/TestCompileAstFnExpr.java`
 
 **AST Definition:** [Swc4jAstFunction.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction.java)
 

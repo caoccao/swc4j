@@ -546,6 +546,20 @@ public final class TypeResolver {
             return mapTsTypeToDescriptor(tsType);
         }
 
+        if (init.isPresent() && init.get() instanceof Swc4jAstNewExpr newExpr) {
+            ISwc4jAstExpr callee = newExpr.getCallee();
+            Swc4jAstClassExpr classExpr = null;
+            if (callee instanceof Swc4jAstClassExpr directClassExpr) {
+                classExpr = directClassExpr;
+            } else if (callee instanceof Swc4jAstParenExpr parenExpr && parenExpr.getExpr() instanceof Swc4jAstClassExpr parenClassExpr) {
+                classExpr = parenClassExpr;
+            }
+            if (classExpr != null) {
+                var info = compiler.getClassExpressionProcessor().prepareClassExpr(classExpr);
+                return "L" + info.internalName() + ";";
+            }
+        }
+
         // Type inference from initializer
         if (init.isPresent()) {
             String type = inferTypeFromExpr(init.get());
@@ -843,6 +857,14 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstNewExpr newExpr) {
             // Constructor call - infer type from the callee (class name)
             ISwc4jAstExpr callee = newExpr.getCallee();
+            if (callee instanceof Swc4jAstClassExpr classExpr) {
+                var info = compiler.getClassExpressionProcessor().prepareClassExpr(classExpr);
+                return "L" + info.internalName() + ";";
+            }
+            if (callee instanceof Swc4jAstParenExpr parenExpr && parenExpr.getExpr() instanceof Swc4jAstClassExpr classExpr) {
+                var info = compiler.getClassExpressionProcessor().prepareClassExpr(classExpr);
+                return "L" + info.internalName() + ";";
+            }
             if (callee instanceof Swc4jAstIdent ident) {
                 String className = ident.getSym();
                 // Resolve the class name using type alias registry
@@ -1283,6 +1305,10 @@ public final class TypeResolver {
             return inferTypeFromExpr(parenExpr.getExpr());
         } else if (expr instanceof Swc4jAstOptChainExpr) {
             return "Ljava/lang/Object;";
+        } else if (expr instanceof Swc4jAstFnExpr) {
+            return "Ljava/lang/Object;";
+        } else if (expr instanceof Swc4jAstClassExpr) {
+            return "Ljava/lang/Class;";
         } else if (expr instanceof Swc4jAstCallExpr callExpr) {
             // For call expressions, try to infer the return type
 

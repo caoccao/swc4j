@@ -16,6 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.pat.*;
@@ -94,7 +96,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
     }
 
-    private List<IIFECapturedVariable> analyzeCapturedVariables(Swc4jAstArrowExpr arrowExpr) {
+    private List<IIFECapturedVariable> analyzeCapturedVariables(Swc4jAstArrowExpr arrowExpr, boolean captureThis) {
         List<IIFECapturedVariable> captured = new ArrayList<>();
 
         // Get the parameter names (these are NOT captured)
@@ -126,7 +128,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
 
         // Check if 'this' is captured
         String currentClass = context.getCurrentClassInternalName();
-        if (currentClass != null && referencesThis(arrowExpr.getBody())) {
+        if (captureThis && currentClass != null && referencesThis(arrowExpr.getBody())) {
             captured.add(0, new IIFECapturedVariable("this", "L" + currentClass + ";", 0));
         }
 
@@ -269,6 +271,16 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         return null;
     }
 
+    private Swc4jAstFnExpr extractFunctionExpr(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstFnExpr fnExpr) {
+            return fnExpr;
+        }
+        if (expr instanceof Swc4jAstParenExpr parenExpr) {
+            return extractFunctionExpr(parenExpr.getExpr());
+        }
+        return null;
+    }
+
     private String extractParamName(ISwc4jAstPat param) {
         if (param instanceof Swc4jAstBindingIdent bindingIdent) {
             return bindingIdent.getId().getSym();
@@ -332,8 +344,17 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         }
 
         Swc4jAstArrowExpr arrowExpr = extractArrowExpr(calleeExpr);
+        boolean isFunctionExpr = false;
         if (arrowExpr == null) {
-            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "IIFE callee must be an arrow expression");
+            Swc4jAstFnExpr fnExpr = extractFunctionExpr(calleeExpr);
+            if (fnExpr != null) {
+                arrowExpr = toArrowExpr(fnExpr);
+                isFunctionExpr = true;
+            }
+        }
+        if (arrowExpr == null) {
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
+                    "IIFE callee must be an arrow or function expression");
         }
 
         // Check for unsupported features
@@ -346,7 +367,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
 
         try {
             // Analyze captured variables
-            List<IIFECapturedVariable> capturedVariables = analyzeCapturedVariables(arrowExpr);
+            List<IIFECapturedVariable> capturedVariables = analyzeCapturedVariables(arrowExpr, !isFunctionExpr);
 
             // Determine the interface and method signature
             IIFETypeInfo typeInfo = analyzeIIFEType(arrowExpr);
@@ -640,7 +661,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
      */
     public boolean isCalleeSupported(ISwc4jAstCallee callee) {
         if (callee instanceof ISwc4jAstExpr expr) {
-            return extractArrowExpr(expr) != null;
+            return extractArrowExpr(expr) != null || extractFunctionExpr(expr) != null;
         }
         return false;
     }
@@ -681,6 +702,27 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
      */
     public void reset() {
         interfaceCounter = 0;
+    }
+
+    private Swc4jAstArrowExpr toArrowExpr(Swc4jAstFnExpr fnExpr) {
+        Swc4jAstFunction function = fnExpr.getFunction();
+        if (function.getBody().isEmpty()) {
+            return null;
+        }
+        List<ISwc4jAstPat> params = new ArrayList<>();
+        for (Swc4jAstParam param : function.getParams()) {
+            params.add(param.getPat());
+        }
+        return new Swc4jAstArrowExpr(
+                function.getCtxt(),
+                params,
+                function.getBody().get(),
+                function.isAsync(),
+                function.isGenerator(),
+                function.getTypeParams().orElse(null),
+                function.getReturnType().orElse(null),
+                function.getSpan()
+        );
     }
 
     /**

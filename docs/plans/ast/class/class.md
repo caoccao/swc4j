@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstClass` in TypeScript to JVM bytecode compilation. Classes are fundamental constructs that contain methods, properties, constructors, and support inheritance.
 
-**Current Status:** FULLY IMPLEMENTED - All class features implemented (basic, inheritance, abstract, interfaces, constructors, fields, static members, access modifiers, generics, direct access for classes without namespace, ES2022 private methods, explicit static blocks)
+**Current Status:** FULLY IMPLEMENTED - All class features implemented (basic, inheritance, abstract, interfaces, constructors, fields, static members, access modifiers, generics, direct access for classes without namespace, ES2022 private methods, explicit static blocks); class expressions return Class objects
 
 **Remaining Work:**
 - None - all features implemented
@@ -60,6 +60,7 @@ class Circle implements IShape {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassDecorators.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassGenerics.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassEdgeCases.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/classexpr/TestCompileAstClassExpr.java`
 
 **AST Definition:** [Swc4jAstClass.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass.java)
 

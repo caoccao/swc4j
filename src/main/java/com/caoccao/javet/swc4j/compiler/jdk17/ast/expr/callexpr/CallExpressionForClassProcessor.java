@@ -18,10 +18,12 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.expr.*;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
@@ -30,6 +32,7 @@ import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,6 +79,16 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             int classIndex = cp.addClass(toInternalName);
             code.checkcast(classIndex);
         }
+    }
+
+    private Swc4jAstClassExpr extractClassExpr(ISwc4jAstExpr callee) {
+        if (callee instanceof Swc4jAstClassExpr classExpr) {
+            return classExpr;
+        }
+        if (callee instanceof Swc4jAstParenExpr parenExpr) {
+            return extractClassExpr(parenExpr.getExpr());
+        }
+        return null;
     }
 
     @Override
@@ -171,6 +184,12 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             if (objType == null) {
                 objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
             }
+            if ("Ljava/lang/Object;".equals(objType)) {
+                String classExprType = inferTypeFromNewClassExpr(memberExpr.getObj());
+                if (classExprType != null) {
+                    objType = classExprType;
+                }
+            }
 
             if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
                 String internalName = objType.substring(1, objType.length() - 1);
@@ -191,7 +210,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
                             "Method is static: " + instanceJavaTypeInfo.getAlias() + "." + methodName);
                 }
 
-                compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null);
+                loadObjectReference(code, classWriter, memberExpr.getObj());
                 generateArgumentsWithVarargs(code, classWriter, args, argTypes, methodInfo);
 
                 internalClassName = instanceJavaTypeInfo.getInternalName();
@@ -241,7 +260,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
 
             // Generate the object reference for instance calls
             if (!isStaticCall) {
-                compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null);
+                loadObjectReference(code, classWriter, memberExpr.getObj());
             }
 
             // Generate arguments
@@ -261,9 +280,18 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             returnType = compiler.getMemory().getScopedJavaTypeRegistry()
                     .resolveClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
             if (returnType == null) {
-                throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
-                        "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
-                                ". Please add explicit return type annotation to the method.");
+                if (returnTypeInfo != null && returnTypeInfo.descriptor() != null) {
+                    returnType = returnTypeInfo.descriptor();
+                } else {
+                    returnType = resolveReturnTypeViaReflection(qualifiedClassName, methodName, paramDescriptor);
+                }
+                if (returnType == null) {
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
+                            "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
+                                    ". Please add explicit return type annotation to the method.");
+                } else {
+                    returnType = "Ljava/lang/Object;";
+                }
             }
 
             methodDescriptor = paramDescriptor + returnType;
@@ -400,6 +428,22 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
         }
     }
 
+    private String getDescriptor(Class<?> clazz) {
+        if (clazz == void.class) return "V";
+        if (clazz == boolean.class) return "Z";
+        if (clazz == byte.class) return "B";
+        if (clazz == char.class) return "C";
+        if (clazz == short.class) return "S";
+        if (clazz == int.class) return "I";
+        if (clazz == long.class) return "J";
+        if (clazz == float.class) return "F";
+        if (clazz == double.class) return "D";
+        if (clazz.isArray()) {
+            return "[" + getDescriptor(clazz.getComponentType());
+        }
+        return "L" + clazz.getName().replace('.', '/') + ";";
+    }
+
     private String getMethodName(ISwc4jAstMemberProp prop) {
         if (prop instanceof Swc4jAstIdent ident) {
             return ident.getSym();
@@ -408,6 +452,17 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
         } else if (prop instanceof Swc4jAstPrivateName privateName) {
             // ES2022 private method - return name without # prefix
             return privateName.getName();
+        }
+        return null;
+    }
+
+    private String inferTypeFromNewClassExpr(ISwc4jAstExpr expr) throws Swc4jByteCodeCompilerException {
+        if (expr instanceof Swc4jAstNewExpr newExpr) {
+            Swc4jAstClassExpr classExpr = extractClassExpr(newExpr.getCallee());
+            if (classExpr != null) {
+                var info = compiler.getClassExpressionProcessor().prepareClassExpr(classExpr);
+                return "L" + info.internalName() + ";";
+            }
         }
         return null;
     }
@@ -446,6 +501,65 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
         // A TS class type is an object type (starts with L and ends with ;)
         // that is not a known Java built-in type
         return objType != null && objType.startsWith("L") && objType.endsWith(";");
+    }
+
+    private void loadObjectReference(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            ISwc4jAstExpr objExpr) throws Swc4jByteCodeCompilerException {
+        if (objExpr instanceof Swc4jAstIdent ident) {
+            var context = compiler.getMemory().getCompilationContext();
+            LocalVariable localVar = context.getLocalVariableTable().getVariable(ident.getSym());
+            if (localVar != null) {
+                switch (localVar.type()) {
+                    case "I", "S", "C", "Z", "B" -> code.iload(localVar.index());
+                    case "J" -> code.lload(localVar.index());
+                    case "F" -> code.fload(localVar.index());
+                    case "D" -> code.dload(localVar.index());
+                    default -> code.aload(localVar.index());
+                }
+                return;
+            }
+        }
+        compiler.getExpressionProcessor().generate(code, classWriter, objExpr, null);
+    }
+
+    private String resolveReturnTypeViaReflection(String qualifiedClassName, String methodName, String paramDescriptor) {
+        try {
+            Class<?> clazz = Class.forName(qualifiedClassName);
+            List<String> paramTypes = ScoreUtils.parseParameterDescriptors(paramDescriptor + "V");
+            Class<?>[] params = new Class<?>[paramTypes.size()];
+            for (int i = 0; i < paramTypes.size(); i++) {
+                params[i] = toClass(paramTypes.get(i));
+            }
+            Method method = clazz.getMethod(methodName, params);
+            return getDescriptor(method.getReturnType());
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            return null;
+        }
+    }
+
+    private Class<?> toClass(String descriptor) throws ClassNotFoundException {
+        return switch (descriptor) {
+            case "Z" -> boolean.class;
+            case "B" -> byte.class;
+            case "C" -> char.class;
+            case "S" -> short.class;
+            case "I" -> int.class;
+            case "J" -> long.class;
+            case "F" -> float.class;
+            case "D" -> double.class;
+            case "V" -> void.class;
+            default -> {
+                if (descriptor.startsWith("[")) {
+                    yield Class.forName(descriptor.replace('/', '.'));
+                }
+                if (descriptor.startsWith("L") && descriptor.endsWith(";")) {
+                    yield Class.forName(descriptor.substring(1, descriptor.length() - 1).replace('/', '.'));
+                }
+                yield Class.forName(descriptor.replace('/', '.'));
+            }
+        };
     }
 
 }

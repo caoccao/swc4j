@@ -18,10 +18,14 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstClassExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstNewExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstParenExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -178,6 +182,12 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
 
         // Handle member access on arrays (e.g., arr.length or arr[index])
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
+        if ("Ljava/lang/Object;".equals(objType)) {
+            String classExprType = inferTypeFromNewClassExpr(memberExpr.getObj());
+            if (classExprType != null) {
+                objType = classExprType;
+            }
+        }
 
         if (objType != null && objType.startsWith("[")) {
             // Java array operations
@@ -323,6 +333,32 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             }
         }
 
+        // Handle instance field access for class expression instances
+        if (objType != null && objType.startsWith("L") && objType.endsWith(";")
+                && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+            String fieldName = propIdent.getSym();
+            String internalName = objType.substring(1, objType.length() - 1);
+            String qualifiedName = internalName.replace('/', '.');
+
+            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+            if (typeInfo == null) {
+                int lastSlash = internalName.lastIndexOf('/');
+                String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
+                typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+            }
+
+            if (typeInfo != null) {
+                FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                if (lookupResult != null) {
+                    FieldInfo fieldInfo = lookupResult.fieldInfo;
+                    compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null);
+                    int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, fieldInfo.descriptor());
+                    code.getfield(fieldRef);
+                    return;
+                }
+            }
+        }
+
         // Handle TemplateStringsArray field access (for raw string support in tagged templates)
         if ("Lcom/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray;".equals(objType)) {
             if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
@@ -413,6 +449,27 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             }
         }
 
+        return null;
+    }
+
+    private String inferTypeFromNewClassExpr(ISwc4jAstExpr expr) throws Swc4jByteCodeCompilerException {
+        if (expr instanceof Swc4jAstNewExpr newExpr) {
+            Swc4jAstClassExpr classExpr = extractClassExpr(newExpr.getCallee());
+            if (classExpr != null) {
+                var info = compiler.getClassExpressionProcessor().prepareClassExpr(classExpr);
+                return "L" + info.internalName() + ";";
+            }
+        }
+        return null;
+    }
+
+    private Swc4jAstClassExpr extractClassExpr(ISwc4jAstExpr callee) {
+        if (callee instanceof Swc4jAstClassExpr classExpr) {
+            return classExpr;
+        }
+        if (callee instanceof Swc4jAstParenExpr parenExpr) {
+            return extractClassExpr(parenExpr.getExpr());
+        }
         return null;
     }
 

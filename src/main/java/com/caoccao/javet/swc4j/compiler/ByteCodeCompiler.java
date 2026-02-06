@@ -84,11 +84,15 @@ public sealed abstract class ByteCodeCompiler permits
      */
     protected final ClassDeclProcessor classDeclProcessor;
     /**
+     * Processor for class expressions.
+     */
+    protected final ClassExpressionProcessor classExpressionProcessor;
+    /**
      * Processor for class methods.
      */
     protected final ClassMethodProcessor classMethodProcessor;
     /**
-     * Processor for class expressions.
+     * The Class processor.
      */
     protected final ClassProcessor classProcessor;
     /**
@@ -135,6 +139,10 @@ public sealed abstract class ByteCodeCompiler permits
      * Processor for function declarations.
      */
     protected final FunctionDeclarationProcessor functionDeclarationProcessor;
+    /**
+     * Processor for function expressions.
+     */
+    protected final FunctionExpressionProcessor functionExpressionProcessor;
     /**
      * Processor for identifier expressions.
      */
@@ -326,6 +334,7 @@ public sealed abstract class ByteCodeCompiler permits
         classDeclProcessor = new ClassDeclProcessor(this);
         classProcessor = new ClassProcessor(this);
         classMethodProcessor = new ClassMethodProcessor(this);
+        classExpressionProcessor = new ClassExpressionProcessor(this);
         conditionalExpressionProcessor = new ConditionalExpressionProcessor(this);
         continueStatementProcessor = new ContinueStatementProcessor(this);
         declProcessor = new DeclProcessor(this);
@@ -333,6 +342,7 @@ public sealed abstract class ByteCodeCompiler permits
         enumCollector = new EnumCollector(this);
         exportDeclProcessor = new ExportDeclProcessor(this);
         expressionProcessor = new ExpressionProcessor(this);
+        functionExpressionProcessor = new FunctionExpressionProcessor(this);
         forInStatementProcessor = new ForInStatementProcessor(this);
         forOfStatementProcessor = new ForOfStatementProcessor(this);
         forStatementProcessor = new ForStatementProcessor(this);
@@ -503,6 +513,15 @@ public sealed abstract class ByteCodeCompiler permits
     }
 
     /**
+     * Gets class expression processor.
+     *
+     * @return the class expression processor
+     */
+    public ClassExpressionProcessor getClassExpressionProcessor() {
+        return classExpressionProcessor;
+    }
+
+    /**
      * Gets the class method processor.
      *
      * @return the class method processor
@@ -617,6 +636,15 @@ public sealed abstract class ByteCodeCompiler permits
      */
     public FunctionDeclarationProcessor getFunctionDeclarationProcessor() {
         return functionDeclarationProcessor;
+    }
+
+    /**
+     * Gets function expression processor.
+     *
+     * @return the function expression processor
+     */
+    public FunctionExpressionProcessor getFunctionExpressionProcessor() {
+        return functionExpressionProcessor;
     }
 
     /**

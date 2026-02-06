@@ -26,10 +26,13 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+
 /**
  * Main processor for expression AST nodes, delegates to specialized processors.
  */
 public final class ExpressionProcessor extends BaseAstProcessor<ISwc4jAstExpr> {
+    private final int classExprCounter = 0;
+
     /**
      * Constructs a processor with the specified compiler.
      *
@@ -91,6 +94,10 @@ public final class ExpressionProcessor extends BaseAstProcessor<ISwc4jAstExpr> {
             compiler.getThisExpressionProcessor().generate(code, classWriter, thisExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstArrowExpr arrowExpr) {
             compiler.getArrowExpressionProcessor().generate(code, classWriter, arrowExpr, returnTypeInfo);
+        } else if (expr instanceof Swc4jAstFnExpr fnExpr) {
+            compiler.getFunctionExpressionProcessor().generate(code, classWriter, fnExpr, returnTypeInfo);
+        } else if (expr instanceof Swc4jAstClassExpr classExpr) {
+            compiler.getClassExpressionProcessor().generate(code, classWriter, classExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstTpl tpl) {
             compiler.getTemplateLiteralProcessor().generate(code, classWriter, tpl, returnTypeInfo);
         } else if (expr instanceof Swc4jAstTaggedTpl taggedTpl) {
@@ -99,4 +106,5 @@ public final class ExpressionProcessor extends BaseAstProcessor<ISwc4jAstExpr> {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), expr, "Unsupported expression type: " + expr.getClass().getSimpleName());
         }
     }
+
 }

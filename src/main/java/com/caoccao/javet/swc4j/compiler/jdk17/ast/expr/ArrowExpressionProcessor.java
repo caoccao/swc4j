@@ -313,7 +313,10 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
      * @param selfReferenceName the name of the variable being assigned (for recursive arrows), or null
      * @return list of captured variables with self-reference information
      */
-    private List<CapturedVariable> analyzeCapturedVariables(Swc4jAstArrowExpr arrowExpr, String selfReferenceName) {
+    private List<CapturedVariable> analyzeCapturedVariables(
+            Swc4jAstArrowExpr arrowExpr,
+            String selfReferenceName,
+            boolean captureThis) {
         List<CapturedVariable> captured = new ArrayList<>();
 
         // Get the parameter names (these are NOT captured)
@@ -360,7 +363,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
         // Check if 'this' is captured
         String currentClass = context.getCurrentClassInternalName();
-        if (currentClass != null && referencesThis(arrowExpr.getBody())) {
+        if (captureThis && currentClass != null && referencesThis(arrowExpr.getBody())) {
             captured.add(0, new CapturedVariable("this", "L" + currentClass + ";", 0, false));
         }
 
@@ -592,7 +595,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             Swc4jAstArrowExpr arrowExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
-        generate(code, classWriter, arrowExpr, returnTypeInfo, null);
+        generateInternal(code, classWriter, arrowExpr, returnTypeInfo, null, true);
     }
 
     /**
@@ -612,44 +615,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             Swc4jAstArrowExpr arrowExpr,
             ReturnTypeInfo returnTypeInfo,
             String selfReferenceName) throws Swc4jByteCodeCompilerException {
-        // Check for unsupported features
-        if (arrowExpr.isAsync()) {
-            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr, "Async arrow functions are not supported");
-        }
-        if (arrowExpr.isGenerator()) {
-            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr, "Generator arrow functions are not supported");
-        }
-
-        try {
-            // Generate a unique class name for this lambda
-            String lambdaClassName = generateLambdaClassName();
-
-            // Analyze captured variables, marking self-references
-            List<CapturedVariable> capturedVariables = analyzeCapturedVariables(arrowExpr, selfReferenceName);
-
-            // Determine the functional interface and method signature
-            // Pass returnTypeInfo to enable parameter type inference from target type context
-            ArrowTypeInfo typeInfo = analyzeArrowType(arrowExpr, returnTypeInfo);
-
-            // Generate the anonymous inner class bytecode
-            byte[] lambdaBytecode = generateLambdaClass(lambdaClassName, arrowExpr, typeInfo, capturedVariables);
-
-            // Store the bytecode in the compiler memory
-            compiler.getMemory().getByteCodeMap().put(lambdaClassName.replace('/', '.'), lambdaBytecode);
-
-            // Generate code to instantiate the lambda
-            generateInstantiation(code, classWriter, lambdaClassName, capturedVariables);
-
-            // Check if there are self-references that need post-processing
-            for (CapturedVariable captured : capturedVariables) {
-                if (captured.isSelfReference()) {
-                    return new SelfReferenceInfo(lambdaClassName, captured.name(), captured.type());
-                }
-            }
-            return null;
-        } catch (IOException e) {
-            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr, "Failed to generate lambda class", e);
-        }
+        return generateInternal(code, classWriter, arrowExpr, returnTypeInfo, selfReferenceName, true);
     }
 
     /**
@@ -771,6 +737,23 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         }
     }
 
+    /**
+     * Generate for function expr.
+     *
+     * @param code           the code
+     * @param classWriter    the class writer
+     * @param arrowExpr      the arrow expr
+     * @param returnTypeInfo the return type info
+     * @throws Swc4jByteCodeCompilerException the swc 4 j byte code compiler exception
+     */
+    public void generateForFunctionExpr(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            Swc4jAstArrowExpr arrowExpr,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        generateInternal(code, classWriter, arrowExpr, returnTypeInfo, null, false);
+    }
+
     private void generateInstantiation(
             CodeBuilder code,
             ClassWriter classWriter,
@@ -809,6 +792,53 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         // 2. Load the lambda back
         // 3. Dup it
         // 4. Store into the captured field
+    }
+
+    private SelfReferenceInfo generateInternal(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            Swc4jAstArrowExpr arrowExpr,
+            ReturnTypeInfo returnTypeInfo,
+            String selfReferenceName,
+            boolean captureThis) throws Swc4jByteCodeCompilerException {
+        // Check for unsupported features
+        if (arrowExpr.isAsync()) {
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr, "Async arrow functions are not supported");
+        }
+        if (arrowExpr.isGenerator()) {
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr, "Generator arrow functions are not supported");
+        }
+
+        try {
+            // Generate a unique class name for this lambda
+            String lambdaClassName = generateLambdaClassName();
+
+            // Analyze captured variables, marking self-references
+            List<CapturedVariable> capturedVariables = analyzeCapturedVariables(arrowExpr, selfReferenceName, captureThis);
+
+            // Determine the functional interface and method signature
+            // Pass returnTypeInfo to enable parameter type inference from target type context
+            ArrowTypeInfo typeInfo = analyzeArrowType(arrowExpr, returnTypeInfo);
+
+            // Generate the anonymous inner class bytecode
+            byte[] lambdaBytecode = generateLambdaClass(lambdaClassName, arrowExpr, typeInfo, capturedVariables);
+
+            // Store the bytecode in the compiler memory
+            compiler.getMemory().getByteCodeMap().put(lambdaClassName.replace('/', '.'), lambdaBytecode);
+
+            // Generate code to instantiate the lambda
+            generateInstantiation(code, classWriter, lambdaClassName, capturedVariables);
+
+            // Check if there are self-references that need post-processing
+            for (CapturedVariable captured : capturedVariables) {
+                if (captured.isSelfReference()) {
+                    return new SelfReferenceInfo(lambdaClassName, captured.name(), captured.type());
+                }
+            }
+            return null;
+        } catch (IOException e) {
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr, "Failed to generate lambda class", e);
+        }
     }
 
     private byte[] generateLambdaClass(

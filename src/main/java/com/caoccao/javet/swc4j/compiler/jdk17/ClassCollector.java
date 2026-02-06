@@ -311,6 +311,16 @@ public final class ClassCollector {
     }
 
     /**
+     * Registers a class expression as a synthetic class declaration.
+     *
+     * @param classDecl      the synthetic class declaration
+     * @param currentPackage the current package context
+     */
+    public void registerClassExpr(Swc4jAstClassDecl classDecl, String currentPackage) {
+        processClassDecl(classDecl, currentPackage);
+    }
+
+    /**
      * Resolves a parent class info from an expression (typically an identifier).
      * Looks up in the ScopedJavaClassRegistry first, then creates a placeholder if not found.
      *
