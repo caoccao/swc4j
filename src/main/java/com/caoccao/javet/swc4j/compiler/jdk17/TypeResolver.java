@@ -32,6 +32,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.ast.ts.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
@@ -1617,21 +1618,60 @@ public final class TypeResolver {
      */
     public String mapTsTypeToDescriptor(
             ISwc4jAstTsType tsType) throws Swc4jByteCodeCompilerException {
-        if (tsType instanceof Swc4jAstTsOptionalType optionalType) {
+        if (tsType == null) {
+            return "Ljava/lang/Object;";
+        } else if (tsType instanceof Swc4jAstTsOptionalType optionalType) {
             return mapTsTypeToDescriptor(optionalType.getTypeAnn());
         } else if (tsType instanceof Swc4jAstTsArrayType arrayType) {
             // type[] syntax - maps to Java array
             String elemType = mapTsTypeToDescriptor(arrayType.getElemType());
             return "[" + elemType;
+        } else if (tsType instanceof Swc4jAstTsRestType restType) {
+            return mapRestTypeToDescriptor(restType);
+        } else if (tsType instanceof Swc4jAstTsUnionType unionType) {
+            return mapUnionTypeToDescriptor(unionType);
+        } else if (tsType instanceof Swc4jAstTsIntersectionType intersectionType) {
+            return mapIntersectionTypeToDescriptor(intersectionType);
+        } else if (tsType instanceof Swc4jAstTsTupleType) {
+            // Tuples are represented as ordered Lists at runtime.
+            return "Ljava/util/List;";
+        } else if (tsType instanceof Swc4jAstTsLitType litType) {
+            return mapTsLiteralTypeToDescriptor(litType.getLit());
+        } else if (tsType instanceof Swc4jAstTsMappedType) {
+            // Mapped object types are compiled to LinkedHashMap.
+            return "Ljava/util/LinkedHashMap;";
+        } else if (tsType instanceof Swc4jAstTsIndexedAccessType indexedAccessType) {
+            return mapIndexedAccessTypeToDescriptor(indexedAccessType);
+        } else if (tsType instanceof Swc4jAstTsTypeOperator typeOperator) {
+            return mapTypeOperatorToDescriptor(typeOperator);
+        } else if (tsType instanceof Swc4jAstTsTypeQuery typeQuery) {
+            return mapTypeQueryToDescriptor(typeQuery);
+        } else if (tsType instanceof Swc4jAstTsImportType importType) {
+            return mapImportTypeToDescriptor(importType);
+        } else if (tsType instanceof Swc4jAstTsTypePredicate) {
+            // Type predicates are function-return boolean contracts at runtime.
+            return "Z";
+        } else if (tsType instanceof Swc4jAstTsConditionalType conditionalType) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    conditionalType,
+                    "Conditional types are not supported in runtime type mapping.");
+        } else if (tsType instanceof Swc4jAstTsInferType inferType) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    inferType,
+                    "Infer types are not supported in runtime type mapping.");
         } else if (tsType instanceof Swc4jAstTsKeywordType keywordType) {
             // Handle TypeScript keyword types (boolean, number, string, etc.)
             return switch (keywordType.getKind()) {
+                case TsAnyKeyword, TsIntrinsicKeyword, TsNeverKeyword, TsNullKeyword,
+                     TsObjectKeyword, TsSymbolKeyword, TsUndefinedKeyword, TsUnknownKeyword ->
+                        "Ljava/lang/Object;";
                 case TsBooleanKeyword -> "Z";
                 case TsNumberKeyword -> "D";  // Default to double for number
                 case TsStringKeyword -> "Ljava/lang/String;";
                 case TsBigIntKeyword -> "J";  // Map to long
                 case TsVoidKeyword -> "V";
-                default -> "Ljava/lang/Object;";
             };
         } else if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
             ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
@@ -1656,6 +1696,182 @@ public final class TypeResolver {
         }
         // Default to Object for unknown types
         return "Ljava/lang/Object;";
+    }
+
+    private Integer getTupleLiteralIndex(ISwc4jAstTsType indexType) {
+        if (indexType instanceof Swc4jAstTsLitType litType && litType.getLit() instanceof Swc4jAstNumber number) {
+            double value = number.getValue();
+            if (value >= 0
+                    && value == Math.floor(value)
+                    && !Double.isInfinite(value)
+                    && !Double.isNaN(value)
+                    && value <= Integer.MAX_VALUE) {
+                return (int) value;
+            }
+        }
+        return null;
+    }
+
+    private String mapImportTypeToDescriptor(Swc4jAstTsImportType importType) throws Swc4jByteCodeCompilerException {
+        if (importType.getQualifier().isEmpty()) {
+            return "Ljava/lang/Object;";
+        }
+        String qualifierName = AstUtils.extractQualifiedName(importType.getQualifier().get());
+        if (qualifierName == null || qualifierName.isEmpty()) {
+            return "Ljava/lang/Object;";
+        }
+        String importPath = importType.getArg().getValue();
+        if (importPath == null || importPath.isEmpty() || importPath.startsWith(".")) {
+            return mapTypeNameToDescriptor(qualifierName);
+        }
+        String resolvedTypeName = importPath.replace('/', '.') + "." + qualifierName;
+        return mapTypeNameToDescriptor(resolvedTypeName);
+    }
+
+    private String mapIndexedAccessTypeToDescriptor(
+            Swc4jAstTsIndexedAccessType indexedAccessType) throws Swc4jByteCodeCompilerException {
+        ISwc4jAstTsType objType = indexedAccessType.getObjType();
+        ISwc4jAstTsType indexType = indexedAccessType.getIndexType();
+
+        if (objType instanceof Swc4jAstTsArrayType arrayType) {
+            return mapTsTypeToDescriptor(arrayType.getElemType());
+        }
+
+        if (objType instanceof Swc4jAstTsTypeRef typeRef
+                && typeRef.getTypeName() instanceof Swc4jAstIdent ident
+                && "Array".equals(ident.getSym())
+                && typeRef.getTypeParams().isPresent()
+                && typeRef.getTypeParams().get().getParams().size() == 1) {
+            return mapTsTypeToDescriptor(typeRef.getTypeParams().get().getParams().get(0));
+        }
+
+        if (objType instanceof Swc4jAstTsTupleType tupleType) {
+            Integer tupleIndex = getTupleLiteralIndex(indexType);
+            if (tupleIndex != null && tupleIndex < tupleType.getElemTypes().size()) {
+                return mapTsTypeToDescriptor(tupleType.getElemTypes().get(tupleIndex).getTy());
+            }
+            return "Ljava/lang/Object;";
+        }
+
+        String objDescriptor = mapTsTypeToDescriptor(objType);
+        if (objDescriptor.startsWith("[")) {
+            return objDescriptor.substring(1);
+        }
+        return "Ljava/lang/Object;";
+    }
+
+    private String mapIntersectionTypeToDescriptor(
+            Swc4jAstTsIntersectionType intersectionType) throws Swc4jByteCodeCompilerException {
+        if (intersectionType.getTypes().isEmpty()) {
+            return "Ljava/lang/Object;";
+        }
+        String descriptor = mapTsTypeToDescriptor(intersectionType.getTypes().get(0));
+        for (int i = 1; i < intersectionType.getTypes().size(); i++) {
+            String nextDescriptor = mapTsTypeToDescriptor(intersectionType.getTypes().get(i));
+            if (!descriptor.equals(nextDescriptor)) {
+                return "Ljava/lang/Object;";
+            }
+        }
+        return descriptor;
+    }
+
+    private String mapRestTypeToDescriptor(
+            Swc4jAstTsRestType restType) throws Swc4jByteCodeCompilerException {
+        String componentDescriptor = mapTsTypeToDescriptor(restType.getTypeAnn());
+        if (componentDescriptor.startsWith("[")) {
+            return componentDescriptor;
+        }
+        if ("V".equals(componentDescriptor)) {
+            return "[Ljava/lang/Object;";
+        }
+        return "[" + componentDescriptor;
+    }
+
+    private String mapTsLiteralTypeToDescriptor(
+            ISwc4jAstTsLit lit) {
+        if (lit instanceof Swc4jAstBigInt) {
+            return "J";
+        }
+        if (lit instanceof Swc4jAstBool) {
+            return "Z";
+        }
+        if (lit instanceof Swc4jAstNumber number) {
+            double value = number.getValue();
+            if (value == Math.floor(value)
+                    && !Double.isInfinite(value)
+                    && !Double.isNaN(value)
+                    && value >= Integer.MIN_VALUE
+                    && value <= Integer.MAX_VALUE) {
+                return "I";
+            }
+            return "D";
+        }
+        if (lit instanceof Swc4jAstStr || lit instanceof Swc4jAstTsTplLitType) {
+            return "Ljava/lang/String;";
+        }
+        return "Ljava/lang/Object;";
+    }
+
+    private String mapTypeOperatorToDescriptor(
+            Swc4jAstTsTypeOperator typeOperator) throws Swc4jByteCodeCompilerException {
+        return switch (typeOperator.getOp()) {
+            case KeyOf -> "Ljava/lang/String;";
+            case ReadOnly, Unique -> mapTsTypeToDescriptor(typeOperator.getTypeAnn());
+        };
+    }
+
+    private String mapTypeQueryToDescriptor(
+            Swc4jAstTsTypeQuery typeQuery) throws Swc4jByteCodeCompilerException {
+        ISwc4jAstTsTypeQueryExpr exprName = typeQuery.getExprName();
+        if (exprName instanceof Swc4jAstTsImportType importType) {
+            return mapImportTypeToDescriptor(importType);
+        }
+        if (exprName instanceof ISwc4jAstTsEntityName entityName) {
+            String qualifiedName = AstUtils.extractQualifiedName(entityName);
+            if (qualifiedName == null || qualifiedName.isEmpty()) {
+                return "Ljava/lang/Object;";
+            }
+            if (qualifiedName.contains(".")) {
+                return mapTypeNameToDescriptor(qualifiedName);
+            }
+            CompilationContext context = compiler.getMemory().getCompilationContext();
+            String inferredType = context.getInferredTypes().get(qualifiedName);
+            if (inferredType != null) {
+                return inferredType;
+            }
+            var localVariable = context.getLocalVariableTable().getVariable(qualifiedName);
+            if (localVariable != null) {
+                return localVariable.type();
+            }
+            String resolvedAlias = compiler.getMemory().getScopedTypeAliasRegistry().resolve(qualifiedName);
+            if (resolvedAlias != null) {
+                return mapTypeNameToDescriptor(resolvedAlias);
+            }
+        }
+        return "Ljava/lang/Object;";
+    }
+
+    private String mapUnionTypeToDescriptor(
+            Swc4jAstTsUnionType unionType) throws Swc4jByteCodeCompilerException {
+        if (unionType.getTypes().isEmpty()) {
+            return "Ljava/lang/Object;";
+        }
+        String descriptor = null;
+        for (ISwc4jAstTsType candidateType : unionType.getTypes()) {
+            String candidateDescriptor = mapTsTypeToDescriptor(candidateType);
+            if ("V".equals(candidateDescriptor)) {
+                candidateDescriptor = "Ljava/lang/Object;";
+            }
+            if (descriptor == null) {
+                descriptor = candidateDescriptor;
+            } else {
+                descriptor = findCommonType(descriptor, candidateDescriptor);
+            }
+            if ("Ljava/lang/Object;".equals(descriptor)) {
+                break;
+            }
+        }
+        return descriptor != null ? descriptor : "Ljava/lang/Object;";
     }
 
     /**
