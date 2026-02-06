@@ -53,8 +53,9 @@ public final class ClassCollector {
      *
      * @param items          the list of module items to process
      * @param currentPackage the current package context
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
-    public void collectFromModuleItems(List<ISwc4jAstModuleItem> items, String currentPackage) {
+    public void collectFromModuleItems(List<ISwc4jAstModuleItem> items, String currentPackage) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstModuleItem item : items) {
             if (item instanceof Swc4jAstTsModuleDecl moduleDecl) {
                 String moduleName = getModuleName(moduleDecl);
@@ -84,8 +85,9 @@ public final class ClassCollector {
      *
      * @param stmts          the list of statements to process
      * @param currentPackage the current package context
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
-    public void collectFromStmts(List<ISwc4jAstStmt> stmts, String currentPackage) {
+    public void collectFromStmts(List<ISwc4jAstStmt> stmts, String currentPackage) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstStmt stmt : stmts) {
             if (stmt instanceof Swc4jAstClassDecl classDecl) {
                 processClassDecl(classDecl, currentPackage);
@@ -104,7 +106,7 @@ public final class ClassCollector {
         return moduleDecl.getId().toString();
     }
 
-    private void processClassDecl(Swc4jAstClassDecl classDecl, String currentPackage) {
+    private void processClassDecl(Swc4jAstClassDecl classDecl, String currentPackage) throws Swc4jByteCodeCompilerException {
         String className = classDecl.getIdent().getSym();
         String qualifiedName = currentPackage.isEmpty() ? className : currentPackage + "." + className;
         String internalName = qualifiedName.replace('.', '/');
@@ -146,7 +148,7 @@ public final class ClassCollector {
             Swc4jAstClassDecl classDecl,
             Swc4jAstClass clazz,
             JavaTypeInfo typeInfo,
-            String qualifiedName) {
+            String qualifiedName) throws Swc4jByteCodeCompilerException {
         String className = classDecl.getIdent().getSym();
 
         clazz.getSuperClass().ifPresent(superClassExpr -> {
@@ -259,7 +261,7 @@ public final class ClassCollector {
         }
     }
 
-    private void processFieldProp(Swc4jAstClassProp prop, JavaTypeInfo typeInfo) {
+    private void processFieldProp(Swc4jAstClassProp prop, JavaTypeInfo typeInfo) throws Swc4jByteCodeCompilerException {
         String fieldName = prop.getKey().toString();
         boolean isStatic = prop.isStatic();
 
@@ -286,7 +288,7 @@ public final class ClassCollector {
         typeInfo.addField(fieldName, fieldInfo);
     }
 
-    private void processPrivateFieldProp(Swc4jAstPrivateProp privateProp, JavaTypeInfo typeInfo) {
+    private void processPrivateFieldProp(Swc4jAstPrivateProp privateProp, JavaTypeInfo typeInfo) throws Swc4jByteCodeCompilerException {
         // ES2022 private fields (#field) - field name without # prefix
         String fieldName = privateProp.getKey().getName();
         boolean isStatic = privateProp.isStatic();
@@ -319,8 +321,9 @@ public final class ClassCollector {
      *
      * @param classDecl      the synthetic class declaration
      * @param currentPackage the current package context
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
-    public void registerClassExpr(Swc4jAstClassDecl classDecl, String currentPackage) {
+    public void registerClassExpr(Swc4jAstClassDecl classDecl, String currentPackage) throws Swc4jByteCodeCompilerException {
         processClassDecl(classDecl, currentPackage);
     }
 

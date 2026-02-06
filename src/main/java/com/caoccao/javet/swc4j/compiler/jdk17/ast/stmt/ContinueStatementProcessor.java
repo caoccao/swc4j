@@ -25,6 +25,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
+import com.caoccao.javet.swc4j.compiler.memory.UsingResourceInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -99,6 +100,13 @@ public final class ContinueStatementProcessor extends BaseAstProcessor<Swc4jAstC
         // Execute pending finally blocks before continue (excluding those already being executed inline)
         var pendingFinallyBlocks = context.getPendingFinallyBlocksExcludingInline();
         for (Swc4jAstBlockStmt finallyBlock : pendingFinallyBlocks) {
+            // Check if this is a using resource sentinel
+            UsingResourceInfo usingInfo = context.getUsingResourceInfo(finallyBlock);
+            if (usingInfo != null) {
+                compiler.getUsingDeclProcessor().generateInlineClose(
+                        code, classWriter, usingInfo.resourceSlot());
+                continue;
+            }
             context.markFinallyBlockAsInlineExecuting(finallyBlock);
             try {
                 for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {

@@ -40,6 +40,7 @@ public class CompilationContext {
     private final LocalVariableTable localVariableTable;
     private final Stack<Swc4jAstBlockStmt> pendingFinallyBlocks;
     private final Stack<TypeParameterScope> typeParameterScopes;
+    private final IdentityHashMap<Swc4jAstBlockStmt, UsingResourceInfo> usingResourceMap;
     private int tempIdCounter;
 
     /**
@@ -58,6 +59,7 @@ public class CompilationContext {
         inferredTypesScopes.push(new HashMap<>()); // Base scope
         localVariableTable = new LocalVariableTable();
         typeParameterScopes = new Stack<>();
+        usingResourceMap = new IdentityHashMap<>();
         tempIdCounter = 0;
     }
 
@@ -237,6 +239,16 @@ public class CompilationContext {
     }
 
     /**
+     * Get using resource info for a sentinel finally block.
+     *
+     * @param sentinel the sentinel block to look up
+     * @return the using resource info, or null if not a using resource sentinel
+     */
+    public UsingResourceInfo getUsingResourceInfo(Swc4jAstBlockStmt sentinel) {
+        return usingResourceMap.get(sentinel);
+    }
+
+    /**
      * Check if there are any pending finally blocks.
      *
      * @return true if there are pending finally blocks
@@ -403,6 +415,16 @@ public class CompilationContext {
     }
 
     /**
+     * Register a using resource sentinel block with its resource info.
+     *
+     * @param sentinel the sentinel block pushed onto pendingFinallyBlocks
+     * @param info     the using resource information
+     */
+    public void registerUsingResource(Swc4jAstBlockStmt sentinel, UsingResourceInfo info) {
+        usingResourceMap.put(sentinel, info);
+    }
+
+    /**
      * Resets the compilation context to its initial state.
      */
     public void reset() {
@@ -428,6 +450,7 @@ public class CompilationContext {
         localVariableTable.reset(isStatic);
         tempIdCounter = 0;
         inlineExecutingFinallyBlocks.clear();
+        usingResourceMap.clear();
         // Note: classStack and typeParameterScopes are NOT cleared - class context persists across method resets
     }
 
@@ -467,5 +490,14 @@ public class CompilationContext {
      */
     public void unmarkFinallyBlockAsInlineExecuting(Swc4jAstBlockStmt block) {
         inlineExecutingFinallyBlocks.remove(block);
+    }
+
+    /**
+     * Unregister a using resource sentinel block.
+     *
+     * @param sentinel the sentinel block to unregister
+     */
+    public void unregisterUsingResource(Swc4jAstBlockStmt sentinel) {
+        usingResourceMap.remove(sentinel);
     }
 }

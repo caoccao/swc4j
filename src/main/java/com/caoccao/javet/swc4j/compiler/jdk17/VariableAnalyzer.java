@@ -53,8 +53,9 @@ public final class VariableAnalyzer {
      * Parameters start at index 1 (index 0 is reserved for 'this' in instance methods).
      *
      * @param function the function
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
-    public void analyzeParameters(Swc4jAstFunction function) {
+    public void analyzeParameters(Swc4jAstFunction function) throws Swc4jByteCodeCompilerException {
         CompilationContext context = compiler.getMemory().getCompilationContext();
         for (Swc4jAstParam param : function.getParams()) {
             ISwc4jAstPat pat = param.getPat();
@@ -207,6 +208,19 @@ public final class VariableAnalyzer {
             if (tryStmt.getFinalizer().isPresent()) {
                 for (ISwc4jAstStmt childStmt : tryStmt.getFinalizer().get().getStmts()) {
                     analyzeStatement(childStmt);
+                }
+            }
+        } else if (stmt instanceof Swc4jAstUsingDecl usingDecl) {
+            // Allocate local variables for using declarations (resources)
+            for (Swc4jAstVarDeclarator declarator : usingDecl.getDecls()) {
+                ISwc4jAstPat name = declarator.getName();
+                if (name instanceof Swc4jAstBindingIdent bindingIdent) {
+                    String varName = bindingIdent.getId().getSym();
+                    String varType = compiler.getTypeResolver().extractType(
+                            bindingIdent, declarator.getInit());
+                    // Using declarations are immutable (like const)
+                    context.getLocalVariableTable().allocateVariable(varName, varType, false);
+                    context.getInferredTypes().put(varName, varType);
                 }
             }
         }

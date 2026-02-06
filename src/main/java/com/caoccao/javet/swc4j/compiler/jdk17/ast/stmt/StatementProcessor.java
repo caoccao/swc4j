@@ -17,6 +17,8 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstNewExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUpdateExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
@@ -28,7 +30,10 @@ import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.memory.UsingResourceInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
+import java.util.List;
 
 /**
  * Main dispatcher for statement code generation.
@@ -107,11 +112,49 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
             compiler.getThrowStatementProcessor().generate(code, classWriter, throwStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstTryStmt tryStmt) {
             compiler.getTryStatementProcessor().generate(code, classWriter, tryStmt, returnTypeInfo);
+        } else if (stmt instanceof Swc4jAstUsingDecl usingDecl) {
+            // Using declarations should be handled via generate(List) which provides remaining-statements context.
+            // If reached here directly, it means the using declaration is outside a proper block iteration.
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), usingDecl,
+                    "Using declaration must be processed within a block statement context");
         } else if (stmt instanceof Swc4jAstDebuggerStmt || stmt instanceof Swc4jAstEmptyStmt) {
             // No-op: debugger and empty statements produce no bytecode
         } else {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), stmt,
                     "Unsupported statement type: " + stmt.getClass().getSimpleName());
+        }
+    }
+
+    /**
+     * Generate bytecode for a list of statements, handling using declarations.
+     * When a using declaration is encountered at position i, the remaining statements
+     * (i+1..end) are delegated to the UsingDeclProcessor for wrapping in try-finally.
+     *
+     * @param code           the code builder
+     * @param classWriter    the class writer
+     * @param stmts          the list of statements
+     * @param returnTypeInfo return type information
+     * @throws Swc4jByteCodeCompilerException if code generation fails
+     */
+    @Override
+    public void generate(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            List<ISwc4jAstStmt> stmts,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        for (int i = 0; i < stmts.size(); i++) {
+            ISwc4jAstStmt stmt = stmts.get(i);
+            if (stmt instanceof Swc4jAstUsingDecl usingDecl) {
+                // Delegate to UsingDeclProcessor with remaining statements
+                List<ISwc4jAstStmt> remaining = stmts.subList(i + 1, stmts.size());
+                compiler.getUsingDeclProcessor().generateWithRemainingStatements(
+                        code, classWriter, usingDecl, remaining, returnTypeInfo);
+                return; // UsingDeclProcessor handles all remaining statements
+            }
+            generate(code, classWriter, stmt, returnTypeInfo);
+            if (isTerminalStatement(stmt)) {
+                break;
+            }
         }
     }
 
@@ -132,16 +175,8 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
         CompilationContext context = compiler.getMemory().getCompilationContext();
         context.getLocalVariableTable().enterScope();
         try {
-            // Generate code for each statement in the block
-            // Stop generating code after a terminal control flow statement (break, continue, return)
-            for (ISwc4jAstStmt stmt : blockStmt.getStmts()) {
-                generate(code, classWriter, stmt, returnTypeInfo);
-
-                // Check if this was a terminal statement - subsequent statements are unreachable
-                if (isTerminalStatement(stmt)) {
-                    break;
-                }
-            }
+            // Delegate to generate(List) which handles using declarations
+            generate(code, classWriter, blockStmt.getStmts(), returnTypeInfo);
         } finally {
             context.getLocalVariableTable().exitScope();
         }
@@ -157,25 +192,27 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
         // Unwrap paren expressions to check the inner expression type
         ISwc4jAstExpr unwrappedExpr = expr.unParenExpr();
 
-        // Assignment and update expressions leave values on the stack that need to be popped
-        // Call expressions handle their own return values (already popped if needed)
-        if (unwrappedExpr instanceof Swc4jAstAssignExpr || unwrappedExpr instanceof Swc4jAstUpdateExpr) {
-            // Assignment and update expressions leave the value on the stack
+        // Expression statements discard their result. Pop any value left on the stack.
+        if (unwrappedExpr instanceof Swc4jAstAssignExpr || unwrappedExpr instanceof Swc4jAstUpdateExpr
+                || unwrappedExpr instanceof Swc4jAstCallExpr || unwrappedExpr instanceof Swc4jAstNewExpr) {
+            // Skip if the expression processor already popped the return value
+            // (e.g., array push/unshift processors handle their own pop internally)
+            if (code.isLastInstructionPop()) {
+                return;
+            }
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(unwrappedExpr);
             if (exprType != null && !("V".equals(exprType))) {
-                // Expression leaves a value, pop it
-                // Use pop2 for wide types (double, long)
                 if ("D".equals(exprType) || "J".equals(exprType)) {
                     code.pop2();
                 } else {
                     code.pop();
                 }
-            } else if (exprType == null) {
-                // If type inference fails, still pop since assignment leaves a value
+            } else if (exprType == null && (unwrappedExpr instanceof Swc4jAstAssignExpr
+                    || unwrappedExpr instanceof Swc4jAstUpdateExpr)) {
+                // If type inference fails for assign/update, still pop since they always leave a value
                 code.pop();
             }
         }
-        // Note: CallExpr already pops its return value in generateCallExpr
     }
 
     /**
@@ -227,6 +264,13 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
 
                 // Execute pending finally blocks
                 for (Swc4jAstBlockStmt finallyBlock : pendingFinallyBlocks) {
+                    // Check if this is a using resource sentinel
+                    UsingResourceInfo usingInfo = context.getUsingResourceInfo(finallyBlock);
+                    if (usingInfo != null) {
+                        compiler.getUsingDeclProcessor().generateInlineClose(
+                                code, classWriter, usingInfo.resourceSlot());
+                        continue;
+                    }
                     context.markFinallyBlockAsInlineExecuting(finallyBlock);
                     try {
                         for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
@@ -250,6 +294,13 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
         } else {
             // Void return - still need to execute finally blocks
             for (Swc4jAstBlockStmt finallyBlock : pendingFinallyBlocks) {
+                // Check if this is a using resource sentinel
+                UsingResourceInfo usingInfo = context.getUsingResourceInfo(finallyBlock);
+                if (usingInfo != null) {
+                    compiler.getUsingDeclProcessor().generateInlineClose(
+                            code, classWriter, usingInfo.resourceSlot());
+                    continue;
+                }
                 context.markFinallyBlockAsInlineExecuting(finallyBlock);
                 try {
                     for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {

@@ -217,7 +217,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         return identifiers;
     }
 
-    private void collectVariableTypes(List<ISwc4jAstStmt> stmts, Map<String, String> varTypes) {
+    private void collectVariableTypes(List<ISwc4jAstStmt> stmts, Map<String, String> varTypes) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstStmt stmt : stmts) {
             if (stmt instanceof Swc4jAstVarDecl varDecl) {
                 for (Swc4jAstVarDeclarator decl : varDecl.getDecls()) {

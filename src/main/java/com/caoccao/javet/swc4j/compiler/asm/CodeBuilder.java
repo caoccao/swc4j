@@ -28,6 +28,7 @@ public class CodeBuilder {
     private final List<ClassWriter.ExceptionTableEntry> exceptionTable = new ArrayList<>();
     private final List<ClassWriter.LineNumberEntry> lineNumbers = new ArrayList<>(1024);
     private int currentLine = -1;
+    private int lastPopPosition = -1;
 
     /**
      * Constructs a new CodeBuilder.
@@ -1325,6 +1326,15 @@ public class CodeBuilder {
     }
 
     /**
+     * Checks if the last instruction emitted was a pop or pop2.
+     *
+     * @return true if the most recently emitted instruction was pop or pop2
+     */
+    public boolean isLastInstructionPop() {
+        return !code.isEmpty() && lastPopPosition == code.size() - 1;
+    }
+
+    /**
      * Shifts int left (ishl).
      *
      * @return this CodeBuilder
@@ -1799,6 +1809,7 @@ public class CodeBuilder {
      * @return this CodeBuilder
      */
     public CodeBuilder pop() {
+        lastPopPosition = code.size();
         code.add((byte) (0x57)); // pop
         return this;
     }
@@ -1809,6 +1820,7 @@ public class CodeBuilder {
      * @return this CodeBuilder
      */
     public CodeBuilder pop2() {
+        lastPopPosition = code.size();
         code.add((byte) (0x58)); // pop2
         return this;
     }

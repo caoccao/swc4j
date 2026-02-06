@@ -426,7 +426,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         return identifiers;
     }
 
-    private void collectVariableTypes(List<ISwc4jAstStmt> stmts, Map<String, String> varTypes) {
+    private void collectVariableTypes(List<ISwc4jAstStmt> stmts, Map<String, String> varTypes) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstStmt stmt : stmts) {
             if (stmt instanceof Swc4jAstVarDecl varDecl) {
                 for (Swc4jAstVarDeclarator decl : varDecl.getDecls()) {
@@ -744,7 +744,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
      * @param classWriter    the class writer
      * @param arrowExpr      the arrow expr
      * @param returnTypeInfo the return type info
-     * @throws Swc4jByteCodeCompilerException the swc 4 j byte code compiler exception
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
     public void generateForFunctionExpr(
             CodeBuilder code,

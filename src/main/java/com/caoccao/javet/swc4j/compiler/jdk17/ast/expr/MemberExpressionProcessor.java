@@ -18,13 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstClassExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstNewExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstParenExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -47,6 +41,16 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
      */
     public MemberExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
+    }
+
+    private Swc4jAstClassExpr extractClassExpr(ISwc4jAstExpr callee) {
+        if (callee instanceof Swc4jAstClassExpr classExpr) {
+            return classExpr;
+        }
+        if (callee instanceof Swc4jAstParenExpr parenExpr) {
+            return extractClassExpr(parenExpr.getExpr());
+        }
+        return null;
     }
 
     @Override
@@ -427,6 +431,17 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
         throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "Member expression not yet supported: " + memberExpr.getProp());
     }
 
+    private String inferTypeFromNewClassExpr(ISwc4jAstExpr expr) throws Swc4jByteCodeCompilerException {
+        if (expr instanceof Swc4jAstNewExpr newExpr) {
+            Swc4jAstClassExpr classExpr = extractClassExpr(newExpr.getCallee());
+            if (classExpr != null) {
+                var info = compiler.getClassExpressionProcessor().prepareClassExpr(classExpr);
+                return "L" + info.internalName() + ";";
+            }
+        }
+        return null;
+    }
+
     /**
      * Looks up a field in the class hierarchy, starting from the given class and traversing up to parent classes.
      *
@@ -449,27 +464,6 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             }
         }
 
-        return null;
-    }
-
-    private String inferTypeFromNewClassExpr(ISwc4jAstExpr expr) throws Swc4jByteCodeCompilerException {
-        if (expr instanceof Swc4jAstNewExpr newExpr) {
-            Swc4jAstClassExpr classExpr = extractClassExpr(newExpr.getCallee());
-            if (classExpr != null) {
-                var info = compiler.getClassExpressionProcessor().prepareClassExpr(classExpr);
-                return "L" + info.internalName() + ";";
-            }
-        }
-        return null;
-    }
-
-    private Swc4jAstClassExpr extractClassExpr(ISwc4jAstExpr callee) {
-        if (callee instanceof Swc4jAstClassExpr classExpr) {
-            return classExpr;
-        }
-        if (callee instanceof Swc4jAstParenExpr parenExpr) {
-            return extractClassExpr(parenExpr.getExpr());
-        }
         return null;
     }
 

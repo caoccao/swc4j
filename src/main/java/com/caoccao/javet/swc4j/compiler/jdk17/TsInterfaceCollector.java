@@ -29,6 +29,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaType;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
 
@@ -60,8 +61,9 @@ public final class TsInterfaceCollector {
      *
      * @param items          the module items to process
      * @param currentPackage the current package name
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
-    public void collectFromModuleItems(List<ISwc4jAstModuleItem> items, String currentPackage) {
+    public void collectFromModuleItems(List<ISwc4jAstModuleItem> items, String currentPackage) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstModuleItem item : items) {
             if (item instanceof Swc4jAstTsModuleDecl moduleDecl) {
                 String moduleName = getModuleName(moduleDecl);
@@ -91,8 +93,9 @@ public final class TsInterfaceCollector {
      *
      * @param stmts          the statements to process
      * @param currentPackage the current package name
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
-    public void collectFromStmts(List<ISwc4jAstStmt> stmts, String currentPackage) {
+    public void collectFromStmts(List<ISwc4jAstStmt> stmts, String currentPackage) throws Swc4jByteCodeCompilerException {
         for (ISwc4jAstStmt stmt : stmts) {
             if (stmt instanceof Swc4jAstTsInterfaceDecl interfaceDecl) {
                 processInterfaceDecl(interfaceDecl, currentPackage);
@@ -148,7 +151,7 @@ public final class TsInterfaceCollector {
      * @param getter   the getter signature
      * @param typeInfo the JavaTypeInfo to register the method in
      */
-    private void processGetterSignature(Swc4jAstTsGetterSignature getter, JavaTypeInfo typeInfo) {
+    private void processGetterSignature(Swc4jAstTsGetterSignature getter, JavaTypeInfo typeInfo) throws Swc4jByteCodeCompilerException {
         String propName = getPropertyName(getter.getKey());
 
         // Get type descriptor
@@ -173,7 +176,7 @@ public final class TsInterfaceCollector {
      * @param indexSig the index signature
      * @param typeInfo the JavaTypeInfo to register the methods in
      */
-    private void processIndexSignature(Swc4jAstTsIndexSignature indexSig, JavaTypeInfo typeInfo) {
+    private void processIndexSignature(Swc4jAstTsIndexSignature indexSig, JavaTypeInfo typeInfo) throws Swc4jByteCodeCompilerException {
         // Get key type from params (first parameter)
         String keyDescriptor = "Ljava/lang/Object;"; // Default
         if (!indexSig.getParams().isEmpty()) {
@@ -212,7 +215,7 @@ public final class TsInterfaceCollector {
      * @param interfaceDecl  the interface declaration to process
      * @param currentPackage the current package name
      */
-    private void processInterfaceDecl(Swc4jAstTsInterfaceDecl interfaceDecl, String currentPackage) {
+    private void processInterfaceDecl(Swc4jAstTsInterfaceDecl interfaceDecl, String currentPackage) throws Swc4jByteCodeCompilerException {
         if (interfaceDecl.isDeclare()) {
             return; // Skip ambient declarations
         }
@@ -260,7 +263,7 @@ public final class TsInterfaceCollector {
      * @param method   the method signature
      * @param typeInfo the JavaTypeInfo to register the method in
      */
-    private void processMethodSignature(Swc4jAstTsMethodSignature method, JavaTypeInfo typeInfo) {
+    private void processMethodSignature(Swc4jAstTsMethodSignature method, JavaTypeInfo typeInfo) throws Swc4jByteCodeCompilerException {
         String methodName = getPropertyName(method.getKey());
 
         // Build method descriptor
@@ -295,7 +298,7 @@ public final class TsInterfaceCollector {
      * @param prop     the property signature
      * @param typeInfo the JavaTypeInfo to register methods in
      */
-    private void processPropertySignature(Swc4jAstTsPropertySignature prop, JavaTypeInfo typeInfo) {
+    private void processPropertySignature(Swc4jAstTsPropertySignature prop, JavaTypeInfo typeInfo) throws Swc4jByteCodeCompilerException {
         String propName = getPropertyName(prop.getKey());
 
         // Get type descriptor
@@ -325,7 +328,7 @@ public final class TsInterfaceCollector {
      * @param setter   the setter signature
      * @param typeInfo the JavaTypeInfo to register the method in
      */
-    private void processSetterSignature(Swc4jAstTsSetterSignature setter, JavaTypeInfo typeInfo) {
+    private void processSetterSignature(Swc4jAstTsSetterSignature setter, JavaTypeInfo typeInfo) throws Swc4jByteCodeCompilerException {
         String propName = getPropertyName(setter.getKey());
 
         // Get type descriptor from parameter

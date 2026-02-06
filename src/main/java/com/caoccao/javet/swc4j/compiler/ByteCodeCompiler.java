@@ -296,6 +296,10 @@ public sealed abstract class ByteCodeCompiler permits
      */
     protected final UpdateExpressionProcessor updateExpressionProcessor;
     /**
+     * Processor for using declarations.
+     */
+    protected final UsingDeclProcessor usingDeclProcessor;
+    /**
      * Processor for variable declarations.
      */
     protected final VarDeclProcessor varDeclProcessor;
@@ -381,6 +385,7 @@ public sealed abstract class ByteCodeCompiler permits
         typeResolver = new TypeResolver(this);
         unaryExpressionProcessor = new UnaryExpressionProcessor(this);
         updateExpressionProcessor = new UpdateExpressionProcessor(this);
+        usingDeclProcessor = new UsingDeclProcessor(this);
         varDeclProcessor = new VarDeclProcessor(this);
         variableAnalyzer = new VariableAnalyzer(this);
         whileStatementProcessor = new WhileStatementProcessor(this);
@@ -969,6 +974,15 @@ public sealed abstract class ByteCodeCompiler permits
      */
     public UpdateExpressionProcessor getUpdateExpressionProcessor() {
         return updateExpressionProcessor;
+    }
+
+    /**
+     * Gets the using declaration processor.
+     *
+     * @return the using declaration processor
+     */
+    public UsingDeclProcessor getUsingDeclProcessor() {
+        return usingDeclProcessor;
     }
 
     /**

@@ -17,10 +17,13 @@
 package com.caoccao.javet.swc4j.compiler.ast.expr.arrow;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +35,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Edge cases 11-13 from the implementation plan.
  */
 public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
+
+    @Override
+    protected ByteCodeCompiler getCompiler(JdkVersion jdkVersion) {
+        Map<String, String> typeAliases = new HashMap<>();
+        typeAliases.put("List", "java.util.List");
+        typeAliases.put("Map", "java.util.Map");
+        typeAliases.put("String", "java.lang.String");
+        return ByteCodeCompiler.of(ByteCodeCompilerOptions.builder()
+                .jdkVersion(jdkVersion)
+                .typeAliasMap(typeAliases)
+                .debug(true)
+                .build());
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

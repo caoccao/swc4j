@@ -16,11 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstClassExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstParenExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstNewExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -62,6 +58,16 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
         } else if (!TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
             TypeConversionUtils.unboxWrapperType(code, classWriter, fromType);
         }
+    }
+
+    private Swc4jAstClassExpr extractClassExpr(ISwc4jAstExpr callee) {
+        if (callee instanceof Swc4jAstClassExpr classExpr) {
+            return classExpr;
+        }
+        if (callee instanceof Swc4jAstParenExpr parenExpr) {
+            return extractClassExpr(parenExpr.getExpr());
+        }
+        return null;
     }
 
     @Override
@@ -166,9 +172,9 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
                 paramDescriptors.append(argTypes.get(i));
             }
             String constructorDescriptor = "(" + paramDescriptors + ")V";
-        int constructorRef = cp.addMethodRef(internalClassName, "<init>", constructorDescriptor);
-        code.invokespecial(constructorRef);
-    }
+            int constructorRef = cp.addMethodRef(internalClassName, "<init>", constructorDescriptor);
+            code.invokespecial(constructorRef);
+        }
 
         // After this, the new object reference is on the stack
     }
@@ -224,15 +230,5 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
                 default -> code.aastore();
             }
         }
-    }
-
-    private Swc4jAstClassExpr extractClassExpr(ISwc4jAstExpr callee) {
-        if (callee instanceof Swc4jAstClassExpr classExpr) {
-            return classExpr;
-        }
-        if (callee instanceof Swc4jAstParenExpr parenExpr) {
-            return extractClassExpr(parenExpr.getExpr());
-        }
-        return null;
     }
 }

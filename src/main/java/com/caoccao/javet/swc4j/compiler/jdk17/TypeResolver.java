@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstSuper;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
@@ -436,9 +437,10 @@ public final class TypeResolver {
      *
      * @param bindingIdent binding identifier with potential type annotation
      * @return GenericTypeInfo if the type annotation is a Record type, null otherwise
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
     public GenericTypeInfo extractGenericTypeInfo(
-            Swc4jAstBindingIdent bindingIdent) {
+            Swc4jAstBindingIdent bindingIdent) throws Swc4jByteCodeCompilerException {
         var typeAnn = bindingIdent.getTypeAnn();
         if (typeAnn.isEmpty()) {
             return null;
@@ -498,9 +500,10 @@ public final class TypeResolver {
      *
      * @param pat the pat
      * @return the string
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
     public String extractParameterType(
-            ISwc4jAstPat pat) {
+            ISwc4jAstPat pat) throws Swc4jByteCodeCompilerException {
         if (pat instanceof Swc4jAstRestPat restPat) {
             // Varargs parameter - extract type from RestPat's type annotation
             var typeAnn = restPat.getTypeAnn();
@@ -635,7 +638,7 @@ public final class TypeResolver {
      * @param fnType the function type AST node
      * @return the descriptor for the generated interface (e.g., "Lcom/A/$Fn$1;")
      */
-    private String generateFunctionalInterface(Swc4jAstTsFnType fnType) {
+    private String generateFunctionalInterface(Swc4jAstTsFnType fnType) throws Swc4jByteCodeCompilerException {
         // Generate interface name
         String currentClass = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
         int counter = compiler.getMemory().getNextFnInterfaceCounter();
@@ -1312,6 +1315,12 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstCallExpr callExpr) {
             // For call expressions, try to infer the return type
 
+            // super() and this() constructor calls always return void
+            if (callExpr.getCallee() instanceof Swc4jAstSuper
+                    || callExpr.getCallee() instanceof Swc4jAstThisExpr) {
+                return "V";
+            }
+
             // Handle direct calls to functional interface variables (e.g., factorial(n - 1))
             if (callExpr.getCallee() instanceof Swc4jAstIdent ident) {
                 String varName = ident.getSym();
@@ -1411,7 +1420,7 @@ public final class TypeResolver {
                                  "keys", "values", "entries" -> {
                                 return "Ljava/util/ArrayList;";
                             }
-                            case "forEach" -> {
+                            case "push", "unshift", "forEach" -> {
                                 return "V";
                             }
                             case "find", "reduce", "reduceRight" -> {
@@ -1594,9 +1603,10 @@ public final class TypeResolver {
      *
      * @param tsType the ts type
      * @return the string
+     * @throws Swc4jByteCodeCompilerException if a type reference cannot be resolved
      */
     public String mapTsTypeToDescriptor(
-            ISwc4jAstTsType tsType) {
+            ISwc4jAstTsType tsType) throws Swc4jByteCodeCompilerException {
         if (tsType instanceof Swc4jAstTsOptionalType optionalType) {
             return mapTsTypeToDescriptor(optionalType.getTypeAnn());
         } else if (tsType instanceof Swc4jAstTsArrayType arrayType) {
@@ -1643,9 +1653,10 @@ public final class TypeResolver {
      *
      * @param typeName the type name
      * @return the string
+     * @throws Swc4jByteCodeCompilerException if the type cannot be resolved
      */
     public String mapTypeNameToDescriptor(
-            String typeName) {
+            String typeName) throws Swc4jByteCodeCompilerException {
         // First check if this is a type parameter (for generics support)
         var context = compiler.getMemory().getCompilationContext();
         if (context.isTypeParameter(typeName)) {
@@ -1679,6 +1690,16 @@ public final class TypeResolver {
             default -> {
                 // Check if this is an enum type - resolve to fully qualified name
                 String qualifiedName = resolveEnumTypeName(resolvedType);
+                // If the type name was not resolved (no package prefix, not an enum, not qualified),
+                // it would produce an invalid descriptor like "LObject;" — throw instead.
+                // Exclude single uppercase letter names (likely generic type parameters like T, K, V)
+                // that may not be registered in the current context during early analysis phases.
+                if (qualifiedName.equals(resolvedType) && !resolvedType.contains(".")
+                        && resolvedType.length() > 1) {
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), null,
+                            "Unresolved type: '" + typeName + "'. "
+                                    + "Import it or register it as a type alias.");
+                }
                 yield "L" + qualifiedName.replace('.', '/') + ";";
             }
         };
@@ -1696,8 +1717,9 @@ public final class TypeResolver {
      *
      * @param tsType TypeScript type annotation (expected to be TsTypeRef for Array)
      * @return element type descriptor, or null if not an Array type
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
-    public String parseArrayType(ISwc4jAstTsType tsType) {
+    public String parseArrayType(ISwc4jAstTsType tsType) throws Swc4jByteCodeCompilerException {
         if (!(tsType instanceof Swc4jAstTsTypeRef typeRef)) {
             return null;
         }
@@ -1743,9 +1765,10 @@ public final class TypeResolver {
      *
      * @param tsType TypeScript type annotation (expected to be TsTypeRef with type params)
      * @return GenericTypeInfo containing key and value type descriptors, or null if not a Record type
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
     public GenericTypeInfo parseRecordType(
-            ISwc4jAstTsType tsType) {
+            ISwc4jAstTsType tsType) throws Swc4jByteCodeCompilerException {
         if (!(tsType instanceof Swc4jAstTsTypeRef typeRef)) {
             return null;
         }

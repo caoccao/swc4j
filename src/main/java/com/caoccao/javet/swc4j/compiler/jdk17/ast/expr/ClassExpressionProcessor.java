@@ -48,7 +48,7 @@ public final class ClassExpressionProcessor extends BaseAstProcessor<Swc4jAstCla
      * @param classExpr   the class expr
      * @param classWriter the class writer
      * @return the class expr info
-     * @throws Swc4jByteCodeCompilerException the swc 4 j byte code compiler exception
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
     public ClassExprInfo ensureClassGenerated(Swc4jAstClassExpr classExpr, ClassWriter classWriter) throws Swc4jByteCodeCompilerException {
         ClassExprInfo info = prepareClassExpr(classExpr);
@@ -79,8 +79,9 @@ public final class ClassExpressionProcessor extends BaseAstProcessor<Swc4jAstCla
      *
      * @param classExpr the class expr
      * @return the class expr info
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
-    public ClassExprInfo prepareClassExpr(Swc4jAstClassExpr classExpr) {
+    public ClassExprInfo prepareClassExpr(Swc4jAstClassExpr classExpr) throws Swc4jByteCodeCompilerException {
         String className = classExpr.getIdent().map(Swc4jAstIdent::getSym)
                 .orElseGet(() -> "$ClassExpr" + (++classExprCounter));
         if (classExpr.getIdent().isEmpty()) {

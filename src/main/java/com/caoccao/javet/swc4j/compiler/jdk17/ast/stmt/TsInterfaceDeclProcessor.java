@@ -221,7 +221,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
     private MethodInfo generateCallSignature(
             ClassWriter classWriter,
             Swc4jAstTsCallSignatureDecl callSig,
-            Set<String> typeParamNames) {
+            Set<String> typeParamNames) throws Swc4jByteCodeCompilerException {
         // Build method descriptor
         StringBuilder paramDescriptors = new StringBuilder("(");
         List<String> paramTypes = new ArrayList<>();
@@ -283,7 +283,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
     private MethodInfo generateConstructSignature(
             ClassWriter classWriter,
             Swc4jAstTsConstructSignatureDecl constructSig,
-            Set<String> typeParamNames) {
+            Set<String> typeParamNames) throws Swc4jByteCodeCompilerException {
         // Build method descriptor
         StringBuilder paramDescriptors = new StringBuilder("(");
         List<String> paramTypes = new ArrayList<>();
@@ -340,7 +340,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
     private void generateGetterSignature(
             ClassWriter classWriter,
             Swc4jAstTsGetterSignature getter,
-            Set<String> typeParamNames) {
+            Set<String> typeParamNames) throws Swc4jByteCodeCompilerException {
         String propName = getPropertyName(getter.getKey());
 
         // Get type descriptor (use Object for type parameters)
@@ -380,7 +380,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
     private void generateIndexSignature(
             ClassWriter classWriter,
             Swc4jAstTsIndexSignature indexSig,
-            Set<String> typeParamNames) {
+            Set<String> typeParamNames) throws Swc4jByteCodeCompilerException {
         // Get key type from params (first parameter)
         String keyDescriptor = "Ljava/lang/Object;"; // Default
         if (!indexSig.getParams().isEmpty()) {
@@ -444,7 +444,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
     private MethodInfo generateMethod(
             ClassWriter classWriter,
             Swc4jAstTsMethodSignature method,
-            Set<String> typeParamNames) {
+            Set<String> typeParamNames) throws Swc4jByteCodeCompilerException {
         String methodName = getPropertyName(method.getKey());
 
         // Build method descriptor
@@ -503,7 +503,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
     private void generatePropertyMethods(
             ClassWriter classWriter,
             Swc4jAstTsPropertySignature prop,
-            Set<String> typeParamNames) {
+            Set<String> typeParamNames) throws Swc4jByteCodeCompilerException {
         String propName = getPropertyName(prop.getKey());
 
         // Get type descriptor (use Object for type parameters)
@@ -554,7 +554,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
     private void generateSetterSignature(
             ClassWriter classWriter,
             Swc4jAstTsSetterSignature setter,
-            Set<String> typeParamNames) {
+            Set<String> typeParamNames) throws Swc4jByteCodeCompilerException {
         String propName = getPropertyName(setter.getKey());
 
         // Get type descriptor from parameter (use Object for type parameters)

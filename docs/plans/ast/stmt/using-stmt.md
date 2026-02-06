@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstUsingDecl` (using declarations) in TypeScript to JVM bytecode compilation. The `using` declaration provides deterministic resource management similar to Java's try-with-resources, ensuring that resources are properly disposed of when they go out of scope.
 
-**Current Status:** NOT IMPLEMENTED
+**Current Status:** PARTIALLY IMPLEMENTED (Phases 1, 2, 4, 5 complete; Phase 3 pending)
 
 **Strategy:** TypeScript `using` declarations will be compiled to JVM try-finally bytecode structures, mirroring Java's try-with-resources pattern. Each `using` resource is wrapped in a try block whose finally clause calls `close()` on the resource. The resource must implement `java.lang.AutoCloseable`. The `await using` variant is not supported (async is out of scope).
 
@@ -36,10 +36,14 @@ outer.doWork()
 ```
 
 **Implementation Files:**
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/UsingDeclProcessor.java` (to be created)
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/UsingDeclProcessor.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/memory/UsingResourceInfo.java`
 
 **Test Files:**
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/usingdecl/TestCompileAstUsingDecl*.java` (to be created)
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/usingstmt/BaseTestCompileAstUsingStmt.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/usingstmt/TestCompileAstUsingStmtBasic.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/usingstmt/TestCompileAstUsingStmtControlFlow.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/usingstmt/TestCompileAstUsingStmtMultiple.java`
 
 **AST Definition:** [Swc4jAstUsingDecl.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstUsingDecl.java)
 
@@ -1057,21 +1061,21 @@ Stack map frames are required at:
 ## Success Criteria
 
 ### Phase 1
-- [ ] Basic `using` declaration with single AutoCloseable resource
-- [ ] `close()` called on normal scope exit
-- [ ] `close()` called on exception
-- [ ] Null-safe close (no NPE when resource is null)
+- [x] Basic `using` declaration with single AutoCloseable resource
+- [x] `close()` called on normal scope exit
+- [x] `close()` called on exception
+- [x] Null-safe close (no NPE when resource is null)
 - [ ] Compile-time error for non-AutoCloseable types
-- [ ] Proper exception table generation
-- [ ] Proper stack map frame generation
-- [ ] All Phase 1 tests passing
+- [x] Proper exception table generation
+- [x] Proper stack map frame generation
+- [x] All Phase 1 tests passing
 
 ### Phase 2
-- [ ] Multiple resources in single `using` declaration
-- [ ] Resources closed in reverse declaration order
-- [ ] Nested `using` statements work correctly
-- [ ] Second resource init failure still closes first resource
-- [ ] All Phase 2 tests passing
+- [x] Multiple resources in single `using` declaration
+- [x] Resources closed in reverse declaration order
+- [x] Nested `using` statements work correctly
+- [x] Second resource init failure still closes first resource
+- [x] All Phase 2 tests passing
 
 ### Phase 3
 - [ ] Suppressed exception support via `addSuppressed()`
@@ -1081,20 +1085,20 @@ Stack map frames are required at:
 - [ ] All Phase 3 tests passing
 
 ### Phase 4
-- [ ] `return` in using body closes resources before returning
-- [ ] `break` in using body inside loop closes resources before breaking
-- [ ] `continue` in using body inside loop closes resources before continuing
-- [ ] Interaction with enclosing try-finally works correctly
-- [ ] All Phase 4 tests passing
+- [x] `return` in using body closes resources before returning
+- [x] `break` in using body inside loop closes resources before breaking
+- [x] `continue` in using body inside loop closes resources before continuing
+- [x] Interaction with enclosing try-finally works correctly
+- [x] All Phase 4 tests passing
 
 ### Phase 5
-- [ ] `await using` rejected with clear compile-time error
-- [ ] Error message includes source location and suggestion
+- [x] `await using` rejected with clear compile-time error
+- [x] Error message includes source location and suggestion
 
 ### Overall
-- [ ] All javadoc builds with no warnings
-- [ ] No regressions in existing test suite
-- [ ] Integration with StatementProcessor dispatch
+- [x] All javadoc builds with no warnings
+- [x] No regressions in existing test suite
+- [x] Integration with StatementProcessor dispatch
 
 ---
 

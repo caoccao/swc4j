@@ -58,7 +58,7 @@ public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4j
     /**
      * Check if a standalone function's first parameter is TemplateStringsArray.
      */
-    private boolean checkStandaloneFunctionUsesTemplateStringsArray(Swc4jAstFnDecl fnDecl) {
+    private boolean checkStandaloneFunctionUsesTemplateStringsArray(Swc4jAstFnDecl fnDecl) throws Swc4jByteCodeCompilerException {
         var params = fnDecl.getFunction().getParams();
         if (params.isEmpty()) {
             return false;

@@ -1023,10 +1023,11 @@ public class StackMapProcessor {
                 }
             }
             // Object creation
-            case 0xBB -> // new
-                // new pushes an uninitialized object reference onto the stack
-                // For simplicity, we treat it as a regular object
-                    stack.add(VerificationType.object("java/lang/Object"));
+            case 0xBB -> { // new
+                int classIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
+                String newClassName = (constantPool != null) ? constantPool.getClassName(classIndex) : null;
+                stack.add(VerificationType.object(newClassName != null ? newClassName : "java/lang/Object"));
+            }
             // Type conversions, i2l, f2l
             case 0x85, 0x8C, 0x8F -> {
                 if (!stack.isEmpty()) {

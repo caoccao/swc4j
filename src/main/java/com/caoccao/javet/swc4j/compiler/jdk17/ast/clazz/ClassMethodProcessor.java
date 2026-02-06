@@ -265,10 +265,11 @@ public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMe
      * @param function       the function to generate a descriptor for
      * @param returnTypeInfo the return type information
      * @return the method descriptor string
+     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
     public String generateDescriptor(
             Swc4jAstFunction function,
-            ReturnTypeInfo returnTypeInfo) {
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // Build parameter descriptors
         StringBuilder paramDescriptors = new StringBuilder();
         for (Swc4jAstParam param : function.getParams()) {
