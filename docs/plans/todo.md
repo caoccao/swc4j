@@ -98,13 +98,6 @@ These need to be addressed so errors always include source snippet, line, column
 - Plan: Resolve super field/method access in class hierarchy, emit invokespecial/getfield/putfield as needed.
 - Tests: Super property access in overridden methods and constructors.
 
-## Feature: TS-Specific Expressions (Type/Assertion Variants)
-- Evidence: `ExpressionProcessor` lacks `Swc4jAstTsNonNullExpr`, `Swc4jAstTsTypeAssertion`, `Swc4jAstTsConstAssertion`, `Swc4jAstTsSatisfiesExpr`, `Swc4jAstTsInstantiation` handling.
-- Status: Not implemented.
-- Confidence: 70%.
-- Plan: Treat as compile-time only (erase to inner expression) while enforcing type constraints where possible.
-- Tests: Non-null and type assertions erased with correct runtime behavior.
-
 ## Feature: TS Type System Coverage in TypeResolver
 - Evidence: `TypeResolver.mapTsTypeToDescriptor()` only handles `TsArrayType`, `TsKeywordType`, `TsTypeRef`, `TsFnType`.
 - Status: Partial; many TS type nodes are not mapped.

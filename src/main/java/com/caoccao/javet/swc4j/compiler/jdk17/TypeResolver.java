@@ -857,6 +857,16 @@ public final class TypeResolver {
             }
             // If we can't determine the cast type, fall back to inferring from the expression
             return inferTypeFromExpr(asExpr.getExpr());
+        } else if (expr instanceof Swc4jAstTsTypeAssertion typeAssertion) {
+            return mapTsTypeToDescriptor(typeAssertion.getTypeAnn());
+        } else if (expr instanceof Swc4jAstTsSatisfiesExpr satisfiesExpr) {
+            return mapTsTypeToDescriptor(satisfiesExpr.getTypeAnn());
+        } else if (expr instanceof Swc4jAstTsNonNullExpr nonNullExpr) {
+            return inferTypeFromExpr(nonNullExpr.getExpr());
+        } else if (expr instanceof Swc4jAstTsConstAssertion constAssertion) {
+            return inferTypeFromExpr(constAssertion.getExpr());
+        } else if (expr instanceof Swc4jAstTsInstantiation instantiation) {
+            return inferTypeFromExpr(instantiation.getExpr());
         } else if (expr instanceof Swc4jAstNewExpr newExpr) {
             // Constructor call - infer type from the callee (class name)
             ISwc4jAstExpr callee = newExpr.getCallee();

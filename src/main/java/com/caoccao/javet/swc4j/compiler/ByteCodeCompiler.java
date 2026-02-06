@@ -31,7 +31,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.interfaces.StmtProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ExportDeclProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ImportDeclProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt.*;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.ts.TsAsExpressionProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.ts.*;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
@@ -264,9 +264,17 @@ public sealed abstract class ByteCodeCompiler permits
      */
     protected final TsAsExpressionProcessor tsAsExpressionProcessor;
     /**
+     * The Ts const assertion expression processor.
+     */
+    protected final TsConstAssertionExpressionProcessor tsConstAssertionExpressionProcessor;
+    /**
      * Processor for TypeScript enum declarations.
      */
     protected final TsEnumDeclProcessor tsEnumDeclProcessor;
+    /**
+     * The Ts instantiation expression processor.
+     */
+    protected final TsInstantiationExpressionProcessor tsInstantiationExpressionProcessor;
     /**
      * Collector for TypeScript interface declarations.
      */
@@ -279,6 +287,18 @@ public sealed abstract class ByteCodeCompiler permits
      * Processor for TypeScript module declarations.
      */
     protected final TsModuleDeclProcessor tsModuleDeclProcessor;
+    /**
+     * The Ts non null expression processor.
+     */
+    protected final TsNonNullExpressionProcessor tsNonNullExpressionProcessor;
+    /**
+     * The Ts satisfies expression processor.
+     */
+    protected final TsSatisfiesExpressionProcessor tsSatisfiesExpressionProcessor;
+    /**
+     * The Ts type assertion expression processor.
+     */
+    protected final TsTypeAssertionExpressionProcessor tsTypeAssertionExpressionProcessor;
     /**
      * Collector for type alias declarations.
      */
@@ -336,9 +356,9 @@ public sealed abstract class ByteCodeCompiler permits
         callExpressionProcessor = new CallExpressionProcessor(this);
         classCollector = new ClassCollector(this);
         classDeclProcessor = new ClassDeclProcessor(this);
-        classProcessor = new ClassProcessor(this);
-        classMethodProcessor = new ClassMethodProcessor(this);
         classExpressionProcessor = new ClassExpressionProcessor(this);
+        classMethodProcessor = new ClassMethodProcessor(this);
+        classProcessor = new ClassProcessor(this);
         conditionalExpressionProcessor = new ConditionalExpressionProcessor(this);
         continueStatementProcessor = new ContinueStatementProcessor(this);
         declProcessor = new DeclProcessor(this);
@@ -346,11 +366,11 @@ public sealed abstract class ByteCodeCompiler permits
         enumCollector = new EnumCollector(this);
         exportDeclProcessor = new ExportDeclProcessor(this);
         expressionProcessor = new ExpressionProcessor(this);
-        functionExpressionProcessor = new FunctionExpressionProcessor(this);
         forInStatementProcessor = new ForInStatementProcessor(this);
         forOfStatementProcessor = new ForOfStatementProcessor(this);
         forStatementProcessor = new ForStatementProcessor(this);
         functionDeclarationProcessor = new FunctionDeclarationProcessor(this);
+        functionExpressionProcessor = new FunctionExpressionProcessor(this);
         identifierProcessor = new IdentifierProcessor(this);
         ifStatementProcessor = new IfStatementProcessor(this);
         importDeclProcessor = new ImportDeclProcessor(this);
@@ -377,10 +397,15 @@ public sealed abstract class ByteCodeCompiler permits
         throwStatementProcessor = new ThrowStatementProcessor(this);
         tryStatementProcessor = new TryStatementProcessor(this);
         tsAsExpressionProcessor = new TsAsExpressionProcessor(this);
+        tsConstAssertionExpressionProcessor = new TsConstAssertionExpressionProcessor(this);
         tsEnumDeclProcessor = new TsEnumDeclProcessor(this);
+        tsInstantiationExpressionProcessor = new TsInstantiationExpressionProcessor(this);
         tsInterfaceCollector = new TsInterfaceCollector(this);
         tsInterfaceDeclProcessor = new TsInterfaceDeclProcessor(this);
         tsModuleDeclProcessor = new TsModuleDeclProcessor(this);
+        tsNonNullExpressionProcessor = new TsNonNullExpressionProcessor(this);
+        tsSatisfiesExpressionProcessor = new TsSatisfiesExpressionProcessor(this);
+        tsTypeAssertionExpressionProcessor = new TsTypeAssertionExpressionProcessor(this);
         typeAliasCollector = new TypeAliasCollector(this);
         typeResolver = new TypeResolver(this);
         unaryExpressionProcessor = new UnaryExpressionProcessor(this);
@@ -905,12 +930,30 @@ public sealed abstract class ByteCodeCompiler permits
     }
 
     /**
+     * Gets ts const assertion expression processor.
+     *
+     * @return the ts const assertion expression processor
+     */
+    public TsConstAssertionExpressionProcessor getTsConstAssertionExpressionProcessor() {
+        return tsConstAssertionExpressionProcessor;
+    }
+
+    /**
      * Gets the TypeScript enum declaration processor.
      *
      * @return the TypeScript enum declaration processor
      */
     public TsEnumDeclProcessor getTsEnumDeclProcessor() {
         return tsEnumDeclProcessor;
+    }
+
+    /**
+     * Gets ts instantiation expression processor.
+     *
+     * @return the ts instantiation expression processor
+     */
+    public TsInstantiationExpressionProcessor getTsInstantiationExpressionProcessor() {
+        return tsInstantiationExpressionProcessor;
     }
 
     /**
@@ -938,6 +981,33 @@ public sealed abstract class ByteCodeCompiler permits
      */
     public TsModuleDeclProcessor getTsModuleDeclProcessor() {
         return tsModuleDeclProcessor;
+    }
+
+    /**
+     * Gets ts non null expression processor.
+     *
+     * @return the ts non null expression processor
+     */
+    public TsNonNullExpressionProcessor getTsNonNullExpressionProcessor() {
+        return tsNonNullExpressionProcessor;
+    }
+
+    /**
+     * Gets ts satisfies expression processor.
+     *
+     * @return the ts satisfies expression processor
+     */
+    public TsSatisfiesExpressionProcessor getTsSatisfiesExpressionProcessor() {
+        return tsSatisfiesExpressionProcessor;
+    }
+
+    /**
+     * Gets ts type assertion expression processor.
+     *
+     * @return the ts type assertion expression processor
+     */
+    public TsTypeAssertionExpressionProcessor getTsTypeAssertionExpressionProcessor() {
+        return tsTypeAssertionExpressionProcessor;
     }
 
     /**

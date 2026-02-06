@@ -50,6 +50,16 @@ public final class ExpressionProcessor extends BaseAstProcessor<ISwc4jAstExpr> {
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         if (expr instanceof Swc4jAstTsAsExpr tsAsExpr) {
             compiler.getTsAsExpressionProcessor().generate(code, classWriter, tsAsExpr, returnTypeInfo);
+        } else if (expr instanceof Swc4jAstTsNonNullExpr tsNonNullExpr) {
+            compiler.getTsNonNullExpressionProcessor().generate(code, classWriter, tsNonNullExpr, returnTypeInfo);
+        } else if (expr instanceof Swc4jAstTsTypeAssertion tsTypeAssertion) {
+            compiler.getTsTypeAssertionExpressionProcessor().generate(code, classWriter, tsTypeAssertion, returnTypeInfo);
+        } else if (expr instanceof Swc4jAstTsConstAssertion tsConstAssertion) {
+            compiler.getTsConstAssertionExpressionProcessor().generate(code, classWriter, tsConstAssertion, returnTypeInfo);
+        } else if (expr instanceof Swc4jAstTsSatisfiesExpr tsSatisfiesExpr) {
+            compiler.getTsSatisfiesExpressionProcessor().generate(code, classWriter, tsSatisfiesExpr, returnTypeInfo);
+        } else if (expr instanceof Swc4jAstTsInstantiation tsInstantiation) {
+            compiler.getTsInstantiationExpressionProcessor().generate(code, classWriter, tsInstantiation, returnTypeInfo);
         } else if (expr instanceof Swc4jAstStr str) {
             compiler.getStringLiteralProcessor().generate(code, classWriter, str, returnTypeInfo);
         } else if (expr instanceof Swc4jAstNumber number) {
