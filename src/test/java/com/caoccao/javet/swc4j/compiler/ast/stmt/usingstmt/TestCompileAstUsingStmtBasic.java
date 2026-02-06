@@ -20,13 +20,206 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for basic using declaration statement compilation.
- * Covers: null resource, close verification, block-scoped close, return inside using.
+ * Covers: null resource, close verification, block-scoped close, return inside using,
+ * and suppressed exception support (Phase 3).
  */
 public class TestCompileAstUsingStmtBasic extends BaseTestCompileAstUsingStmt {
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testBodyAndCloseThrow(JdkVersion jdkVersion) throws Exception {
+        // Phase 3: body throws and close() throws — primary exception has close as suppressed
+        var runner = getCompiler(jdkVersion).compile("""
+                import { ArrayList } from 'java.util'
+                namespace com {
+                  export class BadCloser implements AutoCloseable {
+                    private log: ArrayList
+                    constructor(log: ArrayList) {
+                      this.log = log
+                    }
+                    close(): void {
+                      this.log.add("close")
+                      throw new Error("close error")
+                    }
+                  }
+                  export class A {
+                    test(): Object {
+                      const log: ArrayList = new ArrayList()
+                      {
+                        using r: BadCloser = new BadCloser(log)
+                        log.add("body")
+                        throw new Error("body error")
+                      }
+                    }
+                  }
+                }""");
+        assertThatThrownBy(() -> {
+            try {
+                runner.createInstanceRunner("com.A").invoke("test");
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+        }).isInstanceOf(Error.class)
+                .satisfies(e -> {
+                    assertThat(e.getMessage()).isEqualTo("body error");
+                    assertThat(e.getSuppressed()).hasSize(1);
+                    assertThat(e.getSuppressed()[0]).isInstanceOf(Error.class);
+                    assertThat(e.getSuppressed()[0].getMessage()).isEqualTo("close error");
+                });
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testBodyThrowsCloseSucceeds(JdkVersion jdkVersion) throws Exception {
+        // Phase 3: body throws, close() succeeds — primary propagates with no suppressed
+        var runner = getCompiler(jdkVersion).compile("""
+                import { ArrayList } from 'java.util'
+                namespace com {
+                  export class Resource implements AutoCloseable {
+                    private log: ArrayList
+                    constructor(log: ArrayList) {
+                      this.log = log
+                    }
+                    close(): void {
+                      this.log.add("close")
+                    }
+                  }
+                  export class A {
+                    test(): Object {
+                      const log: ArrayList = new ArrayList()
+                      {
+                        using r: Resource = new Resource(log)
+                        log.add("body")
+                        throw new Error("body error")
+                      }
+                    }
+                  }
+                }""");
+        assertThatThrownBy(() -> {
+            try {
+                runner.createInstanceRunner("com.A").invoke("test");
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+        }).isInstanceOf(Error.class)
+                .satisfies(e -> {
+                    assertThat(e.getMessage()).isEqualTo("body error");
+                    assertThat(e.getSuppressed()).isEmpty();
+                });
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testBodyThrowsCloseSucceedsWithLog(JdkVersion jdkVersion) throws Exception {
+        // Phase 3: body throws, close() succeeds — verify close was called via log
+        var runner = getCompiler(jdkVersion).compile("""
+                import { ArrayList } from 'java.util'
+                namespace com {
+                  export class Resource implements AutoCloseable {
+                    private log: ArrayList
+                    constructor(log: ArrayList) {
+                      this.log = log
+                    }
+                    close(): void {
+                      this.log.add("close")
+                    }
+                  }
+                  export class A {
+                    test(): Object {
+                      const log: ArrayList = new ArrayList()
+                      try {
+                        {
+                          using r: Resource = new Resource(log)
+                          log.add("body")
+                          throw new Error("fail")
+                        }
+                      } catch ({message}: Error) {
+                        log.add("caught:" + message)
+                      }
+                      return log
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo(List.of("body", "close", "caught:fail"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testCloseThrowsOnNormalPath(JdkVersion jdkVersion) throws Exception {
+        // Phase 3: no body exception, close() throws — close exception propagates
+        var runner = getCompiler(jdkVersion).compile("""
+                import { ArrayList } from 'java.util'
+                namespace com {
+                  export class BadCloser implements AutoCloseable {
+                    private log: ArrayList
+                    constructor(log: ArrayList) {
+                      this.log = log
+                    }
+                    close(): void {
+                      this.log.add("close")
+                      throw new Error("close error")
+                    }
+                  }
+                  export class A {
+                    test(): Object {
+                      const log: ArrayList = new ArrayList()
+                      {
+                        using r: BadCloser = new BadCloser(log)
+                        log.add("body")
+                      }
+                      return log
+                    }
+                  }
+                }""");
+        assertThatThrownBy(() -> {
+            try {
+                runner.createInstanceRunner("com.A").invoke("test");
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+        }).isInstanceOf(Error.class)
+                .satisfies(e -> {
+                    assertThat(e.getMessage()).isEqualTo("close error");
+                    assertThat(e.getSuppressed()).isEmpty();
+                });
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNullResourceBodyThrows(JdkVersion jdkVersion) throws Exception {
+        // Phase 3: null resource, body throws — body exception propagates, no NPE, no suppressed
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Object {
+                      {
+                        using res: AutoCloseable = null
+                        throw new Error("body error")
+                      }
+                    }
+                  }
+                }""");
+        assertThatThrownBy(() -> {
+            try {
+                runner.createInstanceRunner("com.A").invoke("test");
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+        }).isInstanceOf(Error.class)
+                .satisfies(e -> {
+                    assertThat(e.getMessage()).isEqualTo("body error");
+                    assertThat(e.getSuppressed()).isEmpty();
+                });
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

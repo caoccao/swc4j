@@ -26,7 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for using declarations with control flow statements.
- * Covers: break in loop, continue in loop, return inside using, using inside try-catch.
+ * Covers: break in loop, continue in loop, return inside using, using inside try-catch,
+ * and suppressed exception support in control flow scenarios (Phase 3).
  */
 public class TestCompileAstUsingStmtControlFlow extends BaseTestCompileAstUsingStmt {
 
@@ -64,6 +65,43 @@ public class TestCompileAstUsingStmtControlFlow extends BaseTestCompileAstUsingS
         // Resource closes when exception is thrown (via exception handler), then catch runs
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
                 .isEqualTo(List.of("tryBody", "close:a", "caught"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testUsingInsideTryCatchWithSuppressed(JdkVersion jdkVersion) throws Exception {
+        // Phase 3: using inside try-catch, body+close throw, catch gets primary with suppressed
+        var runner = getCompiler(jdkVersion).compile("""
+                import { ArrayList } from 'java.util'
+                namespace com {
+                  export class BadCloser implements AutoCloseable {
+                    private log: ArrayList
+                    constructor(log: ArrayList) {
+                      this.log = log
+                    }
+                    close(): void {
+                      this.log.add("close")
+                      throw new Error("close error")
+                    }
+                  }
+                  export class A {
+                    test(): Object {
+                      const log: ArrayList = new ArrayList()
+                      try {
+                        using r: BadCloser = new BadCloser(log)
+                        log.add("tryBody")
+                        throw new Error("body error")
+                      } catch ({message}: Error) {
+                        log.add("caught:" + message)
+                      }
+                      return log
+                    }
+                  }
+                }""");
+        // close() is called (logs "close"), body exception is caught with "body error" message
+        // (close error is suppressed on the body error, but catch only sees primary)
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo(List.of("tryBody", "close", "caught:body error"));
     }
 
     @ParameterizedTest

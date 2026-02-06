@@ -20,13 +20,16 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for using declarations with multiple resources.
- * Covers: two resources, sequential using declarations, nested using blocks.
+ * Covers: two resources, sequential using declarations, nested using blocks,
+ * and suppressed exception support with multiple resources (Phase 3).
  */
 public class TestCompileAstUsingStmtMultiple extends BaseTestCompileAstUsingStmt {
 
@@ -99,6 +102,153 @@ public class TestCompileAstUsingStmtMultiple extends BaseTestCompileAstUsingStmt
         // Inner block closes first, then outer
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
                 .isEqualTo(List.of("innerBody", "close:inner", "outerBody", "close:outer"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedUsingBothClosesThrow(JdkVersion jdkVersion) throws Exception {
+        // Phase 3: nested using blocks, both close() throw
+        var runner = getCompiler(jdkVersion).compile("""
+                import { ArrayList } from 'java.util'
+                namespace com {
+                  export class BadCloser implements AutoCloseable {
+                    private log: ArrayList
+                    private name: String
+                    constructor(log: ArrayList, name: String) {
+                      this.log = log
+                      this.name = name
+                    }
+                    close(): void {
+                      this.log.add("close:" + this.name)
+                      throw new Error("close:" + this.name)
+                    }
+                  }
+                  export class A {
+                    test(): Object {
+                      const log: ArrayList = new ArrayList()
+                      {
+                        using outer: BadCloser = new BadCloser(log, "outer")
+                        {
+                          using inner: BadCloser = new BadCloser(log, "inner")
+                          log.add("body")
+                          throw new Error("body error")
+                        }
+                      }
+                    }
+                  }
+                }""");
+        assertThatThrownBy(() -> {
+            try {
+                runner.createInstanceRunner("com.A").invoke("test");
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+        }).isInstanceOf(Error.class)
+                .satisfies(e -> {
+                    assertThat(e.getMessage()).isEqualTo("body error");
+                    // Inner close exception is suppressed first, then outer
+                    assertThat(e.getSuppressed()).hasSize(2);
+                    assertThat(e.getSuppressed()[0].getMessage()).isEqualTo("close:inner");
+                    assertThat(e.getSuppressed()[1].getMessage()).isEqualTo("close:outer");
+                });
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTwoResourcesBodyAndBothClosesThrow(JdkVersion jdkVersion) throws Exception {
+        // Phase 3: body throws, both close() calls throw — primary has 2 suppressed
+        var runner = getCompiler(jdkVersion).compile("""
+                import { ArrayList } from 'java.util'
+                namespace com {
+                  export class BadCloser implements AutoCloseable {
+                    private log: ArrayList
+                    private name: String
+                    constructor(log: ArrayList, name: String) {
+                      this.log = log
+                      this.name = name
+                    }
+                    close(): void {
+                      this.log.add("close:" + this.name)
+                      throw new Error("close:" + this.name)
+                    }
+                  }
+                  export class A {
+                    test(): Object {
+                      const log: ArrayList = new ArrayList()
+                      {
+                        using r1: BadCloser = new BadCloser(log, "a")
+                        using r2: BadCloser = new BadCloser(log, "b")
+                        log.add("body")
+                        throw new Error("body error")
+                      }
+                    }
+                  }
+                }""");
+        assertThatThrownBy(() -> {
+            try {
+                runner.createInstanceRunner("com.A").invoke("test");
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+        }).isInstanceOf(Error.class)
+                .satisfies(e -> {
+                    assertThat(e.getMessage()).isEqualTo("body error");
+                    assertThat(e.getSuppressed()).hasSize(2);
+                    // Inner resource (b) closes first, outer resource (a) closes second
+                    assertThat(e.getSuppressed()[0].getMessage()).isEqualTo("close:b");
+                    assertThat(e.getSuppressed()[1].getMessage()).isEqualTo("close:a");
+                });
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTwoResourcesInnerCloseThrows(JdkVersion jdkVersion) throws Exception {
+        // Phase 3: no body exception, inner close() throws — outer still closes
+        var runner = getCompiler(jdkVersion).compile("""
+                import { ArrayList } from 'java.util'
+                namespace com {
+                  export class Resource implements AutoCloseable {
+                    private log: ArrayList
+                    private name: String
+                    constructor(log: ArrayList, name: String) {
+                      this.log = log
+                      this.name = name
+                    }
+                    close(): void {
+                      this.log.add("close:" + this.name)
+                    }
+                  }
+                  export class BadCloser implements AutoCloseable {
+                    private log: ArrayList
+                    private name: String
+                    constructor(log: ArrayList, name: String) {
+                      this.log = log
+                      this.name = name
+                    }
+                    close(): void {
+                      this.log.add("close:" + this.name)
+                      throw new Error("close:" + this.name)
+                    }
+                  }
+                  export class A {
+                    test(): Object {
+                      const log: ArrayList = new ArrayList()
+                      try {
+                        {
+                          using r1: Resource = new Resource(log, "a")
+                          using r2: BadCloser = new BadCloser(log, "b")
+                          log.add("body")
+                        }
+                      } catch ({message}: Error) {
+                        log.add("caught:" + message)
+                      }
+                      return log
+                    }
+                  }
+                }""");
+        // Inner close throws (caught by outer exception handler), outer still closes
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo(List.of("body", "close:b", "close:a", "caught:close:b"));
     }
 
     @ParameterizedTest

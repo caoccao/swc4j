@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstUsingDecl` (using declarations) in TypeScript to JVM bytecode compilation. The `using` declaration provides deterministic resource management similar to Java's try-with-resources, ensuring that resources are properly disposed of when they go out of scope.
 
-**Current Status:** PARTIALLY IMPLEMENTED (Phases 1, 2, 4, 5 complete; Phase 3 pending)
+**Current Status:** IMPLEMENTED (All phases complete)
 
 **Strategy:** TypeScript `using` declarations will be compiled to JVM try-finally bytecode structures, mirroring Java's try-with-resources pattern. Each `using` resource is wrapped in a try block whose finally clause calls `close()` on the resource. The resource must implement `java.lang.AutoCloseable`. The `await using` variant is not supported (async is out of scope).
 
@@ -1078,11 +1078,11 @@ Stack map frames are required at:
 - [x] All Phase 2 tests passing
 
 ### Phase 3
-- [ ] Suppressed exception support via `addSuppressed()`
-- [ ] Body exception preserved as primary, close exception suppressed
-- [ ] Close exception propagated when no body exception
-- [ ] Multiple suppressed exceptions chained correctly
-- [ ] All Phase 3 tests passing
+- [x] Suppressed exception support via `addSuppressed()`
+- [x] Body exception preserved as primary, close exception suppressed
+- [x] Close exception propagated when no body exception
+- [x] Multiple suppressed exceptions chained correctly
+- [x] All Phase 3 tests passing
 
 ### Phase 4
 - [x] `return` in using body closes resources before returning

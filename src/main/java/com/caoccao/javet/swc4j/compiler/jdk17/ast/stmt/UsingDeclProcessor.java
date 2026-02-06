@@ -41,7 +41,7 @@ import java.util.List;
  * in nested try-finally blocks. Multiple declarators create nested try-finally blocks
  * with resources closed in reverse declaration order.</p>
  *
- * <p>Bytecode pattern for a single resource:</p>
+ * <p>Bytecode pattern for a single resource (with suppressed exception support):</p>
  * <pre>
  *   // init resource
  *   expr; astore &lt;resource&gt;
@@ -52,9 +52,13 @@ import java.util.List;
  *     aload &lt;resource&gt;; ifnull skip; aload &lt;resource&gt;; invokeinterface close; skip:
  *     goto after_handler
  *   handler:
- *     astore &lt;exc&gt;
- *     aload &lt;resource&gt;; ifnull skip2; aload &lt;resource&gt;; invokeinterface close; skip2:
- *     aload &lt;exc&gt;; athrow
+ *     astore &lt;primaryExc&gt;
+ *     // close with suppression: if close() throws, addSuppressed to primaryExc
+ *     aload &lt;resource&gt;; ifnull rethrow
+ *     try_close: aload &lt;resource&gt;; invokeinterface close; goto rethrow
+ *     catch_close: astore &lt;suppressedExc&gt;; aload &lt;primaryExc&gt;; aload &lt;suppressedExc&gt;;
+ *                  invokevirtual Throwable.addSuppressed
+ *     rethrow: aload &lt;primaryExc&gt;; athrow
  *   after_handler:
  * </pre>
  */
@@ -91,15 +95,7 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
                         + "Use generateWithRemainingStatements() instead.");
     }
 
-    /**
-     * Generate null-safe close bytecode for a resource.
-     * Pattern: {@code aload <resource>; ifnull skip; aload <resource>; invokeinterface close; skip:}
-     *
-     * @param code         the code builder
-     * @param classWriter  the class writer
-     * @param resourceSlot the local variable slot of the resource
-     */
-    public void generateCloseCall(CodeBuilder code, ClassWriter classWriter, int resourceSlot) {
+    private void generateCloseCall(CodeBuilder code, ClassWriter classWriter, int resourceSlot) {
         var cp = classWriter.getConstantPool();
         // aload <resource>
         code.aload(resourceSlot);
@@ -118,19 +114,57 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
         code.patchShort(ifnullOffsetPos, skipPc - ifnullPos);
     }
 
-    /**
-     * Recursively generate nested try-finally blocks for each declarator.
-     * Each declarator gets its own try-finally, with the next declarator (or remaining statements)
-     * as the try body. Resources are closed in reverse declaration order.
-     *
-     * @param code           the code builder
-     * @param classWriter    the class writer
-     * @param decls          the list of declarators
-     * @param idx            the current declarator index
-     * @param remainingStmts the remaining statements after the using declaration
-     * @param returnTypeInfo return type information
-     * @throws Swc4jByteCodeCompilerException if code generation fails
-     */
+    private void generateCloseWithSuppression(
+            CodeBuilder code, ClassWriter classWriter, int resourceSlot, int primaryExcSlot) {
+        var cp = classWriter.getConstantPool();
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+
+        // aload <resource>
+        code.aload(resourceSlot);
+        // ifnull skip
+        int ifnullPos = code.getCurrentOffset();
+        code.ifnull(0);
+        int ifnullOffsetPos = code.getCurrentOffset() - 2;
+
+        // try { resource.close() }
+        int tryCloseStartPc = code.getCurrentOffset();
+        code.aload(resourceSlot);
+        int closeRef = cp.addInterfaceMethodRef("java/lang/AutoCloseable", "close", "()V");
+        code.invokeinterface(closeRef, 1);
+        int tryCloseEndPc = code.getCurrentOffset();
+
+        // goto skip (close succeeded)
+        int gotoOpcodePos = code.getCurrentOffset();
+        code.gotoLabel(0);
+        int gotoOffsetPos = code.getCurrentOffset() - 2;
+
+        // catch (Throwable suppressed) { primaryExc.addSuppressed(suppressed) }
+        int catchClosePc = code.getCurrentOffset();
+
+        // Allocate temp for suppressed exception
+        String suppressedTempName = "$suppressedException$" + resourceSlot;
+        context.getLocalVariableTable().allocateVariable(suppressedTempName, "Ljava/lang/Throwable;");
+        LocalVariable suppressedExc = context.getLocalVariableTable().getVariable(suppressedTempName);
+
+        // astore <suppressed>
+        code.astore(suppressedExc.index());
+        // aload <primaryExc>; aload <suppressed>; invokevirtual addSuppressed
+        code.aload(primaryExcSlot);
+        code.aload(suppressedExc.index());
+        int addSuppressedRef = cp.addMethodRef(
+                "java/lang/Throwable", "addSuppressed", "(Ljava/lang/Throwable;)V");
+        code.invokevirtual(addSuppressedRef);
+
+        // skip: (reached by ifnull, goto after successful close, or fall-through after addSuppressed)
+        int skipPc = code.getCurrentOffset();
+        code.patchShort(ifnullOffsetPos, skipPc - ifnullPos);
+        code.patchShort(gotoOffsetPos, skipPc - gotoOpcodePos);
+
+        // Add inner exception table entry for try-close
+        int throwableClassIndex = cp.addClass("java/lang/Throwable");
+        code.addExceptionHandler(tryCloseStartPc, tryCloseEndPc, catchClosePc, throwableClassIndex);
+    }
+
     private void generateDeclaratorChain(
             CodeBuilder code,
             ClassWriter classWriter,
@@ -224,21 +258,21 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
                 gotoOpcodePos = code.getCurrentOffset() - 3;
             }
 
-            // Exception handler: catch all exceptions, close resource, rethrow
+            // Exception handler: catch all exceptions, close resource with suppression, rethrow
             int handlerPc = code.getCurrentOffset();
 
-            // Allocate temp variable for exception
+            // Allocate temp variable for primary exception
             String tempName = "$usingException$" + System.identityHashCode(declarator);
             context.getLocalVariableTable().allocateVariable(tempName, "Ljava/lang/Throwable;");
             LocalVariable tempException = context.getLocalVariableTable().getVariable(tempName);
 
-            // Store exception
+            // Store primary exception
             code.astore(tempException.index());
 
-            // Close resource (null-safe)
-            generateCloseCall(code, classWriter, localVar.index());
+            // Close resource with suppression (if close() throws, addSuppressed to primary)
+            generateCloseWithSuppression(code, classWriter, localVar.index(), tempException.index());
 
-            // Rethrow exception
+            // Rethrow primary exception
             code.aload(tempException.index());
             code.athrow();
 
