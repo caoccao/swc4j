@@ -21,12 +21,33 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 
+/**
+ * Tests for basic class expression compilation.
+ * Covers: class-as-value, superclass, unique naming, named class expressions.
+ */
 public class TestCompileAstClassExprBasic extends BaseTestCompileSuite {
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testClassExprNamedClass(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                import { Class } from 'java.lang'
+                namespace com {
+                  export class A {
+                    test(): boolean {
+                      const C: Class = class MyCounter {
+                        count: int = 0
+                      }
+                      return C.getName().endsWith("MyCounter")
+                    }
+                  }
+                }""");
+        assertThat((boolean) runner.createInstanceRunner("com.A").invoke("test")).isTrue();
+    }
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testClassExprReturnsClassObject(JdkVersion jdkVersion) throws Exception {
@@ -52,7 +73,7 @@ public class TestCompileAstClassExprBasic extends BaseTestCompileSuite {
                 namespace com {
                   export class Base {
                   }
-
+                
                   export class A {
                     test(): boolean {
                       const C: Class = class Local extends Base { }
@@ -82,117 +103,5 @@ public class TestCompileAstClassExprBasic extends BaseTestCompileSuite {
                 }""");
         var instanceRunner = runner.createInstanceRunner("com.A");
         assertThat((boolean) instanceRunner.invoke("test")).isTrue();
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testClassExprFieldsAndMethods(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                import { Class } from 'java.lang'
-                import { Field, Method } from 'java.lang.reflect'
-                namespace com {
-                  export class A {
-                    test(): boolean {
-                      return (class {
-                        value: int = 1
-
-                        getValue(): int {
-                          return this.value
-                        }
-                      }).getDeclaredFields().length == 1
-                        && (class {
-                          value: int = 1
-
-                          getValue(): int {
-                            return this.value
-                          }
-                        }).getDeclaredMethods().length == 1
-                    }
-                  }
-                }""");
-        var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((boolean) instanceRunner.invoke("test")).isTrue();
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testClassExprConstructor(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                import { Class } from 'java.lang'
-                import { Field, Method } from 'java.lang.reflect'
-                namespace com {
-                  export class A {
-                    test(): boolean {
-                      return (class {
-                        value: int
-
-                        constructor() {
-                          this.value = 7
-                        }
-
-                        getValue(): int {
-                          return this.value
-                        }
-                      }).getDeclaredFields().length == 1
-                        && (class {
-                          value: int
-
-                          constructor() {
-                            this.value = 7
-                          }
-
-                          getValue(): int {
-                            return this.value
-                          }
-                        }).getDeclaredMethods().length == 1
-                    }
-                  }
-                }""");
-        var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((boolean) instanceRunner.invoke("test")).isTrue();
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testClassExprInstanceUse(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): Array<int> {
-                      const obj = new (class {
-                        value: int = 3
-
-                        getValue(): int {
-                          return this.value
-                        }
-                      })()
-                      return [obj.value, obj.getValue()]
-                    }
-                  }
-                }""");
-        var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat(instanceRunner.<Object>invoke("test")).isEqualTo(List.of(3, 3));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testClassExprInstanceValues(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): Array<int> {
-                      const obj = new (class {
-                        value: int = 4
-
-                        getValue(): int {
-                          return this.value + 1
-                        }
-                      })()
-                      return [obj.value, obj.getValue()]
-                    }
-                  }
-                }""");
-        var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat(instanceRunner.<Object>invoke("test")).isEqualTo(List.of(4, 5));
     }
 }

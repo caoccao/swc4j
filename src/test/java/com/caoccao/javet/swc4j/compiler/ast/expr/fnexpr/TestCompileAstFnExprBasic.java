@@ -24,7 +24,33 @@ import org.junit.jupiter.params.provider.EnumSource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
+/**
+ * Tests for basic function expression compilation.
+ * Covers: interface assignment, IIFE, argument passing.
+ */
 public class TestCompileAstFnExprBasic extends BaseTestCompileSuite {
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testFunctionExprAsArgument(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                import { IntUnaryOperator } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    apply(fn: IntUnaryOperator, value: int): int {
+                      return fn(value)
+                    }
+                
+                    test(): int {
+                      const fn: IntUnaryOperator = function(x: int): int { return x * 2 }
+                      return this.apply(fn, 6)
+                    }
+                  }
+                }""");
+        var instanceRunner = runner.createInstanceRunner("com.A");
+        assertThat((int) instanceRunner.invoke("test")).isEqualTo(12);
+    }
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFunctionExprAssignedToInterface(JdkVersion jdkVersion) throws Exception {
@@ -50,27 +76,6 @@ public class TestCompileAstFnExprBasic extends BaseTestCompileSuite {
                   export class A {
                     test(): int {
                       return (function(x: int): int { return x * 3 })(4)
-                    }
-                  }
-                }""");
-        var instanceRunner = runner.createInstanceRunner("com.A");
-        assertThat((int) instanceRunner.invoke("test")).isEqualTo(12);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testFunctionExprAsArgument(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                import { IntUnaryOperator } from 'java.util.function'
-                namespace com {
-                  export class A {
-                    apply(fn: IntUnaryOperator, value: int): int {
-                      return fn(value)
-                    }
-
-                    test(): int {
-                      const fn: IntUnaryOperator = function(x: int): int { return x * 2 }
-                      return this.apply(fn, 6)
                     }
                   }
                 }""");

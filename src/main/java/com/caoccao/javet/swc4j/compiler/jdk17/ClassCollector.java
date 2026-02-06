@@ -128,9 +128,13 @@ public final class ClassCollector {
             compiler.getMemory().getCompilationContext().pushTypeParameterScope(typeParamScope);
         }
 
+        // Push the class onto the compilation context so type inference
+        // (e.g., inferTypeFromExpr for this.field) can resolve fields correctly
+        compiler.getMemory().getCompilationContext().pushClass(internalName);
         try {
             processClassDeclInternal(classDecl, clazz, typeInfo, qualifiedName);
         } finally {
+            compiler.getMemory().getCompilationContext().popClass();
             // Pop the type parameter scope when done
             if (typeParamScope != null) {
                 compiler.getMemory().getCompilationContext().popTypeParameterScope();

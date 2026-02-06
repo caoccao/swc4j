@@ -98,6 +98,10 @@ public final class ClassExpressionProcessor extends BaseAstProcessor<Swc4jAstCla
 
     /**
      * The type Class expr info.
+     *
+     * @param className     the simple class name
+     * @param qualifiedName the fully qualified class name
+     * @param internalName  the JVM internal name
      */
     public record ClassExprInfo(String className, String qualifiedName, String internalName) {
     }
