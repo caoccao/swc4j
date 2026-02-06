@@ -70,13 +70,6 @@ These need to be addressed so errors always include source snippet, line, column
 - Plan: Reject with clear compile-time error explaining unsupported dynamic scope.
 - Tests: with-statement rejection diagnostics.
 
-## Feature: Using Declaration
-- Evidence: `StatementProcessor` lacks `Swc4jAstUsingDecl` handling.
-- Status: Not supported; JS `using` relies on `Symbol.dispose` semantics not available on JVM.
-- Confidence: 15%.
-- Plan: Reject with clear compile-time error; document that try-with-resources is not auto-mapped.
-- Tests: using-decl rejection diagnostics.
-
 ## Feature: JSX AST Nodes
 - Evidence: `ExpressionProcessor` lacks `Swc4jAstJsx*` handling; AST includes JSX nodes.
 - Status: Not supported in bytecode compiler; requires prior JSX transform.
