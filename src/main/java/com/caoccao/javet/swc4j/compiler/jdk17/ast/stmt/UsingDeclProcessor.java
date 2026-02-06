@@ -27,6 +27,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.UsingResourceInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -185,6 +186,7 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
 
         String varName = bindingIdent.getId().getSym();
         String varType = compiler.getTypeResolver().extractType(bindingIdent, declarator.getInit());
+        validateAutoCloseableType(varType, declarator);
         LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
         if (localVar == null) {
             // Try to re-add from allVariables (pre-allocated by VariableAnalyzer in a different scope instance)
@@ -362,5 +364,44 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
                 || stmt instanceof Swc4jAstContinueStmt
                 || stmt instanceof Swc4jAstReturnStmt
                 || stmt instanceof Swc4jAstThrowStmt;
+    }
+
+    private void validateAutoCloseableType(String varType, Swc4jAstVarDeclarator declarator)
+            throws Swc4jByteCodeCompilerException {
+        if (!varType.startsWith("L") || !varType.endsWith(";")) {
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), declarator,
+                    "Resource type in 'using' declaration must be an object type implementing AutoCloseable");
+        }
+        String internalName = varType.substring(1, varType.length() - 1);
+        // AutoCloseable itself always passes
+        if ("java/lang/AutoCloseable".equals(internalName)) {
+            return;
+        }
+        // Try to look up in the scoped Java type registry
+        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolveByInternalName(internalName);
+        if (typeInfo != null) {
+            if (!typeInfo.isAssignableTo("Ljava/lang/AutoCloseable;")) {
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), declarator,
+                        "Resource type '" + internalName.replace('/', '.')
+                                + "' does not implement java.lang.AutoCloseable. "
+                                + "The 'using' declaration requires resources that implement AutoCloseable.");
+            }
+            return;
+        }
+        // Not in registry — try Java reflection as fallback for standard library types
+        try {
+            Class<?> clazz = Class.forName(internalName.replace('/', '.'));
+            if (!AutoCloseable.class.isAssignableFrom(clazz)) {
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), declarator,
+                        "Resource type '" + internalName.replace('/', '.')
+                                + "' does not implement java.lang.AutoCloseable. "
+                                + "The 'using' declaration requires resources that implement AutoCloseable.");
+            }
+        } catch (ClassNotFoundException e) {
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), declarator,
+                    "Resource type '" + internalName.replace('/', '.')
+                            + "' could not be resolved. "
+                            + "The 'using' declaration requires resources that implement AutoCloseable.");
+        }
     }
 }

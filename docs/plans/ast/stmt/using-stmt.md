@@ -1065,7 +1065,7 @@ Stack map frames are required at:
 - [x] `close()` called on normal scope exit
 - [x] `close()` called on exception
 - [x] Null-safe close (no NPE when resource is null)
-- [ ] Compile-time error for non-AutoCloseable types
+- [x] Compile-time error for non-AutoCloseable types
 - [x] Proper exception table generation
 - [x] Proper stack map frame generation
 - [x] All Phase 1 tests passing

@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.ast.stmt.usingstmt;
 
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -191,6 +192,46 @@ public class TestCompileAstUsingStmtBasic extends BaseTestCompileAstUsingStmt {
                     assertThat(e.getMessage()).isEqualTo("close error");
                     assertThat(e.getSuppressed()).isEmpty();
                 });
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testHasCloseMethodButNotAutoCloseable(JdkVersion jdkVersion) {
+        assertThatThrownBy(() -> getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class HasClose {
+                    close(): void {}
+                  }
+                  export class A {
+                    test(): void {
+                      using r: HasClose = new HasClose()
+                    }
+                  }
+                }"""))
+                .isInstanceOf(Swc4jByteCodeCompilerException.class)
+                .cause()
+                .isInstanceOf(Swc4jByteCodeCompilerException.class)
+                .hasMessageContaining("AutoCloseable");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNonAutoCloseableTypeRejected(JdkVersion jdkVersion) {
+        assertThatThrownBy(() -> getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class NotCloseable {
+                    value: int = 42
+                  }
+                  export class A {
+                    test(): void {
+                      using r: NotCloseable = new NotCloseable()
+                    }
+                  }
+                }"""))
+                .isInstanceOf(Swc4jByteCodeCompilerException.class)
+                .cause()
+                .isInstanceOf(Swc4jByteCodeCompilerException.class)
+                .hasMessageContaining("AutoCloseable");
     }
 
     @ParameterizedTest
