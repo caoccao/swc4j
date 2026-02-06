@@ -107,6 +107,8 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
             compiler.getThrowStatementProcessor().generate(code, classWriter, throwStmt, returnTypeInfo);
         } else if (stmt instanceof Swc4jAstTryStmt tryStmt) {
             compiler.getTryStatementProcessor().generate(code, classWriter, tryStmt, returnTypeInfo);
+        } else if (stmt instanceof Swc4jAstDebuggerStmt || stmt instanceof Swc4jAstEmptyStmt) {
+            // No-op: debugger and empty statements produce no bytecode
         } else {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), stmt,
                     "Unsupported statement type: " + stmt.getClass().getSimpleName());

@@ -63,13 +63,6 @@ These need to be addressed so errors always include source snippet, line, column
 - Compiler pathways pass only code strings; there is no centralized source map to resolve span offsets to line/column and snippet.
 - Error propagation does not standardize a single formatter for all thrown `Swc4jByteCodeCompilerException` cases.
 
-## Feature: Debugger and Empty Statements
-- Evidence: `StatementProcessor` lacks `Swc4jAstDebuggerStmt` and `Swc4jAstEmptyStmt` handling.
-- Status: Not implemented.
-- Confidence: 85%.
-- Plan: Treat both as no-ops and ensure they do not affect control flow or line mapping.
-- Tests: Debugger/empty statements within blocks and loops.
-
 ## Feature: With Statement
 - Evidence: `StatementProcessor` lacks `Swc4jAstWithStmt` handling.
 - Status: Not supported (dynamic scope cannot be safely compiled to JVM bytecode).
