@@ -60,10 +60,10 @@ public final class ArrayLiteralProcessor extends BaseAstProcessor<Swc4jAstArrayL
             generateJavaArray(code, classWriter, arrayLit, returnTypeInfo.descriptor());
         } else {
             // Array literal - convert to ArrayList
-            int arrayListClass = cp.addClass("java/util/ArrayList");
-            int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
-            int arrayListAdd = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
-            int arrayListAddAll = cp.addMethodRef("java/util/ArrayList", "addAll", "(Ljava/util/Collection;)Z");
+            int arrayListClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_ARRAYLIST);
+            int arrayListInit = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+            int arrayListAdd = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_ADD, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+            int arrayListAddAll = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, "addAll", "(Ljava/util/Collection;)Z");
 
             // Create new ArrayList instance
             code.newInstance(arrayListClass);
@@ -120,7 +120,7 @@ public final class ArrayLiteralProcessor extends BaseAstProcessor<Swc4jAstArrayL
             Swc4jAstArrayLit arrayLit,
             String arrayDescriptor) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
-        // Extract element type from array descriptor (e.g., "[I" -> TypeConversionUtils.ABBR_INTEGER, "[Ljava/lang/String;" -> "Ljava/lang/String;")
+        // Extract element type from array descriptor (e.g., TypeConversionUtils.ARRAY_I -> TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ARRAY_LJAVA_LANG_STRING -> TypeConversionUtils.LJAVA_LANG_STRING)
         String elemType = arrayDescriptor.substring(1);
 
         // Count non-empty elements

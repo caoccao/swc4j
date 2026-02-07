@@ -113,49 +113,49 @@ public final class IdentifierProcessor extends BaseAstProcessor<Swc4jAstIdent> {
                 switch (localVar.type()) {
                     case TypeConversionUtils.ABBR_INTEGER -> {
                         if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+                            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_I__LJAVA_LANG_INTEGER);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case TypeConversionUtils.ABBR_BOOLEAN -> {
                         if (TypeConversionUtils.LJAVA_LANG_BOOLEAN.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
+                            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_BOOLEAN, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_Z__LJAVA_LANG_BOOLEAN);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case TypeConversionUtils.ABBR_BYTE -> {
                         if (TypeConversionUtils.LJAVA_LANG_BYTE.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+                            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_BYTE, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_B__LJAVA_LANG_BYTE);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case TypeConversionUtils.ABBR_CHARACTER -> {
                         if (TypeConversionUtils.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
+                            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_CHARACTER, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_C__LJAVA_LANG_CHARACTER);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case TypeConversionUtils.ABBR_SHORT -> {
                         if (TypeConversionUtils.LJAVA_LANG_SHORT.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+                            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_SHORT, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_S__LJAVA_LANG_SHORT);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case TypeConversionUtils.ABBR_LONG -> {
                         if (TypeConversionUtils.LJAVA_LANG_LONG.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+                            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_LONG, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_J__LJAVA_LANG_LONG);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case TypeConversionUtils.ABBR_FLOAT -> {
                         if (TypeConversionUtils.LJAVA_LANG_FLOAT.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+                            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_FLOAT, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_F__LJAVA_LANG_FLOAT);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case TypeConversionUtils.ABBR_DOUBLE -> {
                         if (TypeConversionUtils.LJAVA_LANG_DOUBLE.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
+                            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_DOUBLE, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_D__LJAVA_LANG_DOUBLE);
                             code.invokestatic(valueOfRef);
                         }
                     }
@@ -171,34 +171,34 @@ public final class IdentifierProcessor extends BaseAstProcessor<Swc4jAstIdent> {
                     if (targetDescriptor == null) return;
                     switch (targetDescriptor) {
                         case TypeConversionUtils.ABBR_INTEGER: // int
-                            int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
+                            int intValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                             code.invokevirtual(intValueRef);
                             break;
                         case TypeConversionUtils.ABBR_LONG: // long
-                            int longValueRef = cp.addMethodRef("java/math/BigInteger", "longValue", "()J");
+                            int longValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_LONG_VALUE, TypeConversionUtils.DESCRIPTER___J);
                             code.invokevirtual(longValueRef);
                             break;
                         case TypeConversionUtils.ABBR_DOUBLE: // double
-                            int doubleValueRef = cp.addMethodRef("java/math/BigInteger", "doubleValue", "()D");
+                            int doubleValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_DOUBLE_VALUE, TypeConversionUtils.DESCRIPTER___D);
                             code.invokevirtual(doubleValueRef);
                             break;
                         case TypeConversionUtils.ABBR_FLOAT: // float
-                            int floatValueRef = cp.addMethodRef("java/math/BigInteger", "floatValue", "()F");
+                            int floatValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_FLOAT_VALUE, TypeConversionUtils.DESCRIPTER___F);
                             code.invokevirtual(floatValueRef);
                             break;
                         case TypeConversionUtils.ABBR_BYTE: // byte
-                            int byteValueRef = cp.addMethodRef("java/math/BigInteger", "byteValue", "()B");
+                            int byteValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_BYTE_VALUE, TypeConversionUtils.DESCRIPTER___B);
                             code.invokevirtual(byteValueRef);
                             break;
                         case TypeConversionUtils.ABBR_SHORT: // short
-                            int shortValueRef = cp.addMethodRef("java/math/BigInteger", "shortValue", "()S");
+                            int shortValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_SHORT_VALUE, TypeConversionUtils.DESCRIPTER___S);
                             code.invokevirtual(shortValueRef);
                             break;
                         case TypeConversionUtils.ABBR_BOOLEAN: // boolean
                             // BigInteger.equals(ZERO) - zero is false, non-zero is true
-                            int zeroFieldRef = cp.addFieldRef("java/math/BigInteger", "ZERO", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
+                            int zeroFieldRef = cp.addFieldRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, "ZERO", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
                             code.getstatic(zeroFieldRef);
-                            int equalsRef = cp.addMethodRef("java/math/BigInteger", "equals", "(Ljava/lang/Object;)Z");
+                            int equalsRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_EQUALS, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
                             code.invokevirtual(equalsRef);
                             // Invert: equals returns 1 for zero (false), 0 for non-zero (true)
                             code.iconst(1);

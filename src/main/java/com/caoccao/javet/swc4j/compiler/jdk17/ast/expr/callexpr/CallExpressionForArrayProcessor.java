@@ -74,14 +74,14 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
             switch (methodName) {
                 case "fill" -> generateFill(code, classWriter, callExpr, elementType);
                 case "includes" -> generateIncludes(code, classWriter, callExpr, elementType);
-                case "indexOf" -> generateIndexOf(code, classWriter, callExpr, elementType);
+                case TypeConversionUtils.METHOD_INDEX_OF -> generateIndexOf(code, classWriter, callExpr, elementType);
                 case "join" -> generateJoin(code, classWriter, callExpr, elementType);
-                case "lastIndexOf" -> generateLastIndexOf(code, classWriter, callExpr, elementType);
+                case TypeConversionUtils.METHOD_LAST_INDEX_OF -> generateLastIndexOf(code, classWriter, callExpr, elementType);
                 case "reverse" -> generateReverse(code, classWriter, elementType);
                 case "sort" -> generateSort(code, classWriter, elementType);
                 case "toReversed" -> generateToReversed(code, classWriter, elementType);
                 case "toSorted" -> generateToSorted(code, classWriter, elementType);
-                case "toString" -> generateToString(code, classWriter, elementType);
+                case TypeConversionUtils.METHOD_TO_STRING -> generateToString(code, classWriter, elementType);
                 default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                         "Method '" + methodName + "()' is not supported on Java arrays (" + arrayTypeName + "). " +
                                 "Java arrays only support: .length property and index access arr[i].");
@@ -102,7 +102,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         var cp = classWriter.getConstantPool();
         // Cast reference type arrays to Object[] for the method call
         if (elementType.startsWith("L")) {
-            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            int objectArrayClass = cp.addClass(TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT);
             code.checkcast(objectArrayClass);
         }
 
@@ -144,7 +144,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         var cp = classWriter.getConstantPool();
         // Cast reference type arrays to Object[] for the method call
         if (elementType.startsWith("L")) {
-            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            int objectArrayClass = cp.addClass(TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT);
             code.checkcast(objectArrayClass);
         }
 
@@ -179,7 +179,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         var cp = classWriter.getConstantPool();
         // Cast reference type arrays to Object[] for the method call
         if (elementType.startsWith("L")) {
-            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            int objectArrayClass = cp.addClass(TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT);
             code.checkcast(objectArrayClass);
         }
 
@@ -198,8 +198,8 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         }
 
         // Call ArrayApiUtils.indexOf
-        String methodSignature = getArrayApiUtilsSearchSignature("indexOf", elementType, TypeConversionUtils.ABBR_INTEGER);
-        int indexOfMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "indexOf", methodSignature);
+        String methodSignature = getArrayApiUtilsSearchSignature(TypeConversionUtils.METHOD_INDEX_OF, elementType, TypeConversionUtils.ABBR_INTEGER);
+        int indexOfMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", TypeConversionUtils.METHOD_INDEX_OF, methodSignature);
         code.invokestatic(indexOfMethod);
     }
 
@@ -208,7 +208,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         // Cast reference type arrays to Object[] for the method call
         var cp = classWriter.getConstantPool();
         if (elementType.startsWith("L")) {
-            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            int objectArrayClass = cp.addClass(TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT);
             code.checkcast(objectArrayClass);
         }
 
@@ -238,7 +238,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         var cp = classWriter.getConstantPool();
         // Cast reference type arrays to Object[] for the method call
         if (elementType.startsWith("L")) {
-            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            int objectArrayClass = cp.addClass(TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT);
             code.checkcast(objectArrayClass);
         }
 
@@ -257,8 +257,8 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         }
 
         // Call ArrayApiUtils.lastIndexOf
-        String methodSignature = getArrayApiUtilsSearchSignature("lastIndexOf", elementType, TypeConversionUtils.ABBR_INTEGER);
-        int lastIndexOfMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "lastIndexOf", methodSignature);
+        String methodSignature = getArrayApiUtilsSearchSignature(TypeConversionUtils.METHOD_LAST_INDEX_OF, elementType, TypeConversionUtils.ABBR_INTEGER);
+        int lastIndexOfMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", TypeConversionUtils.METHOD_LAST_INDEX_OF, methodSignature);
         code.invokestatic(lastIndexOfMethod);
     }
 
@@ -267,7 +267,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         // Cast reference type arrays to Object[] for the method call
         var cp = classWriter.getConstantPool();
         if (elementType.startsWith("L")) {
-            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            int objectArrayClass = cp.addClass(TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT);
             code.checkcast(objectArrayClass);
         }
 
@@ -288,7 +288,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         // Cast reference type arrays to Object[] for the method call
         var cp = classWriter.getConstantPool();
         if (elementType.startsWith("L")) {
-            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            int objectArrayClass = cp.addClass(TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT);
             code.checkcast(objectArrayClass);
         }
 
@@ -309,7 +309,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         // Cast reference type arrays to Object[] for the method call
         var cp = classWriter.getConstantPool();
         if (elementType.startsWith("L")) {
-            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            int objectArrayClass = cp.addClass(TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT);
             code.checkcast(objectArrayClass);
         }
 
@@ -330,7 +330,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         // Cast reference type arrays to Object[] for the method call
         var cp = classWriter.getConstantPool();
         if (elementType.startsWith("L")) {
-            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            int objectArrayClass = cp.addClass(TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT);
             code.checkcast(objectArrayClass);
         }
 
@@ -351,12 +351,12 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         // Cast reference type arrays to Object[] for the method call
         var cp = classWriter.getConstantPool();
         if (elementType.startsWith("L")) {
-            int objectArrayClass = cp.addClass("[Ljava/lang/Object;");
+            int objectArrayClass = cp.addClass(TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT);
             code.checkcast(objectArrayClass);
         }
 
         String methodSignature = getArrayApiUtilsToStringSignature(elementType);
-        int toStringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "toString", methodSignature);
+        int toStringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", TypeConversionUtils.METHOD_TO_STRING, methodSignature);
         code.invokestatic(toStringMethod);
     }
 
@@ -369,7 +369,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         String valueType;
         if (elementType.startsWith("L")) {
             // Reference type - use Object[] signature
-            arrayDescriptor = "[Ljava/lang/Object;";
+            arrayDescriptor = TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT;
             valueType = TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else {
             // Primitive type
@@ -387,7 +387,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         String arrayDescriptor;
         if (elementType.startsWith("L")) {
             // Reference type - use Object[] signature
-            arrayDescriptor = "[Ljava/lang/Object;";
+            arrayDescriptor = TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT;
         } else {
             // Primitive type
             arrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;
@@ -407,7 +407,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
 
         if (elementType.startsWith("L")) {
             // Reference type - use Object[] signature
-            arrayDescriptor = "[Ljava/lang/Object;";
+            arrayDescriptor = TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT;
             paramType = TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else {
             // Primitive type - use the primitive type
@@ -425,7 +425,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         String arrayDescriptor;
         if (elementType.startsWith("L")) {
             // Reference type - use Object[] signature
-            arrayDescriptor = "[Ljava/lang/Object;";
+            arrayDescriptor = TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT;
         } else {
             // Primitive type
             arrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;
@@ -441,7 +441,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         String arrayDescriptor;
         if (elementType.startsWith("L")) {
             // Reference type - use Object[] signature
-            arrayDescriptor = "[Ljava/lang/Object;";
+            arrayDescriptor = TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT;
         } else {
             // Primitive type
             arrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;

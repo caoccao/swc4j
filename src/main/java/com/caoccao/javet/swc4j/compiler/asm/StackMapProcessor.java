@@ -108,10 +108,10 @@ public class StackMapProcessor {
                         if (entry.catchType() != 0) {
                             exceptionClass = constantPool.getClassName(entry.catchType());
                             if (exceptionClass == null) {
-                                exceptionClass = "java/lang/Throwable";
+                                exceptionClass = TypeConversionUtils.JAVA_LANG_THROWABLE;
                             }
                         } else {
-                            exceptionClass = "java/lang/Throwable"; // catch-all
+                            exceptionClass = TypeConversionUtils.JAVA_LANG_THROWABLE; // catch-all
                         }
                         handlerFrame.stack.add(VerificationType.object(exceptionClass));
                         workQueue.add(new WorkItem(handlerPc, handlerFrame));
@@ -151,7 +151,7 @@ public class StackMapProcessor {
                 // Only add class names for OBJECT types (ClassWriter expects sparse list)
                 if (type.tag == OBJECT) {
                     // Every OBJECT type must have a className
-                    String className = (type.className != null) ? type.className : "java/lang/Object";
+                    String className = (type.className != null) ? type.className : TypeConversionUtils.JAVA_LANG_OBJECT;
                     resultClassNames.add(className);
                 }
             }
@@ -645,12 +645,12 @@ public class StackMapProcessor {
             if (Objects.equals(type1.className, type2.className)) {
                 return type1; // Same class, preserve it
             }
-            return VerificationType.object("java/lang/Object");
+            return VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT);
         }
 
         // Different reference types
         if (type1.tag == NULL || type2.tag == NULL) {
-            return VerificationType.object("java/lang/Object");
+            return VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT);
         }
 
         // For incompatible primitives, return TOP (invalid state)
@@ -688,7 +688,7 @@ public class StackMapProcessor {
                 // Array type
                 stack.add(VerificationType.object(returnType));
             }
-            default -> stack.add(VerificationType.object("java/lang/Object"));
+            default -> stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
         }
     }
 
@@ -725,9 +725,9 @@ public class StackMapProcessor {
                 switch (constType) {
                     case 'I' -> stack.add(VerificationType.integer());
                     case 'F' -> stack.add(VerificationType.float_());
-                    case 'S' -> stack.add(VerificationType.object("java/lang/String"));
-                    case 'C' -> stack.add(VerificationType.object("java/lang/Class"));
-                    default -> stack.add(VerificationType.object("java/lang/Object"));
+                    case 'S' -> stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_STRING));
+                    case 'C' -> stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_CLASS));
+                    default -> stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
                 }
             }
             case 0x14 -> // ldc2_w (long or double)
@@ -752,7 +752,7 @@ public class StackMapProcessor {
                 if (aloadIndex < newFrame.locals.size()) {
                     stack.add(newFrame.locals.get(aloadIndex));
                 } else {
-                    stack.add(VerificationType.object("java/lang/Object"));
+                    stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
                 }
             }
             // Stores - pop from stack and update locals
@@ -914,7 +914,7 @@ public class StackMapProcessor {
                 String methodDescriptor = (constantPool != null) ? constantPool.getMethodDescriptor(methodIndex) : null;
                 if (methodDescriptor != null) {
                     // Parse descriptor to get argument count and return type
-                    // Format: (args)return e.g., "(Ljava/lang/String;)Ljava/lang/String;"
+                    // Format: (args)return e.g., TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING
                     int argCount = countMethodArgSlots(methodDescriptor);
                     String returnType = getReturnType(methodDescriptor);
                     // Pop arguments (and receiver for non-static)
@@ -933,13 +933,13 @@ public class StackMapProcessor {
                     int nextPc = pc + 3;
                     int nextOpcode = (nextPc < bytecode.length) ? (bytecode[nextPc] & 0xFF) : 0;
                     if (nextOpcode == 0x57 || nextOpcode == 0x58) {
-                        stack.add(VerificationType.object("java/lang/Object"));
+                        stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
                     } else if (nextOpcode == 0x59) {
-                        stack.add(VerificationType.object("java/lang/Object"));
+                        stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
                     } else if (opcode == 0xB7) {
                         // void return for invokespecial
                     } else {
-                        stack.add(VerificationType.object("java/lang/Object"));
+                        stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
                     }
                 }
             }
@@ -973,7 +973,7 @@ public class StackMapProcessor {
                     if (nextOpcode == 0x99 || nextOpcode == 0x9A) {
                         stack.add(VerificationType.integer());
                     } else {
-                        stack.add(VerificationType.object("java/lang/Object"));
+                        stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
                     }
                 }
             }
@@ -985,7 +985,7 @@ public class StackMapProcessor {
                 if (fieldDescriptor != null) {
                     pushFieldType(stack, fieldDescriptor);
                 } else {
-                    stack.add(VerificationType.object("java/lang/Object"));
+                    stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
                 }
             }
             case 0xB3 -> // putstatic - pop value, push nothing
@@ -1011,7 +1011,7 @@ public class StackMapProcessor {
                 if (fieldDescriptor != null) {
                     pushFieldType(stack, fieldDescriptor);
                 } else {
-                    stack.add(VerificationType.object("java/lang/Object"));
+                    stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
                 }
             }
             case 0xB5 -> // putfield - pop objectref and value, push nothing
@@ -1028,7 +1028,7 @@ public class StackMapProcessor {
             case 0xBB -> { // new
                 int classIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
                 String newClassName = (constantPool != null) ? constantPool.getClassName(classIndex) : null;
-                stack.add(VerificationType.object(newClassName != null ? newClassName : "java/lang/Object"));
+                stack.add(VerificationType.object(newClassName != null ? newClassName : TypeConversionUtils.JAVA_LANG_OBJECT));
             }
             // Type conversions, i2l, f2l
             case 0x85, 0x8C, 0x8F -> {
@@ -1094,7 +1094,7 @@ public class StackMapProcessor {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1); // index
                     stack.remove(stack.size() - 1); // arrayref
-                    stack.add(VerificationType.object("java/lang/Object"));
+                    stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
                 }
             }
             // Array stores - pop arrayref, index, and value
@@ -1124,14 +1124,14 @@ public class StackMapProcessor {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1); // count
                     // atype byte determines the primitive type, but result is always an array
-                    stack.add(VerificationType.object("[I")); // Generic - actual type depends on atype
+                    stack.add(VerificationType.object(TypeConversionUtils.ARRAY_I)); // Generic - actual type depends on atype
                 }
             }
             // anewarray - pop count, push array reference
             case 0xBD -> {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1); // count
-                    stack.add(VerificationType.object("[Ljava/lang/Object;"));
+                    stack.add(VerificationType.object(TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT));
                 }
             }
             // Type checking
@@ -1139,7 +1139,7 @@ public class StackMapProcessor {
                 if (!stack.isEmpty()) {
                     // Get class index from bytecode
                     int classIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
-                    String className = (constantPool != null) ? constantPool.getClassName(classIndex) : "java/lang/Object";
+                    String className = (constantPool != null) ? constantPool.getClassName(classIndex) : TypeConversionUtils.JAVA_LANG_OBJECT;
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.object(className));
                 }
@@ -1186,7 +1186,7 @@ public class StackMapProcessor {
         /**
          * The Class name.
          */
-        final String className; // For OBJECT types, the internal class name (e.g., "java/lang/String")
+        final String className; // For OBJECT types, the internal class name (e.g., TypeConversionUtils.JAVA_LANG_STRING)
         /**
          * The Tag.
          */

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 
 /**
  * Utility class for String operations matching JavaScript String API semantics.
@@ -75,27 +76,27 @@ public final class StringApiUtils {
             case TypeConversionUtils.ABBR_CHARACTER -> code.invokevirtual(appendChar);
             case TypeConversionUtils.ABBR_LONG -> {
                 // long
-                int appendLong = cp.addMethodRef("java/lang/StringBuilder", "append", "(J)Ljava/lang/StringBuilder;");
+                int appendLong = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, TypeConversionUtils.DESCRIPTOR_J__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendLong);
             }
             case TypeConversionUtils.ABBR_FLOAT -> {
                 // float
-                int appendFloat = cp.addMethodRef("java/lang/StringBuilder", "append", "(F)Ljava/lang/StringBuilder;");
+                int appendFloat = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, TypeConversionUtils.DESCRIPTOR_F__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendFloat);
             }
             case TypeConversionUtils.ABBR_DOUBLE -> {
                 // double
-                int appendDouble = cp.addMethodRef("java/lang/StringBuilder", "append", "(D)Ljava/lang/StringBuilder;");
+                int appendDouble = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, TypeConversionUtils.DESCRIPTOR_D__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendDouble);
             }
             case TypeConversionUtils.ABBR_BOOLEAN -> {
                 // boolean
-                int appendBoolean = cp.addMethodRef("java/lang/StringBuilder", "append", "(Z)Ljava/lang/StringBuilder;");
+                int appendBoolean = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, TypeConversionUtils.DESCRIPTOR_Z__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendBoolean);
             }
             case TypeConversionUtils.LJAVA_LANG_CHARACTER -> {
                 // Unbox Character to char
-                int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
+                int charValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_CHARACTER, TypeConversionUtils.METHOD_CHAR_VALUE, TypeConversionUtils.DESCRIPTER___C);
                 code.invokevirtual(charValueRef);
                 code.invokevirtual(appendChar);
             }
@@ -104,9 +105,9 @@ public final class StringApiUtils {
                 // Unbox to int, then append
                 String wrapperClass = operandType.substring(1, operandType.length() - 1); // Remove L and ;
                 String methodName = switch (operandType) {
-                    case TypeConversionUtils.LJAVA_LANG_BYTE -> "byteValue";
-                    case TypeConversionUtils.LJAVA_LANG_SHORT -> "shortValue";
-                    case TypeConversionUtils.LJAVA_LANG_INTEGER -> "intValue";
+                    case TypeConversionUtils.LJAVA_LANG_BYTE -> TypeConversionUtils.METHOD_BYTE_VALUE;
+                    case TypeConversionUtils.LJAVA_LANG_SHORT -> TypeConversionUtils.METHOD_SHORT_VALUE;
+                    case TypeConversionUtils.LJAVA_LANG_INTEGER -> TypeConversionUtils.METHOD_INT_VALUE;
                     default ->
                             throw new Swc4jByteCodeCompilerException(sourceCode, operand, "Unexpected type: " + operandType);
                 };
@@ -123,35 +124,35 @@ public final class StringApiUtils {
             }
             case TypeConversionUtils.LJAVA_LANG_LONG -> {
                 // Unbox Long to long
-                int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
+                int longValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_LONG, TypeConversionUtils.METHOD_LONG_VALUE, TypeConversionUtils.DESCRIPTER___J);
                 code.invokevirtual(longValueRef);
-                int appendLong = cp.addMethodRef("java/lang/StringBuilder", "append", "(J)Ljava/lang/StringBuilder;");
+                int appendLong = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, TypeConversionUtils.DESCRIPTOR_J__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendLong);
             }
             case TypeConversionUtils.LJAVA_LANG_FLOAT -> {
                 // Unbox Float to float
-                int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
+                int floatValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_FLOAT, TypeConversionUtils.METHOD_FLOAT_VALUE, TypeConversionUtils.DESCRIPTER___F);
                 code.invokevirtual(floatValueRef);
-                int appendFloat = cp.addMethodRef("java/lang/StringBuilder", "append", "(F)Ljava/lang/StringBuilder;");
+                int appendFloat = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, TypeConversionUtils.DESCRIPTOR_F__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendFloat);
             }
             case TypeConversionUtils.LJAVA_LANG_DOUBLE -> {
                 // Unbox Double to double
-                int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
+                int doubleValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_DOUBLE, TypeConversionUtils.METHOD_DOUBLE_VALUE, TypeConversionUtils.DESCRIPTER___D);
                 code.invokevirtual(doubleValueRef);
-                int appendDouble = cp.addMethodRef("java/lang/StringBuilder", "append", "(D)Ljava/lang/StringBuilder;");
+                int appendDouble = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, TypeConversionUtils.DESCRIPTOR_D__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendDouble);
             }
             case TypeConversionUtils.LJAVA_LANG_BOOLEAN -> {
                 // Unbox Boolean to boolean
-                int booleanValueRef = cp.addMethodRef("java/lang/Boolean", "booleanValue", "()Z");
+                int booleanValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_BOOLEAN, TypeConversionUtils.METHOD_BOOLEAN_VALUE, TypeConversionUtils.DESCRIPTER___Z);
                 code.invokevirtual(booleanValueRef);
-                int appendBoolean = cp.addMethodRef("java/lang/StringBuilder", "append", "(Z)Ljava/lang/StringBuilder;");
+                int appendBoolean = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, TypeConversionUtils.DESCRIPTOR_Z__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendBoolean);
             }
             default -> {
                 // For any other object type, use append(Object)
-                int appendObject = cp.addMethodRef("java/lang/StringBuilder", "append", "(Ljava/lang/Object;)Ljava/lang/StringBuilder;");
+                int appendObject = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, "(Ljava/lang/Object;)Ljava/lang/StringBuilder;");
                 code.invokevirtual(appendObject);
             }
         }
@@ -243,12 +244,12 @@ public final class StringApiUtils {
         var cp = classWriter.getConstantPool();
         // Use StringBuilder for string concatenation
         // new StringBuilder
-        int stringBuilderClass = cp.addClass("java/lang/StringBuilder");
-        int stringBuilderInit = cp.addMethodRef("java/lang/StringBuilder", "<init>", "()V");
-        int appendString = cp.addMethodRef("java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
-        int appendInt = cp.addMethodRef("java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;");
-        int appendChar = cp.addMethodRef("java/lang/StringBuilder", "append", "(C)Ljava/lang/StringBuilder;");
-        int toString = cp.addMethodRef("java/lang/StringBuilder", "toString", "()Ljava/lang/String;");
+        int stringBuilderClass = cp.addClass(TypeConversionUtils.JAVA_LANG_STRINGBUILDER);
+        int stringBuilderInit = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+        int appendString = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
+        int appendInt = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_STRINGBUILDER);
+        int appendChar = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, TypeConversionUtils.DESCRIPTOR_C__LJAVA_LANG_STRINGBUILDER);
+        int toString = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_TO_STRING, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
 
         code.newInstance(stringBuilderClass)
                 .dup()

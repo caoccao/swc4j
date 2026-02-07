@@ -32,6 +32,7 @@ import com.caoccao.javet.swc4j.compiler.memory.UsingResourceInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 
 /**
  * Processor for {@code using} declaration statements.
@@ -107,7 +108,7 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
         // aload <resource>
         code.aload(resourceSlot);
         // invokeinterface AutoCloseable.close:()V
-        int closeRef = cp.addInterfaceMethodRef("java/lang/AutoCloseable", "close", "()V");
+        int closeRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_LANG_AUTOCLOSEABLE, "close", TypeConversionUtils.DESCRIPTOR___V);
         code.invokeinterface(closeRef, 1);
         // skip:
         int skipPc = code.getCurrentOffset();
@@ -130,7 +131,7 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
         // try { resource.close() }
         int tryCloseStartPc = code.getCurrentOffset();
         code.aload(resourceSlot);
-        int closeRef = cp.addInterfaceMethodRef("java/lang/AutoCloseable", "close", "()V");
+        int closeRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_LANG_AUTOCLOSEABLE, "close", TypeConversionUtils.DESCRIPTOR___V);
         code.invokeinterface(closeRef, 1);
         int tryCloseEndPc = code.getCurrentOffset();
 
@@ -144,7 +145,7 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
 
         // Allocate temp for suppressed exception
         String suppressedTempName = "$suppressedException$" + resourceSlot;
-        context.getLocalVariableTable().allocateVariable(suppressedTempName, "Ljava/lang/Throwable;");
+        context.getLocalVariableTable().allocateVariable(suppressedTempName, TypeConversionUtils.LJAVA_LANG_THROWABLE);
         LocalVariable suppressedExc = context.getLocalVariableTable().getVariable(suppressedTempName);
 
         // astore <suppressed>
@@ -153,7 +154,7 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
         code.aload(primaryExcSlot);
         code.aload(suppressedExc.index());
         int addSuppressedRef = cp.addMethodRef(
-                "java/lang/Throwable", "addSuppressed", "(Ljava/lang/Throwable;)V");
+                TypeConversionUtils.JAVA_LANG_THROWABLE, "addSuppressed", "(Ljava/lang/Throwable;)V");
         code.invokevirtual(addSuppressedRef);
 
         // skip: (reached by ifnull, goto after successful close, or fall-through after addSuppressed)
@@ -162,7 +163,7 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
         code.patchShort(gotoOffsetPos, skipPc - gotoOpcodePos);
 
         // Add inner exception table entry for try-close
-        int throwableClassIndex = cp.addClass("java/lang/Throwable");
+        int throwableClassIndex = cp.addClass(TypeConversionUtils.JAVA_LANG_THROWABLE);
         code.addExceptionHandler(tryCloseStartPc, tryCloseEndPc, catchClosePc, throwableClassIndex);
     }
 
@@ -265,7 +266,7 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
 
             // Allocate temp variable for primary exception
             String tempName = "$usingException$" + System.identityHashCode(declarator);
-            context.getLocalVariableTable().allocateVariable(tempName, "Ljava/lang/Throwable;");
+            context.getLocalVariableTable().allocateVariable(tempName, TypeConversionUtils.LJAVA_LANG_THROWABLE);
             LocalVariable tempException = context.getLocalVariableTable().getVariable(tempName);
 
             // Store primary exception
@@ -374,13 +375,13 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
         }
         String internalName = varType.substring(1, varType.length() - 1);
         // AutoCloseable itself always passes
-        if ("java/lang/AutoCloseable".equals(internalName)) {
+        if (TypeConversionUtils.JAVA_LANG_AUTOCLOSEABLE.equals(internalName)) {
             return;
         }
         // Try to look up in the scoped Java type registry
         JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolveByInternalName(internalName);
         if (typeInfo != null) {
-            if (!typeInfo.isAssignableTo("Ljava/lang/AutoCloseable;")) {
+            if (!typeInfo.isAssignableTo(TypeConversionUtils.LJAVA_LANG_AUTOCLOSEABLE)) {
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), declarator,
                         "Resource type '" + internalName.replace('/', '.')
                                 + "' does not implement java.lang.AutoCloseable. "

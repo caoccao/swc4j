@@ -79,21 +79,21 @@ public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumbe
             // Box integer to Integer
             int intValue = (int) value;
             code.iconst(intValue);
-            int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_I__LJAVA_LANG_INTEGER);
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                 && TypeConversionUtils.LJAVA_LANG_BYTE.equals(returnTypeInfo.descriptor())) {
             // Box byte to Byte
             byte byteValue = (byte) value;
             code.iconst(byteValue);
-            int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_BYTE, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_B__LJAVA_LANG_BYTE);
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                 && TypeConversionUtils.LJAVA_LANG_SHORT.equals(returnTypeInfo.descriptor())) {
             // Box short to Short
             short shortValue = (short) value;
             code.iconst(shortValue);
-            int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_SHORT, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_S__LJAVA_LANG_SHORT);
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                 && TypeConversionUtils.LJAVA_LANG_LONG.equals(returnTypeInfo.descriptor())) {
@@ -105,7 +105,7 @@ public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumbe
                 int longIndex = cp.addLong(longValue);
                 code.ldc2_w(longIndex);
             }
-            int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_LONG, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_J__LJAVA_LANG_LONG);
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                 && TypeConversionUtils.LJAVA_LANG_FLOAT.equals(returnTypeInfo.descriptor())) {
@@ -117,7 +117,7 @@ public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumbe
                 int floatIndex = cp.addFloat(floatValue);
                 code.ldc(floatIndex);
             }
-            int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_FLOAT, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_F__LJAVA_LANG_FLOAT);
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                 && TypeConversionUtils.LJAVA_LANG_DOUBLE.equals(returnTypeInfo.descriptor())) {
@@ -128,7 +128,7 @@ public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumbe
                 int doubleIndex = cp.addDouble(value);
                 code.ldc2_w(doubleIndex);
             }
-            int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
+            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_DOUBLE, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_D__LJAVA_LANG_DOUBLE);
             code.invokestatic(valueOfRef);
         } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
             // Integer value - check if it fits in iconst/bipush/sipush range

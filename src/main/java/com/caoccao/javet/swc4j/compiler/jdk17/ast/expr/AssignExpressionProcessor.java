@@ -370,11 +370,11 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 // Check if it's arr.length = newLength - NOT SUPPORTED for Java arrays
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
-                    if ("length".equals(propName)) {
+                    if (TypeConversionUtils.METHOD_LENGTH.equals(propName)) {
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr, "Cannot set length on Java array - array size is fixed");
                     }
                 }
-            } else if ("Ljava/util/ArrayList;".equals(objType) || "Ljava/util/List;".equals(objType)) {
+            } else if (TypeConversionUtils.LJAVA_UTIL_ARRAYLIST.equals(objType) || TypeConversionUtils.LJAVA_UTIL_LIST.equals(objType)) {
                 // Check if it's arr[index] = value
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                     // arr[index] = value -> arr.set(index, value)
@@ -385,7 +385,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                     if (TypeConversionUtils.LJAVA_LANG_STRING.equals(indexType)) {
                         // String index -> Integer.parseInt(index)
-                        int parseIntMethod = cp.addMethodRef("java/lang/Integer", "parseInt", "(Ljava/lang/String;)I");
+                        int parseIntMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_PARSE_INT, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__I);
                         code.invokestatic(parseIntMethod); // Stack: [ArrayList/List, int]
                     }
 
@@ -395,14 +395,14 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
                     if (TypeConversionUtils.isPrimitiveType(valueType)) {
                         String wrapperType = TypeConversionUtils.getWrapperType(valueType);
-                        // wrapperType is already in the form "Ljava/lang/Integer;" so use it directly
+                        // wrapperType is already in the form TypeConversionUtils.LJAVA_LANG_INTEGER so use it directly
                         String className = wrapperType.substring(1, wrapperType.length() - 1); // Remove L and ;
-                        int valueOfRef = cp.addMethodRef(className, "valueOf", "(" + valueType + ")" + wrapperType);
+                        int valueOfRef = cp.addMethodRef(className, TypeConversionUtils.METHOD_VALUE_OF, "(" + valueType + ")" + wrapperType);
                         code.invokestatic(valueOfRef); // Stack: [ArrayList/List, index, boxedValue]
                     }
 
                     // Call List.set(int, Object) via interface method
-                    int setMethod = cp.addInterfaceMethodRef("java/util/List", "set", "(ILjava/lang/Object;)Ljava/lang/Object;");
+                    int setMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SET, TypeConversionUtils.DESCRIPTOR_I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                     code.invokeinterface(setMethod, 3); // Stack: [oldValue] - the return value of set() is the previous value
                     // Leave the value on stack for expression statements to pop
                     return;
@@ -411,12 +411,12 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 // Check if it's arr.length = newLength
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
-                    if ("length".equals(propName)) {
+                    if (TypeConversionUtils.METHOD_LENGTH.equals(propName)) {
                         // arr.length = newLength
                         // Special case: arr.length = 0 -> arr.clear()
                         if (assignExpr.getRight() instanceof Swc4jAstNumber number && number.getValue() == 0.0) {
                             compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [List]
-                            int clearMethod = cp.addInterfaceMethodRef("java/util/List", "clear", "()V");
+                            int clearMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, "clear", TypeConversionUtils.DESCRIPTOR___V);
                             code.invokeinterface(clearMethod, 1); // Stack: []
                             // Assignment expression should return the assigned value (0 in this case)
                             code.iconst(0); // Stack: [0]
@@ -435,15 +435,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                             // Get arr.size() - need to load List again
                             compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [List, List, newLength, List]
-                            int sizeMethod = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
+                            int sizeMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
                             code.invokeinterface(sizeMethod, 1); // Stack: [List, List, newLength, size]
 
                             // Call subList(newLength, size) on the second List
-                            int subListMethod = cp.addInterfaceMethodRef("java/util/List", "subList", "(II)Ljava/util/List;");
+                            int subListMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, "subList", TypeConversionUtils.DESCRIPTOR_I_I__LJAVA_UTIL_LIST);
                             code.invokeinterface(subListMethod, 3); // Stack: [List, List]
 
                             // Call clear() on the returned subList
-                            int clearMethod2 = cp.addInterfaceMethodRef("java/util/List", "clear", "()V");
+                            int clearMethod2 = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, "clear", TypeConversionUtils.DESCRIPTOR___V);
                             code.invokeinterface(clearMethod2, 1); // Stack: [List]
 
                             // Assignment expression returns the assigned value (newLength), not the List
@@ -456,7 +456,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr, "Setting array length to non-constant values not yet supported");
                     }
                 }
-            } else if ("Ljava/util/LinkedHashMap;".equals(objType)) {
+            } else if (TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP.equals(objType)) {
                 // LinkedHashMap operations (object literal property assignment)
                 // Check if it's obj[key] = value (computed property)
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
@@ -481,7 +481,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     }
 
                     // Call LinkedHashMap.put(Object, Object)
-                    int putMethod = cp.addMethodRef("java/util/LinkedHashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+                    int putMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, "put", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                     code.invokevirtual(putMethod); // Stack: [oldValue] - the return value is the previous value (or null)
                     // Leave the value on stack for expression statements to pop
                     return;
@@ -505,7 +505,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     }
 
                     // Call LinkedHashMap.put(Object, Object)
-                    int putMethod = cp.addMethodRef("java/util/LinkedHashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+                    int putMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, "put", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                     code.invokevirtual(putMethod); // Stack: [oldValue]
                     // Leave the value on stack for expression statements to pop
                     return;
@@ -617,15 +617,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     // Convert value to String using String.valueOf() if it's not already a String
                     if (!TypeConversionUtils.LJAVA_LANG_STRING.equals(valueType)) {
                         String valueOfDescriptor = switch (valueType) {
-                            case TypeConversionUtils.ABBR_INTEGER -> "(I)Ljava/lang/String;";
-                            case TypeConversionUtils.ABBR_LONG -> "(J)Ljava/lang/String;";
-                            case TypeConversionUtils.ABBR_FLOAT -> "(F)Ljava/lang/String;";
-                            case TypeConversionUtils.ABBR_DOUBLE -> "(D)Ljava/lang/String;";
-                            case TypeConversionUtils.ABBR_BOOLEAN -> "(Z)Ljava/lang/String;";
-                            case TypeConversionUtils.ABBR_CHARACTER -> "(C)Ljava/lang/String;";
-                            default -> "(Ljava/lang/Object;)Ljava/lang/String;";
+                            case TypeConversionUtils.ABBR_INTEGER -> TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_STRING;
+                            case TypeConversionUtils.ABBR_LONG -> TypeConversionUtils.DESCRIPTOR_J__LJAVA_LANG_STRING;
+                            case TypeConversionUtils.ABBR_FLOAT -> TypeConversionUtils.DESCRIPTOR_F__LJAVA_LANG_STRING;
+                            case TypeConversionUtils.ABBR_DOUBLE -> TypeConversionUtils.DESCRIPTOR_D__LJAVA_LANG_STRING;
+                            case TypeConversionUtils.ABBR_BOOLEAN -> TypeConversionUtils.DESCRIPTOR_Z__LJAVA_LANG_STRING;
+                            case TypeConversionUtils.ABBR_CHARACTER -> TypeConversionUtils.DESCRIPTOR_C__LJAVA_LANG_STRING;
+                            default -> TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING;
                         };
-                        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", valueOfDescriptor);
+                        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF, valueOfDescriptor);
                         code.invokestatic(valueOfRef);
                     }
                 } else if (valueType != null && !valueType.equals(varType)) {
@@ -680,15 +680,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
         // Generate the right-hand side expression and store in a temp variable
         compiler.getExpressionProcessor().generate(code, classWriter, assignExpr.getRight(), null);
-        int listClass = cp.addClass("java/util/List");
+        int listClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LIST);
         code.checkcast(listClass);
-        int tempListSlot = getOrAllocateTempSlot(context, "$tempList", "Ljava/util/List;");
+        int tempListSlot = getOrAllocateTempSlot(context, "$tempList", TypeConversionUtils.LJAVA_UTIL_LIST);
         code.astore(tempListSlot);
 
-        int listGetRef = cp.addInterfaceMethodRef("java/util/List", "get", "(I)Ljava/lang/Object;");
-        int listSizeRef = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
-        int listAddRef = cp.addInterfaceMethodRef("java/util/List", "add", "(Ljava/lang/Object;)Z");
-        int listClearRef = cp.addInterfaceMethodRef("java/util/List", "clear", "()V");
+        int listGetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
+        int listSizeRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
+        int listAddRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_ADD, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+        int listClearRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, "clear", TypeConversionUtils.DESCRIPTOR___V);
 
         // First pass: count elements before rest to get restStartIndex
         int restStartIndex = 0;
@@ -919,7 +919,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     case TypeConversionUtils.ABBR_FLOAT -> code.fadd();
                     case TypeConversionUtils.ABBR_DOUBLE -> code.dadd();
                     case TypeConversionUtils.LJAVA_LANG_STRING -> {
-                        int concatMethod = cp.addMethodRef("java/lang/String", "concat", "(Ljava/lang/String;)Ljava/lang/String;");
+                        int concatMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_CONCAT, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
                         code.invokevirtual(concatMethod);
                     }
                 }
@@ -1012,15 +1012,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
         // Generate the right-hand side expression and store in a temp variable
         compiler.getExpressionProcessor().generate(code, classWriter, assignExpr.getRight(), null);
-        int mapClass = cp.addClass("java/util/Map");
+        int mapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_MAP);
         code.checkcast(mapClass);
-        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap", "Ljava/util/Map;");
+        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap", TypeConversionUtils.LJAVA_UTIL_MAP);
         code.astore(tempMapSlot);
 
-        int mapGetRef = cp.addInterfaceMethodRef("java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
-        int mapRemoveRef = cp.addInterfaceMethodRef("java/util/Map", "remove", "(Ljava/lang/Object;)Ljava/lang/Object;");
-        int mapClearRef = cp.addInterfaceMethodRef("java/util/Map", "clear", "()V");
-        int mapPutAllRef = cp.addInterfaceMethodRef("java/util/Map", "putAll", "(Ljava/util/Map;)V");
+        int mapGetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapRemoveRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_REMOVE, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapClearRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, "clear", TypeConversionUtils.DESCRIPTOR___V);
+        int mapPutAllRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, "putAll", TypeConversionUtils.DESCRIPTOR_LJAVA_UTIL_MAP__V);
 
         List<String> extractedKeys = new ArrayList<>();
 
@@ -1133,17 +1133,17 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
     private void generateStringValueOf(CodeBuilder code, ClassWriter classWriter, String valueType) {
         var cp = classWriter.getConstantPool();
         String descriptor = switch (valueType) {
-            case TypeConversionUtils.ABBR_INTEGER -> "(I)Ljava/lang/String;";
-            case TypeConversionUtils.ABBR_LONG -> "(J)Ljava/lang/String;";
-            case TypeConversionUtils.ABBR_FLOAT -> "(F)Ljava/lang/String;";
-            case TypeConversionUtils.ABBR_DOUBLE -> "(D)Ljava/lang/String;";
-            case TypeConversionUtils.ABBR_BOOLEAN -> "(Z)Ljava/lang/String;";
-            case TypeConversionUtils.ABBR_CHARACTER -> "(C)Ljava/lang/String;";
-            case TypeConversionUtils.ABBR_BYTE -> "(B)Ljava/lang/String;";
-            case TypeConversionUtils.ABBR_SHORT -> "(S)Ljava/lang/String;";
-            default -> "(Ljava/lang/Object;)Ljava/lang/String;";
+            case TypeConversionUtils.ABBR_INTEGER -> TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_STRING;
+            case TypeConversionUtils.ABBR_LONG -> TypeConversionUtils.DESCRIPTOR_J__LJAVA_LANG_STRING;
+            case TypeConversionUtils.ABBR_FLOAT -> TypeConversionUtils.DESCRIPTOR_F__LJAVA_LANG_STRING;
+            case TypeConversionUtils.ABBR_DOUBLE -> TypeConversionUtils.DESCRIPTOR_D__LJAVA_LANG_STRING;
+            case TypeConversionUtils.ABBR_BOOLEAN -> TypeConversionUtils.DESCRIPTOR_Z__LJAVA_LANG_STRING;
+            case TypeConversionUtils.ABBR_CHARACTER -> TypeConversionUtils.DESCRIPTOR_C__LJAVA_LANG_STRING;
+            case TypeConversionUtils.ABBR_BYTE -> TypeConversionUtils.DESCRIPTOR_B__LJAVA_LANG_STRING;
+            case TypeConversionUtils.ABBR_SHORT -> TypeConversionUtils.DESCRIPTOR_S__LJAVA_LANG_STRING;
+            default -> TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING;
         };
-        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", descriptor);
+        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF, descriptor);
         code.invokestatic(valueOfRef);
     }
 

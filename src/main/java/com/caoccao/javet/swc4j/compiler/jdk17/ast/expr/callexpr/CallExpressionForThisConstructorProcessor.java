@@ -75,7 +75,7 @@ public final class CallExpressionForThisConstructorProcessor extends BaseAstProc
         String methodDescriptor = "(" + paramDescriptors + ")V";
 
         // Generate invokespecial to call another constructor of this class
-        int ctorRef = cp.addMethodRef(currentClassInternalName, "<init>", methodDescriptor);
+        int ctorRef = cp.addMethodRef(currentClassInternalName, TypeConversionUtils.METHOD_INIT, methodDescriptor);
         code.invokespecial(ctorRef);
     }
 

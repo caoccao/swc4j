@@ -125,9 +125,9 @@ public final class CallExpressionForArrayStaticProcessor extends BaseAstProcesso
             ClassWriter classWriter,
             Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
-        int arrayListClass = cp.addClass("java/util/ArrayList");
-        int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
-        int arrayListAdd = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
+        int arrayListClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_ARRAYLIST);
+        int arrayListInit = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INIT, "()V");
+        int arrayListAdd = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_ADD, "(Ljava/lang/Object;)Z");
 
         code.newInstance(arrayListClass);
         code.dup();

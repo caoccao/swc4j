@@ -166,8 +166,8 @@ public final class ImportDeclProcessor {
                         if (Modifier.isPublic(constructor.getModifiers())) {
                             String descriptor = getConstructorDescriptor(constructor);
                             boolean isVarArgs = constructor.isVarArgs();
-                            MethodInfo methodInfo = new MethodInfo("<init>", descriptor, TypeConversionUtils.ABBR_VOID, false, isVarArgs);
-                            typeInfo.addMethod("<init>", methodInfo);
+                            MethodInfo methodInfo = new MethodInfo(TypeConversionUtils.METHOD_INIT, descriptor, TypeConversionUtils.ABBR_VOID, false, isVarArgs);
+                            typeInfo.addMethod(TypeConversionUtils.METHOD_INIT, methodInfo);
                         }
                     }
 

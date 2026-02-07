@@ -60,7 +60,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             }
 
             switch (methodName) {
-                case "concat" -> generateConcat(code, classWriter, callExpr);
+                case TypeConversionUtils.METHOD_CONCAT -> generateConcat(code, classWriter, callExpr);
                 case "copyWithin" -> generateCopyWithin(code, classWriter, callExpr);
                 case "fill" -> generateFill(code, classWriter, callExpr);
                 case "filter" -> generateFilter(code, classWriter, callExpr);
@@ -70,9 +70,9 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
                 case "flatMap" -> generateFlatMap(code, classWriter, callExpr);
                 case "forEach" -> generateForEach(code, classWriter, callExpr);
                 case "includes" -> generateIncludes(code, classWriter, callExpr);
-                case "indexOf" -> generateIndexOf(code, classWriter, callExpr);
+                case TypeConversionUtils.METHOD_INDEX_OF -> generateIndexOf(code, classWriter, callExpr);
                 case "join" -> generateJoin(code, classWriter, callExpr);
-                case "lastIndexOf" -> generateLastIndexOf(code, classWriter, callExpr);
+                case TypeConversionUtils.METHOD_LAST_INDEX_OF -> generateLastIndexOf(code, classWriter, callExpr);
                 case "keys" -> generateKeys(code, classWriter, callExpr);
                 case "map" -> generateMap(code, classWriter, callExpr);
                 case "pop" -> generatePop(code, classWriter);
@@ -92,7 +92,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
                 case "toReversed" -> generateToReversed(code, classWriter);
                 case "toSorted" -> generateToSorted(code, classWriter);
                 case "toSpliced" -> generateToSpliced(code, classWriter, callExpr);
-                case "toString" -> generateToString(code, classWriter);
+                case TypeConversionUtils.METHOD_TO_STRING -> generateToString(code, classWriter);
                 case "unshift" -> generateUnshift(code, classWriter, callExpr);
                 case "with" -> generateWith(code, classWriter, callExpr);
                 default ->
@@ -111,13 +111,13 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
 
             // Call ArrayListApiUtils.concat(ArrayList, ArrayList)
-            int concatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "concat",
+            int concatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", TypeConversionUtils.METHOD_CONCAT,
                     "(Ljava/util/ArrayList;Ljava/util/ArrayList;)Ljava/util/ArrayList;");
             code.invokestatic(concatMethod);
         } else {
             // No argument - just return a copy of the array
-            int arrayListClass = cp.addClass("java/util/ArrayList");
-            int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V");
+            int arrayListClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_ARRAYLIST);
+            int arrayListInit = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INIT, "(Ljava/util/Collection;)V");
 
             code.newInstance(arrayListClass)
                     .dup_x1()  // Duplicate new ArrayList ref, place it below the original array
@@ -144,7 +144,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         String targetType = compiler.getTypeResolver().inferTypeFromExpr(targetArg.getExpr());
         var cp = classWriter.getConstantPool();
         if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(targetType)) {
-            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+            int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
             code.invokevirtual(intValueMethod);
         }
 
@@ -155,7 +155,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         // Unbox start if needed
         String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
         if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
-            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+            int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
             code.invokevirtual(intValueMethod);
         }
 
@@ -173,7 +173,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Unbox end if needed
             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(endType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -241,7 +241,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Unbox if needed
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -258,7 +258,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Unbox start if needed
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -268,7 +268,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Unbox end if needed
             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(endType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -328,7 +328,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         compiler.getExpressionProcessor().generate(code, classWriter, depthArg.getExpr(), null);
         String depthType = compiler.getTypeResolver().inferTypeFromExpr(depthArg.getExpr());
         if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(depthType)) {
-            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+            int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
             code.invokevirtual(intValueMethod);
         } else if (depthType != null && TypeConversionUtils.isPrimitiveType(depthType) && !TypeConversionUtils.ABBR_INTEGER.equals(depthType)) {
             TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(depthType), TypeConversionUtils.ABBR_INTEGER);
@@ -386,7 +386,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
                 TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
             }
 
-            int containsMethod = cp.addMethodRef("java/util/ArrayList", "contains", "(Ljava/lang/Object;)Z");
+            int containsMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, "contains", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
             code.invokevirtual(containsMethod); // Returns boolean
         } else {
             // No argument - pop ArrayList ref and return false
@@ -408,7 +408,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
                 TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
             }
 
-            int indexOfMethod = cp.addMethodRef("java/util/ArrayList", "indexOf", "(Ljava/lang/Object;)I");
+            int indexOfMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INDEX_OF, "(Ljava/lang/Object;)I");
             code.invokevirtual(indexOfMethod); // Returns int index
         } else {
             // No argument - pop ArrayList ref and return -1
@@ -434,7 +434,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType != null && !TypeConversionUtils.LJAVA_LANG_STRING.equals(argType)) {
                 // Convert to string using String.valueOf()
-                int valueOfMethod = cp.addMethodRef("java/lang/String", "valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
+                int valueOfMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
                 code.invokestatic(valueOfMethod);
             }
         }
@@ -468,7 +468,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
                 TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
             }
 
-            int lastIndexOfMethod = cp.addMethodRef("java/util/ArrayList", "lastIndexOf", "(Ljava/lang/Object;)I");
+            int lastIndexOfMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_LAST_INDEX_OF, "(Ljava/lang/Object;)I");
             code.invokevirtual(lastIndexOfMethod); // Returns int index
         } else {
             // No argument - pop ArrayList ref and return -1
@@ -495,13 +495,13 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         var cp = classWriter.getConstantPool();
         code.dup(); // Duplicate ArrayList reference for size() call
 
-        int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
+        int sizeMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
         code.invokevirtual(sizeMethod); // Get size
 
         code.iconst(1);
         code.isub(); // size - 1
 
-        int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
+        int removeMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_REMOVE, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
         code.invokevirtual(removeMethod); // Returns removed element
     }
 
@@ -516,7 +516,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
                 TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
             }
             var cp = classWriter.getConstantPool();
-            int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
+            int addMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_ADD, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
             code.invokevirtual(addMethod);
             code.pop(); // Pop the boolean return value
         }
@@ -598,7 +598,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         code.dup(); // Duplicate array reference for return
 
         var cp = classWriter.getConstantPool();
-        int reverseMethod = cp.addMethodRef("java/util/Collections", "reverse", "(Ljava/util/List;)V");
+        int reverseMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_COLLECTIONS, "reverse", "(Ljava/util/List;)V");
         code.invokestatic(reverseMethod); // Reverse in place
 
         // The duplicated array reference is now on top of stack, ready to return
@@ -610,7 +610,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         code.iconst(0); // Index 0
 
         var cp = classWriter.getConstantPool();
-        int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
+        int removeMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_REMOVE, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
         code.invokevirtual(removeMethod); // Returns removed element
     }
 
@@ -629,7 +629,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             code.dup();  // Duplicate ArrayList for size() call
 
-            int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
+            int sizeMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
             code.invokevirtual(sizeMethod);  // Get size
 
             // Reorder to: ArrayList, 0, size
@@ -649,7 +649,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Need to unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -658,7 +658,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             code.dup();  // Duplicate ArrayList for size() call
 
-            int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
+            int sizeMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
             code.invokevirtual(sizeMethod);  // Get size
 
             // Reorder to: ArrayList, start, size
@@ -678,7 +678,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -688,7 +688,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Unbox if Integer
             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(endType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
         }
@@ -717,7 +717,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         code.dup(); // Duplicate array reference for return
 
         var cp = classWriter.getConstantPool();
-        int sortMethod = cp.addMethodRef("java/util/Collections", "sort", "(Ljava/util/List;)V");
+        int sortMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_COLLECTIONS, "sort", "(Ljava/util/List;)V");
         code.invokestatic(sortMethod); // Sort in place
 
         // The duplicated array reference is now on top of stack, ready to return
@@ -745,7 +745,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -760,7 +760,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -771,16 +771,16 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Unbox if Integer
             String deleteCountType = compiler.getTypeResolver().inferTypeFromExpr(deleteCountArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(deleteCountType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
 
             // Create ArrayList for items to insert (if any)
             if (argCount > 2) {
                 // Create new ArrayList for items
-                int arrayListClass = cp.addClass("java/util/ArrayList");
-                int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
-                int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
+                int arrayListClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_ARRAYLIST);
+                int arrayListInit = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+                int addMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_ADD, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
 
                 code.newInstance(arrayListClass);
                 code.dup();
@@ -865,7 +865,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -880,7 +880,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -891,16 +891,16 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             // Unbox if Integer
             String deleteCountType = compiler.getTypeResolver().inferTypeFromExpr(deleteCountArg.getExpr());
             if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(deleteCountType)) {
-                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueMethod);
             }
 
             // Create ArrayList for items to insert (if any)
             if (argCount > 2) {
                 // Create new ArrayList for items
-                int arrayListClass = cp.addClass("java/util/ArrayList");
-                int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
-                int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
+                int arrayListClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_ARRAYLIST);
+                int arrayListInit = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+                int addMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_ADD, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
 
                 code.newInstance(arrayListClass);
                 code.dup();
@@ -957,7 +957,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             }
 
             var cp = classWriter.getConstantPool();
-            int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(ILjava/lang/Object;)V");
+            int addMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_ADD, "(ILjava/lang/Object;)V");
             code.invokevirtual(addMethod);
         }
     }
@@ -987,7 +987,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         // Unbox index if needed
         String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
         if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(indexType)) {
-            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+            int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
             code.invokevirtual(intValueMethod);
         }
 
@@ -1044,7 +1044,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
      * @return true if the type is ArrayList
      */
     public boolean isTypeSupported(String type) {
-        return "Ljava/util/ArrayList;".equals(type);
+        return TypeConversionUtils.LJAVA_UTIL_ARRAYLIST.equals(type);
     }
 
     private String resolveArrayElementType(Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {

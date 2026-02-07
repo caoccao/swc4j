@@ -63,51 +63,51 @@ public final class TsAsExpressionProcessor extends BaseAstProcessor<Swc4jAstTsAs
             String wrapperType = TypeConversionUtils.getWrapperType(targetType);
             switch (targetType) {
                 case TypeConversionUtils.ABBR_INTEGER -> {
-                    int integerClass = cp.addClass("java/lang/Integer");
+                    int integerClass = cp.addClass(TypeConversionUtils.JAVA_LANG_INTEGER);
                     code.checkcast(integerClass);
-                    int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                    int intValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                     code.invokevirtual(intValueRef);
                 }
                 case TypeConversionUtils.ABBR_LONG -> {
-                    int longClass = cp.addClass("java/lang/Long");
+                    int longClass = cp.addClass(TypeConversionUtils.JAVA_LANG_LONG);
                     code.checkcast(longClass);
-                    int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
+                    int longValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_LONG, TypeConversionUtils.METHOD_LONG_VALUE, TypeConversionUtils.DESCRIPTER___J);
                     code.invokevirtual(longValueRef);
                 }
                 case TypeConversionUtils.ABBR_DOUBLE -> {
-                    int doubleClass = cp.addClass("java/lang/Double");
+                    int doubleClass = cp.addClass(TypeConversionUtils.JAVA_LANG_DOUBLE);
                     code.checkcast(doubleClass);
-                    int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
+                    int doubleValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_DOUBLE, TypeConversionUtils.METHOD_DOUBLE_VALUE, TypeConversionUtils.DESCRIPTER___D);
                     code.invokevirtual(doubleValueRef);
                 }
                 case TypeConversionUtils.ABBR_FLOAT -> {
-                    int floatClass = cp.addClass("java/lang/Float");
+                    int floatClass = cp.addClass(TypeConversionUtils.JAVA_LANG_FLOAT);
                     code.checkcast(floatClass);
-                    int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
+                    int floatValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_FLOAT, TypeConversionUtils.METHOD_FLOAT_VALUE, TypeConversionUtils.DESCRIPTER___F);
                     code.invokevirtual(floatValueRef);
                 }
                 case TypeConversionUtils.ABBR_BYTE -> {
-                    int byteClass = cp.addClass("java/lang/Byte");
+                    int byteClass = cp.addClass(TypeConversionUtils.JAVA_LANG_BYTE);
                     code.checkcast(byteClass);
-                    int byteValueRef = cp.addMethodRef("java/lang/Byte", "byteValue", "()B");
+                    int byteValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_BYTE, TypeConversionUtils.METHOD_BYTE_VALUE, TypeConversionUtils.DESCRIPTER___B);
                     code.invokevirtual(byteValueRef);
                 }
                 case TypeConversionUtils.ABBR_SHORT -> {
-                    int shortClass = cp.addClass("java/lang/Short");
+                    int shortClass = cp.addClass(TypeConversionUtils.JAVA_LANG_SHORT);
                     code.checkcast(shortClass);
-                    int shortValueRef = cp.addMethodRef("java/lang/Short", "shortValue", "()S");
+                    int shortValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_SHORT, TypeConversionUtils.METHOD_SHORT_VALUE, TypeConversionUtils.DESCRIPTER___S);
                     code.invokevirtual(shortValueRef);
                 }
                 case TypeConversionUtils.ABBR_CHARACTER -> {
-                    int characterClass = cp.addClass("java/lang/Character");
+                    int characterClass = cp.addClass(TypeConversionUtils.JAVA_LANG_CHARACTER);
                     code.checkcast(characterClass);
-                    int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
+                    int charValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_CHARACTER, TypeConversionUtils.METHOD_CHAR_VALUE, TypeConversionUtils.DESCRIPTER___C);
                     code.invokevirtual(charValueRef);
                 }
                 case TypeConversionUtils.ABBR_BOOLEAN -> {
-                    int booleanClass = cp.addClass("java/lang/Boolean");
+                    int booleanClass = cp.addClass(TypeConversionUtils.JAVA_LANG_BOOLEAN);
                     code.checkcast(booleanClass);
-                    int booleanValueRef = cp.addMethodRef("java/lang/Boolean", "booleanValue", "()Z");
+                    int booleanValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_BOOLEAN, TypeConversionUtils.METHOD_BOOLEAN_VALUE, TypeConversionUtils.DESCRIPTER___Z);
                     code.invokevirtual(booleanValueRef);
                 }
             }

@@ -65,7 +65,7 @@ public final class CallExpressionForSuperConstructorProcessor extends BaseAstPro
             superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
         }
         if (superClassInternalName == null) {
-            superClassInternalName = "java/lang/Object";
+            superClassInternalName = TypeConversionUtils.JAVA_LANG_OBJECT;
         }
 
         // Load 'this' reference
@@ -89,7 +89,7 @@ public final class CallExpressionForSuperConstructorProcessor extends BaseAstPro
         String methodDescriptor = "(" + paramDescriptors + ")V";
 
         // Generate invokespecial to call the superclass constructor
-        int ctorRef = cp.addMethodRef(superClassInternalName, "<init>", methodDescriptor);
+        int ctorRef = cp.addMethodRef(superClassInternalName, TypeConversionUtils.METHOD_INIT, methodDescriptor);
         code.invokespecial(ctorRef);
     }
 

@@ -230,17 +230,17 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
             case "message" -> {
                 // exception.getMessage() -> String
                 code.aload(exceptionSlot);
-                int getMessageRef = cp.addMethodRef("java/lang/Throwable", "getMessage", "()Ljava/lang/String;");
+                int getMessageRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_THROWABLE, "getMessage", TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
                 code.invokevirtual(getMessageRef);
                 code.astore(variable.index());
             }
             case "stack" -> {
                 // Arrays.toString(exception.getStackTrace()) -> String
                 code.aload(exceptionSlot);
-                int getStackTraceRef = cp.addMethodRef("java/lang/Throwable", "getStackTrace",
-                        "()[Ljava/lang/StackTraceElement;");
+                int getStackTraceRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_THROWABLE, "getStackTrace",
+                        TypeConversionUtils.DESCRIPTOR___ARRAY_LJAVA_LANG_STACKTRACEELEMENT);
                 code.invokevirtual(getStackTraceRef);
-                int arraysToStringRef = cp.addMethodRef("java/util/Arrays", "toString",
+                int arraysToStringRef = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYS, TypeConversionUtils.METHOD_TO_STRING,
                         "([Ljava/lang/Object;)Ljava/lang/String;");
                 code.invokestatic(arraysToStringRef);
                 code.astore(variable.index());
@@ -248,7 +248,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
             case "cause" -> {
                 // exception.getCause() -> Throwable
                 code.aload(exceptionSlot);
-                int getCauseRef = cp.addMethodRef("java/lang/Throwable", "getCause", "()Ljava/lang/Throwable;");
+                int getCauseRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_THROWABLE, "getCause", TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_THROWABLE);
                 code.invokevirtual(getCauseRef);
                 code.astore(variable.index());
             }
@@ -268,7 +268,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
                 code.aload(exceptionSlot);
                 code.checkcast(jsErrorClass);
                 int getNameRef = cp.addMethodRef("com/caoccao/javet/swc4j/exceptions/JsError", "getName",
-                        "()Ljava/lang/String;");
+                        TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
                 code.invokevirtual(getNameRef);
                 code.astore(variable.index());
                 code.gotoLabel(0); // Jump to end
@@ -279,9 +279,9 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
                 int elseLabel = code.getCurrentOffset();
                 code.patchShort(elseJumpPos, elseLabel - elseJumpOpcodePos);
                 code.aload(exceptionSlot);
-                int getClassRef = cp.addMethodRef("java/lang/Object", "getClass", "()Ljava/lang/Class;");
+                int getClassRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_OBJECT, "getClass", TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_CLASS);
                 code.invokevirtual(getClassRef);
-                int getSimpleNameRef = cp.addMethodRef("java/lang/Class", "getSimpleName", "()Ljava/lang/String;");
+                int getSimpleNameRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_CLASS, "getSimpleName", TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
                 code.invokevirtual(getSimpleNameRef);
                 code.astore(variable.index());
 
@@ -328,13 +328,13 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         Swc4jAstCatchClause catchClause = tryStmt.getHandler().get();
 
         // Store exception in local variable if catch has a parameter
-        String catchType = "Ljava/lang/Throwable;";  // Default to Throwable
+        String catchType = TypeConversionUtils.LJAVA_LANG_THROWABLE;  // Default to Throwable
         var context = compiler.getMemory().getCompilationContext();
         if (catchClause.getParam().isPresent()) {
             ISwc4jAstPat param = catchClause.getParam().get();
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
-                String varType = "Ljava/lang/Throwable;";
+                String varType = TypeConversionUtils.LJAVA_LANG_THROWABLE;
 
                 // Check if variable type annotation exists
                 if (bindingIdent.getTypeAnn().isPresent()) {
@@ -446,12 +446,12 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         Swc4jAstCatchClause catchClause = tryStmt.getHandler().get();
 
         // Store exception in local variable if catch has a parameter
-        String catchType = "Ljava/lang/Throwable;";  // Default to Throwable
+        String catchType = TypeConversionUtils.LJAVA_LANG_THROWABLE;  // Default to Throwable
         if (catchClause.getParam().isPresent()) {
             ISwc4jAstPat param = catchClause.getParam().get();
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
-                String varType = "Ljava/lang/Throwable;";
+                String varType = TypeConversionUtils.LJAVA_LANG_THROWABLE;
 
                 // Check if variable type annotation exists
                 if (bindingIdent.getTypeAnn().isPresent()) {
@@ -527,7 +527,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         LocalVariable tempException = null;
         if (!finallyEndsWithTerminal) {
             String tempName = "$finallyException$" + System.identityHashCode(tryStmt);
-            context.getLocalVariableTable().allocateVariable(tempName, "Ljava/lang/Throwable;");
+            context.getLocalVariableTable().allocateVariable(tempName, TypeConversionUtils.LJAVA_LANG_THROWABLE);
             tempException = context.getLocalVariableTable().getVariable(tempName);
 
             // Store exception
@@ -625,7 +625,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         LocalVariable tempException = null;
         if (!finallyEndsWithTerminal) {
             String tempName = "$finallyException$" + System.identityHashCode(tryStmt);
-            context.getLocalVariableTable().allocateVariable(tempName, "Ljava/lang/Throwable;");
+            context.getLocalVariableTable().allocateVariable(tempName, TypeConversionUtils.LJAVA_LANG_THROWABLE);
             tempException = context.getLocalVariableTable().getVariable(tempName);
 
             // Store exception
@@ -664,7 +664,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
     private String getPropertyType(String propertyName) {
         return switch (propertyName) {
             case "message", "stack", "name" -> TypeConversionUtils.LJAVA_LANG_STRING;
-            case "cause" -> "Ljava/lang/Throwable;";
+            case "cause" -> TypeConversionUtils.LJAVA_LANG_THROWABLE;
             default -> TypeConversionUtils.LJAVA_LANG_OBJECT;
         };
     }

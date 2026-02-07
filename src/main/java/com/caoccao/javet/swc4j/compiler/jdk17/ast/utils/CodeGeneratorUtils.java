@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 
 /**
  * Utility class for code generation helpers.
@@ -32,7 +33,7 @@ public final class CodeGeneratorUtils {
     /**
      * Creates a ReturnTypeInfo from a type descriptor string.
      *
-     * @param descriptor the type descriptor (e.g., TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.LJAVA_LANG_STRING)
+     * @param descriptor the type descriptor (e.g., "I", "Z", "Ljava/lang/String;")
      * @return the corresponding ReturnTypeInfo
      */
     public static ReturnTypeInfo createReturnTypeInfoFromDescriptor(String descriptor) {
@@ -84,7 +85,7 @@ public final class CodeGeneratorUtils {
      * Converts a ReturnTypeInfo to its descriptor string.
      *
      * @param returnTypeInfo the return type information
-     * @return the descriptor string (e.g., TypeConversionUtils.ABBR_VOID, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_STRING)
+     * @return the descriptor string (e.g., "V", "I", "Ljava/lang/String;")
      */
     public static String getReturnDescriptor(ReturnTypeInfo returnTypeInfo) {
         return switch (returnTypeInfo.type()) {

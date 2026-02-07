@@ -126,7 +126,7 @@ public final class TsInterfaceCollector {
             }
             return "is" + capitalize(propName);
         }
-        return "get" + capitalize(propName);
+        return TypeConversionUtils.METHOD_GET + capitalize(propName);
     }
 
     private String getModuleName(Swc4jAstTsModuleDecl moduleDecl) {
@@ -199,14 +199,14 @@ public final class TsInterfaceCollector {
 
         // Register getter method: get(KeyType key): ValueType
         String getterDescriptor = "(" + keyDescriptor + ")" + valueDescriptor;
-        MethodInfo getterInfo = new MethodInfo("get", getterDescriptor, valueDescriptor, false, false);
-        typeInfo.addMethod("get", getterInfo);
+        MethodInfo getterInfo = new MethodInfo(TypeConversionUtils.METHOD_GET, getterDescriptor, valueDescriptor, false, false);
+        typeInfo.addMethod(TypeConversionUtils.METHOD_GET, getterInfo);
 
         // Register setter method (if not readonly): set(KeyType key, ValueType value): void
         if (!indexSig.isReadonly()) {
             String setterDescriptor = "(" + keyDescriptor + valueDescriptor + ")V";
-            MethodInfo setterInfo = new MethodInfo("set", setterDescriptor, TypeConversionUtils.ABBR_VOID, false, false);
-            typeInfo.addMethod("set", setterInfo);
+            MethodInfo setterInfo = new MethodInfo(TypeConversionUtils.METHOD_SET, setterDescriptor, TypeConversionUtils.ABBR_VOID, false, false);
+            typeInfo.addMethod(TypeConversionUtils.METHOD_SET, setterInfo);
         }
     }
 
@@ -316,7 +316,7 @@ public final class TsInterfaceCollector {
 
         // Register setter method (if not readonly)
         if (!prop.isReadonly()) {
-            String setterName = "set" + capitalize(propName);
+            String setterName = TypeConversionUtils.METHOD_SET + capitalize(propName);
             String setterDescriptor = "(" + descriptor + ")V";
             MethodInfo setterInfo = new MethodInfo(setterName, setterDescriptor, TypeConversionUtils.ABBR_VOID, false, false);
             typeInfo.addMethod(setterName, setterInfo);
@@ -343,7 +343,7 @@ public final class TsInterfaceCollector {
         }
 
         // Register setter method
-        String setterName = "set" + capitalize(propName);
+        String setterName = TypeConversionUtils.METHOD_SET + capitalize(propName);
         String setterDescriptor = "(" + descriptor + ")V";
         MethodInfo setterInfo = new MethodInfo(setterName, setterDescriptor, TypeConversionUtils.ABBR_VOID, false, false);
         typeInfo.addMethod(setterName, setterInfo);

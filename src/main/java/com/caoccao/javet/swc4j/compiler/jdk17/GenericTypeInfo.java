@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import java.util.Objects;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 
 /**
  * Holds parsed generic type information for types like {@code Record<K, V>}.
@@ -66,7 +67,7 @@ public final class GenericTypeInfo {
      */
     public static GenericTypeInfo ofArray(String keyType, String arrayElementType) {
         Objects.requireNonNull(arrayElementType, "arrayElementType cannot be null");
-        return new GenericTypeInfo(keyType, "Ljava/util/ArrayList;", false, null, true, arrayElementType);
+        return new GenericTypeInfo(keyType, TypeConversionUtils.LJAVA_UTIL_ARRAYLIST, false, null, true, arrayElementType);
     }
 
     /**
@@ -78,7 +79,7 @@ public final class GenericTypeInfo {
      */
     public static GenericTypeInfo ofNested(String keyType, GenericTypeInfo nestedTypeInfo) {
         Objects.requireNonNull(nestedTypeInfo, "nestedTypeInfo cannot be null");
-        return new GenericTypeInfo(keyType, "Ljava/util/LinkedHashMap;", true, nestedTypeInfo, false, null);
+        return new GenericTypeInfo(keyType, TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP, true, nestedTypeInfo, false, null);
     }
 
     @Override

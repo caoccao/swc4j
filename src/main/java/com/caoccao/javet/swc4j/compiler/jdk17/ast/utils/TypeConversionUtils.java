@@ -62,6 +62,26 @@ public final class TypeConversionUtils {
      */
     public static final String ABBR_VOID = "V";
     /**
+     * The constant ARRAY_I.
+     */
+    public static final String ARRAY_I = "[I";
+    /**
+     * The constant ARRAY_LJAVA_LANG_OBJECT.
+     */
+    public static final String ARRAY_LJAVA_LANG_OBJECT = "[Ljava/lang/Object;";
+    /**
+     * The constant ARRAY_J.
+     */
+    public static final String ARRAY_J = "[J";
+    /**
+     * The constant ARRAY_LJAVA_LANG_STRING.
+     */
+    public static final String ARRAY_LJAVA_LANG_STRING = "[Ljava/lang/String;";
+    /**
+     * The constant ARRAY_ARRAY_LJAVA_LANG_STRING.
+     */
+    public static final String ARRAY_ARRAY_LJAVA_LANG_STRING = "[[Ljava/lang/String;";
+    /**
      * The constant ARRAY_PREFIX.
      */
     public static final String ARRAY_PREFIX = "[";
@@ -98,6 +118,178 @@ public final class TypeConversionUtils {
      */
     public static final String DESCRIPTER_Z__LJAVA_LANG_BOOLEAN = "(Z)Ljava/lang/Boolean;";
     /**
+     * The constant DESCRIPTOR_I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT.
+     */
+    public static final String DESCRIPTOR_I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT = "(ILjava/lang/Object;)Ljava/lang/Object;";
+    /**
+     * The constant DESCRIPTOR_I__LJAVA_LANG_OBJECT.
+     */
+    public static final String DESCRIPTOR_I__LJAVA_LANG_OBJECT = "(I)Ljava/lang/Object;";
+    /**
+     * The constant DESCRIPTOR_I_I__LJAVA_UTIL_LIST.
+     */
+    public static final String DESCRIPTOR_I_I__LJAVA_UTIL_LIST = "(II)Ljava/util/List;";
+    /**
+     * The constant DESCRIPTOR_I__C.
+     */
+    public static final String DESCRIPTOR_I__C = "(I)C";
+    /**
+     * The constant DESCRIPTOR_I__I.
+     */
+    public static final String DESCRIPTOR_I__I = "(I)I";
+    /**
+     * The constant DESCRIPTOR_I__LJAVA_LANG_STRINGBUILDER.
+     */
+    public static final String DESCRIPTOR_I__LJAVA_LANG_STRINGBUILDER = "(I)Ljava/lang/StringBuilder;";
+    /**
+     * The constant DESCRIPTOR_I__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_I__LJAVA_LANG_STRING = "(I)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_I__LJAVA_MATH_BIGINTEGER.
+     */
+    public static final String DESCRIPTOR_I__LJAVA_MATH_BIGINTEGER = "(I)Ljava/math/BigInteger;";
+    /**
+     * The constant DESCRIPTOR_I__V.
+     */
+    public static final String DESCRIPTOR_I__V = "(I)V";
+    /**
+     * The constant DESCRIPTOR_I_D__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_I_D__LJAVA_LANG_STRING = "(ID)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_I_D__V.
+     */
+    public static final String DESCRIPTOR_I_D__V = "(ID)V";
+    /**
+     * The constant DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT = "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT = "(Ljava/lang/Object;)Ljava/lang/Object;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING = "(Ljava/lang/Object;)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_LANG_OBJECT__Z.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_OBJECT__Z = "(Ljava/lang/Object;)Z";
+    /**
+     * The constant DESCRIPTOR_LJAVA_LANG_STRING__I.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_STRING__I = "(Ljava/lang/String;)I";
+    /**
+     * The constant DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING = "(Ljava/lang/String;)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_B__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_B__LJAVA_LANG_STRING = "(B)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_C__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_C__LJAVA_LANG_STRING = "(C)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_C__LJAVA_LANG_STRINGBUILDER.
+     */
+    public static final String DESCRIPTOR_C__LJAVA_LANG_STRINGBUILDER = "(C)Ljava/lang/StringBuilder;";
+    /**
+     * The constant DESCRIPTOR_D__LJAVA_LANG_OBJECT.
+     */
+    public static final String DESCRIPTOR_D__LJAVA_LANG_OBJECT = "(D)Ljava/lang/Object;";
+    /**
+     * The constant DESCRIPTOR_D__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_D__LJAVA_LANG_STRING = "(D)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_D__LJAVA_LANG_STRINGBUILDER.
+     */
+    public static final String DESCRIPTOR_D__LJAVA_LANG_STRINGBUILDER = "(D)Ljava/lang/StringBuilder;";
+    /**
+     * The constant DESCRIPTOR_D_D__D.
+     */
+    public static final String DESCRIPTOR_D_D__D = "(DD)D";
+    /**
+     * The constant DESCRIPTOR_F__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_F__LJAVA_LANG_STRING = "(F)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_F__LJAVA_LANG_STRINGBUILDER.
+     */
+    public static final String DESCRIPTOR_F__LJAVA_LANG_STRINGBUILDER = "(F)Ljava/lang/StringBuilder;";
+    /**
+     * The constant DESCRIPTOR_J__LJAVA_LANG_OBJECT.
+     */
+    public static final String DESCRIPTOR_J__LJAVA_LANG_OBJECT = "(J)Ljava/lang/Object;";
+    /**
+     * The constant DESCRIPTOR_J__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_J__LJAVA_LANG_STRING = "(J)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_J__LJAVA_LANG_STRINGBUILDER.
+     */
+    public static final String DESCRIPTOR_J__LJAVA_LANG_STRINGBUILDER = "(J)Ljava/lang/StringBuilder;";
+    /**
+     * The constant DESCRIPTOR_J__LJAVA_MATH_BIGINTEGER.
+     */
+    public static final String DESCRIPTOR_J__LJAVA_MATH_BIGINTEGER = "(J)Ljava/math/BigInteger;";
+    /**
+     * The constant DESCRIPTOR_S__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_S__LJAVA_LANG_STRING = "(S)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_Z__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_Z__LJAVA_LANG_STRING = "(Z)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_Z__LJAVA_LANG_STRINGBUILDER.
+     */
+    public static final String DESCRIPTOR_Z__LJAVA_LANG_STRINGBUILDER = "(Z)Ljava/lang/StringBuilder;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_MAP__V.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_MAP__V = "(Ljava/util/Map;)V";
+    /**
+     * The constant DESCRIPTOR___LJAVA_LANG_OBJECT.
+     */
+    public static final String DESCRIPTOR___LJAVA_LANG_OBJECT = "()Ljava/lang/Object;";
+    /**
+     * The constant DESCRIPTOR___LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR___LJAVA_LANG_STRING = "()Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR___LJAVA_LANG_CLASS.
+     */
+    public static final String DESCRIPTOR___LJAVA_LANG_CLASS = "()Ljava/lang/Class;";
+    /**
+     * The constant DESCRIPTOR___LJAVA_LANG_THROWABLE.
+     */
+    public static final String DESCRIPTOR___LJAVA_LANG_THROWABLE = "()Ljava/lang/Throwable;";
+    /**
+     * The constant DESCRIPTOR___LJAVA_MATH_BIGINTEGER.
+     */
+    public static final String DESCRIPTOR___LJAVA_MATH_BIGINTEGER = "()Ljava/math/BigInteger;";
+    /**
+     * The constant DESCRIPTOR___LJAVA_UTIL_ITERATOR.
+     */
+    public static final String DESCRIPTOR___LJAVA_UTIL_ITERATOR = "()Ljava/util/Iterator;";
+    /**
+     * The constant DESCRIPTOR___LJAVA_UTIL_SET.
+     */
+    public static final String DESCRIPTOR___LJAVA_UTIL_SET = "()Ljava/util/Set;";
+    /**
+     * The constant DESCRIPTOR___ARRAY_LJAVA_LANG_STACKTRACEELEMENT.
+     */
+    public static final String DESCRIPTOR___ARRAY_LJAVA_LANG_STACKTRACEELEMENT = "()[Ljava/lang/StackTraceElement;";
+    /**
+     * The constant DESCRIPTOR___V.
+     */
+    public static final String DESCRIPTOR___V = "()V";
+    /**
      * The constant DESCRIPTER___B.
      */
     public static final String DESCRIPTER___B = "()B";
@@ -130,6 +322,10 @@ public final class TypeConversionUtils {
      */
     public static final String DESCRIPTER___Z = "()Z";
     /**
+     * The constant JAVA_LANG_AUTOCLOSEABLE.
+     */
+    public static final String JAVA_LANG_AUTOCLOSEABLE = "java/lang/AutoCloseable";
+    /**
      * The constant JAVA_LANG_BOOLEAN.
      */
     public static final String JAVA_LANG_BOOLEAN = "java/lang/Boolean";
@@ -142,29 +338,133 @@ public final class TypeConversionUtils {
      */
     public static final String JAVA_LANG_CHARACTER = "java/lang/Character";
     /**
+     * The constant JAVA_LANG_CLASS.
+     */
+    public static final String JAVA_LANG_CLASS = "java/lang/Class";
+    /**
      * The constant JAVA_LANG_DOUBLE.
      */
     public static final String JAVA_LANG_DOUBLE = "java/lang/Double";
+    /**
+     * The constant JAVA_LANG_ENUM.
+     */
+    public static final String JAVA_LANG_ENUM = "java/lang/Enum";
     /**
      * The constant JAVA_LANG_FLOAT.
      */
     public static final String JAVA_LANG_FLOAT = "java/lang/Float";
     /**
+     * The constant JAVA_LANG_ILLEGALARGUMENTEXCEPTION.
+     */
+    public static final String JAVA_LANG_ILLEGALARGUMENTEXCEPTION = "java/lang/IllegalArgumentException";
+    /**
      * The constant JAVA_LANG_INTEGER.
      */
     public static final String JAVA_LANG_INTEGER = "java/lang/Integer";
+    /**
+     * The constant JAVA_LANG_ITERABLE.
+     */
+    public static final String JAVA_LANG_ITERABLE = "java/lang/Iterable";
     /**
      * The constant JAVA_LANG_LONG.
      */
     public static final String JAVA_LANG_LONG = "java/lang/Long";
     /**
+     * The constant JAVA_LANG_MATH.
+     */
+    public static final String JAVA_LANG_MATH = "java/lang/Math";
+    /**
+     * The constant JAVA_LANG_NUMBER.
+     */
+    public static final String JAVA_LANG_NUMBER = "java/lang/Number";
+    /**
+     * The constant JAVA_LANG_NUMBERFORMATEXCEPTION.
+     */
+    public static final String JAVA_LANG_NUMBERFORMATEXCEPTION = "java/lang/NumberFormatException";
+    /**
+     * The constant JAVA_LANG_OBJECT.
+     */
+    public static final String JAVA_LANG_OBJECT = "java/lang/Object";
+    /**
+     * The constant JAVA_LANG_RUNNABLE.
+     */
+    public static final String JAVA_LANG_RUNNABLE = "java/lang/Runnable";
+    /**
      * The constant JAVA_LANG_SHORT.
      */
     public static final String JAVA_LANG_SHORT = "java/lang/Short";
     /**
+     * The constant JAVA_LANG_STRING.
+     */
+    public static final String JAVA_LANG_STRING = "java/lang/String";
+    /**
+     * The constant JAVA_LANG_STRINGBUILDER.
+     */
+    public static final String JAVA_LANG_STRINGBUILDER = "java/lang/StringBuilder";
+    /**
+     * The constant JAVA_LANG_THROWABLE.
+     */
+    public static final String JAVA_LANG_THROWABLE = "java/lang/Throwable";
+    /**
+     * The constant JAVA_MATH_BIGINTEGER.
+     */
+    public static final String JAVA_MATH_BIGINTEGER = "java/math/BigInteger";
+    /**
+     * The constant JAVA_UTIL_ARRAYLIST.
+     */
+    public static final String JAVA_UTIL_ARRAYLIST = "java/util/ArrayList";
+    /**
+     * The constant JAVA_UTIL_ARRAYS.
+     */
+    public static final String JAVA_UTIL_ARRAYS = "java/util/Arrays";
+    /**
+     * The constant JAVA_UTIL_COLLECTIONS.
+     */
+    public static final String JAVA_UTIL_COLLECTIONS = "java/util/Collections";
+    /**
+     * The constant JAVA_UTIL_HASHMAP.
+     */
+    public static final String JAVA_UTIL_HASHMAP = "java/util/HashMap";
+    /**
+     * The constant JAVA_UTIL_ITERATOR.
+     */
+    public static final String JAVA_UTIL_ITERATOR = "java/util/Iterator";
+    /**
+     * The constant JAVA_UTIL_LINKEDLIST.
+     */
+    public static final String JAVA_UTIL_LINKEDLIST = "java/util/LinkedList";
+    /**
+     * The constant JAVA_UTIL_LINKEDHASHMAP.
+     */
+    public static final String JAVA_UTIL_LINKEDHASHMAP = "java/util/LinkedHashMap";
+    /**
+     * The constant JAVA_UTIL_LIST.
+     */
+    public static final String JAVA_UTIL_LIST = "java/util/List";
+    /**
+     * The constant JAVA_UTIL_MAP.
+     */
+    public static final String JAVA_UTIL_MAP = "java/util/Map";
+    /**
+     * The constant JAVA_UTIL_MAP_ENTRY.
+     */
+    public static final String JAVA_UTIL_MAP_ENTRY = "java/util/Map$Entry";
+    /**
+     * The constant JAVA_UTIL_OBJECTS.
+     */
+    public static final String JAVA_UTIL_OBJECTS = "java/util/Objects";
+    /**
+     * The constant JAVA_UTIL_SET.
+     */
+    public static final String JAVA_UTIL_SET = "java/util/Set";
+    /**
      * The constant LJAVA_LANG_.
      */
     public static final String LJAVA_LANG_ = "Ljava/lang/";
+    /**
+     * The constant LJAVA_LANG_AUTOCLOSEABLE.
+     */
+    public static final String LJAVA_LANG_AUTOCLOSEABLE = "Ljava/lang/AutoCloseable;";
     /**
      * The constant LJAVA_LANG_BOOLEAN.
      */
@@ -177,6 +477,10 @@ public final class TypeConversionUtils {
      * The constant LJAVA_LANG_CHARACTER.
      */
     public static final String LJAVA_LANG_CHARACTER = "Ljava/lang/Character;";
+    /**
+     * The constant LJAVA_LANG_CLASS.
+     */
+    public static final String LJAVA_LANG_CLASS = "Ljava/lang/Class;";
     /**
      * The constant LJAVA_LANG_DOUBLE.
      */
@@ -194,6 +498,10 @@ public final class TypeConversionUtils {
      */
     public static final String LJAVA_LANG_LONG = "Ljava/lang/Long;";
     /**
+     * The constant LJAVA_LANG_NUMBER.
+     */
+    public static final String LJAVA_LANG_NUMBER = "Ljava/lang/Number;";
+    /**
      * The constant LJAVA_LANG_OBJECT.
      */
     public static final String LJAVA_LANG_OBJECT = "Ljava/lang/Object;";
@@ -206,9 +514,53 @@ public final class TypeConversionUtils {
      */
     public static final String LJAVA_LANG_STRING = "Ljava/lang/String;";
     /**
+     * The constant LJAVA_LANG_VOID.
+     */
+    public static final String LJAVA_LANG_VOID = "Ljava/lang/Void;";
+    /**
+     * The constant LJAVA_LANG_THROWABLE.
+     */
+    public static final String LJAVA_LANG_THROWABLE = "Ljava/lang/Throwable;";
+    /**
      * The constant LJAVA_MATH_BIGINTEGER.
      */
     public static final String LJAVA_MATH_BIGINTEGER = "Ljava/math/BigInteger;";
+    /**
+     * The constant LJAVA_UTIL_ARRAYLIST.
+     */
+    public static final String LJAVA_UTIL_ARRAYLIST = "Ljava/util/ArrayList;";
+    /**
+     * The constant LJAVA_UTIL_HASHMAP.
+     */
+    public static final String LJAVA_UTIL_HASHMAP = "Ljava/util/HashMap;";
+    /**
+     * The constant LJAVA_UTIL_ITERATOR.
+     */
+    public static final String LJAVA_UTIL_ITERATOR = "Ljava/util/Iterator;";
+    /**
+     * The constant LJAVA_UTIL_LINKEDHASHMAP.
+     */
+    public static final String LJAVA_UTIL_LINKEDHASHMAP = "Ljava/util/LinkedHashMap;";
+    /**
+     * The constant LJAVA_UTIL_LINKEDLIST.
+     */
+    public static final String LJAVA_UTIL_LINKEDLIST = "Ljava/util/LinkedList;";
+    /**
+     * The constant LJAVA_UTIL_MAP_ENTRY.
+     */
+    public static final String LJAVA_UTIL_MAP_ENTRY = "Ljava/util/Map$Entry;";
+    /**
+     * The constant LJAVA_UTIL_SET.
+     */
+    public static final String LJAVA_UTIL_SET = "Ljava/util/Set;";
+    /**
+     * The constant LJAVA_UTIL_LIST.
+     */
+    public static final String LJAVA_UTIL_LIST = "Ljava/util/List;";
+    /**
+     * The constant LJAVA_UTIL_MAP.
+     */
+    public static final String LJAVA_UTIL_MAP = "Ljava/util/Map;";
     /**
      * The constant TYPEOF_BOOLEAN.
      */
@@ -229,18 +581,177 @@ public final class TypeConversionUtils {
      * The constant TYPEOF_UNDEFINED.
      */
     public static final String TYPEOF_UNDEFINED = "undefined";
-    private static final String BOOLEAN_VALUE = "booleanValue";
-    private static final String BYTE_VALUE = "byteValue";
-    private static final String CHAR_VALUE = "charValue";
-    private static final String DOUBLE_VALUE = "doubleValue";
-    private static final String FLOAT_VALUE = "floatValue";
+    /**
+     * The constant METHOD_ADD.
+     */
+    public static final String METHOD_ADD = "add";
+    /**
+     * The constant METHOD_AND.
+     */
+    public static final String METHOD_AND = "and";
+    /**
+     * The constant METHOD_APPEND.
+     */
+    public static final String METHOD_APPEND = "append";
+    /**
+     * The constant METHOD_BOOLEAN_VALUE.
+     */
+    public static final String METHOD_BOOLEAN_VALUE = "booleanValue";
+    /**
+     * The constant METHOD_BYTE_VALUE.
+     */
+    public static final String METHOD_BYTE_VALUE = "byteValue";
+    /**
+     * The constant METHOD_CHAR_VALUE.
+     */
+    public static final String METHOD_CHAR_VALUE = "charValue";
+    /**
+     * The constant METHOD_COMPARE_TO.
+     */
+    public static final String METHOD_COMPARE_TO = "compareTo";
+    /**
+     * The constant METHOD_CONCAT.
+     */
+    public static final String METHOD_CONCAT = "concat";
+    /**
+     * The constant METHOD_DIVIDE.
+     */
+    public static final String METHOD_DIVIDE = "divide";
+    /**
+     * The constant METHOD_DOUBLE_VALUE.
+     */
+    public static final String METHOD_DOUBLE_VALUE = "doubleValue";
+    /**
+     * The constant METHOD_ENTRY_SET.
+     */
+    public static final String METHOD_ENTRY_SET = "entrySet";
+    /**
+     * The constant METHOD_EQUALS.
+     */
+    public static final String METHOD_EQUALS = "equals";
+    /**
+     * The constant METHOD_FLOAT_VALUE.
+     */
+    public static final String METHOD_FLOAT_VALUE = "floatValue";
+    /**
+     * The constant METHOD_GET.
+     */
+    public static final String METHOD_GET = "get";
+    /**
+     * The constant METHOD_GET_KEY.
+     */
+    public static final String METHOD_GET_KEY = "getKey";
+    /**
+     * The constant METHOD_GET_VALUE.
+     */
+    public static final String METHOD_GET_VALUE = "getValue";
+    /**
+     * The constant METHOD_HAS_NEXT.
+     */
+    public static final String METHOD_HAS_NEXT = "hasNext";
+    /**
+     * The constant METHOD_INDEX_OF.
+     */
+    public static final String METHOD_INDEX_OF = "indexOf";
+    /**
+     * The constant METHOD_INT_VALUE.
+     */
+    public static final String METHOD_INT_VALUE = "intValue";
+    /**
+     * The constant METHOD_ITERATOR.
+     */
+    public static final String METHOD_ITERATOR = "iterator";
+    /**
+     * The constant METHOD_INIT.
+     */
+    public static final String METHOD_INIT = "<init>";
+    /**
+     * The constant METHOD_LAST_INDEX_OF.
+     */
+    public static final String METHOD_LAST_INDEX_OF = "lastIndexOf";
+    /**
+     * The constant METHOD_LENGTH.
+     */
+    public static final String METHOD_LENGTH = "length";
+    /**
+     * The constant METHOD_LONG_VALUE.
+     */
+    public static final String METHOD_LONG_VALUE = "longValue";
+    /**
+     * The constant METHOD_MULTIPLY.
+     */
+    public static final String METHOD_MULTIPLY = "multiply";
+    /**
+     * The constant METHOD_NEXT.
+     */
+    public static final String METHOD_NEXT = "next";
+    /**
+     * The constant METHOD_OR.
+     */
+    public static final String METHOD_OR = "or";
+    /**
+     * The constant METHOD_PARSE_INT.
+     */
+    public static final String METHOD_PARSE_INT = "parseInt";
+    /**
+     * The constant METHOD_POW.
+     */
+    public static final String METHOD_POW = "pow";
+    /**
+     * The constant METHOD_PUT.
+     */
+    public static final String METHOD_PUT = "put";
+    /**
+     * The constant METHOD_PUT_ALL.
+     */
+    public static final String METHOD_PUT_ALL = "putAll";
+    /**
+     * The constant METHOD_REMAINDER.
+     */
+    public static final String METHOD_REMAINDER = "remainder";
+    /**
+     * The constant METHOD_REMOVE.
+     */
+    public static final String METHOD_REMOVE = "remove";
+    /**
+     * The constant METHOD_SET.
+     */
+    public static final String METHOD_SET = "set";
+    /**
+     * The constant METHOD_SHIFT_LEFT.
+     */
+    public static final String METHOD_SHIFT_LEFT = "shiftLeft";
+    /**
+     * The constant METHOD_SHIFT_RIGHT.
+     */
+    public static final String METHOD_SHIFT_RIGHT = "shiftRight";
+    /**
+     * The constant METHOD_SHORT_VALUE.
+     */
+    public static final String METHOD_SHORT_VALUE = "shortValue";
+    /**
+     * The constant METHOD_SIZE.
+     */
+    public static final String METHOD_SIZE = "size";
+    /**
+     * The constant METHOD_SUBTRACT.
+     */
+    public static final String METHOD_SUBTRACT = "subtract";
+    /**
+     * The constant METHOD_TO_STRING.
+     */
+    public static final String METHOD_TO_STRING = "toString";
+    /**
+     * The constant METHOD_VALUE_OF.
+     */
+    public static final String METHOD_VALUE_OF = "valueOf";
+    /**
+     * The constant METHOD_XOR.
+     */
+    public static final String METHOD_XOR = "xor";
     private static final Set<String> INTEGER_PRIMITIVES = Set.of(ABBR_INTEGER, ABBR_LONG, ABBR_BYTE, ABBR_SHORT, ABBR_CHARACTER);
-    private static final String INT_VALUE = "intValue";
-    private static final String LONG_VALUE = "longValue";
     private static final Set<String> NUMERIC_PRIMITIVES = Set.of(ABBR_INTEGER, ABBR_LONG, ABBR_FLOAT, ABBR_DOUBLE, ABBR_BYTE, ABBR_SHORT, ABBR_CHARACTER);
     private static final Set<String> PRIMITIVE_TYPES = Set.of(ABBR_INTEGER, ABBR_BOOLEAN, ABBR_BYTE, ABBR_CHARACTER, ABBR_SHORT, ABBR_LONG, ABBR_FLOAT, ABBR_DOUBLE);
-    private static final String SHORT_VALUE = "shortValue";
-    private static final String VALUE_OF = "valueOf";
 
     private TypeConversionUtils() {
     }
@@ -263,49 +774,49 @@ public final class TypeConversionUtils {
         switch (primitiveType) {
             case ABBR_INTEGER -> {
                 if (LJAVA_LANG_INTEGER.equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef(JAVA_LANG_INTEGER, VALUE_OF, DESCRIPTER_I__LJAVA_LANG_INTEGER);
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_INTEGER, METHOD_VALUE_OF, DESCRIPTER_I__LJAVA_LANG_INTEGER);
                     code.invokestatic(valueOfRef);
                 }
             }
             case ABBR_BOOLEAN -> {
                 if (LJAVA_LANG_BOOLEAN.equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef(JAVA_LANG_BOOLEAN, VALUE_OF, DESCRIPTER_Z__LJAVA_LANG_BOOLEAN);
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_BOOLEAN, METHOD_VALUE_OF, DESCRIPTER_Z__LJAVA_LANG_BOOLEAN);
                     code.invokestatic(valueOfRef);
                 }
             }
             case ABBR_BYTE -> {
                 if (LJAVA_LANG_BYTE.equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef(JAVA_LANG_BYTE, VALUE_OF, DESCRIPTER_B__LJAVA_LANG_BYTE);
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_BYTE, METHOD_VALUE_OF, DESCRIPTER_B__LJAVA_LANG_BYTE);
                     code.invokestatic(valueOfRef);
                 }
             }
             case ABBR_CHARACTER -> {
                 if (LJAVA_LANG_CHARACTER.equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef(JAVA_LANG_CHARACTER, VALUE_OF, DESCRIPTER_C__LJAVA_LANG_CHARACTER);
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_CHARACTER, METHOD_VALUE_OF, DESCRIPTER_C__LJAVA_LANG_CHARACTER);
                     code.invokestatic(valueOfRef);
                 }
             }
             case ABBR_SHORT -> {
                 if (LJAVA_LANG_SHORT.equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef(JAVA_LANG_SHORT, VALUE_OF, DESCRIPTER_S__LJAVA_LANG_SHORT);
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_SHORT, METHOD_VALUE_OF, DESCRIPTER_S__LJAVA_LANG_SHORT);
                     code.invokestatic(valueOfRef);
                 }
             }
             case ABBR_LONG -> {
                 if (LJAVA_LANG_LONG.equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef(JAVA_LANG_LONG, VALUE_OF, DESCRIPTER_J__LJAVA_LANG_LONG);
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_LONG, METHOD_VALUE_OF, DESCRIPTER_J__LJAVA_LANG_LONG);
                     code.invokestatic(valueOfRef);
                 }
             }
             case ABBR_FLOAT -> {
                 if (LJAVA_LANG_FLOAT.equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef(JAVA_LANG_FLOAT, VALUE_OF, DESCRIPTER_F__LJAVA_LANG_FLOAT);
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_FLOAT, METHOD_VALUE_OF, DESCRIPTER_F__LJAVA_LANG_FLOAT);
                     code.invokestatic(valueOfRef);
                 }
             }
             case ABBR_DOUBLE -> {
                 if (LJAVA_LANG_DOUBLE.equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef(JAVA_LANG_DOUBLE, VALUE_OF, DESCRIPTER_D__LJAVA_LANG_DOUBLE);
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_DOUBLE, METHOD_VALUE_OF, DESCRIPTER_D__LJAVA_LANG_DOUBLE);
                     code.invokestatic(valueOfRef);
                 }
             }
@@ -481,35 +992,35 @@ public final class TypeConversionUtils {
         var cp = classWriter.getConstantPool();
         switch (type) {
             case LJAVA_LANG_BOOLEAN -> {
-                int booleanValueRef = cp.addMethodRef(JAVA_LANG_BOOLEAN, BOOLEAN_VALUE, DESCRIPTER___Z);
+                int booleanValueRef = cp.addMethodRef(JAVA_LANG_BOOLEAN, METHOD_BOOLEAN_VALUE, DESCRIPTER___Z);
                 code.invokevirtual(booleanValueRef);
             }
             case LJAVA_LANG_INTEGER -> {
-                int intValueRef = cp.addMethodRef(JAVA_LANG_INTEGER, INT_VALUE, DESCRIPTER___I);
+                int intValueRef = cp.addMethodRef(JAVA_LANG_INTEGER, METHOD_INT_VALUE, DESCRIPTER___I);
                 code.invokevirtual(intValueRef);
             }
             case LJAVA_LANG_CHARACTER -> {
-                int charValueRef = cp.addMethodRef(JAVA_LANG_CHARACTER, CHAR_VALUE, DESCRIPTER___C);
+                int charValueRef = cp.addMethodRef(JAVA_LANG_CHARACTER, METHOD_CHAR_VALUE, DESCRIPTER___C);
                 code.invokevirtual(charValueRef);
             }
             case LJAVA_LANG_BYTE -> {
-                int byteValueRef = cp.addMethodRef(JAVA_LANG_BYTE, BYTE_VALUE, DESCRIPTER___B);
+                int byteValueRef = cp.addMethodRef(JAVA_LANG_BYTE, METHOD_BYTE_VALUE, DESCRIPTER___B);
                 code.invokevirtual(byteValueRef);
             }
             case LJAVA_LANG_LONG -> {
-                int longValueRef = cp.addMethodRef(JAVA_LANG_LONG, LONG_VALUE, DESCRIPTER___J);
+                int longValueRef = cp.addMethodRef(JAVA_LANG_LONG, METHOD_LONG_VALUE, DESCRIPTER___J);
                 code.invokevirtual(longValueRef);
             }
             case LJAVA_LANG_SHORT -> {
-                int shortValueRef = cp.addMethodRef(JAVA_LANG_SHORT, SHORT_VALUE, DESCRIPTER___S);
+                int shortValueRef = cp.addMethodRef(JAVA_LANG_SHORT, METHOD_SHORT_VALUE, DESCRIPTER___S);
                 code.invokevirtual(shortValueRef);
             }
             case LJAVA_LANG_FLOAT -> {
-                int floatValueRef = cp.addMethodRef(JAVA_LANG_FLOAT, FLOAT_VALUE, DESCRIPTER___F);
+                int floatValueRef = cp.addMethodRef(JAVA_LANG_FLOAT, METHOD_FLOAT_VALUE, DESCRIPTER___F);
                 code.invokevirtual(floatValueRef);
             }
             case LJAVA_LANG_DOUBLE -> {
-                int doubleValueRef = cp.addMethodRef(JAVA_LANG_DOUBLE, DOUBLE_VALUE, DESCRIPTER___D);
+                int doubleValueRef = cp.addMethodRef(JAVA_LANG_DOUBLE, METHOD_DOUBLE_VALUE, DESCRIPTER___D);
                 code.invokevirtual(doubleValueRef);
             }
         }

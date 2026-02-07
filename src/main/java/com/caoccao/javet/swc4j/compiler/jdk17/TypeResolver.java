@@ -150,8 +150,8 @@ public final class TypeResolver {
     /**
      * Get the wrapper type for a primitive type.
      *
-     * @param primitiveType primitive type descriptor (e.g., TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_DOUBLE)
-     * @return wrapper type descriptor (e.g., TypeConversionUtils.LJAVA_LANG_INTEGER, TypeConversionUtils.LJAVA_LANG_DOUBLE)
+     * @param primitiveType primitive type descriptor (e.g., "I", "D")
+     * @return wrapper type descriptor (e.g., "Ljava/lang/Integer;", "Ljava/lang/Double;")
      */
     private static String getWrapperType(String primitiveType) {
         return switch (primitiveType) {
@@ -255,7 +255,7 @@ public final class TypeResolver {
         }
 
         // Number wrapper hierarchy: Integer/Long/Short/Byte/Float/Double → Number
-        if (toType.equals("Ljava/lang/Number;")) {
+        if (toType.equals(TypeConversionUtils.LJAVA_LANG_NUMBER)) {
             return fromType.equals(TypeConversionUtils.LJAVA_LANG_INTEGER) ||
                     fromType.equals(TypeConversionUtils.LJAVA_LANG_LONG) ||
                     fromType.equals(TypeConversionUtils.LJAVA_LANG_SHORT) ||
@@ -265,15 +265,15 @@ public final class TypeResolver {
         }
 
         // List interface hierarchy: ArrayList/LinkedList → List
-        if (toType.equals("Ljava/util/List;")) {
-            return fromType.equals("Ljava/util/ArrayList;") ||
-                    fromType.equals("Ljava/util/LinkedList;");
+        if (toType.equals(TypeConversionUtils.LJAVA_UTIL_LIST)) {
+            return fromType.equals(TypeConversionUtils.LJAVA_UTIL_ARRAYLIST) ||
+                    fromType.equals(TypeConversionUtils.LJAVA_UTIL_LINKEDLIST);
         }
 
         // Map interface hierarchy: LinkedHashMap/HashMap → Map
-        if (toType.equals("Ljava/util/Map;")) {
-            return fromType.equals("Ljava/util/LinkedHashMap;") ||
-                    fromType.equals("Ljava/util/HashMap;");
+        if (toType.equals(TypeConversionUtils.LJAVA_UTIL_MAP)) {
+            return fromType.equals(TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP) ||
+                    fromType.equals(TypeConversionUtils.LJAVA_UTIL_HASHMAP);
         }
 
         // For other object types, we'd need full class hierarchy information
@@ -515,7 +515,7 @@ public final class TypeResolver {
                 return mapTsTypeToDescriptor(tsType);
             }
             // Default to Object[] for untyped varargs
-            return "[Ljava/lang/Object;";
+            return TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT;
         } else if (pat instanceof Swc4jAstBindingIdent bindingIdent) {
             // Regular parameter - extract type from type annotation
             var typeAnn = bindingIdent.getTypeAnn();
@@ -691,7 +691,7 @@ public final class TypeResolver {
 
         // Generate interface bytecode
         try {
-            ClassWriter classWriter = new ClassWriter(interfaceName, "java/lang/Object");
+            ClassWriter classWriter = new ClassWriter(interfaceName, TypeConversionUtils.JAVA_LANG_OBJECT);
             classWriter.setAccessFlags(0x0601);  // ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT
             classWriter.addAbstractMethod("call", descriptor.toString());
             byte[] bytecode = classWriter.toByteArray();
@@ -970,10 +970,10 @@ public final class TypeResolver {
             return TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else if (expr instanceof Swc4jAstArrayLit) {
             // Array literal - maps to ArrayList
-            return "Ljava/util/ArrayList;";
+            return TypeConversionUtils.LJAVA_UTIL_ARRAYLIST;
         } else if (expr instanceof Swc4jAstObjectLit) {
             // Object literal - maps to LinkedHashMap
-            return "Ljava/util/LinkedHashMap;";
+            return TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP;
         } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
             // Handle this.field access for instance fields
             if (memberExpr.getObj() instanceof Swc4jAstThisExpr && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
@@ -1065,15 +1065,15 @@ public final class TypeResolver {
                 }
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
-                    if ("length".equals(propName)) {
+                    if (TypeConversionUtils.METHOD_LENGTH.equals(propName)) {
                         return TypeConversionUtils.ABBR_INTEGER; // arr.length returns int
                     }
                 }
-            } else if ("Ljava/util/ArrayList;".equals(objType)) {
+            } else if (TypeConversionUtils.LJAVA_UTIL_ARRAYLIST.equals(objType)) {
                 // ArrayList operations
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
-                    if ("length".equals(propName)) {
+                    if (TypeConversionUtils.METHOD_LENGTH.equals(propName)) {
                         return TypeConversionUtils.ABBR_INTEGER; // arr.length returns int
                     }
                 }
@@ -1081,11 +1081,11 @@ public final class TypeResolver {
                 // String operations
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
-                    if ("length".equals(propName)) {
+                    if (TypeConversionUtils.METHOD_LENGTH.equals(propName)) {
                         return TypeConversionUtils.ABBR_INTEGER; // str.length returns int
                     }
                 }
-            } else if ("Ljava/util/LinkedHashMap;".equals(objType)) {
+            } else if (TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP.equals(objType)) {
                 // LinkedHashMap operations (object literal member access)
                 // map.get() returns Object
                 return TypeConversionUtils.LJAVA_LANG_OBJECT;
@@ -1094,8 +1094,8 @@ public final class TypeResolver {
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
                     if ("raw".equals(propName)) {
-                        return "[Ljava/lang/String;"; // raw field is String[]
-                    } else if ("length".equals(propName)) {
+                        return TypeConversionUtils.ARRAY_LJAVA_LANG_STRING; // raw field is String[]
+                    } else if (TypeConversionUtils.METHOD_LENGTH.equals(propName)) {
                         return TypeConversionUtils.ABBR_INTEGER; // length field is int
                     }
                 }
@@ -1376,7 +1376,7 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstFnExpr) {
             return TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else if (expr instanceof Swc4jAstClassExpr) {
-            return "Ljava/lang/Class;";
+            return TypeConversionUtils.LJAVA_LANG_CLASS;
         } else if (expr instanceof Swc4jAstCallExpr callExpr) {
             // For call expressions, try to infer the return type
 
@@ -1455,7 +1455,7 @@ public final class TypeResolver {
                             return TypeConversionUtils.ABBR_BOOLEAN;
                         }
                         case "from", "of" -> {
-                            return "Ljava/util/ArrayList;";
+                            return TypeConversionUtils.LJAVA_UTIL_ARRAYLIST;
                         }
                     }
                 }
@@ -1475,15 +1475,15 @@ public final class TypeResolver {
                 }
 
                 // ArrayList methods
-                if ("Ljava/util/ArrayList;".equals(objType)) {
+                if (TypeConversionUtils.LJAVA_UTIL_ARRAYLIST.equals(objType)) {
                     if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                         String methodName = propIdent.getSym();
                         // Methods that return ArrayList
                         switch (methodName) {
-                            case "concat", "reverse", "sort", "slice", "splice", "fill", "copyWithin", "toReversed",
+                            case TypeConversionUtils.METHOD_CONCAT, "reverse", "sort", "slice", "splice", "fill", "copyWithin", "toReversed",
                                  "toSorted", "with", "toSpliced", "map", "filter", "flat", "flatMap",
                                  "keys", "values", "entries" -> {
-                                return "Ljava/util/ArrayList;";
+                                return TypeConversionUtils.LJAVA_UTIL_ARRAYLIST;
                             }
                             case "push", "unshift", "forEach" -> {
                                 return TypeConversionUtils.ABBR_VOID;
@@ -1491,10 +1491,10 @@ public final class TypeResolver {
                             case "find", "reduce", "reduceRight" -> {
                                 return TypeConversionUtils.LJAVA_LANG_OBJECT;
                             }
-                            case "join", "toString", "toLocaleString" -> {
+                            case "join", TypeConversionUtils.METHOD_TO_STRING, "toLocaleString" -> {
                                 return TypeConversionUtils.LJAVA_LANG_STRING;
                             }
-                            case "indexOf", "lastIndexOf", "findIndex" -> {
+                            case TypeConversionUtils.METHOD_INDEX_OF, TypeConversionUtils.METHOD_LAST_INDEX_OF, "findIndex" -> {
                                 return TypeConversionUtils.ABBR_INTEGER;
                             }
                             case "includes", "some", "every" -> {
@@ -1521,10 +1521,10 @@ public final class TypeResolver {
                                 // Methods that return a new array of the same type
                                 return objType;
                             }
-                            case "join", "toString" -> {
+                            case "join", TypeConversionUtils.METHOD_TO_STRING -> {
                                 return TypeConversionUtils.LJAVA_LANG_STRING;
                             }
-                            case "indexOf", "lastIndexOf" -> {
+                            case TypeConversionUtils.METHOD_INDEX_OF, TypeConversionUtils.METHOD_LAST_INDEX_OF -> {
                                 return TypeConversionUtils.ABBR_INTEGER;
                             }
                             case "includes" -> {
@@ -1541,15 +1541,15 @@ public final class TypeResolver {
                         return switch (methodName) {
                             // String return types
                             case "charAt", "substring", "slice", "substr", "toLowerCase", "toUpperCase", "trim",
-                                 "trimStart", "trimLeft", "trimEnd", "trimRight", "concat", "repeat", "replace",
+                                 "trimStart", "trimLeft", "trimEnd", "trimRight", TypeConversionUtils.METHOD_CONCAT, "repeat", "replace",
                                  "replaceAll", "padStart", "padEnd" -> TypeConversionUtils.LJAVA_LANG_STRING;
                             // int return types
-                            case "indexOf", "lastIndexOf", "charCodeAt", "codePointAt", "search" ->
+                            case TypeConversionUtils.METHOD_INDEX_OF, TypeConversionUtils.METHOD_LAST_INDEX_OF, "charCodeAt", "codePointAt", "search" ->
                                     TypeConversionUtils.ABBR_INTEGER;
                             // boolean return types
                             case "startsWith", "endsWith", "includes", "test" -> TypeConversionUtils.ABBR_BOOLEAN;
                             // ArrayList return type (split, match, matchAll)
-                            case "split", "match", "matchAll" -> "Ljava/util/ArrayList;";
+                            case "split", "match", "matchAll" -> TypeConversionUtils.LJAVA_UTIL_ARRAYLIST;
                             default -> TypeConversionUtils.LJAVA_LANG_OBJECT;
                         };
                     }
@@ -1734,7 +1734,7 @@ public final class TypeResolver {
             return componentDescriptor;
         }
         if (TypeConversionUtils.ABBR_VOID.equals(componentDescriptor)) {
-            return "[Ljava/lang/Object;";
+            return TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT;
         }
         return TypeConversionUtils.ARRAY_PREFIX + componentDescriptor;
     }
@@ -1789,12 +1789,12 @@ public final class TypeResolver {
             return mapIntersectionTypeToDescriptor(intersectionType);
         } else if (tsType instanceof Swc4jAstTsTupleType) {
             // Tuples are represented as ordered Lists at runtime.
-            return "Ljava/util/List;";
+            return TypeConversionUtils.LJAVA_UTIL_LIST;
         } else if (tsType instanceof Swc4jAstTsLitType litType) {
             return mapTsLiteralTypeToDescriptor(litType.getLit());
         } else if (tsType instanceof Swc4jAstTsMappedType) {
             // Mapped object types are compiled to LinkedHashMap.
-            return "Ljava/util/LinkedHashMap;";
+            return TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP;
         } else if (tsType instanceof Swc4jAstTsIndexedAccessType indexedAccessType) {
             return mapIndexedAccessTypeToDescriptor(indexedAccessType);
         } else if (tsType instanceof Swc4jAstTsTypeOperator typeOperator) {
@@ -1835,12 +1835,12 @@ public final class TypeResolver {
                 // Check if this is Array<T> generic syntax
                 if ("Array".equals(typeName)) {
                     // Array<T> syntax - maps to List interface (more flexible than ArrayList)
-                    return "Ljava/util/List;";
+                    return TypeConversionUtils.LJAVA_UTIL_LIST;
                 }
                 // Phase 2: Check if this is Record<K, V> generic syntax
                 if ("Record".equals(typeName)) {
                     // Record<K, V> syntax - maps to LinkedHashMap
-                    return "Ljava/util/LinkedHashMap;";
+                    return TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP;
                 }
                 return mapTypeNameToDescriptor(typeName);
             }

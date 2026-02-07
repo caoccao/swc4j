@@ -138,7 +138,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         var cp = classWriter.getConstantPool();
         String className = wrapperType.substring(1, wrapperType.length() - 1); // Remove L and ;
         String descriptor = "(" + primitiveType + ")" + wrapperType;
-        int methodRef = cp.addMethodRef(className, "valueOf", descriptor);
+        int methodRef = cp.addMethodRef(className, TypeConversionUtils.METHOD_VALUE_OF, descriptor);
         code.invokestatic(methodRef);
     }
 
@@ -228,12 +228,12 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
     private void generateUnbox(CodeBuilder code, ClassWriter classWriter, String wrapperType, String primitiveType) {
         var cp = classWriter.getConstantPool();
         String methodName = switch (primitiveType) {
-            case TypeConversionUtils.ABBR_INTEGER -> "intValue";
-            case TypeConversionUtils.ABBR_LONG -> "longValue";
-            case TypeConversionUtils.ABBR_FLOAT -> "floatValue";
-            case TypeConversionUtils.ABBR_DOUBLE -> "doubleValue";
-            case TypeConversionUtils.ABBR_BYTE -> "byteValue";
-            case TypeConversionUtils.ABBR_SHORT -> "shortValue";
+            case TypeConversionUtils.ABBR_INTEGER -> TypeConversionUtils.METHOD_INT_VALUE;
+            case TypeConversionUtils.ABBR_LONG -> TypeConversionUtils.METHOD_LONG_VALUE;
+            case TypeConversionUtils.ABBR_FLOAT -> TypeConversionUtils.METHOD_FLOAT_VALUE;
+            case TypeConversionUtils.ABBR_DOUBLE -> TypeConversionUtils.METHOD_DOUBLE_VALUE;
+            case TypeConversionUtils.ABBR_BYTE -> TypeConversionUtils.METHOD_BYTE_VALUE;
+            case TypeConversionUtils.ABBR_SHORT -> TypeConversionUtils.METHOD_SHORT_VALUE;
             default -> throw new IllegalArgumentException("Unknown primitive type: " + primitiveType);
         };
 
@@ -274,15 +274,15 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
 
         // Call ArrayList.get(int)
-        int getMethod = cp.addMethodRef("java/util/ArrayList", "get", "(I)Ljava/lang/Object;");
+        int getMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
         code.invokevirtual(getMethod); // [Object]
 
         // Assume Integer type for now
-        int integerClass = cp.addClass("java/lang/Integer");
+        int integerClass = cp.addClass(TypeConversionUtils.JAVA_LANG_INTEGER);
         code.checkcast(integerClass); // [Integer]
 
         // Unbox to primitive
-        int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+        int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
         code.invokevirtual(intValueMethod); // [int] - old value
 
         // Step 2: Increment/decrement to get new value
@@ -294,7 +294,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         } // [new_int]
 
         // Step 3: Box the new value
-        int valueOfMethod = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+        int valueOfMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_I__LJAVA_LANG_INTEGER);
         code.invokestatic(valueOfMethod); // [new_Integer]
 
         // Step 4: For postfix, we need to return the old value, so get it from ArrayList.set()'s return
@@ -341,7 +341,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
 
         // Call ArrayList.set(int, Object)
-        int setMethod = cp.addMethodRef("java/util/ArrayList", "set", "(ILjava/lang/Object;)Ljava/lang/Object;");
+        int setMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_SET, TypeConversionUtils.DESCRIPTOR_I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
         code.invokevirtual(setMethod); // [return_value, old_value_from_set] or [old_value_from_set]
 
         // For prefix, we already have the return value on stack, pop the set result
@@ -455,7 +455,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
         var cp = classWriter.getConstantPool();
         if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
-            int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
+            int linkedHashMapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP);
             code.checkcast(linkedHashMapClass); // [LinkedHashMap]
         }
 
@@ -474,16 +474,16 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
 
         // Call map.get(key)
-        int getMethod = cp.addMethodRef("java/util/LinkedHashMap", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
+        int getMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
         code.invokevirtual(getMethod); // [Object]
 
         // Assume Integer type for now (we'll need to infer this properly later)
         // TODO: Add proper type inference for map values
-        int integerClass = cp.addClass("java/lang/Integer");
+        int integerClass = cp.addClass(TypeConversionUtils.JAVA_LANG_INTEGER);
         code.checkcast(integerClass); // [Integer]
 
         // Unbox to primitive
-        int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+        int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
         code.invokevirtual(intValueMethod); // [int] - old value
 
         // Step 2: Increment/decrement to get new value
@@ -495,7 +495,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         } // [new_int]
 
         // Step 3: Box the new value
-        int valueOfMethod = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+        int valueOfMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_I__LJAVA_LANG_INTEGER);
         code.invokestatic(valueOfMethod); // [new_Integer]
 
         // Step 4: For postfix, we need to return the old value, so get it from map.put()'s return
@@ -513,7 +513,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
         // Cast to LinkedHashMap if the type is Object (for nested properties)
         if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
-            int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
+            int linkedHashMapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP);
             code.checkcast(linkedHashMapClass); // [LinkedHashMap]
         }
         // Stack: [new_Integer, map] or [new_Integer, new_Integer, map]
@@ -556,7 +556,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
 
         // Call map.put(key, value)
-        int putMethod = cp.addMethodRef("java/util/LinkedHashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+        int putMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, "put", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
         code.invokevirtual(putMethod); // [return_value, old_value_from_put] or [old_value_from_put]
 
         // For prefix, we already have the return value on stack, pop the put result
@@ -649,13 +649,13 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         boolean isPrefix = updateExpr.isPrefix();
 
         // Handle LinkedHashMap (object literals): obj.prop++ or obj[key]++
-        if ("Ljava/util/LinkedHashMap;".equals(objType)) {
+        if (TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP.equals(objType)) {
             handleLinkedHashMapUpdate(code, classWriter, memberExpr, isIncrement, isPrefix);
             return;
         }
 
         // Handle ArrayList: arr[index]++
-        if ("Ljava/util/ArrayList;".equals(objType)) {
+        if (TypeConversionUtils.LJAVA_UTIL_ARRAYLIST.equals(objType)) {
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                 handleArrayListUpdate(code, classWriter, memberExpr, computedProp, isIncrement, isPrefix);
                 return;
@@ -695,7 +695,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
             boolean isPrefix) throws Swc4jByteCodeCompilerException {
 
         // Determine element type from array type descriptor
-        // e.g., "[I" -> TypeConversionUtils.ABBR_INTEGER (int), "[J" -> TypeConversionUtils.ABBR_LONG (long)
+        // e.g., TypeConversionUtils.ARRAY_I -> TypeConversionUtils.ABBR_INTEGER (int), TypeConversionUtils.ARRAY_J -> TypeConversionUtils.ABBR_LONG (long)
         String elementType = arrayType.substring(1);
 
         // Only support primitive element types for now

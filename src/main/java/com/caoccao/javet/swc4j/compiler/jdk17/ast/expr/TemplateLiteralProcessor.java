@@ -76,10 +76,10 @@ public final class TemplateLiteralProcessor extends BaseAstProcessor<Swc4jAstTpl
 
         // General case: use StringBuilder for concatenation
         // new StringBuilder()
-        int sbClass = cp.addClass("java/lang/StringBuilder");
+        int sbClass = cp.addClass(TypeConversionUtils.JAVA_LANG_STRINGBUILDER);
         code.newInstance(sbClass);
         code.dup();
-        int sbInit = cp.addMethodRef("java/lang/StringBuilder", "<init>", "()V");
+        int sbInit = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
         code.invokespecial(sbInit);
 
         // Append all quasis and expressions
@@ -91,7 +91,7 @@ public final class TemplateLiteralProcessor extends BaseAstProcessor<Swc4jAstTpl
             if (!quasiValue.isEmpty()) {
                 int quasiRef = cp.addString(quasiValue);
                 code.ldc(quasiRef);
-                int appendString = cp.addMethodRef("java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
+                int appendString = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
                 code.invokevirtual(appendString);
             }
 
@@ -112,17 +112,17 @@ public final class TemplateLiteralProcessor extends BaseAstProcessor<Swc4jAstTpl
                 }
 
                 // Convert to String using String.valueOf(Object)
-                int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
+                int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
                 code.invokestatic(valueOfRef);
 
                 // Append the String
-                int appendString = cp.addMethodRef("java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
+                int appendString = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
                 code.invokevirtual(appendString);
             }
         }
 
         // Call toString() to get the final String
-        int toStringRef = cp.addMethodRef("java/lang/StringBuilder", "toString", "()Ljava/lang/String;");
+        int toStringRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_TO_STRING, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
         code.invokevirtual(toStringRef);
     }
 }

@@ -194,10 +194,10 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
             String internalClassName = fullClassName.replace('.', '/');
 
             try {
-                classWriter = new ClassWriter(internalClassName, "java/lang/Object");
+                classWriter = new ClassWriter(internalClassName, TypeConversionUtils.JAVA_LANG_OBJECT);
 
                 // Generate default constructor
-                generateDefaultConstructor(classWriter, "java/lang/Object");
+                generateDefaultConstructor(classWriter, TypeConversionUtils.JAVA_LANG_OBJECT);
 
                 // Generate each function as a static method
                 for (Swc4jAstFnDecl childFnDecl : functions) {
@@ -216,7 +216,7 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
     private void generateDefaultConstructor(ClassWriter classWriter, String superClassInternalName) {
         var cp = classWriter.getConstantPool();
         // Generate: public <init>() { super(); }
-        int superCtorRef = cp.addMethodRef(superClassInternalName, "<init>", "()V");
+        int superCtorRef = cp.addMethodRef(superClassInternalName, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
 
         CodeBuilder code = new CodeBuilder();
         code.aload(0)                    // load this
@@ -225,8 +225,8 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
 
         classWriter.addMethod(
                 0x0001, // ACC_PUBLIC
-                "<init>",
-                "()V",
+                TypeConversionUtils.METHOD_INIT,
+                TypeConversionUtils.DESCRIPTOR___V,
                 code.toByteArray(),
                 1, // max stack
                 1  // max locals (this)

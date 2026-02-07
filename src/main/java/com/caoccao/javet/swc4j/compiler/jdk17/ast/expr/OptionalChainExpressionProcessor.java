@@ -213,27 +213,27 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                 return;
             }
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
-                if ("length".equals(propIdent.getSym())) {
+                if (TypeConversionUtils.METHOD_LENGTH.equals(propIdent.getSym())) {
                     code.arraylength();
                     TypeConversionUtils.boxPrimitiveType(code, classWriter, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_INTEGER);
                     return;
                 }
             }
-        } else if ("Ljava/util/ArrayList;".equals(objType) || "Ljava/util/List;".equals(objType)) {
+        } else if (TypeConversionUtils.LJAVA_UTIL_ARRAYLIST.equals(objType) || TypeConversionUtils.LJAVA_UTIL_LIST.equals(objType)) {
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName computedProp) {
                 compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null);
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                 if (TypeConversionUtils.LJAVA_LANG_STRING.equals(indexType)) {
-                    int parseIntMethod = cp.addMethodRef("java/lang/Integer", "parseInt", "(Ljava/lang/String;)I");
+                    int parseIntMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_PARSE_INT, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__I);
                     code.invokestatic(parseIntMethod);
                 }
-                int getMethod = cp.addInterfaceMethodRef("java/util/List", "get", "(I)Ljava/lang/Object;");
+                int getMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
                 code.invokeinterface(getMethod, 2);
                 return;
             }
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
-                if ("length".equals(propIdent.getSym())) {
-                    int sizeMethod = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
+                if (TypeConversionUtils.METHOD_LENGTH.equals(propIdent.getSym())) {
+                    int sizeMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
                     code.invokeinterface(sizeMethod, 1);
                     TypeConversionUtils.boxPrimitiveType(code, classWriter, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_INTEGER);
                     return;
@@ -241,15 +241,15 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
             }
         } else if (TypeConversionUtils.LJAVA_LANG_STRING.equals(objType)) {
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
-                if ("length".equals(propIdent.getSym())) {
-                    int lengthMethod = cp.addMethodRef("java/lang/String", "length", "()I");
+                if (TypeConversionUtils.METHOD_LENGTH.equals(propIdent.getSym())) {
+                    int lengthMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_LENGTH, TypeConversionUtils.DESCRIPTER___I);
                     code.invokevirtual(lengthMethod);
                     TypeConversionUtils.boxPrimitiveType(code, classWriter, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_INTEGER);
                     return;
                 }
             }
-        } else if ("Ljava/util/LinkedHashMap;".equals(objType) || TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
-            int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
+        } else if (TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP.equals(objType) || TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
+            int linkedHashMapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP);
             code.checkcast(linkedHashMapClass);
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName computedProp) {
                 compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null);
@@ -258,14 +258,14 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     String wrapperType = TypeConversionUtils.getWrapperType(keyType);
                     TypeConversionUtils.boxPrimitiveType(code, classWriter, keyType, wrapperType);
                 }
-                int getMethod = cp.addMethodRef("java/util/LinkedHashMap", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
+                int getMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                 code.invokevirtual(getMethod);
                 return;
             }
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
                 int keyIndex = cp.addString(propIdent.getSym());
                 code.ldc(keyIndex);
-                int getMethod = cp.addMethodRef("java/util/LinkedHashMap", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
+                int getMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                 code.invokevirtual(getMethod);
                 return;
             }
@@ -276,14 +276,14 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     int fieldRef = cp.addFieldRef(
                             "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray",
                             "raw",
-                            "[Ljava/lang/String;"
+                            TypeConversionUtils.ARRAY_LJAVA_LANG_STRING
                     );
                     code.getfield(fieldRef);
                     return;
-                } else if ("length".equals(fieldName)) {
+                } else if (TypeConversionUtils.METHOD_LENGTH.equals(fieldName)) {
                     int fieldRef = cp.addFieldRef(
                             "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray",
-                            "length",
+                            TypeConversionUtils.METHOD_LENGTH,
                             TypeConversionUtils.ABBR_INTEGER
                     );
                     code.getfield(fieldRef);

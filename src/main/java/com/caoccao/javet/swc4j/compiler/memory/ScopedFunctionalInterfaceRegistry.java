@@ -211,7 +211,7 @@ public final class ScopedFunctionalInterfaceRegistry {
         Class<?>[] params = method.getParameterTypes();
 
         // equals(Object)
-        if ("equals".equals(name) && params.length == 1 && params[0] == Object.class) {
+        if (TypeConversionUtils.METHOD_EQUALS.equals(name) && params.length == 1 && params[0] == Object.class) {
             return true;
         }
         // hashCode()
@@ -219,7 +219,7 @@ public final class ScopedFunctionalInterfaceRegistry {
             return true;
         }
         // toString()
-        return "toString".equals(name) && params.length == 0;
+        return TypeConversionUtils.METHOD_TO_STRING.equals(name) && params.length == 0;
     }
 
     /**

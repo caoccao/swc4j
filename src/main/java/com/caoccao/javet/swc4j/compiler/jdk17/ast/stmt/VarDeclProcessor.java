@@ -99,7 +99,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
         ISwc4jAstPat arg = restPat.getArg();
         if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
             String varName = bindingIdent.getId().getSym();
-            String varType = isArrayRest ? "Ljava/util/ArrayList;" : "Ljava/util/LinkedHashMap;";
+            String varType = isArrayRest ? TypeConversionUtils.LJAVA_UTIL_ARRAYLIST : TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP;
             allocateVariableIfNeeded(context, varName, varType, allowShadow);
         }
     }
@@ -224,14 +224,14 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             boolean allowShadow) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
 
-        int listClass = cp.addClass("java/util/List");
+        int listClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LIST);
         code.checkcast(listClass);
-        int tempListSlot = getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), "Ljava/util/List;");
+        int tempListSlot = getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), TypeConversionUtils.LJAVA_UTIL_LIST);
         code.astore(tempListSlot);
 
-        int listGetRef = cp.addInterfaceMethodRef("java/util/List", "get", "(I)Ljava/lang/Object;");
-        int listSizeRef = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
-        int listAddRef = cp.addInterfaceMethodRef("java/util/List", "add", "(Ljava/lang/Object;)Z");
+        int listGetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
+        int listSizeRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
+        int listAddRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_ADD, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
 
         int restStartIndex = 0;
 
@@ -504,12 +504,12 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             default -> {
                 // Reference type - create an array of the appropriate element type
                 code.iconst(1);
-                // Extract element type from descriptor (e.g., "Ljava/lang/String;" -> "java/lang/String")
+                // Extract element type from descriptor (e.g., TypeConversionUtils.LJAVA_LANG_STRING -> TypeConversionUtils.JAVA_LANG_STRING)
                 String elementType;
                 if (type.startsWith("L") && type.endsWith(";")) {
                     elementType = type.substring(1, type.length() - 1);
                 } else {
-                    elementType = "java/lang/Object";
+                    elementType = TypeConversionUtils.JAVA_LANG_OBJECT;
                 }
                 int elementClass = cp.addClass(elementType);
                 code.anewarray(elementClass);
@@ -608,12 +608,12 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             default -> {
                 // Reference type - create an array of the appropriate element type
                 code.iconst(1);
-                // Extract element type from descriptor (e.g., "Ljava/lang/String;" -> "java/lang/String")
+                // Extract element type from descriptor (e.g., TypeConversionUtils.LJAVA_LANG_STRING -> TypeConversionUtils.JAVA_LANG_STRING)
                 String elementType;
                 if (type.startsWith("L") && type.endsWith(";")) {
                     elementType = type.substring(1, type.length() - 1);
                 } else {
-                    elementType = "java/lang/Object";
+                    elementType = TypeConversionUtils.JAVA_LANG_OBJECT;
                 }
                 int elementClass = cp.addClass(elementType);
                 code.anewarray(elementClass);
@@ -660,13 +660,13 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             boolean allowShadow) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
 
-        int mapClass = cp.addClass("java/util/Map");
+        int mapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_MAP);
         code.checkcast(mapClass);
-        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), "Ljava/util/Map;");
+        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), TypeConversionUtils.LJAVA_UTIL_MAP);
         code.astore(tempMapSlot);
 
-        int mapGetRef = cp.addInterfaceMethodRef("java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
-        int mapRemoveRef = cp.addInterfaceMethodRef("java/util/Map", "remove", "(Ljava/lang/Object;)Ljava/lang/Object;");
+        int mapGetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapRemoveRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_REMOVE, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
 
         List<String> extractedKeys = new ArrayList<>();
 
@@ -767,8 +767,8 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
 
             // Create new LinkedHashMap as copy of source map
-            int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
-            int linkedHashMapInitRef = cp.addMethodRef("java/util/LinkedHashMap", "<init>", "(Ljava/util/Map;)V");
+            int linkedHashMapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP);
+            int linkedHashMapInitRef = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR_LJAVA_UTIL_MAP__V);
             code.newInstance(linkedHashMapClass);
             code.dup();
             code.aload(sourceSlot);
@@ -812,8 +812,8 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
 
             if (isArrayRest) {
                 // Create new ArrayList
-                int arrayListClass = cp.addClass("java/util/ArrayList");
-                int arrayListInitRef = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
+                int arrayListClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_ARRAYLIST);
+                int arrayListInitRef = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
                 code.newInstance(arrayListClass);
                 code.dup();
                 code.invokespecial(arrayListInitRef);

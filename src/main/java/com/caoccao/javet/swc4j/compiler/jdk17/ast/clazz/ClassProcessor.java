@@ -44,6 +44,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 
 /**
  * Processes class definitions, generating bytecode for class files.
@@ -62,7 +63,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
     private static void generateDefaultConstructor(ClassWriter classWriter, String superClassInternalName) {
         var cp = classWriter.getConstantPool();
         // Generate: public <init>() { super(); }
-        int superCtorRef = cp.addMethodRef(superClassInternalName, "<init>", "()V");
+        int superCtorRef = cp.addMethodRef(superClassInternalName, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
 
         CodeBuilder code = new CodeBuilder();
         code.aload(0)                    // load this
@@ -71,8 +72,8 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
 
         classWriter.addMethod(
                 0x0001, // ACC_PUBLIC
-                "<init>",
-                "()V",
+                TypeConversionUtils.METHOD_INIT,
+                TypeConversionUtils.DESCRIPTOR___V,
                 code.toByteArray(),
                 1, // max stack
                 1  // max locals (this)
@@ -217,7 +218,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
                 classWriter.addField(
                         0x001A, // ACC_PRIVATE | ACC_STATIC | ACC_FINAL
                         cache.fieldName(),
-                        "[Ljava/lang/String;"
+                        TypeConversionUtils.ARRAY_LJAVA_LANG_STRING
                 );
                 // Add private static final TemplateStringsArray field for raw string access
                 classWriter.addField(
@@ -290,12 +291,12 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
         }
 
         // Initialize template cache fields
-        int stringClassRef = cp.addClass("java/lang/String");
+        int stringClassRef = cp.addClass(TypeConversionUtils.JAVA_LANG_STRING);
         String templateStringsArrayClass = "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray";
         int templateStringsArrayClassRef = cp.addClass(templateStringsArrayClass);
         int templateStringsArrayCtorRef = cp.addMethodRef(
                 templateStringsArrayClass,
-                "<init>",
+                TypeConversionUtils.METHOD_INIT,
                 "([Ljava/lang/String;[Ljava/lang/String;)V"
         );
 
@@ -318,7 +319,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
             }
 
             // Store cooked array to static field: $tpl$N = array
-            int cookedFieldRef = cp.addFieldRef(internalClassName, cache.fieldName(), "[Ljava/lang/String;");
+            int cookedFieldRef = cp.addFieldRef(internalClassName, cache.fieldName(), TypeConversionUtils.ARRAY_LJAVA_LANG_STRING);
             code.putstatic(cookedFieldRef);
 
             // Create TemplateStringsArray with both cooked and raw arrays
@@ -363,7 +364,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
                 Math.max(maxLocals, 1),
                 true, // isStatic
                 internalClassName,
-                "()V",
+                TypeConversionUtils.DESCRIPTOR___V,
                 cp
         );
         var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
@@ -371,7 +372,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
         classWriter.addMethod(
                 0x0008, // ACC_STATIC
                 "<clinit>",
-                "()V",
+                TypeConversionUtils.DESCRIPTOR___V,
                 code.toByteArray(),
                 10, // max stack
                 Math.max(maxLocals, 1), // max locals (at least 1 for static blocks with local vars)
@@ -389,7 +390,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
             List<FieldInfo> fieldsToInit) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
         // Generate: public <init>() { super(); this.field1 = value1; ... }
-        int superCtorRef = cp.addMethodRef(superClassInternalName, "<init>", "()V");
+        int superCtorRef = cp.addMethodRef(superClassInternalName, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
 
         // Reset compilation context for constructor code generation
         compiler.getMemory().resetCompilationContext(false); // not static
@@ -414,8 +415,8 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
 
         classWriter.addMethod(
                 0x0001, // ACC_PUBLIC
-                "<init>",
-                "()V",
+                TypeConversionUtils.METHOD_INIT,
+                TypeConversionUtils.DESCRIPTOR___V,
                 code.toByteArray(),
                 10, // max stack (increased for field initialization)
                 1   // max locals (this)
@@ -477,7 +478,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
 
             // If first statement is not super() or this(), inject an implicit super() call
             if (!firstIsSuperOrThisCall) {
-                int superCtorRef = cp.addMethodRef(superClassInternalName, "<init>", "()V");
+                int superCtorRef = cp.addMethodRef(superClassInternalName, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
                 code.aload(0).invokespecial(superCtorRef);
             }
 
@@ -490,7 +491,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
             }
         } else {
             // No body - generate default super() call
-            int superCtorRef = cp.addMethodRef(superClassInternalName, "<init>", "()V");
+            int superCtorRef = cp.addMethodRef(superClassInternalName, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
             code.aload(0).invokespecial(superCtorRef);
         }
 
@@ -504,7 +505,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
 
         classWriter.addMethod(
                 0x0001, // ACC_PUBLIC
-                "<init>",
+                TypeConversionUtils.METHOD_INIT,
                 descriptor,
                 code.toByteArray(),
                 10, // max stack
@@ -569,7 +570,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
      */
     private String resolveSuperClass(Swc4jAstClass clazz) {
         if (clazz.getSuperClass().isEmpty()) {
-            return "java/lang/Object";
+            return TypeConversionUtils.JAVA_LANG_OBJECT;
         }
 
         ISwc4jAstExpr superClassExpr = clazz.getSuperClass().get();
@@ -577,7 +578,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
         // Extract fully qualified name from identifier or member expression
         String qualifiedName = AstUtils.extractQualifiedName(superClassExpr);
         if (qualifiedName == null) {
-            return "java/lang/Object";
+            return TypeConversionUtils.JAVA_LANG_OBJECT;
         }
 
         // Get simple name (last part of qualified name)

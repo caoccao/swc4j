@@ -126,7 +126,7 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
         }
 
         JavaTypeInfo javaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
-        MethodInfo constructorInfo = javaTypeInfo != null ? javaTypeInfo.getMethod("<init>", argTypes) : null;
+        MethodInfo constructorInfo = javaTypeInfo != null ? javaTypeInfo.getMethod(TypeConversionUtils.METHOD_INIT, argTypes) : null;
 
         if (constructorInfo != null) {
             List<String> expectedTypes = ScoreUtils.parseParameterDescriptors(constructorInfo.descriptor());
@@ -162,7 +162,7 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
                 }
             }
 
-            int constructorRef = cp.addMethodRef(internalClassName, "<init>", constructorInfo.descriptor());
+            int constructorRef = cp.addMethodRef(internalClassName, TypeConversionUtils.METHOD_INIT, constructorInfo.descriptor());
             code.invokespecial(constructorRef);
         } else {
             StringBuilder paramDescriptors = new StringBuilder();
@@ -172,7 +172,7 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
                 paramDescriptors.append(argTypes.get(i));
             }
             String constructorDescriptor = "(" + paramDescriptors + ")V";
-            int constructorRef = cp.addMethodRef(internalClassName, "<init>", constructorDescriptor);
+            int constructorRef = cp.addMethodRef(internalClassName, TypeConversionUtils.METHOD_INIT, constructorDescriptor);
             code.invokespecial(constructorRef);
         }
 

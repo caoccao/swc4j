@@ -394,7 +394,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
             Swc4jAstArrowExpr arrowExpr,
             IIFETypeInfo typeInfo,
             List<IIFECapturedVariable> capturedVariables) throws IOException, Swc4jByteCodeCompilerException {
-        ClassWriter classWriter = new ClassWriter(implClassName, "java/lang/Object");
+        ClassWriter classWriter = new ClassWriter(implClassName, TypeConversionUtils.JAVA_LANG_OBJECT);
         ClassWriter.ConstantPool cp = classWriter.getConstantPool();
 
         // Add the interface
@@ -433,7 +433,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         // Call super()
         code.aload(0);
         var cp = classWriter.getConstantPool();
-        int superInit = cp.addMethodRef("java/lang/Object", "<init>", "()V");
+        int superInit = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_OBJECT, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
         code.invokespecial(superInit);
 
         // Initialize captured variable fields
@@ -456,7 +456,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         descriptor.append(")V");
 
         int maxLocals = slot;
-        classWriter.addMethod(0x0001, "<init>", descriptor.toString(), code.toByteArray(), 10, maxLocals);
+        classWriter.addMethod(0x0001, TypeConversionUtils.METHOD_INIT, descriptor.toString(), code.toByteArray(), 10, maxLocals);
     }
 
     private void generateImplMethod(
@@ -551,7 +551,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
     }
 
     private byte[] generateInterface(IIFETypeInfo typeInfo) throws IOException {
-        ClassWriter classWriter = new ClassWriter(typeInfo.interfaceName(), "java/lang/Object");
+        ClassWriter classWriter = new ClassWriter(typeInfo.interfaceName(), TypeConversionUtils.JAVA_LANG_OBJECT);
         // Set interface flag: ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT
         classWriter.setAccessFlags(0x0601);
 
@@ -596,7 +596,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         constructorDesc.append(")V");
 
         // invokespecial <init>
-        int constructorRef = cp.addMethodRef(implClassName, "<init>", constructorDesc.toString());
+        int constructorRef = cp.addMethodRef(implClassName, TypeConversionUtils.METHOD_INIT, constructorDesc.toString());
         code.invokespecial(constructorRef);
 
         // Now we have the instance on the stack, call the method with arguments

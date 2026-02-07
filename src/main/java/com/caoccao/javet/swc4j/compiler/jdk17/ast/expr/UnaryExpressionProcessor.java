@@ -111,14 +111,14 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                     if (objType != null && objType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
                         // Java array - delete not supported
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), unaryExpr, "Delete operator not supported on Java arrays - arrays have fixed size");
-                    } else if ("Ljava/util/ArrayList;".equals(objType)) {
+                    } else if (TypeConversionUtils.LJAVA_UTIL_ARRAYLIST.equals(objType)) {
                         if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                             // delete arr[index] -> arr.remove(index)
                             compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [ArrayList]
                             compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null); // Stack: [ArrayList, index]
 
                             // Call ArrayList.remove(int)
-                            int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
+                            int removeMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_REMOVE, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
                             code.invokevirtual(removeMethod); // Stack: [removedObject]
                             // Delete expression returns true in JavaScript, but we'll just leave the removed object
                             // Actually, delete should return boolean true
@@ -126,9 +126,9 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                             code.iconst(1); // Push true (1)
                             return;
                         }
-                    } else if ("Ljava/util/Map;".equals(objType)
-                            || "Ljava/util/HashMap;".equals(objType)
-                            || "Ljava/util/LinkedHashMap;".equals(objType)) {
+                    } else if (TypeConversionUtils.LJAVA_UTIL_MAP.equals(objType)
+                            || TypeConversionUtils.LJAVA_UTIL_HASHMAP.equals(objType)
+                            || TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP.equals(objType)) {
                         if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                             compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [Map]
                             compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null); // Stack: [Map, key]
@@ -142,7 +142,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                                 }
                             }
 
-                            int removeMethod = cp.addInterfaceMethodRef("java/util/Map", "remove", "(Ljava/lang/Object;)Ljava/lang/Object;");
+                            int removeMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_REMOVE, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                             code.invokeinterface(removeMethod, 2); // Stack: [removedObject]
                             code.pop(); // Pop the removed object
                             code.iconst(1); // Push true (1)
@@ -179,7 +179,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                             int longIndex = cp.addLong(longValue);
                             code.ldc2_w(longIndex);
                         }
-                        int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+                        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_LONG, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_J__LJAVA_LANG_LONG);
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && TypeConversionUtils.LJAVA_LANG_INTEGER.equals(returnTypeInfo.descriptor())) {
@@ -191,21 +191,21 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                             int intIndex = cp.addInteger(intValue);
                             code.ldc(intIndex);
                         }
-                        int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+                        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_I__LJAVA_LANG_INTEGER);
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && TypeConversionUtils.LJAVA_LANG_BYTE.equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with a Byte wrapper
                         byte byteValue = (byte) -(int) value;
                         code.iconst(byteValue);
-                        int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+                        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_BYTE, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_B__LJAVA_LANG_BYTE);
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && TypeConversionUtils.LJAVA_LANG_SHORT.equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with a Short wrapper
                         short shortValue = (short) -(int) value;
                         code.iconst(shortValue);
-                        int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+                        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_SHORT, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_S__LJAVA_LANG_SHORT);
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && TypeConversionUtils.LJAVA_LANG_FLOAT.equals(returnTypeInfo.descriptor())) {
@@ -217,7 +217,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                             int floatIndex = cp.addFloat(floatValue);
                             code.ldc(floatIndex);
                         }
-                        int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+                        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_FLOAT, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_F__LJAVA_LANG_FLOAT);
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && TypeConversionUtils.LJAVA_LANG_DOUBLE.equals(returnTypeInfo.descriptor())) {
@@ -229,7 +229,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                             int doubleIndex = cp.addDouble(doubleValue);
                             code.ldc2_w(doubleIndex);
                         }
-                        int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
+                        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_DOUBLE, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_D__LJAVA_LANG_DOUBLE);
                         code.invokestatic(valueOfRef);
                     } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
                         // Integer value
@@ -313,7 +313,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                     // Handle BigInteger negation
                     if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(argType)) {
                         // Call BigInteger.negate() method
-                        int negateRef = cp.addMethodRef("java/math/BigInteger", "negate", "()Ljava/math/BigInteger;");
+                        int negateRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, "negate", TypeConversionUtils.DESCRIPTOR___LJAVA_MATH_BIGINTEGER);
                         code.invokevirtual(negateRef);
                     } else {
                         // Check if argType is a wrapper before unboxing
@@ -411,7 +411,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
 
                 if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(argType)) {
                     compiler.getExpressionProcessor().generate(code, classWriter, arg, null);
-                    int notRef = cp.addMethodRef("java/math/BigInteger", "not", "()Ljava/math/BigInteger;");
+                    int notRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, "not", TypeConversionUtils.DESCRIPTOR___LJAVA_MATH_BIGINTEGER);
                     code.invokevirtual(notRef);
                     return;
                 }
@@ -480,28 +480,28 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                     int ifNullOpcodePos = code.getCurrentOffset() - 3;
 
                     code.dup();
-                    int stringClass = cp.addClass("java/lang/String");
+                    int stringClass = cp.addClass(TypeConversionUtils.JAVA_LANG_STRING);
                     code.instanceof_(stringClass);
                     code.ifne(0);
                     int ifStringOffsetPos = code.getCurrentOffset() - 2;
                     int ifStringOpcodePos = code.getCurrentOffset() - 3;
 
                     code.dup();
-                    int numberClass = cp.addClass("java/lang/Number");
+                    int numberClass = cp.addClass(TypeConversionUtils.JAVA_LANG_NUMBER);
                     code.instanceof_(numberClass);
                     code.ifne(0);
                     int ifNumberOffsetPos = code.getCurrentOffset() - 2;
                     int ifNumberOpcodePos = code.getCurrentOffset() - 3;
 
                     code.dup();
-                    int booleanClass = cp.addClass("java/lang/Boolean");
+                    int booleanClass = cp.addClass(TypeConversionUtils.JAVA_LANG_BOOLEAN);
                     code.instanceof_(booleanClass);
                     code.ifne(0);
                     int ifBooleanOffsetPos = code.getCurrentOffset() - 2;
                     int ifBooleanOpcodePos = code.getCurrentOffset() - 3;
 
                     code.dup();
-                    int characterClass = cp.addClass("java/lang/Character");
+                    int characterClass = cp.addClass(TypeConversionUtils.JAVA_LANG_CHARACTER);
                     code.instanceof_(characterClass);
                     code.ifne(0);
                     int ifCharacterOffsetPos = code.getCurrentOffset() - 2;

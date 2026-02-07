@@ -80,7 +80,7 @@ public final class CallExpressionForSuperMethodProcessor extends BaseAstProcesso
             superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
         }
         if (superClassInternalName == null) {
-            superClassInternalName = "java/lang/Object";
+            superClassInternalName = TypeConversionUtils.JAVA_LANG_OBJECT;
         }
 
         // Load 'this' reference

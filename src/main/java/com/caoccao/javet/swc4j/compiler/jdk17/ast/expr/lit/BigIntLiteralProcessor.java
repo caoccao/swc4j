@@ -55,36 +55,36 @@ public final class BigIntLiteralProcessor extends BaseAstProcessor<Swc4jAstBigIn
 
         switch (descriptor) {
             case TypeConversionUtils.ABBR_INTEGER: // int
-                int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
+                int intValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueRef);
                 break;
             case TypeConversionUtils.ABBR_LONG: // long
-                int longValueRef = cp.addMethodRef("java/math/BigInteger", "longValue", "()J");
+                int longValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_LONG_VALUE, TypeConversionUtils.DESCRIPTER___J);
                 code.invokevirtual(longValueRef);
                 break;
             case TypeConversionUtils.ABBR_DOUBLE: // double
-                int doubleValueRef = cp.addMethodRef("java/math/BigInteger", "doubleValue", "()D");
+                int doubleValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_DOUBLE_VALUE, TypeConversionUtils.DESCRIPTER___D);
                 code.invokevirtual(doubleValueRef);
                 break;
             case TypeConversionUtils.ABBR_FLOAT: // float
-                int floatValueRef = cp.addMethodRef("java/math/BigInteger", "floatValue", "()F");
+                int floatValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_FLOAT_VALUE, TypeConversionUtils.DESCRIPTER___F);
                 code.invokevirtual(floatValueRef);
                 break;
             case TypeConversionUtils.ABBR_BYTE: // byte
-                int byteValueRef = cp.addMethodRef("java/math/BigInteger", "byteValue", "()B");
+                int byteValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_BYTE_VALUE, TypeConversionUtils.DESCRIPTER___B);
                 code.invokevirtual(byteValueRef);
                 break;
             case TypeConversionUtils.ABBR_SHORT: // short
-                int shortValueRef = cp.addMethodRef("java/math/BigInteger", "shortValue", "()S");
+                int shortValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_SHORT_VALUE, TypeConversionUtils.DESCRIPTER___S);
                 code.invokevirtual(shortValueRef);
                 break;
             case TypeConversionUtils.ABBR_BOOLEAN: // boolean
                 // BigInteger.signum() returns -1, 0, or 1; non-zero is true
                 // Use BigInteger.equals(ZERO) to check if zero
-                int zeroFieldRef = cp.addFieldRef("java/math/BigInteger", "ZERO", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
+                int zeroFieldRef = cp.addFieldRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, "ZERO", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
                 code.getstatic(zeroFieldRef); // Push BigInteger.ZERO
                 // Stack: [BigInteger, BigInteger.ZERO]
-                int equalsRef = cp.addMethodRef("java/math/BigInteger", "equals", "(Ljava/lang/Object;)Z");
+                int equalsRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_EQUALS, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
                 code.invokevirtual(equalsRef); // Returns 1 if equal, 0 if not
                 // Stack: [boolean] where 1=equal (false for our purposes), 0=not equal (true for our purposes)
                 // We need to invert: 1→0, 0→1
@@ -126,17 +126,17 @@ public final class BigIntLiteralProcessor extends BaseAstProcessor<Swc4jAstBigIn
         var cp = classWriter.getConstantPool();
         // Optimize for common values using static constants
         if (BigInteger.ZERO.equals(value)) {
-            int zeroFieldRef = cp.addFieldRef("java/math/BigInteger", "ZERO", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
+            int zeroFieldRef = cp.addFieldRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, "ZERO", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
             code.getstatic(zeroFieldRef);
         } else if (BigInteger.ONE.equals(value)) {
-            int oneFieldRef = cp.addFieldRef("java/math/BigInteger", "ONE", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
+            int oneFieldRef = cp.addFieldRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, "ONE", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
             code.getstatic(oneFieldRef);
         } else if (BigInteger.TEN.equals(value)) {
-            int tenFieldRef = cp.addFieldRef("java/math/BigInteger", "TEN", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
+            int tenFieldRef = cp.addFieldRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, "TEN", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
             code.getstatic(tenFieldRef);
         } else {
             // General case: new BigInteger(String)
-            int bigIntegerClass = cp.addClass("java/math/BigInteger");
+            int bigIntegerClass = cp.addClass(TypeConversionUtils.JAVA_MATH_BIGINTEGER);
             code.newInstance(bigIntegerClass);
             code.dup();
 
@@ -145,7 +145,7 @@ public final class BigIntLiteralProcessor extends BaseAstProcessor<Swc4jAstBigIn
             code.ldc(stringIndex);
 
             // Call constructor: BigInteger(String)
-            int constructorRef = cp.addMethodRef("java/math/BigInteger", "<init>", "(Ljava/lang/String;)V");
+            int constructorRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_INIT, "(Ljava/lang/String;)V");
             code.invokespecial(constructorRef);
         }
     }

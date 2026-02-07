@@ -128,10 +128,10 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
             }
 
             // Check assignability using the unified type hierarchy
-            if (typeInfo.isAssignableTo("Ljava/util/List;")) {
+            if (typeInfo.isAssignableTo(TypeConversionUtils.LJAVA_UTIL_LIST)) {
                 return IterationType.LIST;
             }
-            if (typeInfo.isAssignableTo("Ljava/util/Map;")) {
+            if (typeInfo.isAssignableTo(TypeConversionUtils.LJAVA_UTIL_MAP)) {
                 return IterationType.MAP;
             }
         }
@@ -210,7 +210,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         compiler.getExpressionProcessor().generate(code, classWriter, forInStmt.getRight(), null);
 
         // 2. Get size: List.size() -> int
-        int sizeRef = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
+        int sizeRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
         code.invokeinterface(sizeRef, 1);
 
         // 3. Store size in temporary variable
@@ -235,7 +235,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
 
         // 8. Convert counter to String: String.valueOf(int)
         code.iload(counterSlot);
-        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", "(I)Ljava/lang/String;");
+        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_STRING);
         code.invokestatic(valueOfRef);
 
         // 9. Store in loop variable (as String)
@@ -309,15 +309,15 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         compiler.getExpressionProcessor().generate(code, classWriter, forInStmt.getRight(), null);
 
         // 2. Get keySet: Map.keySet() -> Set
-        int keySetRef = cp.addInterfaceMethodRef("java/util/Map", "keySet", "()Ljava/util/Set;");
+        int keySetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, "keySet", TypeConversionUtils.DESCRIPTOR___LJAVA_UTIL_SET);
         code.invokeinterface(keySetRef, 1);
 
         // 3. Get iterator: Set.iterator() -> Iterator
-        int iteratorRef = cp.addInterfaceMethodRef("java/util/Set", "iterator", "()Ljava/util/Iterator;");
+        int iteratorRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_SET, TypeConversionUtils.METHOD_ITERATOR, TypeConversionUtils.DESCRIPTOR___LJAVA_UTIL_ITERATOR);
         code.invokeinterface(iteratorRef, 1);
 
         // 4. Store iterator in temporary variable
-        int iteratorSlot = context.getLocalVariableTable().allocateVariable("$iterator", "Ljava/util/Iterator;");
+        int iteratorSlot = context.getLocalVariableTable().allocateVariable("$iterator", TypeConversionUtils.LJAVA_UTIL_ITERATOR);
         code.astore(iteratorSlot);
 
         // 5. Mark test label (loop entry point)
@@ -325,7 +325,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
 
         // 6. Test hasNext: Iterator.hasNext() -> boolean
         code.aload(iteratorSlot);
-        int hasNextRef = cp.addInterfaceMethodRef("java/util/Iterator", "hasNext", "()Z");
+        int hasNextRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_ITERATOR, TypeConversionUtils.METHOD_HAS_NEXT, TypeConversionUtils.DESCRIPTER___Z);
         code.invokeinterface(hasNextRef, 1);
 
         // 7. Jump to end if no more elements
@@ -334,11 +334,11 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
 
         // 8. Get next element: Iterator.next() -> Object
         code.aload(iteratorSlot);
-        int nextRef = cp.addInterfaceMethodRef("java/util/Iterator", "next", "()Ljava/lang/Object;");
+        int nextRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_ITERATOR, TypeConversionUtils.METHOD_NEXT, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_OBJECT);
         code.invokeinterface(nextRef, 1);
 
         // 9. Convert to String: String.valueOf(Object) -> String
-        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
+        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
         code.invokestatic(valueOfRef);
 
         // 10. Store in loop variable (keySlot already initialized at method start)
@@ -407,7 +407,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         compiler.getExpressionProcessor().generate(code, classWriter, forInStmt.getRight(), null);
 
         // 2. Get length: String.length() -> int
-        int lengthRef = cp.addMethodRef("java/lang/String", "length", "()I");
+        int lengthRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_LENGTH, TypeConversionUtils.DESCRIPTER___I);
         code.invokevirtual(lengthRef);
 
         // 3. Store length in temporary variable
@@ -432,7 +432,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
 
         // 8. Convert counter to String: String.valueOf(int)
         code.iload(counterSlot);
-        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", "(I)Ljava/lang/String;");
+        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_STRING);
         code.invokestatic(valueOfRef);
 
         // 9. Store in loop variable (as String)

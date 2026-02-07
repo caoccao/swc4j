@@ -60,7 +60,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
         }
 
         // Call BigInteger.valueOf(long)
-        int valueOfRef = cp.addMethodRef("java/math/BigInteger", "valueOf", "(J)Ljava/math/BigInteger;");
+        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTOR_J__LJAVA_MATH_BIGINTEGER);
         code.invokestatic(valueOfRef);
     }
 
@@ -108,10 +108,10 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
             }
 
             // Check assignability using the unified type hierarchy
-            if (typeInfo.isAssignableTo("Ljava/util/List;")) {
+            if (typeInfo.isAssignableTo(TypeConversionUtils.LJAVA_UTIL_LIST)) {
                 return InContainerType.LIST;
             }
-            if (typeInfo.isAssignableTo("Ljava/util/Map;")) {
+            if (typeInfo.isAssignableTo(TypeConversionUtils.LJAVA_UTIL_MAP)) {
                 return InContainerType.MAP;
             }
         }
@@ -178,7 +178,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.add()
-                    int addRef = cp.addMethodRef("java/math/BigInteger", "add", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    int addRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_ADD, "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
                     code.invokevirtual(addRef);
                 } else {
                     // Determine the widened result type
@@ -229,7 +229,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.subtract()
-                    int subRef = cp.addMethodRef("java/math/BigInteger", "subtract", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    int subRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_SUBTRACT, "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
                     code.invokevirtual(subRef);
                 } else {
                     // Determine the widened result type
@@ -280,7 +280,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.multiply()
-                    int mulRef = cp.addMethodRef("java/math/BigInteger", "multiply", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    int mulRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_MULTIPLY, "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
                     code.invokevirtual(mulRef);
                 } else {
                     // Determine the widened result type
@@ -331,7 +331,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.divide()
-                    int divRef = cp.addMethodRef("java/math/BigInteger", "divide", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    int divRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_DIVIDE, "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
                     code.invokevirtual(divRef);
                 } else {
                     // Determine the widened result type
@@ -382,7 +382,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.remainder()
-                    int remRef = cp.addMethodRef("java/math/BigInteger", "remainder", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    int remRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_REMAINDER, "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
                     code.invokevirtual(remRef);
                 } else {
                     // Determine the widened result type
@@ -425,7 +425,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
                     if (isBigInteger(rightType)) {
                         // Convert BigInteger to int using intValue()
-                        int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
+                        int intValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                         code.invokevirtual(intValueRef);
                     } else {
                         TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
@@ -433,7 +433,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.pow(int)
-                    int powRef = cp.addMethodRef("java/math/BigInteger", "pow", "(I)Ljava/math/BigInteger;");
+                    int powRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_POW, TypeConversionUtils.DESCRIPTOR_I__LJAVA_MATH_BIGINTEGER);
                     code.invokevirtual(powRef);
                 } else {
                     resultType = TypeConversionUtils.ABBR_DOUBLE; // Math.pow returns double
@@ -449,7 +449,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), TypeConversionUtils.ABBR_DOUBLE);
 
                     // Call Math.pow(double, double)
-                    int mathPowRef = cp.addMethodRef("java/lang/Math", "pow", "(DD)D");
+                    int mathPowRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_MATH, TypeConversionUtils.METHOD_POW, TypeConversionUtils.DESCRIPTOR_D_D__D);
                     code.invokestatic(mathPowRef);
                 }
             }
@@ -471,7 +471,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
                     if (isBigInteger(rightType)) {
                         // Convert BigInteger to int using intValue()
-                        int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
+                        int intValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                         code.invokevirtual(intValueRef);
                     } else {
                         TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
@@ -479,7 +479,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.shiftLeft(int)
-                    int shiftLeftRef = cp.addMethodRef("java/math/BigInteger", "shiftLeft", "(I)Ljava/math/BigInteger;");
+                    int shiftLeftRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_SHIFT_LEFT, TypeConversionUtils.DESCRIPTOR_I__LJAVA_MATH_BIGINTEGER);
                     code.invokevirtual(shiftLeftRef);
                 } else {
                     // Determine the result type based on left operand
@@ -525,7 +525,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
                     if (isBigInteger(rightType)) {
                         // Convert BigInteger to int using intValue()
-                        int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
+                        int intValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                         code.invokevirtual(intValueRef);
                     } else {
                         TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
@@ -533,7 +533,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.shiftRight(int)
-                    int shiftRightRef = cp.addMethodRef("java/math/BigInteger", "shiftRight", "(I)Ljava/math/BigInteger;");
+                    int shiftRightRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_SHIFT_RIGHT, TypeConversionUtils.DESCRIPTOR_I__LJAVA_MATH_BIGINTEGER);
                     code.invokevirtual(shiftRightRef);
                 } else {
                     // Determine the result type based on left operand
@@ -580,7 +580,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
                     if (isBigInteger(rightType)) {
                         // Convert BigInteger to int using intValue()
-                        int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
+                        int intValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                         code.invokevirtual(intValueRef);
                     } else {
                         TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
@@ -588,7 +588,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.shiftRight(int) - note: this is signed shift
-                    int shiftRightRef = cp.addMethodRef("java/math/BigInteger", "shiftRight", "(I)Ljava/math/BigInteger;");
+                    int shiftRightRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_SHIFT_RIGHT, TypeConversionUtils.DESCRIPTOR_I__LJAVA_MATH_BIGINTEGER);
                     code.invokevirtual(shiftRightRef);
                 } else {
                     // Determine the result type based on left operand
@@ -642,7 +642,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.and()
-                    int andRef = cp.addMethodRef("java/math/BigInteger", "and", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    int andRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_AND, "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
                     code.invokevirtual(andRef);
                 } else {
                     // Determine the widened result type
@@ -691,7 +691,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.or()
-                    int orRef = cp.addMethodRef("java/math/BigInteger", "or", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    int orRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_OR, "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
                     code.invokevirtual(orRef);
                 } else {
                     // Determine the widened result type
@@ -740,7 +740,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.xor()
-                    int xorRef = cp.addMethodRef("java/math/BigInteger", "xor", "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
+                    int xorRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_XOR, "(Ljava/math/BigInteger;)Ljava/math/BigInteger;");
                     code.invokevirtual(xorRef);
                 } else {
                     // Determine the widened result type
@@ -791,7 +791,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.equals()
-                    int equalsRef = cp.addMethodRef("java/math/BigInteger", "equals", "(Ljava/lang/Object;)Z");
+                    int equalsRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_EQUALS, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
                     code.invokevirtual(equalsRef);
                 } else {
                     // Determine the comparison type (widen to common type for primitives)
@@ -878,7 +878,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         }
 
                         // Objects.equals returns boolean (Z) which is represented as 0 or 1
-                        int equalsRef = cp.addMethodRef("java/util/Objects", "equals", "(Ljava/lang/Object;Ljava/lang/Object;)Z");
+                        int equalsRef = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_OBJECTS, TypeConversionUtils.METHOD_EQUALS, "(Ljava/lang/Object;Ljava/lang/Object;)Z");
                         code.invokestatic(equalsRef);
                     }
                 }
@@ -911,7 +911,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.equals() and invert result
-                    int equalsRef = cp.addMethodRef("java/math/BigInteger", "equals", "(Ljava/lang/Object;)Z");
+                    int equalsRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_EQUALS, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
                     code.invokevirtual(equalsRef);
                     // Invert: 0 -> 1, 1 -> 0
                     code.iconst(1);
@@ -1001,7 +1001,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         }
 
                         // Objects.equals returns boolean (Z) which is represented as 0 or 1
-                        int equalsRef = cp.addMethodRef("java/util/Objects", "equals", "(Ljava/lang/Object;Ljava/lang/Object;)Z");
+                        int equalsRef = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_OBJECTS, TypeConversionUtils.METHOD_EQUALS, "(Ljava/lang/Object;Ljava/lang/Object;)Z");
                         code.invokestatic(equalsRef);
 
                         // Invert the result: 0 -> 1, 1 -> 0
@@ -1041,7 +1041,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.compareTo() - returns -1, 0, or 1
-                    int compareToRef = cp.addMethodRef("java/math/BigInteger", "compareTo", "(Ljava/math/BigInteger;)I");
+                    int compareToRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_COMPARE_TO, "(Ljava/math/BigInteger;)I");
                     code.invokevirtual(compareToRef);
 
                     // Check result: < 0 for Lt, <= 0 for LtEq
@@ -1180,7 +1180,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.compareTo() - returns -1, 0, or 1
-                    int compareToRef = cp.addMethodRef("java/math/BigInteger", "compareTo", "(Ljava/math/BigInteger;)I");
+                    int compareToRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_COMPARE_TO, "(Ljava/math/BigInteger;)I");
                     code.invokevirtual(compareToRef);
 
                     // Check result: > 0 for Gt, >= 0 for GtEq
@@ -1393,8 +1393,8 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                         // Convert to String if not already a String
                         if (!TypeConversionUtils.LJAVA_LANG_STRING.equals(leftType)) {
-                            int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf",
-                                    "(Ljava/lang/Object;)Ljava/lang/String;");
+                            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF,
+                                    TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
                             code.invokestatic(valueOfRef);
                         }
 
@@ -1405,8 +1405,8 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         code.swap();
 
                         // Call Map.containsKey(Object) -> boolean
-                        int containsKeyRef = cp.addInterfaceMethodRef("java/util/Map", "containsKey",
-                                "(Ljava/lang/Object;)Z");
+                        int containsKeyRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, "containsKey",
+                                TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
                         code.invokeinterface(containsKeyRef, 2);
                     }
                     case LIST -> {
@@ -1424,7 +1424,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
 
                         // Get list size: List.size() -> int
-                        int sizeRef = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
+                        int sizeRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
                         code.invokeinterface(sizeRef, 1);
 
                         // Now stack has: [index, size]
@@ -1447,7 +1447,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
 
                         // Get string length: String.length() -> int
-                        int lengthRef = cp.addMethodRef("java/lang/String", "length", "()I");
+                        int lengthRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_LENGTH, TypeConversionUtils.DESCRIPTER___I);
                         code.invokevirtual(lengthRef);
 
                         // Now stack has: [index, length]
@@ -1615,31 +1615,31 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
             }
             case TypeConversionUtils.LJAVA_LANG_INTEGER -> {
                 // Unbox Integer to int
-                int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                int intValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
                 code.invokevirtual(intValueRef);
             }
             case TypeConversionUtils.LJAVA_LANG_LONG -> {
                 // Unbox Long to long, then convert to int
-                int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
+                int longValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_LONG, TypeConversionUtils.METHOD_LONG_VALUE, TypeConversionUtils.DESCRIPTER___J);
                 code.invokevirtual(longValueRef);
                 code.l2i();
             }
             case TypeConversionUtils.LJAVA_LANG_FLOAT -> {
                 // Unbox Float to float, then check for whole number and convert to int
-                int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
+                int floatValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_FLOAT, TypeConversionUtils.METHOD_FLOAT_VALUE, TypeConversionUtils.DESCRIPTER___F);
                 code.invokevirtual(floatValueRef);
                 generateFloatToIntWithWholeCheck(code, classWriter);
             }
             case TypeConversionUtils.LJAVA_LANG_DOUBLE -> {
                 // Unbox Double to double, then check for whole number and convert to int
-                int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
+                int doubleValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_DOUBLE, TypeConversionUtils.METHOD_DOUBLE_VALUE, TypeConversionUtils.DESCRIPTER___D);
                 code.invokevirtual(doubleValueRef);
                 generateDoubleToIntWithWholeCheck(code, classWriter);
             }
             default -> {
                 // For other object types, convert to String first, then safely parse
-                int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf",
-                        "(Ljava/lang/Object;)Ljava/lang/String;");
+                int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF,
+                        TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
                 code.invokestatic(valueOfRef);
                 generateSafeStringToInt(code, classWriter);
             }
@@ -1840,7 +1840,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
         // Try block: call Integer.parseInt
         int tryStart = code.getCurrentOffset();
-        int parseIntRef = cp.addMethodRef("java/lang/Integer", "parseInt", "(Ljava/lang/String;)I");
+        int parseIntRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_PARSE_INT, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__I);
         code.invokestatic(parseIntRef);                  // [int]
         int tryEnd = code.getCurrentOffset();
 
@@ -1860,7 +1860,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
         code.patchShort(gotoOffsetPos, endLabel - gotoOpcodePos);
 
         // Add exception table entry for NumberFormatException
-        int catchTypeRef = cp.addClass("java/lang/NumberFormatException");
+        int catchTypeRef = cp.addClass(TypeConversionUtils.JAVA_LANG_NUMBERFORMATEXCEPTION);
         code.addExceptionHandler(tryStart, tryEnd, handlerStart, catchTypeRef);
 
         // Stack: [int]

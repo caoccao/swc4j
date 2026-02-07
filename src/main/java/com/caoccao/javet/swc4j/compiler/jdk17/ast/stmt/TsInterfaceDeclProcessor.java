@@ -142,7 +142,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         String[] extendedInterfaces = processExtends(tsInterfaceDecl.getExtends());
 
         // Create ClassWriter with java/lang/Object as superclass (interfaces always extend Object)
-        classWriter = new ClassWriter(internalClassName, "java/lang/Object", extendedInterfaces);
+        classWriter = new ClassWriter(internalClassName, TypeConversionUtils.JAVA_LANG_OBJECT, extendedInterfaces);
 
         // Set interface flags: ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT
         classWriter.setAccessFlags(INTERFACE_ACCESS_FLAGS);
@@ -413,7 +413,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         String getterDescriptor = "(" + keyDescriptor + ")" + valueDescriptor;
         classWriter.addMethod(
                 METHOD_ACCESS_FLAGS,
-                "get",
+                TypeConversionUtils.METHOD_GET,
                 getterDescriptor,
                 null, // No code for abstract methods
                 0,    // max stack
@@ -425,7 +425,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
             String setterDescriptor = "(" + keyDescriptor + valueDescriptor + ")V";
             classWriter.addMethod(
                     METHOD_ACCESS_FLAGS,
-                    "set",
+                    TypeConversionUtils.METHOD_SET,
                     setterDescriptor,
                     null, // No code for abstract methods
                     0,    // max stack
@@ -532,7 +532,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
 
         // Generate setter (if not readonly)
         if (!prop.isReadonly()) {
-            String setterName = "set" + capitalize(propName);
+            String setterName = TypeConversionUtils.METHOD_SET + capitalize(propName);
             String setterDescriptor = "(" + descriptor + ")V";
             classWriter.addMethod(
                     METHOD_ACCESS_FLAGS,
@@ -573,7 +573,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         }
 
         // Generate setter method
-        String setterName = "set" + capitalize(propName);
+        String setterName = TypeConversionUtils.METHOD_SET + capitalize(propName);
         String setterDescriptor = "(" + descriptor + ")V";
         classWriter.addMethod(
                 METHOD_ACCESS_FLAGS,
@@ -600,7 +600,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
             }
             return "is" + capitalize(propName);
         }
-        return "get" + capitalize(propName);
+        return TypeConversionUtils.METHOD_GET + capitalize(propName);
     }
 
     /**

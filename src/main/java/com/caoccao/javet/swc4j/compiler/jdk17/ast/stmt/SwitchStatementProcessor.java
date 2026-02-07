@@ -586,35 +586,35 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
 
         // Boxed type switches: unbox then use integer switch
         if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Integer", "intValue", "()I", labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I, labelName, returnTypeInfo);
             return;
         }
         if (TypeConversionUtils.LJAVA_LANG_BYTE.equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Byte", "byteValue", "()B", labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, TypeConversionUtils.JAVA_LANG_BYTE, TypeConversionUtils.METHOD_BYTE_VALUE, TypeConversionUtils.DESCRIPTER___B, labelName, returnTypeInfo);
             return;
         }
         if (TypeConversionUtils.LJAVA_LANG_SHORT.equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Short", "shortValue", "()S", labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, TypeConversionUtils.JAVA_LANG_SHORT, TypeConversionUtils.METHOD_SHORT_VALUE, TypeConversionUtils.DESCRIPTER___S, labelName, returnTypeInfo);
             return;
         }
         if (TypeConversionUtils.LJAVA_LANG_CHARACTER.equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Character", "charValue", "()C", labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, TypeConversionUtils.JAVA_LANG_CHARACTER, TypeConversionUtils.METHOD_CHAR_VALUE, TypeConversionUtils.DESCRIPTER___C, labelName, returnTypeInfo);
             return;
         }
         if (TypeConversionUtils.LJAVA_LANG_BOOLEAN.equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Boolean", "booleanValue", "()Z", labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, TypeConversionUtils.JAVA_LANG_BOOLEAN, TypeConversionUtils.METHOD_BOOLEAN_VALUE, TypeConversionUtils.DESCRIPTER___Z, labelName, returnTypeInfo);
             return;
         }
         if (TypeConversionUtils.LJAVA_LANG_LONG.equals(discriminantType)) {
-            generateBoxedLongSwitch(code, classWriter, switchStmt, "java/lang/Long", "longValue", "()J", labelName, returnTypeInfo);
+            generateBoxedLongSwitch(code, classWriter, switchStmt, TypeConversionUtils.JAVA_LANG_LONG, TypeConversionUtils.METHOD_LONG_VALUE, TypeConversionUtils.DESCRIPTER___J, labelName, returnTypeInfo);
             return;
         }
         if (TypeConversionUtils.LJAVA_LANG_FLOAT.equals(discriminantType)) {
-            generateBoxedFloatSwitch(code, classWriter, switchStmt, "java/lang/Float", "floatValue", "()F", labelName, returnTypeInfo);
+            generateBoxedFloatSwitch(code, classWriter, switchStmt, TypeConversionUtils.JAVA_LANG_FLOAT, TypeConversionUtils.METHOD_FLOAT_VALUE, TypeConversionUtils.DESCRIPTER___F, labelName, returnTypeInfo);
             return;
         }
         if (TypeConversionUtils.LJAVA_LANG_DOUBLE.equals(discriminantType)) {
-            generateBoxedDoubleSwitch(code, classWriter, switchStmt, "java/lang/Double", "doubleValue", "()D", labelName, returnTypeInfo);
+            generateBoxedDoubleSwitch(code, classWriter, switchStmt, TypeConversionUtils.JAVA_LANG_DOUBLE, TypeConversionUtils.METHOD_DOUBLE_VALUE, TypeConversionUtils.DESCRIPTER___D, labelName, returnTypeInfo);
             return;
         }
 
@@ -825,7 +825,7 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
 
         // Call ordinal() method to get int value
         // ordinal() is defined in java.lang.Enum and returns int
-        int ordinalRef = cp.addMethodRef("java/lang/Enum", "ordinal", "()I");
+        int ordinalRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_ENUM, "ordinal", TypeConversionUtils.DESCRIPTER___I);
         code.invokevirtual(ordinalRef);
 
         // Now use integer switch with the ordinal value on stack
@@ -1199,8 +1199,8 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
             Map<String, Integer> caseLabelToPosition) {
         var cp = classWriter.getConstantPool();
 
-        int hashCodeRef = cp.addMethodRef("java/lang/String", "hashCode", "()I");
-        int equalsRef = cp.addMethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z");
+        int hashCodeRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, "hashCode", TypeConversionUtils.DESCRIPTER___I);
+        int equalsRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_EQUALS, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
 
         // Generate hashCode() call
         code.aload(strLocal);
