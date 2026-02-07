@@ -19,11 +19,13 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBigInt;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -354,11 +356,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                 String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
 
                 // Check if type is numeric
-                boolean isNumericPrimitive = primitiveType.equals("I") || primitiveType.equals("J") ||
-                        primitiveType.equals("F") || primitiveType.equals("D") ||
-                        primitiveType.equals("B") || primitiveType.equals("S") || primitiveType.equals("C");
-
-                if (!isNumericPrimitive) {
+                if (!TypeConversionUtils.isNumericPrimitive(primitiveType)) {
                     // Reject boolean
                     if (primitiveType.equals("Z")) {
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), unaryExpr,
@@ -419,9 +417,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                 }
                 String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
 
-                boolean isIntegerType = "I".equals(primitiveType) || "J".equals(primitiveType)
-                        || "B".equals(primitiveType) || "S".equals(primitiveType) || "C".equals(primitiveType);
-                if (!isIntegerType) {
+                if (!TypeConversionUtils.isIntegerPrimitive(primitiveType)) {
                     throw new Swc4jByteCodeCompilerException(getSourceCode(), unaryExpr,
                             "Bitwise NOT (~) requires integer type, got: " + argType);
                 }
@@ -448,140 +444,123 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
             case TypeOf -> {
                 ISwc4jAstExpr arg = unaryExpr.getArg();
                 String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
-
-                compiler.getExpressionProcessor().generate(code, classWriter, arg, null);
-
                 if (argType == null) {
                     argType = "Ljava/lang/Object;";
                 }
 
-                if ("V".equals(argType)) {
-                    int undefinedIndex = cp.addString("undefined");
-                    code.ldc(undefinedIndex);
-                    return;
-                }
+                // Try static resolution
+                String typeOfResult = TypeConversionUtils.getTypeOfResult(argType);
 
-                String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
-                boolean isPrimitive = argType.equals(primitiveType);
-                if (("Z".equals(primitiveType) && isPrimitive) || "Ljava/lang/Boolean;".equals(argType)) {
-                    code.pop();
-                    int booleanIndex = cp.addString("boolean");
-                    code.ldc(booleanIndex);
-                    return;
-                }
-                if (isPrimitive && ("I".equals(primitiveType) || "J".equals(primitiveType) || "F".equals(primitiveType)
-                        || "D".equals(primitiveType) || "B".equals(primitiveType) || "S".equals(primitiveType)
-                        || "C".equals(primitiveType))) {
-                    if ("J".equals(primitiveType) || "D".equals(primitiveType)) {
-                        code.pop2();
-                    } else {
-                        code.pop();
+                // Check functional interface registry
+                if (typeOfResult == null && argType.startsWith("L") && argType.endsWith(";")) {
+                    String internalName = argType.substring(1, argType.length() - 1);
+                    if (compiler.getMemory().getScopedFunctionalInterfaceRegistry().isFunctionalInterface(internalName)) {
+                        typeOfResult = "function";
                     }
-                    int numberIndex = cp.addString("number");
-                    code.ldc(numberIndex);
-                    return;
                 }
 
-                if ("Ljava/lang/String;".equals(argType)) {
+                if (typeOfResult != null) {
+                    // Statically resolved — skip evaluation if side-effect-free
+                    boolean sideEffectFree = arg instanceof ISwc4jAstLit || arg instanceof Swc4jAstIdent;
+                    if (!sideEffectFree) {
+                        compiler.getExpressionProcessor().generate(code, classWriter, arg, null);
+                        TypeConversionUtils.popByType(code, argType);
+                    }
+                    int resultIndex = cp.addString(typeOfResult);
+                    code.ldc(resultIndex);
+                } else {
+                    // Runtime path — must be Object or unknown reference type
+                    compiler.getExpressionProcessor().generate(code, classWriter, arg, null);
+
+                    // instanceof chain: null→"object", String→"string", Number→"number",
+                    // Boolean→"boolean", Character→"number", default→"object"
+                    code.dup();
+                    code.ifnull(0);
+                    int ifNullOffsetPos = code.getCurrentOffset() - 2;
+                    int ifNullOpcodePos = code.getCurrentOffset() - 3;
+
+                    code.dup();
+                    int stringClass = cp.addClass("java/lang/String");
+                    code.instanceof_(stringClass);
+                    code.ifne(0);
+                    int ifStringOffsetPos = code.getCurrentOffset() - 2;
+                    int ifStringOpcodePos = code.getCurrentOffset() - 3;
+
+                    code.dup();
+                    int numberClass = cp.addClass("java/lang/Number");
+                    code.instanceof_(numberClass);
+                    code.ifne(0);
+                    int ifNumberOffsetPos = code.getCurrentOffset() - 2;
+                    int ifNumberOpcodePos = code.getCurrentOffset() - 3;
+
+                    code.dup();
+                    int booleanClass = cp.addClass("java/lang/Boolean");
+                    code.instanceof_(booleanClass);
+                    code.ifne(0);
+                    int ifBooleanOffsetPos = code.getCurrentOffset() - 2;
+                    int ifBooleanOpcodePos = code.getCurrentOffset() - 3;
+
+                    code.dup();
+                    int characterClass = cp.addClass("java/lang/Character");
+                    code.instanceof_(characterClass);
+                    code.ifne(0);
+                    int ifCharacterOffsetPos = code.getCurrentOffset() - 2;
+                    int ifCharacterOpcodePos = code.getCurrentOffset() - 3;
+
+                    // default → "object"
+                    code.pop();
+                    int objectIndex = cp.addString("object");
+                    code.ldc(objectIndex);
+                    code.gotoLabel(0);
+                    int gotoEndOffsetPos = code.getCurrentOffset() - 2;
+                    int gotoEndOpcodePos = code.getCurrentOffset() - 3;
+
+                    // null → "object"
+                    int nullLabel = code.getCurrentOffset();
+                    code.pop();
+                    code.ldc(objectIndex);
+                    code.gotoLabel(0);
+                    int gotoEndFromNullOffsetPos = code.getCurrentOffset() - 2;
+                    int gotoEndFromNullOpcodePos = code.getCurrentOffset() - 3;
+
+                    // String → "string"
+                    int stringLabel = code.getCurrentOffset();
                     code.pop();
                     int stringIndex = cp.addString("string");
                     code.ldc(stringIndex);
-                    return;
-                }
+                    code.gotoLabel(0);
+                    int gotoEndFromStringOffsetPos = code.getCurrentOffset() - 2;
+                    int gotoEndFromStringOpcodePos = code.getCurrentOffset() - 3;
 
-                if ("Ljava/lang/Byte;".equals(argType) || "Ljava/lang/Short;".equals(argType)
-                        || "Ljava/lang/Integer;".equals(argType) || "Ljava/lang/Long;".equals(argType)
-                        || "Ljava/lang/Float;".equals(argType) || "Ljava/lang/Double;".equals(argType)
-                        || "Ljava/lang/Character;".equals(argType)) {
+                    // Number or Character → "number"
+                    int numberLabel = code.getCurrentOffset();
                     code.pop();
                     int numberIndex = cp.addString("number");
                     code.ldc(numberIndex);
-                    return;
+                    code.gotoLabel(0);
+                    int gotoEndFromNumberOffsetPos = code.getCurrentOffset() - 2;
+                    int gotoEndFromNumberOpcodePos = code.getCurrentOffset() - 3;
+
+                    // Boolean → "boolean"
+                    int booleanLabel = code.getCurrentOffset();
+                    code.pop();
+                    int booleanIndex = cp.addString("boolean");
+                    code.ldc(booleanIndex);
+
+                    int endLabel = code.getCurrentOffset();
+
+                    // Patch branch offsets
+                    code.patchShort(ifNullOffsetPos, nullLabel - ifNullOpcodePos);
+                    code.patchShort(ifStringOffsetPos, stringLabel - ifStringOpcodePos);
+                    code.patchShort(ifNumberOffsetPos, numberLabel - ifNumberOpcodePos);
+                    code.patchShort(ifBooleanOffsetPos, booleanLabel - ifBooleanOpcodePos);
+                    code.patchShort(ifCharacterOffsetPos, numberLabel - ifCharacterOpcodePos);
+
+                    code.patchShort(gotoEndOffsetPos, endLabel - gotoEndOpcodePos);
+                    code.patchShort(gotoEndFromNullOffsetPos, endLabel - gotoEndFromNullOpcodePos);
+                    code.patchShort(gotoEndFromStringOffsetPos, endLabel - gotoEndFromStringOpcodePos);
+                    code.patchShort(gotoEndFromNumberOffsetPos, endLabel - gotoEndFromNumberOpcodePos);
                 }
-
-                if (argType.startsWith("L") && argType.endsWith(";")) {
-                    String internalName = argType.substring(1, argType.length() - 1);
-                    if (compiler.getMemory().getScopedFunctionalInterfaceRegistry().isFunctionalInterface(internalName)) {
-                        code.pop();
-                        int functionIndex = cp.addString("function");
-                        code.ldc(functionIndex);
-                        return;
-                    }
-                }
-
-                code.dup();
-                code.ifnull(0);
-                int ifNullOffsetPos = code.getCurrentOffset() - 2;
-                int ifNullOpcodePos = code.getCurrentOffset() - 3;
-
-                code.dup();
-                int stringClass = cp.addClass("java/lang/String");
-                code.instanceof_(stringClass);
-                code.ifne(0);
-                int ifStringOffsetPos = code.getCurrentOffset() - 2;
-                int ifStringOpcodePos = code.getCurrentOffset() - 3;
-
-                code.dup();
-                int numberClass = cp.addClass("java/lang/Number");
-                code.instanceof_(numberClass);
-                code.ifne(0);
-                int ifNumberOffsetPos = code.getCurrentOffset() - 2;
-                int ifNumberOpcodePos = code.getCurrentOffset() - 3;
-
-                code.dup();
-                int booleanClass = cp.addClass("java/lang/Boolean");
-                code.instanceof_(booleanClass);
-                code.ifne(0);
-                int ifBooleanOffsetPos = code.getCurrentOffset() - 2;
-                int ifBooleanOpcodePos = code.getCurrentOffset() - 3;
-
-                int defaultLabel = code.getCurrentOffset();
-                code.pop();
-                int objectIndex = cp.addString("object");
-                code.ldc(objectIndex);
-                code.gotoLabel(0);
-                int gotoEndOffsetPos = code.getCurrentOffset() - 2;
-                int gotoEndOpcodePos = code.getCurrentOffset() - 3;
-
-                int nullLabel = code.getCurrentOffset();
-                code.pop();
-                code.ldc(objectIndex);
-                code.gotoLabel(0);
-                int gotoEndFromNullOffsetPos = code.getCurrentOffset() - 2;
-                int gotoEndFromNullOpcodePos = code.getCurrentOffset() - 3;
-
-                int stringLabel = code.getCurrentOffset();
-                code.pop();
-                int stringIndex = cp.addString("string");
-                code.ldc(stringIndex);
-                code.gotoLabel(0);
-                int gotoEndFromStringOffsetPos = code.getCurrentOffset() - 2;
-                int gotoEndFromStringOpcodePos = code.getCurrentOffset() - 3;
-
-                int numberLabel = code.getCurrentOffset();
-                code.pop();
-                int numberIndex = cp.addString("number");
-                code.ldc(numberIndex);
-                code.gotoLabel(0);
-                int gotoEndFromNumberOffsetPos = code.getCurrentOffset() - 2;
-                int gotoEndFromNumberOpcodePos = code.getCurrentOffset() - 3;
-
-                int booleanLabel = code.getCurrentOffset();
-                code.pop();
-                int booleanIndex = cp.addString("boolean");
-                code.ldc(booleanIndex);
-
-                int endLabel = code.getCurrentOffset();
-
-                code.patchShort(ifNullOffsetPos, nullLabel - ifNullOpcodePos);
-                code.patchShort(ifStringOffsetPos, stringLabel - ifStringOpcodePos);
-                code.patchShort(ifNumberOffsetPos, numberLabel - ifNumberOpcodePos);
-                code.patchShort(ifBooleanOffsetPos, booleanLabel - ifBooleanOpcodePos);
-
-                code.patchShort(gotoEndOffsetPos, endLabel - gotoEndOpcodePos);
-                code.patchShort(gotoEndFromNullOffsetPos, endLabel - gotoEndFromNullOpcodePos);
-                code.patchShort(gotoEndFromStringOffsetPos, endLabel - gotoEndFromStringOpcodePos);
-                code.patchShort(gotoEndFromNumberOffsetPos, endLabel - gotoEndFromNumberOpcodePos);
             }
             case Void -> {
                 ISwc4jAstExpr arg = unaryExpr.getArg();
@@ -592,13 +571,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                     argType = "Ljava/lang/Object;";
                 }
 
-                if (!"V".equals(argType)) {
-                    if ("J".equals(argType) || "D".equals(argType)) {
-                        code.pop2();
-                    } else {
-                        code.pop();
-                    }
-                }
+                TypeConversionUtils.popByType(code, argType);
 
                 if (returnTypeInfo != null && returnTypeInfo.type() != ReturnType.VOID) {
                     code.aconst_null();

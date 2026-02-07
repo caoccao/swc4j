@@ -29,6 +29,7 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
@@ -343,12 +344,8 @@ public final class ForStatementProcessor extends BaseAstProcessor<Swc4jAstForStm
 
             // Pop the result of the init expression if it leaves a value on the stack
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
-            if (exprType != null && !"V".equals(exprType)) {
-                if ("D".equals(exprType) || "J".equals(exprType)) {
-                    code.pop2();
-                } else {
-                    code.pop();
-                }
+            if (exprType != null) {
+                TypeConversionUtils.popByType(code, exprType);
             }
         }
     }
@@ -366,12 +363,8 @@ public final class ForStatementProcessor extends BaseAstProcessor<Swc4jAstForStm
         // Pop the result of the update expression if it leaves a value on the stack
         // This includes AssignExpr (i = 5), UpdateExpr (i++), and SeqExpr (i++, j--)
         String updateType = compiler.getTypeResolver().inferTypeFromExpr(updateExpr);
-        if (updateType != null && !"V".equals(updateType)) {
-            if ("D".equals(updateType) || "J".equals(updateType)) {
-                code.pop2();
-            } else {
-                code.pop();
-            }
+        if (updateType != null) {
+            TypeConversionUtils.popByType(code, updateType);
         }
     }
 

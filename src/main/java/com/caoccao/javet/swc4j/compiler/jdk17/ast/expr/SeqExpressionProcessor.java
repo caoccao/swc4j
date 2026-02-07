@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -67,12 +68,8 @@ public final class SeqExpressionProcessor extends BaseAstProcessor<Swc4jAstSeqEx
             // Pop the result of non-last expressions (they're evaluated for side effects only)
             if (!isLast) {
                 String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
-                if (exprType != null && !"V".equals(exprType)) {
-                    if ("D".equals(exprType) || "J".equals(exprType)) {
-                        code.pop2();
-                    } else {
-                        code.pop();
-                    }
+                if (exprType != null) {
+                    TypeConversionUtils.popByType(code, exprType);
                 }
             }
         }

@@ -25,6 +25,8 @@ import java.util.Set;
  * The type Type conversion utils.
  */
 public final class TypeConversionUtils {
+    private static final Set<String> INTEGER_PRIMITIVES = Set.of("I", "J", "B", "S", "C");
+    private static final Set<String> NUMERIC_PRIMITIVES = Set.of("I", "J", "F", "D", "B", "S", "C");
     private static final Set<String> PRIMITIVE_TYPES = Set.of("I", "Z", "B", "C", "S", "J", "F", "D");
 
     private TypeConversionUtils() {
@@ -152,6 +154,25 @@ public final class TypeConversionUtils {
     }
 
     /**
+     * Gets the result of the {@code typeof} operator for a statically-known type.
+     * Returns {@code null} if the type requires runtime checking (e.g., generic Object).
+     *
+     * @param type the JVM type descriptor
+     * @return the typeof result string, or null if runtime check is needed
+     */
+    public static String getTypeOfResult(String type) {
+        if (type == null) return null;
+        if ("V".equals(type)) return "undefined";
+        if ("Ljava/lang/String;".equals(type)) return "string";
+        if ("Ljava/math/BigInteger;".equals(type)) return "number";
+        if (type.startsWith("[")) return "object";
+        String primitiveType = getPrimitiveType(type);
+        if ("Z".equals(primitiveType)) return "boolean";
+        if (isNumericPrimitive(primitiveType)) return "number";
+        return null;
+    }
+
+    /**
      * Gets primitive type.
      *
      * @param type the type
@@ -191,6 +212,26 @@ public final class TypeConversionUtils {
     }
 
     /**
+     * Checks if the given primitive type descriptor is an integer-category type (I, J, B, S, C).
+     *
+     * @param primitiveType the primitive type descriptor
+     * @return true if integer-category
+     */
+    public static boolean isIntegerPrimitive(String primitiveType) {
+        return INTEGER_PRIMITIVES.contains(primitiveType);
+    }
+
+    /**
+     * Checks if the given primitive type descriptor is a numeric type (I, J, F, D, B, S, C).
+     *
+     * @param primitiveType the primitive type descriptor
+     * @return true if numeric
+     */
+    public static boolean isNumericPrimitive(String primitiveType) {
+        return NUMERIC_PRIMITIVES.contains(primitiveType);
+    }
+
+    /**
      * Is primitive type boolean.
      *
      * @param type the type
@@ -198,6 +239,22 @@ public final class TypeConversionUtils {
      */
     public static boolean isPrimitiveType(String type) {
         return PRIMITIVE_TYPES.contains(type);
+    }
+
+    /**
+     * Pops a value from the stack based on its type descriptor.
+     * No-op for void, {@code pop2} for long/double, {@code pop} for everything else.
+     *
+     * @param code the code builder
+     * @param type the JVM type descriptor
+     */
+    public static void popByType(CodeBuilder code, String type) {
+        if ("V".equals(type)) return;
+        if ("J".equals(type) || "D".equals(type)) {
+            code.pop2();
+        } else {
+            code.pop();
+        }
     }
 
     /**

@@ -29,6 +29,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.UsingResourceInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -201,12 +202,8 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
                 return;
             }
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(unwrappedExpr);
-            if (exprType != null && !("V".equals(exprType))) {
-                if ("D".equals(exprType) || "J".equals(exprType)) {
-                    code.pop2();
-                } else {
-                    code.pop();
-                }
+            if (exprType != null) {
+                TypeConversionUtils.popByType(code, exprType);
             } else if (exprType == null && (unwrappedExpr instanceof Swc4jAstAssignExpr
                     || unwrappedExpr instanceof Swc4jAstUpdateExpr)) {
                 // If type inference fails for assign/update, still pop since they always leave a value

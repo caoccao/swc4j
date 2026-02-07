@@ -30,6 +30,89 @@ public class TestCompileUnaryExprTypeOf extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testTypeOfArrayList(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                import { ArrayList } from 'java.util'
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const list: ArrayList = new ArrayList()
+                      return typeof list
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo("object");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTypeOfBigInteger(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const value: bigint = 123n
+                      return typeof value
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo("number");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTypeOfCharacter(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Array<String> {
+                      const c: char = 'A'
+                      const cw: Character = 'B'
+                      return [typeof c, typeof cw]
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo(List.of("number", "number"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTypeOfIntArray(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const arr: int[] = [1, 2, 3]
+                      return typeof arr
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo("object");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTypeOfLinkedHashMap(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                import { LinkedHashMap } from 'java.util'
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const map: LinkedHashMap = new LinkedHashMap()
+                      return typeof map
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo("object");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testTypeOfNull(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -42,6 +125,27 @@ public class TestCompileUnaryExprTypeOf extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
                 .isEqualTo("object");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTypeOfNumericWrappers(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Array<String> {
+                      const i: Integer = 1
+                      const l: Long = 2
+                      const f: Float = 1.5
+                      const d: Double = 2.5
+                      const b: Byte = 1
+                      const s: Short = 2
+                      return [typeof i, typeof l, typeof f, typeof d, typeof b, typeof s]
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo(List.of("number", "number", "number", "number", "number", "number"));
     }
 
     @ParameterizedTest
@@ -92,5 +196,21 @@ public class TestCompileUnaryExprTypeOf extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
                 .isEqualTo(List.of("number", 1));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testTypeOfVoid(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    doNothing(): void {}
+                    test(): String {
+                      return typeof this.doNothing()
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test"))
+                .isEqualTo("undefined");
     }
 }
