@@ -317,7 +317,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                     // Handle BigInteger negation
                     if (ConstantJavaType.LJAVA_MATH_BIGINTEGER.equals(argType)) {
                         // Call BigInteger.negate() method
-                        int negateRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, "negate", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_MATH_BIGINTEGER);
+                        int negateRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_NEGATE, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_MATH_BIGINTEGER);
                         code.invokevirtual(negateRef);
                     } else {
                         // Check if argType is a wrapper before unboxing
@@ -415,7 +415,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
 
                 if (ConstantJavaType.LJAVA_MATH_BIGINTEGER.equals(argType)) {
                     compiler.getExpressionProcessor().generate(code, classWriter, arg, null);
-                    int notRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, "not", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_MATH_BIGINTEGER);
+                    int notRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_NOT, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_MATH_BIGINTEGER);
                     code.invokevirtual(notRef);
                     return;
                 }

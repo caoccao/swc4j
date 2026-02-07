@@ -20,6 +20,9 @@ import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstRegex;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -162,9 +165,9 @@ public final class RegexLiteralProcessor extends BaseAstProcessor<Swc4jAstRegex>
 
         // Call Pattern.compile(String, int)
         int compileMethodRef = cp.addMethodRef(
-                "java/util/regex/Pattern",
-                "compile",
-                "(Ljava/lang/String;I)Ljava/util/regex/Pattern;");
+                ConstantJavaType.JAVA_UTIL_REGEX_PATTERN,
+                ConstantJavaMethod.METHOD_COMPILE,
+                ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__LJAVA_UTIL_REGEX_PATTERN);
         code.invokestatic(compileMethodRef);
 
         // Stack: [Pattern]

@@ -16,10 +16,6 @@
 
 package com.caoccao.javet.swc4j.compiler.constants;
 
-import java.math.BigInteger;
-import java.util.*;
-import java.util.regex.Pattern;
-
 /**
  * Java type constants for bytecode generation.
  * <p>
@@ -140,191 +136,343 @@ public final class ConstantJavaType {
     /**
      * The constant CLASS_JAVA_LANG_BOOLEAN - Boolean fully qualified class name.
      */
-    public static final String CLASS_JAVA_LANG_BOOLEAN = Boolean.class.getName();
+    public static final String CLASS_JAVA_LANG_BOOLEAN = "java.lang.Boolean";
     /**
      * The constant CLASS_JAVA_LANG_BYTE - Byte fully qualified class name.
      */
-    public static final String CLASS_JAVA_LANG_BYTE = Byte.class.getName();
+    public static final String CLASS_JAVA_LANG_BYTE = "java.lang.Byte";
     /**
      * The constant CLASS_JAVA_LANG_CHARACTER - Character fully qualified class name.
      */
-    public static final String CLASS_JAVA_LANG_CHARACTER = Character.class.getName();
+    public static final String CLASS_JAVA_LANG_CHARACTER = "java.lang.Character";
     /**
      * The constant CLASS_JAVA_LANG_DOUBLE - Double fully qualified class name.
      */
-    public static final String CLASS_JAVA_LANG_DOUBLE = Double.class.getName();
+    public static final String CLASS_JAVA_LANG_DOUBLE = "java.lang.Double";
     /**
      * The constant CLASS_JAVA_LANG_FLOAT - Float fully qualified class name.
      */
-    public static final String CLASS_JAVA_LANG_FLOAT = Float.class.getName();
+    public static final String CLASS_JAVA_LANG_FLOAT = "java.lang.Float";
     /**
      * The constant CLASS_JAVA_LANG_INTEGER - Integer fully qualified class name.
      */
-    public static final String CLASS_JAVA_LANG_INTEGER = Integer.class.getName();
+    public static final String CLASS_JAVA_LANG_INTEGER = "java.lang.Integer";
     /**
      * The constant CLASS_JAVA_LANG_LONG - Long fully qualified class name.
      */
-    public static final String CLASS_JAVA_LANG_LONG = Long.class.getName();
+    public static final String CLASS_JAVA_LANG_LONG = "java.lang.Long";
     /**
      * The constant CLASS_JAVA_LANG_NUMBER - Number fully qualified class name.
      */
-    public static final String CLASS_JAVA_LANG_NUMBER = Number.class.getName();
+    public static final String CLASS_JAVA_LANG_NUMBER = "java.lang.Number";
     /**
      * The constant CLASS_JAVA_LANG_OBJECT - Object fully qualified class name.
      */
-    public static final String CLASS_JAVA_LANG_OBJECT = Object.class.getName();
+    public static final String CLASS_JAVA_LANG_OBJECT = "java.lang.Object";
     /**
      * The constant CLASS_JAVA_LANG_SHORT - Short fully qualified class name.
      */
-    public static final String CLASS_JAVA_LANG_SHORT = Short.class.getName();
+    public static final String CLASS_JAVA_LANG_SHORT = "java.lang.Short";
     /**
      * The constant CLASS_JAVA_LANG_STRING - String fully qualified class name.
      */
-    public static final String CLASS_JAVA_LANG_STRING = String.class.getName();
+    public static final String CLASS_JAVA_LANG_STRING = "java.lang.String";
     /**
      * The constant CLASS_JAVA_MATH_BIGINTEGER - BigInteger fully qualified class name.
      */
-    public static final String CLASS_JAVA_MATH_BIGINTEGER = BigInteger.class.getName();
+    public static final String CLASS_JAVA_MATH_BIGINTEGER = "java.math.BigInteger";
     /**
      * The constant CLASS_JAVA_UTIL_REGEX_PATTERN - Pattern fully qualified class name.
      */
-    public static final String CLASS_JAVA_UTIL_REGEX_PATTERN = Pattern.class.getName();
+    public static final String CLASS_JAVA_UTIL_REGEX_PATTERN = "java.util.regex.Pattern";
+    /**
+     * The constant COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAYLIST_API_UTILS - ArrayListApiUtils utility class internal name.
+     */
+    public static final String COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAYLIST_API_UTILS = "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils";
+    /**
+     * The constant COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_API_UTILS - ArrayApiUtils utility class internal name.
+     */
+    public static final String COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_API_UTILS = "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils";
+    /**
+     * The constant COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS - StringApiUtils utility class internal name.
+     */
+    public static final String COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS = "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils";
+    /**
+     * The constant COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_TEMPLATE_STRINGS_ARRAY - TemplateStringsArray utility class internal name.
+     */
+    public static final String COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_TEMPLATE_STRINGS_ARRAY = "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray";
+    /**
+     * The constant COM_CAOCCAO_JAVET_SWC4J_EXCEPTIONS_JS_ERROR - JsError exception class internal name.
+     */
+    public static final String COM_CAOCCAO_JAVET_SWC4J_EXCEPTIONS_JS_ERROR = "com/caoccao/javet/swc4j/exceptions/JsError";
     /**
      * The constant JAVA_LANG_AUTOCLOSEABLE - AutoCloseable class internal name.
      */
-    public static final String JAVA_LANG_AUTOCLOSEABLE = AutoCloseable.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_AUTOCLOSEABLE = "java/lang/AutoCloseable";
     /**
      * The constant JAVA_LANG_BOOLEAN - Boolean class internal name.
      */
-    public static final String JAVA_LANG_BOOLEAN = Boolean.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_BOOLEAN = "java/lang/Boolean";
     /**
      * The constant JAVA_LANG_BYTE - Byte class internal name.
      */
-    public static final String JAVA_LANG_BYTE = Byte.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_BYTE = "java/lang/Byte";
     /**
      * The constant JAVA_LANG_CHARACTER - Character class internal name.
      */
-    public static final String JAVA_LANG_CHARACTER = Character.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_CHARACTER = "java/lang/Character";
     /**
      * The constant JAVA_LANG_CLASS - Class class internal name.
      */
-    public static final String JAVA_LANG_CLASS = Class.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_CLASS = "java/lang/Class";
     /**
      * The constant JAVA_LANG_DOUBLE - Double class internal name.
      */
-    public static final String JAVA_LANG_DOUBLE = Double.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_DOUBLE = "java/lang/Double";
     /**
      * The constant JAVA_LANG_ENUM - Enum class internal name.
      */
-    public static final String JAVA_LANG_ENUM = Enum.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_ENUM = "java/lang/Enum";
     /**
      * The constant JAVA_LANG_FLOAT - Float class internal name.
      */
-    public static final String JAVA_LANG_FLOAT = Float.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_FLOAT = "java/lang/Float";
     /**
      * The constant JAVA_LANG_ILLEGALARGUMENTEXCEPTION - IllegalArgumentException class internal name.
      */
-    public static final String JAVA_LANG_ILLEGALARGUMENTEXCEPTION = IllegalArgumentException.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_ILLEGALARGUMENTEXCEPTION = "java/lang/IllegalArgumentException";
     /**
      * The constant JAVA_LANG_INTEGER - Integer class internal name.
      */
-    public static final String JAVA_LANG_INTEGER = Integer.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_INTEGER = "java/lang/Integer";
     /**
      * The constant JAVA_LANG_ITERABLE - Iterable class internal name.
      */
-    public static final String JAVA_LANG_ITERABLE = Iterable.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_ITERABLE = "java/lang/Iterable";
     /**
      * The constant JAVA_LANG_LONG - Long class internal name.
      */
-    public static final String JAVA_LANG_LONG = Long.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_LONG = "java/lang/Long";
     /**
      * The constant JAVA_LANG_MATH - Math class internal name.
      */
-    public static final String JAVA_LANG_MATH = Math.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_MATH = "java/lang/Math";
     /**
      * The constant JAVA_LANG_NUMBER - Number class internal name.
      */
-    public static final String JAVA_LANG_NUMBER = Number.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_NUMBER = "java/lang/Number";
     /**
      * The constant JAVA_LANG_NUMBERFORMATEXCEPTION - NumberFormatException class internal name.
      */
-    public static final String JAVA_LANG_NUMBERFORMATEXCEPTION = NumberFormatException.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_NUMBERFORMATEXCEPTION = "java/lang/NumberFormatException";
     /**
      * The constant JAVA_LANG_OBJECT - Object class internal name.
      */
-    public static final String JAVA_LANG_OBJECT = Object.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_OBJECT = "java/lang/Object";
     /**
      * The constant JAVA_LANG_RUNNABLE - Runnable class internal name.
      */
-    public static final String JAVA_LANG_RUNNABLE = Runnable.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_RUNNABLE = "java/lang/Runnable";
     /**
      * The constant JAVA_LANG_SHORT - Short class internal name.
      */
-    public static final String JAVA_LANG_SHORT = Short.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_SHORT = "java/lang/Short";
     /**
      * The constant JAVA_LANG_STRING - String class internal name.
      */
-    public static final String JAVA_LANG_STRING = String.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_STRING = "java/lang/String";
     /**
      * The constant JAVA_LANG_STRINGBUILDER - StringBuilder class internal name.
      */
-    public static final String JAVA_LANG_STRINGBUILDER = StringBuilder.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_STRINGBUILDER = "java/lang/StringBuilder";
     /**
      * The constant JAVA_LANG_THROWABLE - Throwable class internal name.
      */
-    public static final String JAVA_LANG_THROWABLE = Throwable.class.getName().replace('.', '/');
+    public static final String JAVA_LANG_THROWABLE = "java/lang/Throwable";
     /**
      * The constant JAVA_MATH_BIGINTEGER - BigInteger class internal name.
      */
-    public static final String JAVA_MATH_BIGINTEGER = BigInteger.class.getName().replace('.', '/');
+    public static final String JAVA_MATH_BIGINTEGER = "java/math/BigInteger";
     /**
      * The constant JAVA_UTIL_ARRAYLIST - ArrayList class internal name.
      */
-    public static final String JAVA_UTIL_ARRAYLIST = ArrayList.class.getName().replace('.', '/');
+    public static final String JAVA_UTIL_ARRAYLIST = "java/util/ArrayList";
     /**
      * The constant JAVA_UTIL_ARRAYS - Arrays class internal name.
      */
-    public static final String JAVA_UTIL_ARRAYS = Arrays.class.getName().replace('.', '/');
+    public static final String JAVA_UTIL_ARRAYS = "java/util/Arrays";
     /**
      * The constant JAVA_UTIL_COLLECTIONS - Collections class internal name.
      */
-    public static final String JAVA_UTIL_COLLECTIONS = Collections.class.getName().replace('.', '/');
+    public static final String JAVA_UTIL_COLLECTIONS = "java/util/Collections";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_BINARY_OPERATOR - BinaryOperator functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_BINARY_OPERATOR = "java/util/function/BinaryOperator";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_BI_CONSUMER - BiConsumer functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_BI_CONSUMER = "java/util/function/BiConsumer";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_BI_FUNCTION - BiFunction functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_BI_FUNCTION = "java/util/function/BiFunction";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_BI_PREDICATE - BiPredicate functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_BI_PREDICATE = "java/util/function/BiPredicate";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_BOOLEAN_SUPPLIER - BooleanSupplier functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_BOOLEAN_SUPPLIER = "java/util/function/BooleanSupplier";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_CONSUMER - Consumer functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_CONSUMER = "java/util/function/Consumer";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_DOUBLE_BINARY_OPERATOR - DoubleBinaryOperator functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_DOUBLE_BINARY_OPERATOR = "java/util/function/DoubleBinaryOperator";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_DOUBLE_CONSUMER - DoubleConsumer functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_DOUBLE_CONSUMER = "java/util/function/DoubleConsumer";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_DOUBLE_FUNCTION - DoubleFunction functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_DOUBLE_FUNCTION = "java/util/function/DoubleFunction";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_DOUBLE_PREDICATE - DoublePredicate functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_DOUBLE_PREDICATE = "java/util/function/DoublePredicate";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_DOUBLE_SUPPLIER - DoubleSupplier functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_DOUBLE_SUPPLIER = "java/util/function/DoubleSupplier";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_DOUBLE_UNARY_OPERATOR - DoubleUnaryOperator functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_DOUBLE_UNARY_OPERATOR = "java/util/function/DoubleUnaryOperator";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_FUNCTION - Function functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_FUNCTION = "java/util/function/Function";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_INT_BINARY_OPERATOR - IntBinaryOperator functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_INT_BINARY_OPERATOR = "java/util/function/IntBinaryOperator";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_INT_CONSUMER - IntConsumer functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_INT_CONSUMER = "java/util/function/IntConsumer";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_INT_FUNCTION - IntFunction functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_INT_FUNCTION = "java/util/function/IntFunction";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_INT_PREDICATE - IntPredicate functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_INT_PREDICATE = "java/util/function/IntPredicate";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_INT_SUPPLIER - IntSupplier functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_INT_SUPPLIER = "java/util/function/IntSupplier";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_INT_UNARY_OPERATOR - IntUnaryOperator functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_INT_UNARY_OPERATOR = "java/util/function/IntUnaryOperator";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_LONG_BINARY_OPERATOR - LongBinaryOperator functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_LONG_BINARY_OPERATOR = "java/util/function/LongBinaryOperator";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_LONG_CONSUMER - LongConsumer functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_LONG_CONSUMER = "java/util/function/LongConsumer";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_LONG_FUNCTION - LongFunction functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_LONG_FUNCTION = "java/util/function/LongFunction";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_LONG_PREDICATE - LongPredicate functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_LONG_PREDICATE = "java/util/function/LongPredicate";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_LONG_SUPPLIER - LongSupplier functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_LONG_SUPPLIER = "java/util/function/LongSupplier";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_LONG_UNARY_OPERATOR - LongUnaryOperator functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_LONG_UNARY_OPERATOR = "java/util/function/LongUnaryOperator";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_PREDICATE - Predicate functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_PREDICATE = "java/util/function/Predicate";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_SUPPLIER - Supplier functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_SUPPLIER = "java/util/function/Supplier";
+    /**
+     * The constant JAVA_UTIL_FUNCTION_UNARY_OPERATOR - UnaryOperator functional interface internal name.
+     */
+    public static final String JAVA_UTIL_FUNCTION_UNARY_OPERATOR = "java/util/function/UnaryOperator";
     /**
      * The constant JAVA_UTIL_HASHMAP - HashMap class internal name.
      */
-    public static final String JAVA_UTIL_HASHMAP = HashMap.class.getName().replace('.', '/');
+    public static final String JAVA_UTIL_HASHMAP = "java/util/HashMap";
     /**
      * The constant JAVA_UTIL_ITERATOR - Iterator class internal name.
      */
-    public static final String JAVA_UTIL_ITERATOR = Iterator.class.getName().replace('.', '/');
+    public static final String JAVA_UTIL_ITERATOR = "java/util/Iterator";
     /**
      * The constant JAVA_UTIL_LINKEDHASHMAP - LinkedHashMap class internal name.
      */
-    public static final String JAVA_UTIL_LINKEDHASHMAP = LinkedHashMap.class.getName().replace('.', '/');
+    public static final String JAVA_UTIL_LINKEDHASHMAP = "java/util/LinkedHashMap";
     /**
      * The constant JAVA_UTIL_LINKEDLIST - LinkedList class internal name.
      */
-    public static final String JAVA_UTIL_LINKEDLIST = LinkedList.class.getName().replace('.', '/');
+    public static final String JAVA_UTIL_LINKEDLIST = "java/util/LinkedList";
     /**
      * The constant JAVA_UTIL_LIST - List class internal name.
      */
-    public static final String JAVA_UTIL_LIST = List.class.getName().replace('.', '/');
+    public static final String JAVA_UTIL_LIST = "java/util/List";
     /**
      * The constant JAVA_UTIL_MAP - Map class internal name.
      */
-    public static final String JAVA_UTIL_MAP = Map.class.getName().replace('.', '/');
+    public static final String JAVA_UTIL_MAP = "java/util/Map";
     /**
      * The constant JAVA_UTIL_MAP_ENTRY - Map.Entry class internal name.
      */
-    public static final String JAVA_UTIL_MAP_ENTRY = Map.Entry.class.getName().replace('.', '/');
+    public static final String JAVA_UTIL_MAP_ENTRY = "java/util/Map$Entry";
     /**
      * The constant JAVA_UTIL_OBJECTS - Objects class internal name.
      */
-    public static final String JAVA_UTIL_OBJECTS = Objects.class.getName().replace('.', '/');
+    public static final String JAVA_UTIL_OBJECTS = "java/util/Objects";
+    /**
+     * The constant JAVA_UTIL_REGEX_MATCHER - Matcher class internal name.
+     */
+    public static final String JAVA_UTIL_REGEX_MATCHER = "java/util/regex/Matcher";
+    /**
+     * The constant JAVA_UTIL_REGEX_PATTERN - Pattern class internal name.
+     */
+    public static final String JAVA_UTIL_REGEX_PATTERN = "java/util/regex/Pattern";
     /**
      * The constant JAVA_UTIL_SET - Set class internal name.
      */
-    public static final String JAVA_UTIL_SET = Set.class.getName().replace('.', '/');
+    public static final String JAVA_UTIL_SET = "java/util/Set";
+    /**
+     * The constant LCOM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_TEMPLATE_STRINGS_ARRAY - TemplateStringsArray type descriptor.
+     */
+    public static final String LCOM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_TEMPLATE_STRINGS_ARRAY = "Lcom/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray;";
+    /**
+     * The constant LJAVAX_ - common prefix for javax type descriptors.
+     */
+    public static final String LJAVAX_ = "Ljavax/";
+    /**
+     * The constant LJAVA_ - common prefix for java type descriptors.
+     */
+    public static final String LJAVA_ = "Ljava/";
     /**
      * The constant LJAVA_LANG_ - common prefix for java.lang type descriptors.
      */
@@ -398,6 +546,86 @@ public final class ConstantJavaType {
      */
     public static final String LJAVA_UTIL_ARRAYLIST = "Ljava/util/ArrayList;";
     /**
+     * The constant LJAVA_UTIL_COLLECTION - Collection type descriptor.
+     */
+    public static final String LJAVA_UTIL_COLLECTION = "Ljava/util/Collection;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_BI_FUNCTION - BiFunction type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_BI_FUNCTION = "Ljava/util/function/BiFunction;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_CONSUMER - Consumer type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_CONSUMER = "Ljava/util/function/Consumer;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_DOUBLE_BINARY_OPERATOR - DoubleBinaryOperator type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_DOUBLE_BINARY_OPERATOR = "Ljava/util/function/DoubleBinaryOperator;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_DOUBLE_CONSUMER - DoubleConsumer type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_DOUBLE_CONSUMER = "Ljava/util/function/DoubleConsumer;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_DOUBLE_FUNCTION - DoubleFunction type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_DOUBLE_FUNCTION = "Ljava/util/function/DoubleFunction;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_DOUBLE_PREDICATE - DoublePredicate type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_DOUBLE_PREDICATE = "Ljava/util/function/DoublePredicate;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_DOUBLE_UNARY_OPERATOR - DoubleUnaryOperator type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_DOUBLE_UNARY_OPERATOR = "Ljava/util/function/DoubleUnaryOperator;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_FUNCTION - Function type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_FUNCTION = "Ljava/util/function/Function;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_INT_BINARY_OPERATOR - IntBinaryOperator type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_INT_BINARY_OPERATOR = "Ljava/util/function/IntBinaryOperator;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_INT_CONSUMER - IntConsumer type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_INT_CONSUMER = "Ljava/util/function/IntConsumer;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_INT_FUNCTION - IntFunction type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_INT_FUNCTION = "Ljava/util/function/IntFunction;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_INT_PREDICATE - IntPredicate type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_INT_PREDICATE = "Ljava/util/function/IntPredicate;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_INT_UNARY_OPERATOR - IntUnaryOperator type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_INT_UNARY_OPERATOR = "Ljava/util/function/IntUnaryOperator;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_LONG_BINARY_OPERATOR - LongBinaryOperator type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_LONG_BINARY_OPERATOR = "Ljava/util/function/LongBinaryOperator;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_LONG_CONSUMER - LongConsumer type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_LONG_CONSUMER = "Ljava/util/function/LongConsumer;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_LONG_FUNCTION - LongFunction type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_LONG_FUNCTION = "Ljava/util/function/LongFunction;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_LONG_PREDICATE - LongPredicate type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_LONG_PREDICATE = "Ljava/util/function/LongPredicate;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_LONG_UNARY_OPERATOR - LongUnaryOperator type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_LONG_UNARY_OPERATOR = "Ljava/util/function/LongUnaryOperator;";
+    /**
+     * The constant LJAVA_UTIL_FUNCTION_PREDICATE - Predicate type descriptor.
+     */
+    public static final String LJAVA_UTIL_FUNCTION_PREDICATE = "Ljava/util/function/Predicate;";
+    /**
      * The constant LJAVA_UTIL_HASHMAP - HashMap type descriptor.
      */
     public static final String LJAVA_UTIL_HASHMAP = "Ljava/util/HashMap;";
@@ -425,6 +653,14 @@ public final class ConstantJavaType {
      * The constant LJAVA_UTIL_MAP_ENTRY - Map.Entry type descriptor.
      */
     public static final String LJAVA_UTIL_MAP_ENTRY = "Ljava/util/Map$Entry;";
+    /**
+     * The constant LJAVA_UTIL_REGEX_MATCHER - Matcher type descriptor.
+     */
+    public static final String LJAVA_UTIL_REGEX_MATCHER = "Ljava/util/regex/Matcher;";
+    /**
+     * The constant LJAVA_UTIL_REGEX_PATTERN - Pattern type descriptor.
+     */
+    public static final String LJAVA_UTIL_REGEX_PATTERN = "Ljava/util/regex/Pattern;";
     /**
      * The constant LJAVA_UTIL_SET - Set type descriptor.
      */
@@ -468,55 +704,55 @@ public final class ConstantJavaType {
     /**
      * The constant SIMPLE_BIGINTEGER - BigInteger simple class name.
      */
-    public static final String SIMPLE_BIGINTEGER = BigInteger.class.getSimpleName();
+    public static final String SIMPLE_BIGINTEGER = "BigInteger";
     /**
      * The constant SIMPLE_BOOLEAN - Boolean simple class name.
      */
-    public static final String SIMPLE_BOOLEAN = Boolean.class.getSimpleName();
+    public static final String SIMPLE_BOOLEAN = "Boolean";
     /**
      * The constant SIMPLE_BYTE - Byte simple class name.
      */
-    public static final String SIMPLE_BYTE = Byte.class.getSimpleName();
+    public static final String SIMPLE_BYTE = "Byte";
     /**
      * The constant SIMPLE_CHARACTER - Character simple class name.
      */
-    public static final String SIMPLE_CHARACTER = Character.class.getSimpleName();
+    public static final String SIMPLE_CHARACTER = "Character";
     /**
      * The constant SIMPLE_DOUBLE - Double simple class name.
      */
-    public static final String SIMPLE_DOUBLE = Double.class.getSimpleName();
+    public static final String SIMPLE_DOUBLE = "Double";
     /**
      * The constant SIMPLE_FLOAT - Float simple class name.
      */
-    public static final String SIMPLE_FLOAT = Float.class.getSimpleName();
+    public static final String SIMPLE_FLOAT = "Float";
     /**
      * The constant SIMPLE_INTEGER - Integer simple class name.
      */
-    public static final String SIMPLE_INTEGER = Integer.class.getSimpleName();
+    public static final String SIMPLE_INTEGER = "Integer";
     /**
      * The constant SIMPLE_LONG - Long simple class name.
      */
-    public static final String SIMPLE_LONG = Long.class.getSimpleName();
+    public static final String SIMPLE_LONG = "Long";
     /**
      * The constant SIMPLE_NUMBER - Number simple class name.
      */
-    public static final String SIMPLE_NUMBER = Number.class.getSimpleName();
+    public static final String SIMPLE_NUMBER = "Number";
     /**
      * The constant SIMPLE_OBJECT - Object simple class name.
      */
-    public static final String SIMPLE_OBJECT = Object.class.getSimpleName();
+    public static final String SIMPLE_OBJECT = "Object";
     /**
      * The constant SIMPLE_PATTERN - Pattern simple class name.
      */
-    public static final String SIMPLE_PATTERN = Pattern.class.getSimpleName();
+    public static final String SIMPLE_PATTERN = "Pattern";
     /**
      * The constant SIMPLE_SHORT - Short simple class name.
      */
-    public static final String SIMPLE_SHORT = Short.class.getSimpleName();
+    public static final String SIMPLE_SHORT = "Short";
     /**
      * The constant SIMPLE_STRING - String simple class name.
      */
-    public static final String SIMPLE_STRING = String.class.getSimpleName();
+    public static final String SIMPLE_STRING = "String";
     /**
      * The constant TYPEOF_BOOLEAN - JavaScript typeof result for boolean values.
      */
@@ -542,9 +778,17 @@ public final class ConstantJavaType {
      */
     public static final String TYPE_ALIAS_ANY = "any";
     /**
+     * The constant TYPE_ALIAS_ARRAY - TypeScript/JavaScript 'Array' type name.
+     */
+    public static final String TYPE_ALIAS_ARRAY = "Array";
+    /**
      * The constant TYPE_ALIAS_NUMBER - TypeScript 'number' type alias (lowercase).
      */
     public static final String TYPE_ALIAS_NUMBER = "number";
+    /**
+     * The constant TYPE_ALIAS_RECORD - TypeScript 'Record' type name.
+     */
+    public static final String TYPE_ALIAS_RECORD = "Record";
     /**
      * The constant TYPE_ALIAS_UNKNOWN - TypeScript 'unknown' type alias.
      */

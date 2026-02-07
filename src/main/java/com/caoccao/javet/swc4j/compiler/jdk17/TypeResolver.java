@@ -33,6 +33,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.ast.ts.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaField;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
@@ -1092,11 +1093,11 @@ public final class TypeResolver {
                 // LinkedHashMap operations (object literal member access)
                 // map.get() returns Object
                 return ConstantJavaType.LJAVA_LANG_OBJECT;
-            } else if ("Lcom/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray;".equals(objType)) {
+            } else if (ConstantJavaType.LCOM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_TEMPLATE_STRINGS_ARRAY.equals(objType)) {
                 // TemplateStringsArray operations (for raw string access in tagged templates)
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
-                    if ("raw".equals(propName)) {
+                    if (ConstantJavaField.FIELD_RAW.equals(propName)) {
                         return ConstantJavaType.ARRAY_LJAVA_LANG_STRING; // raw field is String[]
                     } else if (ConstantJavaMethod.METHOD_LENGTH.equals(propName)) {
                         return ConstantJavaType.ABBR_INTEGER; // length field is int
@@ -1450,14 +1451,14 @@ public final class TypeResolver {
 
             if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
                 if (memberExpr.getObj() instanceof Swc4jAstIdent objIdent
-                        && "Array".equals(objIdent.getSym())
+                        && ConstantJavaType.TYPE_ALIAS_ARRAY.equals(objIdent.getSym())
                         && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String methodName = propIdent.getSym();
                     switch (methodName) {
-                        case "isArray" -> {
+                        case ConstantJavaMethod.METHOD_IS_ARRAY -> {
                             return ConstantJavaType.ABBR_BOOLEAN;
                         }
-                        case "from", "of" -> {
+                        case ConstantJavaMethod.METHOD_FROM, ConstantJavaMethod.METHOD_OF -> {
                             return ConstantJavaType.LJAVA_UTIL_ARRAYLIST;
                         }
                     }
@@ -1483,29 +1484,39 @@ public final class TypeResolver {
                         String methodName = propIdent.getSym();
                         // Methods that return ArrayList
                         switch (methodName) {
-                            case ConstantJavaMethod.METHOD_CONCAT, "reverse", "sort", "slice", "splice", "fill",
-                                 "copyWithin", "toReversed",
-                                 "toSorted", "with", "toSpliced", "map", "filter", "flat", "flatMap",
-                                 "keys", "values", "entries" -> {
+                            case ConstantJavaMethod.METHOD_CONCAT, ConstantJavaMethod.METHOD_REVERSE,
+                                 ConstantJavaMethod.METHOD_SORT, ConstantJavaMethod.METHOD_SLICE,
+                                 ConstantJavaMethod.METHOD_SPLICE, ConstantJavaMethod.METHOD_FILL,
+                                 ConstantJavaMethod.METHOD_COPY_WITHIN, ConstantJavaMethod.METHOD_TO_REVERSED,
+                                 ConstantJavaMethod.METHOD_TO_SORTED, ConstantJavaMethod.METHOD_WITH,
+                                 ConstantJavaMethod.METHOD_TO_SPLICED, ConstantJavaMethod.METHOD_MAP,
+                                 ConstantJavaMethod.METHOD_FILTER, ConstantJavaMethod.METHOD_FLAT,
+                                 ConstantJavaMethod.METHOD_FLAT_MAP,
+                                 ConstantJavaMethod.METHOD_KEYS, ConstantJavaMethod.METHOD_VALUES,
+                                 ConstantJavaMethod.METHOD_ENTRIES -> {
                                 return ConstantJavaType.LJAVA_UTIL_ARRAYLIST;
                             }
-                            case "push", "unshift", "forEach" -> {
+                            case ConstantJavaMethod.METHOD_PUSH, ConstantJavaMethod.METHOD_UNSHIFT,
+                                 ConstantJavaMethod.METHOD_FOR_EACH -> {
                                 return ConstantJavaType.ABBR_VOID;
                             }
-                            case "find", "reduce", "reduceRight" -> {
+                            case ConstantJavaMethod.METHOD_FIND, ConstantJavaMethod.METHOD_REDUCE,
+                                 ConstantJavaMethod.METHOD_REDUCE_RIGHT -> {
                                 return ConstantJavaType.LJAVA_LANG_OBJECT;
                             }
-                            case "join", ConstantJavaMethod.METHOD_TO_STRING, "toLocaleString" -> {
+                            case ConstantJavaMethod.METHOD_JOIN, ConstantJavaMethod.METHOD_TO_STRING,
+                                 ConstantJavaMethod.METHOD_TO_LOCALE_STRING -> {
                                 return ConstantJavaType.LJAVA_LANG_STRING;
                             }
                             case ConstantJavaMethod.METHOD_INDEX_OF, ConstantJavaMethod.METHOD_LAST_INDEX_OF,
-                                 "findIndex" -> {
+                                 ConstantJavaMethod.METHOD_FIND_INDEX -> {
                                 return ConstantJavaType.ABBR_INTEGER;
                             }
-                            case "includes", "some", "every" -> {
+                            case ConstantJavaMethod.METHOD_INCLUDES, ConstantJavaMethod.METHOD_SOME,
+                                 ConstantJavaMethod.METHOD_EVERY -> {
                                 return ConstantJavaType.ABBR_BOOLEAN;
                             }
-                            case "pop", "shift" -> {
+                            case ConstantJavaMethod.METHOD_POP, ConstantJavaMethod.METHOD_SHIFT -> {
                                 return ConstantJavaType.LJAVA_LANG_OBJECT;
                             }
                         }
@@ -1518,21 +1529,22 @@ public final class TypeResolver {
                         String methodName = propIdent.getSym();
                         String elementType = objType.substring(1); // Remove leading ConstantJavaType.ARRAY_PREFIX
                         switch (methodName) {
-                            case "reverse", "sort", "fill" -> {
+                            case ConstantJavaMethod.METHOD_REVERSE, ConstantJavaMethod.METHOD_SORT,
+                                 ConstantJavaMethod.METHOD_FILL -> {
                                 // Methods that mutate and return the same array type
                                 return objType;
                             }
-                            case "toReversed", "toSorted" -> {
+                            case ConstantJavaMethod.METHOD_TO_REVERSED, ConstantJavaMethod.METHOD_TO_SORTED -> {
                                 // Methods that return a new array of the same type
                                 return objType;
                             }
-                            case "join", ConstantJavaMethod.METHOD_TO_STRING -> {
+                            case ConstantJavaMethod.METHOD_JOIN, ConstantJavaMethod.METHOD_TO_STRING -> {
                                 return ConstantJavaType.LJAVA_LANG_STRING;
                             }
                             case ConstantJavaMethod.METHOD_INDEX_OF, ConstantJavaMethod.METHOD_LAST_INDEX_OF -> {
                                 return ConstantJavaType.ABBR_INTEGER;
                             }
-                            case "includes" -> {
+                            case ConstantJavaMethod.METHOD_INCLUDES -> {
                                 return ConstantJavaType.ABBR_BOOLEAN;
                             }
                         }
@@ -1545,17 +1557,27 @@ public final class TypeResolver {
                         String methodName = propIdent.getSym();
                         return switch (methodName) {
                             // String return types
-                            case "charAt", "substring", "slice", "substr", "toLowerCase", "toUpperCase", "trim",
-                                 "trimStart", "trimLeft", "trimEnd", "trimRight", ConstantJavaMethod.METHOD_CONCAT,
-                                 "repeat", "replace",
-                                 "replaceAll", "padStart", "padEnd" -> ConstantJavaType.LJAVA_LANG_STRING;
+                            case ConstantJavaMethod.METHOD_CHAR_AT, ConstantJavaMethod.METHOD_SUBSTRING,
+                                 ConstantJavaMethod.METHOD_SLICE, ConstantJavaMethod.METHOD_SUBSTR,
+                                 ConstantJavaMethod.METHOD_TO_LOWER_CASE, ConstantJavaMethod.METHOD_TO_UPPER_CASE,
+                                 ConstantJavaMethod.METHOD_TRIM,
+                                 ConstantJavaMethod.METHOD_TRIM_START, ConstantJavaMethod.METHOD_TRIM_LEFT,
+                                 ConstantJavaMethod.METHOD_TRIM_END, ConstantJavaMethod.METHOD_TRIM_RIGHT,
+                                 ConstantJavaMethod.METHOD_CONCAT,
+                                 ConstantJavaMethod.METHOD_REPEAT, ConstantJavaMethod.METHOD_REPLACE,
+                                 ConstantJavaMethod.METHOD_REPLACE_ALL, ConstantJavaMethod.METHOD_PAD_START,
+                                 ConstantJavaMethod.METHOD_PAD_END -> ConstantJavaType.LJAVA_LANG_STRING;
                             // int return types
                             case ConstantJavaMethod.METHOD_INDEX_OF, ConstantJavaMethod.METHOD_LAST_INDEX_OF,
-                                 "charCodeAt", "codePointAt", "search" -> ConstantJavaType.ABBR_INTEGER;
+                                 ConstantJavaMethod.METHOD_CHAR_CODE_AT, ConstantJavaMethod.METHOD_CODE_POINT_AT,
+                                 ConstantJavaMethod.METHOD_SEARCH -> ConstantJavaType.ABBR_INTEGER;
                             // boolean return types
-                            case "startsWith", "endsWith", "includes", "test" -> ConstantJavaType.ABBR_BOOLEAN;
+                            case ConstantJavaMethod.METHOD_STARTS_WITH, ConstantJavaMethod.METHOD_ENDS_WITH,
+                                 ConstantJavaMethod.METHOD_INCLUDES, ConstantJavaMethod.METHOD_TEST ->
+                                    ConstantJavaType.ABBR_BOOLEAN;
                             // ArrayList return type (split, match, matchAll)
-                            case "split", "match", "matchAll" -> ConstantJavaType.LJAVA_UTIL_ARRAYLIST;
+                            case ConstantJavaMethod.METHOD_SPLIT, ConstantJavaMethod.METHOD_MATCH,
+                                 ConstantJavaMethod.METHOD_MATCH_ALL -> ConstantJavaType.LJAVA_UTIL_ARRAYLIST;
                             default -> ConstantJavaType.LJAVA_LANG_OBJECT;
                         };
                     }
@@ -1596,7 +1618,7 @@ public final class TypeResolver {
                             return returnType;
                         }
                         // For non-Java types, require explicit annotation
-                        if (!objType.startsWith("Ljava/") && !objType.startsWith("Ljavax/")) {
+                        if (!objType.startsWith(ConstantJavaType.LJAVA_) && !objType.startsWith(ConstantJavaType.LJAVAX_)) {
                             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                                     "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
                                             ". Please add explicit return type annotation to the method.");
@@ -1697,7 +1719,7 @@ public final class TypeResolver {
 
         if (objType instanceof Swc4jAstTsTypeRef typeRef
                 && typeRef.getTypeName() instanceof Swc4jAstIdent ident
-                && "Array".equals(ident.getSym())
+                && ConstantJavaType.TYPE_ALIAS_ARRAY.equals(ident.getSym())
                 && typeRef.getTypeParams().isPresent()
                 && typeRef.getTypeParams().get().getParams().size() == 1) {
             return mapTsTypeToDescriptor(typeRef.getTypeParams().get().getParams().get(0));
@@ -1839,12 +1861,12 @@ public final class TypeResolver {
             if (entityName instanceof Swc4jAstIdent ident) {
                 String typeName = ident.getSym();
                 // Check if this is Array<T> generic syntax
-                if ("Array".equals(typeName)) {
+                if (ConstantJavaType.TYPE_ALIAS_ARRAY.equals(typeName)) {
                     // Array<T> syntax - maps to List interface (more flexible than ArrayList)
                     return ConstantJavaType.LJAVA_UTIL_LIST;
                 }
                 // Phase 2: Check if this is Record<K, V> generic syntax
-                if ("Record".equals(typeName)) {
+                if (ConstantJavaType.TYPE_ALIAS_RECORD.equals(typeName)) {
                     // Record<K, V> syntax - maps to LinkedHashMap
                     return ConstantJavaType.LJAVA_UTIL_LINKEDHASHMAP;
                 }
@@ -1890,14 +1912,14 @@ public final class TypeResolver {
 
         return switch (resolvedType) {
             case ConstantJavaType.TYPEOF_BOOLEAN -> ConstantJavaType.ABBR_BOOLEAN;
-            case "byte" -> ConstantJavaType.ABBR_BYTE;
-            case "char" -> ConstantJavaType.ABBR_CHARACTER;
-            case "double" -> ConstantJavaType.ABBR_DOUBLE;
-            case "float" -> ConstantJavaType.ABBR_FLOAT;
-            case "int" -> ConstantJavaType.ABBR_INTEGER;
-            case "long" -> ConstantJavaType.ABBR_LONG;
-            case "short" -> ConstantJavaType.ABBR_SHORT;
-            case "void" -> ConstantJavaType.ABBR_VOID;
+            case ConstantJavaType.PRIMITIVE_BYTE -> ConstantJavaType.ABBR_BYTE;
+            case ConstantJavaType.PRIMITIVE_CHAR -> ConstantJavaType.ABBR_CHARACTER;
+            case ConstantJavaType.PRIMITIVE_DOUBLE -> ConstantJavaType.ABBR_DOUBLE;
+            case ConstantJavaType.PRIMITIVE_FLOAT -> ConstantJavaType.ABBR_FLOAT;
+            case ConstantJavaType.PRIMITIVE_INT -> ConstantJavaType.ABBR_INTEGER;
+            case ConstantJavaType.PRIMITIVE_LONG -> ConstantJavaType.ABBR_LONG;
+            case ConstantJavaType.PRIMITIVE_SHORT -> ConstantJavaType.ABBR_SHORT;
+            case ConstantJavaType.PRIMITIVE_VOID -> ConstantJavaType.ABBR_VOID;
             default -> {
                 // Check if this is an enum type - resolve to fully qualified name
                 String qualifiedName = resolveEnumTypeName(resolvedType);
@@ -2004,7 +2026,7 @@ public final class TypeResolver {
         }
 
         String typeName = ident.getSym();
-        if (!"Array".equals(typeName)) {
+        if (!ConstantJavaType.TYPE_ALIAS_ARRAY.equals(typeName)) {
             return null;
         }
 
@@ -2053,7 +2075,7 @@ public final class TypeResolver {
         }
 
         String typeName = ident.getSym();
-        if (!"Record".equals(typeName)) {
+        if (!ConstantJavaType.TYPE_ALIAS_RECORD.equals(typeName)) {
             return null;
         }
 

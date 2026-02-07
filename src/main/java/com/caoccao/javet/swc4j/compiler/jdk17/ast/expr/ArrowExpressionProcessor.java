@@ -266,8 +266,8 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 methodDescriptor = parts[2];
             } else {
                 // (T, U) => R -> BiFunction<T, U, R>
-                interfaceName = "java/util/function/BiFunction";
-                methodName = "apply";
+                interfaceName = ConstantJavaType.JAVA_UTIL_FUNCTION_BI_FUNCTION;
+                methodName = ConstantJavaMethod.METHOD_APPLY;
                 StringBuilder desc = new StringBuilder("(");
                 for (String pt : paramTypes) {
                     desc.append(boxedDescriptor(pt));
@@ -1424,39 +1424,43 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
     private String getBinaryOperatorInfo(String param1Type, String param2Type, ReturnTypeInfo returnInfo) {
         // IntBinaryOperator: (int, int) => int
         if (param1Type.equals(ConstantJavaType.ABBR_INTEGER) && param2Type.equals(ConstantJavaType.ABBR_INTEGER) && returnInfo.type() == ReturnType.INT) {
-            return "java/util/function/IntBinaryOperator|applyAsInt|(II)I";
+            return ConstantJavaType.JAVA_UTIL_FUNCTION_INT_BINARY_OPERATOR + "|" + ConstantJavaMethod.METHOD_APPLY_AS_INT + "|(II)I";
         }
         // LongBinaryOperator: (long, long) => long
         if (param1Type.equals(ConstantJavaType.ABBR_LONG) && param2Type.equals(ConstantJavaType.ABBR_LONG) && returnInfo.type() == ReturnType.LONG) {
-            return "java/util/function/LongBinaryOperator|applyAsLong|(JJ)J";
+            return ConstantJavaType.JAVA_UTIL_FUNCTION_LONG_BINARY_OPERATOR + "|" + ConstantJavaMethod.METHOD_APPLY_AS_LONG + "|(JJ)J";
         }
         // DoubleBinaryOperator: (double, double) => double
         if (param1Type.equals(ConstantJavaType.ABBR_DOUBLE) && param2Type.equals(ConstantJavaType.ABBR_DOUBLE) && returnInfo.type() == ReturnType.DOUBLE) {
-            return "java/util/function/DoubleBinaryOperator|applyAsDouble|(DD)D";
+            return ConstantJavaType.JAVA_UTIL_FUNCTION_DOUBLE_BINARY_OPERATOR + "|" + ConstantJavaMethod.METHOD_APPLY_AS_DOUBLE + "|(DD)D";
         }
         return null;
     }
 
     private String getConsumerInterface(String paramType) {
         return switch (paramType) {
-            case ConstantJavaType.ABBR_INTEGER -> "java/util/function/IntConsumer";
-            case ConstantJavaType.ABBR_LONG -> "java/util/function/LongConsumer";
-            case ConstantJavaType.ABBR_DOUBLE -> "java/util/function/DoubleConsumer";
-            default -> "java/util/function/Consumer";
+            case ConstantJavaType.ABBR_INTEGER -> ConstantJavaType.JAVA_UTIL_FUNCTION_INT_CONSUMER;
+            case ConstantJavaType.ABBR_LONG -> ConstantJavaType.JAVA_UTIL_FUNCTION_LONG_CONSUMER;
+            case ConstantJavaType.ABBR_DOUBLE -> ConstantJavaType.JAVA_UTIL_FUNCTION_DOUBLE_CONSUMER;
+            default -> ConstantJavaType.JAVA_UTIL_FUNCTION_CONSUMER;
         };
     }
 
     private String getConsumerMethodName(String paramType) {
-        return "accept";
+        return ConstantJavaMethod.METHOD_ACCEPT;
     }
 
     private String getErasedFunctionDescriptor(String interfaceName) {
-        return switch (interfaceName) {
-            case "java/util/function/IntFunction" -> ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT;
-            case "java/util/function/LongFunction" -> ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_OBJECT;
-            case "java/util/function/DoubleFunction" -> ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_OBJECT;
-            default -> ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT;
-        };
+        if (interfaceName.equals(ConstantJavaType.JAVA_UTIL_FUNCTION_INT_FUNCTION)) {
+            return ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT;
+        }
+        if (interfaceName.equals(ConstantJavaType.JAVA_UTIL_FUNCTION_LONG_FUNCTION)) {
+            return ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_OBJECT;
+        }
+        if (interfaceName.equals(ConstantJavaType.JAVA_UTIL_FUNCTION_DOUBLE_FUNCTION)) {
+            return ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_OBJECT;
+        }
+        return ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT;
     }
 
     private String getErasedSupplierReturnDescriptor(ReturnTypeInfo returnInfo) {
@@ -1473,47 +1477,62 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     private String getFunctionInterface(String paramType, ReturnTypeInfo returnInfo) {
         // Check for primitive specializations
-        if (paramType.equals(ConstantJavaType.ABBR_INTEGER) && returnInfo.type() == ReturnType.INT) {
-            return "java/util/function/IntUnaryOperator";
-        }
-        if (paramType.equals(ConstantJavaType.ABBR_INTEGER) && returnInfo.type() == ReturnType.BOOLEAN) {
-            return "java/util/function/IntPredicate";
-        }
-        if (paramType.equals(ConstantJavaType.ABBR_LONG) && returnInfo.type() == ReturnType.LONG) {
-            return "java/util/function/LongUnaryOperator";
-        }
-        if (paramType.equals(ConstantJavaType.ABBR_DOUBLE) && returnInfo.type() == ReturnType.DOUBLE) {
-            return "java/util/function/DoubleUnaryOperator";
-        }
-        if (paramType.equals(ConstantJavaType.ABBR_INTEGER)) {
-            return "java/util/function/IntFunction";
-        }
-        if (paramType.equals(ConstantJavaType.ABBR_LONG)) {
-            return "java/util/function/LongFunction";
-        }
-        if (paramType.equals(ConstantJavaType.ABBR_DOUBLE)) {
-            return "java/util/function/DoubleFunction";
-        }
-        if (returnInfo.type() == ReturnType.BOOLEAN) {
-            return "java/util/function/Predicate";
-        }
-        return "java/util/function/Function";
+        return switch (paramType) {
+            case ConstantJavaType.ABBR_INTEGER -> {
+                if (returnInfo.type() == ReturnType.INT) {
+                    yield ConstantJavaType.JAVA_UTIL_FUNCTION_INT_UNARY_OPERATOR;
+                } else if (returnInfo.type() == ReturnType.BOOLEAN) {
+                    yield ConstantJavaType.JAVA_UTIL_FUNCTION_INT_PREDICATE;
+                } else {
+                    yield ConstantJavaType.JAVA_UTIL_FUNCTION_INT_FUNCTION;
+                }
+            }
+            case ConstantJavaType.ABBR_LONG -> {
+                if (returnInfo.type() == ReturnType.LONG) {
+                    yield ConstantJavaType.JAVA_UTIL_FUNCTION_LONG_UNARY_OPERATOR;
+                } else {
+                    yield ConstantJavaType.JAVA_UTIL_FUNCTION_LONG_FUNCTION;
+                }
+            }
+            case ConstantJavaType.ABBR_DOUBLE -> {
+                if (returnInfo.type() == ReturnType.DOUBLE) {
+                    yield ConstantJavaType.JAVA_UTIL_FUNCTION_DOUBLE_UNARY_OPERATOR;
+                } else {
+                    yield ConstantJavaType.JAVA_UTIL_FUNCTION_DOUBLE_FUNCTION;
+                }
+            }
+            default -> {
+                if (returnInfo.type() == ReturnType.BOOLEAN) {
+                    yield ConstantJavaType.JAVA_UTIL_FUNCTION_PREDICATE;
+                }
+                yield ConstantJavaType.JAVA_UTIL_FUNCTION_FUNCTION;
+            }
+        };
     }
 
     private String getFunctionMethodName(String paramType, ReturnTypeInfo returnInfo) {
-        if (paramType.equals(ConstantJavaType.ABBR_INTEGER) && returnInfo.type() == ReturnType.INT) {
-            return "applyAsInt";
-        }
-        if (paramType.equals(ConstantJavaType.ABBR_LONG) && returnInfo.type() == ReturnType.LONG) {
-            return "applyAsLong";
-        }
-        if (paramType.equals(ConstantJavaType.ABBR_DOUBLE) && returnInfo.type() == ReturnType.DOUBLE) {
-            return "applyAsDouble";
-        }
-        if (returnInfo.type() == ReturnType.BOOLEAN) {
-            return "test";
-        }
-        return "apply";
+        return switch (returnInfo.type()) {
+            case INT -> {
+                if (paramType.equals(ConstantJavaType.ABBR_INTEGER)) {
+                    yield ConstantJavaMethod.METHOD_APPLY_AS_INT;
+                }
+                yield ConstantJavaMethod.METHOD_APPLY;
+            }
+            case LONG -> {
+                if (paramType.equals(ConstantJavaType.ABBR_LONG)) {
+                    yield ConstantJavaMethod.METHOD_APPLY_AS_LONG;
+                }
+                yield ConstantJavaMethod.METHOD_APPLY;
+            }
+            case DOUBLE -> {
+                if (paramType.equals(ConstantJavaType.ABBR_DOUBLE)) {
+                    yield ConstantJavaMethod.METHOD_APPLY_AS_DOUBLE;
+                }
+                yield ConstantJavaMethod.METHOD_APPLY;
+            }
+            case BOOLEAN -> ConstantJavaMethod.METHOD_TEST;
+            default -> ConstantJavaMethod.METHOD_APPLY;
+        };
     }
 
     /**
@@ -1536,50 +1555,49 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             }
         }
 
-        // UnaryOperator<T> - single param, same return type
-        if (interfaceName.equals("java/util/function/UnaryOperator")) {
-            // UnaryOperator.apply(Object): Object
-            return new FunctionalInterfaceInfo(interfaceName, "apply", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        }
-        // Function<T, R> - single param, different return type
-        if (interfaceName.equals("java/util/function/Function")) {
-            // Function.apply(Object): Object
-            return new FunctionalInterfaceInfo(interfaceName, "apply", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        }
-        // Supplier<T> - no params, returns T
-        if (interfaceName.equals("java/util/function/Supplier")) {
-            // Supplier.get(): Object
-            return new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
-        }
-        // Consumer<T> - single param, void return
-        if (interfaceName.equals("java/util/function/Consumer")) {
-            // Consumer.accept(Object): void
-            return new FunctionalInterfaceInfo(interfaceName, "accept", "(Ljava/lang/Object;)V");
-        }
-        // Predicate<T> - single param, boolean return
-        if (interfaceName.equals("java/util/function/Predicate")) {
-            // Predicate.test(Object): boolean
-            return new FunctionalInterfaceInfo(interfaceName, "test", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
-        }
-        // BiFunction<T, U, R> - two params, returns R
-        if (interfaceName.equals("java/util/function/BiFunction")) {
-            // BiFunction.apply(Object, Object): Object
-            return new FunctionalInterfaceInfo(interfaceName, "apply", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        }
-        // BinaryOperator<T> - two params same type, returns same type
-        if (interfaceName.equals("java/util/function/BinaryOperator")) {
-            // BinaryOperator.apply(Object, Object): Object
-            return new FunctionalInterfaceInfo(interfaceName, "apply", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        }
-        // BiConsumer<T, U> - two params, void return
-        if (interfaceName.equals("java/util/function/BiConsumer")) {
-            // BiConsumer.accept(Object, Object): void
-            return new FunctionalInterfaceInfo(interfaceName, "accept", "(Ljava/lang/Object;Ljava/lang/Object;)V");
-        }
-        // BiPredicate<T, U> - two params, boolean return
-        if (interfaceName.equals("java/util/function/BiPredicate")) {
-            // BiPredicate.test(Object, Object): boolean
-            return new FunctionalInterfaceInfo(interfaceName, "test", "(Ljava/lang/Object;Ljava/lang/Object;)Z");
+        // Known functional interfaces
+        var result = switch (interfaceName) {
+            // UnaryOperator<T> - single param, same return type
+            case ConstantJavaType.JAVA_UTIL_FUNCTION_UNARY_OPERATOR ->
+                // UnaryOperator.apply(Object): Object
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_APPLY, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+            // Function<T, R> - single param, different return type
+            case ConstantJavaType.JAVA_UTIL_FUNCTION_FUNCTION ->
+                // Function.apply(Object): Object
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_APPLY, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+            // Supplier<T> - no params, returns T
+            case ConstantJavaType.JAVA_UTIL_FUNCTION_SUPPLIER ->
+                // Supplier.get(): Object
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
+            // Consumer<T> - single param, void return
+            case ConstantJavaType.JAVA_UTIL_FUNCTION_CONSUMER ->
+                // Consumer.accept(Object): void
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_ACCEPT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__V);
+            // Predicate<T> - single param, boolean return
+            case ConstantJavaType.JAVA_UTIL_FUNCTION_PREDICATE ->
+                // Predicate.test(Object): boolean
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_TEST, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+            // BiFunction<T, U, R> - two params, returns R
+            case ConstantJavaType.JAVA_UTIL_FUNCTION_BI_FUNCTION ->
+                // BiFunction.apply(Object, Object): Object
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_APPLY, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+            // BinaryOperator<T> - two params same type, returns same type
+            case ConstantJavaType.JAVA_UTIL_FUNCTION_BINARY_OPERATOR ->
+                // BinaryOperator.apply(Object, Object): Object
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_APPLY, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+            // BiConsumer<T, U> - two params, void return
+            case ConstantJavaType.JAVA_UTIL_FUNCTION_BI_CONSUMER ->
+                // BiConsumer.accept(Object, Object): void
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_ACCEPT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__V);
+            // BiPredicate<T, U> - two params, boolean return
+            case ConstantJavaType.JAVA_UTIL_FUNCTION_BI_PREDICATE ->
+                // BiPredicate.test(Object, Object): boolean
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_TEST, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__Z);
+            default -> null;
+        };
+
+        if (result != null) {
+            return result;
         }
 
         // Check if it's a custom functional interface registered in the registry
@@ -1607,20 +1625,20 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     private String getSupplierInterface(ReturnTypeInfo returnInfo) {
         return switch (returnInfo.type()) {
-            case INT -> "java/util/function/IntSupplier";
-            case LONG -> "java/util/function/LongSupplier";
-            case DOUBLE -> "java/util/function/DoubleSupplier";
-            case BOOLEAN -> "java/util/function/BooleanSupplier";
-            default -> "java/util/function/Supplier";
+            case INT -> ConstantJavaType.JAVA_UTIL_FUNCTION_INT_SUPPLIER;
+            case LONG -> ConstantJavaType.JAVA_UTIL_FUNCTION_LONG_SUPPLIER;
+            case DOUBLE -> ConstantJavaType.JAVA_UTIL_FUNCTION_DOUBLE_SUPPLIER;
+            case BOOLEAN -> ConstantJavaType.JAVA_UTIL_FUNCTION_BOOLEAN_SUPPLIER;
+            default -> ConstantJavaType.JAVA_UTIL_FUNCTION_SUPPLIER;
         };
     }
 
     private String getSupplierMethodName(ReturnTypeInfo returnInfo) {
         return switch (returnInfo.type()) {
-            case INT -> "getAsInt";
-            case LONG -> "getAsLong";
-            case DOUBLE -> "getAsDouble";
-            case BOOLEAN -> "getAsBoolean";
+            case INT -> ConstantJavaMethod.METHOD_GET_AS_INT;
+            case LONG -> ConstantJavaMethod.METHOD_GET_AS_LONG;
+            case DOUBLE -> ConstantJavaMethod.METHOD_GET_AS_DOUBLE;
+            case BOOLEAN -> ConstantJavaMethod.METHOD_GET_AS_BOOLEAN;
             default -> ConstantJavaMethod.METHOD_GET;
         };
     }
@@ -1638,11 +1656,11 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
     }
 
     private boolean isErasedFunctionInterface(String interfaceName) {
-        return interfaceName.equals("java/util/function/Function")
-                || interfaceName.equals("java/util/function/UnaryOperator")
-                || interfaceName.equals("java/util/function/IntFunction")
-                || interfaceName.equals("java/util/function/LongFunction")
-                || interfaceName.equals("java/util/function/DoubleFunction");
+        return interfaceName.equals(ConstantJavaType.JAVA_UTIL_FUNCTION_FUNCTION)
+                || interfaceName.equals(ConstantJavaType.JAVA_UTIL_FUNCTION_UNARY_OPERATOR)
+                || interfaceName.equals(ConstantJavaType.JAVA_UTIL_FUNCTION_INT_FUNCTION)
+                || interfaceName.equals(ConstantJavaType.JAVA_UTIL_FUNCTION_LONG_FUNCTION)
+                || interfaceName.equals(ConstantJavaType.JAVA_UTIL_FUNCTION_DOUBLE_FUNCTION);
     }
 
     private void loadVariable(CodeBuilder code, int slot, String type) {

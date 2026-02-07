@@ -89,6 +89,10 @@ public final class ConstantJavaDescriptor {
      */
     public static final String DESCRIPTOR_I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT = "(ILjava/lang/Object;)Ljava/lang/Object;";
     /**
+     * The constant DESCRIPTOR_I_LJAVA_LANG_OBJECT__V.
+     */
+    public static final String DESCRIPTOR_I_LJAVA_LANG_OBJECT__V = "(ILjava/lang/Object;)V";
+    /**
      * The constant DESCRIPTOR_I__C.
      */
     public static final String DESCRIPTOR_I__C = "(I)C";
@@ -145,6 +149,18 @@ public final class ConstantJavaDescriptor {
      */
     public static final String DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT = "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;";
     /**
+     * The constant DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__V.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__V = "(Ljava/lang/Object;Ljava/lang/Object;)V";
+    /**
+     * The constant DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__Z.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__Z = "(Ljava/lang/Object;Ljava/lang/Object;)Z";
+    /**
+     * The constant DESCRIPTOR_LJAVA_LANG_OBJECT__I.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_OBJECT__I = "(Ljava/lang/Object;)I";
+    /**
      * The constant DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT.
      */
     public static final String DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT = "(Ljava/lang/Object;)Ljava/lang/Object;";
@@ -153,9 +169,17 @@ public final class ConstantJavaDescriptor {
      */
     public static final String DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING = "(Ljava/lang/Object;)Ljava/lang/String;";
     /**
+     * The constant DESCRIPTOR_LJAVA_LANG_OBJECT__V.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_OBJECT__V = "(Ljava/lang/Object;)V";
+    /**
      * The constant DESCRIPTOR_LJAVA_LANG_OBJECT__Z.
      */
     public static final String DESCRIPTOR_LJAVA_LANG_OBJECT__Z = "(Ljava/lang/Object;)Z";
+    /**
+     * The constant DESCRIPTOR_LJAVA_LANG_STRING_I__LJAVA_UTIL_REGEX_PATTERN.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_STRING_I__LJAVA_UTIL_REGEX_PATTERN = "(Ljava/lang/String;I)Ljava/util/regex/Pattern;";
     /**
      * The constant DESCRIPTOR_LJAVA_LANG_STRING__I.
      */
@@ -164,6 +188,74 @@ public final class ConstantJavaDescriptor {
      * The constant DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING.
      */
     public static final String DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING = "(Ljava/lang/String;)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRINGBUILDER.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRINGBUILDER = "(Ljava/lang/String;)Ljava/lang/StringBuilder;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_LANG_STRING__V.
+     */
+    public static final String DESCRIPTOR_LJAVA_LANG_STRING__V = "(Ljava/lang/String;)V";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_I_I_I__LJAVA_UTIL_ARRAYLIST.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_I_I_I__LJAVA_UTIL_ARRAYLIST = "(Ljava/util/ArrayList;III)Ljava/util/ArrayList;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_I_I_LJAVA_UTIL_ARRAYLIST__LJAVA_UTIL_ARRAYLIST.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_I_I_LJAVA_UTIL_ARRAYLIST__LJAVA_UTIL_ARRAYLIST = "(Ljava/util/ArrayList;IILjava/util/ArrayList;)Ljava/util/ArrayList;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_I_I__LJAVA_UTIL_ARRAYLIST.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_I_I__LJAVA_UTIL_ARRAYLIST = "(Ljava/util/ArrayList;II)Ljava/util/ArrayList;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_I_LJAVA_LANG_OBJECT__LJAVA_UTIL_ARRAYLIST.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_I_LJAVA_LANG_OBJECT__LJAVA_UTIL_ARRAYLIST = "(Ljava/util/ArrayList;ILjava/lang/Object;)Ljava/util/ArrayList;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_I__LJAVA_UTIL_ARRAYLIST.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_I__LJAVA_UTIL_ARRAYLIST = "(Ljava/util/ArrayList;I)Ljava/util/ArrayList;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_LJAVA_LANG_OBJECT_I_I__LJAVA_UTIL_ARRAYLIST.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_LJAVA_LANG_OBJECT_I_I__LJAVA_UTIL_ARRAYLIST = "(Ljava/util/ArrayList;Ljava/lang/Object;II)Ljava/util/ArrayList;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_LJAVA_LANG_OBJECT_I__LJAVA_UTIL_ARRAYLIST.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_LJAVA_LANG_OBJECT_I__LJAVA_UTIL_ARRAYLIST = "(Ljava/util/ArrayList;Ljava/lang/Object;I)Ljava/util/ArrayList;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_LJAVA_LANG_OBJECT__LJAVA_UTIL_ARRAYLIST.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_LJAVA_LANG_OBJECT__LJAVA_UTIL_ARRAYLIST = "(Ljava/util/ArrayList;Ljava/lang/Object;)Ljava/util/ArrayList;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_LJAVA_UTIL_ARRAYLIST__LJAVA_UTIL_ARRAYLIST.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_ARRAYLIST_LJAVA_UTIL_ARRAYLIST__LJAVA_UTIL_ARRAYLIST = "(Ljava/util/ArrayList;Ljava/util/ArrayList;)Ljava/util/ArrayList;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_ARRAYLIST__LJAVA_UTIL_ARRAYLIST.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_ARRAYLIST__LJAVA_UTIL_ARRAYLIST = "(Ljava/util/ArrayList;)Ljava/util/ArrayList;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_COLLECTION__V.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_COLLECTION__V = "(Ljava/util/Collection;)V";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_COLLECTION__Z.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_COLLECTION__Z = "(Ljava/util/Collection;)Z";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_LIST_LJAVA_LANG_STRING__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_LIST_LJAVA_LANG_STRING__LJAVA_LANG_STRING = "(Ljava/util/List;Ljava/lang/String;)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_LIST__LJAVA_LANG_STRING.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_LIST__LJAVA_LANG_STRING = "(Ljava/util/List;)Ljava/lang/String;";
+    /**
+     * The constant DESCRIPTOR_LJAVA_UTIL_LIST__V.
+     */
+    public static final String DESCRIPTOR_LJAVA_UTIL_LIST__V = "(Ljava/util/List;)V";
     /**
      * The constant DESCRIPTOR_LJAVA_UTIL_MAP__V.
      */
