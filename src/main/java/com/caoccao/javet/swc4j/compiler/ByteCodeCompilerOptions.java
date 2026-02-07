@@ -16,6 +16,9 @@
 
 package com.caoccao.javet.swc4j.compiler;
 
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.exceptions.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -39,48 +42,48 @@ public record ByteCodeCompilerOptions(
 
     static {
         DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
-                "boolean", "boolean",
-                "byte", "byte",
-                "char", "char",
-                "double", "double",
-                "float", "float",
-                "int", "int",
-                "long", "long",
-                "short", "short"
+                ConstantJavaType.PRIMITIVE_BOOLEAN, ConstantJavaType.PRIMITIVE_BOOLEAN,
+                ConstantJavaType.PRIMITIVE_BYTE, ConstantJavaType.PRIMITIVE_BYTE,
+                ConstantJavaType.PRIMITIVE_CHAR, ConstantJavaType.PRIMITIVE_CHAR,
+                ConstantJavaType.PRIMITIVE_DOUBLE, ConstantJavaType.PRIMITIVE_DOUBLE,
+                ConstantJavaType.PRIMITIVE_FLOAT, ConstantJavaType.PRIMITIVE_FLOAT,
+                ConstantJavaType.PRIMITIVE_INT, ConstantJavaType.PRIMITIVE_INT,
+                ConstantJavaType.PRIMITIVE_LONG, ConstantJavaType.PRIMITIVE_LONG,
+                ConstantJavaType.PRIMITIVE_SHORT, ConstantJavaType.PRIMITIVE_SHORT
         ));
         DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
-                "Boolean", "java.lang.Boolean",
-                "Byte", "java.lang.Byte",
-                "Character", "java.lang.Character",
-                "Double", "java.lang.Double",
-                "Float", "java.lang.Float",
-                "Integer", "java.lang.Integer",
-                "Long", "java.lang.Long",
-                "Short", "java.lang.Short"
+                ConstantJavaType.SIMPLE_BOOLEAN, ConstantJavaType.CLASS_JAVA_LANG_BOOLEAN,
+                ConstantJavaType.SIMPLE_BYTE, ConstantJavaType.CLASS_JAVA_LANG_BYTE,
+                ConstantJavaType.SIMPLE_CHARACTER, ConstantJavaType.CLASS_JAVA_LANG_CHARACTER,
+                ConstantJavaType.SIMPLE_DOUBLE, ConstantJavaType.CLASS_JAVA_LANG_DOUBLE,
+                ConstantJavaType.SIMPLE_FLOAT, ConstantJavaType.CLASS_JAVA_LANG_FLOAT,
+                ConstantJavaType.SIMPLE_INTEGER, ConstantJavaType.CLASS_JAVA_LANG_INTEGER,
+                ConstantJavaType.SIMPLE_LONG, ConstantJavaType.CLASS_JAVA_LANG_LONG,
+                ConstantJavaType.SIMPLE_SHORT, ConstantJavaType.CLASS_JAVA_LANG_SHORT
         ));
         DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
-                "BigInteger", "java.math.BigInteger",
-                "Pattern", "java.util.regex.Pattern",
-                "String", "java.lang.String",
-                "Object", "java.lang.Object",
-                "number", "java.lang.Number",
-                "Number", "java.lang.Number",
-                "void", "void"
+                ConstantJavaType.SIMPLE_BIGINTEGER, ConstantJavaType.CLASS_JAVA_MATH_BIGINTEGER,
+                ConstantJavaType.SIMPLE_PATTERN, ConstantJavaType.CLASS_JAVA_UTIL_REGEX_PATTERN,
+                ConstantJavaType.SIMPLE_STRING, ConstantJavaType.CLASS_JAVA_LANG_STRING,
+                ConstantJavaType.SIMPLE_OBJECT, ConstantJavaType.CLASS_JAVA_LANG_OBJECT,
+                ConstantJavaType.TYPE_ALIAS_NUMBER, ConstantJavaType.CLASS_JAVA_LANG_NUMBER,
+                ConstantJavaType.SIMPLE_NUMBER, ConstantJavaType.CLASS_JAVA_LANG_NUMBER,
+                ConstantJavaType.PRIMITIVE_VOID, ConstantJavaType.PRIMITIVE_VOID
         ));
         DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
-                "unknown", "java.lang.Object",
-                "any", "java.lang.Object"
+                ConstantJavaType.TYPE_ALIAS_UNKNOWN, ConstantJavaType.CLASS_JAVA_LANG_OBJECT,
+                ConstantJavaType.TYPE_ALIAS_ANY, ConstantJavaType.CLASS_JAVA_LANG_OBJECT
         ));
         // JavaScript built-in error types
         DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
-                "Error", "com.caoccao.javet.swc4j.exceptions.JsError",
-                "TypeError", "com.caoccao.javet.swc4j.exceptions.JsTypeError",
-                "RangeError", "com.caoccao.javet.swc4j.exceptions.JsRangeError",
-                "ReferenceError", "com.caoccao.javet.swc4j.exceptions.JsReferenceError",
-                "SyntaxError", "com.caoccao.javet.swc4j.exceptions.JsSyntaxError",
-                "URIError", "com.caoccao.javet.swc4j.exceptions.JsURIError",
-                "EvalError", "com.caoccao.javet.swc4j.exceptions.JsEvalError",
-                "AggregateError", "com.caoccao.javet.swc4j.exceptions.JsAggregateError"
+                JsError.NAME, JsError.class.getName(),
+                JsTypeError.NAME, JsTypeError.class.getName(),
+                JsRangeError.NAME, JsRangeError.class.getName(),
+                JsReferenceError.NAME, JsReferenceError.class.getName(),
+                JsSyntaxError.NAME, JsSyntaxError.class.getName(),
+                JsURIError.NAME, JsURIError.class.getName(),
+                JsEvalError.NAME, JsEvalError.class.getName(),
+                JsAggregateError.NAME, JsAggregateError.class.getName()
         ));
     }
 

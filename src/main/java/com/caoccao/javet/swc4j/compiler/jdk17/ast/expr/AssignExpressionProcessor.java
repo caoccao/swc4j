@@ -30,6 +30,9 @@ import com.caoccao.javet.swc4j.ast.pat.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
@@ -37,10 +40,8 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
-import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
-import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
-import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -620,12 +621,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     // Convert value to String using String.valueOf() if it's not already a String
                     if (!ConstantJavaType.LJAVA_LANG_STRING.equals(valueType)) {
                         String valueOfDescriptor = switch (valueType) {
-                            case ConstantJavaType.ABBR_INTEGER -> ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_STRING;
+                            case ConstantJavaType.ABBR_INTEGER ->
+                                    ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_STRING;
                             case ConstantJavaType.ABBR_LONG -> ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_STRING;
                             case ConstantJavaType.ABBR_FLOAT -> ConstantJavaDescriptor.DESCRIPTOR_F__LJAVA_LANG_STRING;
                             case ConstantJavaType.ABBR_DOUBLE -> ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_STRING;
-                            case ConstantJavaType.ABBR_BOOLEAN -> ConstantJavaDescriptor.DESCRIPTOR_Z__LJAVA_LANG_STRING;
-                            case ConstantJavaType.ABBR_CHARACTER -> ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_STRING;
+                            case ConstantJavaType.ABBR_BOOLEAN ->
+                                    ConstantJavaDescriptor.DESCRIPTOR_Z__LJAVA_LANG_STRING;
+                            case ConstantJavaType.ABBR_CHARACTER ->
+                                    ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_STRING;
                             default -> ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING;
                         };
                         int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_VALUE_OF, valueOfDescriptor);

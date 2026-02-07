@@ -31,6 +31,11 @@ import java.util.List;
  */
 public class JsAggregateError extends JsError {
     /**
+     * The constant NAME - JavaScript error type name.
+     */
+    public static final String NAME = "AggregateError";
+
+    /**
      * The list of aggregated errors.
      */
     private final List<Throwable> errors;

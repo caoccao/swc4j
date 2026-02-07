@@ -26,6 +26,11 @@ package com.caoccao.javet.swc4j.exceptions;
  */
 public class JsSyntaxError extends JsError {
     /**
+     * The constant NAME - JavaScript error type name.
+     */
+    public static final String NAME = "SyntaxError";
+
+    /**
      * Instantiates a new Js syntax error.
      *
      * @since 1.4.0

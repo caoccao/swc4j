@@ -20,10 +20,10 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+
 /**
  * Utility class for code generation helpers.
  */
@@ -83,7 +83,6 @@ public final class CodeGeneratorUtils {
     }
 
     /**
-
      * Returns the number of local variable slots required for a type.
      *
      * @param type the type descriptor

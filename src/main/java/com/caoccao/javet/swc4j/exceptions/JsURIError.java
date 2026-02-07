@@ -27,6 +27,11 @@ package com.caoccao.javet.swc4j.exceptions;
  */
 public class JsURIError extends JsError {
     /**
+     * The constant NAME - JavaScript error type name.
+     */
+    public static final String NAME = "URIError";
+
+    /**
      * Instantiates a new Js URI error.
      *
      * @since 1.4.0

@@ -27,6 +27,11 @@ package com.caoccao.javet.swc4j.exceptions;
  */
 public class JsTypeError extends JsError {
     /**
+     * The constant NAME - JavaScript error type name.
+     */
+    public static final String NAME = "TypeError";
+
+    /**
      * Instantiates a new Js type error.
      *
      * @since 1.4.0

@@ -33,14 +33,15 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.ast.ts.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
-import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
-import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -1482,7 +1483,8 @@ public final class TypeResolver {
                         String methodName = propIdent.getSym();
                         // Methods that return ArrayList
                         switch (methodName) {
-                            case ConstantJavaMethod.METHOD_CONCAT, "reverse", "sort", "slice", "splice", "fill", "copyWithin", "toReversed",
+                            case ConstantJavaMethod.METHOD_CONCAT, "reverse", "sort", "slice", "splice", "fill",
+                                 "copyWithin", "toReversed",
                                  "toSorted", "with", "toSpliced", "map", "filter", "flat", "flatMap",
                                  "keys", "values", "entries" -> {
                                 return ConstantJavaType.LJAVA_UTIL_ARRAYLIST;
@@ -1496,7 +1498,8 @@ public final class TypeResolver {
                             case "join", ConstantJavaMethod.METHOD_TO_STRING, "toLocaleString" -> {
                                 return ConstantJavaType.LJAVA_LANG_STRING;
                             }
-                            case ConstantJavaMethod.METHOD_INDEX_OF, ConstantJavaMethod.METHOD_LAST_INDEX_OF, "findIndex" -> {
+                            case ConstantJavaMethod.METHOD_INDEX_OF, ConstantJavaMethod.METHOD_LAST_INDEX_OF,
+                                 "findIndex" -> {
                                 return ConstantJavaType.ABBR_INTEGER;
                             }
                             case "includes", "some", "every" -> {
@@ -1543,11 +1546,12 @@ public final class TypeResolver {
                         return switch (methodName) {
                             // String return types
                             case "charAt", "substring", "slice", "substr", "toLowerCase", "toUpperCase", "trim",
-                                 "trimStart", "trimLeft", "trimEnd", "trimRight", ConstantJavaMethod.METHOD_CONCAT, "repeat", "replace",
+                                 "trimStart", "trimLeft", "trimEnd", "trimRight", ConstantJavaMethod.METHOD_CONCAT,
+                                 "repeat", "replace",
                                  "replaceAll", "padStart", "padEnd" -> ConstantJavaType.LJAVA_LANG_STRING;
                             // int return types
-                            case ConstantJavaMethod.METHOD_INDEX_OF, ConstantJavaMethod.METHOD_LAST_INDEX_OF, "charCodeAt", "codePointAt", "search" ->
-                                    ConstantJavaType.ABBR_INTEGER;
+                            case ConstantJavaMethod.METHOD_INDEX_OF, ConstantJavaMethod.METHOD_LAST_INDEX_OF,
+                                 "charCodeAt", "codePointAt", "search" -> ConstantJavaType.ABBR_INTEGER;
                             // boolean return types
                             case "startsWith", "endsWith", "includes", "test" -> ConstantJavaType.ABBR_BOOLEAN;
                             // ArrayList return type (split, match, matchAll)

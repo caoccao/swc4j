@@ -25,14 +25,14 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
-import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
-import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
-import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -229,8 +229,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 // Use appropriate array load instruction based on element type
                 String elemType = objType.substring(1); // Remove leading ConstantJavaType.ARRAY_PREFIX
                 switch (elemType) {
-                    case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE ->
-                            code.baload(); // boolean and byte
+                    case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.baload(); // boolean and byte
                     case ConstantJavaType.ABBR_CHARACTER -> code.caload(); // char
                     case ConstantJavaType.ABBR_SHORT -> code.saload(); // short
                     case ConstantJavaType.ABBR_INTEGER -> code.iaload(); // int

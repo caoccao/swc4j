@@ -93,6 +93,10 @@ public final class ConstantJavaMethod {
      */
     public static final String METHOD_INDEX_OF = "indexOf";
     /**
+     * The constant METHOD_INIT.
+     */
+    public static final String METHOD_INIT = "<init>";
+    /**
      * The constant METHOD_INT_VALUE.
      */
     public static final String METHOD_INT_VALUE = "intValue";
@@ -100,10 +104,6 @@ public final class ConstantJavaMethod {
      * The constant METHOD_ITERATOR.
      */
     public static final String METHOD_ITERATOR = "iterator";
-    /**
-     * The constant METHOD_INIT.
-     */
-    public static final String METHOD_INIT = "<init>";
     /**
      * The constant METHOD_LAST_INDEX_OF.
      */

@@ -26,6 +26,11 @@ package com.caoccao.javet.swc4j.exceptions;
  */
 public class JsRangeError extends JsError {
     /**
+     * The constant NAME - JavaScript error type name.
+     */
+    public static final String NAME = "RangeError";
+
+    /**
      * Instantiates a new Js range error.
      *
      * @since 1.4.0

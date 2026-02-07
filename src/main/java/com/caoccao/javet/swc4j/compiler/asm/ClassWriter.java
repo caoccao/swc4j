@@ -18,11 +18,12 @@
 package com.caoccao.javet.swc4j.compiler.asm;
 
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.*;
+
 /**
  * Simple bytecode class writer for generating JVM class files.
  * This is a minimal implementation to support basic class generation.

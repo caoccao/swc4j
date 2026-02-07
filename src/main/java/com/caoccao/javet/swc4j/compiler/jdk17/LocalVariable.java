@@ -17,7 +17,6 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 
 /**

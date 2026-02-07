@@ -18,8 +18,9 @@
 package com.caoccao.javet.swc4j.compiler.memory;
 
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+
 import java.util.*;
+
 /**
  * Manages Java type registrations (classes, interfaces, enums) in a scoped manner.
  * Each scope represents a file being compiled, preventing import leakage between files.

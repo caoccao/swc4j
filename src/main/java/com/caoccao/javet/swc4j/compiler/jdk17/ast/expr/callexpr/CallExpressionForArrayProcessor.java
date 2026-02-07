@@ -23,12 +23,13 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
 /**
  * Generator for call expressions on Java arrays.
  * <p>
@@ -78,7 +79,8 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
                 case "includes" -> generateIncludes(code, classWriter, callExpr, elementType);
                 case ConstantJavaMethod.METHOD_INDEX_OF -> generateIndexOf(code, classWriter, callExpr, elementType);
                 case "join" -> generateJoin(code, classWriter, callExpr, elementType);
-                case ConstantJavaMethod.METHOD_LAST_INDEX_OF -> generateLastIndexOf(code, classWriter, callExpr, elementType);
+                case ConstantJavaMethod.METHOD_LAST_INDEX_OF ->
+                        generateLastIndexOf(code, classWriter, callExpr, elementType);
                 case "reverse" -> generateReverse(code, classWriter, elementType);
                 case "sort" -> generateSort(code, classWriter, elementType);
                 case "toReversed" -> generateToReversed(code, classWriter, elementType);

@@ -18,7 +18,6 @@
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -61,11 +60,9 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor, G
         if (type.length() == 1) {
             return switch (type) {
                 case ConstantJavaType.ABBR_INTEGER -> new ReturnTypeInfo(ReturnType.INT, 1, null, genericTypeInfo);
-                case ConstantJavaType.ABBR_BOOLEAN ->
-                        new ReturnTypeInfo(ReturnType.BOOLEAN, 1, null, genericTypeInfo);
+                case ConstantJavaType.ABBR_BOOLEAN -> new ReturnTypeInfo(ReturnType.BOOLEAN, 1, null, genericTypeInfo);
                 case ConstantJavaType.ABBR_BYTE -> new ReturnTypeInfo(ReturnType.BYTE, 1, null, genericTypeInfo);
-                case ConstantJavaType.ABBR_CHARACTER ->
-                        new ReturnTypeInfo(ReturnType.CHAR, 1, null, genericTypeInfo);
+                case ConstantJavaType.ABBR_CHARACTER -> new ReturnTypeInfo(ReturnType.CHAR, 1, null, genericTypeInfo);
                 case ConstantJavaType.ABBR_SHORT -> new ReturnTypeInfo(ReturnType.SHORT, 1, null, genericTypeInfo);
                 case ConstantJavaType.ABBR_LONG -> new ReturnTypeInfo(ReturnType.LONG, 2, null, genericTypeInfo);
                 case ConstantJavaType.ABBR_FLOAT -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null, genericTypeInfo);

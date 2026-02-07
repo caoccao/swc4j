@@ -117,7 +117,8 @@ public final class TypeConversionUtils {
 
         // byte, short, char are stored as int on the stack, so they start as "I" after unboxing
         String stackFromType = switch (fromType) {
-            case ConstantJavaType.ABBR_BYTE, ConstantJavaType.ABBR_SHORT, ConstantJavaType.ABBR_CHARACTER -> ConstantJavaType.ABBR_INTEGER;
+            case ConstantJavaType.ABBR_BYTE, ConstantJavaType.ABBR_SHORT, ConstantJavaType.ABBR_CHARACTER ->
+                    ConstantJavaType.ABBR_INTEGER;
             default -> fromType;
         };
 
@@ -158,6 +159,27 @@ public final class TypeConversionUtils {
     }
 
     /**
+     * Gets the JVM newarray type code for a primitive type descriptor.
+     * These are the standard JVM type codes used by the newarray bytecode instruction.
+     *
+     * @param primitiveType the primitive type descriptor
+     * @return the newarray type code (4-11), or 10 (int) as default
+     */
+    public static int getNewarrayTypeCode(String primitiveType) {
+        return switch (primitiveType) {
+            case ConstantJavaType.ABBR_BOOLEAN -> 4;   // T_BOOLEAN
+            case ConstantJavaType.ABBR_CHARACTER -> 5; // T_CHAR
+            case ConstantJavaType.ABBR_FLOAT -> 6;     // T_FLOAT
+            case ConstantJavaType.ABBR_DOUBLE -> 7;    // T_DOUBLE
+            case ConstantJavaType.ABBR_BYTE -> 8;      // T_BYTE
+            case ConstantJavaType.ABBR_SHORT -> 9;     // T_SHORT
+            case ConstantJavaType.ABBR_INTEGER -> 10;  // T_INT
+            case ConstantJavaType.ABBR_LONG -> 11;     // T_LONG
+            default -> 10;                              // Default to int
+        };
+    }
+
+    /**
      * Gets primitive type.
      *
      * @param type the type
@@ -174,6 +196,17 @@ public final class TypeConversionUtils {
             case ConstantJavaType.LJAVA_LANG_CHARACTER -> ConstantJavaType.ABBR_CHARACTER;
             default -> type;
         };
+    }
+
+    /**
+     * Converts a ReturnTypeInfo to its descriptor string.
+     *
+     * @param returnTypeInfo the return type information
+     * @return the descriptor string (e.g., "V", "I", "Ljava/lang/String;")
+     */
+    public static String getReturnDescriptor(ReturnTypeInfo returnTypeInfo) {
+        // For OBJECT type with specific descriptor, use it; otherwise use enum default
+        return returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : returnTypeInfo.type().getDescriptor();
     }
 
     /**
@@ -212,27 +245,6 @@ public final class TypeConversionUtils {
             case ConstantJavaType.ABBR_CHARACTER -> ConstantJavaType.LJAVA_LANG_CHARACTER;
             case ConstantJavaType.ABBR_BOOLEAN -> ConstantJavaType.LJAVA_LANG_BOOLEAN;
             default -> primitiveType; // Already a wrapper or reference type
-        };
-    }
-
-    /**
-     * Gets the JVM newarray type code for a primitive type descriptor.
-     * These are the standard JVM type codes used by the newarray bytecode instruction.
-     *
-     * @param primitiveType the primitive type descriptor
-     * @return the newarray type code (4-11), or 10 (int) as default
-     */
-    public static int getNewarrayTypeCode(String primitiveType) {
-        return switch (primitiveType) {
-            case ConstantJavaType.ABBR_BOOLEAN -> 4;   // T_BOOLEAN
-            case ConstantJavaType.ABBR_CHARACTER -> 5; // T_CHAR
-            case ConstantJavaType.ABBR_FLOAT -> 6;     // T_FLOAT
-            case ConstantJavaType.ABBR_DOUBLE -> 7;    // T_DOUBLE
-            case ConstantJavaType.ABBR_BYTE -> 8;      // T_BYTE
-            case ConstantJavaType.ABBR_SHORT -> 9;     // T_SHORT
-            case ConstantJavaType.ABBR_INTEGER -> 10;  // T_INT
-            case ConstantJavaType.ABBR_LONG -> 11;     // T_LONG
-            default -> 10;                              // Default to int
         };
     }
 
@@ -325,16 +337,5 @@ public final class TypeConversionUtils {
                 code.invokevirtual(doubleValueRef);
             }
         }
-    }
-
-    /**
-     * Converts a ReturnTypeInfo to its descriptor string.
-     *
-     * @param returnTypeInfo the return type information
-     * @return the descriptor string (e.g., "V", "I", "Ljava/lang/String;")
-     */
-    public static String getReturnDescriptor(ReturnTypeInfo returnTypeInfo) {
-        // For OBJECT type with specific descriptor, use it; otherwise use enum default
-        return returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : returnTypeInfo.type().getDescriptor();
     }
 }

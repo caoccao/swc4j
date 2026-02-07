@@ -26,6 +26,11 @@ package com.caoccao.javet.swc4j.exceptions;
  */
 public class JsReferenceError extends JsError {
     /**
+     * The constant NAME - JavaScript error type name.
+     */
+    public static final String NAME = "ReferenceError";
+
+    /**
      * Instantiates a new Js reference error.
      *
      * @since 1.4.0

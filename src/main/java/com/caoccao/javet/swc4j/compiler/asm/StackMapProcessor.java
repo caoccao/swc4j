@@ -18,8 +18,9 @@
 package com.caoccao.javet.swc4j.compiler.asm;
 
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+
 import java.util.*;
+
 /**
  * Generates StackMapTable frames by analyzing bytecode with data flow analysis.
  */
@@ -223,7 +224,8 @@ public class StackMapProcessor {
                 while (i < params.length()) {
                     char c = params.charAt(i);
                     switch (c) {
-                        case ConstantJavaType.CHAR_BYTE, ConstantJavaType.CHAR_CHARACTER, ConstantJavaType.CHAR_SHORT, ConstantJavaType.CHAR_INTEGER, ConstantJavaType.CHAR_BOOLEAN -> {
+                        case ConstantJavaType.CHAR_BYTE, ConstantJavaType.CHAR_CHARACTER, ConstantJavaType.CHAR_SHORT,
+                             ConstantJavaType.CHAR_INTEGER, ConstantJavaType.CHAR_BOOLEAN -> {
                             locals.add(VerificationType.integer());
                             i++;
                         }
@@ -675,7 +677,8 @@ public class StackMapProcessor {
         }
         char c = returnType.charAt(0);
         switch (c) {
-            case ConstantJavaType.CHAR_BOOLEAN, ConstantJavaType.CHAR_BYTE, ConstantJavaType.CHAR_CHARACTER, ConstantJavaType.CHAR_SHORT, ConstantJavaType.CHAR_INTEGER -> stack.add(VerificationType.integer());
+            case ConstantJavaType.CHAR_BOOLEAN, ConstantJavaType.CHAR_BYTE, ConstantJavaType.CHAR_CHARACTER,
+                 ConstantJavaType.CHAR_SHORT, ConstantJavaType.CHAR_INTEGER -> stack.add(VerificationType.integer());
             case ConstantJavaType.CHAR_LONG -> stack.add(VerificationType.long_());
             case ConstantJavaType.CHAR_FLOAT -> stack.add(VerificationType.float_());
             case ConstantJavaType.CHAR_DOUBLE -> stack.add(VerificationType.double_());
