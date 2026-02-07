@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
@@ -35,8 +36,10 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.io.IOException;
 import java.util.*;
 
@@ -122,7 +125,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         ISwc4jAstPat arg = restPat.getArg();
         if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
             String varName = bindingIdent.getId().getSym();
-            String varType = isArrayRest ? TypeConversionUtils.LJAVA_UTIL_ARRAYLIST : TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP;
+            String varType = isArrayRest ? ConstantJavaType.LJAVA_UTIL_ARRAYLIST : ConstantJavaType.LJAVA_UTIL_LINKEDHASHMAP;
             allocateVariableIfNeeded(context, varName, varType);
         }
     }
@@ -178,7 +181,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             String paramName = extractParamName(param);
 
             // If parameter type is Object and we have target type info, try to infer from target
-            if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(paramType) && targetParamTypes != null && i < targetParamTypes.size()) {
+            if (ConstantJavaType.LJAVA_LANG_OBJECT.equals(paramType) && targetParamTypes != null && i < targetParamTypes.size()) {
                 paramType = targetParamTypes.get(i);
             }
 
@@ -229,9 +232,9 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
         if (params.isEmpty() && returnInfo.type() == ReturnType.VOID) {
             // () => void -> Runnable
-            interfaceName = TypeConversionUtils.JAVA_LANG_RUNNABLE;
+            interfaceName = ConstantJavaType.JAVA_LANG_RUNNABLE;
             methodName = "run";
-            methodDescriptor = TypeConversionUtils.DESCRIPTOR___V;
+            methodDescriptor = ConstantJavaDescriptor.DESCRIPTOR___V;
         } else if (params.isEmpty()) {
             // () => T -> Supplier<T>
             interfaceName = getSupplierInterface(returnInfo);
@@ -250,7 +253,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             if (isErasedFunctionInterface(interfaceName)) {
                 methodDescriptor = getErasedFunctionDescriptor(interfaceName);
             } else {
-                methodDescriptor = "(" + paramTypes.get(0) + ")" + getReturnDescriptor(returnInfo);
+                methodDescriptor = "(" + paramTypes.get(0) + ")" + TypeConversionUtils.getReturnDescriptor(returnInfo);
             }
         } else if (params.size() == 2) {
             // Check for primitive binary operators first
@@ -268,7 +271,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 for (String pt : paramTypes) {
                     desc.append(boxedDescriptor(pt));
                 }
-                desc.append(")").append(boxedDescriptor(getReturnDescriptor(returnInfo)));
+                desc.append(")").append(boxedDescriptor(TypeConversionUtils.getReturnDescriptor(returnInfo)));
                 methodDescriptor = desc.toString();
             }
         } else {
@@ -349,11 +352,11 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                     // Capture the holder array instead of the value
                     captured.add(new CapturedVariable(
                             varName,
-                            localVar.getHolderType(),  // e.g., TypeConversionUtils.ARRAY_I for int[]
+                            localVar.getHolderType(),  // e.g., ConstantJavaType.ARRAY_I for int[]
                             localVar.holderIndex(),    // slot of the holder array
                             isSelfRef,
                             true,                       // isHolder = true
-                            localVar.type()            // original type e.g., TypeConversionUtils.ABBR_INTEGER
+                            localVar.type()            // original type e.g., ConstantJavaType.ABBR_INTEGER
                     ));
                 } else {
                     captured.add(new CapturedVariable(varName, localVar.type(), localVar.index(), isSelfRef));
@@ -393,15 +396,15 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     private String boxedDescriptor(String descriptor) {
         return switch (descriptor) {
-            case TypeConversionUtils.ABBR_INTEGER -> TypeConversionUtils.LJAVA_LANG_INTEGER;
-            case TypeConversionUtils.ABBR_LONG -> TypeConversionUtils.LJAVA_LANG_LONG;
-            case TypeConversionUtils.ABBR_DOUBLE -> TypeConversionUtils.LJAVA_LANG_DOUBLE;
-            case TypeConversionUtils.ABBR_FLOAT -> TypeConversionUtils.LJAVA_LANG_FLOAT;
-            case TypeConversionUtils.ABBR_BOOLEAN -> TypeConversionUtils.LJAVA_LANG_BOOLEAN;
-            case TypeConversionUtils.ABBR_BYTE -> TypeConversionUtils.LJAVA_LANG_BYTE;
-            case TypeConversionUtils.ABBR_CHARACTER -> TypeConversionUtils.LJAVA_LANG_CHARACTER;
-            case TypeConversionUtils.ABBR_SHORT -> TypeConversionUtils.LJAVA_LANG_SHORT;
-            case TypeConversionUtils.ABBR_VOID -> TypeConversionUtils.LJAVA_LANG_VOID;
+            case ConstantJavaType.ABBR_INTEGER -> ConstantJavaType.LJAVA_LANG_INTEGER;
+            case ConstantJavaType.ABBR_LONG -> ConstantJavaType.LJAVA_LANG_LONG;
+            case ConstantJavaType.ABBR_DOUBLE -> ConstantJavaType.LJAVA_LANG_DOUBLE;
+            case ConstantJavaType.ABBR_FLOAT -> ConstantJavaType.LJAVA_LANG_FLOAT;
+            case ConstantJavaType.ABBR_BOOLEAN -> ConstantJavaType.LJAVA_LANG_BOOLEAN;
+            case ConstantJavaType.ABBR_BYTE -> ConstantJavaType.LJAVA_LANG_BYTE;
+            case ConstantJavaType.ABBR_CHARACTER -> ConstantJavaType.LJAVA_LANG_CHARACTER;
+            case ConstantJavaType.ABBR_SHORT -> ConstantJavaType.LJAVA_LANG_SHORT;
+            case ConstantJavaType.ABBR_VOID -> ConstantJavaType.LJAVA_LANG_VOID;
             default -> descriptor;
         };
     }
@@ -489,7 +492,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 return extractTypeFromAnnotation(typeAnn.get().getTypeAnn(), false);
             }
         }
-        return TypeConversionUtils.LJAVA_LANG_OBJECT;
+        return ConstantJavaType.LJAVA_LANG_OBJECT;
     }
 
     private String extractParamName(ISwc4jAstPat param) {
@@ -545,7 +548,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 }
             }
         }
-        return TypeConversionUtils.LJAVA_LANG_OBJECT;
+        return ConstantJavaType.LJAVA_LANG_OBJECT;
     }
 
     private ReturnTypeInfo findReturnType(ISwc4jAstStmt stmt, Map<String, String> varTypes)
@@ -563,7 +566,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 // Fall back to type inference
                 String type = compiler.getTypeResolver().inferTypeFromExpr(arg);
                 if (type == null) {
-                    type = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                    type = ConstantJavaType.LJAVA_LANG_OBJECT;
                 }
                 return compiler.getTypeResolver().createReturnTypeInfoFromDescriptor(type);
             }
@@ -634,14 +637,14 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             Swc4jAstArrayPat arrayPat) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
 
-        int listClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LIST);
+        int listClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LIST);
         code.checkcast(listClass);
-        int tempListSlot = getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), TypeConversionUtils.LJAVA_UTIL_LIST);
+        int tempListSlot = getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_LIST);
         code.astore(tempListSlot);
 
-        int listGetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
-        int listSizeRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
-        int listAddRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_ADD, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+        int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
+        int listSizeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
+        int listAddRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
 
         // Extract element type from the array pattern's type annotation
         String elementType = extractElementType(arrayPat);
@@ -719,18 +722,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         String componentType = arrayType.substring(1);
         code.iconst(0);
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
-            int typeCode = switch (componentType) {
-                case TypeConversionUtils.ABBR_BOOLEAN -> 4;
-                case TypeConversionUtils.ABBR_CHARACTER -> 5;
-                case TypeConversionUtils.ABBR_FLOAT -> 6;
-                case TypeConversionUtils.ABBR_DOUBLE -> 7;
-                case TypeConversionUtils.ABBR_BYTE -> 8;
-                case TypeConversionUtils.ABBR_SHORT -> 9;
-                case TypeConversionUtils.ABBR_INTEGER -> 10;
-                case TypeConversionUtils.ABBR_LONG -> 11;
-                default -> 10;
-            };
-            code.newarray(typeCode);
+            code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
         } else {
             int classRef = cp.addClass(toInternalName(componentType));
             code.anewarray(classRef);
@@ -783,7 +775,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         descriptor.append(")V");
 
         // invokespecial <init>
-        int constructorRef = cp.addMethodRef(lambdaClassName, TypeConversionUtils.METHOD_INIT, descriptor.toString());
+        int constructorRef = cp.addMethodRef(lambdaClassName, ConstantJavaMethod.METHOD_INIT, descriptor.toString());
         code.invokespecial(constructorRef);
 
         // For self-referencing captures, we need to update the field AFTER the lambda is stored
@@ -846,7 +838,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             Swc4jAstArrowExpr arrowExpr,
             ArrowTypeInfo typeInfo,
             List<CapturedVariable> capturedVariables) throws IOException, Swc4jByteCodeCompilerException {
-        ClassWriter classWriter = new ClassWriter(lambdaClassName, TypeConversionUtils.JAVA_LANG_OBJECT);
+        ClassWriter classWriter = new ClassWriter(lambdaClassName, ConstantJavaType.JAVA_LANG_OBJECT);
         ClassWriter.ConstantPool cp = classWriter.getConstantPool();
 
         // Add the functional interface
@@ -889,7 +881,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
         // Call super()
         code.aload(0);
-        int superInit = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_OBJECT, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+        int superInit = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
         code.invokespecial(superInit);
 
         // Initialize captured variable fields
@@ -912,7 +904,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         descriptor.append(")V");
 
         int maxLocals = slot;
-        classWriter.addMethod(0x0001, TypeConversionUtils.METHOD_INIT, descriptor.toString(), code.toByteArray(), 10, maxLocals);
+        classWriter.addMethod(0x0001, ConstantJavaMethod.METHOD_INIT, descriptor.toString(), code.toByteArray(), 10, maxLocals);
     }
 
     private void generateLambdaMethod(
@@ -961,11 +953,11 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         for (int i = 0; i < descriptorParams.size() && i < typeInfo.paramTypes().size(); i++) {
             String descriptorParam = descriptorParams.get(i);
             String paramType = typeInfo.paramTypes().get(i);
-            if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(descriptorParam) && !TypeConversionUtils.LJAVA_LANG_OBJECT.equals(paramType)) {
+            if (ConstantJavaType.LJAVA_LANG_OBJECT.equals(descriptorParam) && !ConstantJavaType.LJAVA_LANG_OBJECT.equals(paramType)) {
                 String paramName = typeInfo.paramNames().get(i);
                 LocalVariable paramVar = lambdaContext.getLocalVariableTable().getVariable(paramName);
                 code.aload(paramVar.index());
-                int classRef = cp.addClass(paramType.startsWith(TypeConversionUtils.ARRAY_PREFIX) ? paramType : paramType.substring(1, paramType.length() - 1));
+                int classRef = cp.addClass(paramType.startsWith(ConstantJavaType.ARRAY_PREFIX) ? paramType : paramType.substring(1, paramType.length() - 1));
                 code.checkcast(classRef);
                 code.astore(paramVar.index());
             }
@@ -997,7 +989,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 String paramName = typeInfo.paramNames().get(i);
                 LocalVariable paramVar = lambdaContext.getLocalVariableTable().getVariable(paramName);
                 String paramType = typeInfo.paramTypes().get(i);
-                if (paramType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
+                if (paramType.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
                     code.aload(paramVar.index());
                     code.ifnonnull(0);
                     int ifnonnullOffsetPos = code.getCurrentOffset() - 2;
@@ -1083,13 +1075,13 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             Swc4jAstObjectPat objectPat) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
 
-        int mapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_MAP);
+        int mapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_MAP);
         code.checkcast(mapClass);
-        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), TypeConversionUtils.LJAVA_UTIL_MAP);
+        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_MAP);
         code.astore(tempMapSlot);
 
-        int mapGetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        int mapRemoveRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_REMOVE, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapRemoveRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
 
         // Extract value type from the object pattern's type annotation (Map<K, V> -> V)
         String valueType = extractElementType(objectPat);
@@ -1185,29 +1177,29 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         LocalVariable restVar = context.getLocalVariableTable().getVariable(restVarName);
 
         // Create a new LinkedHashMap for the rest object
-        int linkedHashMapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP);
+        int linkedHashMapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP);
         code.newInstance(linkedHashMapClass);
         code.dup();
-        int linkedHashMapInitRef = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+        int linkedHashMapInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
         code.invokespecial(linkedHashMapInitRef);
-        int restMapSlot = getOrAllocateTempSlot(context, "$restMap" + context.getNextTempId(), TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP);
+        int restMapSlot = getOrAllocateTempSlot(context, "$restMap" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_LINKEDHASHMAP);
         code.astore(restMapSlot);
 
         // Copy all entries from original map except extracted keys
-        int mapEntrySetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_ENTRY_SET, TypeConversionUtils.DESCRIPTOR___LJAVA_UTIL_SET);
-        int setIteratorRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_SET, TypeConversionUtils.METHOD_ITERATOR, TypeConversionUtils.DESCRIPTOR___LJAVA_UTIL_ITERATOR);
-        int iteratorHasNextRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_ITERATOR, TypeConversionUtils.METHOD_HAS_NEXT, TypeConversionUtils.DESCRIPTER___Z);
-        int iteratorNextRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_ITERATOR, TypeConversionUtils.METHOD_NEXT, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_OBJECT);
-        int entryGetKeyRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP_ENTRY, TypeConversionUtils.METHOD_GET_KEY, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_OBJECT);
-        int entryGetValueRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP_ENTRY, TypeConversionUtils.METHOD_GET_VALUE, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_OBJECT);
-        int mapPutRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, "put", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        int objectEqualsRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_OBJECT, TypeConversionUtils.METHOD_EQUALS, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+        int mapEntrySetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_ENTRY_SET, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_UTIL_SET);
+        int setIteratorRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_SET, ConstantJavaMethod.METHOD_ITERATOR, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_UTIL_ITERATOR);
+        int iteratorHasNextRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_ITERATOR, ConstantJavaMethod.METHOD_HAS_NEXT, ConstantJavaDescriptor.DESCRIPTOR___Z);
+        int iteratorNextRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_ITERATOR, ConstantJavaMethod.METHOD_NEXT, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
+        int entryGetKeyRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP_ENTRY, ConstantJavaMethod.METHOD_GET_KEY, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
+        int entryGetValueRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP_ENTRY, ConstantJavaMethod.METHOD_GET_VALUE, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
+        int mapPutRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, "put", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int objectEqualsRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
 
         // Get iterator from original map's entry set
         code.aload(tempMapSlot);
         code.invokeinterface(mapEntrySetRef, 1);
         code.invokeinterface(setIteratorRef, 1);
-        int iteratorSlot = getOrAllocateTempSlot(context, "$iterator" + context.getNextTempId(), TypeConversionUtils.LJAVA_UTIL_ITERATOR);
+        int iteratorSlot = getOrAllocateTempSlot(context, "$iterator" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_ITERATOR);
         code.astore(iteratorSlot);
 
         // Loop through entries
@@ -1220,15 +1212,15 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         // Get next entry
         code.aload(iteratorSlot);
         code.invokeinterface(iteratorNextRef, 1);
-        int entryClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_MAP_ENTRY);
+        int entryClass = cp.addClass(ConstantJavaType.JAVA_UTIL_MAP_ENTRY);
         code.checkcast(entryClass);
-        int entrySlot = getOrAllocateTempSlot(context, "$entry" + context.getNextTempId(), TypeConversionUtils.LJAVA_UTIL_MAP_ENTRY);
+        int entrySlot = getOrAllocateTempSlot(context, "$entry" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_MAP_ENTRY);
         code.astore(entrySlot);
 
         // Get key from entry
         code.aload(entrySlot);
         code.invokeinterface(entryGetKeyRef, 1);
-        int keySlot = getOrAllocateTempSlot(context, "$key" + context.getNextTempId(), TypeConversionUtils.LJAVA_LANG_OBJECT);
+        int keySlot = getOrAllocateTempSlot(context, "$key" + context.getNextTempId(), ConstantJavaType.LJAVA_LANG_OBJECT);
         code.astore(keySlot);
 
         // Check if key is in extracted keys - if so, skip adding to rest map
@@ -1299,21 +1291,21 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         LocalVariable restVar = context.getLocalVariableTable().getVariable(restVarName);
 
         // Create a new ArrayList for the rest elements
-        int arrayListClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_ARRAYLIST);
+        int arrayListClass = cp.addClass(ConstantJavaType.JAVA_UTIL_ARRAYLIST);
         code.newInstance(arrayListClass);
         code.dup();
-        int arrayListInitRef = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+        int arrayListInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
         code.invokespecial(arrayListInitRef);
         code.astore(restVar.index());
 
         // Get list size
         code.aload(tempListSlot);
         code.invokeinterface(listSizeRef, 1);
-        int sizeSlot = getOrAllocateTempSlot(context, "$size" + context.getNextTempId(), TypeConversionUtils.ABBR_INTEGER);
+        int sizeSlot = getOrAllocateTempSlot(context, "$size" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
         code.istore(sizeSlot);
 
         // Loop from restStartIndex to size, adding elements to rest array
-        int indexSlot = getOrAllocateTempSlot(context, "$index" + context.getNextTempId(), TypeConversionUtils.ABBR_INTEGER);
+        int indexSlot = getOrAllocateTempSlot(context, "$index" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
         code.iconst(restStartIndex);
         code.istore(indexSlot);
 
@@ -1365,51 +1357,51 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
     private void generateUnboxingIfNeeded(CodeBuilder code, ClassWriter classWriter, String targetType) {
         var cp = classWriter.getConstantPool();
         switch (targetType) {
-            case TypeConversionUtils.ABBR_INTEGER -> { // int
-                int intValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
-                int integerClass = cp.addClass(TypeConversionUtils.JAVA_LANG_INTEGER);
+            case ConstantJavaType.ABBR_INTEGER -> { // int
+                int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                int integerClass = cp.addClass(ConstantJavaType.JAVA_LANG_INTEGER);
                 code.checkcast(integerClass);
                 code.invokevirtual(intValueRef);
             }
-            case TypeConversionUtils.ABBR_LONG -> { // long
-                int longValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_LONG, TypeConversionUtils.METHOD_LONG_VALUE, TypeConversionUtils.DESCRIPTER___J);
-                int longClass = cp.addClass(TypeConversionUtils.JAVA_LANG_LONG);
+            case ConstantJavaType.ABBR_LONG -> { // long
+                int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.DESCRIPTOR___J);
+                int longClass = cp.addClass(ConstantJavaType.JAVA_LANG_LONG);
                 code.checkcast(longClass);
                 code.invokevirtual(longValueRef);
             }
-            case TypeConversionUtils.ABBR_DOUBLE -> { // double
-                int doubleValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_DOUBLE, TypeConversionUtils.METHOD_DOUBLE_VALUE, TypeConversionUtils.DESCRIPTER___D);
-                int doubleClass = cp.addClass(TypeConversionUtils.JAVA_LANG_DOUBLE);
+            case ConstantJavaType.ABBR_DOUBLE -> { // double
+                int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___D);
+                int doubleClass = cp.addClass(ConstantJavaType.JAVA_LANG_DOUBLE);
                 code.checkcast(doubleClass);
                 code.invokevirtual(doubleValueRef);
             }
-            case TypeConversionUtils.ABBR_FLOAT -> { // float
-                int floatValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_FLOAT, TypeConversionUtils.METHOD_FLOAT_VALUE, TypeConversionUtils.DESCRIPTER___F);
-                int floatClass = cp.addClass(TypeConversionUtils.JAVA_LANG_FLOAT);
+            case ConstantJavaType.ABBR_FLOAT -> { // float
+                int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___F);
+                int floatClass = cp.addClass(ConstantJavaType.JAVA_LANG_FLOAT);
                 code.checkcast(floatClass);
                 code.invokevirtual(floatValueRef);
             }
-            case TypeConversionUtils.ABBR_BOOLEAN -> { // boolean
-                int booleanValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_BOOLEAN, TypeConversionUtils.METHOD_BOOLEAN_VALUE, TypeConversionUtils.DESCRIPTER___Z);
-                int booleanClass = cp.addClass(TypeConversionUtils.JAVA_LANG_BOOLEAN);
+            case ConstantJavaType.ABBR_BOOLEAN -> { // boolean
+                int booleanValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_BOOLEAN_VALUE, ConstantJavaDescriptor.DESCRIPTOR___Z);
+                int booleanClass = cp.addClass(ConstantJavaType.JAVA_LANG_BOOLEAN);
                 code.checkcast(booleanClass);
                 code.invokevirtual(booleanValueRef);
             }
-            case TypeConversionUtils.ABBR_BYTE -> { // byte
-                int byteValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_BYTE, TypeConversionUtils.METHOD_BYTE_VALUE, TypeConversionUtils.DESCRIPTER___B);
-                int byteClass = cp.addClass(TypeConversionUtils.JAVA_LANG_BYTE);
+            case ConstantJavaType.ABBR_BYTE -> { // byte
+                int byteValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_BYTE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___B);
+                int byteClass = cp.addClass(ConstantJavaType.JAVA_LANG_BYTE);
                 code.checkcast(byteClass);
                 code.invokevirtual(byteValueRef);
             }
-            case TypeConversionUtils.ABBR_CHARACTER -> { // char
-                int charValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_CHARACTER, TypeConversionUtils.METHOD_CHAR_VALUE, TypeConversionUtils.DESCRIPTER___C);
-                int charClass = cp.addClass(TypeConversionUtils.JAVA_LANG_CHARACTER);
+            case ConstantJavaType.ABBR_CHARACTER -> { // char
+                int charValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_CHAR_VALUE, ConstantJavaDescriptor.DESCRIPTOR___C);
+                int charClass = cp.addClass(ConstantJavaType.JAVA_LANG_CHARACTER);
                 code.checkcast(charClass);
                 code.invokevirtual(charValueRef);
             }
-            case TypeConversionUtils.ABBR_SHORT -> { // short
-                int shortValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_SHORT, TypeConversionUtils.METHOD_SHORT_VALUE, TypeConversionUtils.DESCRIPTER___S);
-                int shortClass = cp.addClass(TypeConversionUtils.JAVA_LANG_SHORT);
+            case ConstantJavaType.ABBR_SHORT -> { // short
+                int shortValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_SHORT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___S);
+                int shortClass = cp.addClass(ConstantJavaType.JAVA_LANG_SHORT);
                 code.checkcast(shortClass);
                 code.invokevirtual(shortValueRef);
             }
@@ -1430,15 +1422,15 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
      */
     private String getBinaryOperatorInfo(String param1Type, String param2Type, ReturnTypeInfo returnInfo) {
         // IntBinaryOperator: (int, int) => int
-        if (param1Type.equals(TypeConversionUtils.ABBR_INTEGER) && param2Type.equals(TypeConversionUtils.ABBR_INTEGER) && returnInfo.type() == ReturnType.INT) {
+        if (param1Type.equals(ConstantJavaType.ABBR_INTEGER) && param2Type.equals(ConstantJavaType.ABBR_INTEGER) && returnInfo.type() == ReturnType.INT) {
             return "java/util/function/IntBinaryOperator|applyAsInt|(II)I";
         }
         // LongBinaryOperator: (long, long) => long
-        if (param1Type.equals(TypeConversionUtils.ABBR_LONG) && param2Type.equals(TypeConversionUtils.ABBR_LONG) && returnInfo.type() == ReturnType.LONG) {
+        if (param1Type.equals(ConstantJavaType.ABBR_LONG) && param2Type.equals(ConstantJavaType.ABBR_LONG) && returnInfo.type() == ReturnType.LONG) {
             return "java/util/function/LongBinaryOperator|applyAsLong|(JJ)J";
         }
         // DoubleBinaryOperator: (double, double) => double
-        if (param1Type.equals(TypeConversionUtils.ABBR_DOUBLE) && param2Type.equals(TypeConversionUtils.ABBR_DOUBLE) && returnInfo.type() == ReturnType.DOUBLE) {
+        if (param1Type.equals(ConstantJavaType.ABBR_DOUBLE) && param2Type.equals(ConstantJavaType.ABBR_DOUBLE) && returnInfo.type() == ReturnType.DOUBLE) {
             return "java/util/function/DoubleBinaryOperator|applyAsDouble|(DD)D";
         }
         return null;
@@ -1446,9 +1438,9 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     private String getConsumerInterface(String paramType) {
         return switch (paramType) {
-            case TypeConversionUtils.ABBR_INTEGER -> "java/util/function/IntConsumer";
-            case TypeConversionUtils.ABBR_LONG -> "java/util/function/LongConsumer";
-            case TypeConversionUtils.ABBR_DOUBLE -> "java/util/function/DoubleConsumer";
+            case ConstantJavaType.ABBR_INTEGER -> "java/util/function/IntConsumer";
+            case ConstantJavaType.ABBR_LONG -> "java/util/function/LongConsumer";
+            case ConstantJavaType.ABBR_DOUBLE -> "java/util/function/DoubleConsumer";
             default -> "java/util/function/Consumer";
         };
     }
@@ -1459,10 +1451,10 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     private String getErasedFunctionDescriptor(String interfaceName) {
         return switch (interfaceName) {
-            case "java/util/function/IntFunction" -> TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT;
-            case "java/util/function/LongFunction" -> TypeConversionUtils.DESCRIPTOR_J__LJAVA_LANG_OBJECT;
-            case "java/util/function/DoubleFunction" -> TypeConversionUtils.DESCRIPTOR_D__LJAVA_LANG_OBJECT;
-            default -> TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT;
+            case "java/util/function/IntFunction" -> ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT;
+            case "java/util/function/LongFunction" -> ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_OBJECT;
+            case "java/util/function/DoubleFunction" -> ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_OBJECT;
+            default -> ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT;
         };
     }
 
@@ -1470,35 +1462,35 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         // For primitive supplier interfaces, return the primitive descriptor
         // For generic Supplier<T>, return Object due to type erasure
         return switch (returnInfo.type()) {
-            case INT -> TypeConversionUtils.ABBR_INTEGER;
-            case LONG -> TypeConversionUtils.ABBR_LONG;
-            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
-            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
-            default -> TypeConversionUtils.LJAVA_LANG_OBJECT;
+            case INT -> ConstantJavaType.ABBR_INTEGER;
+            case LONG -> ConstantJavaType.ABBR_LONG;
+            case DOUBLE -> ConstantJavaType.ABBR_DOUBLE;
+            case BOOLEAN -> ConstantJavaType.ABBR_BOOLEAN;
+            default -> ConstantJavaType.LJAVA_LANG_OBJECT;
         };
     }
 
     private String getFunctionInterface(String paramType, ReturnTypeInfo returnInfo) {
         // Check for primitive specializations
-        if (paramType.equals(TypeConversionUtils.ABBR_INTEGER) && returnInfo.type() == ReturnType.INT) {
+        if (paramType.equals(ConstantJavaType.ABBR_INTEGER) && returnInfo.type() == ReturnType.INT) {
             return "java/util/function/IntUnaryOperator";
         }
-        if (paramType.equals(TypeConversionUtils.ABBR_INTEGER) && returnInfo.type() == ReturnType.BOOLEAN) {
+        if (paramType.equals(ConstantJavaType.ABBR_INTEGER) && returnInfo.type() == ReturnType.BOOLEAN) {
             return "java/util/function/IntPredicate";
         }
-        if (paramType.equals(TypeConversionUtils.ABBR_LONG) && returnInfo.type() == ReturnType.LONG) {
+        if (paramType.equals(ConstantJavaType.ABBR_LONG) && returnInfo.type() == ReturnType.LONG) {
             return "java/util/function/LongUnaryOperator";
         }
-        if (paramType.equals(TypeConversionUtils.ABBR_DOUBLE) && returnInfo.type() == ReturnType.DOUBLE) {
+        if (paramType.equals(ConstantJavaType.ABBR_DOUBLE) && returnInfo.type() == ReturnType.DOUBLE) {
             return "java/util/function/DoubleUnaryOperator";
         }
-        if (paramType.equals(TypeConversionUtils.ABBR_INTEGER)) {
+        if (paramType.equals(ConstantJavaType.ABBR_INTEGER)) {
             return "java/util/function/IntFunction";
         }
-        if (paramType.equals(TypeConversionUtils.ABBR_LONG)) {
+        if (paramType.equals(ConstantJavaType.ABBR_LONG)) {
             return "java/util/function/LongFunction";
         }
-        if (paramType.equals(TypeConversionUtils.ABBR_DOUBLE)) {
+        if (paramType.equals(ConstantJavaType.ABBR_DOUBLE)) {
             return "java/util/function/DoubleFunction";
         }
         if (returnInfo.type() == ReturnType.BOOLEAN) {
@@ -1508,13 +1500,13 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
     }
 
     private String getFunctionMethodName(String paramType, ReturnTypeInfo returnInfo) {
-        if (paramType.equals(TypeConversionUtils.ABBR_INTEGER) && returnInfo.type() == ReturnType.INT) {
+        if (paramType.equals(ConstantJavaType.ABBR_INTEGER) && returnInfo.type() == ReturnType.INT) {
             return "applyAsInt";
         }
-        if (paramType.equals(TypeConversionUtils.ABBR_LONG) && returnInfo.type() == ReturnType.LONG) {
+        if (paramType.equals(ConstantJavaType.ABBR_LONG) && returnInfo.type() == ReturnType.LONG) {
             return "applyAsLong";
         }
-        if (paramType.equals(TypeConversionUtils.ABBR_DOUBLE) && returnInfo.type() == ReturnType.DOUBLE) {
+        if (paramType.equals(ConstantJavaType.ABBR_DOUBLE) && returnInfo.type() == ReturnType.DOUBLE) {
             return "applyAsDouble";
         }
         if (returnInfo.type() == ReturnType.BOOLEAN) {
@@ -1546,17 +1538,17 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         // UnaryOperator<T> - single param, same return type
         if (interfaceName.equals("java/util/function/UnaryOperator")) {
             // UnaryOperator.apply(Object): Object
-            return new FunctionalInterfaceInfo(interfaceName, "apply", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+            return new FunctionalInterfaceInfo(interfaceName, "apply", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
         }
         // Function<T, R> - single param, different return type
         if (interfaceName.equals("java/util/function/Function")) {
             // Function.apply(Object): Object
-            return new FunctionalInterfaceInfo(interfaceName, "apply", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+            return new FunctionalInterfaceInfo(interfaceName, "apply", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
         }
         // Supplier<T> - no params, returns T
         if (interfaceName.equals("java/util/function/Supplier")) {
             // Supplier.get(): Object
-            return new FunctionalInterfaceInfo(interfaceName, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_OBJECT);
+            return new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
         }
         // Consumer<T> - single param, void return
         if (interfaceName.equals("java/util/function/Consumer")) {
@@ -1566,17 +1558,17 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         // Predicate<T> - single param, boolean return
         if (interfaceName.equals("java/util/function/Predicate")) {
             // Predicate.test(Object): boolean
-            return new FunctionalInterfaceInfo(interfaceName, "test", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+            return new FunctionalInterfaceInfo(interfaceName, "test", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
         }
         // BiFunction<T, U, R> - two params, returns R
         if (interfaceName.equals("java/util/function/BiFunction")) {
             // BiFunction.apply(Object, Object): Object
-            return new FunctionalInterfaceInfo(interfaceName, "apply", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+            return new FunctionalInterfaceInfo(interfaceName, "apply", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
         }
         // BinaryOperator<T> - two params same type, returns same type
         if (interfaceName.equals("java/util/function/BinaryOperator")) {
             // BinaryOperator.apply(Object, Object): Object
-            return new FunctionalInterfaceInfo(interfaceName, "apply", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+            return new FunctionalInterfaceInfo(interfaceName, "apply", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
         }
         // BiConsumer<T, U> - two params, void return
         if (interfaceName.equals("java/util/function/BiConsumer")) {
@@ -1608,25 +1600,8 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         return tempVar.index();
     }
 
-    private String getReturnDescriptor(ReturnTypeInfo returnInfo) {
-        return switch (returnInfo.type()) {
-            case VOID -> TypeConversionUtils.ABBR_VOID;
-            case INT -> TypeConversionUtils.ABBR_INTEGER;
-            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
-            case BYTE -> TypeConversionUtils.ABBR_BYTE;
-            case CHAR -> TypeConversionUtils.ABBR_CHARACTER;
-            case SHORT -> TypeConversionUtils.ABBR_SHORT;
-            case LONG -> TypeConversionUtils.ABBR_LONG;
-            case FLOAT -> TypeConversionUtils.ABBR_FLOAT;
-            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
-            case STRING -> TypeConversionUtils.LJAVA_LANG_STRING;
-            case OBJECT ->
-                    returnInfo.descriptor() != null ? returnInfo.descriptor() : TypeConversionUtils.LJAVA_LANG_OBJECT;
-        };
-    }
-
     private int getSlotSize(String type) {
-        return (TypeConversionUtils.ABBR_LONG.equals(type) || TypeConversionUtils.ABBR_DOUBLE.equals(type)) ? 2 : 1;
+        return (ConstantJavaType.ABBR_LONG.equals(type) || ConstantJavaType.ABBR_DOUBLE.equals(type)) ? 2 : 1;
     }
 
     private String getSupplierInterface(ReturnTypeInfo returnInfo) {
@@ -1645,7 +1620,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             case LONG -> "getAsLong";
             case DOUBLE -> "getAsDouble";
             case BOOLEAN -> "getAsBoolean";
-            default -> TypeConversionUtils.METHOD_GET;
+            default -> ConstantJavaMethod.METHOD_GET;
         };
     }
 
@@ -1671,11 +1646,11 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     private void loadVariable(CodeBuilder code, int slot, String type) {
         switch (type) {
-            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE,
-                 TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_SHORT -> code.iload(slot);
-            case TypeConversionUtils.ABBR_LONG -> code.lload(slot);
-            case TypeConversionUtils.ABBR_FLOAT -> code.fload(slot);
-            case TypeConversionUtils.ABBR_DOUBLE -> code.dload(slot);
+            case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE,
+                 ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_SHORT -> code.iload(slot);
+            case ConstantJavaType.ABBR_LONG -> code.lload(slot);
+            case ConstantJavaType.ABBR_FLOAT -> code.fload(slot);
+            case ConstantJavaType.ABBR_DOUBLE -> code.dload(slot);
             default -> code.aload(slot);
         }
     }
@@ -1715,17 +1690,17 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
      */
     private void storeValueByType(CodeBuilder code, int slot, String type) {
         switch (type) {
-            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE,
-                 TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_SHORT -> code.istore(slot);
-            case TypeConversionUtils.ABBR_LONG -> code.lstore(slot);
-            case TypeConversionUtils.ABBR_FLOAT -> code.fstore(slot);
-            case TypeConversionUtils.ABBR_DOUBLE -> code.dstore(slot);
+            case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE,
+                 ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_SHORT -> code.istore(slot);
+            case ConstantJavaType.ABBR_LONG -> code.lstore(slot);
+            case ConstantJavaType.ABBR_FLOAT -> code.fstore(slot);
+            case ConstantJavaType.ABBR_DOUBLE -> code.dstore(slot);
             default -> code.astore(slot);
         }
     }
 
     private String toInternalName(String typeDescriptor) {
-        if (typeDescriptor.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
+        if (typeDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
             return typeDescriptor;
         }
         if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {

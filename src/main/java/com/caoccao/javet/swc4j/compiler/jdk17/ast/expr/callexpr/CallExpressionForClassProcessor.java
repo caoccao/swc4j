@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
@@ -30,12 +31,11 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  * Generates bytecode for class method calls:
  * - Java class static method calls (e.g., Math.floor())
@@ -130,7 +130,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             }
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType == null) {
-                argType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                argType = ConstantJavaType.LJAVA_LANG_OBJECT;
             }
             argTypes.add(argType);
         }
@@ -184,7 +184,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             if (objType == null) {
                 objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
             }
-            if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
+            if (ConstantJavaType.LJAVA_LANG_OBJECT.equals(objType)) {
                 String classExprType = inferTypeFromNewClassExpr(memberExpr.getObj());
                 if (classExprType != null) {
                     objType = classExprType;
@@ -231,7 +231,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
                 // For method chaining: if the return type is a parent class of the imported class,
                 // cast it to the imported class type to ensure subsequent chained calls work correctly
                 String expectedType = "L" + internalClassName + ";";
-                if (!returnType.equals(expectedType) && returnType.startsWith("L") && !returnType.equals(TypeConversionUtils.ABBR_VOID)) {
+                if (!returnType.equals(expectedType) && returnType.startsWith("L") && !returnType.equals(ConstantJavaType.ABBR_VOID)) {
                     // Check if the return type is assignable to the class type
                     // If so, cast to the class type for proper method chaining
                     try {
@@ -290,7 +290,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
                             "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
                                     ". Please add explicit return type annotation to the method.");
                 } else {
-                    returnType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                    returnType = ConstantJavaType.LJAVA_LANG_OBJECT;
                 }
             }
 
@@ -349,7 +349,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
 
         int fixedCount = expectedTypes.size() - 1;
         String varargArrayType = expectedTypes.get(expectedTypes.size() - 1);
-        String componentType = varargArrayType.startsWith(TypeConversionUtils.ARRAY_PREFIX) ? varargArrayType.substring(1) : varargArrayType;
+        String componentType = varargArrayType.startsWith(ConstantJavaType.ARRAY_PREFIX) ? varargArrayType.substring(1) : varargArrayType;
 
         boolean directArrayPass = args.size() == expectedTypes.size()
                 && argTypes.get(argTypes.size() - 1).equals(varargArrayType);
@@ -385,19 +385,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
 
         var cp = classWriter.getConstantPool();
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
-            int typeCode = switch (componentType) {
-                case TypeConversionUtils.ABBR_BOOLEAN -> 4;
-                case TypeConversionUtils.ABBR_CHARACTER -> 5;
-                case TypeConversionUtils.ABBR_FLOAT -> 6;
-                case TypeConversionUtils.ABBR_DOUBLE -> 7;
-                case TypeConversionUtils.ABBR_BYTE -> 8;
-                case TypeConversionUtils.ABBR_SHORT -> 9;
-                case TypeConversionUtils.ABBR_INTEGER -> 10;
-                case TypeConversionUtils.ABBR_LONG -> 11;
-                default ->
-                        throw new Swc4jByteCodeCompilerException(getSourceCode(), null, "Unsupported vararg primitive type: " + componentType);
-            };
-            code.newarray(typeCode);
+            code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
         } else {
             String internalName = componentType.substring(1, componentType.length() - 1);
             int classIndex = cp.addClass(internalName);
@@ -416,30 +404,30 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             convertType(code, classWriter, argType, componentType);
 
             switch (componentType) {
-                case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.bastore();
-                case TypeConversionUtils.ABBR_CHARACTER -> code.castore();
-                case TypeConversionUtils.ABBR_SHORT -> code.sastore();
-                case TypeConversionUtils.ABBR_INTEGER -> code.iastore();
-                case TypeConversionUtils.ABBR_LONG -> code.lastore();
-                case TypeConversionUtils.ABBR_FLOAT -> code.fastore();
-                case TypeConversionUtils.ABBR_DOUBLE -> code.dastore();
+                case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
+                case ConstantJavaType.ABBR_CHARACTER -> code.castore();
+                case ConstantJavaType.ABBR_SHORT -> code.sastore();
+                case ConstantJavaType.ABBR_INTEGER -> code.iastore();
+                case ConstantJavaType.ABBR_LONG -> code.lastore();
+                case ConstantJavaType.ABBR_FLOAT -> code.fastore();
+                case ConstantJavaType.ABBR_DOUBLE -> code.dastore();
                 default -> code.aastore();
             }
         }
     }
 
     private String getDescriptor(Class<?> clazz) {
-        if (clazz == void.class) return TypeConversionUtils.ABBR_VOID;
-        if (clazz == boolean.class) return TypeConversionUtils.ABBR_BOOLEAN;
-        if (clazz == byte.class) return TypeConversionUtils.ABBR_BYTE;
-        if (clazz == char.class) return TypeConversionUtils.ABBR_CHARACTER;
-        if (clazz == short.class) return TypeConversionUtils.ABBR_SHORT;
-        if (clazz == int.class) return TypeConversionUtils.ABBR_INTEGER;
-        if (clazz == long.class) return TypeConversionUtils.ABBR_LONG;
-        if (clazz == float.class) return TypeConversionUtils.ABBR_FLOAT;
-        if (clazz == double.class) return TypeConversionUtils.ABBR_DOUBLE;
+        if (clazz == void.class) return ConstantJavaType.ABBR_VOID;
+        if (clazz == boolean.class) return ConstantJavaType.ABBR_BOOLEAN;
+        if (clazz == byte.class) return ConstantJavaType.ABBR_BYTE;
+        if (clazz == char.class) return ConstantJavaType.ABBR_CHARACTER;
+        if (clazz == short.class) return ConstantJavaType.ABBR_SHORT;
+        if (clazz == int.class) return ConstantJavaType.ABBR_INTEGER;
+        if (clazz == long.class) return ConstantJavaType.ABBR_LONG;
+        if (clazz == float.class) return ConstantJavaType.ABBR_FLOAT;
+        if (clazz == double.class) return ConstantJavaType.ABBR_DOUBLE;
         if (clazz.isArray()) {
-            return TypeConversionUtils.ARRAY_PREFIX + getDescriptor(clazz.getComponentType());
+            return ConstantJavaType.ARRAY_PREFIX + getDescriptor(clazz.getComponentType());
         }
         return "L" + clazz.getName().replace('.', '/') + ";";
     }
@@ -512,12 +500,12 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             LocalVariable localVar = context.getLocalVariableTable().getVariable(ident.getSym());
             if (localVar != null) {
                 switch (localVar.type()) {
-                    case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_SHORT,
-                         TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_BOOLEAN,
-                         TypeConversionUtils.ABBR_BYTE -> code.iload(localVar.index());
-                    case TypeConversionUtils.ABBR_LONG -> code.lload(localVar.index());
-                    case TypeConversionUtils.ABBR_FLOAT -> code.fload(localVar.index());
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.dload(localVar.index());
+                    case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_SHORT,
+                         ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_BOOLEAN,
+                         ConstantJavaType.ABBR_BYTE -> code.iload(localVar.index());
+                    case ConstantJavaType.ABBR_LONG -> code.lload(localVar.index());
+                    case ConstantJavaType.ABBR_FLOAT -> code.fload(localVar.index());
+                    case ConstantJavaType.ABBR_DOUBLE -> code.dload(localVar.index());
                     default -> code.aload(localVar.index());
                 }
                 return;
@@ -529,7 +517,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
     private String resolveReturnTypeViaReflection(String qualifiedClassName, String methodName, String paramDescriptor) {
         try {
             Class<?> clazz = Class.forName(qualifiedClassName);
-            List<String> paramTypes = ScoreUtils.parseParameterDescriptors(paramDescriptor + TypeConversionUtils.ABBR_VOID);
+            List<String> paramTypes = ScoreUtils.parseParameterDescriptors(paramDescriptor + ConstantJavaType.ABBR_VOID);
             Class<?>[] params = new Class<?>[paramTypes.size()];
             for (int i = 0; i < paramTypes.size(); i++) {
                 params[i] = toClass(paramTypes.get(i));
@@ -543,17 +531,17 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
 
     private Class<?> toClass(String descriptor) throws ClassNotFoundException {
         return switch (descriptor) {
-            case TypeConversionUtils.ABBR_BOOLEAN -> boolean.class;
-            case TypeConversionUtils.ABBR_BYTE -> byte.class;
-            case TypeConversionUtils.ABBR_CHARACTER -> char.class;
-            case TypeConversionUtils.ABBR_SHORT -> short.class;
-            case TypeConversionUtils.ABBR_INTEGER -> int.class;
-            case TypeConversionUtils.ABBR_LONG -> long.class;
-            case TypeConversionUtils.ABBR_FLOAT -> float.class;
-            case TypeConversionUtils.ABBR_DOUBLE -> double.class;
-            case TypeConversionUtils.ABBR_VOID -> void.class;
+            case ConstantJavaType.ABBR_BOOLEAN -> boolean.class;
+            case ConstantJavaType.ABBR_BYTE -> byte.class;
+            case ConstantJavaType.ABBR_CHARACTER -> char.class;
+            case ConstantJavaType.ABBR_SHORT -> short.class;
+            case ConstantJavaType.ABBR_INTEGER -> int.class;
+            case ConstantJavaType.ABBR_LONG -> long.class;
+            case ConstantJavaType.ABBR_FLOAT -> float.class;
+            case ConstantJavaType.ABBR_DOUBLE -> double.class;
+            case ConstantJavaType.ABBR_VOID -> void.class;
             default -> {
-                if (descriptor.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
+                if (descriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
                     yield Class.forName(descriptor.replace('/', '.'));
                 }
                 if (descriptor.startsWith("L") && descriptor.endsWith(";")) {

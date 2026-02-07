@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
@@ -24,11 +25,12 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.math.BigInteger;
-
 /**
  * Generator for BigInt literals.
  * Compiles JavaScript/TypeScript BigInt literals (e.g., 123n) to Java BigInteger objects.
@@ -50,41 +52,40 @@ public final class BigIntLiteralProcessor extends BaseAstProcessor<Swc4jAstBigIn
      */
     private void convertToPrimitive(CodeBuilder code, ClassWriter classWriter, ReturnTypeInfo returnTypeInfo) {
         var cp = classWriter.getConstantPool();
-        String descriptor = returnTypeInfo.getPrimitiveTypeDescriptor();
-        if (descriptor == null) return;
+        String descriptor = returnTypeInfo.type().getPrimitiveDescriptor();
 
         switch (descriptor) {
-            case TypeConversionUtils.ABBR_INTEGER: // int
-                int intValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+            case ConstantJavaType.ABBR_INTEGER: // int
+                int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                 code.invokevirtual(intValueRef);
                 break;
-            case TypeConversionUtils.ABBR_LONG: // long
-                int longValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_LONG_VALUE, TypeConversionUtils.DESCRIPTER___J);
+            case ConstantJavaType.ABBR_LONG: // long
+                int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.DESCRIPTOR___J);
                 code.invokevirtual(longValueRef);
                 break;
-            case TypeConversionUtils.ABBR_DOUBLE: // double
-                int doubleValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_DOUBLE_VALUE, TypeConversionUtils.DESCRIPTER___D);
+            case ConstantJavaType.ABBR_DOUBLE: // double
+                int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___D);
                 code.invokevirtual(doubleValueRef);
                 break;
-            case TypeConversionUtils.ABBR_FLOAT: // float
-                int floatValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_FLOAT_VALUE, TypeConversionUtils.DESCRIPTER___F);
+            case ConstantJavaType.ABBR_FLOAT: // float
+                int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___F);
                 code.invokevirtual(floatValueRef);
                 break;
-            case TypeConversionUtils.ABBR_BYTE: // byte
-                int byteValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_BYTE_VALUE, TypeConversionUtils.DESCRIPTER___B);
+            case ConstantJavaType.ABBR_BYTE: // byte
+                int byteValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_BYTE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___B);
                 code.invokevirtual(byteValueRef);
                 break;
-            case TypeConversionUtils.ABBR_SHORT: // short
-                int shortValueRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_SHORT_VALUE, TypeConversionUtils.DESCRIPTER___S);
+            case ConstantJavaType.ABBR_SHORT: // short
+                int shortValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_SHORT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___S);
                 code.invokevirtual(shortValueRef);
                 break;
-            case TypeConversionUtils.ABBR_BOOLEAN: // boolean
+            case ConstantJavaType.ABBR_BOOLEAN: // boolean
                 // BigInteger.signum() returns -1, 0, or 1; non-zero is true
                 // Use BigInteger.equals(ZERO) to check if zero
-                int zeroFieldRef = cp.addFieldRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, "ZERO", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
+                int zeroFieldRef = cp.addFieldRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, "ZERO", ConstantJavaType.LJAVA_MATH_BIGINTEGER);
                 code.getstatic(zeroFieldRef); // Push BigInteger.ZERO
                 // Stack: [BigInteger, BigInteger.ZERO]
-                int equalsRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_EQUALS, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+                int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
                 code.invokevirtual(equalsRef); // Returns 1 if equal, 0 if not
                 // Stack: [boolean] where 1=equal (false for our purposes), 0=not equal (true for our purposes)
                 // We need to invert: 1→0, 0→1
@@ -126,17 +127,17 @@ public final class BigIntLiteralProcessor extends BaseAstProcessor<Swc4jAstBigIn
         var cp = classWriter.getConstantPool();
         // Optimize for common values using static constants
         if (BigInteger.ZERO.equals(value)) {
-            int zeroFieldRef = cp.addFieldRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, "ZERO", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
+            int zeroFieldRef = cp.addFieldRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, "ZERO", ConstantJavaType.LJAVA_MATH_BIGINTEGER);
             code.getstatic(zeroFieldRef);
         } else if (BigInteger.ONE.equals(value)) {
-            int oneFieldRef = cp.addFieldRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, "ONE", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
+            int oneFieldRef = cp.addFieldRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, "ONE", ConstantJavaType.LJAVA_MATH_BIGINTEGER);
             code.getstatic(oneFieldRef);
         } else if (BigInteger.TEN.equals(value)) {
-            int tenFieldRef = cp.addFieldRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, "TEN", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
+            int tenFieldRef = cp.addFieldRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, "TEN", ConstantJavaType.LJAVA_MATH_BIGINTEGER);
             code.getstatic(tenFieldRef);
         } else {
             // General case: new BigInteger(String)
-            int bigIntegerClass = cp.addClass(TypeConversionUtils.JAVA_MATH_BIGINTEGER);
+            int bigIntegerClass = cp.addClass(ConstantJavaType.JAVA_MATH_BIGINTEGER);
             code.newInstance(bigIntegerClass);
             code.dup();
 
@@ -145,7 +146,7 @@ public final class BigIntLiteralProcessor extends BaseAstProcessor<Swc4jAstBigIn
             code.ldc(stringIndex);
 
             // Call constructor: BigInteger(String)
-            int constructorRef = cp.addMethodRef(TypeConversionUtils.JAVA_MATH_BIGINTEGER, TypeConversionUtils.METHOD_INIT, "(Ljava/lang/String;)V");
+            int constructorRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INIT, "(Ljava/lang/String;)V");
             code.invokespecial(constructorRef);
         }
     }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
@@ -31,8 +32,9 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -88,13 +90,13 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
                 String constraintSignature = mapTsTypeToSignature(param.getConstraint().get());
                 signature.append(constraintSignature);
             } else {
-                signature.append(TypeConversionUtils.LJAVA_LANG_OBJECT);
+                signature.append(ConstantJavaType.LJAVA_LANG_OBJECT);
             }
         }
         signature.append(">");
 
         // Add superclass (always Object for interfaces)
-        signature.append(TypeConversionUtils.LJAVA_LANG_OBJECT);
+        signature.append(ConstantJavaType.LJAVA_LANG_OBJECT);
 
         // Add extended interfaces with their signatures
         for (String iface : extendedInterfaces) {
@@ -142,7 +144,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         String[] extendedInterfaces = processExtends(tsInterfaceDecl.getExtends());
 
         // Create ClassWriter with java/lang/Object as superclass (interfaces always extend Object)
-        classWriter = new ClassWriter(internalClassName, TypeConversionUtils.JAVA_LANG_OBJECT, extendedInterfaces);
+        classWriter = new ClassWriter(internalClassName, ConstantJavaType.JAVA_LANG_OBJECT, extendedInterfaces);
 
         // Set interface flags: ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT
         classWriter.setAccessFlags(INTERFACE_ACCESS_FLAGS);
@@ -227,12 +229,12 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         StringBuilder paramDescriptors = new StringBuilder("(");
         List<String> paramTypes = new ArrayList<>();
         for (ISwc4jAstTsFnParam param : callSig.getParams()) {
-            String paramType = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+            String paramType = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
                 if (bindingIdent.getTypeAnn().isPresent()) {
                     ISwc4jAstTsType type = bindingIdent.getTypeAnn().get().getTypeAnn();
                     if (isTypeParameter(type, typeParamNames)) {
-                        paramType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                        paramType = ConstantJavaType.LJAVA_LANG_OBJECT;
                     } else {
                         paramType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
                     }
@@ -244,11 +246,11 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         paramDescriptors.append(")");
 
         // Get return type
-        String returnType = TypeConversionUtils.ABBR_VOID; // Default to void
+        String returnType = ConstantJavaType.ABBR_VOID; // Default to void
         if (callSig.getTypeAnn().isPresent()) {
             ISwc4jAstTsType type = callSig.getTypeAnn().get().getTypeAnn();
             if (isTypeParameter(type, typeParamNames)) {
-                returnType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                returnType = ConstantJavaType.LJAVA_LANG_OBJECT;
             } else {
                 returnType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
             }
@@ -289,12 +291,12 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         StringBuilder paramDescriptors = new StringBuilder("(");
         List<String> paramTypes = new ArrayList<>();
         for (ISwc4jAstTsFnParam param : constructSig.getParams()) {
-            String paramType = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+            String paramType = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
                 if (bindingIdent.getTypeAnn().isPresent()) {
                     ISwc4jAstTsType type = bindingIdent.getTypeAnn().get().getTypeAnn();
                     if (isTypeParameter(type, typeParamNames)) {
-                        paramType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                        paramType = ConstantJavaType.LJAVA_LANG_OBJECT;
                     } else {
                         paramType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
                     }
@@ -306,11 +308,11 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         paramDescriptors.append(")");
 
         // Get return type (the type being constructed)
-        String returnType = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default to Object
+        String returnType = ConstantJavaType.LJAVA_LANG_OBJECT; // Default to Object
         if (constructSig.getTypeAnn().isPresent()) {
             ISwc4jAstTsType type = constructSig.getTypeAnn().get().getTypeAnn();
             if (isTypeParameter(type, typeParamNames)) {
-                returnType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                returnType = ConstantJavaType.LJAVA_LANG_OBJECT;
             } else {
                 returnType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
             }
@@ -345,11 +347,11 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         String propName = getPropertyName(getter.getKey());
 
         // Get type descriptor (use Object for type parameters)
-        String descriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+        String descriptor = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
         if (getter.getTypeAnn().isPresent()) {
             ISwc4jAstTsType type = getter.getTypeAnn().get().getTypeAnn();
             if (isTypeParameter(type, typeParamNames)) {
-                descriptor = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                descriptor = ConstantJavaType.LJAVA_LANG_OBJECT;
             } else {
                 descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
             }
@@ -383,14 +385,14 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
             Swc4jAstTsIndexSignature indexSig,
             Set<String> typeParamNames) throws Swc4jByteCodeCompilerException {
         // Get key type from params (first parameter)
-        String keyDescriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+        String keyDescriptor = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
         if (!indexSig.getParams().isEmpty()) {
             ISwc4jAstTsFnParam param = indexSig.getParams().get(0);
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
                 if (bindingIdent.getTypeAnn().isPresent()) {
                     ISwc4jAstTsType keyType = bindingIdent.getTypeAnn().get().getTypeAnn();
                     if (isTypeParameter(keyType, typeParamNames)) {
-                        keyDescriptor = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                        keyDescriptor = ConstantJavaType.LJAVA_LANG_OBJECT;
                     } else {
                         keyDescriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(keyType);
                     }
@@ -399,11 +401,11 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         }
 
         // Get value type from typeAnn
-        String valueDescriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+        String valueDescriptor = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
         if (indexSig.getTypeAnn().isPresent()) {
             ISwc4jAstTsType valueType = indexSig.getTypeAnn().get().getTypeAnn();
             if (isTypeParameter(valueType, typeParamNames)) {
-                valueDescriptor = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                valueDescriptor = ConstantJavaType.LJAVA_LANG_OBJECT;
             } else {
                 valueDescriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(valueType);
             }
@@ -413,7 +415,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         String getterDescriptor = "(" + keyDescriptor + ")" + valueDescriptor;
         classWriter.addMethod(
                 METHOD_ACCESS_FLAGS,
-                TypeConversionUtils.METHOD_GET,
+                ConstantJavaMethod.METHOD_GET,
                 getterDescriptor,
                 null, // No code for abstract methods
                 0,    // max stack
@@ -425,7 +427,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
             String setterDescriptor = "(" + keyDescriptor + valueDescriptor + ")V";
             classWriter.addMethod(
                     METHOD_ACCESS_FLAGS,
-                    TypeConversionUtils.METHOD_SET,
+                    ConstantJavaMethod.METHOD_SET,
                     setterDescriptor,
                     null, // No code for abstract methods
                     0,    // max stack
@@ -452,12 +454,12 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         StringBuilder paramDescriptors = new StringBuilder("(");
         List<String> paramTypes = new ArrayList<>();
         for (ISwc4jAstTsFnParam param : method.getParams()) {
-            String paramType = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+            String paramType = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
                 if (bindingIdent.getTypeAnn().isPresent()) {
                     ISwc4jAstTsType type = bindingIdent.getTypeAnn().get().getTypeAnn();
                     if (isTypeParameter(type, typeParamNames)) {
-                        paramType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                        paramType = ConstantJavaType.LJAVA_LANG_OBJECT;
                     } else {
                         paramType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
                     }
@@ -469,11 +471,11 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         paramDescriptors.append(")");
 
         // Get return type
-        String returnType = TypeConversionUtils.ABBR_VOID; // Default to void
+        String returnType = ConstantJavaType.ABBR_VOID; // Default to void
         if (method.getTypeAnn().isPresent()) {
             ISwc4jAstTsType type = method.getTypeAnn().get().getTypeAnn();
             if (isTypeParameter(type, typeParamNames)) {
-                returnType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                returnType = ConstantJavaType.LJAVA_LANG_OBJECT;
             } else {
                 returnType = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
             }
@@ -508,11 +510,11 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         String propName = getPropertyName(prop.getKey());
 
         // Get type descriptor (use Object for type parameters)
-        String descriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+        String descriptor = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
         if (prop.getTypeAnn().isPresent()) {
             ISwc4jAstTsType type = prop.getTypeAnn().get().getTypeAnn();
             if (isTypeParameter(type, typeParamNames)) {
-                descriptor = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                descriptor = ConstantJavaType.LJAVA_LANG_OBJECT;
             } else {
                 descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
             }
@@ -532,7 +534,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
 
         // Generate setter (if not readonly)
         if (!prop.isReadonly()) {
-            String setterName = TypeConversionUtils.METHOD_SET + capitalize(propName);
+            String setterName = ConstantJavaMethod.METHOD_SET + capitalize(propName);
             String setterDescriptor = "(" + descriptor + ")V";
             classWriter.addMethod(
                     METHOD_ACCESS_FLAGS,
@@ -559,13 +561,13 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         String propName = getPropertyName(setter.getKey());
 
         // Get type descriptor from parameter (use Object for type parameters)
-        String descriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+        String descriptor = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
         ISwc4jAstTsFnParam param = setter.getParam();
         if (param instanceof Swc4jAstBindingIdent bindingIdent) {
             if (bindingIdent.getTypeAnn().isPresent()) {
                 ISwc4jAstTsType type = bindingIdent.getTypeAnn().get().getTypeAnn();
                 if (isTypeParameter(type, typeParamNames)) {
-                    descriptor = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                    descriptor = ConstantJavaType.LJAVA_LANG_OBJECT;
                 } else {
                     descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(type);
                 }
@@ -573,7 +575,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         }
 
         // Generate setter method
-        String setterName = TypeConversionUtils.METHOD_SET + capitalize(propName);
+        String setterName = ConstantJavaMethod.METHOD_SET + capitalize(propName);
         String setterDescriptor = "(" + descriptor + ")V";
         classWriter.addMethod(
                 METHOD_ACCESS_FLAGS,
@@ -593,14 +595,14 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
      * @return the getter method name
      */
     private String getGetterName(String propName, String descriptor) {
-        if (TypeConversionUtils.ABBR_BOOLEAN.equals(descriptor)) {
+        if (ConstantJavaType.ABBR_BOOLEAN.equals(descriptor)) {
             // Boolean: use 'is' prefix unless already prefixed
             if (propName.startsWith("is") || propName.startsWith("has") || propName.startsWith("can")) {
                 return propName;
             }
             return "is" + capitalize(propName);
         }
-        return TypeConversionUtils.METHOD_GET + capitalize(propName);
+        return ConstantJavaMethod.METHOD_GET + capitalize(propName);
     }
 
     /**
@@ -661,7 +663,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
             // since type bounds in Java must be reference types
             return mapTypeNameToSignature(keywordType.getKind().getName());
         }
-        return TypeConversionUtils.LJAVA_LANG_OBJECT;
+        return ConstantJavaType.LJAVA_LANG_OBJECT;
     }
 
     /**

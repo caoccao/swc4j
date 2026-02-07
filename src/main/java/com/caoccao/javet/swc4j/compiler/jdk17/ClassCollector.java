@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.clazz.*;
@@ -29,8 +30,8 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.List;
 
 /**
@@ -204,12 +205,8 @@ public final class ClassCollector {
                             // Object types have descriptor set
                             returnDescriptor = returnTypeInfo.descriptor();
                         } else {
-                            // Primitive types need to use getPrimitiveTypeDescriptor()
-                            returnDescriptor = returnTypeInfo.getPrimitiveTypeDescriptor();
-                            if (returnDescriptor == null) {
-                                // VOID type or unknown
-                                returnDescriptor = TypeConversionUtils.ABBR_VOID;
-                            }
+                            // Primitive types use type().getPrimitiveDescriptor()
+                            returnDescriptor = returnTypeInfo.type().getPrimitiveDescriptor();
                         }
 
                         String fullDescriptor = "(" + paramDescriptors + ")" + returnDescriptor;
@@ -243,10 +240,7 @@ public final class ClassCollector {
                         if (returnTypeInfo.descriptor() != null) {
                             returnDescriptor = returnTypeInfo.descriptor();
                         } else {
-                            returnDescriptor = returnTypeInfo.getPrimitiveTypeDescriptor();
-                            if (returnDescriptor == null) {
-                                returnDescriptor = TypeConversionUtils.ABBR_VOID;
-                            }
+                            returnDescriptor = returnTypeInfo.type().getPrimitiveDescriptor();
                         }
 
                         String fullDescriptor = "(" + paramDescriptors + ")" + returnDescriptor;
@@ -267,7 +261,7 @@ public final class ClassCollector {
         boolean isStatic = prop.isStatic();
 
         // Determine field type from type annotation or initializer
-        String fieldDescriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // default
+        String fieldDescriptor = ConstantJavaType.LJAVA_LANG_OBJECT; // default
 
         // Check type annotation first
         if (prop.getTypeAnn().isPresent()) {
@@ -295,7 +289,7 @@ public final class ClassCollector {
         boolean isStatic = privateProp.isStatic();
 
         // Determine field type from type annotation or initializer
-        String fieldDescriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // default
+        String fieldDescriptor = ConstantJavaType.LJAVA_LANG_OBJECT; // default
 
         // Check type annotation first
         if (privateProp.getTypeAnn().isPresent()) {

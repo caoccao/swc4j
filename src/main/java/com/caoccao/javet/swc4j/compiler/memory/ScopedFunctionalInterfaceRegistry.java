@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.memory;
 
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
-
 /**
  * Manages functional interface SAM (Single Abstract Method) information in a scoped manner.
  * Each scope represents a file being compiled, preventing data leakage between files.
@@ -43,17 +44,17 @@ public final class ScopedFunctionalInterfaceRegistry {
      * Converts a Java Class to its JVM type descriptor.
      */
     private String classToDescriptor(Class<?> clazz) {
-        if (clazz == void.class) return TypeConversionUtils.ABBR_VOID;
-        if (clazz == boolean.class) return TypeConversionUtils.ABBR_BOOLEAN;
-        if (clazz == byte.class) return TypeConversionUtils.ABBR_BYTE;
-        if (clazz == char.class) return TypeConversionUtils.ABBR_CHARACTER;
-        if (clazz == short.class) return TypeConversionUtils.ABBR_SHORT;
-        if (clazz == int.class) return TypeConversionUtils.ABBR_INTEGER;
-        if (clazz == long.class) return TypeConversionUtils.ABBR_LONG;
-        if (clazz == float.class) return TypeConversionUtils.ABBR_FLOAT;
-        if (clazz == double.class) return TypeConversionUtils.ABBR_DOUBLE;
+        if (clazz == void.class) return ConstantJavaType.ABBR_VOID;
+        if (clazz == boolean.class) return ConstantJavaType.ABBR_BOOLEAN;
+        if (clazz == byte.class) return ConstantJavaType.ABBR_BYTE;
+        if (clazz == char.class) return ConstantJavaType.ABBR_CHARACTER;
+        if (clazz == short.class) return ConstantJavaType.ABBR_SHORT;
+        if (clazz == int.class) return ConstantJavaType.ABBR_INTEGER;
+        if (clazz == long.class) return ConstantJavaType.ABBR_LONG;
+        if (clazz == float.class) return ConstantJavaType.ABBR_FLOAT;
+        if (clazz == double.class) return ConstantJavaType.ABBR_DOUBLE;
         if (clazz.isArray()) {
-            return TypeConversionUtils.ARRAY_PREFIX + classToDescriptor(clazz.getComponentType());
+            return ConstantJavaType.ARRAY_PREFIX + classToDescriptor(clazz.getComponentType());
         }
         return "L" + clazz.getName().replace('.', '/') + ";";
     }
@@ -211,7 +212,7 @@ public final class ScopedFunctionalInterfaceRegistry {
         Class<?>[] params = method.getParameterTypes();
 
         // equals(Object)
-        if (TypeConversionUtils.METHOD_EQUALS.equals(name) && params.length == 1 && params[0] == Object.class) {
+        if (ConstantJavaMethod.METHOD_EQUALS.equals(name) && params.length == 1 && params[0] == Object.class) {
             return true;
         }
         // hashCode()
@@ -219,7 +220,7 @@ public final class ScopedFunctionalInterfaceRegistry {
             return true;
         }
         // toString()
-        return TypeConversionUtils.METHOD_TO_STRING.equals(name) && params.length == 0;
+        return ConstantJavaMethod.METHOD_TO_STRING.equals(name) && params.length == 0;
     }
 
     /**

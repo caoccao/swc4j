@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.asm;
 
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
-
 import java.util.*;
-
 /**
  * Generates StackMapTable frames by analyzing bytecode with data flow analysis.
  */
@@ -108,10 +108,10 @@ public class StackMapProcessor {
                         if (entry.catchType() != 0) {
                             exceptionClass = constantPool.getClassName(entry.catchType());
                             if (exceptionClass == null) {
-                                exceptionClass = TypeConversionUtils.JAVA_LANG_THROWABLE;
+                                exceptionClass = ConstantJavaType.JAVA_LANG_THROWABLE;
                             }
                         } else {
-                            exceptionClass = TypeConversionUtils.JAVA_LANG_THROWABLE; // catch-all
+                            exceptionClass = ConstantJavaType.JAVA_LANG_THROWABLE; // catch-all
                         }
                         handlerFrame.stack.add(VerificationType.object(exceptionClass));
                         workQueue.add(new WorkItem(handlerPc, handlerFrame));
@@ -151,7 +151,7 @@ public class StackMapProcessor {
                 // Only add class names for OBJECT types (ClassWriter expects sparse list)
                 if (type.tag == OBJECT) {
                     // Every OBJECT type must have a className
-                    String className = (type.className != null) ? type.className : TypeConversionUtils.JAVA_LANG_OBJECT;
+                    String className = (type.className != null) ? type.className : ConstantJavaType.JAVA_LANG_OBJECT;
                     resultClassNames.add(className);
                 }
             }
@@ -175,24 +175,24 @@ public class StackMapProcessor {
         int i = 1; // Skip opening '('
         while (i < descriptor.length() && descriptor.charAt(i) != ')') {
             char c = descriptor.charAt(i);
-            if (c == 'J' || c == 'D') {
+            if (c == ConstantJavaType.CHAR_LONG || c == ConstantJavaType.CHAR_DOUBLE) {
                 count += 2; // Long and double take 2 slots
                 i++;
-            } else if (c == 'L') {
+            } else if (c == ConstantJavaType.CHAR_REFERENCE) {
                 count++;
                 // Skip to ';'
                 while (i < descriptor.length() && descriptor.charAt(i) != ';') {
                     i++;
                 }
                 i++; // Skip ';'
-            } else if (c == '[') {
+            } else if (c == ConstantJavaType.CHAR_ARRAY) {
                 count++;
                 i++;
                 // Skip array element type
-                while (i < descriptor.length() && descriptor.charAt(i) == '[') {
+                while (i < descriptor.length() && descriptor.charAt(i) == ConstantJavaType.CHAR_ARRAY) {
                     i++;
                 }
-                if (i < descriptor.length() && descriptor.charAt(i) == 'L') {
+                if (i < descriptor.length() && descriptor.charAt(i) == ConstantJavaType.CHAR_REFERENCE) {
                     while (i < descriptor.length() && descriptor.charAt(i) != ';') {
                         i++;
                     }
@@ -223,40 +223,40 @@ public class StackMapProcessor {
                 while (i < params.length()) {
                     char c = params.charAt(i);
                     switch (c) {
-                        case 'B', 'C', 'S', 'I', 'Z' -> {
+                        case ConstantJavaType.CHAR_BYTE, ConstantJavaType.CHAR_CHARACTER, ConstantJavaType.CHAR_SHORT, ConstantJavaType.CHAR_INTEGER, ConstantJavaType.CHAR_BOOLEAN -> {
                             locals.add(VerificationType.integer());
                             i++;
                         }
-                        case 'J' -> {
+                        case ConstantJavaType.CHAR_LONG -> {
                             locals.add(VerificationType.long_());
                             locals.add(VerificationType.top()); // Long takes 2 slots
                             i++;
                         }
-                        case 'F' -> {
+                        case ConstantJavaType.CHAR_FLOAT -> {
                             locals.add(VerificationType.float_());
                             i++;
                         }
-                        case 'D' -> {
+                        case ConstantJavaType.CHAR_DOUBLE -> {
                             locals.add(VerificationType.double_());
                             locals.add(VerificationType.top()); // Double takes 2 slots
                             i++;
                         }
-                        case 'L' -> {
+                        case ConstantJavaType.CHAR_REFERENCE -> {
                             // Object type - extract class name
                             int end = params.indexOf(';', i);
                             String className = params.substring(i + 1, end); // Skip 'L', stop before ';'
                             locals.add(VerificationType.object(className));
                             i = end + 1;
                         }
-                        case '[' -> {
+                        case ConstantJavaType.CHAR_ARRAY -> {
                             // Array type - extract full array descriptor
                             int start = i;
                             i++;
-                            while (i < params.length() && params.charAt(i) == '[') {
+                            while (i < params.length() && params.charAt(i) == ConstantJavaType.CHAR_ARRAY) {
                                 i++;
                             }
                             if (i < params.length()) {
-                                if (params.charAt(i) == 'L') {
+                                if (params.charAt(i) == ConstantJavaType.CHAR_REFERENCE) {
                                     i = params.indexOf(';', i) + 1;
                                 } else {
                                     i++;
@@ -561,7 +561,7 @@ public class StackMapProcessor {
         if (parenIndex >= 0 && parenIndex + 1 < descriptor.length()) {
             return descriptor.substring(parenIndex + 1);
         }
-        return TypeConversionUtils.ABBR_VOID; // Default to void
+        return ConstantJavaType.ABBR_VOID; // Default to void
     }
 
     private int getTableSwitchSize(int pc) {
@@ -645,12 +645,12 @@ public class StackMapProcessor {
             if (Objects.equals(type1.className, type2.className)) {
                 return type1; // Same class, preserve it
             }
-            return VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT);
+            return VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT);
         }
 
         // Different reference types
         if (type1.tag == NULL || type2.tag == NULL) {
-            return VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT);
+            return VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT);
         }
 
         // For incompatible primitives, return TOP (invalid state)
@@ -669,26 +669,26 @@ public class StackMapProcessor {
      * Push the appropriate verification type onto the stack based on return type.
      */
     private void pushReturnType(List<VerificationType> stack, String returnType) {
-        if (returnType == null || returnType.isEmpty() || returnType.equals(TypeConversionUtils.ABBR_VOID)) {
+        if (returnType == null || returnType.isEmpty() || returnType.equals(ConstantJavaType.ABBR_VOID)) {
             // Void return - don't push anything
             return;
         }
         char c = returnType.charAt(0);
         switch (c) {
-            case 'Z', 'B', 'C', 'S', 'I' -> stack.add(VerificationType.integer());
-            case 'J' -> stack.add(VerificationType.long_());
-            case 'F' -> stack.add(VerificationType.float_());
-            case 'D' -> stack.add(VerificationType.double_());
-            case 'L' -> {
+            case ConstantJavaType.CHAR_BOOLEAN, ConstantJavaType.CHAR_BYTE, ConstantJavaType.CHAR_CHARACTER, ConstantJavaType.CHAR_SHORT, ConstantJavaType.CHAR_INTEGER -> stack.add(VerificationType.integer());
+            case ConstantJavaType.CHAR_LONG -> stack.add(VerificationType.long_());
+            case ConstantJavaType.CHAR_FLOAT -> stack.add(VerificationType.float_());
+            case ConstantJavaType.CHAR_DOUBLE -> stack.add(VerificationType.double_());
+            case ConstantJavaType.CHAR_REFERENCE -> {
                 // Object type - extract class name (remove L and ;)
                 String className = returnType.substring(1, returnType.length() - 1);
                 stack.add(VerificationType.object(className));
             }
-            case '[' -> {
+            case ConstantJavaType.CHAR_ARRAY -> {
                 // Array type
                 stack.add(VerificationType.object(returnType));
             }
-            default -> stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
+            default -> stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT));
         }
     }
 
@@ -725,9 +725,9 @@ public class StackMapProcessor {
                 switch (constType) {
                     case 'I' -> stack.add(VerificationType.integer());
                     case 'F' -> stack.add(VerificationType.float_());
-                    case 'S' -> stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_STRING));
-                    case 'C' -> stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_CLASS));
-                    default -> stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
+                    case 'S' -> stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_STRING));
+                    case 'C' -> stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_CLASS));
+                    default -> stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT));
                 }
             }
             case 0x14 -> // ldc2_w (long or double)
@@ -735,8 +735,8 @@ public class StackMapProcessor {
                 // Get constant pool index from bytecode
                 int cpIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
                 // Look up constant type from constant pool
-                char constType = (constantPool != null) ? constantPool.getConstantType(cpIndex) : 'D';
-                if (constType == 'J') {
+                char constType = (constantPool != null) ? constantPool.getConstantType(cpIndex) : ConstantJavaType.CHAR_DOUBLE;
+                if (constType == ConstantJavaType.CHAR_LONG) {
                     stack.add(VerificationType.long_());
                 } else {
                     stack.add(VerificationType.double_());
@@ -752,7 +752,7 @@ public class StackMapProcessor {
                 if (aloadIndex < newFrame.locals.size()) {
                     stack.add(newFrame.locals.get(aloadIndex));
                 } else {
-                    stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
+                    stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT));
                 }
             }
             // Stores - pop from stack and update locals
@@ -914,7 +914,7 @@ public class StackMapProcessor {
                 String methodDescriptor = (constantPool != null) ? constantPool.getMethodDescriptor(methodIndex) : null;
                 if (methodDescriptor != null) {
                     // Parse descriptor to get argument count and return type
-                    // Format: (args)return e.g., TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING
+                    // Format: (args)return e.g., ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING
                     int argCount = countMethodArgSlots(methodDescriptor);
                     String returnType = getReturnType(methodDescriptor);
                     // Pop arguments (and receiver for non-static)
@@ -933,13 +933,13 @@ public class StackMapProcessor {
                     int nextPc = pc + 3;
                     int nextOpcode = (nextPc < bytecode.length) ? (bytecode[nextPc] & 0xFF) : 0;
                     if (nextOpcode == 0x57 || nextOpcode == 0x58) {
-                        stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
+                        stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT));
                     } else if (nextOpcode == 0x59) {
-                        stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
+                        stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT));
                     } else if (opcode == 0xB7) {
                         // void return for invokespecial
                     } else {
-                        stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
+                        stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT));
                     }
                 }
             }
@@ -973,7 +973,7 @@ public class StackMapProcessor {
                     if (nextOpcode == 0x99 || nextOpcode == 0x9A) {
                         stack.add(VerificationType.integer());
                     } else {
-                        stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
+                        stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT));
                     }
                 }
             }
@@ -985,7 +985,7 @@ public class StackMapProcessor {
                 if (fieldDescriptor != null) {
                     pushFieldType(stack, fieldDescriptor);
                 } else {
-                    stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
+                    stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT));
                 }
             }
             case 0xB3 -> // putstatic - pop value, push nothing
@@ -1011,7 +1011,7 @@ public class StackMapProcessor {
                 if (fieldDescriptor != null) {
                     pushFieldType(stack, fieldDescriptor);
                 } else {
-                    stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
+                    stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT));
                 }
             }
             case 0xB5 -> // putfield - pop objectref and value, push nothing
@@ -1028,7 +1028,7 @@ public class StackMapProcessor {
             case 0xBB -> { // new
                 int classIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
                 String newClassName = (constantPool != null) ? constantPool.getClassName(classIndex) : null;
-                stack.add(VerificationType.object(newClassName != null ? newClassName : TypeConversionUtils.JAVA_LANG_OBJECT));
+                stack.add(VerificationType.object(newClassName != null ? newClassName : ConstantJavaType.JAVA_LANG_OBJECT));
             }
             // Type conversions, i2l, f2l
             case 0x85, 0x8C, 0x8F -> {
@@ -1094,7 +1094,7 @@ public class StackMapProcessor {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1); // index
                     stack.remove(stack.size() - 1); // arrayref
-                    stack.add(VerificationType.object(TypeConversionUtils.JAVA_LANG_OBJECT));
+                    stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT));
                 }
             }
             // Array stores - pop arrayref, index, and value
@@ -1124,14 +1124,14 @@ public class StackMapProcessor {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1); // count
                     // atype byte determines the primitive type, but result is always an array
-                    stack.add(VerificationType.object(TypeConversionUtils.ARRAY_I)); // Generic - actual type depends on atype
+                    stack.add(VerificationType.object(ConstantJavaType.ARRAY_I)); // Generic - actual type depends on atype
                 }
             }
             // anewarray - pop count, push array reference
             case 0xBD -> {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1); // count
-                    stack.add(VerificationType.object(TypeConversionUtils.ARRAY_LJAVA_LANG_OBJECT));
+                    stack.add(VerificationType.object(ConstantJavaType.ARRAY_LJAVA_LANG_OBJECT));
                 }
             }
             // Type checking
@@ -1139,7 +1139,7 @@ public class StackMapProcessor {
                 if (!stack.isEmpty()) {
                     // Get class index from bytecode
                     int classIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
-                    String className = (constantPool != null) ? constantPool.getClassName(classIndex) : TypeConversionUtils.JAVA_LANG_OBJECT;
+                    String className = (constantPool != null) ? constantPool.getClassName(classIndex) : ConstantJavaType.JAVA_LANG_OBJECT;
                     stack.remove(stack.size() - 1);
                     stack.add(VerificationType.object(className));
                 }
@@ -1186,7 +1186,7 @@ public class StackMapProcessor {
         /**
          * The Class name.
          */
-        final String className; // For OBJECT types, the internal class name (e.g., TypeConversionUtils.JAVA_LANG_STRING)
+        final String className; // For OBJECT types, the internal class name (e.g., ConstantJavaType.JAVA_LANG_STRING)
         /**
          * The Tag.
          */

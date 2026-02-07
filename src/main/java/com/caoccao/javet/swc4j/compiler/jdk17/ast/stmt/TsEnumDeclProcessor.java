@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
@@ -34,8 +35,10 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -246,7 +249,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         EnumInfo enumInfo = analyzeEnumMembers(members);
 
         // Create ClassWriter with java.lang.Enum as superclass
-        ClassWriter classWriter = new ClassWriter(internalClassName, TypeConversionUtils.JAVA_LANG_ENUM);
+        ClassWriter classWriter = new ClassWriter(internalClassName, ConstantJavaType.JAVA_LANG_ENUM);
         ClassWriter.ConstantPool cp = classWriter.getConstantPool();
 
         // Set enum class flags: ACC_PUBLIC | ACC_FINAL | ACC_SUPER | ACC_ENUM
@@ -264,7 +267,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         }
 
         // Generate value field (private final int/String value)
-        String valueFieldDescriptor = enumInfo.isStringEnum ? TypeConversionUtils.LJAVA_LANG_STRING : TypeConversionUtils.ABBR_INTEGER;
+        String valueFieldDescriptor = enumInfo.isStringEnum ? ConstantJavaType.LJAVA_LANG_STRING : ConstantJavaType.ABBR_INTEGER;
         classWriter.addField(
                 0x0002 | 0x0010, // ACC_PRIVATE | ACC_FINAL
                 "value",
@@ -307,7 +310,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         var cp = classWriter.getConstantPool();
         // Generate: private EnumType(String name, int ordinal, <type> value)
         String descriptor = isStringEnum ? "(Ljava/lang/String;ILjava/lang/String;)V" : "(Ljava/lang/String;II)V";
-        int superCtorRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_ENUM, TypeConversionUtils.METHOD_INIT, "(Ljava/lang/String;I)V");
+        int superCtorRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_ENUM, ConstantJavaMethod.METHOD_INIT, "(Ljava/lang/String;I)V");
 
         CodeBuilder code = new CodeBuilder();
         code.aload(0)           // load this
@@ -328,7 +331,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
                     .aload(3);      // load value (String at slot 3)
         }
 
-        String valueFieldDescriptor = isStringEnum ? TypeConversionUtils.LJAVA_LANG_STRING : TypeConversionUtils.ABBR_INTEGER;
+        String valueFieldDescriptor = isStringEnum ? ConstantJavaType.LJAVA_LANG_STRING : ConstantJavaType.ABBR_INTEGER;
         int valueFieldRef = cp.addFieldRef(internalClassName, "value", valueFieldDescriptor);
 
         code.putfield(valueFieldRef) // this.value = value
@@ -336,7 +339,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
 
         classWriter.addMethod(
                 0x0002, // ACC_PRIVATE
-                TypeConversionUtils.METHOD_INIT,
+                ConstantJavaMethod.METHOD_INIT,
                 descriptor,
                 code.toByteArray(),
                 4, // max stack
@@ -350,16 +353,16 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
             EnumInfo enumInfo) {
         var cp = classWriter.getConstantPool();
         // Generate: public static EnumType fromValue(<type> value)
-        String valueType = enumInfo.isStringEnum ? TypeConversionUtils.LJAVA_LANG_STRING : TypeConversionUtils.ABBR_INTEGER;
+        String valueType = enumInfo.isStringEnum ? ConstantJavaType.LJAVA_LANG_STRING : ConstantJavaType.ABBR_INTEGER;
         String enumDescriptor = "L" + internalClassName + ";";
         String methodDescriptor = "(" + valueType + ")" + enumDescriptor;
 
         int valuesRef = cp.addMethodRef(internalClassName, "values", "()[L" + internalClassName + ";");
-        int getValueRef = cp.addMethodRef(internalClassName, TypeConversionUtils.METHOD_GET_VALUE, "()" + valueType);
-        int exceptionClassRef = cp.addClass(TypeConversionUtils.JAVA_LANG_ILLEGALARGUMENTEXCEPTION);
+        int getValueRef = cp.addMethodRef(internalClassName, ConstantJavaMethod.METHOD_GET_VALUE, "()" + valueType);
+        int exceptionClassRef = cp.addClass(ConstantJavaType.JAVA_LANG_ILLEGALARGUMENTEXCEPTION);
         int exceptionCtorRef = cp.addMethodRef(
-                TypeConversionUtils.JAVA_LANG_ILLEGALARGUMENTEXCEPTION,
-                TypeConversionUtils.METHOD_INIT,
+                ConstantJavaType.JAVA_LANG_ILLEGALARGUMENTEXCEPTION,
+                ConstantJavaMethod.METHOD_INIT,
                 "(Ljava/lang/String;)V");
 
         CodeBuilder code = new CodeBuilder();
@@ -394,7 +397,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
                         : List.of(1, 7, 1, 1),
                 List.of(), // empty stack
                 enumInfo.isStringEnum
-                        ? List.of(TypeConversionUtils.JAVA_LANG_STRING, arrayClassName)  // class names for the two Object types
+                        ? List.of(ConstantJavaType.JAVA_LANG_STRING, arrayClassName)  // class names for the two Object types
                         : List.of(arrayClassName),  // class name for the one Object type
                 null  // no stack class names
         ));
@@ -419,7 +422,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         int continueTarget; // save for later use in loopEnd frame calculation
         if (enumInfo.isStringEnum) {
             // String comparison: if (e.getValue().equals(value))
-            int equalsRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_EQUALS, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+            int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
             code.aload(0)               // load value parameter
                     .invokevirtual(equalsRef) // call equals()
                     .ifeq(0);               // if false, continue loop
@@ -441,7 +444,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
                     255, // FULL_FRAME
                     List.of(7, 7, 1, 1, 7), // [Object, Object, int, int, Object]
                     List.of(), // empty stack
-                    List.of(TypeConversionUtils.JAVA_LANG_STRING, arrayClassName, internalClassName), // class names for the three Object types
+                    List.of(ConstantJavaType.JAVA_LANG_STRING, arrayClassName, internalClassName), // class names for the three Object types
                     null // no stack class names
             ));
         } else {
@@ -494,7 +497,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
                         : List.of(1, 7, 1, 1),
                 List.of(), // empty stack
                 enumInfo.isStringEnum
-                        ? List.of(TypeConversionUtils.JAVA_LANG_STRING, arrayClassName)  // class names for the two Object types
+                        ? List.of(ConstantJavaType.JAVA_LANG_STRING, arrayClassName)  // class names for the two Object types
                         : List.of(arrayClassName),  // class name for the one Object type
                 null  // no stack class names
         ));
@@ -504,11 +507,11 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
                 .dup();                     // duplicate
 
         // Build error message
-        int sbClassRef = cp.addClass(TypeConversionUtils.JAVA_LANG_STRINGBUILDER);
-        int sbCtorRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
-        int sbAppendStringRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
-        int sbAppendIntRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_STRINGBUILDER);
-        int sbToStringRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_TO_STRING, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
+        int sbClassRef = cp.addClass(ConstantJavaType.JAVA_LANG_STRINGBUILDER);
+        int sbCtorRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+        int sbAppendStringRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
+        int sbAppendIntRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_STRINGBUILDER);
+        int sbToStringRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_TO_STRING, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
 
         code.newInstance(sbClassRef)    // new StringBuilder
                 .dup()                      // duplicate
@@ -547,7 +550,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
             boolean isStringEnum) {
         var cp = classWriter.getConstantPool();
         // Generate: public <type> getValue()
-        String valueFieldDescriptor = isStringEnum ? TypeConversionUtils.LJAVA_LANG_STRING : TypeConversionUtils.ABBR_INTEGER;
+        String valueFieldDescriptor = isStringEnum ? ConstantJavaType.LJAVA_LANG_STRING : ConstantJavaType.ABBR_INTEGER;
         String methodDescriptor = "()" + valueFieldDescriptor;
         int valueFieldRef = cp.addFieldRef(internalClassName, "value", valueFieldDescriptor);
 
@@ -563,7 +566,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
 
         classWriter.addMethod(
                 0x0001, // ACC_PUBLIC
-                TypeConversionUtils.METHOD_GET_VALUE,
+                ConstantJavaMethod.METHOD_GET_VALUE,
                 methodDescriptor,
                 code.toByteArray(),
                 1, // max stack
@@ -581,7 +584,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         int enumClassRef = cp.addClass(internalClassName);
         String enumDescriptor = "L" + internalClassName + ";";
         String ctorDescriptor = enumInfo.isStringEnum ? "(Ljava/lang/String;ILjava/lang/String;)V" : "(Ljava/lang/String;II)V";
-        int ctorRef = cp.addMethodRef(internalClassName, TypeConversionUtils.METHOD_INIT, ctorDescriptor);
+        int ctorRef = cp.addMethodRef(internalClassName, ConstantJavaMethod.METHOD_INIT, ctorDescriptor);
 
         // Create each enum constant instance
         int ordinal = 0;
@@ -674,7 +677,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         classWriter.addMethod(
                 0x0008, // ACC_STATIC
                 "<clinit>",
-                TypeConversionUtils.DESCRIPTOR___V,
+                ConstantJavaDescriptor.DESCRIPTOR___V,
                 code.toByteArray(),
                 maxStack,
                 0  // max locals (static method)
@@ -689,8 +692,8 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         int enumClassRef = cp.addClass(internalClassName);
         String enumDescriptor = "L" + internalClassName + ";";
         int valueOfRef = cp.addMethodRef(
-                TypeConversionUtils.JAVA_LANG_ENUM,
-                TypeConversionUtils.METHOD_VALUE_OF,
+                ConstantJavaType.JAVA_LANG_ENUM,
+                ConstantJavaMethod.METHOD_VALUE_OF,
                 "(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;");
 
         CodeBuilder code = new CodeBuilder();
@@ -702,7 +705,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
 
         classWriter.addMethod(
                 0x0001 | 0x0008, // ACC_PUBLIC | ACC_STATIC
-                TypeConversionUtils.METHOD_VALUE_OF,
+                ConstantJavaMethod.METHOD_VALUE_OF,
                 "(Ljava/lang/String;)" + enumDescriptor,
                 code.toByteArray(),
                 2, // max stack
@@ -717,7 +720,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         // Generate: public static EnumType[] values()
         String arrayDescriptor = "[L" + internalClassName + ";";
         int arrayFieldRef = cp.addFieldRef(internalClassName, "$VALUES", arrayDescriptor);
-        int cloneRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_OBJECT, "clone", TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_OBJECT);
+        int cloneRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, "clone", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
 
         CodeBuilder code = new CodeBuilder();
         code.getstatic(arrayFieldRef)   // load $VALUES

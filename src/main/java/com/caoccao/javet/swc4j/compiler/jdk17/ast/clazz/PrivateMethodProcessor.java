@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
@@ -252,20 +253,7 @@ public final class PrivateMethodProcessor extends BaseAstProcessor<Swc4jAstPriva
             paramDescriptors.append(paramType);
         }
 
-        String returnDescriptor = switch (returnTypeInfo.type()) {
-            case VOID -> TypeConversionUtils.ABBR_VOID;
-            case INT -> TypeConversionUtils.ABBR_INTEGER;
-            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
-            case BYTE -> TypeConversionUtils.ABBR_BYTE;
-            case CHAR -> TypeConversionUtils.ABBR_CHARACTER;
-            case SHORT -> TypeConversionUtils.ABBR_SHORT;
-            case LONG -> TypeConversionUtils.ABBR_LONG;
-            case FLOAT -> TypeConversionUtils.ABBR_FLOAT;
-            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
-            case STRING -> TypeConversionUtils.LJAVA_LANG_STRING;
-            case OBJECT ->
-                    returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : TypeConversionUtils.LJAVA_LANG_OBJECT;
-        };
+        String returnDescriptor = TypeConversionUtils.getReturnDescriptor(returnTypeInfo);
 
         return "(" + paramDescriptors + ")" + returnDescriptor;
     }
@@ -294,9 +282,8 @@ public final class PrivateMethodProcessor extends BaseAstProcessor<Swc4jAstPriva
             String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
             overloadParamDescriptors.append(paramType);
         }
-        String returnDescriptor = CodeGeneratorUtils.getReturnDescriptor(returnTypeInfo);
+        String returnDescriptor = TypeConversionUtils.getReturnDescriptor(returnTypeInfo);
         String overloadDescriptor = "(" + overloadParamDescriptors + ")" + returnDescriptor;
-
         CodeBuilder code = new CodeBuilder();
 
         int slot = 0;

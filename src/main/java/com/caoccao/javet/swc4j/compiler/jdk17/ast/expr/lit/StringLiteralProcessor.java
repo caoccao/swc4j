@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
@@ -23,9 +24,11 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 /**
  * The type String literal processor.
  */
@@ -49,7 +52,7 @@ public final class StringLiteralProcessor extends BaseAstProcessor<Swc4jAstStr> 
         String value = str.getValue();
         // Check if we need to convert to char based on return type
         if (returnTypeInfo != null && (returnTypeInfo.type() == ReturnType.CHAR
-                || (returnTypeInfo.type() == ReturnType.OBJECT && TypeConversionUtils.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())))) {
+                || (returnTypeInfo.type() == ReturnType.OBJECT && ConstantJavaType.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())))) {
             // Convert string to char - use first character
             if (value.length() > 0) {
                 char charValue = value.charAt(0);
@@ -63,15 +66,15 @@ public final class StringLiteralProcessor extends BaseAstProcessor<Swc4jAstStr> 
                     code.ldc(charIndex);
                 }
                 // Box to Character if needed
-                if (returnTypeInfo.type() == ReturnType.OBJECT && TypeConversionUtils.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())) {
-                    int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_CHARACTER, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_C__LJAVA_LANG_CHARACTER);
+                if (returnTypeInfo.type() == ReturnType.OBJECT && ConstantJavaType.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())) {
+                    int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_CHARACTER);
                     code.invokestatic(valueOfRef);
                 }
             } else {
                 // Empty string, use null character
                 code.iconst(0);
-                if (returnTypeInfo.type() == ReturnType.OBJECT && TypeConversionUtils.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())) {
-                    int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_CHARACTER, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_C__LJAVA_LANG_CHARACTER);
+                if (returnTypeInfo.type() == ReturnType.OBJECT && ConstantJavaType.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())) {
+                    int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_CHARACTER);
                     code.invokestatic(valueOfRef);
                 }
             }

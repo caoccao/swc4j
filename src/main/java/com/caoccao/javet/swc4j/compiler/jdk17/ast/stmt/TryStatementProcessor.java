@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
@@ -35,8 +36,10 @@ import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.List;
 
 /**
@@ -230,17 +233,17 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
             case "message" -> {
                 // exception.getMessage() -> String
                 code.aload(exceptionSlot);
-                int getMessageRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_THROWABLE, "getMessage", TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
+                int getMessageRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, "getMessage", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
                 code.invokevirtual(getMessageRef);
                 code.astore(variable.index());
             }
             case "stack" -> {
                 // Arrays.toString(exception.getStackTrace()) -> String
                 code.aload(exceptionSlot);
-                int getStackTraceRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_THROWABLE, "getStackTrace",
-                        TypeConversionUtils.DESCRIPTOR___ARRAY_LJAVA_LANG_STACKTRACEELEMENT);
+                int getStackTraceRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, "getStackTrace",
+                        ConstantJavaDescriptor.DESCRIPTOR___ARRAY_LJAVA_LANG_STACKTRACEELEMENT);
                 code.invokevirtual(getStackTraceRef);
-                int arraysToStringRef = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYS, TypeConversionUtils.METHOD_TO_STRING,
+                int arraysToStringRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYS, ConstantJavaMethod.METHOD_TO_STRING,
                         "([Ljava/lang/Object;)Ljava/lang/String;");
                 code.invokestatic(arraysToStringRef);
                 code.astore(variable.index());
@@ -248,7 +251,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
             case "cause" -> {
                 // exception.getCause() -> Throwable
                 code.aload(exceptionSlot);
-                int getCauseRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_THROWABLE, "getCause", TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_THROWABLE);
+                int getCauseRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, "getCause", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_THROWABLE);
                 code.invokevirtual(getCauseRef);
                 code.astore(variable.index());
             }
@@ -268,7 +271,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
                 code.aload(exceptionSlot);
                 code.checkcast(jsErrorClass);
                 int getNameRef = cp.addMethodRef("com/caoccao/javet/swc4j/exceptions/JsError", "getName",
-                        TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
+                        ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
                 code.invokevirtual(getNameRef);
                 code.astore(variable.index());
                 code.gotoLabel(0); // Jump to end
@@ -279,9 +282,9 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
                 int elseLabel = code.getCurrentOffset();
                 code.patchShort(elseJumpPos, elseLabel - elseJumpOpcodePos);
                 code.aload(exceptionSlot);
-                int getClassRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_OBJECT, "getClass", TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_CLASS);
+                int getClassRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, "getClass", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_CLASS);
                 code.invokevirtual(getClassRef);
-                int getSimpleNameRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_CLASS, "getSimpleName", TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
+                int getSimpleNameRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CLASS, "getSimpleName", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
                 code.invokevirtual(getSimpleNameRef);
                 code.astore(variable.index());
 
@@ -328,13 +331,13 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         Swc4jAstCatchClause catchClause = tryStmt.getHandler().get();
 
         // Store exception in local variable if catch has a parameter
-        String catchType = TypeConversionUtils.LJAVA_LANG_THROWABLE;  // Default to Throwable
+        String catchType = ConstantJavaType.LJAVA_LANG_THROWABLE;  // Default to Throwable
         var context = compiler.getMemory().getCompilationContext();
         if (catchClause.getParam().isPresent()) {
             ISwc4jAstPat param = catchClause.getParam().get();
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
-                String varType = TypeConversionUtils.LJAVA_LANG_THROWABLE;
+                String varType = ConstantJavaType.LJAVA_LANG_THROWABLE;
 
                 // Check if variable type annotation exists
                 if (bindingIdent.getTypeAnn().isPresent()) {
@@ -446,12 +449,12 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         Swc4jAstCatchClause catchClause = tryStmt.getHandler().get();
 
         // Store exception in local variable if catch has a parameter
-        String catchType = TypeConversionUtils.LJAVA_LANG_THROWABLE;  // Default to Throwable
+        String catchType = ConstantJavaType.LJAVA_LANG_THROWABLE;  // Default to Throwable
         if (catchClause.getParam().isPresent()) {
             ISwc4jAstPat param = catchClause.getParam().get();
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
-                String varType = TypeConversionUtils.LJAVA_LANG_THROWABLE;
+                String varType = ConstantJavaType.LJAVA_LANG_THROWABLE;
 
                 // Check if variable type annotation exists
                 if (bindingIdent.getTypeAnn().isPresent()) {
@@ -527,7 +530,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         LocalVariable tempException = null;
         if (!finallyEndsWithTerminal) {
             String tempName = "$finallyException$" + System.identityHashCode(tryStmt);
-            context.getLocalVariableTable().allocateVariable(tempName, TypeConversionUtils.LJAVA_LANG_THROWABLE);
+            context.getLocalVariableTable().allocateVariable(tempName, ConstantJavaType.LJAVA_LANG_THROWABLE);
             tempException = context.getLocalVariableTable().getVariable(tempName);
 
             // Store exception
@@ -625,7 +628,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         LocalVariable tempException = null;
         if (!finallyEndsWithTerminal) {
             String tempName = "$finallyException$" + System.identityHashCode(tryStmt);
-            context.getLocalVariableTable().allocateVariable(tempName, TypeConversionUtils.LJAVA_LANG_THROWABLE);
+            context.getLocalVariableTable().allocateVariable(tempName, ConstantJavaType.LJAVA_LANG_THROWABLE);
             tempException = context.getLocalVariableTable().getVariable(tempName);
 
             // Store exception
@@ -663,9 +666,9 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
 
     private String getPropertyType(String propertyName) {
         return switch (propertyName) {
-            case "message", "stack", "name" -> TypeConversionUtils.LJAVA_LANG_STRING;
-            case "cause" -> TypeConversionUtils.LJAVA_LANG_THROWABLE;
-            default -> TypeConversionUtils.LJAVA_LANG_OBJECT;
+            case "message", "stack", "name" -> ConstantJavaType.LJAVA_LANG_STRING;
+            case "cause" -> ConstantJavaType.LJAVA_LANG_THROWABLE;
+            default -> ConstantJavaType.LJAVA_LANG_OBJECT;
         };
     }
 

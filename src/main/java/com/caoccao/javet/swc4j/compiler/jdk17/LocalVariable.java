@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 
 /**
  * Represents a local variable in the compilation context.
@@ -61,7 +63,7 @@ public record LocalVariable(String name, String type, int index, boolean mutable
      * @return the holder array type descriptor
      */
     public String getHolderType() {
-        return TypeConversionUtils.ARRAY_PREFIX + type;
+        return ConstantJavaType.ARRAY_PREFIX + type;
     }
 
     /**

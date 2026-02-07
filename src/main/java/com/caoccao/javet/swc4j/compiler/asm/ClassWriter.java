@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.asm;
 
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.*;
-
 /**
  * Simple bytecode class writer for generating JVM class files.
  * This is a minimal implementation to support basic class generation.
@@ -46,7 +46,7 @@ public class ClassWriter {
      * @param className the internal name of the class to generate
      */
     public ClassWriter(String className) {
-        this(className, TypeConversionUtils.JAVA_LANG_OBJECT);
+        this(className, ConstantJavaType.JAVA_LANG_OBJECT);
     }
 
     /**
@@ -528,7 +528,7 @@ public class ClassWriter {
     private void writeVerificationType(DataOutputStream out, int type, String classNameForObject) throws IOException {
         out.writeByte(type);
         if (type == 7) { // OBJECT - use specified class or java/lang/Object for compatibility
-            String classToUse = (classNameForObject != null) ? classNameForObject : TypeConversionUtils.JAVA_LANG_OBJECT;
+            String classToUse = (classNameForObject != null) ? classNameForObject : ConstantJavaType.JAVA_LANG_OBJECT;
             int classIndex = constantPool.addClass(classToUse);
             out.writeShort(classIndex);
         }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
@@ -30,8 +31,10 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaType;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,7 +95,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
         int resultSlot = compiler.getMemory().getCompilationContext()
                 .getLocalVariableTable()
                 .allocateVariable("$optChainResult" + compiler.getMemory().getCompilationContext().getNextTempId(),
-                        TypeConversionUtils.LJAVA_LANG_OBJECT);
+                        ConstantJavaType.LJAVA_LANG_OBJECT);
 
         // Generate the chain with null checks
         generateChain(code, classWriter, optChainExpr, nullJumpPositions);
@@ -181,26 +184,26 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     "Cannot infer object type for optional member access");
         }
 
-        if (objType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
+        if (objType.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName computedProp) {
                 compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null);
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-                if (indexType != null && !TypeConversionUtils.ABBR_INTEGER.equals(indexType)) {
-                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), TypeConversionUtils.ABBR_INTEGER);
+                if (indexType != null && !ConstantJavaType.ABBR_INTEGER.equals(indexType)) {
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), ConstantJavaType.ABBR_INTEGER);
                 }
                 String elemType = objType.substring(1);
                 switch (elemType) {
-                    case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.baload();
-                    case TypeConversionUtils.ABBR_CHARACTER -> code.caload();
-                    case TypeConversionUtils.ABBR_SHORT -> code.saload();
-                    case TypeConversionUtils.ABBR_INTEGER -> code.iaload();
-                    case TypeConversionUtils.ABBR_LONG -> code.laload();
-                    case TypeConversionUtils.ABBR_FLOAT -> code.faload();
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.daload();
+                    case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.baload();
+                    case ConstantJavaType.ABBR_CHARACTER -> code.caload();
+                    case ConstantJavaType.ABBR_SHORT -> code.saload();
+                    case ConstantJavaType.ABBR_INTEGER -> code.iaload();
+                    case ConstantJavaType.ABBR_LONG -> code.laload();
+                    case ConstantJavaType.ABBR_FLOAT -> code.faload();
+                    case ConstantJavaType.ABBR_DOUBLE -> code.daload();
                     default -> {
                         code.aaload();
                         if (elemType.startsWith("L") && elemType.endsWith(";")
-                                && !TypeConversionUtils.LJAVA_LANG_OBJECT.equals(elemType)) {
+                                && !ConstantJavaType.LJAVA_LANG_OBJECT.equals(elemType)) {
                             int classIndex = cp.addClass(elemType.substring(1, elemType.length() - 1));
                             code.checkcast(classIndex);
                         }
@@ -213,43 +216,43 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                 return;
             }
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
-                if (TypeConversionUtils.METHOD_LENGTH.equals(propIdent.getSym())) {
+                if (ConstantJavaMethod.METHOD_LENGTH.equals(propIdent.getSym())) {
                     code.arraylength();
-                    TypeConversionUtils.boxPrimitiveType(code, classWriter, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_INTEGER);
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, ConstantJavaType.ABBR_INTEGER, ConstantJavaType.LJAVA_LANG_INTEGER);
                     return;
                 }
             }
-        } else if (TypeConversionUtils.LJAVA_UTIL_ARRAYLIST.equals(objType) || TypeConversionUtils.LJAVA_UTIL_LIST.equals(objType)) {
+        } else if (ConstantJavaType.LJAVA_UTIL_ARRAYLIST.equals(objType) || ConstantJavaType.LJAVA_UTIL_LIST.equals(objType)) {
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName computedProp) {
                 compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null);
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-                if (TypeConversionUtils.LJAVA_LANG_STRING.equals(indexType)) {
-                    int parseIntMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_PARSE_INT, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__I);
+                if (ConstantJavaType.LJAVA_LANG_STRING.equals(indexType)) {
+                    int parseIntMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_PARSE_INT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__I);
                     code.invokestatic(parseIntMethod);
                 }
-                int getMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
+                int getMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
                 code.invokeinterface(getMethod, 2);
                 return;
             }
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
-                if (TypeConversionUtils.METHOD_LENGTH.equals(propIdent.getSym())) {
-                    int sizeMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
+                if (ConstantJavaMethod.METHOD_LENGTH.equals(propIdent.getSym())) {
+                    int sizeMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
                     code.invokeinterface(sizeMethod, 1);
-                    TypeConversionUtils.boxPrimitiveType(code, classWriter, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_INTEGER);
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, ConstantJavaType.ABBR_INTEGER, ConstantJavaType.LJAVA_LANG_INTEGER);
                     return;
                 }
             }
-        } else if (TypeConversionUtils.LJAVA_LANG_STRING.equals(objType)) {
+        } else if (ConstantJavaType.LJAVA_LANG_STRING.equals(objType)) {
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
-                if (TypeConversionUtils.METHOD_LENGTH.equals(propIdent.getSym())) {
-                    int lengthMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_LENGTH, TypeConversionUtils.DESCRIPTER___I);
+                if (ConstantJavaMethod.METHOD_LENGTH.equals(propIdent.getSym())) {
+                    int lengthMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LENGTH, ConstantJavaDescriptor.DESCRIPTOR___I);
                     code.invokevirtual(lengthMethod);
-                    TypeConversionUtils.boxPrimitiveType(code, classWriter, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_INTEGER);
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, ConstantJavaType.ABBR_INTEGER, ConstantJavaType.LJAVA_LANG_INTEGER);
                     return;
                 }
             }
-        } else if (TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP.equals(objType) || TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
-            int linkedHashMapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP);
+        } else if (ConstantJavaType.LJAVA_UTIL_LINKEDHASHMAP.equals(objType) || ConstantJavaType.LJAVA_LANG_OBJECT.equals(objType)) {
+            int linkedHashMapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP);
             code.checkcast(linkedHashMapClass);
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName computedProp) {
                 compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null);
@@ -258,14 +261,14 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     String wrapperType = TypeConversionUtils.getWrapperType(keyType);
                     TypeConversionUtils.boxPrimitiveType(code, classWriter, keyType, wrapperType);
                 }
-                int getMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                 code.invokevirtual(getMethod);
                 return;
             }
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
                 int keyIndex = cp.addString(propIdent.getSym());
                 code.ldc(keyIndex);
-                int getMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                 code.invokevirtual(getMethod);
                 return;
             }
@@ -276,18 +279,18 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     int fieldRef = cp.addFieldRef(
                             "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray",
                             "raw",
-                            TypeConversionUtils.ARRAY_LJAVA_LANG_STRING
+                            ConstantJavaType.ARRAY_LJAVA_LANG_STRING
                     );
                     code.getfield(fieldRef);
                     return;
-                } else if (TypeConversionUtils.METHOD_LENGTH.equals(fieldName)) {
+                } else if (ConstantJavaMethod.METHOD_LENGTH.equals(fieldName)) {
                     int fieldRef = cp.addFieldRef(
                             "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray",
-                            TypeConversionUtils.METHOD_LENGTH,
-                            TypeConversionUtils.ABBR_INTEGER
+                            ConstantJavaMethod.METHOD_LENGTH,
+                            ConstantJavaType.ABBR_INTEGER
                     );
                     code.getfield(fieldRef);
-                    TypeConversionUtils.boxPrimitiveType(code, classWriter, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_INTEGER);
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, ConstantJavaType.ABBR_INTEGER, ConstantJavaType.LJAVA_LANG_INTEGER);
                     return;
                 }
             }
@@ -433,7 +436,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
         for (Swc4jAstExprOrSpread arg : args) {
             ISwc4jAstExpr argExpr = arg.getExpr();
             String argType = compiler.getTypeResolver().inferTypeFromExpr(argExpr);
-            argTypes.add(argType != null ? argType : TypeConversionUtils.LJAVA_LANG_OBJECT);
+            argTypes.add(argType != null ? argType : ConstantJavaType.LJAVA_LANG_OBJECT);
         }
 
         var typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
@@ -470,7 +473,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
             if (methodInfo.isVarArgs() && !expectedTypes.isEmpty()) {
                 int fixedCount = expectedTypes.size() - 1;
                 String varargArrayType = expectedTypes.get(expectedTypes.size() - 1);
-                String componentType = varargArrayType.startsWith(TypeConversionUtils.ARRAY_PREFIX) ? varargArrayType.substring(1) : varargArrayType;
+                String componentType = varargArrayType.startsWith(ConstantJavaType.ARRAY_PREFIX) ? varargArrayType.substring(1) : varargArrayType;
 
                 invokeArgCount = fixedCount + 2;
 
@@ -597,18 +600,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
         code.iconst(varargCount);
 
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
-            int typeCode = switch (componentType) {
-                case TypeConversionUtils.ABBR_BOOLEAN -> 4;
-                case TypeConversionUtils.ABBR_CHARACTER -> 5;
-                case TypeConversionUtils.ABBR_FLOAT -> 6;
-                case TypeConversionUtils.ABBR_DOUBLE -> 7;
-                case TypeConversionUtils.ABBR_BYTE -> 8;
-                case TypeConversionUtils.ABBR_SHORT -> 9;
-                case TypeConversionUtils.ABBR_INTEGER -> 10;
-                case TypeConversionUtils.ABBR_LONG -> 11;
-                default -> 10;
-            };
-            code.newarray(typeCode);
+            code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
         } else {
             int classIndex = cp.addClass(toInternalName(componentType));
             code.anewarray(classIndex);
@@ -623,20 +615,20 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
             convertType(code, classWriter, argType, componentType);
 
             switch (componentType) {
-                case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.bastore();
-                case TypeConversionUtils.ABBR_CHARACTER -> code.castore();
-                case TypeConversionUtils.ABBR_SHORT -> code.sastore();
-                case TypeConversionUtils.ABBR_INTEGER -> code.iastore();
-                case TypeConversionUtils.ABBR_LONG -> code.lastore();
-                case TypeConversionUtils.ABBR_FLOAT -> code.fastore();
-                case TypeConversionUtils.ABBR_DOUBLE -> code.dastore();
+                case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
+                case ConstantJavaType.ABBR_CHARACTER -> code.castore();
+                case ConstantJavaType.ABBR_SHORT -> code.sastore();
+                case ConstantJavaType.ABBR_INTEGER -> code.iastore();
+                case ConstantJavaType.ABBR_LONG -> code.lastore();
+                case ConstantJavaType.ABBR_FLOAT -> code.fastore();
+                case ConstantJavaType.ABBR_DOUBLE -> code.dastore();
                 default -> code.aastore();
             }
         }
     }
 
     private String toInternalName(String typeDescriptor) {
-        if (typeDescriptor.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
+        if (typeDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
             return typeDescriptor;
         }
         if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {

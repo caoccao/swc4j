@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.utils;
 
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 /**
  * Utility class for scoring type matches in overload resolution.
  * <p>
@@ -133,19 +133,19 @@ public final class ScoreUtils {
         while (position < paramTypes.length()) {
             char c = paramTypes.charAt(position);
 
-            if (c == 'L') {
+            if (c == ConstantJavaType.CHAR_REFERENCE) {
                 // Object type - find the semicolon
                 int semicolon = paramTypes.indexOf(';', position);
                 types.add(paramTypes.substring(position, semicolon + 1));
                 position = semicolon + 1;
-            } else if (c == '[') {
+            } else if (c == ConstantJavaType.CHAR_ARRAY) {
                 // Array type - consume array markers and the element type
                 int start = position;
-                while (position < paramTypes.length() && paramTypes.charAt(position) == '[') {
+                while (position < paramTypes.length() && paramTypes.charAt(position) == ConstantJavaType.CHAR_ARRAY) {
                     position++;
                 }
                 if (position < paramTypes.length()) {
-                    if (paramTypes.charAt(position) == 'L') {
+                    if (paramTypes.charAt(position) == ConstantJavaType.CHAR_REFERENCE) {
                         int semicolon = paramTypes.indexOf(';', position);
                         position = semicolon + 1;
                     } else {
@@ -388,7 +388,7 @@ public final class ScoreUtils {
         // Both reference types
         if (!TypeConversionUtils.isPrimitiveType(argType) && !TypeConversionUtils.isPrimitiveType(paramType)) {
             // Any reference type can be assigned to Object
-            if (paramType.equals(TypeConversionUtils.LJAVA_LANG_OBJECT)) {
+            if (paramType.equals(ConstantJavaType.LJAVA_LANG_OBJECT)) {
                 return 0.5;
             }
             return 0.0;
@@ -408,46 +408,46 @@ public final class ScoreUtils {
      */
     public static double scoreDescriptorWidening(String fromType, String toType) {
         return switch (fromType) {
-            case TypeConversionUtils.ABBR_BYTE -> // byte
+            case ConstantJavaType.ABBR_BYTE -> // byte
                     switch (toType) {
-                        case TypeConversionUtils.ABBR_SHORT -> 0.99; // byte -> short (closest)
-                        case TypeConversionUtils.ABBR_INTEGER -> 0.98; // byte -> int
-                        case TypeConversionUtils.ABBR_LONG -> 0.97; // byte -> long
-                        case TypeConversionUtils.ABBR_FLOAT -> 0.96; // byte -> float
-                        case TypeConversionUtils.ABBR_DOUBLE -> 0.95; // byte -> double (farthest)
+                        case ConstantJavaType.ABBR_SHORT -> 0.99; // byte -> short (closest)
+                        case ConstantJavaType.ABBR_INTEGER -> 0.98; // byte -> int
+                        case ConstantJavaType.ABBR_LONG -> 0.97; // byte -> long
+                        case ConstantJavaType.ABBR_FLOAT -> 0.96; // byte -> float
+                        case ConstantJavaType.ABBR_DOUBLE -> 0.95; // byte -> double (farthest)
                         default -> 0.0;
                     };
-            case TypeConversionUtils.ABBR_SHORT -> // short
+            case ConstantJavaType.ABBR_SHORT -> // short
                     switch (toType) {
-                        case TypeConversionUtils.ABBR_INTEGER -> 0.99; // short -> int (closest)
-                        case TypeConversionUtils.ABBR_LONG -> 0.98; // short -> long
-                        case TypeConversionUtils.ABBR_FLOAT -> 0.97; // short -> float
-                        case TypeConversionUtils.ABBR_DOUBLE -> 0.96; // short -> double (farthest)
+                        case ConstantJavaType.ABBR_INTEGER -> 0.99; // short -> int (closest)
+                        case ConstantJavaType.ABBR_LONG -> 0.98; // short -> long
+                        case ConstantJavaType.ABBR_FLOAT -> 0.97; // short -> float
+                        case ConstantJavaType.ABBR_DOUBLE -> 0.96; // short -> double (farthest)
                         default -> 0.0;
                     };
-            case TypeConversionUtils.ABBR_CHARACTER -> // char
+            case ConstantJavaType.ABBR_CHARACTER -> // char
                     switch (toType) {
-                        case TypeConversionUtils.ABBR_INTEGER -> 0.99; // char -> int (closest)
-                        case TypeConversionUtils.ABBR_LONG -> 0.98; // char -> long
-                        case TypeConversionUtils.ABBR_FLOAT -> 0.97; // char -> float
-                        case TypeConversionUtils.ABBR_DOUBLE -> 0.96; // char -> double (farthest)
+                        case ConstantJavaType.ABBR_INTEGER -> 0.99; // char -> int (closest)
+                        case ConstantJavaType.ABBR_LONG -> 0.98; // char -> long
+                        case ConstantJavaType.ABBR_FLOAT -> 0.97; // char -> float
+                        case ConstantJavaType.ABBR_DOUBLE -> 0.96; // char -> double (farthest)
                         default -> 0.0;
                     };
-            case TypeConversionUtils.ABBR_INTEGER -> // int
+            case ConstantJavaType.ABBR_INTEGER -> // int
                     switch (toType) {
-                        case TypeConversionUtils.ABBR_LONG -> 0.99; // int -> long (closest)
-                        case TypeConversionUtils.ABBR_FLOAT -> 0.98; // int -> float
-                        case TypeConversionUtils.ABBR_DOUBLE -> 0.97; // int -> double (farthest)
+                        case ConstantJavaType.ABBR_LONG -> 0.99; // int -> long (closest)
+                        case ConstantJavaType.ABBR_FLOAT -> 0.98; // int -> float
+                        case ConstantJavaType.ABBR_DOUBLE -> 0.97; // int -> double (farthest)
                         default -> 0.0;
                     };
-            case TypeConversionUtils.ABBR_LONG -> // long
+            case ConstantJavaType.ABBR_LONG -> // long
                     switch (toType) {
-                        case TypeConversionUtils.ABBR_FLOAT -> 0.99; // long -> float (closest)
-                        case TypeConversionUtils.ABBR_DOUBLE -> 0.98; // long -> double (farthest)
+                        case ConstantJavaType.ABBR_FLOAT -> 0.99; // long -> float (closest)
+                        case ConstantJavaType.ABBR_DOUBLE -> 0.98; // long -> double (farthest)
                         default -> 0.0;
                     };
-            case TypeConversionUtils.ABBR_FLOAT -> // float
-                    toType.equals(TypeConversionUtils.ABBR_DOUBLE) ? 0.99 : 0.0; // float -> double
+            case ConstantJavaType.ABBR_FLOAT -> // float
+                    toType.equals(ConstantJavaType.ABBR_DOUBLE) ? 0.99 : 0.0; // float -> double
             default -> 0.0;
         };
     }

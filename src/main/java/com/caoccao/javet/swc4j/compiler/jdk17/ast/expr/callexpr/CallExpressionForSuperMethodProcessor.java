@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
@@ -26,9 +27,9 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 /**
  * Generates bytecode for super.method() calls.
  * Uses invokespecial to call the parent class method.
@@ -80,7 +81,7 @@ public final class CallExpressionForSuperMethodProcessor extends BaseAstProcesso
             superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
         }
         if (superClassInternalName == null) {
-            superClassInternalName = TypeConversionUtils.JAVA_LANG_OBJECT;
+            superClassInternalName = ConstantJavaType.JAVA_LANG_OBJECT;
         }
 
         // Load 'this' reference
@@ -96,7 +97,7 @@ public final class CallExpressionForSuperMethodProcessor extends BaseAstProcesso
             compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType == null) {
-                argType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                argType = ConstantJavaType.LJAVA_LANG_OBJECT;
             }
             paramDescriptors.append(argType);
         }

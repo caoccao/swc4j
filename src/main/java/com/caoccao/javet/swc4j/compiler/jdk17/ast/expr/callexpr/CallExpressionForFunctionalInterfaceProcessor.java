@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
@@ -28,11 +29,10 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CapturedVariable;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.memory.ScopedFunctionalInterfaceRegistry.SamMethodInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.List;
-
 /**
  * Generates bytecode for calling functional interface variables directly.
  * <p>
@@ -90,10 +90,10 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
         // Verify argument count matches parameter count (allow rest/optional padding)
         var args = callExpr.getArgs();
         int paramCount = samInfo.paramTypes().size();
-        boolean hasArrayRest = paramCount > 0 && samInfo.paramTypes().get(paramCount - 1).startsWith(TypeConversionUtils.ARRAY_PREFIX);
+        boolean hasArrayRest = paramCount > 0 && samInfo.paramTypes().get(paramCount - 1).startsWith(ConstantJavaType.ARRAY_PREFIX);
         String syntheticRestType = null;
         if (!hasArrayRest && paramCount == 1 && args.size() > 1
-                && TypeConversionUtils.LJAVA_LANG_OBJECT.equals(samInfo.paramTypes().get(0))) {
+                && ConstantJavaType.LJAVA_LANG_OBJECT.equals(samInfo.paramTypes().get(0))) {
             hasArrayRest = true;
             syntheticRestType = "[Ljava/lang/Object;";
         }
@@ -157,7 +157,7 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
         // long and double take 2 slots, others take 1 slot
         int slotCount = 1; // 'this'
         for (String paramType : samInfo.paramTypes()) {
-            slotCount += (TypeConversionUtils.ABBR_LONG.equals(paramType) || TypeConversionUtils.ABBR_DOUBLE.equals(paramType)) ? 2 : 1;
+            slotCount += (ConstantJavaType.ABBR_LONG.equals(paramType) || ConstantJavaType.ABBR_DOUBLE.equals(paramType)) ? 2 : 1;
         }
         code.invokeinterface(methodRef, slotCount);
     }
@@ -174,19 +174,7 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
         var cp = classWriter.getConstantPool();
         code.iconst(restCount);
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
-            int typeCode = switch (componentType) {
-                case TypeConversionUtils.ABBR_BOOLEAN -> 4;
-                case TypeConversionUtils.ABBR_CHARACTER -> 5;
-                case TypeConversionUtils.ABBR_FLOAT -> 6;
-                case TypeConversionUtils.ABBR_DOUBLE -> 7;
-                case TypeConversionUtils.ABBR_BYTE -> 8;
-                case TypeConversionUtils.ABBR_SHORT -> 9;
-                case TypeConversionUtils.ABBR_INTEGER -> 10;
-                case TypeConversionUtils.ABBR_LONG -> 11;
-                default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), null,
-                        "Unsupported rest primitive type: " + componentType);
-            };
-            code.newarray(typeCode);
+            code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
         } else {
             int classRef = cp.addClass(toInternalName(componentType));
             code.anewarray(classRef);
@@ -201,20 +189,20 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
             code.iconst(i);
             ReturnTypeInfo argTypeInfo = ReturnTypeInfo.of(getSourceCode(), arg.getExpr(), componentType);
             compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), argTypeInfo);
-            if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(componentType)) {
+            if (ConstantJavaType.LJAVA_LANG_OBJECT.equals(componentType)) {
                 String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
                 if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
                     TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
                 }
             }
             switch (componentType) {
-                case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.bastore();
-                case TypeConversionUtils.ABBR_CHARACTER -> code.castore();
-                case TypeConversionUtils.ABBR_SHORT -> code.sastore();
-                case TypeConversionUtils.ABBR_INTEGER -> code.iastore();
-                case TypeConversionUtils.ABBR_LONG -> code.lastore();
-                case TypeConversionUtils.ABBR_FLOAT -> code.fastore();
-                case TypeConversionUtils.ABBR_DOUBLE -> code.dastore();
+                case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
+                case ConstantJavaType.ABBR_CHARACTER -> code.castore();
+                case ConstantJavaType.ABBR_SHORT -> code.sastore();
+                case ConstantJavaType.ABBR_INTEGER -> code.iastore();
+                case ConstantJavaType.ABBR_LONG -> code.lastore();
+                case ConstantJavaType.ABBR_FLOAT -> code.fastore();
+                case ConstantJavaType.ABBR_DOUBLE -> code.dastore();
                 default -> code.aastore();
             }
         }
@@ -254,34 +242,23 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
 
     private void pushMissingArg(CodeBuilder code, ClassWriter classWriter, String expectedType) {
         var cp = classWriter.getConstantPool();
-        if (expectedType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
+        if (expectedType.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
             String componentType = expectedType.substring(1);
             code.iconst(0);
             if (TypeConversionUtils.isPrimitiveType(componentType)) {
-                int typeCode = switch (componentType) {
-                    case TypeConversionUtils.ABBR_BOOLEAN -> 4;
-                    case TypeConversionUtils.ABBR_CHARACTER -> 5;
-                    case TypeConversionUtils.ABBR_FLOAT -> 6;
-                    case TypeConversionUtils.ABBR_DOUBLE -> 7;
-                    case TypeConversionUtils.ABBR_BYTE -> 8;
-                    case TypeConversionUtils.ABBR_SHORT -> 9;
-                    case TypeConversionUtils.ABBR_INTEGER -> 10;
-                    case TypeConversionUtils.ABBR_LONG -> 11;
-                    default -> 10;
-                };
-                code.newarray(typeCode);
+                code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
             } else {
                 int classRef = cp.addClass(toInternalName(componentType));
                 code.anewarray(classRef);
             }
         } else if (TypeConversionUtils.isPrimitiveType(expectedType)) {
             switch (expectedType) {
-                case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE,
-                     TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_SHORT,
-                     TypeConversionUtils.ABBR_INTEGER -> code.iconst(0);
-                case TypeConversionUtils.ABBR_LONG -> code.lconst(0L);
-                case TypeConversionUtils.ABBR_FLOAT -> code.fconst(0.0f);
-                case TypeConversionUtils.ABBR_DOUBLE -> code.dconst(0.0d);
+                case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE,
+                     ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_SHORT,
+                     ConstantJavaType.ABBR_INTEGER -> code.iconst(0);
+                case ConstantJavaType.ABBR_LONG -> code.lconst(0L);
+                case ConstantJavaType.ABBR_FLOAT -> code.fconst(0.0f);
+                case ConstantJavaType.ABBR_DOUBLE -> code.dconst(0.0d);
                 default -> code.iconst(0);
             }
         } else {
@@ -290,7 +267,7 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
     }
 
     private String toInternalName(String typeDescriptor) {
-        if (typeDescriptor.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
+        if (typeDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
             return typeDescriptor;
         }
         if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {

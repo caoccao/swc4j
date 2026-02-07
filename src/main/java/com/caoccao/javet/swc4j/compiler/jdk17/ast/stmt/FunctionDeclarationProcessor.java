@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026. caoccao.com Sam Cao
+ * Copyright (c) 2026. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
@@ -37,8 +38,10 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.ScopedStandaloneFunctionRegistry;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -194,10 +197,10 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
             String internalClassName = fullClassName.replace('.', '/');
 
             try {
-                classWriter = new ClassWriter(internalClassName, TypeConversionUtils.JAVA_LANG_OBJECT);
+                classWriter = new ClassWriter(internalClassName, ConstantJavaType.JAVA_LANG_OBJECT);
 
                 // Generate default constructor
-                generateDefaultConstructor(classWriter, TypeConversionUtils.JAVA_LANG_OBJECT);
+                generateDefaultConstructor(classWriter, ConstantJavaType.JAVA_LANG_OBJECT);
 
                 // Generate each function as a static method
                 for (Swc4jAstFnDecl childFnDecl : functions) {
@@ -216,7 +219,7 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
     private void generateDefaultConstructor(ClassWriter classWriter, String superClassInternalName) {
         var cp = classWriter.getConstantPool();
         // Generate: public <init>() { super(); }
-        int superCtorRef = cp.addMethodRef(superClassInternalName, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+        int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
 
         CodeBuilder code = new CodeBuilder();
         code.aload(0)                    // load this
@@ -225,8 +228,8 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
 
         classWriter.addMethod(
                 0x0001, // ACC_PUBLIC
-                TypeConversionUtils.METHOD_INIT,
-                TypeConversionUtils.DESCRIPTOR___V,
+                ConstantJavaMethod.METHOD_INIT,
+                ConstantJavaDescriptor.DESCRIPTOR___V,
                 code.toByteArray(),
                 1, // max stack
                 1  // max locals (this)
@@ -275,7 +278,7 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
                 }
             }
 
-            String returnDescriptor = getReturnDescriptor(returnTypeInfo);
+            String returnDescriptor = TypeConversionUtils.getReturnDescriptor(returnTypeInfo);
             String descriptor = "(" + paramDescriptors + ")" + returnDescriptor;
 
             // Analyze variable declarations in the body
@@ -311,14 +314,6 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
 
     private ScopedStandaloneFunctionRegistry getRegistry() {
         return compiler.getMemory().getScopedStandaloneFunctionRegistry();
-    }
-
-    private String getReturnDescriptor(ReturnTypeInfo returnTypeInfo) {
-        if (returnTypeInfo.descriptor() != null) {
-            return returnTypeInfo.descriptor();
-        }
-        String primitiveDescriptor = returnTypeInfo.getPrimitiveTypeDescriptor();
-        return primitiveDescriptor != null ? primitiveDescriptor : TypeConversionUtils.ABBR_VOID;
     }
 
     private boolean isClassNameTaken(String fullClassName) {

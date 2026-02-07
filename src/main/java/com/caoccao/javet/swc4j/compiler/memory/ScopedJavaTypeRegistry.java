@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.memory;
 
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
-
 import java.util.*;
-
 /**
  * Manages Java type registrations (classes, interfaces, enums) in a scoped manner.
  * Each scope represents a file being compiled, preventing import leakage between files.
@@ -101,17 +101,17 @@ public final class ScopedJavaTypeRegistry {
      * @return the type descriptor
      */
     private String getDescriptor(Class<?> clazz) {
-        if (clazz == void.class) return TypeConversionUtils.ABBR_VOID;
-        if (clazz == boolean.class) return TypeConversionUtils.ABBR_BOOLEAN;
-        if (clazz == byte.class) return TypeConversionUtils.ABBR_BYTE;
-        if (clazz == char.class) return TypeConversionUtils.ABBR_CHARACTER;
-        if (clazz == short.class) return TypeConversionUtils.ABBR_SHORT;
-        if (clazz == int.class) return TypeConversionUtils.ABBR_INTEGER;
-        if (clazz == long.class) return TypeConversionUtils.ABBR_LONG;
-        if (clazz == float.class) return TypeConversionUtils.ABBR_FLOAT;
-        if (clazz == double.class) return TypeConversionUtils.ABBR_DOUBLE;
+        if (clazz == void.class) return ConstantJavaType.ABBR_VOID;
+        if (clazz == boolean.class) return ConstantJavaType.ABBR_BOOLEAN;
+        if (clazz == byte.class) return ConstantJavaType.ABBR_BYTE;
+        if (clazz == char.class) return ConstantJavaType.ABBR_CHARACTER;
+        if (clazz == short.class) return ConstantJavaType.ABBR_SHORT;
+        if (clazz == int.class) return ConstantJavaType.ABBR_INTEGER;
+        if (clazz == long.class) return ConstantJavaType.ABBR_LONG;
+        if (clazz == float.class) return ConstantJavaType.ABBR_FLOAT;
+        if (clazz == double.class) return ConstantJavaType.ABBR_DOUBLE;
         if (clazz.isArray()) {
-            return TypeConversionUtils.ARRAY_PREFIX + getDescriptor(clazz.getComponentType());
+            return ConstantJavaType.ARRAY_PREFIX + getDescriptor(clazz.getComponentType());
         }
         return "L" + clazz.getName().replace('.', '/') + ";";
     }
@@ -170,39 +170,39 @@ public final class ScopedJavaTypeRegistry {
         while (i < inner.length()) {
             char c = inner.charAt(i);
             switch (c) {
-                case 'Z' -> {
+                case ConstantJavaType.CHAR_BOOLEAN -> {
                     params.add(boolean.class);
                     i++;
                 }
-                case 'B' -> {
+                case ConstantJavaType.CHAR_BYTE -> {
                     params.add(byte.class);
                     i++;
                 }
-                case 'C' -> {
+                case ConstantJavaType.CHAR_CHARACTER -> {
                     params.add(char.class);
                     i++;
                 }
-                case 'S' -> {
+                case ConstantJavaType.CHAR_SHORT -> {
                     params.add(short.class);
                     i++;
                 }
-                case 'I' -> {
+                case ConstantJavaType.CHAR_INTEGER -> {
                     params.add(int.class);
                     i++;
                 }
-                case 'J' -> {
+                case ConstantJavaType.CHAR_LONG -> {
                     params.add(long.class);
                     i++;
                 }
-                case 'F' -> {
+                case ConstantJavaType.CHAR_FLOAT -> {
                     params.add(float.class);
                     i++;
                 }
-                case 'D' -> {
+                case ConstantJavaType.CHAR_DOUBLE -> {
                     params.add(double.class);
                     i++;
                 }
-                case 'L' -> {
+                case ConstantJavaType.CHAR_REFERENCE -> {
                     // Object type
                     int semicolon = inner.indexOf(';', i);
                     if (semicolon == -1) break;
@@ -214,13 +214,13 @@ public final class ScopedJavaTypeRegistry {
                     }
                     i = semicolon + 1;
                 }
-                case '[' -> {
+                case ConstantJavaType.CHAR_ARRAY -> {
                     // Array type - find the element type
                     int start = i;
-                    while (i < inner.length() && inner.charAt(i) == '[') i++;
+                    while (i < inner.length() && inner.charAt(i) == ConstantJavaType.CHAR_ARRAY) i++;
                     if (i < inner.length()) {
                         char elemType = inner.charAt(i);
-                        if (elemType == 'L') {
+                        if (elemType == ConstantJavaType.CHAR_REFERENCE) {
                             int semicolon = inner.indexOf(';', i);
                             if (semicolon != -1) i = semicolon + 1;
                         } else {

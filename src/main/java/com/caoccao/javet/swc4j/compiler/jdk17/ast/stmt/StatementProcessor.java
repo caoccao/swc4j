@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
@@ -32,9 +33,10 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.UsingResourceInfo;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Main dispatcher for statement code generation.
@@ -249,7 +251,9 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
             // If there are pending finally blocks, save return value and execute them
             if (!pendingFinallyBlocks.isEmpty()) {
                 // Determine the return type descriptor
-                String returnType = getDescriptorForReturnType(returnTypeInfo);
+                String returnType = Optional.ofNullable(returnTypeInfo)
+                        .map(TypeConversionUtils::getReturnDescriptor)
+                        .orElse(ConstantJavaType.LJAVA_LANG_OBJECT);
 
                 // Allocate temp variable to store return value
                 String tempName = "$returnValue$" + context.getNextTempId();
@@ -312,33 +316,6 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
             }
             code.returnVoid();
         }
-    }
-
-    /**
-     * Get the JVM descriptor for a return type.
-     */
-    private String getDescriptorForReturnType(ReturnTypeInfo returnTypeInfo) {
-        if (returnTypeInfo == null) {
-            return TypeConversionUtils.LJAVA_LANG_OBJECT;
-        }
-        // If descriptor is available, use it
-        if (returnTypeInfo.descriptor() != null) {
-            return returnTypeInfo.descriptor();
-        }
-        // Otherwise, derive from type
-        return switch (returnTypeInfo.type()) {
-            case INT -> TypeConversionUtils.ABBR_INTEGER;
-            case LONG -> TypeConversionUtils.ABBR_LONG;
-            case FLOAT -> TypeConversionUtils.ABBR_FLOAT;
-            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
-            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
-            case BYTE -> TypeConversionUtils.ABBR_BYTE;
-            case CHAR -> TypeConversionUtils.ABBR_CHARACTER;
-            case SHORT -> TypeConversionUtils.ABBR_SHORT;
-            case VOID -> TypeConversionUtils.ABBR_VOID;
-            case STRING -> TypeConversionUtils.LJAVA_LANG_STRING;
-            default -> TypeConversionUtils.LJAVA_LANG_OBJECT;
-        };
     }
 
     /**

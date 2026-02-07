@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
@@ -30,8 +31,9 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaType;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.List;
 
 /**
@@ -119,14 +121,14 @@ public final class TsInterfaceCollector {
      * @return the getter method name
      */
     private String getGetterName(String propName, String descriptor) {
-        if (TypeConversionUtils.ABBR_BOOLEAN.equals(descriptor)) {
+        if (ConstantJavaType.ABBR_BOOLEAN.equals(descriptor)) {
             // Boolean: use 'is' prefix unless already prefixed
             if (propName.startsWith("is") || propName.startsWith("has") || propName.startsWith("can")) {
                 return propName;
             }
             return "is" + capitalize(propName);
         }
-        return TypeConversionUtils.METHOD_GET + capitalize(propName);
+        return ConstantJavaMethod.METHOD_GET + capitalize(propName);
     }
 
     private String getModuleName(Swc4jAstTsModuleDecl moduleDecl) {
@@ -156,7 +158,7 @@ public final class TsInterfaceCollector {
         String propName = getPropertyName(getter.getKey());
 
         // Get type descriptor
-        String descriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+        String descriptor = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
         if (getter.getTypeAnn().isPresent()) {
             descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(getter.getTypeAnn().get().getTypeAnn());
         }
@@ -179,7 +181,7 @@ public final class TsInterfaceCollector {
      */
     private void processIndexSignature(Swc4jAstTsIndexSignature indexSig, JavaTypeInfo typeInfo) throws Swc4jByteCodeCompilerException {
         // Get key type from params (first parameter)
-        String keyDescriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+        String keyDescriptor = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
         if (!indexSig.getParams().isEmpty()) {
             ISwc4jAstTsFnParam param = indexSig.getParams().get(0);
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
@@ -191,7 +193,7 @@ public final class TsInterfaceCollector {
         }
 
         // Get value type from typeAnn
-        String valueDescriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+        String valueDescriptor = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
         if (indexSig.getTypeAnn().isPresent()) {
             valueDescriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(
                     indexSig.getTypeAnn().get().getTypeAnn());
@@ -199,14 +201,14 @@ public final class TsInterfaceCollector {
 
         // Register getter method: get(KeyType key): ValueType
         String getterDescriptor = "(" + keyDescriptor + ")" + valueDescriptor;
-        MethodInfo getterInfo = new MethodInfo(TypeConversionUtils.METHOD_GET, getterDescriptor, valueDescriptor, false, false);
-        typeInfo.addMethod(TypeConversionUtils.METHOD_GET, getterInfo);
+        MethodInfo getterInfo = new MethodInfo(ConstantJavaMethod.METHOD_GET, getterDescriptor, valueDescriptor, false, false);
+        typeInfo.addMethod(ConstantJavaMethod.METHOD_GET, getterInfo);
 
         // Register setter method (if not readonly): set(KeyType key, ValueType value): void
         if (!indexSig.isReadonly()) {
             String setterDescriptor = "(" + keyDescriptor + valueDescriptor + ")V";
-            MethodInfo setterInfo = new MethodInfo(TypeConversionUtils.METHOD_SET, setterDescriptor, TypeConversionUtils.ABBR_VOID, false, false);
-            typeInfo.addMethod(TypeConversionUtils.METHOD_SET, setterInfo);
+            MethodInfo setterInfo = new MethodInfo(ConstantJavaMethod.METHOD_SET, setterDescriptor, ConstantJavaType.ABBR_VOID, false, false);
+            typeInfo.addMethod(ConstantJavaMethod.METHOD_SET, setterInfo);
         }
     }
 
@@ -270,7 +272,7 @@ public final class TsInterfaceCollector {
         // Build method descriptor
         StringBuilder paramDescriptors = new StringBuilder("(");
         for (ISwc4jAstTsFnParam param : method.getParams()) {
-            String paramType = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+            String paramType = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
             if (param instanceof Swc4jAstBindingIdent bindingIdent) {
                 if (bindingIdent.getTypeAnn().isPresent()) {
                     paramType = compiler.getTypeResolver().mapTsTypeToDescriptor(
@@ -282,7 +284,7 @@ public final class TsInterfaceCollector {
         paramDescriptors.append(")");
 
         // Get return type
-        String returnType = TypeConversionUtils.ABBR_VOID; // Default to void
+        String returnType = ConstantJavaType.ABBR_VOID; // Default to void
         if (method.getTypeAnn().isPresent()) {
             returnType = compiler.getTypeResolver().mapTsTypeToDescriptor(
                     method.getTypeAnn().get().getTypeAnn());
@@ -303,7 +305,7 @@ public final class TsInterfaceCollector {
         String propName = getPropertyName(prop.getKey());
 
         // Get type descriptor
-        String descriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+        String descriptor = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
         if (prop.getTypeAnn().isPresent()) {
             descriptor = compiler.getTypeResolver().mapTsTypeToDescriptor(prop.getTypeAnn().get().getTypeAnn());
         }
@@ -316,9 +318,9 @@ public final class TsInterfaceCollector {
 
         // Register setter method (if not readonly)
         if (!prop.isReadonly()) {
-            String setterName = TypeConversionUtils.METHOD_SET + capitalize(propName);
+            String setterName = ConstantJavaMethod.METHOD_SET + capitalize(propName);
             String setterDescriptor = "(" + descriptor + ")V";
-            MethodInfo setterInfo = new MethodInfo(setterName, setterDescriptor, TypeConversionUtils.ABBR_VOID, false, false);
+            MethodInfo setterInfo = new MethodInfo(setterName, setterDescriptor, ConstantJavaType.ABBR_VOID, false, false);
             typeInfo.addMethod(setterName, setterInfo);
         }
     }
@@ -333,7 +335,7 @@ public final class TsInterfaceCollector {
         String propName = getPropertyName(setter.getKey());
 
         // Get type descriptor from parameter
-        String descriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
+        String descriptor = ConstantJavaType.LJAVA_LANG_OBJECT; // Default
         ISwc4jAstTsFnParam param = setter.getParam();
         if (param instanceof Swc4jAstBindingIdent bindingIdent) {
             if (bindingIdent.getTypeAnn().isPresent()) {
@@ -343,9 +345,9 @@ public final class TsInterfaceCollector {
         }
 
         // Register setter method
-        String setterName = TypeConversionUtils.METHOD_SET + capitalize(propName);
+        String setterName = ConstantJavaMethod.METHOD_SET + capitalize(propName);
         String setterDescriptor = "(" + descriptor + ")V";
-        MethodInfo setterInfo = new MethodInfo(setterName, setterDescriptor, TypeConversionUtils.ABBR_VOID, false, false);
+        MethodInfo setterInfo = new MethodInfo(setterName, setterDescriptor, ConstantJavaType.ABBR_VOID, false, false);
         typeInfo.addMethod(setterName, setterInfo);
     }
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstSuper;
@@ -24,9 +25,10 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 /**
  * Generates bytecode for super() constructor calls.
  * Uses invokespecial to call the parent class constructor.
@@ -65,7 +67,7 @@ public final class CallExpressionForSuperConstructorProcessor extends BaseAstPro
             superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
         }
         if (superClassInternalName == null) {
-            superClassInternalName = TypeConversionUtils.JAVA_LANG_OBJECT;
+            superClassInternalName = ConstantJavaType.JAVA_LANG_OBJECT;
         }
 
         // Load 'this' reference
@@ -81,7 +83,7 @@ public final class CallExpressionForSuperConstructorProcessor extends BaseAstPro
             compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType == null) {
-                argType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                argType = ConstantJavaType.LJAVA_LANG_OBJECT;
             }
             paramDescriptors.append(argType);
         }
@@ -89,7 +91,7 @@ public final class CallExpressionForSuperConstructorProcessor extends BaseAstPro
         String methodDescriptor = "(" + paramDescriptors + ")V";
 
         // Generate invokespecial to call the superclass constructor
-        int ctorRef = cp.addMethodRef(superClassInternalName, TypeConversionUtils.METHOD_INIT, methodDescriptor);
+        int ctorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, methodDescriptor);
         code.invokespecial(ctorRef);
     }
 

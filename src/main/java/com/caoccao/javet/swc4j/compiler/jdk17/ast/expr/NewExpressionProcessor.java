@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.*;
@@ -27,8 +28,9 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,20 +122,20 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
             }
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType == null) {
-                argType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                argType = ConstantJavaType.LJAVA_LANG_OBJECT;
             }
             argTypes.add(argType);
         }
 
         JavaTypeInfo javaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
-        MethodInfo constructorInfo = javaTypeInfo != null ? javaTypeInfo.getMethod(TypeConversionUtils.METHOD_INIT, argTypes) : null;
+        MethodInfo constructorInfo = javaTypeInfo != null ? javaTypeInfo.getMethod(ConstantJavaMethod.METHOD_INIT, argTypes) : null;
 
         if (constructorInfo != null) {
             List<String> expectedTypes = ScoreUtils.parseParameterDescriptors(constructorInfo.descriptor());
             if (constructorInfo.isVarArgs() && !expectedTypes.isEmpty()) {
                 int fixedCount = expectedTypes.size() - 1;
                 String varargArrayType = expectedTypes.get(expectedTypes.size() - 1);
-                String componentType = varargArrayType.startsWith(TypeConversionUtils.ARRAY_PREFIX) ? varargArrayType.substring(1) : varargArrayType;
+                String componentType = varargArrayType.startsWith(ConstantJavaType.ARRAY_PREFIX) ? varargArrayType.substring(1) : varargArrayType;
 
                 boolean directArrayPass = args.size() == expectedTypes.size()
                         && argTypes.get(argTypes.size() - 1).equals(varargArrayType);
@@ -162,7 +164,7 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
                 }
             }
 
-            int constructorRef = cp.addMethodRef(internalClassName, TypeConversionUtils.METHOD_INIT, constructorInfo.descriptor());
+            int constructorRef = cp.addMethodRef(internalClassName, ConstantJavaMethod.METHOD_INIT, constructorInfo.descriptor());
             code.invokespecial(constructorRef);
         } else {
             StringBuilder paramDescriptors = new StringBuilder();
@@ -172,7 +174,7 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
                 paramDescriptors.append(argTypes.get(i));
             }
             String constructorDescriptor = "(" + paramDescriptors + ")V";
-            int constructorRef = cp.addMethodRef(internalClassName, TypeConversionUtils.METHOD_INIT, constructorDescriptor);
+            int constructorRef = cp.addMethodRef(internalClassName, ConstantJavaMethod.METHOD_INIT, constructorDescriptor);
             code.invokespecial(constructorRef);
         }
 
@@ -192,20 +194,8 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
         code.iconst(varargCount);
 
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
-            int typeCode = switch (componentType) {
-                case TypeConversionUtils.ABBR_BOOLEAN -> 4;
-                case TypeConversionUtils.ABBR_CHARACTER -> 5;
-                case TypeConversionUtils.ABBR_FLOAT -> 6;
-                case TypeConversionUtils.ABBR_DOUBLE -> 7;
-                case TypeConversionUtils.ABBR_BYTE -> 8;
-                case TypeConversionUtils.ABBR_SHORT -> 9;
-                case TypeConversionUtils.ABBR_INTEGER -> 10;
-                case TypeConversionUtils.ABBR_LONG -> 11;
-                default ->
-                        throw new Swc4jByteCodeCompilerException(getSourceCode(), null, "Unsupported vararg primitive type: " + componentType);
-            };
-            code.newarray(typeCode);
-        } else {
+            code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
+        } else{
             String internalName = componentType.substring(1, componentType.length() - 1);
             int classIndex = cp.addClass(internalName);
             code.anewarray(classIndex);
@@ -220,13 +210,13 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
             convertType(code, classWriter, argType, componentType);
 
             switch (componentType) {
-                case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.bastore();
-                case TypeConversionUtils.ABBR_CHARACTER -> code.castore();
-                case TypeConversionUtils.ABBR_SHORT -> code.sastore();
-                case TypeConversionUtils.ABBR_INTEGER -> code.iastore();
-                case TypeConversionUtils.ABBR_LONG -> code.lastore();
-                case TypeConversionUtils.ABBR_FLOAT -> code.fastore();
-                case TypeConversionUtils.ABBR_DOUBLE -> code.dastore();
+                case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
+                case ConstantJavaType.ABBR_CHARACTER -> code.castore();
+                case ConstantJavaType.ABBR_SHORT -> code.sastore();
+                case ConstantJavaType.ABBR_INTEGER -> code.iastore();
+                case ConstantJavaType.ABBR_LONG -> code.lastore();
+                case ConstantJavaType.ABBR_FLOAT -> code.fastore();
+                case ConstantJavaType.ABBR_DOUBLE -> code.dastore();
                 default -> code.aastore();
             }
         }

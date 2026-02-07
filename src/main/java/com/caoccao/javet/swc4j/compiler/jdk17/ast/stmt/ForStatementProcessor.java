@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
@@ -33,6 +34,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -291,7 +293,7 @@ public final class ForStatementProcessor extends BaseAstProcessor<Swc4jAstForStm
         String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
 
         // Only handle int comparisons for now (most common case)
-        if (!TypeConversionUtils.ABBR_INTEGER.equals(leftType) || !TypeConversionUtils.ABBR_INTEGER.equals(rightType)) {
+        if (!ConstantJavaType.ABBR_INTEGER.equals(leftType) || !ConstantJavaType.ABBR_INTEGER.equals(rightType)) {
             return false;
         }
 

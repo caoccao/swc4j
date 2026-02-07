@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
@@ -23,9 +24,11 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 /**
  * The type Number literal processor.
  */
@@ -75,28 +78,28 @@ public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumbe
                 code.ldc2_w(longIndex);
             }
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && TypeConversionUtils.LJAVA_LANG_INTEGER.equals(returnTypeInfo.descriptor())) {
+                && ConstantJavaType.LJAVA_LANG_INTEGER.equals(returnTypeInfo.descriptor())) {
             // Box integer to Integer
             int intValue = (int) value;
             code.iconst(intValue);
-            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_I__LJAVA_LANG_INTEGER);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_INTEGER);
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && TypeConversionUtils.LJAVA_LANG_BYTE.equals(returnTypeInfo.descriptor())) {
+                && ConstantJavaType.LJAVA_LANG_BYTE.equals(returnTypeInfo.descriptor())) {
             // Box byte to Byte
             byte byteValue = (byte) value;
             code.iconst(byteValue);
-            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_BYTE, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_B__LJAVA_LANG_BYTE);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_B__LJAVA_LANG_BYTE);
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && TypeConversionUtils.LJAVA_LANG_SHORT.equals(returnTypeInfo.descriptor())) {
+                && ConstantJavaType.LJAVA_LANG_SHORT.equals(returnTypeInfo.descriptor())) {
             // Box short to Short
             short shortValue = (short) value;
             code.iconst(shortValue);
-            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_SHORT, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_S__LJAVA_LANG_SHORT);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_S__LJAVA_LANG_SHORT);
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && TypeConversionUtils.LJAVA_LANG_LONG.equals(returnTypeInfo.descriptor())) {
+                && ConstantJavaType.LJAVA_LANG_LONG.equals(returnTypeInfo.descriptor())) {
             // Box long to Long
             long longValue = (long) value;
             if (longValue == 0L || longValue == 1L) {
@@ -105,10 +108,10 @@ public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumbe
                 int longIndex = cp.addLong(longValue);
                 code.ldc2_w(longIndex);
             }
-            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_LONG, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_J__LJAVA_LANG_LONG);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_LONG);
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && TypeConversionUtils.LJAVA_LANG_FLOAT.equals(returnTypeInfo.descriptor())) {
+                && ConstantJavaType.LJAVA_LANG_FLOAT.equals(returnTypeInfo.descriptor())) {
             // Box float to Float
             float floatValue = (float) value;
             if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
@@ -117,10 +120,10 @@ public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumbe
                 int floatIndex = cp.addFloat(floatValue);
                 code.ldc(floatIndex);
             }
-            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_FLOAT, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_F__LJAVA_LANG_FLOAT);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_F__LJAVA_LANG_FLOAT);
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && TypeConversionUtils.LJAVA_LANG_DOUBLE.equals(returnTypeInfo.descriptor())) {
+                && ConstantJavaType.LJAVA_LANG_DOUBLE.equals(returnTypeInfo.descriptor())) {
             // Box double to Double
             if (value == 0.0 || value == 1.0) {
                 code.dconst(value);
@@ -128,7 +131,7 @@ public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumbe
                 int doubleIndex = cp.addDouble(value);
                 code.ldc2_w(doubleIndex);
             }
-            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_DOUBLE, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_D__LJAVA_LANG_DOUBLE);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_DOUBLE);
             code.invokestatic(valueOfRef);
         } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
             // Integer value - check if it fits in iconst/bipush/sipush range

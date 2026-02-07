@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.*;
@@ -26,8 +27,8 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,7 +135,7 @@ public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4j
         for (ISwc4jAstExpr expr : exprs) {
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
             if (exprType == null) {
-                exprType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                exprType = ConstantJavaType.LJAVA_LANG_OBJECT;
             }
             exprParamDescriptors.append(exprType);
         }
@@ -251,7 +252,7 @@ public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4j
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
             compiler.getExpressionProcessor().generate(code, classWriter, expr, null);
             if (exprType == null) {
-                exprType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                exprType = ConstantJavaType.LJAVA_LANG_OBJECT;
             }
             paramDescriptors.append(exprType);
         }
@@ -352,6 +353,6 @@ public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4j
             return compiler.getTypeResolver().mapTsTypeToDescriptor(returnTypeAnn.get().getTypeAnn());
         }
         // Default to String return type for tag functions
-        return TypeConversionUtils.LJAVA_LANG_STRING;
+        return ConstantJavaType.LJAVA_LANG_STRING;
     }
 }

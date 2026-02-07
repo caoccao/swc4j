@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
@@ -33,8 +34,10 @@ import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,12 +129,12 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
         }
 
         // Check for String type (String doesn't implement List or Map)
-        if (TypeConversionUtils.LJAVA_LANG_STRING.equals(typeDescriptor)) {
+        if (ConstantJavaType.LJAVA_LANG_STRING.equals(typeDescriptor)) {
             return IterationType.STRING;
         }
 
         // Check for array types (both primitive and object arrays)
-        if (typeDescriptor.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
+        if (typeDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
             return IterationType.ARRAY;
         }
 
@@ -159,13 +162,13 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
             }
 
             // Check assignability using the unified type hierarchy
-            if (typeInfo.isAssignableTo(TypeConversionUtils.LJAVA_UTIL_LIST)) {
+            if (typeInfo.isAssignableTo(ConstantJavaType.LJAVA_UTIL_LIST)) {
                 return IterationType.LIST;
             }
-            if (typeInfo.isAssignableTo(TypeConversionUtils.LJAVA_UTIL_SET)) {
+            if (typeInfo.isAssignableTo(ConstantJavaType.LJAVA_UTIL_SET)) {
                 return IterationType.SET;
             }
-            if (typeInfo.isAssignableTo(TypeConversionUtils.LJAVA_UTIL_MAP)) {
+            if (typeInfo.isAssignableTo(ConstantJavaType.LJAVA_UTIL_MAP)) {
                 return IterationType.MAP;
             }
         }
@@ -266,9 +269,9 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
             int listSlot,
             int restStartIndex) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
-        int listGetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
-        int listSizeRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
-        int listAddRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_ADD, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+        int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
+        int listSizeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
+        int listAddRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
 
         int currentIndex = 0;
         for (var optElem : arrayPat.getElems()) {
@@ -308,8 +311,8 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
                     }
 
                     // Create new ArrayList
-                    int arrayListClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_ARRAYLIST);
-                    int arrayListInitRef = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+                    int arrayListClass = cp.addClass(ConstantJavaType.JAVA_UTIL_ARRAYLIST);
+                    int arrayListInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
                     code.newInstance(arrayListClass);
                     code.dup();
                     code.invokespecial(arrayListInitRef);
@@ -318,12 +321,12 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
                     // Get source list size
                     code.aload(listSlot);
                     code.invokeinterface(listSizeRef, 1);
-                    int sizeSlot = context.getLocalVariableTable().allocateVariable("$restSize", TypeConversionUtils.ABBR_INTEGER);
+                    int sizeSlot = context.getLocalVariableTable().allocateVariable("$restSize", ConstantJavaType.ABBR_INTEGER);
                     code.istore(sizeSlot);
 
                     // Initialize loop counter at restStartIndex
                     code.iconst(restStartIndex);
-                    int iSlot = context.getLocalVariableTable().allocateVariable("$restI", TypeConversionUtils.ABBR_INTEGER);
+                    int iSlot = context.getLocalVariableTable().allocateVariable("$restI", ConstantJavaType.ABBR_INTEGER);
                     code.istore(iSlot);
 
                     // Loop to copy remaining elements
@@ -407,7 +410,7 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
 
         // Get array type descriptor
         String arrayTypeDescriptor = compiler.getTypeResolver().inferTypeFromExpr(forOfStmt.getRight());
-        if (arrayTypeDescriptor == null || !arrayTypeDescriptor.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
+        if (arrayTypeDescriptor == null || !arrayTypeDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), forOfStmt.getRight(),
                     "Cannot determine array type");
         }
@@ -428,7 +431,7 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
         code.arraylength();
 
         // 4. Store length in temporary variable
-        int lengthSlot = context.getLocalVariableTable().allocateVariable("$length", TypeConversionUtils.ABBR_INTEGER);
+        int lengthSlot = context.getLocalVariableTable().allocateVariable("$length", ConstantJavaType.ABBR_INTEGER);
         code.istore(lengthSlot);
 
         // 5. Store array in temporary variable
@@ -437,7 +440,7 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
 
         // 6. Initialize counter: i = 0
         code.iconst(0);
-        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", TypeConversionUtils.ABBR_INTEGER);
+        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", ConstantJavaType.ABBR_INTEGER);
         code.istore(counterSlot);
 
         // 7. Mark test label (loop entry point)
@@ -457,14 +460,14 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
 
         // Use type-specific array load instruction
         switch (elementTypeDescriptor) {
-            case TypeConversionUtils.ABBR_INTEGER -> code.iaload();  // int[]
-            case TypeConversionUtils.ABBR_DOUBLE -> code.daload();  // double[]
-            case TypeConversionUtils.ABBR_FLOAT -> code.faload();  // float[]
-            case TypeConversionUtils.ABBR_LONG -> code.laload();  // long[]
-            case TypeConversionUtils.ABBR_BYTE -> code.baload();  // byte[]
-            case TypeConversionUtils.ABBR_CHARACTER -> code.caload();  // char[]
-            case TypeConversionUtils.ABBR_SHORT -> code.saload();  // short[]
-            case TypeConversionUtils.ABBR_BOOLEAN -> code.baload();  // boolean[] (uses baload)
+            case ConstantJavaType.ABBR_INTEGER -> code.iaload();  // int[]
+            case ConstantJavaType.ABBR_DOUBLE -> code.daload();  // double[]
+            case ConstantJavaType.ABBR_FLOAT -> code.faload();  // float[]
+            case ConstantJavaType.ABBR_LONG -> code.laload();  // long[]
+            case ConstantJavaType.ABBR_BYTE -> code.baload();  // byte[]
+            case ConstantJavaType.ABBR_CHARACTER -> code.caload();  // char[]
+            case ConstantJavaType.ABBR_SHORT -> code.saload();  // short[]
+            case ConstantJavaType.ABBR_BOOLEAN -> code.baload();  // boolean[] (uses baload)
             default -> {
                 // Object arrays
                 code.aaload();
@@ -479,12 +482,12 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
 
         // 11. Store in loop variable
         switch (elementTypeDescriptor) {
-            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BYTE, TypeConversionUtils.ABBR_CHARACTER,
-                 TypeConversionUtils.ABBR_SHORT, TypeConversionUtils.ABBR_BOOLEAN ->
+            case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BYTE, ConstantJavaType.ABBR_CHARACTER,
+                 ConstantJavaType.ABBR_SHORT, ConstantJavaType.ABBR_BOOLEAN ->
                     code.istore(elementSlot);  // int, byte, char, short, boolean
-            case TypeConversionUtils.ABBR_DOUBLE -> code.dstore(elementSlot);  // double
-            case TypeConversionUtils.ABBR_FLOAT -> code.fstore(elementSlot);  // float
-            case TypeConversionUtils.ABBR_LONG -> code.lstore(elementSlot);  // long
+            case ConstantJavaType.ABBR_DOUBLE -> code.dstore(elementSlot);  // double
+            case ConstantJavaType.ABBR_FLOAT -> code.fstore(elementSlot);  // float
+            case ConstantJavaType.ABBR_LONG -> code.lstore(elementSlot);  // long
             default -> code.astore(elementSlot);  // Object references
         }
 
@@ -581,18 +584,18 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
         int valueSlot = -1;
         if (!hasObjectDestructuring && !hasArrayDestructuring) {
             // Initialize loop variable with Object type (for-of values are objects)
-            valueSlot = initializeLoopVariable(code, forOfStmt.getLeft(), TypeConversionUtils.LJAVA_LANG_OBJECT);
+            valueSlot = initializeLoopVariable(code, forOfStmt.getLeft(), ConstantJavaType.LJAVA_LANG_OBJECT);
         }
 
         // 1. Generate right expression (iterable)
         compiler.getExpressionProcessor().generate(code, classWriter, forOfStmt.getRight(), null);
 
         // 2. Get iterator: Iterable.iterator() -> Iterator
-        int iteratorRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_LANG_ITERABLE, TypeConversionUtils.METHOD_ITERATOR, TypeConversionUtils.DESCRIPTOR___LJAVA_UTIL_ITERATOR);
+        int iteratorRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_LANG_ITERABLE, ConstantJavaMethod.METHOD_ITERATOR, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_UTIL_ITERATOR);
         code.invokeinterface(iteratorRef, 1);
 
         // 3. Store iterator in temporary variable
-        int iteratorSlot = context.getLocalVariableTable().allocateVariable("$iterator", TypeConversionUtils.LJAVA_UTIL_ITERATOR);
+        int iteratorSlot = context.getLocalVariableTable().allocateVariable("$iterator", ConstantJavaType.LJAVA_UTIL_ITERATOR);
         code.astore(iteratorSlot);
 
         // 4. Mark test label (loop entry point)
@@ -600,7 +603,7 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
 
         // 5. Test hasNext: Iterator.hasNext() -> boolean
         code.aload(iteratorSlot);
-        int hasNextRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_ITERATOR, TypeConversionUtils.METHOD_HAS_NEXT, TypeConversionUtils.DESCRIPTER___Z);
+        int hasNextRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_ITERATOR, ConstantJavaMethod.METHOD_HAS_NEXT, ConstantJavaDescriptor.DESCRIPTOR___Z);
         code.invokeinterface(hasNextRef, 1);
 
         // 6. Jump to end if no more elements
@@ -609,15 +612,15 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
 
         // 7. Get next value: Iterator.next() -> Object
         code.aload(iteratorSlot);
-        int nextRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_ITERATOR, TypeConversionUtils.METHOD_NEXT, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_OBJECT);
+        int nextRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_ITERATOR, ConstantJavaMethod.METHOD_NEXT, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
         code.invokeinterface(nextRef, 1);
 
         if (hasObjectDestructuring) {
             // 8a. Handle object destructuring - element is a Map
             // Cast to Map and store temporarily
-            int mapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_MAP);
+            int mapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_MAP);
             code.checkcast(mapClass);
-            tempElementSlot = context.getLocalVariableTable().allocateVariable("$element", TypeConversionUtils.LJAVA_UTIL_MAP);
+            tempElementSlot = context.getLocalVariableTable().allocateVariable("$element", ConstantJavaType.LJAVA_UTIL_MAP);
             code.astore(tempElementSlot);
 
             // Extract each property from the map
@@ -625,9 +628,9 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
         } else if (hasArrayDestructuring) {
             // 8b. Handle array destructuring - element is a List
             // Cast to List and store temporarily
-            int listClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LIST);
+            int listClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LIST);
             code.checkcast(listClass);
-            tempElementSlot = context.getLocalVariableTable().allocateVariable("$element", TypeConversionUtils.LJAVA_UTIL_LIST);
+            tempElementSlot = context.getLocalVariableTable().allocateVariable("$element", ConstantJavaType.LJAVA_UTIL_LIST);
             code.astore(tempElementSlot);
 
             // Extract each element from the list
@@ -714,15 +717,15 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
                 // Allocate variables for key and value
                 if (!elems.isEmpty() && elems.get(0) instanceof Swc4jAstBindingIdent keyIdent) {
                     String keyName = keyIdent.getId().getSym();
-                    keySlot = context.getLocalVariableTable().allocateVariable(keyName, TypeConversionUtils.LJAVA_LANG_OBJECT);
-                    context.getInferredTypes().put(keyName, TypeConversionUtils.LJAVA_LANG_OBJECT);
+                    keySlot = context.getLocalVariableTable().allocateVariable(keyName, ConstantJavaType.LJAVA_LANG_OBJECT);
+                    context.getInferredTypes().put(keyName, ConstantJavaType.LJAVA_LANG_OBJECT);
                     code.aconst_null();
                     code.astore(keySlot);
                 }
                 if (elems.size() > 1 && elems.get(1) instanceof Swc4jAstBindingIdent valueIdent) {
                     String valueName = valueIdent.getId().getSym();
-                    valueSlot = context.getLocalVariableTable().allocateVariable(valueName, TypeConversionUtils.LJAVA_LANG_OBJECT);
-                    context.getInferredTypes().put(valueName, TypeConversionUtils.LJAVA_LANG_OBJECT);
+                    valueSlot = context.getLocalVariableTable().allocateVariable(valueName, ConstantJavaType.LJAVA_LANG_OBJECT);
+                    context.getInferredTypes().put(valueName, ConstantJavaType.LJAVA_LANG_OBJECT);
                     code.aconst_null();
                     code.astore(valueSlot);
                 }
@@ -731,22 +734,22 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
 
         // If no destructuring, just use a single variable for the entry
         if (!hasDestructuring) {
-            entrySlot = initializeLoopVariable(code, left, TypeConversionUtils.LJAVA_UTIL_MAP_ENTRY);
+            entrySlot = initializeLoopVariable(code, left, ConstantJavaType.LJAVA_UTIL_MAP_ENTRY);
         }
 
         // 1. Generate right expression (map)
         compiler.getExpressionProcessor().generate(code, classWriter, forOfStmt.getRight(), null);
 
         // 2. Get entrySet: Map.entrySet() -> Set<Entry>
-        int entrySetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_ENTRY_SET, TypeConversionUtils.DESCRIPTOR___LJAVA_UTIL_SET);
+        int entrySetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_ENTRY_SET, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_UTIL_SET);
         code.invokeinterface(entrySetRef, 1);
 
         // 3. Get iterator: Set.iterator() -> Iterator
-        int iteratorRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_SET, TypeConversionUtils.METHOD_ITERATOR, TypeConversionUtils.DESCRIPTOR___LJAVA_UTIL_ITERATOR);
+        int iteratorRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_SET, ConstantJavaMethod.METHOD_ITERATOR, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_UTIL_ITERATOR);
         code.invokeinterface(iteratorRef, 1);
 
         // 4. Store iterator in temporary variable
-        int iteratorSlot = context.getLocalVariableTable().allocateVariable("$iterator", TypeConversionUtils.LJAVA_UTIL_ITERATOR);
+        int iteratorSlot = context.getLocalVariableTable().allocateVariable("$iterator", ConstantJavaType.LJAVA_UTIL_ITERATOR);
         code.astore(iteratorSlot);
 
         // 5. Mark test label (loop entry point)
@@ -754,7 +757,7 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
 
         // 6. Test hasNext: Iterator.hasNext() -> boolean
         code.aload(iteratorSlot);
-        int hasNextRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_ITERATOR, TypeConversionUtils.METHOD_HAS_NEXT, TypeConversionUtils.DESCRIPTER___Z);
+        int hasNextRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_ITERATOR, ConstantJavaMethod.METHOD_HAS_NEXT, ConstantJavaDescriptor.DESCRIPTOR___Z);
         code.invokeinterface(hasNextRef, 1);
 
         // 7. Jump to end if no more elements
@@ -763,22 +766,22 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
 
         // 8. Get next entry: Iterator.next() -> Object
         code.aload(iteratorSlot);
-        int nextRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_ITERATOR, TypeConversionUtils.METHOD_NEXT, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_OBJECT);
+        int nextRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_ITERATOR, ConstantJavaMethod.METHOD_NEXT, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
         code.invokeinterface(nextRef, 1);
 
         // 9. Cast to Map.Entry
-        int entryClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_MAP_ENTRY);
+        int entryClass = cp.addClass(ConstantJavaType.JAVA_UTIL_MAP_ENTRY);
         code.checkcast(entryClass);
 
         if (hasDestructuring) {
             // 10a. Store entry temporarily
-            int tempEntrySlot = context.getLocalVariableTable().allocateVariable("$entry", TypeConversionUtils.LJAVA_UTIL_MAP_ENTRY);
+            int tempEntrySlot = context.getLocalVariableTable().allocateVariable("$entry", ConstantJavaType.LJAVA_UTIL_MAP_ENTRY);
             code.astore(tempEntrySlot);
 
             // 11a. Extract key: entry.getKey()
             if (keySlot >= 0) {
                 code.aload(tempEntrySlot);
-                int getKeyRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP_ENTRY, TypeConversionUtils.METHOD_GET_KEY, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_OBJECT);
+                int getKeyRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP_ENTRY, ConstantJavaMethod.METHOD_GET_KEY, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
                 code.invokeinterface(getKeyRef, 1);
                 code.astore(keySlot);
             }
@@ -786,7 +789,7 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
             // 12a. Extract value: entry.getValue()
             if (valueSlot >= 0) {
                 code.aload(tempEntrySlot);
-                int getValueRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP_ENTRY, TypeConversionUtils.METHOD_GET_VALUE, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_OBJECT);
+                int getValueRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP_ENTRY, ConstantJavaMethod.METHOD_GET_VALUE, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
                 code.invokeinterface(getValueRef, 1);
                 code.astore(valueSlot);
             }
@@ -860,7 +863,7 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
             int mapSlot,
             List<String> extractedKeys) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
-        int mapGetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
 
         for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
             if (prop instanceof Swc4jAstAssignPatProp assignProp) {
@@ -937,18 +940,18 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
 
                     // Create new LinkedHashMap as copy of source map
                     // new LinkedHashMap(sourceMap)
-                    int linkedHashMapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP);
+                    int linkedHashMapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP);
                     code.newInstance(linkedHashMapClass);
                     code.dup();
                     code.aload(mapSlot);
-                    int linkedHashMapInitRef = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR_LJAVA_UTIL_MAP__V);
+                    int linkedHashMapInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_UTIL_MAP__V);
                     code.invokespecial(linkedHashMapInitRef);
 
                     // Store the copy
                     code.astore(variable.index());
 
                     // Remove all extracted keys from the rest map
-                    int mapRemoveRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_REMOVE, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                    int mapRemoveRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                     for (String key : extractedKeys) {
                         code.aload(variable.index());
                         int keyStringIndex = cp.addString(key);
@@ -981,7 +984,7 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         // Initialize loop variable with String type (for-of over string returns chars as strings)
-        int charSlot = initializeLoopVariable(code, forOfStmt.getLeft(), TypeConversionUtils.LJAVA_LANG_STRING);
+        int charSlot = initializeLoopVariable(code, forOfStmt.getLeft(), ConstantJavaType.LJAVA_LANG_STRING);
 
         // 1. Generate right expression (string)
         compiler.getExpressionProcessor().generate(code, classWriter, forOfStmt.getRight(), null);
@@ -990,20 +993,20 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
         code.dup();
 
         // 3. Get length: String.length() -> int
-        int lengthRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_LENGTH, TypeConversionUtils.DESCRIPTER___I);
+        int lengthRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LENGTH, ConstantJavaDescriptor.DESCRIPTOR___I);
         code.invokevirtual(lengthRef);
 
         // 4. Store length in temporary variable
-        int lengthSlot = context.getLocalVariableTable().allocateVariable("$length", TypeConversionUtils.ABBR_INTEGER);
+        int lengthSlot = context.getLocalVariableTable().allocateVariable("$length", ConstantJavaType.ABBR_INTEGER);
         code.istore(lengthSlot);
 
         // 5. Store string in temporary variable
-        int stringSlot = context.getLocalVariableTable().allocateVariable("$string", TypeConversionUtils.LJAVA_LANG_STRING);
+        int stringSlot = context.getLocalVariableTable().allocateVariable("$string", ConstantJavaType.LJAVA_LANG_STRING);
         code.astore(stringSlot);
 
         // 6. Initialize counter: i = 0
         code.iconst(0);
-        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", TypeConversionUtils.ABBR_INTEGER);
+        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", ConstantJavaType.ABBR_INTEGER);
         code.istore(counterSlot);
 
         // 7. Mark test label (loop entry point)
@@ -1020,11 +1023,11 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
         // 10. Get character at index: str.charAt(i)
         code.aload(stringSlot);
         code.iload(counterSlot);
-        int charAtRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, "charAt", TypeConversionUtils.DESCRIPTOR_I__C);
+        int charAtRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "charAt", ConstantJavaDescriptor.DESCRIPTOR_I__C);
         code.invokevirtual(charAtRef);
 
         // 11. Convert char to String: String.valueOf(char)
-        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTOR_C__LJAVA_LANG_STRING);
+        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_STRING);
         code.invokestatic(valueOfRef);
 
         // 12. Store in loop variable (as String)
@@ -1105,8 +1108,8 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
             if (elem instanceof Swc4jAstBindingIdent bindingIdent) {
                 // Simple element: [a]
                 String varName = bindingIdent.getId().getSym();
-                int slot = context.getLocalVariableTable().allocateVariable(varName, TypeConversionUtils.LJAVA_LANG_OBJECT);
-                context.getInferredTypes().put(varName, TypeConversionUtils.LJAVA_LANG_OBJECT);
+                int slot = context.getLocalVariableTable().allocateVariable(varName, ConstantJavaType.LJAVA_LANG_OBJECT);
+                context.getInferredTypes().put(varName, ConstantJavaType.LJAVA_LANG_OBJECT);
                 code.aconst_null();
                 code.astore(slot);
                 restStartIndex++;
@@ -1117,8 +1120,8 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
                 if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
                     String varName = bindingIdent.getId().getSym();
                     // Rest creates a new ArrayList
-                    int slot = context.getLocalVariableTable().allocateVariable(varName, TypeConversionUtils.LJAVA_UTIL_ARRAYLIST);
-                    context.getInferredTypes().put(varName, TypeConversionUtils.LJAVA_UTIL_ARRAYLIST);
+                    int slot = context.getLocalVariableTable().allocateVariable(varName, ConstantJavaType.LJAVA_UTIL_ARRAYLIST);
+                    context.getInferredTypes().put(varName, ConstantJavaType.LJAVA_UTIL_ARRAYLIST);
                     code.aconst_null();
                     code.astore(slot);
                     // Don't increment restStartIndex - rest doesn't count
@@ -1162,21 +1165,21 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
                 context.getInferredTypes().put(varName, defaultType);
                 // Initialize with appropriate zero value based on type
                 switch (defaultType) {
-                    case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BYTE,
-                         TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_SHORT,
-                         TypeConversionUtils.ABBR_BOOLEAN -> {
+                    case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BYTE,
+                         ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_SHORT,
+                         ConstantJavaType.ABBR_BOOLEAN -> {
                         code.iconst(0);
                         code.istore(slot);
                     }
-                    case TypeConversionUtils.ABBR_LONG -> {
+                    case ConstantJavaType.ABBR_LONG -> {
                         code.lconst(0);
                         code.lstore(slot);
                     }
-                    case TypeConversionUtils.ABBR_FLOAT -> {
+                    case ConstantJavaType.ABBR_FLOAT -> {
                         code.fconst(0);
                         code.fstore(slot);
                     }
-                    case TypeConversionUtils.ABBR_DOUBLE -> {
+                    case ConstantJavaType.ABBR_DOUBLE -> {
                         code.dconst(0);
                         code.dstore(slot);
                     }
@@ -1226,8 +1229,8 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
                 // Shorthand property: { name }
                 String varName = assignProp.getKey().getId().getSym();
                 extractedKeys.add(varName);
-                int slot = context.getLocalVariableTable().allocateVariable(varName, TypeConversionUtils.LJAVA_LANG_OBJECT);
-                context.getInferredTypes().put(varName, TypeConversionUtils.LJAVA_LANG_OBJECT);
+                int slot = context.getLocalVariableTable().allocateVariable(varName, ConstantJavaType.LJAVA_LANG_OBJECT);
+                context.getInferredTypes().put(varName, ConstantJavaType.LJAVA_LANG_OBJECT);
                 code.aconst_null();
                 code.astore(slot);
 
@@ -1239,8 +1242,8 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
                 ISwc4jAstPat valuePat = keyValueProp.getValue();
                 if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
                     String varName = bindingIdent.getId().getSym();
-                    int slot = context.getLocalVariableTable().allocateVariable(varName, TypeConversionUtils.LJAVA_LANG_OBJECT);
-                    context.getInferredTypes().put(varName, TypeConversionUtils.LJAVA_LANG_OBJECT);
+                    int slot = context.getLocalVariableTable().allocateVariable(varName, ConstantJavaType.LJAVA_LANG_OBJECT);
+                    context.getInferredTypes().put(varName, ConstantJavaType.LJAVA_LANG_OBJECT);
                     code.aconst_null();
                     code.astore(slot);
                 } else {
@@ -1254,8 +1257,8 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
                 if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
                     String varName = bindingIdent.getId().getSym();
                     // Rest creates a new LinkedHashMap
-                    int slot = context.getLocalVariableTable().allocateVariable(varName, TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP);
-                    context.getInferredTypes().put(varName, TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP);
+                    int slot = context.getLocalVariableTable().allocateVariable(varName, ConstantJavaType.LJAVA_UTIL_LINKEDHASHMAP);
+                    context.getInferredTypes().put(varName, ConstantJavaType.LJAVA_UTIL_LINKEDHASHMAP);
                     code.aconst_null();
                     code.astore(slot);
                 } else {

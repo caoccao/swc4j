@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
@@ -30,9 +31,10 @@ import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
-import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
-import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
  * The type Variable analyzer.
@@ -191,7 +193,7 @@ public final class VariableAnalyzer {
                     ISwc4jAstPat param = catchClause.getParam().get();
                     if (param instanceof Swc4jAstBindingIdent bindingIdent) {
                         String varName = bindingIdent.getId().getSym();
-                        String varType = TypeConversionUtils.LJAVA_LANG_THROWABLE;
+                        String varType = ConstantJavaType.LJAVA_LANG_THROWABLE;
                         if (bindingIdent.getTypeAnn().isPresent()) {
                             var typeAnn = bindingIdent.getTypeAnn().get();
                             varType = compiler.getTypeResolver().mapTsTypeToDescriptor(typeAnn.getTypeAnn());
@@ -246,7 +248,7 @@ public final class VariableAnalyzer {
                     context.getGenericTypeInfoMap().put(varName, genericTypeInfo);
                 }
 
-                if (declarator.getInit().isPresent() && TypeConversionUtils.LJAVA_UTIL_ARRAYLIST.equals(varType)) {
+                if (declarator.getInit().isPresent() && ConstantJavaType.LJAVA_UTIL_ARRAYLIST.equals(varType)) {
                     var initExpr = declarator.getInit().get().unParenExpr();
                     if (initExpr instanceof Swc4jAstArrayLit arrayLit) {
                         String elementType = compiler.getTypeResolver().inferArrayElementType(arrayLit);

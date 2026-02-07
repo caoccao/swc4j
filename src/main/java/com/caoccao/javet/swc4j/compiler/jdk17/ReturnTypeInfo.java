@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -58,26 +60,26 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor, G
         }
         if (type.length() == 1) {
             return switch (type) {
-                case TypeConversionUtils.ABBR_INTEGER -> new ReturnTypeInfo(ReturnType.INT, 1, null, genericTypeInfo);
-                case TypeConversionUtils.ABBR_BOOLEAN ->
+                case ConstantJavaType.ABBR_INTEGER -> new ReturnTypeInfo(ReturnType.INT, 1, null, genericTypeInfo);
+                case ConstantJavaType.ABBR_BOOLEAN ->
                         new ReturnTypeInfo(ReturnType.BOOLEAN, 1, null, genericTypeInfo);
-                case TypeConversionUtils.ABBR_BYTE -> new ReturnTypeInfo(ReturnType.BYTE, 1, null, genericTypeInfo);
-                case TypeConversionUtils.ABBR_CHARACTER ->
+                case ConstantJavaType.ABBR_BYTE -> new ReturnTypeInfo(ReturnType.BYTE, 1, null, genericTypeInfo);
+                case ConstantJavaType.ABBR_CHARACTER ->
                         new ReturnTypeInfo(ReturnType.CHAR, 1, null, genericTypeInfo);
-                case TypeConversionUtils.ABBR_SHORT -> new ReturnTypeInfo(ReturnType.SHORT, 1, null, genericTypeInfo);
-                case TypeConversionUtils.ABBR_LONG -> new ReturnTypeInfo(ReturnType.LONG, 2, null, genericTypeInfo);
-                case TypeConversionUtils.ABBR_FLOAT -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null, genericTypeInfo);
-                case TypeConversionUtils.ABBR_DOUBLE -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null, genericTypeInfo);
-                case TypeConversionUtils.ABBR_VOID -> new ReturnTypeInfo(ReturnType.VOID, 0, null, genericTypeInfo);
+                case ConstantJavaType.ABBR_SHORT -> new ReturnTypeInfo(ReturnType.SHORT, 1, null, genericTypeInfo);
+                case ConstantJavaType.ABBR_LONG -> new ReturnTypeInfo(ReturnType.LONG, 2, null, genericTypeInfo);
+                case ConstantJavaType.ABBR_FLOAT -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null, genericTypeInfo);
+                case ConstantJavaType.ABBR_DOUBLE -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null, genericTypeInfo);
+                case ConstantJavaType.ABBR_VOID -> new ReturnTypeInfo(ReturnType.VOID, 0, null, genericTypeInfo);
                 default ->
                         throw new Swc4jByteCodeCompilerException(sourceCode, ast, "Unsupported primitive type: " + type);
             };
         }
-        if (type.equals(TypeConversionUtils.LJAVA_LANG_STRING)) {
+        if (type.equals(ConstantJavaType.LJAVA_LANG_STRING)) {
             return new ReturnTypeInfo(ReturnType.STRING, 1, type, genericTypeInfo);
         }
         // Handle array types (primitive arrays like [I or reference arrays like [Ljava/lang/String;)
-        if (type.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
+        if (type.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
             return new ReturnTypeInfo(ReturnType.OBJECT, 1, type, genericTypeInfo);
         }
         // Handle regular reference types
@@ -85,24 +87,5 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor, G
             return new ReturnTypeInfo(ReturnType.OBJECT, 1, type, genericTypeInfo);
         }
         throw new Swc4jByteCodeCompilerException(sourceCode, ast, "Unsupported object type: " + type);
-    }
-
-    /**
-     * Gets primitive type descriptor.
-     *
-     * @return the primitive type descriptor
-     */
-    public String getPrimitiveTypeDescriptor() {
-        return switch (type) {
-            case INT -> TypeConversionUtils.ABBR_INTEGER;
-            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
-            case BYTE -> TypeConversionUtils.ABBR_BYTE;
-            case CHAR -> TypeConversionUtils.ABBR_CHARACTER;
-            case SHORT -> TypeConversionUtils.ABBR_SHORT;
-            case LONG -> TypeConversionUtils.ABBR_LONG;
-            case FLOAT -> TypeConversionUtils.ABBR_FLOAT;
-            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
-            default -> null; // For VOID, STRING, OBJECT, return null to skip conversion
-        };
     }
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
@@ -26,9 +27,10 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 /**
  * Processes call expressions for Array static methods.
  */
@@ -125,9 +127,9 @@ public final class CallExpressionForArrayStaticProcessor extends BaseAstProcesso
             ClassWriter classWriter,
             Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
-        int arrayListClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_ARRAYLIST);
-        int arrayListInit = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INIT, "()V");
-        int arrayListAdd = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_ADD, "(Ljava/lang/Object;)Z");
+        int arrayListClass = cp.addClass(ConstantJavaType.JAVA_UTIL_ARRAYLIST);
+        int arrayListInit = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, "()V");
+        int arrayListAdd = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_ADD, "(Ljava/lang/Object;)Z");
 
         code.newInstance(arrayListClass);
         code.dup();

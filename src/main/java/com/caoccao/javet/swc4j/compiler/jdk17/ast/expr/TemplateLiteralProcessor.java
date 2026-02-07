@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstTpl;
@@ -25,8 +26,10 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.List;
 
 /**
@@ -76,10 +79,10 @@ public final class TemplateLiteralProcessor extends BaseAstProcessor<Swc4jAstTpl
 
         // General case: use StringBuilder for concatenation
         // new StringBuilder()
-        int sbClass = cp.addClass(TypeConversionUtils.JAVA_LANG_STRINGBUILDER);
+        int sbClass = cp.addClass(ConstantJavaType.JAVA_LANG_STRINGBUILDER);
         code.newInstance(sbClass);
         code.dup();
-        int sbInit = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+        int sbInit = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
         code.invokespecial(sbInit);
 
         // Append all quasis and expressions
@@ -91,7 +94,7 @@ public final class TemplateLiteralProcessor extends BaseAstProcessor<Swc4jAstTpl
             if (!quasiValue.isEmpty()) {
                 int quasiRef = cp.addString(quasiValue);
                 code.ldc(quasiRef);
-                int appendString = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
+                int appendString = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
                 code.invokevirtual(appendString);
             }
 
@@ -112,17 +115,17 @@ public final class TemplateLiteralProcessor extends BaseAstProcessor<Swc4jAstTpl
                 }
 
                 // Convert to String using String.valueOf(Object)
-                int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
+                int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
                 code.invokestatic(valueOfRef);
 
                 // Append the String
-                int appendString = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_APPEND, "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
+                int appendString = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
                 code.invokevirtual(appendString);
             }
         }
 
         // Call toString() to get the final String
-        int toStringRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRINGBUILDER, TypeConversionUtils.METHOD_TO_STRING, TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
+        int toStringRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_TO_STRING, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
         code.invokevirtual(toStringRef);
     }
 }

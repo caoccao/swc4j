@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
@@ -23,9 +24,11 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 /**
  * Processor for boolean literal expressions in bytecode compilation.
  */
@@ -58,10 +61,10 @@ public final class BoolLiteralProcessor extends BaseAstProcessor<Swc4jAstBool> {
         boolean value = bool.isValue();
         // Check if we need to box to Boolean
         if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && TypeConversionUtils.LJAVA_LANG_BOOLEAN.equals(returnTypeInfo.descriptor())) {
+                && ConstantJavaType.LJAVA_LANG_BOOLEAN.equals(returnTypeInfo.descriptor())) {
             // Box boolean to Boolean
             code.iconst(value ? 1 : 0);
-            int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_BOOLEAN, TypeConversionUtils.METHOD_VALUE_OF, TypeConversionUtils.DESCRIPTER_Z__LJAVA_LANG_BOOLEAN);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_Z__LJAVA_LANG_BOOLEAN);
             code.invokestatic(valueOfRef);
         } else {
             // Primitive boolean

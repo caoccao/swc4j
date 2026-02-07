@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
@@ -24,9 +25,11 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 /**
  * Processes call expressions for String instance methods.
  */
@@ -61,11 +64,11 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 case "charAt" -> generateCharAt(code, classWriter, callExpr);
                 case "charCodeAt" -> generateCharCodeAt(code, classWriter, callExpr);
                 case "codePointAt" -> generateCodePointAt(code, classWriter, callExpr);
-                case TypeConversionUtils.METHOD_CONCAT -> generateConcat(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_CONCAT -> generateConcat(code, classWriter, callExpr);
                 case "endsWith" -> generateEndsWith(code, classWriter, callExpr);
                 case "includes" -> generateIncludes(code, classWriter, callExpr);
-                case TypeConversionUtils.METHOD_INDEX_OF -> generateIndexOf(code, classWriter, callExpr);
-                case TypeConversionUtils.METHOD_LAST_INDEX_OF -> generateLastIndexOf(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_INDEX_OF -> generateIndexOf(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_LAST_INDEX_OF -> generateLastIndexOf(code, classWriter, callExpr);
                 case "match" -> generateMatch(code, classWriter, callExpr);
                 case "matchAll" -> generateMatchAll(code, classWriter, callExpr);
                 case "padEnd" -> generatePadEnd(code, classWriter, callExpr);
@@ -100,8 +103,8 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             // Unbox if Integer wrapper
             String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
-            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(indexType)) {
-                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(indexType)) {
+                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -128,8 +131,8 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             compiler.getExpressionProcessor().generate(code, classWriter, indexArg.getExpr(), null);
 
             String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
-            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(indexType)) {
-                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(indexType)) {
+                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -151,13 +154,13 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             compiler.getExpressionProcessor().generate(code, classWriter, indexArg.getExpr(), null);
 
             String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
-            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(indexType)) {
-                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(indexType)) {
+                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                 code.invokevirtual(intValueMethod);
             }
 
             // Call String.codePointAt(int) -> int
-            int codePointAtMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, "codePointAt", TypeConversionUtils.DESCRIPTOR_I__I);
+            int codePointAtMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "codePointAt", ConstantJavaDescriptor.DESCRIPTOR_I__I);
             code.invokevirtual(codePointAtMethod);
         }
     }
@@ -171,7 +174,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             var cp = classWriter.getConstantPool();
             for (var arg : callExpr.getArgs()) {
                 compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
-                int concatMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_CONCAT, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
+                int concatMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_CONCAT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
                 code.invokevirtual(concatMethod);
                 // Stack now has result, which becomes receiver for next concat
             }
@@ -188,7 +191,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             compiler.getExpressionProcessor().generate(code, classWriter, searchArg.getExpr(), null);
 
             var cp = classWriter.getConstantPool();
-            int endsWithMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, "endsWith", "(Ljava/lang/String;)Z");
+            int endsWithMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "endsWith", "(Ljava/lang/String;)Z");
             code.invokevirtual(endsWithMethod);
         }
     }
@@ -203,7 +206,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             compiler.getExpressionProcessor().generate(code, classWriter, searchArg.getExpr(), null);
 
             var cp = classWriter.getConstantPool();
-            int containsMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, "contains", "(Ljava/lang/CharSequence;)Z");
+            int containsMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "contains", "(Ljava/lang/CharSequence;)Z");
             code.invokevirtual(containsMethod);
         }
     }
@@ -227,17 +230,17 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
                 // Unbox if Integer
                 String fromIndexType = compiler.getTypeResolver().inferTypeFromExpr(fromIndexArg.getExpr());
-                if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(fromIndexType)) {
-                    int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(fromIndexType)) {
+                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                     code.invokevirtual(intValueMethod);
                 }
 
                 // Call indexOf(String, int)
-                int indexOfMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_INDEX_OF, "(Ljava/lang/String;I)I");
+                int indexOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_INDEX_OF, "(Ljava/lang/String;I)I");
                 code.invokevirtual(indexOfMethod);
             } else {
                 // Call indexOf(String)
-                int indexOfMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_INDEX_OF, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__I);
+                int indexOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_INDEX_OF, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__I);
                 code.invokevirtual(indexOfMethod);
             }
         }
@@ -259,15 +262,15 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, fromIndexArg.getExpr(), null);
 
                 String fromIndexType = compiler.getTypeResolver().inferTypeFromExpr(fromIndexArg.getExpr());
-                if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(fromIndexType)) {
-                    int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(fromIndexType)) {
+                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                     code.invokevirtual(intValueMethod);
                 }
 
-                int lastIndexOfMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_LAST_INDEX_OF, "(Ljava/lang/String;I)I");
+                int lastIndexOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LAST_INDEX_OF, "(Ljava/lang/String;I)I");
                 code.invokevirtual(lastIndexOfMethod);
             } else {
-                int lastIndexOfMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_LAST_INDEX_OF, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__I);
+                int lastIndexOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LAST_INDEX_OF, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__I);
                 code.invokevirtual(lastIndexOfMethod);
             }
         }
@@ -296,8 +299,8 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
         if (callExpr.getArgs().isEmpty()) {
             // No pattern - return empty ArrayList
             code.pop();
-            int arrayListClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_ARRAYLIST);
-            int arrayListInit = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+            int arrayListClass = cp.addClass(ConstantJavaType.JAVA_UTIL_ARRAYLIST);
+            int arrayListInit = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
             code.newInstance(arrayListClass);
             code.dup();
             code.invokespecial(arrayListInit);
@@ -321,8 +324,8 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             var cp = classWriter.getConstantPool();
             String lengthType = compiler.getTypeResolver().inferTypeFromExpr(targetLengthArg.getExpr());
-            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(lengthType)) {
-                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(lengthType)) {
+                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -355,8 +358,8 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             var cp = classWriter.getConstantPool();
             String lengthType = compiler.getTypeResolver().inferTypeFromExpr(targetLengthArg.getExpr());
-            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(lengthType)) {
-                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(lengthType)) {
+                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -393,13 +396,13 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             // Unbox if Integer
             String countType = compiler.getTypeResolver().inferTypeFromExpr(countArg.getExpr());
-            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(countType)) {
-                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(countType)) {
+                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                 code.invokevirtual(intValueMethod);
             }
 
             // Call String.repeat(int) - Available in JDK 11+
-            int repeatMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, "repeat", TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_STRING);
+            int repeatMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "repeat", ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_STRING);
             code.invokevirtual(repeatMethod);
         }
     }
@@ -435,7 +438,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             compiler.getExpressionProcessor().generate(code, classWriter, replacementArg.getExpr(), null);
 
             var cp = classWriter.getConstantPool();
-            int replaceMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, "replace", "(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Ljava/lang/String;");
+            int replaceMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "replace", "(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Ljava/lang/String;");
             code.invokevirtual(replaceMethod);
         }
     }
@@ -467,8 +470,8 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             var cp = classWriter.getConstantPool();
-            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
+                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -478,8 +481,8 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, endArg.getExpr(), null);
 
                 String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-                if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(endType)) {
-                    int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(endType)) {
+                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                     code.invokevirtual(intValueMethod);
                 }
 
@@ -514,8 +517,8 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, limitArg.getExpr(), null);
 
                 String limitType = compiler.getTypeResolver().inferTypeFromExpr(limitArg.getExpr());
-                if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(limitType)) {
-                    int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(limitType)) {
+                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                     code.invokevirtual(intValueMethod);
                 }
 
@@ -547,15 +550,15 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, posArg.getExpr(), null);
 
                 String posType = compiler.getTypeResolver().inferTypeFromExpr(posArg.getExpr());
-                if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(posType)) {
-                    int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(posType)) {
+                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                     code.invokevirtual(intValueMethod);
                 }
 
-                int startsWithMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, "startsWith", "(Ljava/lang/String;I)Z");
+                int startsWithMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "startsWith", "(Ljava/lang/String;I)Z");
                 code.invokevirtual(startsWithMethod);
             } else {
-                int startsWithMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, "startsWith", "(Ljava/lang/String;)Z");
+                int startsWithMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "startsWith", "(Ljava/lang/String;)Z");
                 code.invokevirtual(startsWithMethod);
             }
         }
@@ -572,8 +575,8 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             var cp = classWriter.getConstantPool();
-            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
+                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -583,8 +586,8 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, lengthArg.getExpr(), null);
 
                 String lengthType = compiler.getTypeResolver().inferTypeFromExpr(lengthArg.getExpr());
-                if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(lengthType)) {
-                    int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(lengthType)) {
+                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                     code.invokevirtual(intValueMethod);
                 }
 
@@ -611,8 +614,8 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             var cp = classWriter.getConstantPool();
-            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
+                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                 code.invokevirtual(intValueMethod);
             }
 
@@ -622,8 +625,8 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, endArg.getExpr(), null);
 
                 String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-                if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(endType)) {
-                    int intValueMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_INT_VALUE, TypeConversionUtils.DESCRIPTER___I);
+                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(endType)) {
+                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
                     code.invokevirtual(intValueMethod);
                 }
 
@@ -658,21 +661,21 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
     private void generateToLowerCase(CodeBuilder code, ClassWriter classWriter) {
         // str.toLowerCase()
         var cp = classWriter.getConstantPool();
-        int toLowerMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, "toLowerCase", TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
+        int toLowerMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "toLowerCase", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
         code.invokevirtual(toLowerMethod);
     }
 
     private void generateToUpperCase(CodeBuilder code, ClassWriter classWriter) {
         // str.toUpperCase()
         var cp = classWriter.getConstantPool();
-        int toUpperMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, "toUpperCase", TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
+        int toUpperMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "toUpperCase", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
         code.invokevirtual(toUpperMethod);
     }
 
     private void generateTrim(CodeBuilder code, ClassWriter classWriter) {
         // str.trim()
         var cp = classWriter.getConstantPool();
-        int trimMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, "trim", TypeConversionUtils.DESCRIPTOR___LJAVA_LANG_STRING);
+        int trimMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "trim", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
         code.invokevirtual(trimMethod);
     }
 
@@ -680,7 +683,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
         // str.trimEnd() or str.trimRight() (alias)
         // Use StringApiUtils.trimEnd which uses stripTrailing() (JDK 11+)
         var cp = classWriter.getConstantPool();
-        int trimEndMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "trimEnd", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
+        int trimEndMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "trimEnd", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
         code.invokestatic(trimEndMethod);
     }
 
@@ -688,7 +691,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
         // str.trimStart() or str.trimLeft() (alias)
         // Use StringApiUtils.trimStart which uses stripLeading() (JDK 11+)
         var cp = classWriter.getConstantPool();
-        int trimStartMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "trimStart", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
+        int trimStartMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "trimStart", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
         code.invokestatic(trimStartMethod);
     }
 
@@ -699,6 +702,6 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
      * @return true if the type is String
      */
     public boolean isTypeSupported(String type) {
-        return TypeConversionUtils.LJAVA_LANG_STRING.equals(type);
+        return ConstantJavaType.LJAVA_LANG_STRING.equals(type);
     }
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCondExpr;
@@ -23,9 +24,9 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 /**
  * Processes conditional (ternary) expressions (test ? consequent : alternate).
  */
@@ -109,7 +110,7 @@ public final class ConditionalExpressionProcessor extends BaseAstProcessor<Swc4j
         // Find common supertype (may default to Object)
 
         // For now, if types don't match and aren't both primitives, use Object
-        return TypeConversionUtils.LJAVA_LANG_OBJECT;
+        return ConstantJavaType.LJAVA_LANG_OBJECT;
     }
 
     @Override
@@ -186,13 +187,13 @@ public final class ConditionalExpressionProcessor extends BaseAstProcessor<Swc4j
      */
     private int getPrimitiveRank(String type) {
         return switch (type) {
-            case TypeConversionUtils.ABBR_BYTE -> 1; // byte
-            case TypeConversionUtils.ABBR_SHORT -> 2; // short
-            case TypeConversionUtils.ABBR_CHARACTER -> 2; // char (same rank as short, can widen to int)
-            case TypeConversionUtils.ABBR_INTEGER -> 3; // int
-            case TypeConversionUtils.ABBR_LONG -> 4; // long
-            case TypeConversionUtils.ABBR_FLOAT -> 5; // float
-            case TypeConversionUtils.ABBR_DOUBLE -> 6; // double
+            case ConstantJavaType.ABBR_BYTE -> 1; // byte
+            case ConstantJavaType.ABBR_SHORT -> 2; // short
+            case ConstantJavaType.ABBR_CHARACTER -> 2; // char (same rank as short, can widen to int)
+            case ConstantJavaType.ABBR_INTEGER -> 3; // int
+            case ConstantJavaType.ABBR_LONG -> 4; // long
+            case ConstantJavaType.ABBR_FLOAT -> 5; // float
+            case ConstantJavaType.ABBR_DOUBLE -> 6; // double
             default -> 0;
         };
     }
@@ -209,8 +210,8 @@ public final class ConditionalExpressionProcessor extends BaseAstProcessor<Swc4j
         }
 
         // Boolean can't be widened
-        if (TypeConversionUtils.ABBR_BOOLEAN.equals(type1) || TypeConversionUtils.ABBR_BOOLEAN.equals(type2)) {
-            return TypeConversionUtils.ABBR_BOOLEAN; // This will likely cause issues, but matches current behavior
+        if (ConstantJavaType.ABBR_BOOLEAN.equals(type1) || ConstantJavaType.ABBR_BOOLEAN.equals(type2)) {
+            return ConstantJavaType.ABBR_BOOLEAN; // This will likely cause issues, but matches current behavior
         }
 
         // Create widening order (higher number = wider type)

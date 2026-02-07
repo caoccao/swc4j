@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
@@ -38,8 +39,10 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ArrowExpressionProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +66,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
      */
     private void allocateNestedPatternVariables(CompilationContext context, ISwc4jAstPat pat, boolean allowShadow) {
         if (pat instanceof Swc4jAstBindingIdent bindingIdent) {
-            allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), TypeConversionUtils.LJAVA_LANG_OBJECT, allowShadow);
+            allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), ConstantJavaType.LJAVA_LANG_OBJECT, allowShadow);
         } else if (pat instanceof Swc4jAstArrayPat arrayPat) {
             for (var optElem : arrayPat.getElems()) {
                 if (optElem.isPresent()) {
@@ -78,7 +81,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
         } else if (pat instanceof Swc4jAstObjectPat objectPat) {
             for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
                 if (prop instanceof Swc4jAstAssignPatProp assignProp) {
-                    allocateVariableIfNeeded(context, assignProp.getKey().getId().getSym(), TypeConversionUtils.LJAVA_LANG_OBJECT, allowShadow);
+                    allocateVariableIfNeeded(context, assignProp.getKey().getId().getSym(), ConstantJavaType.LJAVA_LANG_OBJECT, allowShadow);
                 } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
                     allocateNestedPatternVariables(context, keyValueProp.getValue(), allowShadow);
                 } else if (prop instanceof Swc4jAstRestPat restPat) {
@@ -99,7 +102,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
         ISwc4jAstPat arg = restPat.getArg();
         if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
             String varName = bindingIdent.getId().getSym();
-            String varType = isArrayRest ? TypeConversionUtils.LJAVA_UTIL_ARRAYLIST : TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP;
+            String varType = isArrayRest ? ConstantJavaType.LJAVA_UTIL_ARRAYLIST : ConstantJavaType.LJAVA_UTIL_LINKEDHASHMAP;
             allocateVariableIfNeeded(context, varName, varType, allowShadow);
         }
     }
@@ -224,14 +227,14 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             boolean allowShadow) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
 
-        int listClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LIST);
+        int listClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LIST);
         code.checkcast(listClass);
-        int tempListSlot = getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), TypeConversionUtils.LJAVA_UTIL_LIST);
+        int tempListSlot = getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_LIST);
         code.astore(tempListSlot);
 
-        int listGetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
-        int listSizeRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
-        int listAddRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_ADD, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+        int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
+        int listSizeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
+        int listAddRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
 
         int restStartIndex = 0;
 
@@ -244,7 +247,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             ISwc4jAstPat elem = optElem.get();
             if (elem instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
-                allocateVariableIfNeeded(context, varName, TypeConversionUtils.LJAVA_LANG_OBJECT, allowShadow);
+                allocateVariableIfNeeded(context, varName, ConstantJavaType.LJAVA_LANG_OBJECT, allowShadow);
                 restStartIndex++;
             } else if (elem instanceof Swc4jAstArrayPat || elem instanceof Swc4jAstObjectPat) {
                 // Nested pattern - allocate variables recursively
@@ -353,21 +356,21 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 // Pre-initialize to null (for reference types) or default value (for primitives)
                 // This ensures the variable slot is initialized when captured by the lambda
                 switch (localVar.type()) {
-                    case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_SHORT,
-                         TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_BOOLEAN,
-                         TypeConversionUtils.ABBR_BYTE -> {
+                    case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_SHORT,
+                         ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_BOOLEAN,
+                         ConstantJavaType.ABBR_BYTE -> {
                         code.iconst(0);
                         code.istore(localVar.index());
                     }
-                    case TypeConversionUtils.ABBR_LONG -> {
+                    case ConstantJavaType.ABBR_LONG -> {
                         code.lconst(0);
                         code.lstore(localVar.index());
                     }
-                    case TypeConversionUtils.ABBR_FLOAT -> {
+                    case ConstantJavaType.ABBR_FLOAT -> {
                         code.fconst(0);
                         code.fstore(localVar.index());
                     }
-                    case TypeConversionUtils.ABBR_DOUBLE -> {
+                    case ConstantJavaType.ABBR_DOUBLE -> {
                         code.dconst(0);
                         code.dstore(localVar.index());
                     }
@@ -404,12 +407,12 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
 
                 // Store the value in the local variable
                 switch (localVar.type()) {
-                    case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_SHORT,
-                         TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_BOOLEAN,
-                         TypeConversionUtils.ABBR_BYTE -> code.istore(localVar.index());
-                    case TypeConversionUtils.ABBR_LONG -> code.lstore(localVar.index());
-                    case TypeConversionUtils.ABBR_FLOAT -> code.fstore(localVar.index());
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.dstore(localVar.index());
+                    case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_SHORT,
+                         ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_BOOLEAN,
+                         ConstantJavaType.ABBR_BYTE -> code.istore(localVar.index());
+                    case ConstantJavaType.ABBR_LONG -> code.lstore(localVar.index());
+                    case ConstantJavaType.ABBR_FLOAT -> code.fstore(localVar.index());
+                    case ConstantJavaType.ABBR_DOUBLE -> code.dstore(localVar.index());
                     default -> code.astore(localVar.index());
                 }
             }
@@ -421,21 +424,21 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 // Generate default initialization for variables without initializers
                 // This is required by the JVM verifier to track variable initialization
                 switch (localVar.type()) {
-                    case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_SHORT,
-                         TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_BOOLEAN,
-                         TypeConversionUtils.ABBR_BYTE -> {
+                    case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_SHORT,
+                         ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_BOOLEAN,
+                         ConstantJavaType.ABBR_BYTE -> {
                         code.iconst(0);
                         code.istore(localVar.index());
                     }
-                    case TypeConversionUtils.ABBR_LONG -> {
+                    case ConstantJavaType.ABBR_LONG -> {
                         code.lconst(0);
                         code.lstore(localVar.index());
                     }
-                    case TypeConversionUtils.ABBR_FLOAT -> {
+                    case ConstantJavaType.ABBR_FLOAT -> {
                         code.fconst(0);
                         code.fstore(localVar.index());
                     }
-                    case TypeConversionUtils.ABBR_DOUBLE -> {
+                    case ConstantJavaType.ABBR_DOUBLE -> {
                         code.dconst(0);
                         code.dstore(localVar.index());
                     }
@@ -461,42 +464,42 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
         int holderSlot = localVar.holderIndex();
 
         switch (type) {
-            case TypeConversionUtils.ABBR_INTEGER -> {
+            case ConstantJavaType.ABBR_INTEGER -> {
                 code.iconst(1);
                 code.newarray(10); // T_INT
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_LONG -> {
+            case ConstantJavaType.ABBR_LONG -> {
                 code.iconst(1);
                 code.newarray(11); // T_LONG
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_DOUBLE -> {
+            case ConstantJavaType.ABBR_DOUBLE -> {
                 code.iconst(1);
                 code.newarray(7); // T_DOUBLE
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_FLOAT -> {
+            case ConstantJavaType.ABBR_FLOAT -> {
                 code.iconst(1);
                 code.newarray(6); // T_FLOAT
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_BOOLEAN -> {
+            case ConstantJavaType.ABBR_BOOLEAN -> {
                 code.iconst(1);
                 code.newarray(4); // T_BOOLEAN
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_BYTE -> {
+            case ConstantJavaType.ABBR_BYTE -> {
                 code.iconst(1);
                 code.newarray(8); // T_BYTE
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_CHARACTER -> {
+            case ConstantJavaType.ABBR_CHARACTER -> {
                 code.iconst(1);
                 code.newarray(5); // T_CHAR
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_SHORT -> {
+            case ConstantJavaType.ABBR_SHORT -> {
                 code.iconst(1);
                 code.newarray(9); // T_SHORT
                 code.astore(holderSlot);
@@ -504,12 +507,12 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             default -> {
                 // Reference type - create an array of the appropriate element type
                 code.iconst(1);
-                // Extract element type from descriptor (e.g., TypeConversionUtils.LJAVA_LANG_STRING -> TypeConversionUtils.JAVA_LANG_STRING)
+                // Extract element type from descriptor (e.g., ConstantJavaType.LJAVA_LANG_STRING -> ConstantJavaType.JAVA_LANG_STRING)
                 String elementType;
                 if (type.startsWith("L") && type.endsWith(";")) {
                     elementType = type.substring(1, type.length() - 1);
                 } else {
-                    elementType = TypeConversionUtils.JAVA_LANG_OBJECT;
+                    elementType = ConstantJavaType.JAVA_LANG_OBJECT;
                 }
                 int elementClass = cp.addClass(elementType);
                 code.anewarray(elementClass);
@@ -533,7 +536,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
         int holderSlot = localVar.holderIndex();
 
         switch (type) {
-            case TypeConversionUtils.ABBR_INTEGER -> {
+            case ConstantJavaType.ABBR_INTEGER -> {
                 code.iconst(1);
                 code.newarray(10); // T_INT
                 code.dup();
@@ -542,7 +545,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.iastore();
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_LONG -> {
+            case ConstantJavaType.ABBR_LONG -> {
                 code.iconst(1);
                 code.newarray(11); // T_LONG
                 code.dup();
@@ -551,7 +554,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.lastore();
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_DOUBLE -> {
+            case ConstantJavaType.ABBR_DOUBLE -> {
                 code.iconst(1);
                 code.newarray(7); // T_DOUBLE
                 code.dup();
@@ -560,7 +563,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.dastore();
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_FLOAT -> {
+            case ConstantJavaType.ABBR_FLOAT -> {
                 code.iconst(1);
                 code.newarray(6); // T_FLOAT
                 code.dup();
@@ -569,7 +572,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.fastore();
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_BOOLEAN -> {
+            case ConstantJavaType.ABBR_BOOLEAN -> {
                 code.iconst(1);
                 code.newarray(4); // T_BOOLEAN
                 code.dup();
@@ -578,7 +581,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.bastore();
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_BYTE -> {
+            case ConstantJavaType.ABBR_BYTE -> {
                 code.iconst(1);
                 code.newarray(8); // T_BYTE
                 code.dup();
@@ -587,7 +590,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.bastore();
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_CHARACTER -> {
+            case ConstantJavaType.ABBR_CHARACTER -> {
                 code.iconst(1);
                 code.newarray(5); // T_CHAR
                 code.dup();
@@ -596,7 +599,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.castore();
                 code.astore(holderSlot);
             }
-            case TypeConversionUtils.ABBR_SHORT -> {
+            case ConstantJavaType.ABBR_SHORT -> {
                 code.iconst(1);
                 code.newarray(9); // T_SHORT
                 code.dup();
@@ -608,12 +611,12 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             default -> {
                 // Reference type - create an array of the appropriate element type
                 code.iconst(1);
-                // Extract element type from descriptor (e.g., TypeConversionUtils.LJAVA_LANG_STRING -> TypeConversionUtils.JAVA_LANG_STRING)
+                // Extract element type from descriptor (e.g., ConstantJavaType.LJAVA_LANG_STRING -> ConstantJavaType.JAVA_LANG_STRING)
                 String elementType;
                 if (type.startsWith("L") && type.endsWith(";")) {
                     elementType = type.substring(1, type.length() - 1);
                 } else {
-                    elementType = TypeConversionUtils.JAVA_LANG_OBJECT;
+                    elementType = ConstantJavaType.JAVA_LANG_OBJECT;
                 }
                 int elementClass = cp.addClass(elementType);
                 code.anewarray(elementClass);
@@ -660,13 +663,13 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             boolean allowShadow) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
 
-        int mapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_MAP);
+        int mapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_MAP);
         code.checkcast(mapClass);
-        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), TypeConversionUtils.LJAVA_UTIL_MAP);
+        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_MAP);
         code.astore(tempMapSlot);
 
-        int mapGetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        int mapRemoveRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_REMOVE, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapRemoveRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
 
         List<String> extractedKeys = new ArrayList<>();
 
@@ -675,13 +678,13 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             if (prop instanceof Swc4jAstAssignPatProp assignProp) {
                 String varName = assignProp.getKey().getId().getSym();
                 extractedKeys.add(varName);
-                allocateVariableIfNeeded(context, varName, TypeConversionUtils.LJAVA_LANG_OBJECT, allowShadow);
+                allocateVariableIfNeeded(context, varName, ConstantJavaType.LJAVA_LANG_OBJECT, allowShadow);
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
                 String keyName = extractPropertyName(keyValueProp.getKey());
                 extractedKeys.add(keyName);
                 ISwc4jAstPat valuePat = keyValueProp.getValue();
                 if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
-                    allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), TypeConversionUtils.LJAVA_LANG_OBJECT, allowShadow);
+                    allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), ConstantJavaType.LJAVA_LANG_OBJECT, allowShadow);
                 } else if (valuePat instanceof Swc4jAstArrayPat || valuePat instanceof Swc4jAstObjectPat) {
                     // Nested pattern - allocate variables recursively
                     allocateNestedPatternVariables(context, valuePat, allowShadow);
@@ -767,8 +770,8 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
 
             // Create new LinkedHashMap as copy of source map
-            int linkedHashMapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP);
-            int linkedHashMapInitRef = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR_LJAVA_UTIL_MAP__V);
+            int linkedHashMapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP);
+            int linkedHashMapInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_UTIL_MAP__V);
             code.newInstance(linkedHashMapClass);
             code.dup();
             code.aload(sourceSlot);
@@ -812,8 +815,8 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
 
             if (isArrayRest) {
                 // Create new ArrayList
-                int arrayListClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_ARRAYLIST);
-                int arrayListInitRef = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+                int arrayListClass = cp.addClass(ConstantJavaType.JAVA_UTIL_ARRAYLIST);
+                int arrayListInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
                 code.newInstance(arrayListClass);
                 code.dup();
                 code.invokespecial(arrayListInitRef);
@@ -822,12 +825,12 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 // Get source list size
                 code.aload(sourceSlot);
                 code.invokeinterface(listSizeRef, 1);
-                int sizeSlot = getOrAllocateTempSlot(context, "$restSize" + context.getNextTempId(), TypeConversionUtils.ABBR_INTEGER);
+                int sizeSlot = getOrAllocateTempSlot(context, "$restSize" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
                 code.istore(sizeSlot);
 
                 // Initialize loop counter at restStartIndex
                 code.iconst(restStartIndex);
-                int iSlot = getOrAllocateTempSlot(context, "$restI" + context.getNextTempId(), TypeConversionUtils.ABBR_INTEGER);
+                int iSlot = getOrAllocateTempSlot(context, "$restI" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
                 code.istore(iSlot);
 
                 // Loop to copy remaining elements

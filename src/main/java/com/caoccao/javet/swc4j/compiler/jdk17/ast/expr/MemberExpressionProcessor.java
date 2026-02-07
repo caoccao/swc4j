@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
@@ -29,6 +30,9 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -202,14 +206,14 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
 
         // Handle member access on arrays (e.g., arr.length or arr[index])
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
-        if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
+        if (ConstantJavaType.LJAVA_LANG_OBJECT.equals(objType)) {
             String classExprType = inferTypeFromNewClassExpr(memberExpr.getObj());
             if (classExprType != null) {
                 objType = classExprType;
             }
         }
 
-        if (objType != null && objType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
+        if (objType != null && objType.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
             // Java array operations
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                 // arr[index] - array element access
@@ -218,27 +222,27 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
 
                 // Convert index to int if needed
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-                if (indexType != null && !TypeConversionUtils.ABBR_INTEGER.equals(indexType)) {
-                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), TypeConversionUtils.ABBR_INTEGER);
+                if (indexType != null && !ConstantJavaType.ABBR_INTEGER.equals(indexType)) {
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), ConstantJavaType.ABBR_INTEGER);
                 }
 
                 // Use appropriate array load instruction based on element type
-                String elemType = objType.substring(1); // Remove leading TypeConversionUtils.ARRAY_PREFIX
+                String elemType = objType.substring(1); // Remove leading ConstantJavaType.ARRAY_PREFIX
                 switch (elemType) {
-                    case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE ->
+                    case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE ->
                             code.baload(); // boolean and byte
-                    case TypeConversionUtils.ABBR_CHARACTER -> code.caload(); // char
-                    case TypeConversionUtils.ABBR_SHORT -> code.saload(); // short
-                    case TypeConversionUtils.ABBR_INTEGER -> code.iaload(); // int
-                    case TypeConversionUtils.ABBR_LONG -> code.laload(); // long
-                    case TypeConversionUtils.ABBR_FLOAT -> code.faload(); // float
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.daload(); // double
+                    case ConstantJavaType.ABBR_CHARACTER -> code.caload(); // char
+                    case ConstantJavaType.ABBR_SHORT -> code.saload(); // short
+                    case ConstantJavaType.ABBR_INTEGER -> code.iaload(); // int
+                    case ConstantJavaType.ABBR_LONG -> code.laload(); // long
+                    case ConstantJavaType.ABBR_FLOAT -> code.faload(); // float
+                    case ConstantJavaType.ABBR_DOUBLE -> code.daload(); // double
                     default -> {
                         // reference types
                         code.aaload();
                         // Add checkcast for non-Object element types to ensure type safety
                         if (elemType.startsWith("L") && elemType.endsWith(";") &&
-                                !elemType.equals(TypeConversionUtils.LJAVA_LANG_OBJECT)) {
+                                !elemType.equals(ConstantJavaType.LJAVA_LANG_OBJECT)) {
                             String elementInternalName = elemType.substring(1, elemType.length() - 1);
                             int classIndex = cp.addClass(elementInternalName);
                             code.checkcast(classIndex);
@@ -251,14 +255,14 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             // Named property access
             if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                 String propName = propIdent.getSym();
-                if (TypeConversionUtils.METHOD_LENGTH.equals(propName)) {
+                if (ConstantJavaMethod.METHOD_LENGTH.equals(propName)) {
                     // arr.length - use arraylength instruction
                     compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [array]
                     code.arraylength(); // Stack: [int]
                     return;
                 }
             }
-        } else if (TypeConversionUtils.LJAVA_UTIL_ARRAYLIST.equals(objType) || TypeConversionUtils.LJAVA_UTIL_LIST.equals(objType)) {
+        } else if (ConstantJavaType.LJAVA_UTIL_ARRAYLIST.equals(objType) || ConstantJavaType.LJAVA_UTIL_LIST.equals(objType)) {
             // ArrayList/List operations
             // Check if it's a computed property (arr[index]) or named property (arr.length)
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
@@ -268,14 +272,14 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
 
                 // Convert index to int if it's a String (for-in returns string indices in JS semantics)
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-                if (TypeConversionUtils.LJAVA_LANG_STRING.equals(indexType)) {
+                if (ConstantJavaType.LJAVA_LANG_STRING.equals(indexType)) {
                     // String index -> Integer.parseInt(index)
-                    int parseIntMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_PARSE_INT, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__I);
+                    int parseIntMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_PARSE_INT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__I);
                     code.invokestatic(parseIntMethod); // Stack: [ArrayList/List, int]
                 }
 
                 // Call List.get(int) via interface method
-                int getMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
+                int getMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
                 code.invokeinterface(getMethod, 2); // Stack: [Object]
                 return;
             }
@@ -283,27 +287,27 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             // Named property access (arr.length)
             if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                 String propName = propIdent.getSym();
-                if (TypeConversionUtils.METHOD_LENGTH.equals(propName)) {
+                if (ConstantJavaMethod.METHOD_LENGTH.equals(propName)) {
                     // arr.length -> arr.size()
                     compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [ArrayList/List]
-                    int sizeMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
+                    int sizeMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
                     code.invokeinterface(sizeMethod, 1); // Stack: [int]
                     return;
                 }
             }
-        } else if (TypeConversionUtils.LJAVA_LANG_STRING.equals(objType)) {
+        } else if (ConstantJavaType.LJAVA_LANG_STRING.equals(objType)) {
             // String operations
             if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                 String propName = propIdent.getSym();
-                if (TypeConversionUtils.METHOD_LENGTH.equals(propName)) {
+                if (ConstantJavaMethod.METHOD_LENGTH.equals(propName)) {
                     // str.length -> str.length()
                     compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [String]
-                    int lengthMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_LENGTH, TypeConversionUtils.DESCRIPTER___I);
+                    int lengthMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LENGTH, ConstantJavaDescriptor.DESCRIPTOR___I);
                     code.invokevirtual(lengthMethod); // Stack: [int]
                     return;
                 }
             }
-        } else if (TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP.equals(objType) || TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
+        } else if (ConstantJavaType.LJAVA_UTIL_LINKEDHASHMAP.equals(objType) || ConstantJavaType.LJAVA_LANG_OBJECT.equals(objType)) {
             // LinkedHashMap operations (object literal member access)
             // Also handle Object type (for nested properties where map values are typed as Object)
             // Check if it's a computed property (obj[key]) or named property (obj.prop)
@@ -312,8 +316,8 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [LinkedHashMap or Object]
 
                 // Cast to LinkedHashMap if type is Object
-                if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
-                    int linkedHashMapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP);
+                if (ConstantJavaType.LJAVA_LANG_OBJECT.equals(objType)) {
+                    int linkedHashMapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP);
                     code.checkcast(linkedHashMapClass); // Stack: [LinkedHashMap]
                 }
 
@@ -327,7 +331,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 }
 
                 // Call LinkedHashMap.get(Object)
-                int getMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                 code.invokevirtual(getMethod); // Stack: [Object]
                 return;
             }
@@ -339,8 +343,8 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [LinkedHashMap or Object]
 
                 // Cast to LinkedHashMap if type is Object
-                if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
-                    int linkedHashMapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP);
+                if (ConstantJavaType.LJAVA_LANG_OBJECT.equals(objType)) {
+                    int linkedHashMapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP);
                     code.checkcast(linkedHashMapClass); // Stack: [LinkedHashMap]
                 }
 
@@ -348,7 +352,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 code.ldc(keyIndex); // Stack: [LinkedHashMap, "prop"]
 
                 // Call LinkedHashMap.get(Object)
-                int getMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                 code.invokevirtual(getMethod); // Stack: [Object]
                 return;
             }
@@ -391,16 +395,16 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                     int fieldRef = cp.addFieldRef(
                             "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray",
                             "raw",
-                            TypeConversionUtils.ARRAY_LJAVA_LANG_STRING
+                            ConstantJavaType.ARRAY_LJAVA_LANG_STRING
                     );
                     code.getfield(fieldRef);
                     return;
-                } else if (TypeConversionUtils.METHOD_LENGTH.equals(fieldName)) {
+                } else if (ConstantJavaMethod.METHOD_LENGTH.equals(fieldName)) {
                     // Access length field: int
                     int fieldRef = cp.addFieldRef(
                             "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray",
-                            TypeConversionUtils.METHOD_LENGTH,
-                            TypeConversionUtils.ABBR_INTEGER
+                            ConstantJavaMethod.METHOD_LENGTH,
+                            ConstantJavaType.ABBR_INTEGER
                     );
                     code.getfield(fieldRef);
                     return;

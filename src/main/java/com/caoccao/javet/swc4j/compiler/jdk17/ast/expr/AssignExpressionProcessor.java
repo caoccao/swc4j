@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
@@ -36,8 +37,10 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,18 +84,18 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         boolean valueIsPrimitive = TypeConversionUtils.isPrimitiveType(primitiveValueType) &&
                 TypeConversionUtils.isPrimitiveType(valueType);
 
-        if (TypeConversionUtils.LJAVA_LANG_STRING.equals(targetType)) {
+        if (ConstantJavaType.LJAVA_LANG_STRING.equals(targetType)) {
             if (valueIsPrimitive) {
                 generateStringValueOf(code, classWriter, primitiveValueType);
-            } else if (!TypeConversionUtils.LJAVA_LANG_STRING.equals(valueType)) {
-                generateStringValueOf(code, classWriter, TypeConversionUtils.LJAVA_LANG_OBJECT);
+            } else if (!ConstantJavaType.LJAVA_LANG_STRING.equals(valueType)) {
+                generateStringValueOf(code, classWriter, ConstantJavaType.LJAVA_LANG_OBJECT);
             }
             return;
         }
 
         if (valueIsPrimitive) {
             String wrapperType = TypeConversionUtils.getWrapperType(primitiveValueType);
-            if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(targetType) || targetType.equals(wrapperType)) {
+            if (ConstantJavaType.LJAVA_LANG_OBJECT.equals(targetType) || targetType.equals(wrapperType)) {
                 TypeConversionUtils.boxPrimitiveType(code, classWriter, primitiveValueType, wrapperType);
                 return;
             }
@@ -197,7 +200,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                             // Duplicate value for assignment expression result (assignment returns the assigned value)
                             String fieldDesc = fieldInfo.descriptor();
-                            if (TypeConversionUtils.ABBR_DOUBLE.equals(fieldDesc) || TypeConversionUtils.ABBR_LONG.equals(fieldDesc)) {
+                            if (ConstantJavaType.ABBR_DOUBLE.equals(fieldDesc) || ConstantJavaType.ABBR_LONG.equals(fieldDesc)) {
                                 code.dup2_x1(); // For wide types (double, long)
                             } else {
                                 code.dup_x1(); // For single-slot types
@@ -237,7 +240,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                             // Duplicate value for assignment expression result
                             String fieldDesc = fieldInfo.descriptor();
-                            if (TypeConversionUtils.ABBR_DOUBLE.equals(fieldDesc) || TypeConversionUtils.ABBR_LONG.equals(fieldDesc)) {
+                            if (ConstantJavaType.ABBR_DOUBLE.equals(fieldDesc) || ConstantJavaType.ABBR_LONG.equals(fieldDesc)) {
                                 code.dup2_x1();
                             } else {
                                 code.dup_x1();
@@ -270,7 +273,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                         // Duplicate value for assignment expression result
                         String fieldDesc = fieldInfo.descriptor();
-                        if (TypeConversionUtils.ABBR_DOUBLE.equals(fieldDesc) || TypeConversionUtils.ABBR_LONG.equals(fieldDesc)) {
+                        if (ConstantJavaType.ABBR_DOUBLE.equals(fieldDesc) || ConstantJavaType.ABBR_LONG.equals(fieldDesc)) {
                             code.dup2(); // For wide types (double, long)
                         } else {
                             code.dup(); // For single-slot types
@@ -302,7 +305,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                         // Duplicate value for assignment expression result
                         String fieldDesc = fieldInfo.descriptor();
-                        if (TypeConversionUtils.ABBR_DOUBLE.equals(fieldDesc) || TypeConversionUtils.ABBR_LONG.equals(fieldDesc)) {
+                        if (ConstantJavaType.ABBR_DOUBLE.equals(fieldDesc) || ConstantJavaType.ABBR_LONG.equals(fieldDesc)) {
                             code.dup2(); // For wide types (double, long)
                         } else {
                             code.dup(); // For single-slot types
@@ -317,7 +320,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
             String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
 
-            if (objType != null && objType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
+            if (objType != null && objType.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
                 // Java array operations
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                     // arr[index] = value - array element assignment
@@ -326,8 +329,8 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                     // Convert index to int if needed
                     String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-                    if (indexType != null && !TypeConversionUtils.ABBR_INTEGER.equals(indexType)) {
-                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), TypeConversionUtils.ABBR_INTEGER);
+                    if (indexType != null && !ConstantJavaType.ABBR_INTEGER.equals(indexType)) {
+                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), ConstantJavaType.ABBR_INTEGER);
                     }
 
                     // Generate the value to store
@@ -338,13 +341,13 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     TypeConversionUtils.unboxWrapperType(code, classWriter, valueType);
 
                     // Convert to target element type if needed
-                    String elemType = objType.substring(1); // Remove leading TypeConversionUtils.ARRAY_PREFIX
+                    String elemType = objType.substring(1); // Remove leading ConstantJavaType.ARRAY_PREFIX
                     String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
                     TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, elemType);
 
                     // Duplicate value and place it below array and index so it's left after store
                     // Stack: [array, index, value] -> [value, array, index, value]
-                    if (TypeConversionUtils.ABBR_DOUBLE.equals(elemType) || TypeConversionUtils.ABBR_LONG.equals(elemType)) {
+                    if (ConstantJavaType.ABBR_DOUBLE.equals(elemType) || ConstantJavaType.ABBR_LONG.equals(elemType)) {
                         code.dup2_x2(); // For wide types (double, long)
                     } else {
                         code.dup_x2(); // For single-slot types
@@ -353,14 +356,14 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     // Use appropriate array store instruction
                     // Stack: [value, array, index, value] -> [value] after store
                     switch (elemType) {
-                        case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE ->
+                        case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE ->
                                 code.bastore(); // boolean and byte
-                        case TypeConversionUtils.ABBR_CHARACTER -> code.castore(); // char
-                        case TypeConversionUtils.ABBR_SHORT -> code.sastore(); // short
-                        case TypeConversionUtils.ABBR_INTEGER -> code.iastore(); // int
-                        case TypeConversionUtils.ABBR_LONG -> code.lastore(); // long
-                        case TypeConversionUtils.ABBR_FLOAT -> code.fastore(); // float
-                        case TypeConversionUtils.ABBR_DOUBLE -> code.dastore(); // double
+                        case ConstantJavaType.ABBR_CHARACTER -> code.castore(); // char
+                        case ConstantJavaType.ABBR_SHORT -> code.sastore(); // short
+                        case ConstantJavaType.ABBR_INTEGER -> code.iastore(); // int
+                        case ConstantJavaType.ABBR_LONG -> code.lastore(); // long
+                        case ConstantJavaType.ABBR_FLOAT -> code.fastore(); // float
+                        case ConstantJavaType.ABBR_DOUBLE -> code.dastore(); // double
                         default -> code.aastore(); // reference types
                     }
                     // The duplicated value is now on the stack as the assignment result
@@ -370,11 +373,11 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 // Check if it's arr.length = newLength - NOT SUPPORTED for Java arrays
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
-                    if (TypeConversionUtils.METHOD_LENGTH.equals(propName)) {
+                    if (ConstantJavaMethod.METHOD_LENGTH.equals(propName)) {
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr, "Cannot set length on Java array - array size is fixed");
                     }
                 }
-            } else if (TypeConversionUtils.LJAVA_UTIL_ARRAYLIST.equals(objType) || TypeConversionUtils.LJAVA_UTIL_LIST.equals(objType)) {
+            } else if (ConstantJavaType.LJAVA_UTIL_ARRAYLIST.equals(objType) || ConstantJavaType.LJAVA_UTIL_LIST.equals(objType)) {
                 // Check if it's arr[index] = value
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                     // arr[index] = value -> arr.set(index, value)
@@ -383,9 +386,9 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                     // Convert index to int if it's a String (for-in returns string indices in JS semantics)
                     String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-                    if (TypeConversionUtils.LJAVA_LANG_STRING.equals(indexType)) {
+                    if (ConstantJavaType.LJAVA_LANG_STRING.equals(indexType)) {
                         // String index -> Integer.parseInt(index)
-                        int parseIntMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_INTEGER, TypeConversionUtils.METHOD_PARSE_INT, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__I);
+                        int parseIntMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_PARSE_INT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__I);
                         code.invokestatic(parseIntMethod); // Stack: [ArrayList/List, int]
                     }
 
@@ -395,14 +398,14 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
                     if (TypeConversionUtils.isPrimitiveType(valueType)) {
                         String wrapperType = TypeConversionUtils.getWrapperType(valueType);
-                        // wrapperType is already in the form TypeConversionUtils.LJAVA_LANG_INTEGER so use it directly
+                        // wrapperType is already in the form ConstantJavaType.LJAVA_LANG_INTEGER so use it directly
                         String className = wrapperType.substring(1, wrapperType.length() - 1); // Remove L and ;
-                        int valueOfRef = cp.addMethodRef(className, TypeConversionUtils.METHOD_VALUE_OF, "(" + valueType + ")" + wrapperType);
+                        int valueOfRef = cp.addMethodRef(className, ConstantJavaMethod.METHOD_VALUE_OF, "(" + valueType + ")" + wrapperType);
                         code.invokestatic(valueOfRef); // Stack: [ArrayList/List, index, boxedValue]
                     }
 
                     // Call List.set(int, Object) via interface method
-                    int setMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SET, TypeConversionUtils.DESCRIPTOR_I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                    int setMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SET, ConstantJavaDescriptor.DESCRIPTOR_I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                     code.invokeinterface(setMethod, 3); // Stack: [oldValue] - the return value of set() is the previous value
                     // Leave the value on stack for expression statements to pop
                     return;
@@ -411,12 +414,12 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 // Check if it's arr.length = newLength
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
-                    if (TypeConversionUtils.METHOD_LENGTH.equals(propName)) {
+                    if (ConstantJavaMethod.METHOD_LENGTH.equals(propName)) {
                         // arr.length = newLength
                         // Special case: arr.length = 0 -> arr.clear()
                         if (assignExpr.getRight() instanceof Swc4jAstNumber number && number.getValue() == 0.0) {
                             compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [List]
-                            int clearMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, "clear", TypeConversionUtils.DESCRIPTOR___V);
+                            int clearMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, "clear", ConstantJavaDescriptor.DESCRIPTOR___V);
                             code.invokeinterface(clearMethod, 1); // Stack: []
                             // Assignment expression should return the assigned value (0 in this case)
                             code.iconst(0); // Stack: [0]
@@ -435,15 +438,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                             // Get arr.size() - need to load List again
                             compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [List, List, newLength, List]
-                            int sizeMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
+                            int sizeMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
                             code.invokeinterface(sizeMethod, 1); // Stack: [List, List, newLength, size]
 
                             // Call subList(newLength, size) on the second List
-                            int subListMethod = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, "subList", TypeConversionUtils.DESCRIPTOR_I_I__LJAVA_UTIL_LIST);
+                            int subListMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, "subList", ConstantJavaDescriptor.DESCRIPTOR_I_I__LJAVA_UTIL_LIST);
                             code.invokeinterface(subListMethod, 3); // Stack: [List, List]
 
                             // Call clear() on the returned subList
-                            int clearMethod2 = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, "clear", TypeConversionUtils.DESCRIPTOR___V);
+                            int clearMethod2 = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, "clear", ConstantJavaDescriptor.DESCRIPTOR___V);
                             code.invokeinterface(clearMethod2, 1); // Stack: [List]
 
                             // Assignment expression returns the assigned value (newLength), not the List
@@ -456,7 +459,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), assignExpr, "Setting array length to non-constant values not yet supported");
                     }
                 }
-            } else if (TypeConversionUtils.LJAVA_UTIL_LINKEDHASHMAP.equals(objType)) {
+            } else if (ConstantJavaType.LJAVA_UTIL_LINKEDHASHMAP.equals(objType)) {
                 // LinkedHashMap operations (object literal property assignment)
                 // Check if it's obj[key] = value (computed property)
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
@@ -481,7 +484,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     }
 
                     // Call LinkedHashMap.put(Object, Object)
-                    int putMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, "put", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                    int putMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, "put", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                     code.invokevirtual(putMethod); // Stack: [oldValue] - the return value is the previous value (or null)
                     // Leave the value on stack for expression statements to pop
                     return;
@@ -505,7 +508,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     }
 
                     // Call LinkedHashMap.put(Object, Object)
-                    int putMethod = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_LINKEDHASHMAP, "put", TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                    int putMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, "put", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                     code.invokevirtual(putMethod); // Stack: [oldValue]
                     // Leave the value on stack for expression statements to pop
                     return;
@@ -547,13 +550,13 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     code.aload(var.holderIndex());
                     code.iconst(0);
                     switch (varType) {
-                        case TypeConversionUtils.ABBR_INTEGER -> code.iaload();
-                        case TypeConversionUtils.ABBR_LONG -> code.laload();
-                        case TypeConversionUtils.ABBR_FLOAT -> code.faload();
-                        case TypeConversionUtils.ABBR_DOUBLE -> code.daload();
-                        case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.baload();
-                        case TypeConversionUtils.ABBR_CHARACTER -> code.caload();
-                        case TypeConversionUtils.ABBR_SHORT -> code.saload();
+                        case ConstantJavaType.ABBR_INTEGER -> code.iaload();
+                        case ConstantJavaType.ABBR_LONG -> code.laload();
+                        case ConstantJavaType.ABBR_FLOAT -> code.faload();
+                        case ConstantJavaType.ABBR_DOUBLE -> code.daload();
+                        case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.baload();
+                        case ConstantJavaType.ABBR_CHARACTER -> code.caload();
+                        case ConstantJavaType.ABBR_SHORT -> code.saload();
                         default -> code.aaload();
                     }
 
@@ -566,7 +569,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 }
 
                 // Duplicate for expression result, then store
-                if (TypeConversionUtils.ABBR_DOUBLE.equals(varType) || TypeConversionUtils.ABBR_LONG.equals(varType)) {
+                if (ConstantJavaType.ABBR_DOUBLE.equals(varType) || ConstantJavaType.ABBR_LONG.equals(varType)) {
                     code.dup2_x2();
                 } else {
                     code.dup_x2();
@@ -574,13 +577,13 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                 // Store into holder array
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.iastore();
-                    case TypeConversionUtils.ABBR_LONG -> code.lastore();
-                    case TypeConversionUtils.ABBR_FLOAT -> code.fastore();
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.dastore();
-                    case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.bastore();
-                    case TypeConversionUtils.ABBR_CHARACTER -> code.castore();
-                    case TypeConversionUtils.ABBR_SHORT -> code.sastore();
+                    case ConstantJavaType.ABBR_INTEGER -> code.iastore();
+                    case ConstantJavaType.ABBR_LONG -> code.lastore();
+                    case ConstantJavaType.ABBR_FLOAT -> code.fastore();
+                    case ConstantJavaType.ABBR_DOUBLE -> code.dastore();
+                    case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
+                    case ConstantJavaType.ABBR_CHARACTER -> code.castore();
+                    case ConstantJavaType.ABBR_SHORT -> code.sastore();
                     default -> code.aastore();
                 }
                 return;
@@ -597,12 +600,12 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 // Compound assignment: x += value, x -= value, etc.
                 // Load current value of variable
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN,
-                         TypeConversionUtils.ABBR_BYTE, TypeConversionUtils.ABBR_CHARACTER,
-                         TypeConversionUtils.ABBR_SHORT -> code.iload(var.index());
-                    case TypeConversionUtils.ABBR_LONG -> code.lload(var.index());
-                    case TypeConversionUtils.ABBR_FLOAT -> code.fload(var.index());
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.dload(var.index());
+                    case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BOOLEAN,
+                         ConstantJavaType.ABBR_BYTE, ConstantJavaType.ABBR_CHARACTER,
+                         ConstantJavaType.ABBR_SHORT -> code.iload(var.index());
+                    case ConstantJavaType.ABBR_LONG -> code.lload(var.index());
+                    case ConstantJavaType.ABBR_FLOAT -> code.fload(var.index());
+                    case ConstantJavaType.ABBR_DOUBLE -> code.dload(var.index());
                     default -> code.aload(var.index());
                 }
 
@@ -613,19 +616,19 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
 
                 // Special handling for String += (need to convert value to String)
-                if (TypeConversionUtils.LJAVA_LANG_STRING.equals(varType) && op == Swc4jAstAssignOp.AddAssign) {
+                if (ConstantJavaType.LJAVA_LANG_STRING.equals(varType) && op == Swc4jAstAssignOp.AddAssign) {
                     // Convert value to String using String.valueOf() if it's not already a String
-                    if (!TypeConversionUtils.LJAVA_LANG_STRING.equals(valueType)) {
+                    if (!ConstantJavaType.LJAVA_LANG_STRING.equals(valueType)) {
                         String valueOfDescriptor = switch (valueType) {
-                            case TypeConversionUtils.ABBR_INTEGER -> TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_STRING;
-                            case TypeConversionUtils.ABBR_LONG -> TypeConversionUtils.DESCRIPTOR_J__LJAVA_LANG_STRING;
-                            case TypeConversionUtils.ABBR_FLOAT -> TypeConversionUtils.DESCRIPTOR_F__LJAVA_LANG_STRING;
-                            case TypeConversionUtils.ABBR_DOUBLE -> TypeConversionUtils.DESCRIPTOR_D__LJAVA_LANG_STRING;
-                            case TypeConversionUtils.ABBR_BOOLEAN -> TypeConversionUtils.DESCRIPTOR_Z__LJAVA_LANG_STRING;
-                            case TypeConversionUtils.ABBR_CHARACTER -> TypeConversionUtils.DESCRIPTOR_C__LJAVA_LANG_STRING;
-                            default -> TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING;
+                            case ConstantJavaType.ABBR_INTEGER -> ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_STRING;
+                            case ConstantJavaType.ABBR_LONG -> ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_STRING;
+                            case ConstantJavaType.ABBR_FLOAT -> ConstantJavaDescriptor.DESCRIPTOR_F__LJAVA_LANG_STRING;
+                            case ConstantJavaType.ABBR_DOUBLE -> ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_STRING;
+                            case ConstantJavaType.ABBR_BOOLEAN -> ConstantJavaDescriptor.DESCRIPTOR_Z__LJAVA_LANG_STRING;
+                            case ConstantJavaType.ABBR_CHARACTER -> ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_STRING;
+                            default -> ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING;
                         };
-                        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF, valueOfDescriptor);
+                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_VALUE_OF, valueOfDescriptor);
                         code.invokestatic(valueOfRef);
                     }
                 } else if (valueType != null && !valueType.equals(varType)) {
@@ -637,7 +640,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
             }
 
             // Duplicate the value on the stack before storing (assignment returns the value)
-            if (TypeConversionUtils.ABBR_DOUBLE.equals(varType) || TypeConversionUtils.ABBR_LONG.equals(varType)) {
+            if (ConstantJavaType.ABBR_DOUBLE.equals(varType) || ConstantJavaType.ABBR_LONG.equals(varType)) {
                 code.dup2(); // For wide types (double, long)
             } else {
                 code.dup(); // For single-slot types
@@ -645,11 +648,11 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
             // Store into local variable
             switch (varType) {
-                case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE,
-                     TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_SHORT -> code.istore(var.index());
-                case TypeConversionUtils.ABBR_LONG -> code.lstore(var.index());
-                case TypeConversionUtils.ABBR_FLOAT -> code.fstore(var.index());
-                case TypeConversionUtils.ABBR_DOUBLE -> code.dstore(var.index());
+                case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE,
+                     ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_SHORT -> code.istore(var.index());
+                case ConstantJavaType.ABBR_LONG -> code.lstore(var.index());
+                case ConstantJavaType.ABBR_FLOAT -> code.fstore(var.index());
+                case ConstantJavaType.ABBR_DOUBLE -> code.dstore(var.index());
                 default -> code.astore(var.index()); // Reference types
             }
             // The duplicated value is now on the stack as the assignment result
@@ -680,15 +683,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
         // Generate the right-hand side expression and store in a temp variable
         compiler.getExpressionProcessor().generate(code, classWriter, assignExpr.getRight(), null);
-        int listClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_LIST);
+        int listClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LIST);
         code.checkcast(listClass);
-        int tempListSlot = getOrAllocateTempSlot(context, "$tempList", TypeConversionUtils.LJAVA_UTIL_LIST);
+        int tempListSlot = getOrAllocateTempSlot(context, "$tempList", ConstantJavaType.LJAVA_UTIL_LIST);
         code.astore(tempListSlot);
 
-        int listGetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
-        int listSizeRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_SIZE, TypeConversionUtils.DESCRIPTER___I);
-        int listAddRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, TypeConversionUtils.METHOD_ADD, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
-        int listClearRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_LIST, "clear", TypeConversionUtils.DESCRIPTOR___V);
+        int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
+        int listSizeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
+        int listAddRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+        int listClearRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, "clear", ConstantJavaDescriptor.DESCRIPTOR___V);
 
         // First pass: count elements before rest to get restStartIndex
         int restStartIndex = 0;
@@ -750,12 +753,12 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     // Get source list size
                     code.aload(tempListSlot);
                     code.invokeinterface(listSizeRef, 1);
-                    int sizeSlot = getOrAllocateTempSlot(context, "$restSize", TypeConversionUtils.ABBR_INTEGER);
+                    int sizeSlot = getOrAllocateTempSlot(context, "$restSize", ConstantJavaType.ABBR_INTEGER);
                     code.istore(sizeSlot);
 
                     // Initialize loop counter at restStartIndex
                     code.iconst(restStartIndex);
-                    int iSlot = getOrAllocateTempSlot(context, "$restI", TypeConversionUtils.ABBR_INTEGER);
+                    int iSlot = getOrAllocateTempSlot(context, "$restI", ConstantJavaType.ABBR_INTEGER);
                     code.istore(iSlot);
 
                     // Loop to copy remaining elements
@@ -832,13 +835,13 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 code.getfield(fieldRef);
                 code.iconst(0);
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.iaload();
-                    case TypeConversionUtils.ABBR_LONG -> code.laload();
-                    case TypeConversionUtils.ABBR_FLOAT -> code.faload();
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.daload();
-                    case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.baload();
-                    case TypeConversionUtils.ABBR_CHARACTER -> code.caload();
-                    case TypeConversionUtils.ABBR_SHORT -> code.saload();
+                    case ConstantJavaType.ABBR_INTEGER -> code.iaload();
+                    case ConstantJavaType.ABBR_LONG -> code.laload();
+                    case ConstantJavaType.ABBR_FLOAT -> code.faload();
+                    case ConstantJavaType.ABBR_DOUBLE -> code.daload();
+                    case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.baload();
+                    case ConstantJavaType.ABBR_CHARACTER -> code.caload();
+                    case ConstantJavaType.ABBR_SHORT -> code.saload();
                     default -> code.aaload();
                 }
 
@@ -851,7 +854,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
             }
 
             // Duplicate for expression result, then store into holder array
-            if (TypeConversionUtils.ABBR_DOUBLE.equals(varType) || TypeConversionUtils.ABBR_LONG.equals(varType)) {
+            if (ConstantJavaType.ABBR_DOUBLE.equals(varType) || ConstantJavaType.ABBR_LONG.equals(varType)) {
                 code.dup2_x2();
             } else {
                 code.dup_x2();
@@ -859,13 +862,13 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
             // Store into holder array
             switch (varType) {
-                case TypeConversionUtils.ABBR_INTEGER -> code.iastore();
-                case TypeConversionUtils.ABBR_LONG -> code.lastore();
-                case TypeConversionUtils.ABBR_FLOAT -> code.fastore();
-                case TypeConversionUtils.ABBR_DOUBLE -> code.dastore();
-                case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.bastore();
-                case TypeConversionUtils.ABBR_CHARACTER -> code.castore();
-                case TypeConversionUtils.ABBR_SHORT -> code.sastore();
+                case ConstantJavaType.ABBR_INTEGER -> code.iastore();
+                case ConstantJavaType.ABBR_LONG -> code.lastore();
+                case ConstantJavaType.ABBR_FLOAT -> code.fastore();
+                case ConstantJavaType.ABBR_DOUBLE -> code.dastore();
+                case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
+                case ConstantJavaType.ABBR_CHARACTER -> code.castore();
+                case ConstantJavaType.ABBR_SHORT -> code.sastore();
                 default -> code.aastore();
             }
         } else {
@@ -896,7 +899,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
             }
 
             // Duplicate for expression result, then store
-            if (TypeConversionUtils.ABBR_DOUBLE.equals(varType) || TypeConversionUtils.ABBR_LONG.equals(varType)) {
+            if (ConstantJavaType.ABBR_DOUBLE.equals(varType) || ConstantJavaType.ABBR_LONG.equals(varType)) {
                 code.dup2_x1();
             } else {
                 code.dup_x1();
@@ -914,82 +917,82 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         switch (op) {
             case AddAssign -> {
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.iadd();
-                    case TypeConversionUtils.ABBR_LONG -> code.ladd();
-                    case TypeConversionUtils.ABBR_FLOAT -> code.fadd();
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.dadd();
-                    case TypeConversionUtils.LJAVA_LANG_STRING -> {
-                        int concatMethod = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_CONCAT, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
+                    case ConstantJavaType.ABBR_INTEGER -> code.iadd();
+                    case ConstantJavaType.ABBR_LONG -> code.ladd();
+                    case ConstantJavaType.ABBR_FLOAT -> code.fadd();
+                    case ConstantJavaType.ABBR_DOUBLE -> code.dadd();
+                    case ConstantJavaType.LJAVA_LANG_STRING -> {
+                        int concatMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_CONCAT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
                         code.invokevirtual(concatMethod);
                     }
                 }
             }
             case SubAssign -> {
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.isub();
-                    case TypeConversionUtils.ABBR_LONG -> code.lsub();
-                    case TypeConversionUtils.ABBR_FLOAT -> code.fsub();
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.dsub();
+                    case ConstantJavaType.ABBR_INTEGER -> code.isub();
+                    case ConstantJavaType.ABBR_LONG -> code.lsub();
+                    case ConstantJavaType.ABBR_FLOAT -> code.fsub();
+                    case ConstantJavaType.ABBR_DOUBLE -> code.dsub();
                 }
             }
             case MulAssign -> {
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.imul();
-                    case TypeConversionUtils.ABBR_LONG -> code.lmul();
-                    case TypeConversionUtils.ABBR_FLOAT -> code.fmul();
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.dmul();
+                    case ConstantJavaType.ABBR_INTEGER -> code.imul();
+                    case ConstantJavaType.ABBR_LONG -> code.lmul();
+                    case ConstantJavaType.ABBR_FLOAT -> code.fmul();
+                    case ConstantJavaType.ABBR_DOUBLE -> code.dmul();
                 }
             }
             case DivAssign -> {
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.idiv();
-                    case TypeConversionUtils.ABBR_LONG -> code.ldiv();
-                    case TypeConversionUtils.ABBR_FLOAT -> code.fdiv();
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.ddiv();
+                    case ConstantJavaType.ABBR_INTEGER -> code.idiv();
+                    case ConstantJavaType.ABBR_LONG -> code.ldiv();
+                    case ConstantJavaType.ABBR_FLOAT -> code.fdiv();
+                    case ConstantJavaType.ABBR_DOUBLE -> code.ddiv();
                 }
             }
             case ModAssign -> {
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.irem();
-                    case TypeConversionUtils.ABBR_LONG -> code.lrem();
-                    case TypeConversionUtils.ABBR_FLOAT -> code.frem();
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.drem();
+                    case ConstantJavaType.ABBR_INTEGER -> code.irem();
+                    case ConstantJavaType.ABBR_LONG -> code.lrem();
+                    case ConstantJavaType.ABBR_FLOAT -> code.frem();
+                    case ConstantJavaType.ABBR_DOUBLE -> code.drem();
                 }
             }
             case BitAndAssign -> {
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.iand();
-                    case TypeConversionUtils.ABBR_LONG -> code.land();
+                    case ConstantJavaType.ABBR_INTEGER -> code.iand();
+                    case ConstantJavaType.ABBR_LONG -> code.land();
                 }
             }
             case BitOrAssign -> {
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.ior();
-                    case TypeConversionUtils.ABBR_LONG -> code.lor();
+                    case ConstantJavaType.ABBR_INTEGER -> code.ior();
+                    case ConstantJavaType.ABBR_LONG -> code.lor();
                 }
             }
             case BitXorAssign -> {
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.ixor();
-                    case TypeConversionUtils.ABBR_LONG -> code.lxor();
+                    case ConstantJavaType.ABBR_INTEGER -> code.ixor();
+                    case ConstantJavaType.ABBR_LONG -> code.lxor();
                 }
             }
             case LShiftAssign -> {
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.ishl();
-                    case TypeConversionUtils.ABBR_LONG -> code.lshl();
+                    case ConstantJavaType.ABBR_INTEGER -> code.ishl();
+                    case ConstantJavaType.ABBR_LONG -> code.lshl();
                 }
             }
             case RShiftAssign -> {
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.ishr();
-                    case TypeConversionUtils.ABBR_LONG -> code.lshr();
+                    case ConstantJavaType.ABBR_INTEGER -> code.ishr();
+                    case ConstantJavaType.ABBR_LONG -> code.lshr();
                 }
             }
             case ZeroFillRShiftAssign -> {
                 switch (varType) {
-                    case TypeConversionUtils.ABBR_INTEGER -> code.iushr();
-                    case TypeConversionUtils.ABBR_LONG -> code.lushr();
+                    case ConstantJavaType.ABBR_INTEGER -> code.iushr();
+                    case ConstantJavaType.ABBR_LONG -> code.lushr();
                 }
             }
             default -> {
@@ -1012,15 +1015,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
         // Generate the right-hand side expression and store in a temp variable
         compiler.getExpressionProcessor().generate(code, classWriter, assignExpr.getRight(), null);
-        int mapClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_MAP);
+        int mapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_MAP);
         code.checkcast(mapClass);
-        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap", TypeConversionUtils.LJAVA_UTIL_MAP);
+        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap", ConstantJavaType.LJAVA_UTIL_MAP);
         code.astore(tempMapSlot);
 
-        int mapGetRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_GET, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        int mapRemoveRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, TypeConversionUtils.METHOD_REMOVE, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        int mapClearRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, "clear", TypeConversionUtils.DESCRIPTOR___V);
-        int mapPutAllRef = cp.addInterfaceMethodRef(TypeConversionUtils.JAVA_UTIL_MAP, "putAll", TypeConversionUtils.DESCRIPTOR_LJAVA_UTIL_MAP__V);
+        int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapRemoveRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapClearRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, "clear", ConstantJavaDescriptor.DESCRIPTOR___V);
+        int mapPutAllRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, "putAll", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_UTIL_MAP__V);
 
         List<String> extractedKeys = new ArrayList<>();
 
@@ -1133,17 +1136,17 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
     private void generateStringValueOf(CodeBuilder code, ClassWriter classWriter, String valueType) {
         var cp = classWriter.getConstantPool();
         String descriptor = switch (valueType) {
-            case TypeConversionUtils.ABBR_INTEGER -> TypeConversionUtils.DESCRIPTOR_I__LJAVA_LANG_STRING;
-            case TypeConversionUtils.ABBR_LONG -> TypeConversionUtils.DESCRIPTOR_J__LJAVA_LANG_STRING;
-            case TypeConversionUtils.ABBR_FLOAT -> TypeConversionUtils.DESCRIPTOR_F__LJAVA_LANG_STRING;
-            case TypeConversionUtils.ABBR_DOUBLE -> TypeConversionUtils.DESCRIPTOR_D__LJAVA_LANG_STRING;
-            case TypeConversionUtils.ABBR_BOOLEAN -> TypeConversionUtils.DESCRIPTOR_Z__LJAVA_LANG_STRING;
-            case TypeConversionUtils.ABBR_CHARACTER -> TypeConversionUtils.DESCRIPTOR_C__LJAVA_LANG_STRING;
-            case TypeConversionUtils.ABBR_BYTE -> TypeConversionUtils.DESCRIPTOR_B__LJAVA_LANG_STRING;
-            case TypeConversionUtils.ABBR_SHORT -> TypeConversionUtils.DESCRIPTOR_S__LJAVA_LANG_STRING;
-            default -> TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_INTEGER -> ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_LONG -> ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_FLOAT -> ConstantJavaDescriptor.DESCRIPTOR_F__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_DOUBLE -> ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_BOOLEAN -> ConstantJavaDescriptor.DESCRIPTOR_Z__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_CHARACTER -> ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_BYTE -> ConstantJavaDescriptor.DESCRIPTOR_B__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_SHORT -> ConstantJavaDescriptor.DESCRIPTOR_S__LJAVA_LANG_STRING;
+            default -> ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING;
         };
-        int valueOfRef = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_STRING, TypeConversionUtils.METHOD_VALUE_OF, descriptor);
+        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_VALUE_OF, descriptor);
         code.invokestatic(valueOfRef);
     }
 
@@ -1205,7 +1208,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
         coerceAssignmentValue(code, classWriter, assignExpr, valueType, fieldDescriptor);
 
-        if (TypeConversionUtils.ABBR_DOUBLE.equals(fieldDescriptor) || TypeConversionUtils.ABBR_LONG.equals(fieldDescriptor)) {
+        if (ConstantJavaType.ABBR_DOUBLE.equals(fieldDescriptor) || ConstantJavaType.ABBR_LONG.equals(fieldDescriptor)) {
             code.dup2_x1();
         } else {
             code.dup_x1();

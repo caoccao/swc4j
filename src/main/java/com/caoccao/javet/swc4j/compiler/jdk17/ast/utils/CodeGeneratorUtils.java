@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
-
 /**
  * Utility class for code generation helpers.
  */
@@ -38,15 +39,15 @@ public final class CodeGeneratorUtils {
      */
     public static ReturnTypeInfo createReturnTypeInfoFromDescriptor(String descriptor) {
         return switch (descriptor) {
-            case TypeConversionUtils.ABBR_INTEGER -> new ReturnTypeInfo(ReturnType.INT, 1, null, null);
-            case TypeConversionUtils.ABBR_BOOLEAN -> new ReturnTypeInfo(ReturnType.BOOLEAN, 1, null, null);
-            case TypeConversionUtils.ABBR_BYTE -> new ReturnTypeInfo(ReturnType.BYTE, 1, null, null);
-            case TypeConversionUtils.ABBR_CHARACTER -> new ReturnTypeInfo(ReturnType.CHAR, 1, null, null);
-            case TypeConversionUtils.ABBR_SHORT -> new ReturnTypeInfo(ReturnType.SHORT, 1, null, null);
-            case TypeConversionUtils.ABBR_LONG -> new ReturnTypeInfo(ReturnType.LONG, 2, null, null);
-            case TypeConversionUtils.ABBR_FLOAT -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null, null);
-            case TypeConversionUtils.ABBR_DOUBLE -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null, null);
-            case TypeConversionUtils.LJAVA_LANG_STRING -> new ReturnTypeInfo(ReturnType.STRING, 1, null, null);
+            case ConstantJavaType.ABBR_INTEGER -> new ReturnTypeInfo(ReturnType.INT, 1, null, null);
+            case ConstantJavaType.ABBR_BOOLEAN -> new ReturnTypeInfo(ReturnType.BOOLEAN, 1, null, null);
+            case ConstantJavaType.ABBR_BYTE -> new ReturnTypeInfo(ReturnType.BYTE, 1, null, null);
+            case ConstantJavaType.ABBR_CHARACTER -> new ReturnTypeInfo(ReturnType.CHAR, 1, null, null);
+            case ConstantJavaType.ABBR_SHORT -> new ReturnTypeInfo(ReturnType.SHORT, 1, null, null);
+            case ConstantJavaType.ABBR_LONG -> new ReturnTypeInfo(ReturnType.LONG, 2, null, null);
+            case ConstantJavaType.ABBR_FLOAT -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null, null);
+            case ConstantJavaType.ABBR_DOUBLE -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null, null);
+            case ConstantJavaType.LJAVA_LANG_STRING -> new ReturnTypeInfo(ReturnType.STRING, 1, null, null);
             default -> new ReturnTypeInfo(ReturnType.OBJECT, 1, descriptor, null);
         };
     }
@@ -82,36 +83,14 @@ public final class CodeGeneratorUtils {
     }
 
     /**
-     * Converts a ReturnTypeInfo to its descriptor string.
-     *
-     * @param returnTypeInfo the return type information
-     * @return the descriptor string (e.g., "V", "I", "Ljava/lang/String;")
-     */
-    public static String getReturnDescriptor(ReturnTypeInfo returnTypeInfo) {
-        return switch (returnTypeInfo.type()) {
-            case VOID -> TypeConversionUtils.ABBR_VOID;
-            case INT -> TypeConversionUtils.ABBR_INTEGER;
-            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
-            case BYTE -> TypeConversionUtils.ABBR_BYTE;
-            case CHAR -> TypeConversionUtils.ABBR_CHARACTER;
-            case SHORT -> TypeConversionUtils.ABBR_SHORT;
-            case LONG -> TypeConversionUtils.ABBR_LONG;
-            case FLOAT -> TypeConversionUtils.ABBR_FLOAT;
-            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
-            case STRING -> TypeConversionUtils.LJAVA_LANG_STRING;
-            case OBJECT ->
-                    returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : TypeConversionUtils.LJAVA_LANG_OBJECT;
-        };
-    }
 
-    /**
      * Returns the number of local variable slots required for a type.
      *
      * @param type the type descriptor
      * @return 2 for long/double, 1 for all other types
      */
     public static int getSlotSize(String type) {
-        return (TypeConversionUtils.ABBR_LONG.equals(type) || TypeConversionUtils.ABBR_DOUBLE.equals(type)) ? 2 : 1;
+        return (ConstantJavaType.ABBR_LONG.equals(type) || ConstantJavaType.ABBR_DOUBLE.equals(type)) ? 2 : 1;
     }
 
     /**
@@ -144,11 +123,11 @@ public final class CodeGeneratorUtils {
      */
     public static void loadParameter(CodeBuilder code, int slot, String paramType) {
         switch (paramType) {
-            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE,
-                 TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_SHORT -> code.iload(slot);
-            case TypeConversionUtils.ABBR_LONG -> code.lload(slot);
-            case TypeConversionUtils.ABBR_FLOAT -> code.fload(slot);
-            case TypeConversionUtils.ABBR_DOUBLE -> code.dload(slot);
+            case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE,
+                 ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_SHORT -> code.iload(slot);
+            case ConstantJavaType.ABBR_LONG -> code.lload(slot);
+            case ConstantJavaType.ABBR_FLOAT -> code.fload(slot);
+            case ConstantJavaType.ABBR_DOUBLE -> code.dload(slot);
             default -> code.aload(slot);
         }
     }

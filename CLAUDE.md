@@ -176,7 +176,8 @@ Version is defined in `build.gradle.kts` under `Config.Versions.SWC4J`. To chang
 
 ## Code Style
 
-- Java target: Java 8 (1.8)
+- Java target: Java 17
 - Rust edition: 2024
 - Java classes use comprehensive Javadoc
 - Rust code uses standard rustfmt formatting
+- No `import static`

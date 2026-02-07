@@ -16,6 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+
 /**
  * The enum Return type.
  */
@@ -23,53 +25,66 @@ public enum ReturnType {
     /**
      * Boolean return type.
      */
-    BOOLEAN(3),
+    BOOLEAN(3, ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BOOLEAN),
     /**
      * Byte return type.
      */
-    BYTE(3),
+    BYTE(3, ConstantJavaType.ABBR_BYTE, ConstantJavaType.ABBR_BYTE),
     /**
      * Char return type.
      */
-    CHAR(3),
+    CHAR(3, ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_CHARACTER),
     /**
      * Double return type.
      */
-    DOUBLE(4),
+    DOUBLE(4, ConstantJavaType.ABBR_DOUBLE, ConstantJavaType.ABBR_DOUBLE),
     /**
      * Float return type.
      */
-    FLOAT(3),
+    FLOAT(3, ConstantJavaType.ABBR_FLOAT, ConstantJavaType.ABBR_FLOAT),
     /**
      * Int return type.
      */
-    INT(3),
+    INT(3, ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_INTEGER),
     /**
      * Long return type.
      */
-    LONG(4),
+    LONG(4, ConstantJavaType.ABBR_LONG, ConstantJavaType.ABBR_LONG),
     /**
      * Object return type.
      */
-    OBJECT(3),
+    OBJECT(3, ConstantJavaType.ABBR_VOID, ConstantJavaType.LJAVA_LANG_OBJECT),
     /**
      * Short return type.
      */
-    SHORT(3),
+    SHORT(3, ConstantJavaType.ABBR_SHORT, ConstantJavaType.ABBR_SHORT),
     /**
      * String return type.
      */
-    STRING(3),
+    STRING(3, ConstantJavaType.ABBR_VOID, ConstantJavaType.LJAVA_LANG_STRING),
     /**
      * Void return type.
      */
-    VOID(0),
+    VOID(0, ConstantJavaType.ABBR_VOID, ConstantJavaType.ABBR_VOID),
     ;
 
+    private final String descriptor;
     private final int minStack;
+    private final String primitiveDescriptor;
 
-    ReturnType(int minStack) {
+    ReturnType(int minStack, String primitiveDescriptor, String descriptor) {
         this.minStack = minStack;
+        this.primitiveDescriptor = primitiveDescriptor;
+        this.descriptor = descriptor;
+    }
+
+    /**
+     * Gets descriptor.
+     *
+     * @return the descriptor
+     */
+    public String getDescriptor() {
+        return descriptor;
     }
 
     /**
@@ -79,5 +94,14 @@ public enum ReturnType {
      */
     public int getMinStack() {
         return minStack;
+    }
+
+    /**
+     * Gets primitive descriptor.
+     *
+     * @return the primitive descriptor
+     */
+    public String getPrimitiveDescriptor() {
+        return primitiveDescriptor;
     }
 }

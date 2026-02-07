@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026. caoccao.com Sam Cao
+ * Copyright (c) 2026. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.module;
 
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstImportDecl;
@@ -22,7 +23,8 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
-
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -95,17 +97,17 @@ public final class ImportDeclProcessor {
      * - void -> V
      */
     private String getTypeDescriptor(Class<?> type) {
-        if (type == void.class) return TypeConversionUtils.ABBR_VOID;
-        if (type == boolean.class) return TypeConversionUtils.ABBR_BOOLEAN;
-        if (type == byte.class) return TypeConversionUtils.ABBR_BYTE;
-        if (type == char.class) return TypeConversionUtils.ABBR_CHARACTER;
-        if (type == short.class) return TypeConversionUtils.ABBR_SHORT;
-        if (type == int.class) return TypeConversionUtils.ABBR_INTEGER;
-        if (type == long.class) return TypeConversionUtils.ABBR_LONG;
-        if (type == float.class) return TypeConversionUtils.ABBR_FLOAT;
-        if (type == double.class) return TypeConversionUtils.ABBR_DOUBLE;
+        if (type == void.class) return ConstantJavaType.ABBR_VOID;
+        if (type == boolean.class) return ConstantJavaType.ABBR_BOOLEAN;
+        if (type == byte.class) return ConstantJavaType.ABBR_BYTE;
+        if (type == char.class) return ConstantJavaType.ABBR_CHARACTER;
+        if (type == short.class) return ConstantJavaType.ABBR_SHORT;
+        if (type == int.class) return ConstantJavaType.ABBR_INTEGER;
+        if (type == long.class) return ConstantJavaType.ABBR_LONG;
+        if (type == float.class) return ConstantJavaType.ABBR_FLOAT;
+        if (type == double.class) return ConstantJavaType.ABBR_DOUBLE;
         if (type.isArray()) {
-            return TypeConversionUtils.ARRAY_PREFIX + getTypeDescriptor(type.getComponentType());
+            return ConstantJavaType.ARRAY_PREFIX + getTypeDescriptor(type.getComponentType());
         }
         return "L" + getInternalName(type.getName()) + ";";
     }
@@ -166,8 +168,8 @@ public final class ImportDeclProcessor {
                         if (Modifier.isPublic(constructor.getModifiers())) {
                             String descriptor = getConstructorDescriptor(constructor);
                             boolean isVarArgs = constructor.isVarArgs();
-                            MethodInfo methodInfo = new MethodInfo(TypeConversionUtils.METHOD_INIT, descriptor, TypeConversionUtils.ABBR_VOID, false, isVarArgs);
-                            typeInfo.addMethod(TypeConversionUtils.METHOD_INIT, methodInfo);
+                            MethodInfo methodInfo = new MethodInfo(ConstantJavaMethod.METHOD_INIT, descriptor, ConstantJavaType.ABBR_VOID, false, isVarArgs);
+                            typeInfo.addMethod(ConstantJavaMethod.METHOD_INIT, methodInfo);
                         }
                     }
 

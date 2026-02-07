@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
@@ -24,8 +25,10 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.util.Optional;
 
 /**
@@ -53,17 +56,17 @@ public final class ArrayLiteralProcessor extends BaseAstProcessor<Swc4jAstArrayL
         // Check if we should generate a Java array or ArrayList
         boolean isJavaArray = returnTypeInfo != null &&
                 returnTypeInfo.descriptor() != null &&
-                returnTypeInfo.descriptor().startsWith(TypeConversionUtils.ARRAY_PREFIX);
+                returnTypeInfo.descriptor().startsWith(ConstantJavaType.ARRAY_PREFIX);
 
         if (isJavaArray) {
             // Generate Java array
             generateJavaArray(code, classWriter, arrayLit, returnTypeInfo.descriptor());
         } else {
             // Array literal - convert to ArrayList
-            int arrayListClass = cp.addClass(TypeConversionUtils.JAVA_UTIL_ARRAYLIST);
-            int arrayListInit = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
-            int arrayListAdd = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, TypeConversionUtils.METHOD_ADD, TypeConversionUtils.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
-            int arrayListAddAll = cp.addMethodRef(TypeConversionUtils.JAVA_UTIL_ARRAYLIST, "addAll", "(Ljava/util/Collection;)Z");
+            int arrayListClass = cp.addClass(ConstantJavaType.JAVA_UTIL_ARRAYLIST);
+            int arrayListInit = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+            int arrayListAdd = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+            int arrayListAddAll = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, "addAll", "(Ljava/util/Collection;)Z");
 
             // Create new ArrayList instance
             code.newInstance(arrayListClass);
@@ -93,14 +96,14 @@ public final class ArrayLiteralProcessor extends BaseAstProcessor<Swc4jAstArrayL
                         // Generate code for the element expression - ensure it's boxed
                         ISwc4jAstExpr elemExpr = elem.getExpr();
                         String elemType = compiler.getTypeResolver().inferTypeFromExpr(elemExpr);
-                        if (elemType == null) elemType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                        if (elemType == null) elemType = ConstantJavaType.LJAVA_LANG_OBJECT;
 
                         compiler.getExpressionProcessor().generate(code, classWriter, elemExpr, null);
 
                         // Box primitives to objects
-                        if (TypeConversionUtils.ABBR_INTEGER.equals(elemType) || TypeConversionUtils.ABBR_BOOLEAN.equals(elemType) || TypeConversionUtils.ABBR_BYTE.equals(elemType) ||
-                                TypeConversionUtils.ABBR_CHARACTER.equals(elemType) || TypeConversionUtils.ABBR_SHORT.equals(elemType) || TypeConversionUtils.ABBR_LONG.equals(elemType) ||
-                                TypeConversionUtils.ABBR_FLOAT.equals(elemType) || TypeConversionUtils.ABBR_DOUBLE.equals(elemType)) {
+                        if (ConstantJavaType.ABBR_INTEGER.equals(elemType) || ConstantJavaType.ABBR_BOOLEAN.equals(elemType) || ConstantJavaType.ABBR_BYTE.equals(elemType) ||
+                                ConstantJavaType.ABBR_CHARACTER.equals(elemType) || ConstantJavaType.ABBR_SHORT.equals(elemType) || ConstantJavaType.ABBR_LONG.equals(elemType) ||
+                                ConstantJavaType.ABBR_FLOAT.equals(elemType) || ConstantJavaType.ABBR_DOUBLE.equals(elemType)) {
                             TypeConversionUtils.boxPrimitiveType(code, classWriter, elemType, TypeConversionUtils.getWrapperType(elemType));
                         }
 
@@ -120,7 +123,7 @@ public final class ArrayLiteralProcessor extends BaseAstProcessor<Swc4jAstArrayL
             Swc4jAstArrayLit arrayLit,
             String arrayDescriptor) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
-        // Extract element type from array descriptor (e.g., TypeConversionUtils.ARRAY_I -> TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ARRAY_LJAVA_LANG_STRING -> TypeConversionUtils.LJAVA_LANG_STRING)
+        // Extract element type from array descriptor (e.g., ConstantJavaType.ARRAY_I -> ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ARRAY_LJAVA_LANG_STRING -> ConstantJavaType.LJAVA_LANG_STRING)
         String elemType = arrayDescriptor.substring(1);
 
         // Count non-empty elements
@@ -131,14 +134,14 @@ public final class ArrayLiteralProcessor extends BaseAstProcessor<Swc4jAstArrayL
 
         // Use newarray for primitive types, anewarray for reference types
         switch (elemType) {
-            case TypeConversionUtils.ABBR_BOOLEAN -> code.newarray(4);  // T_BOOLEAN
-            case TypeConversionUtils.ABBR_CHARACTER -> code.newarray(5);  // T_CHAR
-            case TypeConversionUtils.ABBR_FLOAT -> code.newarray(6);  // T_FLOAT
-            case TypeConversionUtils.ABBR_DOUBLE -> code.newarray(7);  // T_DOUBLE
-            case TypeConversionUtils.ABBR_BYTE -> code.newarray(8);  // T_BYTE
-            case TypeConversionUtils.ABBR_SHORT -> code.newarray(9);  // T_SHORT
-            case TypeConversionUtils.ABBR_INTEGER -> code.newarray(10); // T_INT
-            case TypeConversionUtils.ABBR_LONG -> code.newarray(11); // T_LONG
+            case ConstantJavaType.ABBR_BOOLEAN -> code.newarray(4);  // T_BOOLEAN
+            case ConstantJavaType.ABBR_CHARACTER -> code.newarray(5);  // T_CHAR
+            case ConstantJavaType.ABBR_FLOAT -> code.newarray(6);  // T_FLOAT
+            case ConstantJavaType.ABBR_DOUBLE -> code.newarray(7);  // T_DOUBLE
+            case ConstantJavaType.ABBR_BYTE -> code.newarray(8);  // T_BYTE
+            case ConstantJavaType.ABBR_SHORT -> code.newarray(9);  // T_SHORT
+            case ConstantJavaType.ABBR_INTEGER -> code.newarray(10); // T_INT
+            case ConstantJavaType.ABBR_LONG -> code.newarray(11); // T_LONG
             default -> {
                 // Reference type array - use anewarray
                 String className = elemType.substring(1, elemType.length() - 1); // Remove "L" and ";"
@@ -159,7 +162,7 @@ public final class ArrayLiteralProcessor extends BaseAstProcessor<Swc4jAstArrayL
 
                 // Generate the element value
                 String exprType = compiler.getTypeResolver().inferTypeFromExpr(elemExpr);
-                if (exprType == null) exprType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (exprType == null) exprType = ConstantJavaType.LJAVA_LANG_OBJECT;
 
                 compiler.getExpressionProcessor().generate(code, classWriter, elemExpr, null);
 
@@ -172,14 +175,14 @@ public final class ArrayLiteralProcessor extends BaseAstProcessor<Swc4jAstArrayL
 
                 // Store in array using appropriate instruction
                 switch (elemType) {
-                    case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE ->
+                    case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE ->
                             code.bastore(); // boolean and byte use bastore
-                    case TypeConversionUtils.ABBR_CHARACTER -> code.castore(); // char uses castore
-                    case TypeConversionUtils.ABBR_SHORT -> code.sastore(); // short uses sastore
-                    case TypeConversionUtils.ABBR_INTEGER -> code.iastore(); // int uses iastore
-                    case TypeConversionUtils.ABBR_LONG -> code.lastore(); // long uses lastore
-                    case TypeConversionUtils.ABBR_FLOAT -> code.fastore(); // float uses fastore
-                    case TypeConversionUtils.ABBR_DOUBLE -> code.dastore(); // double uses dastore
+                    case ConstantJavaType.ABBR_CHARACTER -> code.castore(); // char uses castore
+                    case ConstantJavaType.ABBR_SHORT -> code.sastore(); // short uses sastore
+                    case ConstantJavaType.ABBR_INTEGER -> code.iastore(); // int uses iastore
+                    case ConstantJavaType.ABBR_LONG -> code.lastore(); // long uses lastore
+                    case ConstantJavaType.ABBR_FLOAT -> code.fastore(); // float uses fastore
+                    case ConstantJavaType.ABBR_DOUBLE -> code.dastore(); // double uses dastore
                     default -> code.aastore(); // reference types use aastore
                 }
 

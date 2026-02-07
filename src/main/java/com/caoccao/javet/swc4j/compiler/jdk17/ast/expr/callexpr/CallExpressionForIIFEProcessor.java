@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
@@ -30,13 +31,14 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.memory.CapturedVariable;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
-
 import java.io.IOException;
 import java.util.*;
-
 /**
  * Generates bytecode for IIFE (Immediately Invoked Function Expression) patterns.
  * <p>
@@ -171,7 +173,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         for (String paramType : paramTypes) {
             methodDescriptor.append(paramType);
         }
-        methodDescriptor.append(")").append(getReturnDescriptor(returnInfo));
+        methodDescriptor.append(")").append(TypeConversionUtils.getReturnDescriptor(returnInfo));
 
         return new IIFETypeInfo(interfaceName, methodName, methodDescriptor.toString(),
                 paramTypes, paramNames, returnInfo);
@@ -306,7 +308,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
                 }
                 String type = compiler.getTypeResolver().inferTypeFromExpr(arg);
                 if (type == null) {
-                    type = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                    type = ConstantJavaType.LJAVA_LANG_OBJECT;
                 }
                 return compiler.getTypeResolver().createReturnTypeInfoFromDescriptor(type);
             }
@@ -394,7 +396,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
             Swc4jAstArrowExpr arrowExpr,
             IIFETypeInfo typeInfo,
             List<IIFECapturedVariable> capturedVariables) throws IOException, Swc4jByteCodeCompilerException {
-        ClassWriter classWriter = new ClassWriter(implClassName, TypeConversionUtils.JAVA_LANG_OBJECT);
+        ClassWriter classWriter = new ClassWriter(implClassName, ConstantJavaType.JAVA_LANG_OBJECT);
         ClassWriter.ConstantPool cp = classWriter.getConstantPool();
 
         // Add the interface
@@ -433,7 +435,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         // Call super()
         code.aload(0);
         var cp = classWriter.getConstantPool();
-        int superInit = cp.addMethodRef(TypeConversionUtils.JAVA_LANG_OBJECT, TypeConversionUtils.METHOD_INIT, TypeConversionUtils.DESCRIPTOR___V);
+        int superInit = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
         code.invokespecial(superInit);
 
         // Initialize captured variable fields
@@ -456,7 +458,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         descriptor.append(")V");
 
         int maxLocals = slot;
-        classWriter.addMethod(0x0001, TypeConversionUtils.METHOD_INIT, descriptor.toString(), code.toByteArray(), 10, maxLocals);
+        classWriter.addMethod(0x0001, ConstantJavaMethod.METHOD_INIT, descriptor.toString(), code.toByteArray(), 10, maxLocals);
     }
 
     private void generateImplMethod(
@@ -551,7 +553,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
     }
 
     private byte[] generateInterface(IIFETypeInfo typeInfo) throws IOException {
-        ClassWriter classWriter = new ClassWriter(typeInfo.interfaceName(), TypeConversionUtils.JAVA_LANG_OBJECT);
+        ClassWriter classWriter = new ClassWriter(typeInfo.interfaceName(), ConstantJavaType.JAVA_LANG_OBJECT);
         // Set interface flag: ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT
         classWriter.setAccessFlags(0x0601);
 
@@ -596,7 +598,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         constructorDesc.append(")V");
 
         // invokespecial <init>
-        int constructorRef = cp.addMethodRef(implClassName, TypeConversionUtils.METHOD_INIT, constructorDesc.toString());
+        int constructorRef = cp.addMethodRef(implClassName, ConstantJavaMethod.METHOD_INIT, constructorDesc.toString());
         code.invokespecial(constructorRef);
 
         // Now we have the instance on the stack, call the method with arguments
@@ -634,25 +636,8 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         }
     }
 
-    private String getReturnDescriptor(ReturnTypeInfo returnInfo) {
-        return switch (returnInfo.type()) {
-            case VOID -> TypeConversionUtils.ABBR_VOID;
-            case INT -> TypeConversionUtils.ABBR_INTEGER;
-            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
-            case BYTE -> TypeConversionUtils.ABBR_BYTE;
-            case CHAR -> TypeConversionUtils.ABBR_CHARACTER;
-            case SHORT -> TypeConversionUtils.ABBR_SHORT;
-            case LONG -> TypeConversionUtils.ABBR_LONG;
-            case FLOAT -> TypeConversionUtils.ABBR_FLOAT;
-            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
-            case STRING -> TypeConversionUtils.LJAVA_LANG_STRING;
-            case OBJECT ->
-                    returnInfo.descriptor() != null ? returnInfo.descriptor() : TypeConversionUtils.LJAVA_LANG_OBJECT;
-        };
-    }
-
     private int getSlotSize(String type) {
-        return (TypeConversionUtils.ABBR_LONG.equals(type) || TypeConversionUtils.ABBR_DOUBLE.equals(type)) ? 2 : 1;
+        return (ConstantJavaType.ABBR_LONG.equals(type) || ConstantJavaType.ABBR_DOUBLE.equals(type)) ? 2 : 1;
     }
 
     /**
@@ -670,11 +655,11 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
 
     private void loadVariable(CodeBuilder code, int slot, String type) {
         switch (type) {
-            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE,
-                 TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_SHORT -> code.iload(slot);
-            case TypeConversionUtils.ABBR_LONG -> code.lload(slot);
-            case TypeConversionUtils.ABBR_FLOAT -> code.fload(slot);
-            case TypeConversionUtils.ABBR_DOUBLE -> code.dload(slot);
+            case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE,
+                 ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_SHORT -> code.iload(slot);
+            case ConstantJavaType.ABBR_LONG -> code.lload(slot);
+            case ConstantJavaType.ABBR_FLOAT -> code.fload(slot);
+            case ConstantJavaType.ABBR_DOUBLE -> code.dload(slot);
             default -> code.aload(slot);
         }
     }
