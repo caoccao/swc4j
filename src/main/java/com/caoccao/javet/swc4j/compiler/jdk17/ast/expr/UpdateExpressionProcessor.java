@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUpdateOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -73,6 +74,8 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         if (updateExpr.getArg() instanceof Swc4jAstIdent ident) {
             // Phase 1: Local variables
             handleLocalVariable(code, classWriter, updateExpr, ident, returnTypeInfo);
+        } else if (updateExpr.getArg() instanceof Swc4jAstSuperPropExpr superPropExpr) {
+            handleSuperPropertyUpdate(code, classWriter, updateExpr, superPropExpr);
         } else if (updateExpr.getArg() instanceof Swc4jAstMemberExpr memberExpr) {
             // Phase 2: Member access (obj.prop++ or arr[i]++)
             handleMemberAccess(code, classWriter, updateExpr, memberExpr, returnTypeInfo);
@@ -655,6 +658,70 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
                 "Update expressions on member access not yet supported for type: " + objType);
     }
 
+    private String extractSuperPropertyName(
+            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
+        if (superPropExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+            return propIdent.getSym();
+        }
+        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp
+                && computedProp.getExpr() instanceof Swc4jAstStr str) {
+            return str.getValue();
+        }
+        throw new Swc4jByteCodeCompilerException(
+                getSourceCode(),
+                superPropExpr,
+                "Computed super property expressions not yet supported");
+    }
+
+    private void handleSuperPropertyUpdate(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            Swc4jAstUpdateExpr updateExpr,
+            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
+        String fieldName = extractSuperPropertyName(superPropExpr);
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+        String currentClassName = context.getCurrentClassInternalName();
+        if (currentClassName == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "super property update outside of class context");
+        }
+
+        String superClassInternalName = resolveSuperClassInternalName(currentClassName);
+        if (superClassInternalName == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Cannot resolve superclass for " + currentClassName);
+        }
+
+        JavaTypeInfo superTypeInfo = resolveTypeInfoByInternalName(superClassInternalName);
+        if (superTypeInfo == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Cannot resolve superclass type info for " + superClassInternalName);
+        }
+
+        FieldLookupResult lookupResult = lookupFieldInHierarchy(superTypeInfo, fieldName);
+        if (lookupResult == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Field not found in super hierarchy: " + fieldName);
+        }
+
+        code.aload(0);
+        updateInstanceField(
+                code,
+                classWriter,
+                updateExpr,
+                lookupResult.ownerInternalName,
+                fieldName,
+                lookupResult.fieldInfo.descriptor());
+    }
+
     /**
      * Handle update on native Java array element: arr[index]++ for int[], long[], etc.
      * Currently supports only primitive arrays (int[], long[], double[], etc.).
@@ -864,6 +931,31 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
             }
         }
         return null;
+    }
+
+    private String resolveSuperClassInternalName(String currentClassInternalName) {
+        String qualifiedClassName = currentClassInternalName.replace('/', '.');
+        String superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry()
+                .resolveSuperClass(qualifiedClassName);
+        if (superClassInternalName == null) {
+            int lastSlash = currentClassInternalName.lastIndexOf('/');
+            String simpleName = lastSlash >= 0
+                    ? currentClassInternalName.substring(lastSlash + 1)
+                    : currentClassInternalName;
+            superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
+        }
+        return superClassInternalName;
+    }
+
+    private JavaTypeInfo resolveTypeInfoByInternalName(String internalName) {
+        String qualifiedName = internalName.replace('/', '.');
+        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+        if (typeInfo == null) {
+            int lastSlash = internalName.lastIndexOf('/');
+            String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
+            typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+        }
+        return typeInfo;
     }
 
     private void storePrimitive(CodeBuilder code, String primitiveType, int varIndex) {

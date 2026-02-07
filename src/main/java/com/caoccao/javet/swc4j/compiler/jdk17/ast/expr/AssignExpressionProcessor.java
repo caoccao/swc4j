@@ -148,6 +148,10 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         CompilationContext context = compiler.getMemory().getCompilationContext();
         // Handle assignments like arr[1] = value or arr.length = 0
         var left = assignExpr.getLeft();
+        if (left instanceof Swc4jAstSuperPropExpr superPropExpr) {
+            handleSuperPropertyAssignment(code, classWriter, assignExpr, superPropExpr);
+            return;
+        }
         if (left instanceof Swc4jAstMemberExpr memberExpr) {
             // Handle this.field = value assignment
             if (memberExpr.getObj() instanceof Swc4jAstThisExpr && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
@@ -1107,6 +1111,78 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         code.aload(tempMapSlot);
     }
 
+    private String extractSuperPropertyName(
+            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
+        if (superPropExpr.getProp() instanceof Swc4jAstIdentName identName) {
+            return identName.getSym();
+        }
+        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp
+                && computedProp.getExpr() instanceof Swc4jAstStr str) {
+            return str.getValue();
+        }
+        throw new Swc4jByteCodeCompilerException(
+                getSourceCode(),
+                superPropExpr,
+                "Computed super property expressions not yet supported");
+    }
+
+    private void handleSuperPropertyAssignment(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            Swc4jAstAssignExpr assignExpr,
+            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
+        String fieldName = extractSuperPropertyName(superPropExpr);
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+        String currentClassName = context.getCurrentClassInternalName();
+        if (currentClassName == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "super property assignment outside of class context");
+        }
+
+        String superClassInternalName = resolveSuperClassInternalName(currentClassName);
+        if (superClassInternalName == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Cannot resolve superclass for " + currentClassName);
+        }
+
+        JavaTypeInfo superTypeInfo = resolveTypeInfoByInternalName(superClassInternalName);
+        if (superTypeInfo == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Cannot resolve superclass type info for " + superClassInternalName);
+        }
+
+        FieldLookupResult fieldLookupResult = lookupFieldInHierarchy(superTypeInfo, fieldName);
+        if (fieldLookupResult == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Field not found in super hierarchy: " + fieldName);
+        }
+
+        var cp = classWriter.getConstantPool();
+        String fieldDescriptor = fieldLookupResult.fieldInfo.descriptor();
+        code.aload(0);
+        compiler.getExpressionProcessor().generate(code, classWriter, assignExpr.getRight(), null);
+
+        String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
+        coerceAssignmentValue(code, classWriter, assignExpr, valueType, fieldDescriptor);
+
+        if ("D".equals(fieldDescriptor) || "J".equals(fieldDescriptor)) {
+            code.dup2_x1();
+        } else {
+            code.dup_x1();
+        }
+
+        int fieldRef = cp.addFieldRef(fieldLookupResult.ownerInternalName, fieldName, fieldDescriptor);
+        code.putfield(fieldRef);
+    }
+
     private void generateStringValueOf(CodeBuilder code, ClassWriter classWriter, String valueType) {
         var cp = classWriter.getConstantPool();
         String descriptor = switch (valueType) {
@@ -1135,11 +1211,53 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         return context.getLocalVariableTable().allocateVariable(name, type);
     }
 
+    private FieldLookupResult lookupFieldInHierarchy(JavaTypeInfo typeInfo, String fieldName) {
+        FieldInfo fieldInfo = typeInfo.getField(fieldName);
+        if (fieldInfo != null) {
+            return new FieldLookupResult(fieldInfo, typeInfo.getInternalName());
+        }
+        for (JavaTypeInfo parentInfo : typeInfo.getParentTypeInfos()) {
+            FieldLookupResult result = lookupFieldInHierarchy(parentInfo, fieldName);
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    private String resolveSuperClassInternalName(String currentClassInternalName) {
+        String qualifiedClassName = currentClassInternalName.replace('/', '.');
+        String superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry()
+                .resolveSuperClass(qualifiedClassName);
+        if (superClassInternalName == null) {
+            int lastSlash = currentClassInternalName.lastIndexOf('/');
+            String simpleName = lastSlash >= 0
+                    ? currentClassInternalName.substring(lastSlash + 1)
+                    : currentClassInternalName;
+            superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
+        }
+        return superClassInternalName;
+    }
+
+    private JavaTypeInfo resolveTypeInfoByInternalName(String internalName) {
+        String qualifiedName = internalName.replace('/', '.');
+        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+        if (typeInfo == null) {
+            int lastSlash = internalName.lastIndexOf('/');
+            String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
+            typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+        }
+        return typeInfo;
+    }
+
     private boolean isWrapperType(String type) {
         if (type == null) {
             return false;
         }
         String primitive = TypeConversionUtils.getPrimitiveType(type);
         return !type.equals(primitive) && TypeConversionUtils.isPrimitiveType(primitive);
+    }
+
+    private record FieldLookupResult(FieldInfo fieldInfo, String ownerInternalName) {
     }
 }

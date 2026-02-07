@@ -37,7 +37,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class TestTypeResolverTsTypeCoverage extends BaseTestCompileSuite {
+public class TestCompileAstTsTypeCoverage extends BaseTestCompileSuite {
     private static Swc4jAstTsKeywordType keyword(Swc4jAstTsKeywordTypeKind kind) {
         return Swc4jAstTsKeywordType.create(kind);
     }

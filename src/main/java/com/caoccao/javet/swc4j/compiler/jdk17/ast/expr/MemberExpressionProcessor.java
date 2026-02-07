@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.expr.*;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -51,6 +52,70 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             return extractClassExpr(parenExpr.getExpr());
         }
         return null;
+    }
+
+    private String extractSuperPropertyName(
+            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
+        if (superPropExpr.getProp() instanceof Swc4jAstIdentName identName) {
+            return identName.getSym();
+        }
+        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp
+                && computedProp.getExpr() instanceof Swc4jAstStr str) {
+            return str.getValue();
+        }
+        throw new Swc4jByteCodeCompilerException(
+                getSourceCode(),
+                superPropExpr,
+                "Computed super property expressions not yet supported");
+    }
+
+    /**
+     * Generate bytecode for super property reads (e.g. super.value).
+     *
+     * @param code           the code builder
+     * @param classWriter    the class writer
+     * @param superPropExpr  the super property expression
+     * @param returnTypeInfo the return type info
+     * @throws Swc4jByteCodeCompilerException if generation fails
+     */
+    public void generateSuperProperty(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            Swc4jAstSuperPropExpr superPropExpr,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        String fieldName = extractSuperPropertyName(superPropExpr);
+        String currentClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+        if (currentClassName == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "super property access outside of class context");
+        }
+        String superClassInternalName = resolveSuperClassInternalName(currentClassName);
+        if (superClassInternalName == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Cannot resolve superclass for " + currentClassName);
+        }
+        JavaTypeInfo superTypeInfo = resolveTypeInfoByInternalName(superClassInternalName);
+        if (superTypeInfo == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Cannot resolve superclass type info for " + superClassInternalName);
+        }
+        FieldLookupResult lookupResult = lookupFieldInHierarchy(superTypeInfo, fieldName);
+        if (lookupResult == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Field not found in super hierarchy: " + fieldName);
+        }
+        var cp = classWriter.getConstantPool();
+        code.aload(0);
+        int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, lookupResult.fieldInfo.descriptor());
+        code.getfield(fieldRef);
     }
 
     @Override
@@ -440,6 +505,31 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             }
         }
         return null;
+    }
+
+    private String resolveSuperClassInternalName(String currentClassInternalName) {
+        String qualifiedClassName = currentClassInternalName.replace('/', '.');
+        String superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry()
+                .resolveSuperClass(qualifiedClassName);
+        if (superClassInternalName == null) {
+            int lastSlash = currentClassInternalName.lastIndexOf('/');
+            String simpleName = lastSlash >= 0
+                    ? currentClassInternalName.substring(lastSlash + 1)
+                    : currentClassInternalName;
+            superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
+        }
+        return superClassInternalName;
+    }
+
+    private JavaTypeInfo resolveTypeInfoByInternalName(String internalName) {
+        String qualifiedName = internalName.replace('/', '.');
+        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+        if (typeInfo == null) {
+            int lastSlash = internalName.lastIndexOf('/');
+            String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
+            typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+        }
+        return typeInfo;
     }
 
     /**

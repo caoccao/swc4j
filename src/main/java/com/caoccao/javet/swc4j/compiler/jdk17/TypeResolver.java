@@ -476,6 +476,24 @@ public final class TypeResolver {
     }
 
     /**
+     * Extract super property name string.
+     *
+     * @param superPropExpr the super property expression
+     * @return the property name string, or null if dynamic
+     */
+    public String extractSuperPropExprPropName(Swc4jAstSuperPropExpr superPropExpr) {
+        if (superPropExpr.getProp() instanceof Swc4jAstIdentName identName) {
+            return identName.getSym();
+        }
+        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+            if (computedProp.getExpr() instanceof Swc4jAstStr str) {
+                return str.getValue();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Extracts the parameter name from a pattern.
      *
      * @param pat the pattern
@@ -913,6 +931,28 @@ public final class TypeResolver {
                 return "L" + currentClass + ";";
             }
             // Fallback to Object if no current class is set
+            return "Ljava/lang/Object;";
+        } else if (expr instanceof Swc4jAstSuperPropExpr superPropExpr) {
+            String propName = extractSuperPropExprPropName(superPropExpr);
+            if (propName == null) {
+                return "Ljava/lang/Object;";
+            }
+            String currentClassName = context.getCurrentClassInternalName();
+            if (currentClassName == null) {
+                return "Ljava/lang/Object;";
+            }
+            String superClassInternalName = resolveSuperClassInternalName(currentClassName);
+            if (superClassInternalName == null) {
+                return "Ljava/lang/Object;";
+            }
+            JavaTypeInfo superTypeInfo = resolveTypeInfoByInternalName(superClassInternalName);
+            if (superTypeInfo == null) {
+                return "Ljava/lang/Object;";
+            }
+            FieldInfo fieldInfo = lookupFieldInHierarchy(superTypeInfo, propName);
+            if (fieldInfo != null) {
+                return fieldInfo.descriptor();
+            }
             return "Ljava/lang/Object;";
         } else if (expr instanceof Swc4jAstArrayLit) {
             // Array literal - maps to ArrayList
@@ -1607,6 +1647,31 @@ public final class TypeResolver {
         }
 
         return null;
+    }
+
+    private String resolveSuperClassInternalName(String currentClassInternalName) {
+        String qualifiedClassName = currentClassInternalName.replace('/', '.');
+        String superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry()
+                .resolveSuperClass(qualifiedClassName);
+        if (superClassInternalName == null) {
+            int lastSlash = currentClassInternalName.lastIndexOf('/');
+            String simpleName = lastSlash >= 0
+                    ? currentClassInternalName.substring(lastSlash + 1)
+                    : currentClassInternalName;
+            superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
+        }
+        return superClassInternalName;
+    }
+
+    private JavaTypeInfo resolveTypeInfoByInternalName(String internalName) {
+        String qualifiedName = internalName.replace('/', '.');
+        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+        if (typeInfo == null) {
+            int lastSlash = internalName.lastIndexOf('/');
+            String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
+            typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+        }
+        return typeInfo;
     }
 
     /**

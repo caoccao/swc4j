@@ -102,6 +102,8 @@ public final class ExpressionProcessor extends BaseAstProcessor<ISwc4jAstExpr> {
             compiler.getSeqExpressionProcessor().generate(code, classWriter, seqExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstThisExpr thisExpr) {
             compiler.getThisExpressionProcessor().generate(code, classWriter, thisExpr, returnTypeInfo);
+        } else if (expr instanceof Swc4jAstSuperPropExpr superPropExpr) {
+            compiler.getMemberExpressionProcessor().generateSuperProperty(code, classWriter, superPropExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstArrowExpr arrowExpr) {
             compiler.getArrowExpressionProcessor().generate(code, classWriter, arrowExpr, returnTypeInfo);
         } else if (expr instanceof Swc4jAstFnExpr fnExpr) {
