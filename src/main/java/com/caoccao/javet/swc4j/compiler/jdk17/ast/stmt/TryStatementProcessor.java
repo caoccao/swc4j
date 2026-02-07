@@ -34,6 +34,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
@@ -662,9 +663,9 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
 
     private String getPropertyType(String propertyName) {
         return switch (propertyName) {
-            case "message", "stack", "name" -> "Ljava/lang/String;";
+            case "message", "stack", "name" -> TypeConversionUtils.LJAVA_LANG_STRING;
             case "cause" -> "Ljava/lang/Throwable;";
-            default -> "Ljava/lang/Object;";
+            default -> TypeConversionUtils.LJAVA_LANG_OBJECT;
         };
     }
 

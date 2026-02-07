@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.module;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstImportDecl;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstImportNamedSpecifier;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
 
@@ -94,17 +95,17 @@ public final class ImportDeclProcessor {
      * - void -> V
      */
     private String getTypeDescriptor(Class<?> type) {
-        if (type == void.class) return "V";
-        if (type == boolean.class) return "Z";
-        if (type == byte.class) return "B";
-        if (type == char.class) return "C";
-        if (type == short.class) return "S";
-        if (type == int.class) return "I";
-        if (type == long.class) return "J";
-        if (type == float.class) return "F";
-        if (type == double.class) return "D";
+        if (type == void.class) return TypeConversionUtils.ABBR_VOID;
+        if (type == boolean.class) return TypeConversionUtils.ABBR_BOOLEAN;
+        if (type == byte.class) return TypeConversionUtils.ABBR_BYTE;
+        if (type == char.class) return TypeConversionUtils.ABBR_CHARACTER;
+        if (type == short.class) return TypeConversionUtils.ABBR_SHORT;
+        if (type == int.class) return TypeConversionUtils.ABBR_INTEGER;
+        if (type == long.class) return TypeConversionUtils.ABBR_LONG;
+        if (type == float.class) return TypeConversionUtils.ABBR_FLOAT;
+        if (type == double.class) return TypeConversionUtils.ABBR_DOUBLE;
         if (type.isArray()) {
-            return "[" + getTypeDescriptor(type.getComponentType());
+            return TypeConversionUtils.ARRAY_PREFIX + getTypeDescriptor(type.getComponentType());
         }
         return "L" + getInternalName(type.getName()) + ";";
     }
@@ -165,7 +166,7 @@ public final class ImportDeclProcessor {
                         if (Modifier.isPublic(constructor.getModifiers())) {
                             String descriptor = getConstructorDescriptor(constructor);
                             boolean isVarArgs = constructor.isVarArgs();
-                            MethodInfo methodInfo = new MethodInfo("<init>", descriptor, "V", false, isVarArgs);
+                            MethodInfo methodInfo = new MethodInfo("<init>", descriptor, TypeConversionUtils.ABBR_VOID, false, isVarArgs);
                             typeInfo.addMethod("<init>", methodInfo);
                         }
                     }

@@ -78,11 +78,11 @@ public final class TypeResolver {
         }
         if (type1 == null) {
             // null with any type -> Object (for stackmap compatibility)
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
         if (type2 == null) {
             // any type with null -> Object (for stackmap compatibility)
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
 
         // Same type - no conversion needed
@@ -97,19 +97,19 @@ public final class TypeResolver {
 
         // One primitive, one reference - result is Object
         // (either boxing the primitive or finding common supertype)
-        return "Ljava/lang/Object;";
+        return TypeConversionUtils.LJAVA_LANG_OBJECT;
     }
 
     private static String getPrimitiveType(String type) {
         return switch (type) {
-            case "Ljava/lang/Boolean;" -> "Z";
-            case "Ljava/lang/Byte;" -> "B";
-            case "Ljava/lang/Short;" -> "S";
-            case "Ljava/lang/Integer;" -> "I";
-            case "Ljava/lang/Long;" -> "J";
-            case "Ljava/lang/Float;" -> "F";
-            case "Ljava/lang/Double;" -> "D";
-            case "Ljava/lang/Character;" -> "C";
+            case TypeConversionUtils.LJAVA_LANG_BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
+            case TypeConversionUtils.LJAVA_LANG_BYTE -> TypeConversionUtils.ABBR_BYTE;
+            case TypeConversionUtils.LJAVA_LANG_SHORT -> TypeConversionUtils.ABBR_SHORT;
+            case TypeConversionUtils.LJAVA_LANG_INTEGER -> TypeConversionUtils.ABBR_INTEGER;
+            case TypeConversionUtils.LJAVA_LANG_LONG -> TypeConversionUtils.ABBR_LONG;
+            case TypeConversionUtils.LJAVA_LANG_FLOAT -> TypeConversionUtils.ABBR_FLOAT;
+            case TypeConversionUtils.LJAVA_LANG_DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
+            case TypeConversionUtils.LJAVA_LANG_CHARACTER -> TypeConversionUtils.ABBR_CHARACTER;
             default -> type;
         };
     }
@@ -127,42 +127,42 @@ public final class TypeResolver {
         String right = getPrimitiveType(rightType);
 
         // byte, short, char promote to int for operations
-        if ("B".equals(left) || "S".equals(left) || "C".equals(left)) {
-            left = "I";
+        if (TypeConversionUtils.ABBR_BYTE.equals(left) || TypeConversionUtils.ABBR_SHORT.equals(left) || TypeConversionUtils.ABBR_CHARACTER.equals(left)) {
+            left = TypeConversionUtils.ABBR_INTEGER;
         }
-        if ("B".equals(right) || "S".equals(right) || "C".equals(right)) {
-            right = "I";
+        if (TypeConversionUtils.ABBR_BYTE.equals(right) || TypeConversionUtils.ABBR_SHORT.equals(right) || TypeConversionUtils.ABBR_CHARACTER.equals(right)) {
+            right = TypeConversionUtils.ABBR_INTEGER;
         }
 
         // Type widening rules: double > float > long > int
-        if ("D".equals(left) || "D".equals(right)) {
-            return "D";
+        if (TypeConversionUtils.ABBR_DOUBLE.equals(left) || TypeConversionUtils.ABBR_DOUBLE.equals(right)) {
+            return TypeConversionUtils.ABBR_DOUBLE;
         }
-        if ("F".equals(left) || "F".equals(right)) {
-            return "F";
+        if (TypeConversionUtils.ABBR_FLOAT.equals(left) || TypeConversionUtils.ABBR_FLOAT.equals(right)) {
+            return TypeConversionUtils.ABBR_FLOAT;
         }
-        if ("J".equals(left) || "J".equals(right)) {
-            return "J";
+        if (TypeConversionUtils.ABBR_LONG.equals(left) || TypeConversionUtils.ABBR_LONG.equals(right)) {
+            return TypeConversionUtils.ABBR_LONG;
         }
-        return "I";
+        return TypeConversionUtils.ABBR_INTEGER;
     }
 
     /**
      * Get the wrapper type for a primitive type.
      *
-     * @param primitiveType primitive type descriptor (e.g., "I", "D")
-     * @return wrapper type descriptor (e.g., "Ljava/lang/Integer;", "Ljava/lang/Double;")
+     * @param primitiveType primitive type descriptor (e.g., TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_DOUBLE)
+     * @return wrapper type descriptor (e.g., TypeConversionUtils.LJAVA_LANG_INTEGER, TypeConversionUtils.LJAVA_LANG_DOUBLE)
      */
     private static String getWrapperType(String primitiveType) {
         return switch (primitiveType) {
-            case "Z" -> "Ljava/lang/Boolean;";
-            case "B" -> "Ljava/lang/Byte;";
-            case "C" -> "Ljava/lang/Character;";
-            case "S" -> "Ljava/lang/Short;";
-            case "I" -> "Ljava/lang/Integer;";
-            case "J" -> "Ljava/lang/Long;";
-            case "F" -> "Ljava/lang/Float;";
-            case "D" -> "Ljava/lang/Double;";
+            case TypeConversionUtils.ABBR_BOOLEAN -> TypeConversionUtils.LJAVA_LANG_BOOLEAN;
+            case TypeConversionUtils.ABBR_BYTE -> TypeConversionUtils.LJAVA_LANG_BYTE;
+            case TypeConversionUtils.ABBR_CHARACTER -> TypeConversionUtils.LJAVA_LANG_CHARACTER;
+            case TypeConversionUtils.ABBR_SHORT -> TypeConversionUtils.LJAVA_LANG_SHORT;
+            case TypeConversionUtils.ABBR_INTEGER -> TypeConversionUtils.LJAVA_LANG_INTEGER;
+            case TypeConversionUtils.ABBR_LONG -> TypeConversionUtils.LJAVA_LANG_LONG;
+            case TypeConversionUtils.ABBR_FLOAT -> TypeConversionUtils.LJAVA_LANG_FLOAT;
+            case TypeConversionUtils.ABBR_DOUBLE -> TypeConversionUtils.LJAVA_LANG_DOUBLE;
             default -> null;
         };
     }
@@ -250,18 +250,18 @@ public final class TypeResolver {
         }
 
         // Everything is assignable to Object
-        if (toType.equals("Ljava/lang/Object;")) {
+        if (toType.equals(TypeConversionUtils.LJAVA_LANG_OBJECT)) {
             return true;
         }
 
         // Number wrapper hierarchy: Integer/Long/Short/Byte/Float/Double → Number
         if (toType.equals("Ljava/lang/Number;")) {
-            return fromType.equals("Ljava/lang/Integer;") ||
-                    fromType.equals("Ljava/lang/Long;") ||
-                    fromType.equals("Ljava/lang/Short;") ||
-                    fromType.equals("Ljava/lang/Byte;") ||
-                    fromType.equals("Ljava/lang/Float;") ||
-                    fromType.equals("Ljava/lang/Double;");
+            return fromType.equals(TypeConversionUtils.LJAVA_LANG_INTEGER) ||
+                    fromType.equals(TypeConversionUtils.LJAVA_LANG_LONG) ||
+                    fromType.equals(TypeConversionUtils.LJAVA_LANG_SHORT) ||
+                    fromType.equals(TypeConversionUtils.LJAVA_LANG_BYTE) ||
+                    fromType.equals(TypeConversionUtils.LJAVA_LANG_FLOAT) ||
+                    fromType.equals(TypeConversionUtils.LJAVA_LANG_DOUBLE);
         }
 
         // List interface hierarchy: ArrayList/LinkedList → List
@@ -306,21 +306,21 @@ public final class TypeResolver {
 
         // Widening conversions matrix
         return switch (fromPrimitive) {
-            case "B" -> // byte
-                    toPrimitive.equals("S") || toPrimitive.equals("I") || toPrimitive.equals("J") ||
-                            toPrimitive.equals("F") || toPrimitive.equals("D");
-            case "S" -> // short
-                    toPrimitive.equals("I") || toPrimitive.equals("J") ||
-                            toPrimitive.equals("F") || toPrimitive.equals("D");
-            case "C" -> // char
-                    toPrimitive.equals("I") || toPrimitive.equals("J") ||
-                            toPrimitive.equals("F") || toPrimitive.equals("D");
-            case "I" -> // int
-                    toPrimitive.equals("J") || toPrimitive.equals("F") || toPrimitive.equals("D");
-            case "J" -> // long
-                    toPrimitive.equals("F") || toPrimitive.equals("D");
-            case "F" -> // float
-                    toPrimitive.equals("D");
+            case TypeConversionUtils.ABBR_BYTE -> // byte
+                    toPrimitive.equals(TypeConversionUtils.ABBR_SHORT) || toPrimitive.equals(TypeConversionUtils.ABBR_INTEGER) || toPrimitive.equals(TypeConversionUtils.ABBR_LONG) ||
+                            toPrimitive.equals(TypeConversionUtils.ABBR_FLOAT) || toPrimitive.equals(TypeConversionUtils.ABBR_DOUBLE);
+            case TypeConversionUtils.ABBR_SHORT -> // short
+                    toPrimitive.equals(TypeConversionUtils.ABBR_INTEGER) || toPrimitive.equals(TypeConversionUtils.ABBR_LONG) ||
+                            toPrimitive.equals(TypeConversionUtils.ABBR_FLOAT) || toPrimitive.equals(TypeConversionUtils.ABBR_DOUBLE);
+            case TypeConversionUtils.ABBR_CHARACTER -> // char
+                    toPrimitive.equals(TypeConversionUtils.ABBR_INTEGER) || toPrimitive.equals(TypeConversionUtils.ABBR_LONG) ||
+                            toPrimitive.equals(TypeConversionUtils.ABBR_FLOAT) || toPrimitive.equals(TypeConversionUtils.ABBR_DOUBLE);
+            case TypeConversionUtils.ABBR_INTEGER -> // int
+                    toPrimitive.equals(TypeConversionUtils.ABBR_LONG) || toPrimitive.equals(TypeConversionUtils.ABBR_FLOAT) || toPrimitive.equals(TypeConversionUtils.ABBR_DOUBLE);
+            case TypeConversionUtils.ABBR_LONG -> // long
+                    toPrimitive.equals(TypeConversionUtils.ABBR_FLOAT) || toPrimitive.equals(TypeConversionUtils.ABBR_DOUBLE);
+            case TypeConversionUtils.ABBR_FLOAT -> // float
+                    toPrimitive.equals(TypeConversionUtils.ABBR_DOUBLE);
             default -> false;
         };
     }
@@ -352,8 +352,8 @@ public final class TypeResolver {
         // Fall back to type inference from return statements (including nested ones)
         String returnType = inferReturnTypeFromBlock(body);
         if (returnType != null) {
-            // If type is "V" (void), return void type info
-            if ("V".equals(returnType)) {
+            // If type is TypeConversionUtils.ABBR_VOID (void), return void type info
+            if (TypeConversionUtils.ABBR_VOID.equals(returnType)) {
                 return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
             }
             // Otherwise, create ReturnTypeInfo from the inferred type
@@ -386,19 +386,19 @@ public final class TypeResolver {
      */
     public ReturnTypeInfo createReturnTypeInfoFromDescriptor(String descriptor) {
         if (descriptor == null) {
-            return new ReturnTypeInfo(ReturnType.OBJECT, 0, "Ljava/lang/Object;", null);
+            return new ReturnTypeInfo(ReturnType.OBJECT, 0, TypeConversionUtils.LJAVA_LANG_OBJECT, null);
         }
         return switch (descriptor) {
-            case "V" -> new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
-            case "Z" -> new ReturnTypeInfo(ReturnType.BOOLEAN, 0, null, null);
-            case "B" -> new ReturnTypeInfo(ReturnType.BYTE, 0, null, null);
-            case "C" -> new ReturnTypeInfo(ReturnType.CHAR, 0, null, null);
-            case "S" -> new ReturnTypeInfo(ReturnType.SHORT, 0, null, null);
-            case "I" -> new ReturnTypeInfo(ReturnType.INT, 0, null, null);
-            case "J" -> new ReturnTypeInfo(ReturnType.LONG, 0, null, null);
-            case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 0, null, null);
-            case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 0, null, null);
-            case "Ljava/lang/String;" -> new ReturnTypeInfo(ReturnType.STRING, 0, descriptor, null);
+            case TypeConversionUtils.ABBR_VOID -> new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
+            case TypeConversionUtils.ABBR_BOOLEAN -> new ReturnTypeInfo(ReturnType.BOOLEAN, 0, null, null);
+            case TypeConversionUtils.ABBR_BYTE -> new ReturnTypeInfo(ReturnType.BYTE, 0, null, null);
+            case TypeConversionUtils.ABBR_CHARACTER -> new ReturnTypeInfo(ReturnType.CHAR, 0, null, null);
+            case TypeConversionUtils.ABBR_SHORT -> new ReturnTypeInfo(ReturnType.SHORT, 0, null, null);
+            case TypeConversionUtils.ABBR_INTEGER -> new ReturnTypeInfo(ReturnType.INT, 0, null, null);
+            case TypeConversionUtils.ABBR_LONG -> new ReturnTypeInfo(ReturnType.LONG, 0, null, null);
+            case TypeConversionUtils.ABBR_FLOAT -> new ReturnTypeInfo(ReturnType.FLOAT, 0, null, null);
+            case TypeConversionUtils.ABBR_DOUBLE -> new ReturnTypeInfo(ReturnType.DOUBLE, 0, null, null);
+            case TypeConversionUtils.LJAVA_LANG_STRING -> new ReturnTypeInfo(ReturnType.STRING, 0, descriptor, null);
             default -> new ReturnTypeInfo(ReturnType.OBJECT, 0, descriptor, null);
         };
     }
@@ -476,24 +476,6 @@ public final class TypeResolver {
     }
 
     /**
-     * Extract super property name string.
-     *
-     * @param superPropExpr the super property expression
-     * @return the property name string, or null if dynamic
-     */
-    public String extractSuperPropExprPropName(Swc4jAstSuperPropExpr superPropExpr) {
-        if (superPropExpr.getProp() instanceof Swc4jAstIdentName identName) {
-            return identName.getSym();
-        }
-        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
-            if (computedProp.getExpr() instanceof Swc4jAstStr str) {
-                return str.getValue();
-            }
-        }
-        return null;
-    }
-
-    /**
      * Extracts the parameter name from a pattern.
      *
      * @param pat the pattern
@@ -542,12 +524,30 @@ public final class TypeResolver {
                 return mapTsTypeToDescriptor(tsType);
             }
             // Default to Object for untyped parameters
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else if (pat instanceof Swc4jAstAssignPat assignPat) {
             // Default parameter - extract type from left side
             return extractParameterType(assignPat.getLeft());
         }
-        return "Ljava/lang/Object;";
+        return TypeConversionUtils.LJAVA_LANG_OBJECT;
+    }
+
+    /**
+     * Extract super property name string.
+     *
+     * @param superPropExpr the super property expression
+     * @return the property name string, or null if dynamic
+     */
+    public String extractSuperPropExprPropName(Swc4jAstSuperPropExpr superPropExpr) {
+        if (superPropExpr.getProp() instanceof Swc4jAstIdentName identName) {
+            return identName.getSym();
+        }
+        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+            if (computedProp.getExpr() instanceof Swc4jAstStr str) {
+                return str.getValue();
+            }
+        }
+        return null;
     }
 
     /**
@@ -586,10 +586,10 @@ public final class TypeResolver {
         if (init.isPresent()) {
             String type = inferTypeFromExpr(init.get());
             // If type is null (e.g., for null literal), default to Object
-            return type != null ? type : "Ljava/lang/Object;";
+            return type != null ? type : TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
 
-        return "Ljava/lang/Object;"; // Default
+        return TypeConversionUtils.LJAVA_LANG_OBJECT; // Default
     }
 
     /**
@@ -606,11 +606,11 @@ public final class TypeResolver {
                 // If inferTypeFromExpr returns null (e.g., for null literals),
                 // default to Object type since null is compatible with any reference type
                 if (type == null) {
-                    return "Ljava/lang/Object;";
+                    return TypeConversionUtils.LJAVA_LANG_OBJECT;
                 }
                 return type;
             }
-            return "V"; // void return
+            return TypeConversionUtils.ABBR_VOID; // void return
         } else if (stmt instanceof Swc4jAstBlockStmt innerBlock) {
             return inferReturnTypeFromBlock(innerBlock);
         } else if (stmt instanceof Swc4jAstIfStmt ifStmt) {
@@ -675,7 +675,7 @@ public final class TypeResolver {
             if (param instanceof ISwc4jAstPat pat) {
                 paramTypes.add(extractParameterType(pat));
             } else {
-                paramTypes.add("Ljava/lang/Object;");
+                paramTypes.add(TypeConversionUtils.LJAVA_LANG_OBJECT);
             }
         }
 
@@ -715,6 +715,20 @@ public final class TypeResolver {
         return compiler.getMemory().getScopedSourceCode().getSourceCode();
     }
 
+    private Integer getTupleLiteralIndex(ISwc4jAstTsType indexType) {
+        if (indexType instanceof Swc4jAstTsLitType litType && litType.getLit() instanceof Swc4jAstNumber number) {
+            double value = number.getValue();
+            if (value >= 0
+                    && value == Math.floor(value)
+                    && !Double.isInfinite(value)
+                    && !Double.isNaN(value)
+                    && value <= Integer.MAX_VALUE) {
+                return (int) value;
+            }
+        }
+        return null;
+    }
+
     /**
      * Check if a parameter has a default value.
      *
@@ -734,7 +748,7 @@ public final class TypeResolver {
      */
     public String inferArrayElementType(Swc4jAstArrayLit arrayLit) throws Swc4jByteCodeCompilerException {
         if (arrayLit == null) {
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
         String elementType = null;
         for (var elemOpt : arrayLit.getElems()) {
@@ -743,7 +757,7 @@ public final class TypeResolver {
             }
             var elem = elemOpt.get();
             if (elem.getSpread().isPresent()) {
-                return "Ljava/lang/Object;";
+                return TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
             ISwc4jAstExpr elemExpr = elem.getExpr();
             String exprType = inferTypeFromExpr(elemExpr);
@@ -755,11 +769,11 @@ public final class TypeResolver {
             } else {
                 elementType = findCommonType(elementType, exprType);
             }
-            if ("Ljava/lang/Object;".equals(elementType)) {
+            if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(elementType)) {
                 return elementType;
             }
         }
-        return elementType != null ? elementType : "Ljava/lang/Object;";
+        return elementType != null ? elementType : TypeConversionUtils.LJAVA_LANG_OBJECT;
     }
 
     /**
@@ -779,17 +793,17 @@ public final class TypeResolver {
     public String inferKeyType(
             ISwc4jAstPropName key) throws Swc4jByteCodeCompilerException {
         if (key == null) {
-            return "Ljava/lang/String;"; // Default to String
+            return TypeConversionUtils.LJAVA_LANG_STRING; // Default to String
         }
 
         // IdentName keys are always strings
         if (key instanceof Swc4jAstIdentName) {
-            return "Ljava/lang/String;";
+            return TypeConversionUtils.LJAVA_LANG_STRING;
         }
 
         // String literal keys
         if (key instanceof Swc4jAstStr) {
-            return "Ljava/lang/String;";
+            return TypeConversionUtils.LJAVA_LANG_STRING;
         }
 
         // Numeric keys - infer specific numeric type
@@ -803,33 +817,33 @@ public final class TypeResolver {
 
                 // Check if it fits in an int
                 if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
-                    return "Ljava/lang/Integer;";
+                    return TypeConversionUtils.LJAVA_LANG_INTEGER;
                 }
 
                 // It needs a long
-                return "Ljava/lang/Long;";
+                return TypeConversionUtils.LJAVA_LANG_LONG;
             }
 
             // It has a decimal part - use Double
-            return "Ljava/lang/Double;";
+            return TypeConversionUtils.LJAVA_LANG_DOUBLE;
         }
 
         // BigInt keys - always Long or BigInteger
         if (key instanceof Swc4jAstBigInt bigInt) {
             // For now, default to Long
             // In the future, could parse the BigInt value and choose BigInteger if needed
-            return "Ljava/lang/Long;";
+            return TypeConversionUtils.LJAVA_LANG_LONG;
         }
 
         // Computed property names - infer from expression
         if (key instanceof Swc4jAstComputedPropName computed) {
             ISwc4jAstExpr expr = computed.getExpr();
             String inferredType = inferTypeFromExpr(expr);
-            return inferredType != null ? inferredType : "Ljava/lang/String;";
+            return inferredType != null ? inferredType : TypeConversionUtils.LJAVA_LANG_STRING;
         }
 
         // Default to String for any unknown key type
-        return "Ljava/lang/String;";
+        return TypeConversionUtils.LJAVA_LANG_STRING;
     }
 
     /**
@@ -909,17 +923,17 @@ public final class TypeResolver {
                 return mapTypeNameToDescriptor(className);
             }
             // If we can't determine the constructor type, return Object
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else if (expr instanceof Swc4jAstNumber number) {
             double value = number.getValue();
             if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
-                return "I";
+                return TypeConversionUtils.ABBR_INTEGER;
             }
-            return "D";
+            return TypeConversionUtils.ABBR_DOUBLE;
         } else if (expr instanceof Swc4jAstBool) {
-            return "Z";
+            return TypeConversionUtils.ABBR_BOOLEAN;
         } else if (expr instanceof Swc4jAstBigInt) {
-            return "Ljava/math/BigInteger;";
+            return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
         } else if (expr instanceof Swc4jAstNull) {
             // null has no specific type - it's compatible with any reference type
             // Return null to indicate that the type should be determined by context
@@ -931,29 +945,29 @@ public final class TypeResolver {
                 return "L" + currentClass + ";";
             }
             // Fallback to Object if no current class is set
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else if (expr instanceof Swc4jAstSuperPropExpr superPropExpr) {
             String propName = extractSuperPropExprPropName(superPropExpr);
             if (propName == null) {
-                return "Ljava/lang/Object;";
+                return TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
             String currentClassName = context.getCurrentClassInternalName();
             if (currentClassName == null) {
-                return "Ljava/lang/Object;";
+                return TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
             String superClassInternalName = resolveSuperClassInternalName(currentClassName);
             if (superClassInternalName == null) {
-                return "Ljava/lang/Object;";
+                return TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
             JavaTypeInfo superTypeInfo = resolveTypeInfoByInternalName(superClassInternalName);
             if (superTypeInfo == null) {
-                return "Ljava/lang/Object;";
+                return TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
             FieldInfo fieldInfo = lookupFieldInHierarchy(superTypeInfo, propName);
             if (fieldInfo != null) {
                 return fieldInfo.descriptor();
             }
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else if (expr instanceof Swc4jAstArrayLit) {
             // Array literal - maps to ArrayList
             return "Ljava/util/ArrayList;";
@@ -1043,7 +1057,7 @@ public final class TypeResolver {
             // Member expression - handle array-like properties
             String objType = inferTypeFromExpr(memberExpr.getObj());
 
-            if (objType != null && objType.startsWith("[")) {
+            if (objType != null && objType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
                 // Java array operations
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
                     // arr[index] returns the element type
@@ -1052,7 +1066,7 @@ public final class TypeResolver {
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
                     if ("length".equals(propName)) {
-                        return "I"; // arr.length returns int
+                        return TypeConversionUtils.ABBR_INTEGER; // arr.length returns int
                     }
                 }
             } else if ("Ljava/util/ArrayList;".equals(objType)) {
@@ -1060,21 +1074,21 @@ public final class TypeResolver {
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
                     if ("length".equals(propName)) {
-                        return "I"; // arr.length returns int
+                        return TypeConversionUtils.ABBR_INTEGER; // arr.length returns int
                     }
                 }
-            } else if ("Ljava/lang/String;".equals(objType)) {
+            } else if (TypeConversionUtils.LJAVA_LANG_STRING.equals(objType)) {
                 // String operations
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
                     if ("length".equals(propName)) {
-                        return "I"; // str.length returns int
+                        return TypeConversionUtils.ABBR_INTEGER; // str.length returns int
                     }
                 }
             } else if ("Ljava/util/LinkedHashMap;".equals(objType)) {
                 // LinkedHashMap operations (object literal member access)
                 // map.get() returns Object
-                return "Ljava/lang/Object;";
+                return TypeConversionUtils.LJAVA_LANG_OBJECT;
             } else if ("Lcom/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray;".equals(objType)) {
                 // TemplateStringsArray operations (for raw string access in tagged templates)
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
@@ -1082,7 +1096,7 @@ public final class TypeResolver {
                     if ("raw".equals(propName)) {
                         return "[Ljava/lang/String;"; // raw field is String[]
                     } else if ("length".equals(propName)) {
-                        return "I"; // length field is int
+                        return TypeConversionUtils.ABBR_INTEGER; // length field is int
                     }
                 }
             }
@@ -1114,12 +1128,12 @@ public final class TypeResolver {
                 }
             }
 
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else if (expr instanceof Swc4jAstStr) {
-            return "Ljava/lang/String;";
+            return TypeConversionUtils.LJAVA_LANG_STRING;
         } else if (expr instanceof Swc4jAstTpl) {
             // Template literal always returns String
-            return "Ljava/lang/String;";
+            return TypeConversionUtils.LJAVA_LANG_STRING;
         } else if (expr instanceof Swc4jAstTaggedTpl) {
             // Tagged template - return type depends on the tag function
             // For now, return null to let method resolution handle it
@@ -1130,12 +1144,12 @@ public final class TypeResolver {
             var left = assignExpr.getLeft();
             if (left instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
-                return context.getInferredType(varName, "Ljava/lang/Object;");
+                return context.getInferredType(varName, TypeConversionUtils.LJAVA_LANG_OBJECT);
             }
             // For other left-hand side types (member expressions, etc.), fall back to right operand type
             return inferTypeFromExpr(assignExpr.getRight());
         } else if (expr instanceof Swc4jAstIdent ident) {
-            return context.getInferredType(ident.getSym(), "Ljava/lang/Object;");
+            return context.getInferredType(ident.getSym(), TypeConversionUtils.LJAVA_LANG_OBJECT);
         } else if (expr instanceof Swc4jAstUpdateExpr updateExpr) {
             // Update expression (++/--) returns the type of the operand
             return inferTypeFromExpr(updateExpr.getArg());
@@ -1145,15 +1159,15 @@ public final class TypeResolver {
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     String rightType = inferTypeFromExpr(binExpr.getRight());
                     // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                    if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                     // String concatenation - if either operand is String, result is String
-                    if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
-                        return "Ljava/lang/String;";
+                    if (TypeConversionUtils.LJAVA_LANG_STRING.equals(leftType) || TypeConversionUtils.LJAVA_LANG_STRING.equals(rightType)) {
+                        return TypeConversionUtils.LJAVA_LANG_STRING;
                     }
                     // BigInteger operations - if either operand is BigInteger, result is BigInteger
-                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
-                        return "Ljava/math/BigInteger;";
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(leftType) || TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(rightType)) {
+                        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
                     }
                     // Numeric addition - use type widening rules
                     return getWidenedType(leftType, rightType);
@@ -1162,11 +1176,11 @@ public final class TypeResolver {
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     String rightType = inferTypeFromExpr(binExpr.getRight());
                     // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                    if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                     // BigInteger operations - if either operand is BigInteger, result is BigInteger
-                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
-                        return "Ljava/math/BigInteger;";
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(leftType) || TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(rightType)) {
+                        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
                     }
                     // Numeric subtraction - use type widening rules
                     return getWidenedType(leftType, rightType);
@@ -1175,11 +1189,11 @@ public final class TypeResolver {
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     String rightType = inferTypeFromExpr(binExpr.getRight());
                     // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                    if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                     // BigInteger operations - if either operand is BigInteger, result is BigInteger
-                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
-                        return "Ljava/math/BigInteger;";
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(leftType) || TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(rightType)) {
+                        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
                     }
                     // Numeric multiplication - use type widening rules
                     return getWidenedType(leftType, rightType);
@@ -1188,11 +1202,11 @@ public final class TypeResolver {
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     String rightType = inferTypeFromExpr(binExpr.getRight());
                     // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                    if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                     // BigInteger operations - if either operand is BigInteger, result is BigInteger
-                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
-                        return "Ljava/math/BigInteger;";
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(leftType) || TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(rightType)) {
+                        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
                     }
                     // Numeric division - use type widening rules
                     return getWidenedType(leftType, rightType);
@@ -1201,11 +1215,11 @@ public final class TypeResolver {
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     String rightType = inferTypeFromExpr(binExpr.getRight());
                     // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                    if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                     // BigInteger operations - if either operand is BigInteger, result is BigInteger
-                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
-                        return "Ljava/math/BigInteger;";
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(leftType) || TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(rightType)) {
+                        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
                     }
                     // Numeric modulo - use type widening rules
                     return getWidenedType(leftType, rightType);
@@ -1213,76 +1227,76 @@ public final class TypeResolver {
                 case Exp -> {
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     // BigInteger exponentiation - if base is BigInteger, result is BigInteger
-                    if ("Ljava/math/BigInteger;".equals(leftType)) {
-                        return "Ljava/math/BigInteger;";
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(leftType)) {
+                        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
                     }
                     // Exponentiation always returns double (Math.pow returns double)
-                    return "D";
+                    return TypeConversionUtils.ABBR_DOUBLE;
                 }
                 case LShift -> {
                     // Left shift returns the type of the left operand (int or long)
                     // For JavaScript semantics, we convert to int (ToInt32), but JVM supports both
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                     // BigInteger shift - if left is BigInteger, result is BigInteger
-                    if ("Ljava/math/BigInteger;".equals(leftType)) {
-                        return "Ljava/math/BigInteger;";
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(leftType)) {
+                        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
                     }
                     // Get primitive type
                     String primitiveType = getPrimitiveType(leftType);
                     // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
-                    if ("J".equals(primitiveType)) {
-                        return "J";
+                    if (TypeConversionUtils.ABBR_LONG.equals(primitiveType)) {
+                        return TypeConversionUtils.ABBR_LONG;
                     }
-                    return "I";
+                    return TypeConversionUtils.ABBR_INTEGER;
                 }
                 case RShift -> {
                     // Right shift returns the type of the left operand (int or long)
                     // Same semantics as left shift
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                     // BigInteger shift - if left is BigInteger, result is BigInteger
-                    if ("Ljava/math/BigInteger;".equals(leftType)) {
-                        return "Ljava/math/BigInteger;";
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(leftType)) {
+                        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
                     }
                     // Get primitive type
                     String primitiveType = getPrimitiveType(leftType);
                     // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
-                    if ("J".equals(primitiveType)) {
-                        return "J";
+                    if (TypeConversionUtils.ABBR_LONG.equals(primitiveType)) {
+                        return TypeConversionUtils.ABBR_LONG;
                     }
-                    return "I";
+                    return TypeConversionUtils.ABBR_INTEGER;
                 }
                 case ZeroFillRShift -> {
                     // Zero-fill right shift returns the type of the left operand (int or long)
                     // Same semantics as other shift operations
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                     // BigInteger shift - if left is BigInteger, result is BigInteger
-                    if ("Ljava/math/BigInteger;".equals(leftType)) {
-                        return "Ljava/math/BigInteger;";
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(leftType)) {
+                        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
                     }
                     // Get primitive type
                     String primitiveType = getPrimitiveType(leftType);
                     // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
-                    if ("J".equals(primitiveType)) {
-                        return "J";
+                    if (TypeConversionUtils.ABBR_LONG.equals(primitiveType)) {
+                        return TypeConversionUtils.ABBR_LONG;
                     }
-                    return "I";
+                    return TypeConversionUtils.ABBR_INTEGER;
                 }
                 case BitAnd -> {
                     // Bitwise AND uses type widening - result is wider of the two operand types
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     String rightType = inferTypeFromExpr(binExpr.getRight());
                     // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                    if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                     // BigInteger operations - if either operand is BigInteger, result is BigInteger
-                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
-                        return "Ljava/math/BigInteger;";
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(leftType) || TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(rightType)) {
+                        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
                     }
                     // Use type widening rules (int & long → long, etc.)
                     return getWidenedType(leftType, rightType);
@@ -1292,11 +1306,11 @@ public final class TypeResolver {
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     String rightType = inferTypeFromExpr(binExpr.getRight());
                     // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                    if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                     // BigInteger operations - if either operand is BigInteger, result is BigInteger
-                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
-                        return "Ljava/math/BigInteger;";
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(leftType) || TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(rightType)) {
+                        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
                     }
                     // Use type widening rules (int | long → long, etc.)
                     return getWidenedType(leftType, rightType);
@@ -1306,18 +1320,18 @@ public final class TypeResolver {
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
                     String rightType = inferTypeFromExpr(binExpr.getRight());
                     // Handle null types - default to Object for null literals
-                    if (leftType == null) leftType = "Ljava/lang/Object;";
-                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                    if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                     // BigInteger operations - if either operand is BigInteger, result is BigInteger
-                    if ("Ljava/math/BigInteger;".equals(leftType) || "Ljava/math/BigInteger;".equals(rightType)) {
-                        return "Ljava/math/BigInteger;";
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(leftType) || TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(rightType)) {
+                        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
                     }
                     // Use type widening rules (int ^ long → long, etc.)
                     return getWidenedType(leftType, rightType);
                 }
                 case EqEq, EqEqEq, NotEq, NotEqEq, Lt, LtEq, Gt, GtEq, LogicalAnd, LogicalOr, InstanceOf, In -> {
                     // Equality, inequality, relational comparisons, logical operations, instanceof, and in return boolean
-                    return "Z";
+                    return TypeConversionUtils.ABBR_BOOLEAN;
                 }
                 case NullishCoalescing -> {
                     String leftType = inferTypeFromExpr(binExpr.getLeft());
@@ -1335,19 +1349,19 @@ public final class TypeResolver {
                             && TypeConversionUtils.isPrimitiveType(rightType)) {
                         return getWidenedType(leftType, rightType);
                     }
-                    return "Ljava/lang/Object;";
+                    return TypeConversionUtils.LJAVA_LANG_OBJECT;
                 }
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             switch (unaryExpr.getOp()) {
                 case Bang, Delete -> {
-                    return "Z";
+                    return TypeConversionUtils.ABBR_BOOLEAN;
                 }
                 case TypeOf -> {
-                    return "Ljava/lang/String;";
+                    return TypeConversionUtils.LJAVA_LANG_STRING;
                 }
                 case Void -> {
-                    return "Ljava/lang/Object;";
+                    return TypeConversionUtils.LJAVA_LANG_OBJECT;
                 }
                 default -> {
                     // For unary expressions, infer type from the argument
@@ -1358,9 +1372,9 @@ public final class TypeResolver {
             // For parenthesized expressions, infer type from the inner expression
             return inferTypeFromExpr(parenExpr.getExpr());
         } else if (expr instanceof Swc4jAstOptChainExpr) {
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else if (expr instanceof Swc4jAstFnExpr) {
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else if (expr instanceof Swc4jAstClassExpr) {
             return "Ljava/lang/Class;";
         } else if (expr instanceof Swc4jAstCallExpr callExpr) {
@@ -1369,7 +1383,7 @@ public final class TypeResolver {
             // super() and this() constructor calls always return void
             if (callExpr.getCallee() instanceof Swc4jAstSuper
                     || callExpr.getCallee() instanceof Swc4jAstThisExpr) {
-                return "V";
+                return TypeConversionUtils.ABBR_VOID;
             }
 
             // Handle direct calls to functional interface variables (e.g., factorial(n - 1))
@@ -1438,7 +1452,7 @@ public final class TypeResolver {
                     String methodName = propIdent.getSym();
                     switch (methodName) {
                         case "isArray" -> {
-                            return "Z";
+                            return TypeConversionUtils.ABBR_BOOLEAN;
                         }
                         case "from", "of" -> {
                             return "Ljava/util/ArrayList;";
@@ -1472,32 +1486,32 @@ public final class TypeResolver {
                                 return "Ljava/util/ArrayList;";
                             }
                             case "push", "unshift", "forEach" -> {
-                                return "V";
+                                return TypeConversionUtils.ABBR_VOID;
                             }
                             case "find", "reduce", "reduceRight" -> {
-                                return "Ljava/lang/Object;";
+                                return TypeConversionUtils.LJAVA_LANG_OBJECT;
                             }
                             case "join", "toString", "toLocaleString" -> {
-                                return "Ljava/lang/String;";
+                                return TypeConversionUtils.LJAVA_LANG_STRING;
                             }
                             case "indexOf", "lastIndexOf", "findIndex" -> {
-                                return "I";
+                                return TypeConversionUtils.ABBR_INTEGER;
                             }
                             case "includes", "some", "every" -> {
-                                return "Z";
+                                return TypeConversionUtils.ABBR_BOOLEAN;
                             }
                             case "pop", "shift" -> {
-                                return "Ljava/lang/Object;";
+                                return TypeConversionUtils.LJAVA_LANG_OBJECT;
                             }
                         }
                     }
                 }
 
                 // Java array methods
-                if (objType != null && objType.startsWith("[")) {
+                if (objType != null && objType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
                     if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                         String methodName = propIdent.getSym();
-                        String elementType = objType.substring(1); // Remove leading "["
+                        String elementType = objType.substring(1); // Remove leading TypeConversionUtils.ARRAY_PREFIX
                         switch (methodName) {
                             case "reverse", "sort", "fill" -> {
                                 // Methods that mutate and return the same array type
@@ -1508,34 +1522,35 @@ public final class TypeResolver {
                                 return objType;
                             }
                             case "join", "toString" -> {
-                                return "Ljava/lang/String;";
+                                return TypeConversionUtils.LJAVA_LANG_STRING;
                             }
                             case "indexOf", "lastIndexOf" -> {
-                                return "I";
+                                return TypeConversionUtils.ABBR_INTEGER;
                             }
                             case "includes" -> {
-                                return "Z";
+                                return TypeConversionUtils.ABBR_BOOLEAN;
                             }
                         }
                     }
                 }
 
                 // String methods
-                if ("Ljava/lang/String;".equals(objType)) {
+                if (TypeConversionUtils.LJAVA_LANG_STRING.equals(objType)) {
                     if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                         String methodName = propIdent.getSym();
                         return switch (methodName) {
                             // String return types
                             case "charAt", "substring", "slice", "substr", "toLowerCase", "toUpperCase", "trim",
                                  "trimStart", "trimLeft", "trimEnd", "trimRight", "concat", "repeat", "replace",
-                                 "replaceAll", "padStart", "padEnd" -> "Ljava/lang/String;";
+                                 "replaceAll", "padStart", "padEnd" -> TypeConversionUtils.LJAVA_LANG_STRING;
                             // int return types
-                            case "indexOf", "lastIndexOf", "charCodeAt", "codePointAt", "search" -> "I";
+                            case "indexOf", "lastIndexOf", "charCodeAt", "codePointAt", "search" ->
+                                    TypeConversionUtils.ABBR_INTEGER;
                             // boolean return types
-                            case "startsWith", "endsWith", "includes", "test" -> "Z";
+                            case "startsWith", "endsWith", "includes", "test" -> TypeConversionUtils.ABBR_BOOLEAN;
                             // ArrayList return type (split, match, matchAll)
                             case "split", "match", "matchAll" -> "Ljava/util/ArrayList;";
-                            default -> "Ljava/lang/Object;";
+                            default -> TypeConversionUtils.LJAVA_LANG_OBJECT;
                         };
                     }
                 }
@@ -1563,7 +1578,7 @@ public final class TypeResolver {
                             }
                             String argType = inferTypeFromExpr(arg.getExpr());
                             if (argType == null) {
-                                argType = "Ljava/lang/Object;";
+                                argType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                             }
                             paramDescriptors.append(argType);
                         }
@@ -1608,20 +1623,20 @@ public final class TypeResolver {
                         }
                     }
                     // Default to Object if we can't infer
-                    return "Ljava/lang/Object;";
+                    return TypeConversionUtils.LJAVA_LANG_OBJECT;
                 }
             }
 
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else if (expr instanceof Swc4jAstSeqExpr seqExpr) {
             // Sequence expression returns the type of the last expression
             var exprs = seqExpr.getExprs();
             if (!exprs.isEmpty()) {
                 return inferTypeFromExpr(exprs.get(exprs.size() - 1));
             }
-            return "V"; // Empty sequence - void
+            return TypeConversionUtils.ABBR_VOID; // Empty sequence - void
         }
-        return "Ljava/lang/Object;";
+        return TypeConversionUtils.LJAVA_LANG_OBJECT;
     }
 
     /**
@@ -1649,141 +1664,13 @@ public final class TypeResolver {
         return null;
     }
 
-    private String resolveSuperClassInternalName(String currentClassInternalName) {
-        String qualifiedClassName = currentClassInternalName.replace('/', '.');
-        String superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry()
-                .resolveSuperClass(qualifiedClassName);
-        if (superClassInternalName == null) {
-            int lastSlash = currentClassInternalName.lastIndexOf('/');
-            String simpleName = lastSlash >= 0
-                    ? currentClassInternalName.substring(lastSlash + 1)
-                    : currentClassInternalName;
-            superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
-        }
-        return superClassInternalName;
-    }
-
-    private JavaTypeInfo resolveTypeInfoByInternalName(String internalName) {
-        String qualifiedName = internalName.replace('/', '.');
-        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
-        if (typeInfo == null) {
-            int lastSlash = internalName.lastIndexOf('/');
-            String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
-            typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
-        }
-        return typeInfo;
-    }
-
-    /**
-     * Map ts type to descriptor string.
-     *
-     * @param tsType the ts type
-     * @return the string
-     * @throws Swc4jByteCodeCompilerException if a type reference cannot be resolved
-     */
-    public String mapTsTypeToDescriptor(
-            ISwc4jAstTsType tsType) throws Swc4jByteCodeCompilerException {
-        if (tsType == null) {
-            return "Ljava/lang/Object;";
-        } else if (tsType instanceof Swc4jAstTsOptionalType optionalType) {
-            return mapTsTypeToDescriptor(optionalType.getTypeAnn());
-        } else if (tsType instanceof Swc4jAstTsArrayType arrayType) {
-            // type[] syntax - maps to Java array
-            String elemType = mapTsTypeToDescriptor(arrayType.getElemType());
-            return "[" + elemType;
-        } else if (tsType instanceof Swc4jAstTsRestType restType) {
-            return mapRestTypeToDescriptor(restType);
-        } else if (tsType instanceof Swc4jAstTsUnionType unionType) {
-            return mapUnionTypeToDescriptor(unionType);
-        } else if (tsType instanceof Swc4jAstTsIntersectionType intersectionType) {
-            return mapIntersectionTypeToDescriptor(intersectionType);
-        } else if (tsType instanceof Swc4jAstTsTupleType) {
-            // Tuples are represented as ordered Lists at runtime.
-            return "Ljava/util/List;";
-        } else if (tsType instanceof Swc4jAstTsLitType litType) {
-            return mapTsLiteralTypeToDescriptor(litType.getLit());
-        } else if (tsType instanceof Swc4jAstTsMappedType) {
-            // Mapped object types are compiled to LinkedHashMap.
-            return "Ljava/util/LinkedHashMap;";
-        } else if (tsType instanceof Swc4jAstTsIndexedAccessType indexedAccessType) {
-            return mapIndexedAccessTypeToDescriptor(indexedAccessType);
-        } else if (tsType instanceof Swc4jAstTsTypeOperator typeOperator) {
-            return mapTypeOperatorToDescriptor(typeOperator);
-        } else if (tsType instanceof Swc4jAstTsTypeQuery typeQuery) {
-            return mapTypeQueryToDescriptor(typeQuery);
-        } else if (tsType instanceof Swc4jAstTsImportType importType) {
-            return mapImportTypeToDescriptor(importType);
-        } else if (tsType instanceof Swc4jAstTsTypePredicate) {
-            // Type predicates are function-return boolean contracts at runtime.
-            return "Z";
-        } else if (tsType instanceof Swc4jAstTsConditionalType conditionalType) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    conditionalType,
-                    "Conditional types are not supported in runtime type mapping.");
-        } else if (tsType instanceof Swc4jAstTsInferType inferType) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    inferType,
-                    "Infer types are not supported in runtime type mapping.");
-        } else if (tsType instanceof Swc4jAstTsKeywordType keywordType) {
-            // Handle TypeScript keyword types (boolean, number, string, etc.)
-            return switch (keywordType.getKind()) {
-                case TsAnyKeyword, TsIntrinsicKeyword, TsNeverKeyword, TsNullKeyword,
-                     TsObjectKeyword, TsSymbolKeyword, TsUndefinedKeyword, TsUnknownKeyword ->
-                        "Ljava/lang/Object;";
-                case TsBooleanKeyword -> "Z";
-                case TsNumberKeyword -> "D";  // Default to double for number
-                case TsStringKeyword -> "Ljava/lang/String;";
-                case TsBigIntKeyword -> "J";  // Map to long
-                case TsVoidKeyword -> "V";
-            };
-        } else if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
-            ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
-            if (entityName instanceof Swc4jAstIdent ident) {
-                String typeName = ident.getSym();
-                // Check if this is Array<T> generic syntax
-                if ("Array".equals(typeName)) {
-                    // Array<T> syntax - maps to List interface (more flexible than ArrayList)
-                    return "Ljava/util/List;";
-                }
-                // Phase 2: Check if this is Record<K, V> generic syntax
-                if ("Record".equals(typeName)) {
-                    // Record<K, V> syntax - maps to LinkedHashMap
-                    return "Ljava/util/LinkedHashMap;";
-                }
-                return mapTypeNameToDescriptor(typeName);
-            }
-        } else if (tsType instanceof Swc4jAstTsFnType fnType) {
-            // Function type syntax: (a: int, b: int) => int
-            // Generate a custom functional interface at compile time
-            return generateFunctionalInterface(fnType);
-        }
-        // Default to Object for unknown types
-        return "Ljava/lang/Object;";
-    }
-
-    private Integer getTupleLiteralIndex(ISwc4jAstTsType indexType) {
-        if (indexType instanceof Swc4jAstTsLitType litType && litType.getLit() instanceof Swc4jAstNumber number) {
-            double value = number.getValue();
-            if (value >= 0
-                    && value == Math.floor(value)
-                    && !Double.isInfinite(value)
-                    && !Double.isNaN(value)
-                    && value <= Integer.MAX_VALUE) {
-                return (int) value;
-            }
-        }
-        return null;
-    }
-
     private String mapImportTypeToDescriptor(Swc4jAstTsImportType importType) throws Swc4jByteCodeCompilerException {
         if (importType.getQualifier().isEmpty()) {
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
         String qualifierName = AstUtils.extractQualifiedName(importType.getQualifier().get());
         if (qualifierName == null || qualifierName.isEmpty()) {
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
         String importPath = importType.getArg().getValue();
         if (importPath == null || importPath.isEmpty() || importPath.startsWith(".")) {
@@ -1815,26 +1702,26 @@ public final class TypeResolver {
             if (tupleIndex != null && tupleIndex < tupleType.getElemTypes().size()) {
                 return mapTsTypeToDescriptor(tupleType.getElemTypes().get(tupleIndex).getTy());
             }
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
 
         String objDescriptor = mapTsTypeToDescriptor(objType);
-        if (objDescriptor.startsWith("[")) {
+        if (objDescriptor.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
             return objDescriptor.substring(1);
         }
-        return "Ljava/lang/Object;";
+        return TypeConversionUtils.LJAVA_LANG_OBJECT;
     }
 
     private String mapIntersectionTypeToDescriptor(
             Swc4jAstTsIntersectionType intersectionType) throws Swc4jByteCodeCompilerException {
         if (intersectionType.getTypes().isEmpty()) {
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
         String descriptor = mapTsTypeToDescriptor(intersectionType.getTypes().get(0));
         for (int i = 1; i < intersectionType.getTypes().size(); i++) {
             String nextDescriptor = mapTsTypeToDescriptor(intersectionType.getTypes().get(i));
             if (!descriptor.equals(nextDescriptor)) {
-                return "Ljava/lang/Object;";
+                return TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
         }
         return descriptor;
@@ -1843,22 +1730,22 @@ public final class TypeResolver {
     private String mapRestTypeToDescriptor(
             Swc4jAstTsRestType restType) throws Swc4jByteCodeCompilerException {
         String componentDescriptor = mapTsTypeToDescriptor(restType.getTypeAnn());
-        if (componentDescriptor.startsWith("[")) {
+        if (componentDescriptor.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
             return componentDescriptor;
         }
-        if ("V".equals(componentDescriptor)) {
+        if (TypeConversionUtils.ABBR_VOID.equals(componentDescriptor)) {
             return "[Ljava/lang/Object;";
         }
-        return "[" + componentDescriptor;
+        return TypeConversionUtils.ARRAY_PREFIX + componentDescriptor;
     }
 
     private String mapTsLiteralTypeToDescriptor(
             ISwc4jAstTsLit lit) {
         if (lit instanceof Swc4jAstBigInt) {
-            return "J";
+            return TypeConversionUtils.ABBR_LONG;
         }
         if (lit instanceof Swc4jAstBool) {
-            return "Z";
+            return TypeConversionUtils.ABBR_BOOLEAN;
         }
         if (lit instanceof Swc4jAstNumber number) {
             double value = number.getValue();
@@ -1867,76 +1754,103 @@ public final class TypeResolver {
                     && !Double.isNaN(value)
                     && value >= Integer.MIN_VALUE
                     && value <= Integer.MAX_VALUE) {
-                return "I";
+                return TypeConversionUtils.ABBR_INTEGER;
             }
-            return "D";
+            return TypeConversionUtils.ABBR_DOUBLE;
         }
         if (lit instanceof Swc4jAstStr || lit instanceof Swc4jAstTsTplLitType) {
-            return "Ljava/lang/String;";
+            return TypeConversionUtils.LJAVA_LANG_STRING;
         }
-        return "Ljava/lang/Object;";
+        return TypeConversionUtils.LJAVA_LANG_OBJECT;
     }
 
-    private String mapTypeOperatorToDescriptor(
-            Swc4jAstTsTypeOperator typeOperator) throws Swc4jByteCodeCompilerException {
-        return switch (typeOperator.getOp()) {
-            case KeyOf -> "Ljava/lang/String;";
-            case ReadOnly, Unique -> mapTsTypeToDescriptor(typeOperator.getTypeAnn());
-        };
-    }
-
-    private String mapTypeQueryToDescriptor(
-            Swc4jAstTsTypeQuery typeQuery) throws Swc4jByteCodeCompilerException {
-        ISwc4jAstTsTypeQueryExpr exprName = typeQuery.getExprName();
-        if (exprName instanceof Swc4jAstTsImportType importType) {
+    /**
+     * Map ts type to descriptor string.
+     *
+     * @param tsType the ts type
+     * @return the string
+     * @throws Swc4jByteCodeCompilerException if a type reference cannot be resolved
+     */
+    public String mapTsTypeToDescriptor(
+            ISwc4jAstTsType tsType) throws Swc4jByteCodeCompilerException {
+        if (tsType == null) {
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
+        } else if (tsType instanceof Swc4jAstTsOptionalType optionalType) {
+            return mapTsTypeToDescriptor(optionalType.getTypeAnn());
+        } else if (tsType instanceof Swc4jAstTsArrayType arrayType) {
+            // type[] syntax - maps to Java array
+            String elemType = mapTsTypeToDescriptor(arrayType.getElemType());
+            return TypeConversionUtils.ARRAY_PREFIX + elemType;
+        } else if (tsType instanceof Swc4jAstTsRestType restType) {
+            return mapRestTypeToDescriptor(restType);
+        } else if (tsType instanceof Swc4jAstTsUnionType unionType) {
+            return mapUnionTypeToDescriptor(unionType);
+        } else if (tsType instanceof Swc4jAstTsIntersectionType intersectionType) {
+            return mapIntersectionTypeToDescriptor(intersectionType);
+        } else if (tsType instanceof Swc4jAstTsTupleType) {
+            // Tuples are represented as ordered Lists at runtime.
+            return "Ljava/util/List;";
+        } else if (tsType instanceof Swc4jAstTsLitType litType) {
+            return mapTsLiteralTypeToDescriptor(litType.getLit());
+        } else if (tsType instanceof Swc4jAstTsMappedType) {
+            // Mapped object types are compiled to LinkedHashMap.
+            return "Ljava/util/LinkedHashMap;";
+        } else if (tsType instanceof Swc4jAstTsIndexedAccessType indexedAccessType) {
+            return mapIndexedAccessTypeToDescriptor(indexedAccessType);
+        } else if (tsType instanceof Swc4jAstTsTypeOperator typeOperator) {
+            return mapTypeOperatorToDescriptor(typeOperator);
+        } else if (tsType instanceof Swc4jAstTsTypeQuery typeQuery) {
+            return mapTypeQueryToDescriptor(typeQuery);
+        } else if (tsType instanceof Swc4jAstTsImportType importType) {
             return mapImportTypeToDescriptor(importType);
+        } else if (tsType instanceof Swc4jAstTsTypePredicate) {
+            // Type predicates are function-return boolean contracts at runtime.
+            return TypeConversionUtils.ABBR_BOOLEAN;
+        } else if (tsType instanceof Swc4jAstTsConditionalType conditionalType) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    conditionalType,
+                    "Conditional types are not supported in runtime type mapping.");
+        } else if (tsType instanceof Swc4jAstTsInferType inferType) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    inferType,
+                    "Infer types are not supported in runtime type mapping.");
+        } else if (tsType instanceof Swc4jAstTsKeywordType keywordType) {
+            // Handle TypeScript keyword types (boolean, number, string, etc.)
+            return switch (keywordType.getKind()) {
+                case TsAnyKeyword, TsIntrinsicKeyword, TsNeverKeyword, TsNullKeyword,
+                     TsObjectKeyword, TsSymbolKeyword, TsUndefinedKeyword, TsUnknownKeyword ->
+                        TypeConversionUtils.LJAVA_LANG_OBJECT;
+                case TsBooleanKeyword -> TypeConversionUtils.ABBR_BOOLEAN;
+                case TsNumberKeyword -> TypeConversionUtils.ABBR_DOUBLE;  // Default to double for number
+                case TsStringKeyword -> TypeConversionUtils.LJAVA_LANG_STRING;
+                case TsBigIntKeyword -> TypeConversionUtils.ABBR_LONG;  // Map to long
+                case TsVoidKeyword -> TypeConversionUtils.ABBR_VOID;
+            };
+        } else if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
+            ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
+            if (entityName instanceof Swc4jAstIdent ident) {
+                String typeName = ident.getSym();
+                // Check if this is Array<T> generic syntax
+                if ("Array".equals(typeName)) {
+                    // Array<T> syntax - maps to List interface (more flexible than ArrayList)
+                    return "Ljava/util/List;";
+                }
+                // Phase 2: Check if this is Record<K, V> generic syntax
+                if ("Record".equals(typeName)) {
+                    // Record<K, V> syntax - maps to LinkedHashMap
+                    return "Ljava/util/LinkedHashMap;";
+                }
+                return mapTypeNameToDescriptor(typeName);
+            }
+        } else if (tsType instanceof Swc4jAstTsFnType fnType) {
+            // Function type syntax: (a: int, b: int) => int
+            // Generate a custom functional interface at compile time
+            return generateFunctionalInterface(fnType);
         }
-        if (exprName instanceof ISwc4jAstTsEntityName entityName) {
-            String qualifiedName = AstUtils.extractQualifiedName(entityName);
-            if (qualifiedName == null || qualifiedName.isEmpty()) {
-                return "Ljava/lang/Object;";
-            }
-            if (qualifiedName.contains(".")) {
-                return mapTypeNameToDescriptor(qualifiedName);
-            }
-            CompilationContext context = compiler.getMemory().getCompilationContext();
-            String inferredType = context.getInferredTypes().get(qualifiedName);
-            if (inferredType != null) {
-                return inferredType;
-            }
-            var localVariable = context.getLocalVariableTable().getVariable(qualifiedName);
-            if (localVariable != null) {
-                return localVariable.type();
-            }
-            String resolvedAlias = compiler.getMemory().getScopedTypeAliasRegistry().resolve(qualifiedName);
-            if (resolvedAlias != null) {
-                return mapTypeNameToDescriptor(resolvedAlias);
-            }
-        }
-        return "Ljava/lang/Object;";
-    }
-
-    private String mapUnionTypeToDescriptor(
-            Swc4jAstTsUnionType unionType) throws Swc4jByteCodeCompilerException {
-        if (unionType.getTypes().isEmpty()) {
-            return "Ljava/lang/Object;";
-        }
-        String descriptor = null;
-        for (ISwc4jAstTsType candidateType : unionType.getTypes()) {
-            String candidateDescriptor = mapTsTypeToDescriptor(candidateType);
-            if ("V".equals(candidateDescriptor)) {
-                candidateDescriptor = "Ljava/lang/Object;";
-            }
-            if (descriptor == null) {
-                descriptor = candidateDescriptor;
-            } else {
-                descriptor = findCommonType(descriptor, candidateDescriptor);
-            }
-            if ("Ljava/lang/Object;".equals(descriptor)) {
-                break;
-            }
-        }
-        return descriptor != null ? descriptor : "Ljava/lang/Object;";
+        // Default to Object for unknown types
+        return TypeConversionUtils.LJAVA_LANG_OBJECT;
     }
 
     /**
@@ -1958,7 +1872,7 @@ public final class TypeResolver {
                 return mapTsTypeToDescriptor(constraintOpt.get());
             } else {
                 // No constraint - erase to Object
-                return "Ljava/lang/Object;";
+                return TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
         }
 
@@ -1969,15 +1883,15 @@ public final class TypeResolver {
         }
 
         return switch (resolvedType) {
-            case "boolean" -> "Z";
-            case "byte" -> "B";
-            case "char" -> "C";
-            case "double" -> "D";
-            case "float" -> "F";
-            case "int" -> "I";
-            case "long" -> "J";
-            case "short" -> "S";
-            case "void" -> "V";
+            case TypeConversionUtils.TYPEOF_BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
+            case "byte" -> TypeConversionUtils.ABBR_BYTE;
+            case "char" -> TypeConversionUtils.ABBR_CHARACTER;
+            case "double" -> TypeConversionUtils.ABBR_DOUBLE;
+            case "float" -> TypeConversionUtils.ABBR_FLOAT;
+            case "int" -> TypeConversionUtils.ABBR_INTEGER;
+            case "long" -> TypeConversionUtils.ABBR_LONG;
+            case "short" -> TypeConversionUtils.ABBR_SHORT;
+            case "void" -> TypeConversionUtils.ABBR_VOID;
             default -> {
                 // Check if this is an enum type - resolve to fully qualified name
                 String qualifiedName = resolveEnumTypeName(resolvedType);
@@ -1994,6 +1908,68 @@ public final class TypeResolver {
                 yield "L" + qualifiedName.replace('.', '/') + ";";
             }
         };
+    }
+
+    private String mapTypeOperatorToDescriptor(
+            Swc4jAstTsTypeOperator typeOperator) throws Swc4jByteCodeCompilerException {
+        return switch (typeOperator.getOp()) {
+            case KeyOf -> TypeConversionUtils.LJAVA_LANG_STRING;
+            case ReadOnly, Unique -> mapTsTypeToDescriptor(typeOperator.getTypeAnn());
+        };
+    }
+
+    private String mapTypeQueryToDescriptor(
+            Swc4jAstTsTypeQuery typeQuery) throws Swc4jByteCodeCompilerException {
+        ISwc4jAstTsTypeQueryExpr exprName = typeQuery.getExprName();
+        if (exprName instanceof Swc4jAstTsImportType importType) {
+            return mapImportTypeToDescriptor(importType);
+        }
+        if (exprName instanceof ISwc4jAstTsEntityName entityName) {
+            String qualifiedName = AstUtils.extractQualifiedName(entityName);
+            if (qualifiedName == null || qualifiedName.isEmpty()) {
+                return TypeConversionUtils.LJAVA_LANG_OBJECT;
+            }
+            if (qualifiedName.contains(".")) {
+                return mapTypeNameToDescriptor(qualifiedName);
+            }
+            CompilationContext context = compiler.getMemory().getCompilationContext();
+            String inferredType = context.getInferredTypes().get(qualifiedName);
+            if (inferredType != null) {
+                return inferredType;
+            }
+            var localVariable = context.getLocalVariableTable().getVariable(qualifiedName);
+            if (localVariable != null) {
+                return localVariable.type();
+            }
+            String resolvedAlias = compiler.getMemory().getScopedTypeAliasRegistry().resolve(qualifiedName);
+            if (resolvedAlias != null) {
+                return mapTypeNameToDescriptor(resolvedAlias);
+            }
+        }
+        return TypeConversionUtils.LJAVA_LANG_OBJECT;
+    }
+
+    private String mapUnionTypeToDescriptor(
+            Swc4jAstTsUnionType unionType) throws Swc4jByteCodeCompilerException {
+        if (unionType.getTypes().isEmpty()) {
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
+        }
+        String descriptor = null;
+        for (ISwc4jAstTsType candidateType : unionType.getTypes()) {
+            String candidateDescriptor = mapTsTypeToDescriptor(candidateType);
+            if (TypeConversionUtils.ABBR_VOID.equals(candidateDescriptor)) {
+                candidateDescriptor = TypeConversionUtils.LJAVA_LANG_OBJECT;
+            }
+            if (descriptor == null) {
+                descriptor = candidateDescriptor;
+            } else {
+                descriptor = findCommonType(descriptor, candidateDescriptor);
+            }
+            if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(descriptor)) {
+                break;
+            }
+        }
+        return descriptor != null ? descriptor : TypeConversionUtils.LJAVA_LANG_OBJECT;
     }
 
     /**
@@ -2030,7 +2006,7 @@ public final class TypeResolver {
         Optional<Swc4jAstTsTypeParamInstantiation> typeParamsOpt = typeRef.getTypeParams();
         if (typeParamsOpt.isEmpty()) {
             // Array without type parameter - default to Array<Object>
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
 
         Swc4jAstTsTypeParamInstantiation typeParams = typeParamsOpt.get();
@@ -2079,7 +2055,7 @@ public final class TypeResolver {
         Optional<Swc4jAstTsTypeParamInstantiation> typeParamsOpt = typeRef.getTypeParams();
         if (typeParamsOpt.isEmpty()) {
             // Record without type parameters - default to Record<string, Object>
-            return GenericTypeInfo.of("Ljava/lang/String;", "Ljava/lang/Object;");
+            return GenericTypeInfo.of(TypeConversionUtils.LJAVA_LANG_STRING, TypeConversionUtils.LJAVA_LANG_OBJECT);
         }
 
         Swc4jAstTsTypeParamInstantiation typeParams = typeParamsOpt.get();
@@ -2143,5 +2119,30 @@ public final class TypeResolver {
         }
 
         return typeName;
+    }
+
+    private String resolveSuperClassInternalName(String currentClassInternalName) {
+        String qualifiedClassName = currentClassInternalName.replace('/', '.');
+        String superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry()
+                .resolveSuperClass(qualifiedClassName);
+        if (superClassInternalName == null) {
+            int lastSlash = currentClassInternalName.lastIndexOf('/');
+            String simpleName = lastSlash >= 0
+                    ? currentClassInternalName.substring(lastSlash + 1)
+                    : currentClassInternalName;
+            superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
+        }
+        return superClassInternalName;
+    }
+
+    private JavaTypeInfo resolveTypeInfoByInternalName(String internalName) {
+        String qualifiedName = internalName.replace('/', '.');
+        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+        if (typeInfo == null) {
+            int lastSlash = internalName.lastIndexOf('/');
+            String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
+            typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+        }
+        return typeInfo;
     }
 }

@@ -48,18 +48,35 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
     private void addPrimitive(CodeBuilder code, String primitiveType) {
         switch (primitiveType) {
-            case "I", "B", "S", "C" -> code.iadd();
-            case "J" -> code.ladd();
-            case "F" -> code.fadd();
-            case "D" -> code.dadd();
+            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BYTE, TypeConversionUtils.ABBR_SHORT,
+                 TypeConversionUtils.ABBR_CHARACTER -> code.iadd();
+            case TypeConversionUtils.ABBR_LONG -> code.ladd();
+            case TypeConversionUtils.ABBR_FLOAT -> code.fadd();
+            case TypeConversionUtils.ABBR_DOUBLE -> code.dadd();
         }
     }
 
     private void duplicatePrimitive(CodeBuilder code, String primitiveType) {
         switch (primitiveType) {
-            case "J", "D" -> code.dup2(); // long and double take 2 stack slots
+            case TypeConversionUtils.ABBR_LONG, TypeConversionUtils.ABBR_DOUBLE ->
+                    code.dup2(); // long and double take 2 stack slots
             default -> code.dup();         // all others take 1 slot
         }
+    }
+
+    private String extractSuperPropertyName(
+            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
+        if (superPropExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+            return propIdent.getSym();
+        }
+        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp
+                && computedProp.getExpr() instanceof Swc4jAstStr str) {
+            return str.getValue();
+        }
+        throw new Swc4jByteCodeCompilerException(
+                getSourceCode(),
+                superPropExpr,
+                "Computed super property expressions not yet supported");
     }
 
     @Override
@@ -90,13 +107,13 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
      */
     private void generateArrayLoad(CodeBuilder code, String elementType) {
         switch (elementType) {
-            case "Z", "B" -> code.baload(); // boolean and byte
-            case "C" -> code.caload(); // char
-            case "S" -> code.saload(); // short
-            case "I" -> code.iaload(); // int
-            case "J" -> code.laload(); // long
-            case "F" -> code.faload(); // float
-            case "D" -> code.daload(); // double
+            case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.baload(); // boolean and byte
+            case TypeConversionUtils.ABBR_CHARACTER -> code.caload(); // char
+            case TypeConversionUtils.ABBR_SHORT -> code.saload(); // short
+            case TypeConversionUtils.ABBR_INTEGER -> code.iaload(); // int
+            case TypeConversionUtils.ABBR_LONG -> code.laload(); // long
+            case TypeConversionUtils.ABBR_FLOAT -> code.faload(); // float
+            case TypeConversionUtils.ABBR_DOUBLE -> code.daload(); // double
             default -> code.aaload(); // reference types (Object, Integer, etc.)
         }
     }
@@ -106,13 +123,13 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
      */
     private void generateArrayStore(CodeBuilder code, String elementType) {
         switch (elementType) {
-            case "Z", "B" -> code.bastore(); // boolean and byte
-            case "C" -> code.castore(); // char
-            case "S" -> code.sastore(); // short
-            case "I" -> code.iastore(); // int
-            case "J" -> code.lastore(); // long
-            case "F" -> code.fastore(); // float
-            case "D" -> code.dastore(); // double
+            case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.bastore(); // boolean and byte
+            case TypeConversionUtils.ABBR_CHARACTER -> code.castore(); // char
+            case TypeConversionUtils.ABBR_SHORT -> code.sastore(); // short
+            case TypeConversionUtils.ABBR_INTEGER -> code.iastore(); // int
+            case TypeConversionUtils.ABBR_LONG -> code.lastore(); // long
+            case TypeConversionUtils.ABBR_FLOAT -> code.fastore(); // float
+            case TypeConversionUtils.ABBR_DOUBLE -> code.dastore(); // double
             default -> code.aastore(); // reference types (Object, Integer, etc.)
         }
     }
@@ -211,12 +228,12 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
     private void generateUnbox(CodeBuilder code, ClassWriter classWriter, String wrapperType, String primitiveType) {
         var cp = classWriter.getConstantPool();
         String methodName = switch (primitiveType) {
-            case "I" -> "intValue";
-            case "J" -> "longValue";
-            case "F" -> "floatValue";
-            case "D" -> "doubleValue";
-            case "B" -> "byteValue";
-            case "S" -> "shortValue";
+            case TypeConversionUtils.ABBR_INTEGER -> "intValue";
+            case TypeConversionUtils.ABBR_LONG -> "longValue";
+            case TypeConversionUtils.ABBR_FLOAT -> "floatValue";
+            case TypeConversionUtils.ABBR_DOUBLE -> "doubleValue";
+            case TypeConversionUtils.ABBR_BYTE -> "byteValue";
+            case TypeConversionUtils.ABBR_SHORT -> "shortValue";
             default -> throw new IllegalArgumentException("Unknown primitive type: " + primitiveType);
         };
 
@@ -252,8 +269,8 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
         // Convert index to int if needed
         String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-        if (indexType != null && !"I".equals(indexType)) {
-            TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
+        if (indexType != null && !TypeConversionUtils.ABBR_INTEGER.equals(indexType)) {
+            TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), TypeConversionUtils.ABBR_INTEGER);
         }
 
         // Call ArrayList.get(int)
@@ -297,8 +314,8 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null);
 
         // Convert index to int if needed
-        if (indexType != null && !"I".equals(indexType)) {
-            TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
+        if (indexType != null && !TypeConversionUtils.ABBR_INTEGER.equals(indexType)) {
+            TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), TypeConversionUtils.ABBR_INTEGER);
         }
         // Stack: [new_Integer, ArrayList, index] or [new_Integer, new_Integer, ArrayList, index]
 
@@ -437,7 +454,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         // Cast to LinkedHashMap if the type is Object (for nested properties)
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
         var cp = classWriter.getConstantPool();
-        if ("Ljava/lang/Object;".equals(objType)) {
+        if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
             int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
             code.checkcast(linkedHashMapClass); // [LinkedHashMap]
         }
@@ -495,7 +512,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         // Stack: [new_Integer, map or Object] or [new_Integer, new_Integer, map or Object]
 
         // Cast to LinkedHashMap if the type is Object (for nested properties)
-        if ("Ljava/lang/Object;".equals(objType)) {
+        if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
             int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
             code.checkcast(linkedHashMapClass); // [LinkedHashMap]
         }
@@ -575,21 +592,27 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
         // Validate type - only numeric types can be incremented/decremented
         switch (varType) {
-            case "I", "B", "S", "C", "J", "F", "D",
-                 "Ljava/lang/Integer;", "Ljava/lang/Long;", "Ljava/lang/Float;",
-                 "Ljava/lang/Double;", "Ljava/lang/Byte;", "Ljava/lang/Short;" -> {
+            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BYTE, TypeConversionUtils.ABBR_SHORT,
+                 TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_LONG, TypeConversionUtils.ABBR_FLOAT,
+                 TypeConversionUtils.ABBR_DOUBLE,
+                 TypeConversionUtils.LJAVA_LANG_INTEGER, TypeConversionUtils.LJAVA_LANG_LONG,
+                 TypeConversionUtils.LJAVA_LANG_FLOAT,
+                 TypeConversionUtils.LJAVA_LANG_DOUBLE, TypeConversionUtils.LJAVA_LANG_BYTE,
+                 TypeConversionUtils.LJAVA_LANG_SHORT -> {
                 // Valid numeric type
             }
-            case "Z", "Ljava/lang/Boolean;" -> throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
-                    "Cannot apply " + updateExpr.getOp().getName() + " operator to boolean type");
-            case "Ljava/lang/String;" -> throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
-                    "Cannot apply " + updateExpr.getOp().getName() + " operator to string type");
+            case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.LJAVA_LANG_BOOLEAN ->
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
+                            "Cannot apply " + updateExpr.getOp().getName() + " operator to boolean type");
+            case TypeConversionUtils.LJAVA_LANG_STRING ->
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
+                            "Cannot apply " + updateExpr.getOp().getName() + " operator to string type");
             default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
                     "Cannot apply " + updateExpr.getOp().getName() + " operator to type: " + varType);
         }
 
         // Optimization: Use iinc instruction for int local variables
-        if (varType.equals("I")) {
+        if (varType.equals(TypeConversionUtils.ABBR_INTEGER)) {
             generateIntUpdate(code, varIndex, isIncrement, isPrefix);
         } else {
             // General case for other numeric types
@@ -640,7 +663,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
 
         // Handle native Java arrays: arr[index]++ for int[], Object[], etc.
-        if (objType != null && objType.startsWith("[")) {
+        if (objType != null && objType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                 handleNativeArrayUpdate(code, classWriter, memberExpr, computedProp, objType, isIncrement, isPrefix);
                 return;
@@ -649,77 +672,13 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
         // Handle Object type (nested properties like obj.inner.count++ where obj.inner returns Object)
         // Assume it's a LinkedHashMap since that's what object literals compile to
-        if ("Ljava/lang/Object;".equals(objType)) {
+        if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
             handleLinkedHashMapUpdate(code, classWriter, memberExpr, isIncrement, isPrefix);
             return;
         }
 
         throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
                 "Update expressions on member access not yet supported for type: " + objType);
-    }
-
-    private String extractSuperPropertyName(
-            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
-        if (superPropExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-            return propIdent.getSym();
-        }
-        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp
-                && computedProp.getExpr() instanceof Swc4jAstStr str) {
-            return str.getValue();
-        }
-        throw new Swc4jByteCodeCompilerException(
-                getSourceCode(),
-                superPropExpr,
-                "Computed super property expressions not yet supported");
-    }
-
-    private void handleSuperPropertyUpdate(
-            CodeBuilder code,
-            ClassWriter classWriter,
-            Swc4jAstUpdateExpr updateExpr,
-            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
-        String fieldName = extractSuperPropertyName(superPropExpr);
-        CompilationContext context = compiler.getMemory().getCompilationContext();
-        String currentClassName = context.getCurrentClassInternalName();
-        if (currentClassName == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    superPropExpr,
-                    "super property update outside of class context");
-        }
-
-        String superClassInternalName = resolveSuperClassInternalName(currentClassName);
-        if (superClassInternalName == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    superPropExpr,
-                    "Cannot resolve superclass for " + currentClassName);
-        }
-
-        JavaTypeInfo superTypeInfo = resolveTypeInfoByInternalName(superClassInternalName);
-        if (superTypeInfo == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    superPropExpr,
-                    "Cannot resolve superclass type info for " + superClassInternalName);
-        }
-
-        FieldLookupResult lookupResult = lookupFieldInHierarchy(superTypeInfo, fieldName);
-        if (lookupResult == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    superPropExpr,
-                    "Field not found in super hierarchy: " + fieldName);
-        }
-
-        code.aload(0);
-        updateInstanceField(
-                code,
-                classWriter,
-                updateExpr,
-                lookupResult.ownerInternalName,
-                fieldName,
-                lookupResult.fieldInfo.descriptor());
     }
 
     /**
@@ -736,7 +695,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
             boolean isPrefix) throws Swc4jByteCodeCompilerException {
 
         // Determine element type from array type descriptor
-        // e.g., "[I" -> "I" (int), "[J" -> "J" (long)
+        // e.g., "[I" -> TypeConversionUtils.ABBR_INTEGER (int), "[J" -> TypeConversionUtils.ABBR_LONG (long)
         String elementType = arrayType.substring(1);
 
         // Only support primitive element types for now
@@ -745,12 +704,12 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
                     "Update expressions on arrays currently only support primitive element types, got: " + elementType);
         }
 
-        if (!isPrefix && ("J".equals(elementType) || "D".equals(elementType))) {
+        if (!isPrefix && (TypeConversionUtils.ABBR_LONG.equals(elementType) || TypeConversionUtils.ABBR_DOUBLE.equals(elementType))) {
             CompilationContext context = compiler.getMemory().getCompilationContext();
             int arraySlot = getOrAllocateTempSlot(context,
                     "$tempUpdateArray" + context.getNextTempId(), arrayType);
             int indexSlot = getOrAllocateTempSlot(context,
-                    "$tempUpdateIndex" + context.getNextTempId(), "I");
+                    "$tempUpdateIndex" + context.getNextTempId(), TypeConversionUtils.ABBR_INTEGER);
             int valueSlot = getOrAllocateTempSlot(context,
                     "$tempUpdateValue" + context.getNextTempId(), elementType);
             int newValueSlot = getOrAllocateTempSlot(context,
@@ -761,8 +720,8 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
             compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null);
             String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-            if (indexType != null && !"I".equals(indexType)) {
-                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
+            if (indexType != null && !TypeConversionUtils.ABBR_INTEGER.equals(indexType)) {
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), TypeConversionUtils.ABBR_INTEGER);
             }
             code.istore(indexSlot);
 
@@ -797,8 +756,8 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
         // Convert index to int if needed
         String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-        if (indexType != null && !"I".equals(indexType)) {
-            TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
+        if (indexType != null && !TypeConversionUtils.ABBR_INTEGER.equals(indexType)) {
+            TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), TypeConversionUtils.ABBR_INTEGER);
         }
 
         // Duplicate array and index for later store
@@ -818,7 +777,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
             } // [array, index, new_value]
 
             // Duplicate new value for return, then store
-            if ("J".equals(elementType) || "D".equals(elementType)) {
+            if (TypeConversionUtils.ABBR_LONG.equals(elementType) || TypeConversionUtils.ABBR_DOUBLE.equals(elementType)) {
                 // Category 2: [array, index, new_value(2)]
                 code.dup2_x2(); // [new_value(2), array, index, new_value(2)]
             } else {
@@ -834,7 +793,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
             // First, move old value out of the way
             // We'll use a pattern: load, increment, then juggle stack
-            if ("J".equals(elementType) || "D".equals(elementType)) {
+            if (TypeConversionUtils.ABBR_LONG.equals(elementType) || TypeConversionUtils.ABBR_DOUBLE.equals(elementType)) {
                 // Category 2 - use temp local to avoid complex stack manipulation
                 CompilationContext context = compiler.getMemory().getCompilationContext();
                 int tempSlot = getOrAllocateTempSlot(context,
@@ -901,21 +860,72 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         return true;
     }
 
+    private void handleSuperPropertyUpdate(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            Swc4jAstUpdateExpr updateExpr,
+            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
+        String fieldName = extractSuperPropertyName(superPropExpr);
+        CompilationContext context = compiler.getMemory().getCompilationContext();
+        String currentClassName = context.getCurrentClassInternalName();
+        if (currentClassName == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "super property update outside of class context");
+        }
+
+        String superClassInternalName = resolveSuperClassInternalName(currentClassName);
+        if (superClassInternalName == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Cannot resolve superclass for " + currentClassName);
+        }
+
+        JavaTypeInfo superTypeInfo = resolveTypeInfoByInternalName(superClassInternalName);
+        if (superTypeInfo == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Cannot resolve superclass type info for " + superClassInternalName);
+        }
+
+        FieldLookupResult lookupResult = lookupFieldInHierarchy(superTypeInfo, fieldName);
+        if (lookupResult == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Field not found in super hierarchy: " + fieldName);
+        }
+
+        code.aload(0);
+        updateInstanceField(
+                code,
+                classWriter,
+                updateExpr,
+                lookupResult.ownerInternalName,
+                fieldName,
+                lookupResult.fieldInfo.descriptor());
+    }
+
     private void loadOne(CodeBuilder code, String primitiveType) {
         switch (primitiveType) {
-            case "I", "B", "S", "C" -> code.iconst(1);
-            case "J" -> code.lconst(1L);
-            case "F" -> code.fconst(1.0f);
-            case "D" -> code.dconst(1.0);
+            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BYTE, TypeConversionUtils.ABBR_SHORT,
+                 TypeConversionUtils.ABBR_CHARACTER -> code.iconst(1);
+            case TypeConversionUtils.ABBR_LONG -> code.lconst(1L);
+            case TypeConversionUtils.ABBR_FLOAT -> code.fconst(1.0f);
+            case TypeConversionUtils.ABBR_DOUBLE -> code.dconst(1.0);
         }
     }
 
     private void loadPrimitive(CodeBuilder code, String primitiveType, int varIndex) {
         switch (primitiveType) {
-            case "I", "B", "S", "C" -> code.iload(varIndex);
-            case "J" -> code.lload(varIndex);
-            case "F" -> code.fload(varIndex);
-            case "D" -> code.dload(varIndex);
+            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BYTE, TypeConversionUtils.ABBR_SHORT,
+                 TypeConversionUtils.ABBR_CHARACTER -> code.iload(varIndex);
+            case TypeConversionUtils.ABBR_LONG -> code.lload(varIndex);
+            case TypeConversionUtils.ABBR_FLOAT -> code.fload(varIndex);
+            case TypeConversionUtils.ABBR_DOUBLE -> code.dload(varIndex);
         }
     }
 
@@ -960,31 +970,33 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
     private void storePrimitive(CodeBuilder code, String primitiveType, int varIndex) {
         switch (primitiveType) {
-            case "I", "B", "S", "C" -> code.istore(varIndex);
-            case "J" -> code.lstore(varIndex);
-            case "F" -> code.fstore(varIndex);
-            case "D" -> code.dstore(varIndex);
+            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BYTE, TypeConversionUtils.ABBR_SHORT,
+                 TypeConversionUtils.ABBR_CHARACTER -> code.istore(varIndex);
+            case TypeConversionUtils.ABBR_LONG -> code.lstore(varIndex);
+            case TypeConversionUtils.ABBR_FLOAT -> code.fstore(varIndex);
+            case TypeConversionUtils.ABBR_DOUBLE -> code.dstore(varIndex);
         }
     }
 
     private void subtractPrimitive(CodeBuilder code, String primitiveType) {
         switch (primitiveType) {
-            case "I", "B", "S", "C" -> code.isub();
-            case "J" -> code.lsub();
-            case "F" -> code.fsub();
-            case "D" -> code.dsub();
+            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BYTE, TypeConversionUtils.ABBR_SHORT,
+                 TypeConversionUtils.ABBR_CHARACTER -> code.isub();
+            case TypeConversionUtils.ABBR_LONG -> code.lsub();
+            case TypeConversionUtils.ABBR_FLOAT -> code.fsub();
+            case TypeConversionUtils.ABBR_DOUBLE -> code.dsub();
         }
     }
 
     private String unwrapType(String wrapperType) {
         return switch (wrapperType) {
-            case "Ljava/lang/Integer;" -> "I";
-            case "Ljava/lang/Long;" -> "J";
-            case "Ljava/lang/Float;" -> "F";
-            case "Ljava/lang/Double;" -> "D";
-            case "Ljava/lang/Byte;" -> "B";
-            case "Ljava/lang/Short;" -> "S";
-            case "Ljava/lang/Character;" -> "C";
+            case TypeConversionUtils.LJAVA_LANG_INTEGER -> TypeConversionUtils.ABBR_INTEGER;
+            case TypeConversionUtils.LJAVA_LANG_LONG -> TypeConversionUtils.ABBR_LONG;
+            case TypeConversionUtils.LJAVA_LANG_FLOAT -> TypeConversionUtils.ABBR_FLOAT;
+            case TypeConversionUtils.LJAVA_LANG_DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
+            case TypeConversionUtils.LJAVA_LANG_BYTE -> TypeConversionUtils.ABBR_BYTE;
+            case TypeConversionUtils.LJAVA_LANG_SHORT -> TypeConversionUtils.ABBR_SHORT;
+            case TypeConversionUtils.LJAVA_LANG_CHARACTER -> TypeConversionUtils.ABBR_CHARACTER;
             default -> throw new IllegalArgumentException("Unknown wrapper type: " + wrapperType);
         };
     }
@@ -1000,7 +1012,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         boolean isPrimitive = fieldType.equals(primitiveType);
         boolean isWrapper = TypeConversionUtils.isPrimitiveType(primitiveType) && !isPrimitive;
 
-        if (!TypeConversionUtils.isPrimitiveType(primitiveType) || "Z".equals(primitiveType)) {
+        if (!TypeConversionUtils.isPrimitiveType(primitiveType) || TypeConversionUtils.ABBR_BOOLEAN.equals(primitiveType)) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
                     "Cannot apply " + updateExpr.getOp().getName() + " operator to type: " + fieldType);
         }
@@ -1055,7 +1067,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
             }
         } else {
             if (isPrefix) {
-                if ("J".equals(primitiveType) || "D".equals(primitiveType)) {
+                if (TypeConversionUtils.ABBR_LONG.equals(primitiveType) || TypeConversionUtils.ABBR_DOUBLE.equals(primitiveType)) {
                     code.dup2_x1();
                 } else {
                     code.dup_x1();
@@ -1079,7 +1091,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         boolean isPrimitive = fieldType.equals(primitiveType);
         boolean isWrapper = TypeConversionUtils.isPrimitiveType(primitiveType) && !isPrimitive;
 
-        if (!TypeConversionUtils.isPrimitiveType(primitiveType) || "Z".equals(primitiveType)) {
+        if (!TypeConversionUtils.isPrimitiveType(primitiveType) || TypeConversionUtils.ABBR_BOOLEAN.equals(primitiveType)) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
                     "Cannot apply " + updateExpr.getOp().getName() + " operator to type: " + fieldType);
         }

@@ -33,6 +33,7 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
@@ -263,7 +264,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         }
 
         // Generate value field (private final int/String value)
-        String valueFieldDescriptor = enumInfo.isStringEnum ? "Ljava/lang/String;" : "I";
+        String valueFieldDescriptor = enumInfo.isStringEnum ? TypeConversionUtils.LJAVA_LANG_STRING : TypeConversionUtils.ABBR_INTEGER;
         classWriter.addField(
                 0x0002 | 0x0010, // ACC_PRIVATE | ACC_FINAL
                 "value",
@@ -327,7 +328,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
                     .aload(3);      // load value (String at slot 3)
         }
 
-        String valueFieldDescriptor = isStringEnum ? "Ljava/lang/String;" : "I";
+        String valueFieldDescriptor = isStringEnum ? TypeConversionUtils.LJAVA_LANG_STRING : TypeConversionUtils.ABBR_INTEGER;
         int valueFieldRef = cp.addFieldRef(internalClassName, "value", valueFieldDescriptor);
 
         code.putfield(valueFieldRef) // this.value = value
@@ -349,7 +350,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
             EnumInfo enumInfo) {
         var cp = classWriter.getConstantPool();
         // Generate: public static EnumType fromValue(<type> value)
-        String valueType = enumInfo.isStringEnum ? "Ljava/lang/String;" : "I";
+        String valueType = enumInfo.isStringEnum ? TypeConversionUtils.LJAVA_LANG_STRING : TypeConversionUtils.ABBR_INTEGER;
         String enumDescriptor = "L" + internalClassName + ";";
         String methodDescriptor = "(" + valueType + ")" + enumDescriptor;
 
@@ -546,7 +547,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
             boolean isStringEnum) {
         var cp = classWriter.getConstantPool();
         // Generate: public <type> getValue()
-        String valueFieldDescriptor = isStringEnum ? "Ljava/lang/String;" : "I";
+        String valueFieldDescriptor = isStringEnum ? TypeConversionUtils.LJAVA_LANG_STRING : TypeConversionUtils.ABBR_INTEGER;
         String methodDescriptor = "()" + valueFieldDescriptor;
         int valueFieldRef = cp.addFieldRef(internalClassName, "value", valueFieldDescriptor);
 

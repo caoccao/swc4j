@@ -16,6 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+
 /**
  * Represents a local variable in the compilation context.
  *
@@ -59,7 +61,7 @@ public record LocalVariable(String name, String type, int index, boolean mutable
      * @return the holder array type descriptor
      */
     public String getHolderType() {
-        return "[" + type;
+        return TypeConversionUtils.ARRAY_PREFIX + type;
     }
 
     /**

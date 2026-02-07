@@ -143,7 +143,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         // Unbox target if needed
         String targetType = compiler.getTypeResolver().inferTypeFromExpr(targetArg.getExpr());
         var cp = classWriter.getConstantPool();
-        if ("Ljava/lang/Integer;".equals(targetType)) {
+        if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(targetType)) {
             int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
             code.invokevirtual(intValueMethod);
         }
@@ -154,7 +154,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
         // Unbox start if needed
         String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-        if ("Ljava/lang/Integer;".equals(startType)) {
+        if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
             int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
             code.invokevirtual(intValueMethod);
         }
@@ -172,7 +172,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox end if needed
             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(endType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(endType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -240,7 +240,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if needed
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(startType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -257,7 +257,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox start if needed
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(startType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -267,7 +267,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox end if needed
             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(endType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(endType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -327,11 +327,11 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         var depthArg = callExpr.getArgs().get(0);
         compiler.getExpressionProcessor().generate(code, classWriter, depthArg.getExpr(), null);
         String depthType = compiler.getTypeResolver().inferTypeFromExpr(depthArg.getExpr());
-        if ("Ljava/lang/Integer;".equals(depthType)) {
+        if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(depthType)) {
             int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
             code.invokevirtual(intValueMethod);
-        } else if (depthType != null && TypeConversionUtils.isPrimitiveType(depthType) && !"I".equals(depthType)) {
-            TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(depthType), "I");
+        } else if (depthType != null && TypeConversionUtils.isPrimitiveType(depthType) && !TypeConversionUtils.ABBR_INTEGER.equals(depthType)) {
+            TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(depthType), TypeConversionUtils.ABBR_INTEGER);
         }
         int flatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "flat",
                 "(Ljava/util/ArrayList;I)Ljava/util/ArrayList;");
@@ -432,7 +432,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // If the separator is not a String, convert it
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-            if (argType != null && !"Ljava/lang/String;".equals(argType)) {
+            if (argType != null && !TypeConversionUtils.LJAVA_LANG_STRING.equals(argType)) {
                 // Convert to string using String.valueOf()
                 int valueOfMethod = cp.addMethodRef("java/lang/String", "valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
                 code.invokestatic(valueOfMethod);
@@ -551,7 +551,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
                 TypeConversionUtils.boxPrimitiveType(code, classWriter, initType, TypeConversionUtils.getWrapperType(initType));
             }
         }
-        String initDescriptor = primitiveType != null ? primitiveType : "Ljava/lang/Object;";
+        String initDescriptor = primitiveType != null ? primitiveType : TypeConversionUtils.LJAVA_LANG_OBJECT;
         int reduceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "reduce",
                 "(Ljava/util/ArrayList;" + interfaceDescriptor + initDescriptor + ")Ljava/lang/Object;");
         code.invokestatic(reduceMethod);
@@ -586,7 +586,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
                 TypeConversionUtils.boxPrimitiveType(code, classWriter, initType, TypeConversionUtils.getWrapperType(initType));
             }
         }
-        String initDescriptor = primitiveType != null ? primitiveType : "Ljava/lang/Object;";
+        String initDescriptor = primitiveType != null ? primitiveType : TypeConversionUtils.LJAVA_LANG_OBJECT;
         int reduceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayListApiUtils", "reduceRight",
                 "(Ljava/util/ArrayList;" + interfaceDescriptor + initDescriptor + ")Ljava/lang/Object;");
         code.invokestatic(reduceMethod);
@@ -648,7 +648,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Need to unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(startType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -677,7 +677,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(startType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -687,7 +687,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(endType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(endType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -744,7 +744,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(startType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -759,7 +759,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(startType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -770,7 +770,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String deleteCountType = compiler.getTypeResolver().inferTypeFromExpr(deleteCountArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(deleteCountType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(deleteCountType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -864,7 +864,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(startType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -879,7 +879,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(startType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(startType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -890,7 +890,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String deleteCountType = compiler.getTypeResolver().inferTypeFromExpr(deleteCountArg.getExpr());
-            if ("Ljava/lang/Integer;".equals(deleteCountType)) {
+            if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(deleteCountType)) {
                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueMethod);
             }
@@ -986,7 +986,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         var cp = classWriter.getConstantPool();
         // Unbox index if needed
         String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
-        if ("Ljava/lang/Integer;".equals(indexType)) {
+        if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(indexType)) {
             int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
             code.invokevirtual(intValueMethod);
         }
@@ -1034,7 +1034,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
     }
 
     private boolean isNumericPrimitive(String type) {
-        return "I".equals(type) || "J".equals(type) || "D".equals(type);
+        return TypeConversionUtils.ABBR_INTEGER.equals(type) || TypeConversionUtils.ABBR_LONG.equals(type) || TypeConversionUtils.ABBR_DOUBLE.equals(type);
     }
 
     /**
@@ -1081,7 +1081,8 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         }
         String primitiveType = TypeConversionUtils.getPrimitiveType(elementType);
         return switch (primitiveType) {
-            case "I", "J", "D" -> primitiveType;
+            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_LONG, TypeConversionUtils.ABBR_DOUBLE ->
+                    primitiveType;
             default -> null;
         };
     }
@@ -1106,9 +1107,9 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             return "Ljava/util/function/BiFunction;";
         }
         return switch (primitiveType) {
-            case "I" -> "Ljava/util/function/IntBinaryOperator;";
-            case "J" -> "Ljava/util/function/LongBinaryOperator;";
-            case "D" -> "Ljava/util/function/DoubleBinaryOperator;";
+            case TypeConversionUtils.ABBR_INTEGER -> "Ljava/util/function/IntBinaryOperator;";
+            case TypeConversionUtils.ABBR_LONG -> "Ljava/util/function/LongBinaryOperator;";
+            case TypeConversionUtils.ABBR_DOUBLE -> "Ljava/util/function/DoubleBinaryOperator;";
             default -> "Ljava/util/function/BiFunction;";
         };
     }
@@ -1118,9 +1119,9 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             return "Ljava/util/function/Consumer;";
         }
         return switch (primitiveType) {
-            case "I" -> "Ljava/util/function/IntConsumer;";
-            case "J" -> "Ljava/util/function/LongConsumer;";
-            case "D" -> "Ljava/util/function/DoubleConsumer;";
+            case TypeConversionUtils.ABBR_INTEGER -> "Ljava/util/function/IntConsumer;";
+            case TypeConversionUtils.ABBR_LONG -> "Ljava/util/function/LongConsumer;";
+            case TypeConversionUtils.ABBR_DOUBLE -> "Ljava/util/function/DoubleConsumer;";
             default -> "Ljava/util/function/Consumer;";
         };
     }
@@ -1130,9 +1131,9 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             return "Ljava/util/function/Function;";
         }
         return switch (primitiveType) {
-            case "I" -> "Ljava/util/function/IntFunction;";
-            case "J" -> "Ljava/util/function/LongFunction;";
-            case "D" -> "Ljava/util/function/DoubleFunction;";
+            case TypeConversionUtils.ABBR_INTEGER -> "Ljava/util/function/IntFunction;";
+            case TypeConversionUtils.ABBR_LONG -> "Ljava/util/function/LongFunction;";
+            case TypeConversionUtils.ABBR_DOUBLE -> "Ljava/util/function/DoubleFunction;";
             default -> "Ljava/util/function/Function;";
         };
     }
@@ -1142,18 +1143,18 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
             return "Ljava/util/function/Predicate;";
         }
         return switch (primitiveType) {
-            case "I" -> "Ljava/util/function/IntPredicate;";
-            case "J" -> "Ljava/util/function/LongPredicate;";
-            case "D" -> "Ljava/util/function/DoublePredicate;";
+            case TypeConversionUtils.ABBR_INTEGER -> "Ljava/util/function/IntPredicate;";
+            case TypeConversionUtils.ABBR_LONG -> "Ljava/util/function/LongPredicate;";
+            case TypeConversionUtils.ABBR_DOUBLE -> "Ljava/util/function/DoublePredicate;";
             default -> "Ljava/util/function/Predicate;";
         };
     }
 
     private String selectUnaryOperatorInterfaceDescriptor(String primitiveType) {
         return switch (primitiveType) {
-            case "I" -> "Ljava/util/function/IntUnaryOperator;";
-            case "J" -> "Ljava/util/function/LongUnaryOperator;";
-            case "D" -> "Ljava/util/function/DoubleUnaryOperator;";
+            case TypeConversionUtils.ABBR_INTEGER -> "Ljava/util/function/IntUnaryOperator;";
+            case TypeConversionUtils.ABBR_LONG -> "Ljava/util/function/LongUnaryOperator;";
+            case TypeConversionUtils.ABBR_DOUBLE -> "Ljava/util/function/DoubleUnaryOperator;";
             default -> "Ljava/util/function/Function;";
         };
     }

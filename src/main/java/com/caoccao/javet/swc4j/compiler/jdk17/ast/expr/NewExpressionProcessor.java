@@ -120,7 +120,7 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
             }
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType == null) {
-                argType = "Ljava/lang/Object;";
+                argType = TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
             argTypes.add(argType);
         }
@@ -133,7 +133,7 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
             if (constructorInfo.isVarArgs() && !expectedTypes.isEmpty()) {
                 int fixedCount = expectedTypes.size() - 1;
                 String varargArrayType = expectedTypes.get(expectedTypes.size() - 1);
-                String componentType = varargArrayType.startsWith("[") ? varargArrayType.substring(1) : varargArrayType;
+                String componentType = varargArrayType.startsWith(TypeConversionUtils.ARRAY_PREFIX) ? varargArrayType.substring(1) : varargArrayType;
 
                 boolean directArrayPass = args.size() == expectedTypes.size()
                         && argTypes.get(argTypes.size() - 1).equals(varargArrayType);
@@ -193,14 +193,14 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
 
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
             int typeCode = switch (componentType) {
-                case "Z" -> 4;
-                case "C" -> 5;
-                case "F" -> 6;
-                case "D" -> 7;
-                case "B" -> 8;
-                case "S" -> 9;
-                case "I" -> 10;
-                case "J" -> 11;
+                case TypeConversionUtils.ABBR_BOOLEAN -> 4;
+                case TypeConversionUtils.ABBR_CHARACTER -> 5;
+                case TypeConversionUtils.ABBR_FLOAT -> 6;
+                case TypeConversionUtils.ABBR_DOUBLE -> 7;
+                case TypeConversionUtils.ABBR_BYTE -> 8;
+                case TypeConversionUtils.ABBR_SHORT -> 9;
+                case TypeConversionUtils.ABBR_INTEGER -> 10;
+                case TypeConversionUtils.ABBR_LONG -> 11;
                 default ->
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), null, "Unsupported vararg primitive type: " + componentType);
             };
@@ -220,13 +220,13 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
             convertType(code, classWriter, argType, componentType);
 
             switch (componentType) {
-                case "Z", "B" -> code.bastore();
-                case "C" -> code.castore();
-                case "S" -> code.sastore();
-                case "I" -> code.iastore();
-                case "J" -> code.lastore();
-                case "F" -> code.fastore();
-                case "D" -> code.dastore();
+                case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.bastore();
+                case TypeConversionUtils.ABBR_CHARACTER -> code.castore();
+                case TypeConversionUtils.ABBR_SHORT -> code.sastore();
+                case TypeConversionUtils.ABBR_INTEGER -> code.iastore();
+                case TypeConversionUtils.ABBR_LONG -> code.lastore();
+                case TypeConversionUtils.ABBR_FLOAT -> code.fastore();
+                case TypeConversionUtils.ABBR_DOUBLE -> code.dastore();
                 default -> code.aastore();
             }
         }

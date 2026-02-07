@@ -28,6 +28,7 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
@@ -98,7 +99,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         }
 
         // Check for String type (String doesn't implement List or Map)
-        if ("Ljava/lang/String;".equals(typeDescriptor)) {
+        if (TypeConversionUtils.LJAVA_LANG_STRING.equals(typeDescriptor)) {
             return IterationType.STRING;
         }
 
@@ -213,12 +214,12 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         code.invokeinterface(sizeRef, 1);
 
         // 3. Store size in temporary variable
-        int sizeSlot = context.getLocalVariableTable().allocateVariable("$size", "I");
+        int sizeSlot = context.getLocalVariableTable().allocateVariable("$size", TypeConversionUtils.ABBR_INTEGER);
         code.istore(sizeSlot);
 
         // 4. Initialize counter: i = 0
         code.iconst(0);
-        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", "I");
+        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", TypeConversionUtils.ABBR_INTEGER);
         code.istore(counterSlot);
 
         // 5. Mark test label (loop entry point)
@@ -410,12 +411,12 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         code.invokevirtual(lengthRef);
 
         // 3. Store length in temporary variable
-        int lengthSlot = context.getLocalVariableTable().allocateVariable("$length", "I");
+        int lengthSlot = context.getLocalVariableTable().allocateVariable("$length", TypeConversionUtils.ABBR_INTEGER);
         code.istore(lengthSlot);
 
         // 4. Initialize counter: i = 0
         code.iconst(0);
-        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", "I");
+        int counterSlot = context.getLocalVariableTable().allocateVariable("$i", TypeConversionUtils.ABBR_INTEGER);
         code.istore(counterSlot);
 
         // 5. Mark test label (loop entry point)
@@ -503,9 +504,9 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
             if (name instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
                 // Allocate variable in current scope (object keys are strings)
-                int slot = context.getLocalVariableTable().allocateVariable(varName, "Ljava/lang/String;");
+                int slot = context.getLocalVariableTable().allocateVariable(varName, TypeConversionUtils.LJAVA_LANG_STRING);
                 // Also register in inferredTypes so TypeResolver can find it
-                context.getInferredTypes().put(varName, "Ljava/lang/String;");
+                context.getInferredTypes().put(varName, TypeConversionUtils.LJAVA_LANG_STRING);
                 // Initialize to null in case loop doesn't execute
                 code.aconst_null();
                 code.astore(slot);
@@ -521,7 +522,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), bindingIdent, "Variable not found: " + varName);
             }
             // Update inferredTypes to String for object keys
-            context.getInferredTypes().put(varName, "Ljava/lang/String;");
+            context.getInferredTypes().put(varName, TypeConversionUtils.LJAVA_LANG_STRING);
             return variable.index();
         } else {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), left, "Unsupported for-in left type: " + left.getClass().getName());

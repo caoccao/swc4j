@@ -110,7 +110,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
                 ISwc4jAstExpr valueExpr = kvProp.getValue();
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(valueExpr);
                 if (valueType == null) {
-                    valueType = "Ljava/lang/Object;";
+                    valueType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                 }
 
                 // Phase 2.3: Pass nested GenericTypeInfo for nested object literals
@@ -153,7 +153,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
                 // Generate value - the identifier refers to a variable with that name
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(ident);
                 if (valueType == null) {
-                    valueType = "Ljava/lang/Object;";
+                    valueType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                 }
 
                 compiler.getExpressionProcessor().generate(code, classWriter, ident, null);
@@ -265,7 +265,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
 
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
             if (exprType == null) {
-                exprType = "Ljava/lang/Object;";
+                exprType = TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
 
             // Generate the expression
@@ -289,7 +289,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
                 }
             } else {
                 // Default behavior - convert to String using String.valueOf()
-                if ("Ljava/lang/String;".equals(exprType)) {
+                if (TypeConversionUtils.LJAVA_LANG_STRING.equals(exprType)) {
                     // Already a String, no conversion needed
                 } else {
                     // Box primitives first, then call String.valueOf(Object)
@@ -336,28 +336,28 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
         double value = num.getValue();
 
         // For explicit Long type annotation, always use Long
-        if ("Ljava/lang/Long;".equals(expectedKeyType) || "J".equals(expectedKeyType)) {
+        if (TypeConversionUtils.LJAVA_LANG_LONG.equals(expectedKeyType) || TypeConversionUtils.ABBR_LONG.equals(expectedKeyType)) {
             long longValue = (long) value;
             code.ldc2_w(cp.addLong(longValue));
             int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
             code.invokestatic(valueOfRef);
         }
         // For explicit Short type annotation, always use Short
-        else if ("Ljava/lang/Short;".equals(expectedKeyType) || "S".equals(expectedKeyType)) {
+        else if (TypeConversionUtils.LJAVA_LANG_SHORT.equals(expectedKeyType) || TypeConversionUtils.ABBR_SHORT.equals(expectedKeyType)) {
             short shortValue = (short) value;
             code.iconst(shortValue);
             int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
             code.invokestatic(valueOfRef);
         }
         // For explicit Byte type annotation, always use Byte
-        else if ("Ljava/lang/Byte;".equals(expectedKeyType) || "B".equals(expectedKeyType)) {
+        else if (TypeConversionUtils.LJAVA_LANG_BYTE.equals(expectedKeyType) || TypeConversionUtils.ABBR_BYTE.equals(expectedKeyType)) {
             byte byteValue = (byte) value;
             code.iconst(byteValue);
             int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
             code.invokestatic(valueOfRef);
         }
         // For explicit Float type annotation, always use Float
-        else if ("Ljava/lang/Float;".equals(expectedKeyType) || "F".equals(expectedKeyType)) {
+        else if (TypeConversionUtils.LJAVA_LANG_FLOAT.equals(expectedKeyType) || TypeConversionUtils.ABBR_FLOAT.equals(expectedKeyType)) {
             float floatValue = (float) value;
             if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
                 code.fconst(floatValue);
@@ -368,7 +368,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
             code.invokestatic(valueOfRef);
         }
         // For explicit Double type annotation, always use Double
-        else if ("Ljava/lang/Double;".equals(expectedKeyType)) {
+        else if (TypeConversionUtils.LJAVA_LANG_DOUBLE.equals(expectedKeyType)) {
             if (value == 0.0 || value == 1.0) {
                 code.dconst(value);
             } else {
@@ -447,22 +447,22 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
         // Support all primitive wrappers and primitives except String
         // Wrappers: Integer, Long, Float, Double, Boolean, Short, Byte, Character
         // Primitives: int, long, float, double, boolean, short, byte, char
-        return "Ljava/lang/Integer;".equals(typeDescriptor) ||
-                "Ljava/lang/Long;".equals(typeDescriptor) ||
-                "Ljava/lang/Float;".equals(typeDescriptor) ||
-                "Ljava/lang/Double;".equals(typeDescriptor) ||
-                "Ljava/lang/Boolean;".equals(typeDescriptor) ||
-                "Ljava/lang/Short;".equals(typeDescriptor) ||
-                "Ljava/lang/Byte;".equals(typeDescriptor) ||
-                "Ljava/lang/Character;".equals(typeDescriptor) ||
-                "I".equals(typeDescriptor) ||
-                "J".equals(typeDescriptor) ||
-                "F".equals(typeDescriptor) ||
-                "D".equals(typeDescriptor) ||
-                "Z".equals(typeDescriptor) ||
-                "S".equals(typeDescriptor) ||
-                "B".equals(typeDescriptor) ||
-                "C".equals(typeDescriptor);
+        return TypeConversionUtils.LJAVA_LANG_INTEGER.equals(typeDescriptor) ||
+                TypeConversionUtils.LJAVA_LANG_LONG.equals(typeDescriptor) ||
+                TypeConversionUtils.LJAVA_LANG_FLOAT.equals(typeDescriptor) ||
+                TypeConversionUtils.LJAVA_LANG_DOUBLE.equals(typeDescriptor) ||
+                TypeConversionUtils.LJAVA_LANG_BOOLEAN.equals(typeDescriptor) ||
+                TypeConversionUtils.LJAVA_LANG_SHORT.equals(typeDescriptor) ||
+                TypeConversionUtils.LJAVA_LANG_BYTE.equals(typeDescriptor) ||
+                TypeConversionUtils.LJAVA_LANG_CHARACTER.equals(typeDescriptor) ||
+                TypeConversionUtils.ABBR_INTEGER.equals(typeDescriptor) ||
+                TypeConversionUtils.ABBR_LONG.equals(typeDescriptor) ||
+                TypeConversionUtils.ABBR_FLOAT.equals(typeDescriptor) ||
+                TypeConversionUtils.ABBR_DOUBLE.equals(typeDescriptor) ||
+                TypeConversionUtils.ABBR_BOOLEAN.equals(typeDescriptor) ||
+                TypeConversionUtils.ABBR_SHORT.equals(typeDescriptor) ||
+                TypeConversionUtils.ABBR_BYTE.equals(typeDescriptor) ||
+                TypeConversionUtils.ABBR_CHARACTER.equals(typeDescriptor);
     }
 
     /**
@@ -514,7 +514,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
                 // Infer the actual element type
                 String actualElementType = compiler.getTypeResolver().inferTypeFromExpr(elemExpr);
                 if (actualElementType == null) {
-                    actualElementType = "Ljava/lang/Object;";
+                    actualElementType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                 }
 
                 // Check if the actual element type is assignable to the expected element type
@@ -581,7 +581,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
         // Validate value type
         String actualValueType = compiler.getTypeResolver().inferTypeFromExpr(valueExpr);
         if (actualValueType == null) {
-            actualValueType = "Ljava/lang/Object;";
+            actualValueType = TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
 
         String expectedValueType = genericTypeInfo.getValueType();
@@ -630,7 +630,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
         String propertyName = ident.getSym();
 
         // Shorthand keys are always strings
-        String actualKeyType = "Ljava/lang/String;";
+        String actualKeyType = TypeConversionUtils.LJAVA_LANG_STRING;
         String expectedKeyType = genericTypeInfo.getKeyType();
 
         if (!TypeResolver.isAssignable(actualKeyType, expectedKeyType)) {
@@ -647,7 +647,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
         // Validate value type (the identifier's inferred type)
         String actualValueType = compiler.getTypeResolver().inferTypeFromExpr(ident);
         if (actualValueType == null) {
-            actualValueType = "Ljava/lang/Object;";
+            actualValueType = TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
 
         String expectedValueType = genericTypeInfo.getValueType();
@@ -675,14 +675,14 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
         // Infer the type of the spread expression
         String spreadType = compiler.getTypeResolver().inferTypeFromExpr(spreadExpr);
         if (spreadType == null) {
-            spreadType = "Ljava/lang/Object;";
+            spreadType = TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
 
         // The spread source must be a LinkedHashMap (or compatible Map type)
         // For now, we check if it's assignable to LinkedHashMap
         if (!"Ljava/util/LinkedHashMap;".equals(spreadType) &&
                 !"Ljava/util/Map;".equals(spreadType) &&
-                !"Ljava/lang/Object;".equals(spreadType)) {
+                !TypeConversionUtils.LJAVA_LANG_OBJECT.equals(spreadType)) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(),
                     spread,
                     "Spread source must be a Map type, got: " + spreadType);

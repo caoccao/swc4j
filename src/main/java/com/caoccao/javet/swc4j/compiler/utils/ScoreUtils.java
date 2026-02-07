@@ -119,46 +119,6 @@ public final class ScoreUtils {
     }
 
     /**
-     * Gets the primitive type descriptor for a wrapper type descriptor.
-     *
-     * @param wrapperType the wrapper type descriptor (e.g., "Ljava/lang/Integer;")
-     * @return the primitive type descriptor (e.g., "I"), or null if not a wrapper
-     */
-    public static String getPrimitiveDescriptor(String wrapperType) {
-        return switch (wrapperType) {
-            case "Ljava/lang/Boolean;" -> "Z";
-            case "Ljava/lang/Byte;" -> "B";
-            case "Ljava/lang/Character;" -> "C";
-            case "Ljava/lang/Short;" -> "S";
-            case "Ljava/lang/Integer;" -> "I";
-            case "Ljava/lang/Long;" -> "J";
-            case "Ljava/lang/Float;" -> "F";
-            case "Ljava/lang/Double;" -> "D";
-            default -> null;
-        };
-    }
-
-    /**
-     * Gets the wrapper type descriptor for a primitive type descriptor.
-     *
-     * @param primitiveType the primitive type descriptor (e.g., "I")
-     * @return the wrapper type descriptor (e.g., "Ljava/lang/Integer;"), or null if not a primitive
-     */
-    public static String getWrapperDescriptor(String primitiveType) {
-        return switch (primitiveType) {
-            case "Z" -> "Ljava/lang/Boolean;";
-            case "B" -> "Ljava/lang/Byte;";
-            case "C" -> "Ljava/lang/Character;";
-            case "S" -> "Ljava/lang/Short;";
-            case "I" -> "Ljava/lang/Integer;";
-            case "J" -> "Ljava/lang/Long;";
-            case "F" -> "Ljava/lang/Float;";
-            case "D" -> "Ljava/lang/Double;";
-            default -> null;
-        };
-    }
-
-    /**
      * Parses parameter types from a method descriptor.
      * Example: "(IDLjava/lang/String;)V" -> ["I", "D", "Ljava/lang/String;"]
      *
@@ -402,8 +362,8 @@ public final class ScoreUtils {
 
         // Boxing: primitive -> wrapper
         if (TypeConversionUtils.isPrimitiveType(argType) && !TypeConversionUtils.isPrimitiveType(paramType)) {
-            String wrapperType = getWrapperDescriptor(argType);
-            if (wrapperType != null && wrapperType.equals(paramType)) {
+            String wrapperType = TypeConversionUtils.getWrapperType(argType);
+            if (!wrapperType.equals(argType) && wrapperType.equals(paramType)) {
                 return 0.7; // Boxing with exact match
             }
             return 0.0;
@@ -411,8 +371,8 @@ public final class ScoreUtils {
 
         // Unboxing: wrapper -> primitive
         if (!TypeConversionUtils.isPrimitiveType(argType) && TypeConversionUtils.isPrimitiveType(paramType)) {
-            String primitiveType = getPrimitiveDescriptor(argType);
-            if (primitiveType != null) {
+            String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
+            if (!primitiveType.equals(argType)) {
                 if (primitiveType.equals(paramType)) {
                     return 0.7; // Unboxing with exact match
                 }
@@ -428,7 +388,7 @@ public final class ScoreUtils {
         // Both reference types
         if (!TypeConversionUtils.isPrimitiveType(argType) && !TypeConversionUtils.isPrimitiveType(paramType)) {
             // Any reference type can be assigned to Object
-            if (paramType.equals("Ljava/lang/Object;")) {
+            if (paramType.equals(TypeConversionUtils.LJAVA_LANG_OBJECT)) {
                 return 0.5;
             }
             return 0.0;
@@ -448,46 +408,46 @@ public final class ScoreUtils {
      */
     public static double scoreDescriptorWidening(String fromType, String toType) {
         return switch (fromType) {
-            case "B" -> // byte
+            case TypeConversionUtils.ABBR_BYTE -> // byte
                     switch (toType) {
-                        case "S" -> 0.99; // byte -> short (closest)
-                        case "I" -> 0.98; // byte -> int
-                        case "J" -> 0.97; // byte -> long
-                        case "F" -> 0.96; // byte -> float
-                        case "D" -> 0.95; // byte -> double (farthest)
+                        case TypeConversionUtils.ABBR_SHORT -> 0.99; // byte -> short (closest)
+                        case TypeConversionUtils.ABBR_INTEGER -> 0.98; // byte -> int
+                        case TypeConversionUtils.ABBR_LONG -> 0.97; // byte -> long
+                        case TypeConversionUtils.ABBR_FLOAT -> 0.96; // byte -> float
+                        case TypeConversionUtils.ABBR_DOUBLE -> 0.95; // byte -> double (farthest)
                         default -> 0.0;
                     };
-            case "S" -> // short
+            case TypeConversionUtils.ABBR_SHORT -> // short
                     switch (toType) {
-                        case "I" -> 0.99; // short -> int (closest)
-                        case "J" -> 0.98; // short -> long
-                        case "F" -> 0.97; // short -> float
-                        case "D" -> 0.96; // short -> double (farthest)
+                        case TypeConversionUtils.ABBR_INTEGER -> 0.99; // short -> int (closest)
+                        case TypeConversionUtils.ABBR_LONG -> 0.98; // short -> long
+                        case TypeConversionUtils.ABBR_FLOAT -> 0.97; // short -> float
+                        case TypeConversionUtils.ABBR_DOUBLE -> 0.96; // short -> double (farthest)
                         default -> 0.0;
                     };
-            case "C" -> // char
+            case TypeConversionUtils.ABBR_CHARACTER -> // char
                     switch (toType) {
-                        case "I" -> 0.99; // char -> int (closest)
-                        case "J" -> 0.98; // char -> long
-                        case "F" -> 0.97; // char -> float
-                        case "D" -> 0.96; // char -> double (farthest)
+                        case TypeConversionUtils.ABBR_INTEGER -> 0.99; // char -> int (closest)
+                        case TypeConversionUtils.ABBR_LONG -> 0.98; // char -> long
+                        case TypeConversionUtils.ABBR_FLOAT -> 0.97; // char -> float
+                        case TypeConversionUtils.ABBR_DOUBLE -> 0.96; // char -> double (farthest)
                         default -> 0.0;
                     };
-            case "I" -> // int
+            case TypeConversionUtils.ABBR_INTEGER -> // int
                     switch (toType) {
-                        case "J" -> 0.99; // int -> long (closest)
-                        case "F" -> 0.98; // int -> float
-                        case "D" -> 0.97; // int -> double (farthest)
+                        case TypeConversionUtils.ABBR_LONG -> 0.99; // int -> long (closest)
+                        case TypeConversionUtils.ABBR_FLOAT -> 0.98; // int -> float
+                        case TypeConversionUtils.ABBR_DOUBLE -> 0.97; // int -> double (farthest)
                         default -> 0.0;
                     };
-            case "J" -> // long
+            case TypeConversionUtils.ABBR_LONG -> // long
                     switch (toType) {
-                        case "F" -> 0.99; // long -> float (closest)
-                        case "D" -> 0.98; // long -> double (farthest)
+                        case TypeConversionUtils.ABBR_FLOAT -> 0.99; // long -> float (closest)
+                        case TypeConversionUtils.ABBR_DOUBLE -> 0.98; // long -> double (farthest)
                         default -> 0.0;
                     };
-            case "F" -> // float
-                    toType.equals("D") ? 0.99 : 0.0; // float -> double
+            case TypeConversionUtils.ABBR_FLOAT -> // float
+                    toType.equals(TypeConversionUtils.ABBR_DOUBLE) ? 0.99 : 0.0; // float -> double
             default -> 0.0;
         };
     }

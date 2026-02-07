@@ -127,7 +127,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
 
         // Cast back to original type if reference type
         if (elementType.startsWith("L")) {
-            String originalArrayDescriptor = "[" + elementType;
+            String originalArrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;
             int originalArrayClass = cp.addClass(originalArrayDescriptor);
             code.checkcast(originalArrayClass);
         }
@@ -163,7 +163,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         }
 
         // Call ArrayApiUtils.includes
-        String methodSignature = getArrayApiUtilsSearchSignature("includes", elementType, "Z");
+        String methodSignature = getArrayApiUtilsSearchSignature("includes", elementType, TypeConversionUtils.ABBR_BOOLEAN);
         int includesMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "includes", methodSignature);
         code.invokestatic(includesMethod);
     }
@@ -198,7 +198,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         }
 
         // Call ArrayApiUtils.indexOf
-        String methodSignature = getArrayApiUtilsSearchSignature("indexOf", elementType, "I");
+        String methodSignature = getArrayApiUtilsSearchSignature("indexOf", elementType, TypeConversionUtils.ABBR_INTEGER);
         int indexOfMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "indexOf", methodSignature);
         code.invokestatic(indexOfMethod);
     }
@@ -257,7 +257,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         }
 
         // Call ArrayApiUtils.lastIndexOf
-        String methodSignature = getArrayApiUtilsSearchSignature("lastIndexOf", elementType, "I");
+        String methodSignature = getArrayApiUtilsSearchSignature("lastIndexOf", elementType, TypeConversionUtils.ABBR_INTEGER);
         int lastIndexOfMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "lastIndexOf", methodSignature);
         code.invokestatic(lastIndexOfMethod);
     }
@@ -277,7 +277,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
 
         // Cast back to original type if reference type
         if (elementType.startsWith("L")) {
-            String originalArrayDescriptor = "[" + elementType;
+            String originalArrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;
             int originalArrayClass = cp.addClass(originalArrayDescriptor);
             code.checkcast(originalArrayClass);
         }
@@ -298,7 +298,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
 
         // Cast back to original type if reference type
         if (elementType.startsWith("L")) {
-            String originalArrayDescriptor = "[" + elementType;
+            String originalArrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;
             int originalArrayClass = cp.addClass(originalArrayDescriptor);
             code.checkcast(originalArrayClass);
         }
@@ -319,7 +319,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
 
         // Cast back to original type if reference type
         if (elementType.startsWith("L")) {
-            String originalArrayDescriptor = "[" + elementType;
+            String originalArrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;
             int originalArrayClass = cp.addClass(originalArrayDescriptor);
             code.checkcast(originalArrayClass);
         }
@@ -340,7 +340,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
 
         // Cast back to original type if reference type
         if (elementType.startsWith("L")) {
-            String originalArrayDescriptor = "[" + elementType;
+            String originalArrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;
             int originalArrayClass = cp.addClass(originalArrayDescriptor);
             code.checkcast(originalArrayClass);
         }
@@ -370,10 +370,10 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         if (elementType.startsWith("L")) {
             // Reference type - use Object[] signature
             arrayDescriptor = "[Ljava/lang/Object;";
-            valueType = "Ljava/lang/Object;";
+            valueType = TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else {
             // Primitive type
-            arrayDescriptor = "[" + elementType;
+            arrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;
             valueType = elementType;
         }
         return "(" + arrayDescriptor + valueType + ")" + arrayDescriptor;
@@ -390,7 +390,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
             arrayDescriptor = "[Ljava/lang/Object;";
         } else {
             // Primitive type
-            arrayDescriptor = "[" + elementType;
+            arrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;
         }
         return "(" + arrayDescriptor + "Ljava/lang/String;)Ljava/lang/String;";
     }
@@ -408,10 +408,10 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         if (elementType.startsWith("L")) {
             // Reference type - use Object[] signature
             arrayDescriptor = "[Ljava/lang/Object;";
-            paramType = "Ljava/lang/Object;";
+            paramType = TypeConversionUtils.LJAVA_LANG_OBJECT;
         } else {
             // Primitive type - use the primitive type
-            arrayDescriptor = "[" + elementType;
+            arrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;
             paramType = elementType;
         }
         return "(" + arrayDescriptor + paramType + ")" + returnType;
@@ -428,7 +428,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
             arrayDescriptor = "[Ljava/lang/Object;";
         } else {
             // Primitive type
-            arrayDescriptor = "[" + elementType;
+            arrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;
         }
         return "(" + arrayDescriptor + ")" + arrayDescriptor;
     }
@@ -444,7 +444,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
             arrayDescriptor = "[Ljava/lang/Object;";
         } else {
             // Primitive type
-            arrayDescriptor = "[" + elementType;
+            arrayDescriptor = TypeConversionUtils.ARRAY_PREFIX + elementType;
         }
         return "(" + arrayDescriptor + ")Ljava/lang/String;";
     }
@@ -456,7 +456,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
      * @return human-readable type name (e.g., "int[]", "String[][]")
      */
     private String getArrayTypeName(String arrayDescriptor) {
-        if (arrayDescriptor == null || !arrayDescriptor.startsWith("[")) {
+        if (arrayDescriptor == null || !arrayDescriptor.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
             return "unknown array type";
         }
 
@@ -475,7 +475,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
 
         char typeChar = arrayDescriptor.charAt(index);
         String elementType = switch (typeChar) {
-            case 'Z' -> "boolean";
+            case 'Z' -> TypeConversionUtils.TYPEOF_BOOLEAN;
             case 'B' -> "byte";
             case 'C' -> "char";
             case 'S' -> "short";
@@ -507,6 +507,6 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
      * @return true if the type is a Java array (starts with '[')
      */
     public boolean isTypeSupported(String type) {
-        return type != null && type.startsWith("[");
+        return type != null && type.startsWith(TypeConversionUtils.ARRAY_PREFIX);
     }
 }

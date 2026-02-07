@@ -29,6 +29,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CapturedVariable;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -305,7 +306,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
                 }
                 String type = compiler.getTypeResolver().inferTypeFromExpr(arg);
                 if (type == null) {
-                    type = "Ljava/lang/Object;";
+                    type = TypeConversionUtils.LJAVA_LANG_OBJECT;
                 }
                 return compiler.getTypeResolver().createReturnTypeInfoFromDescriptor(type);
             }
@@ -635,22 +636,23 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
 
     private String getReturnDescriptor(ReturnTypeInfo returnInfo) {
         return switch (returnInfo.type()) {
-            case VOID -> "V";
-            case INT -> "I";
-            case BOOLEAN -> "Z";
-            case BYTE -> "B";
-            case CHAR -> "C";
-            case SHORT -> "S";
-            case LONG -> "J";
-            case FLOAT -> "F";
-            case DOUBLE -> "D";
-            case STRING -> "Ljava/lang/String;";
-            case OBJECT -> returnInfo.descriptor() != null ? returnInfo.descriptor() : "Ljava/lang/Object;";
+            case VOID -> TypeConversionUtils.ABBR_VOID;
+            case INT -> TypeConversionUtils.ABBR_INTEGER;
+            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
+            case BYTE -> TypeConversionUtils.ABBR_BYTE;
+            case CHAR -> TypeConversionUtils.ABBR_CHARACTER;
+            case SHORT -> TypeConversionUtils.ABBR_SHORT;
+            case LONG -> TypeConversionUtils.ABBR_LONG;
+            case FLOAT -> TypeConversionUtils.ABBR_FLOAT;
+            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
+            case STRING -> TypeConversionUtils.LJAVA_LANG_STRING;
+            case OBJECT ->
+                    returnInfo.descriptor() != null ? returnInfo.descriptor() : TypeConversionUtils.LJAVA_LANG_OBJECT;
         };
     }
 
     private int getSlotSize(String type) {
-        return ("J".equals(type) || "D".equals(type)) ? 2 : 1;
+        return (TypeConversionUtils.ABBR_LONG.equals(type) || TypeConversionUtils.ABBR_DOUBLE.equals(type)) ? 2 : 1;
     }
 
     /**
@@ -668,10 +670,11 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
 
     private void loadVariable(CodeBuilder code, int slot, String type) {
         switch (type) {
-            case "I", "Z", "B", "C", "S" -> code.iload(slot);
-            case "J" -> code.lload(slot);
-            case "F" -> code.fload(slot);
-            case "D" -> code.dload(slot);
+            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE,
+                 TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_SHORT -> code.iload(slot);
+            case TypeConversionUtils.ABBR_LONG -> code.lload(slot);
+            case TypeConversionUtils.ABBR_FLOAT -> code.fload(slot);
+            case TypeConversionUtils.ABBR_DOUBLE -> code.dload(slot);
             default -> code.aload(slot);
         }
     }

@@ -66,7 +66,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                 String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
 
                 // Bang operator requires boolean operand
-                if ("Z".equals(argType) || "Ljava/lang/Boolean;".equals(argType)) {
+                if (TypeConversionUtils.ABBR_BOOLEAN.equals(argType) || TypeConversionUtils.LJAVA_LANG_BOOLEAN.equals(argType)) {
                     // Generate the operand
                     compiler.getExpressionProcessor().generate(code, classWriter, arg, null);
 
@@ -108,7 +108,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                 if (arg instanceof Swc4jAstMemberExpr memberExpr) {
                     String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
 
-                    if (objType != null && objType.startsWith("[")) {
+                    if (objType != null && objType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
                         // Java array - delete not supported
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), unaryExpr, "Delete operator not supported on Java arrays - arrays have fixed size");
                     } else if ("Ljava/util/ArrayList;".equals(objType)) {
@@ -170,7 +170,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                             code.ldc2_w(longIndex);
                         }
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                            && "Ljava/lang/Long;".equals(returnTypeInfo.descriptor())) {
+                            && TypeConversionUtils.LJAVA_LANG_LONG.equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with a Long wrapper
                         long longValue = value == 9223372036854775808.0 ? Long.MIN_VALUE : -(long) value;
                         if (longValue == 0L || longValue == 1L) {
@@ -182,7 +182,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                         int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                            && "Ljava/lang/Integer;".equals(returnTypeInfo.descriptor())) {
+                            && TypeConversionUtils.LJAVA_LANG_INTEGER.equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with an Integer wrapper
                         int intValue = value == 2147483648.0 ? Integer.MIN_VALUE : -(int) value;
                         if (intValue >= Short.MIN_VALUE && intValue <= Short.MAX_VALUE) {
@@ -194,21 +194,21 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                         int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                            && "Ljava/lang/Byte;".equals(returnTypeInfo.descriptor())) {
+                            && TypeConversionUtils.LJAVA_LANG_BYTE.equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with a Byte wrapper
                         byte byteValue = (byte) -(int) value;
                         code.iconst(byteValue);
                         int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                            && "Ljava/lang/Short;".equals(returnTypeInfo.descriptor())) {
+                            && TypeConversionUtils.LJAVA_LANG_SHORT.equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with a Short wrapper
                         short shortValue = (short) -(int) value;
                         code.iconst(shortValue);
                         int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                            && "Ljava/lang/Float;".equals(returnTypeInfo.descriptor())) {
+                            && TypeConversionUtils.LJAVA_LANG_FLOAT.equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with a Float wrapper
                         float floatValue = -(float) value;
                         if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
@@ -220,7 +220,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                         int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                            && "Ljava/lang/Double;".equals(returnTypeInfo.descriptor())) {
+                            && TypeConversionUtils.LJAVA_LANG_DOUBLE.equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with a Double wrapper
                         double doubleValue = -value;
                         if (doubleValue == 0.0 || doubleValue == 1.0) {
@@ -245,22 +245,22 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                     } else {
                         // Floating point value - need to determine if it's float or double
                         // Check context to infer the type
-                        String targetType = "D"; // Default to double
+                        String targetType = TypeConversionUtils.ABBR_DOUBLE; // Default to double
                         if (returnTypeInfo != null) {
                             if (returnTypeInfo.type() == ReturnType.FLOAT) {
-                                targetType = "F";
+                                targetType = TypeConversionUtils.ABBR_FLOAT;
                             } else if (returnTypeInfo.type() == ReturnType.DOUBLE) {
-                                targetType = "D";
+                                targetType = TypeConversionUtils.ABBR_DOUBLE;
                             } else if (returnTypeInfo.descriptor() != null) {
-                                if (returnTypeInfo.descriptor().equals("F")) {
-                                    targetType = "F";
-                                } else if (returnTypeInfo.descriptor().equals("D")) {
-                                    targetType = "D";
+                                if (returnTypeInfo.descriptor().equals(TypeConversionUtils.ABBR_FLOAT)) {
+                                    targetType = TypeConversionUtils.ABBR_FLOAT;
+                                } else if (returnTypeInfo.descriptor().equals(TypeConversionUtils.ABBR_DOUBLE)) {
+                                    targetType = TypeConversionUtils.ABBR_DOUBLE;
                                 }
                             }
                         }
 
-                        if ("F".equals(targetType)) {
+                        if (TypeConversionUtils.ABBR_FLOAT.equals(targetType)) {
                             // Float type
                             float floatValue = -(float) value;
                             if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
@@ -302,16 +302,16 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
 
                     String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
                     // Handle null type - should not happen for negation, default to int
-                    if (argType == null) argType = "I";
+                    if (argType == null) argType = TypeConversionUtils.ABBR_INTEGER;
 
                     String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
-                    if ("Z".equals(primitiveType)) {
+                    if (TypeConversionUtils.ABBR_BOOLEAN.equals(primitiveType)) {
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), unaryExpr,
                                 "Unary minus (-) not supported on boolean types");
                     }
 
                     // Handle BigInteger negation
-                    if ("Ljava/math/BigInteger;".equals(argType)) {
+                    if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(argType)) {
                         // Call BigInteger.negate() method
                         int negateRef = cp.addMethodRef("java/math/BigInteger", "negate", "()Ljava/math/BigInteger;");
                         code.invokevirtual(negateRef);
@@ -324,9 +324,9 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
 
                         // Get the primitive type for determining which negation instruction to use
                         switch (primitiveType) {
-                            case "D" -> code.dneg();
-                            case "F" -> code.fneg();
-                            case "J" -> code.lneg();
+                            case TypeConversionUtils.ABBR_DOUBLE -> code.dneg();
+                            case TypeConversionUtils.ABBR_FLOAT -> code.fneg();
+                            case TypeConversionUtils.ABBR_LONG -> code.lneg();
                             default -> code.ineg();
                         }
 
@@ -350,7 +350,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                 String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
 
                 // Handle null type
-                if (argType == null) argType = "I";
+                if (argType == null) argType = TypeConversionUtils.ABBR_INTEGER;
 
                 // Get primitive type
                 String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
@@ -358,12 +358,12 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                 // Check if type is numeric
                 if (!TypeConversionUtils.isNumericPrimitive(primitiveType)) {
                     // Reject boolean
-                    if (primitiveType.equals("Z")) {
+                    if (primitiveType.equals(TypeConversionUtils.ABBR_BOOLEAN)) {
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), unaryExpr,
                                 "Unary plus (+) not supported on boolean types");
                     }
                     // Reject string
-                    if ("Ljava/lang/String;".equals(argType)) {
+                    if (TypeConversionUtils.LJAVA_LANG_STRING.equals(argType)) {
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), unaryExpr,
                                 "Unary plus (+) string-to-number conversion not supported. " +
                                         "Use explicit parsing: Integer.parseInt() or Double.parseDouble()");
@@ -406,10 +406,10 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
 
                 String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
                 if (argType == null) {
-                    argType = "I";
+                    argType = TypeConversionUtils.ABBR_INTEGER;
                 }
 
-                if ("Ljava/math/BigInteger;".equals(argType)) {
+                if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(argType)) {
                     compiler.getExpressionProcessor().generate(code, classWriter, arg, null);
                     int notRef = cp.addMethodRef("java/math/BigInteger", "not", "()Ljava/math/BigInteger;");
                     code.invokevirtual(notRef);
@@ -427,14 +427,14 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                 boolean isWrapper = !argType.equals(primitiveType);
                 TypeConversionUtils.unboxWrapperType(code, classWriter, argType);
 
-                if ("J".equals(primitiveType)) {
+                if (TypeConversionUtils.ABBR_LONG.equals(primitiveType)) {
                     int longIndex = cp.addLong(-1L);
                     code.ldc2_w(longIndex);
                     code.lxor();
                 } else {
                     code.iconst(-1);
                     code.ixor();
-                    TypeConversionUtils.convertPrimitiveType(code, "I", primitiveType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.ABBR_INTEGER, primitiveType);
                 }
 
                 if (isWrapper) {
@@ -445,7 +445,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                 ISwc4jAstExpr arg = unaryExpr.getArg();
                 String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
                 if (argType == null) {
-                    argType = "Ljava/lang/Object;";
+                    argType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                 }
 
                 // Try static resolution
@@ -568,7 +568,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
 
                 String argType = compiler.getTypeResolver().inferTypeFromExpr(arg);
                 if (argType == null) {
-                    argType = "Ljava/lang/Object;";
+                    argType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                 }
 
                 TypeConversionUtils.popByType(code, argType);

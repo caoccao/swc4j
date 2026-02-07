@@ -319,7 +319,7 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
      */
     private String getDescriptorForReturnType(ReturnTypeInfo returnTypeInfo) {
         if (returnTypeInfo == null) {
-            return "Ljava/lang/Object;";
+            return TypeConversionUtils.LJAVA_LANG_OBJECT;
         }
         // If descriptor is available, use it
         if (returnTypeInfo.descriptor() != null) {
@@ -327,17 +327,17 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
         }
         // Otherwise, derive from type
         return switch (returnTypeInfo.type()) {
-            case INT -> "I";
-            case LONG -> "J";
-            case FLOAT -> "F";
-            case DOUBLE -> "D";
-            case BOOLEAN -> "Z";
-            case BYTE -> "B";
-            case CHAR -> "C";
-            case SHORT -> "S";
-            case VOID -> "V";
-            case STRING -> "Ljava/lang/String;";
-            default -> "Ljava/lang/Object;";
+            case INT -> TypeConversionUtils.ABBR_INTEGER;
+            case LONG -> TypeConversionUtils.ABBR_LONG;
+            case FLOAT -> TypeConversionUtils.ABBR_FLOAT;
+            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
+            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
+            case BYTE -> TypeConversionUtils.ABBR_BYTE;
+            case CHAR -> TypeConversionUtils.ABBR_CHARACTER;
+            case SHORT -> TypeConversionUtils.ABBR_SHORT;
+            case VOID -> TypeConversionUtils.ABBR_VOID;
+            case STRING -> TypeConversionUtils.LJAVA_LANG_STRING;
+            default -> TypeConversionUtils.LJAVA_LANG_OBJECT;
         };
     }
 

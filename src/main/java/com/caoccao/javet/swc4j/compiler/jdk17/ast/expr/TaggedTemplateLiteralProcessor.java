@@ -134,7 +134,7 @@ public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4j
         for (ISwc4jAstExpr expr : exprs) {
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
             if (exprType == null) {
-                exprType = "Ljava/lang/Object;";
+                exprType = TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
             exprParamDescriptors.append(exprType);
         }
@@ -251,7 +251,7 @@ public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4j
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
             compiler.getExpressionProcessor().generate(code, classWriter, expr, null);
             if (exprType == null) {
-                exprType = "Ljava/lang/Object;";
+                exprType = TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
             paramDescriptors.append(exprType);
         }
@@ -352,6 +352,6 @@ public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4j
             return compiler.getTypeResolver().mapTsTypeToDescriptor(returnTypeAnn.get().getTypeAnn());
         }
         // Default to String return type for tag functions
-        return "Ljava/lang/String;";
+        return TypeConversionUtils.LJAVA_LANG_STRING;
     }
 }

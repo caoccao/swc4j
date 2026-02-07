@@ -130,7 +130,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             }
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType == null) {
-                argType = "Ljava/lang/Object;";
+                argType = TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
             argTypes.add(argType);
         }
@@ -184,7 +184,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             if (objType == null) {
                 objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
             }
-            if ("Ljava/lang/Object;".equals(objType)) {
+            if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
                 String classExprType = inferTypeFromNewClassExpr(memberExpr.getObj());
                 if (classExprType != null) {
                     objType = classExprType;
@@ -231,7 +231,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
                 // For method chaining: if the return type is a parent class of the imported class,
                 // cast it to the imported class type to ensure subsequent chained calls work correctly
                 String expectedType = "L" + internalClassName + ";";
-                if (!returnType.equals(expectedType) && returnType.startsWith("L") && !returnType.equals("V")) {
+                if (!returnType.equals(expectedType) && returnType.startsWith("L") && !returnType.equals(TypeConversionUtils.ABBR_VOID)) {
                     // Check if the return type is assignable to the class type
                     // If so, cast to the class type for proper method chaining
                     try {
@@ -290,7 +290,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
                             "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
                                     ". Please add explicit return type annotation to the method.");
                 } else {
-                    returnType = "Ljava/lang/Object;";
+                    returnType = TypeConversionUtils.LJAVA_LANG_OBJECT;
                 }
             }
 
@@ -349,7 +349,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
 
         int fixedCount = expectedTypes.size() - 1;
         String varargArrayType = expectedTypes.get(expectedTypes.size() - 1);
-        String componentType = varargArrayType.startsWith("[") ? varargArrayType.substring(1) : varargArrayType;
+        String componentType = varargArrayType.startsWith(TypeConversionUtils.ARRAY_PREFIX) ? varargArrayType.substring(1) : varargArrayType;
 
         boolean directArrayPass = args.size() == expectedTypes.size()
                 && argTypes.get(argTypes.size() - 1).equals(varargArrayType);
@@ -386,14 +386,14 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
         var cp = classWriter.getConstantPool();
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
             int typeCode = switch (componentType) {
-                case "Z" -> 4;
-                case "C" -> 5;
-                case "F" -> 6;
-                case "D" -> 7;
-                case "B" -> 8;
-                case "S" -> 9;
-                case "I" -> 10;
-                case "J" -> 11;
+                case TypeConversionUtils.ABBR_BOOLEAN -> 4;
+                case TypeConversionUtils.ABBR_CHARACTER -> 5;
+                case TypeConversionUtils.ABBR_FLOAT -> 6;
+                case TypeConversionUtils.ABBR_DOUBLE -> 7;
+                case TypeConversionUtils.ABBR_BYTE -> 8;
+                case TypeConversionUtils.ABBR_SHORT -> 9;
+                case TypeConversionUtils.ABBR_INTEGER -> 10;
+                case TypeConversionUtils.ABBR_LONG -> 11;
                 default ->
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), null, "Unsupported vararg primitive type: " + componentType);
             };
@@ -416,30 +416,30 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             convertType(code, classWriter, argType, componentType);
 
             switch (componentType) {
-                case "Z", "B" -> code.bastore();
-                case "C" -> code.castore();
-                case "S" -> code.sastore();
-                case "I" -> code.iastore();
-                case "J" -> code.lastore();
-                case "F" -> code.fastore();
-                case "D" -> code.dastore();
+                case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.bastore();
+                case TypeConversionUtils.ABBR_CHARACTER -> code.castore();
+                case TypeConversionUtils.ABBR_SHORT -> code.sastore();
+                case TypeConversionUtils.ABBR_INTEGER -> code.iastore();
+                case TypeConversionUtils.ABBR_LONG -> code.lastore();
+                case TypeConversionUtils.ABBR_FLOAT -> code.fastore();
+                case TypeConversionUtils.ABBR_DOUBLE -> code.dastore();
                 default -> code.aastore();
             }
         }
     }
 
     private String getDescriptor(Class<?> clazz) {
-        if (clazz == void.class) return "V";
-        if (clazz == boolean.class) return "Z";
-        if (clazz == byte.class) return "B";
-        if (clazz == char.class) return "C";
-        if (clazz == short.class) return "S";
-        if (clazz == int.class) return "I";
-        if (clazz == long.class) return "J";
-        if (clazz == float.class) return "F";
-        if (clazz == double.class) return "D";
+        if (clazz == void.class) return TypeConversionUtils.ABBR_VOID;
+        if (clazz == boolean.class) return TypeConversionUtils.ABBR_BOOLEAN;
+        if (clazz == byte.class) return TypeConversionUtils.ABBR_BYTE;
+        if (clazz == char.class) return TypeConversionUtils.ABBR_CHARACTER;
+        if (clazz == short.class) return TypeConversionUtils.ABBR_SHORT;
+        if (clazz == int.class) return TypeConversionUtils.ABBR_INTEGER;
+        if (clazz == long.class) return TypeConversionUtils.ABBR_LONG;
+        if (clazz == float.class) return TypeConversionUtils.ABBR_FLOAT;
+        if (clazz == double.class) return TypeConversionUtils.ABBR_DOUBLE;
         if (clazz.isArray()) {
-            return "[" + getDescriptor(clazz.getComponentType());
+            return TypeConversionUtils.ARRAY_PREFIX + getDescriptor(clazz.getComponentType());
         }
         return "L" + clazz.getName().replace('.', '/') + ";";
     }
@@ -512,10 +512,12 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             LocalVariable localVar = context.getLocalVariableTable().getVariable(ident.getSym());
             if (localVar != null) {
                 switch (localVar.type()) {
-                    case "I", "S", "C", "Z", "B" -> code.iload(localVar.index());
-                    case "J" -> code.lload(localVar.index());
-                    case "F" -> code.fload(localVar.index());
-                    case "D" -> code.dload(localVar.index());
+                    case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_SHORT,
+                         TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_BOOLEAN,
+                         TypeConversionUtils.ABBR_BYTE -> code.iload(localVar.index());
+                    case TypeConversionUtils.ABBR_LONG -> code.lload(localVar.index());
+                    case TypeConversionUtils.ABBR_FLOAT -> code.fload(localVar.index());
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.dload(localVar.index());
                     default -> code.aload(localVar.index());
                 }
                 return;
@@ -527,7 +529,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
     private String resolveReturnTypeViaReflection(String qualifiedClassName, String methodName, String paramDescriptor) {
         try {
             Class<?> clazz = Class.forName(qualifiedClassName);
-            List<String> paramTypes = ScoreUtils.parseParameterDescriptors(paramDescriptor + "V");
+            List<String> paramTypes = ScoreUtils.parseParameterDescriptors(paramDescriptor + TypeConversionUtils.ABBR_VOID);
             Class<?>[] params = new Class<?>[paramTypes.size()];
             for (int i = 0; i < paramTypes.size(); i++) {
                 params[i] = toClass(paramTypes.get(i));
@@ -541,17 +543,17 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
 
     private Class<?> toClass(String descriptor) throws ClassNotFoundException {
         return switch (descriptor) {
-            case "Z" -> boolean.class;
-            case "B" -> byte.class;
-            case "C" -> char.class;
-            case "S" -> short.class;
-            case "I" -> int.class;
-            case "J" -> long.class;
-            case "F" -> float.class;
-            case "D" -> double.class;
-            case "V" -> void.class;
+            case TypeConversionUtils.ABBR_BOOLEAN -> boolean.class;
+            case TypeConversionUtils.ABBR_BYTE -> byte.class;
+            case TypeConversionUtils.ABBR_CHARACTER -> char.class;
+            case TypeConversionUtils.ABBR_SHORT -> short.class;
+            case TypeConversionUtils.ABBR_INTEGER -> int.class;
+            case TypeConversionUtils.ABBR_LONG -> long.class;
+            case TypeConversionUtils.ABBR_FLOAT -> float.class;
+            case TypeConversionUtils.ABBR_DOUBLE -> double.class;
+            case TypeConversionUtils.ABBR_VOID -> void.class;
             default -> {
-                if (descriptor.startsWith("[")) {
+                if (descriptor.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
                     yield Class.forName(descriptor.replace('/', '.'));
                 }
                 if (descriptor.startsWith("L") && descriptor.endsWith(";")) {

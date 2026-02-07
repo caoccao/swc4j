@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -48,7 +49,7 @@ public final class StringLiteralProcessor extends BaseAstProcessor<Swc4jAstStr> 
         String value = str.getValue();
         // Check if we need to convert to char based on return type
         if (returnTypeInfo != null && (returnTypeInfo.type() == ReturnType.CHAR
-                || (returnTypeInfo.type() == ReturnType.OBJECT && "Ljava/lang/Character;".equals(returnTypeInfo.descriptor())))) {
+                || (returnTypeInfo.type() == ReturnType.OBJECT && TypeConversionUtils.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())))) {
             // Convert string to char - use first character
             if (value.length() > 0) {
                 char charValue = value.charAt(0);
@@ -62,14 +63,14 @@ public final class StringLiteralProcessor extends BaseAstProcessor<Swc4jAstStr> 
                     code.ldc(charIndex);
                 }
                 // Box to Character if needed
-                if (returnTypeInfo.type() == ReturnType.OBJECT && "Ljava/lang/Character;".equals(returnTypeInfo.descriptor())) {
+                if (returnTypeInfo.type() == ReturnType.OBJECT && TypeConversionUtils.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())) {
                     int valueOfRef = cp.addMethodRef("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
                     code.invokestatic(valueOfRef);
                 }
             } else {
                 // Empty string, use null character
                 code.iconst(0);
-                if (returnTypeInfo.type() == ReturnType.OBJECT && "Ljava/lang/Character;".equals(returnTypeInfo.descriptor())) {
+                if (returnTypeInfo.type() == ReturnType.OBJECT && TypeConversionUtils.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())) {
                     int valueOfRef = cp.addMethodRef("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
                     code.invokestatic(valueOfRef);
                 }

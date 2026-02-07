@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -64,13 +65,13 @@ public final class IdentifierProcessor extends BaseAstProcessor<Swc4jAstIdent> {
                 code.iconst(0);
                 // Use originalType to determine the correct array load instruction
                 switch (capturedVar.originalType()) {
-                    case "I" -> code.iaload();
-                    case "J" -> code.laload();
-                    case "F" -> code.faload();
-                    case "D" -> code.daload();
-                    case "Z", "B" -> code.baload();
-                    case "C" -> code.caload();
-                    case "S" -> code.saload();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.iaload();
+                    case TypeConversionUtils.ABBR_LONG -> code.laload();
+                    case TypeConversionUtils.ABBR_FLOAT -> code.faload();
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.daload();
+                    case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.baload();
+                    case TypeConversionUtils.ABBR_CHARACTER -> code.caload();
+                    case TypeConversionUtils.ABBR_SHORT -> code.saload();
                     default -> code.aaload();
                 }
             }
@@ -85,21 +86,23 @@ public final class IdentifierProcessor extends BaseAstProcessor<Swc4jAstIdent> {
                 code.aload(localVar.holderIndex());
                 code.iconst(0);
                 switch (localVar.type()) {
-                    case "I" -> code.iaload();
-                    case "J" -> code.laload();
-                    case "F" -> code.faload();
-                    case "D" -> code.daload();
-                    case "Z", "B" -> code.baload();
-                    case "C" -> code.caload();
-                    case "S" -> code.saload();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.iaload();
+                    case TypeConversionUtils.ABBR_LONG -> code.laload();
+                    case TypeConversionUtils.ABBR_FLOAT -> code.faload();
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.daload();
+                    case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.baload();
+                    case TypeConversionUtils.ABBR_CHARACTER -> code.caload();
+                    case TypeConversionUtils.ABBR_SHORT -> code.saload();
                     default -> code.aaload();
                 }
             } else {
                 switch (localVar.type()) {
-                    case "I", "S", "C", "Z", "B" -> code.iload(localVar.index());
-                    case "J" -> code.lload(localVar.index());
-                    case "F" -> code.fload(localVar.index());
-                    case "D" -> code.dload(localVar.index());
+                    case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_SHORT,
+                         TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_BOOLEAN,
+                         TypeConversionUtils.ABBR_BYTE -> code.iload(localVar.index());
+                    case TypeConversionUtils.ABBR_LONG -> code.lload(localVar.index());
+                    case TypeConversionUtils.ABBR_FLOAT -> code.fload(localVar.index());
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.dload(localVar.index());
                     default -> code.aload(localVar.index());
                 }
             }
@@ -108,50 +111,50 @@ public final class IdentifierProcessor extends BaseAstProcessor<Swc4jAstIdent> {
             if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT && returnTypeInfo.descriptor() != null) {
                 // Check if we need to box a primitive to its wrapper
                 switch (localVar.type()) {
-                    case "I" -> {
-                        if ("Ljava/lang/Integer;".equals(returnTypeInfo.descriptor())) {
+                    case TypeConversionUtils.ABBR_INTEGER -> {
+                        if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(returnTypeInfo.descriptor())) {
                             int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
                             code.invokestatic(valueOfRef);
                         }
                     }
-                    case "Z" -> {
-                        if ("Ljava/lang/Boolean;".equals(returnTypeInfo.descriptor())) {
+                    case TypeConversionUtils.ABBR_BOOLEAN -> {
+                        if (TypeConversionUtils.LJAVA_LANG_BOOLEAN.equals(returnTypeInfo.descriptor())) {
                             int valueOfRef = cp.addMethodRef("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
                             code.invokestatic(valueOfRef);
                         }
                     }
-                    case "B" -> {
-                        if ("Ljava/lang/Byte;".equals(returnTypeInfo.descriptor())) {
+                    case TypeConversionUtils.ABBR_BYTE -> {
+                        if (TypeConversionUtils.LJAVA_LANG_BYTE.equals(returnTypeInfo.descriptor())) {
                             int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
                             code.invokestatic(valueOfRef);
                         }
                     }
-                    case "C" -> {
-                        if ("Ljava/lang/Character;".equals(returnTypeInfo.descriptor())) {
+                    case TypeConversionUtils.ABBR_CHARACTER -> {
+                        if (TypeConversionUtils.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())) {
                             int valueOfRef = cp.addMethodRef("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
                             code.invokestatic(valueOfRef);
                         }
                     }
-                    case "S" -> {
-                        if ("Ljava/lang/Short;".equals(returnTypeInfo.descriptor())) {
+                    case TypeConversionUtils.ABBR_SHORT -> {
+                        if (TypeConversionUtils.LJAVA_LANG_SHORT.equals(returnTypeInfo.descriptor())) {
                             int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
                             code.invokestatic(valueOfRef);
                         }
                     }
-                    case "J" -> {
-                        if ("Ljava/lang/Long;".equals(returnTypeInfo.descriptor())) {
+                    case TypeConversionUtils.ABBR_LONG -> {
+                        if (TypeConversionUtils.LJAVA_LANG_LONG.equals(returnTypeInfo.descriptor())) {
                             int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
                             code.invokestatic(valueOfRef);
                         }
                     }
-                    case "F" -> {
-                        if ("Ljava/lang/Float;".equals(returnTypeInfo.descriptor())) {
+                    case TypeConversionUtils.ABBR_FLOAT -> {
+                        if (TypeConversionUtils.LJAVA_LANG_FLOAT.equals(returnTypeInfo.descriptor())) {
                             int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
                             code.invokestatic(valueOfRef);
                         }
                     }
-                    case "D" -> {
-                        if ("Ljava/lang/Double;".equals(returnTypeInfo.descriptor())) {
+                    case TypeConversionUtils.ABBR_DOUBLE -> {
+                        if (TypeConversionUtils.LJAVA_LANG_DOUBLE.equals(returnTypeInfo.descriptor())) {
                             int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
                             code.invokestatic(valueOfRef);
                         }
@@ -162,38 +165,38 @@ public final class IdentifierProcessor extends BaseAstProcessor<Swc4jAstIdent> {
             // Handle unboxing/conversion if needed (object to primitive)
             if (returnTypeInfo != null && returnTypeInfo.type() != ReturnType.OBJECT && returnTypeInfo.type() != ReturnType.STRING) {
                 // Need to convert from object type to primitive
-                if ("Ljava/math/BigInteger;".equals(localVar.type())) {
+                if (TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(localVar.type())) {
                     // Convert BigInteger to primitive
                     String targetDescriptor = returnTypeInfo.getPrimitiveTypeDescriptor();
                     if (targetDescriptor == null) return;
                     switch (targetDescriptor) {
-                        case "I": // int
+                        case TypeConversionUtils.ABBR_INTEGER: // int
                             int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
                             code.invokevirtual(intValueRef);
                             break;
-                        case "J": // long
+                        case TypeConversionUtils.ABBR_LONG: // long
                             int longValueRef = cp.addMethodRef("java/math/BigInteger", "longValue", "()J");
                             code.invokevirtual(longValueRef);
                             break;
-                        case "D": // double
+                        case TypeConversionUtils.ABBR_DOUBLE: // double
                             int doubleValueRef = cp.addMethodRef("java/math/BigInteger", "doubleValue", "()D");
                             code.invokevirtual(doubleValueRef);
                             break;
-                        case "F": // float
+                        case TypeConversionUtils.ABBR_FLOAT: // float
                             int floatValueRef = cp.addMethodRef("java/math/BigInteger", "floatValue", "()F");
                             code.invokevirtual(floatValueRef);
                             break;
-                        case "B": // byte
+                        case TypeConversionUtils.ABBR_BYTE: // byte
                             int byteValueRef = cp.addMethodRef("java/math/BigInteger", "byteValue", "()B");
                             code.invokevirtual(byteValueRef);
                             break;
-                        case "S": // short
+                        case TypeConversionUtils.ABBR_SHORT: // short
                             int shortValueRef = cp.addMethodRef("java/math/BigInteger", "shortValue", "()S");
                             code.invokevirtual(shortValueRef);
                             break;
-                        case "Z": // boolean
+                        case TypeConversionUtils.ABBR_BOOLEAN: // boolean
                             // BigInteger.equals(ZERO) - zero is false, non-zero is true
-                            int zeroFieldRef = cp.addFieldRef("java/math/BigInteger", "ZERO", "Ljava/math/BigInteger;");
+                            int zeroFieldRef = cp.addFieldRef("java/math/BigInteger", "ZERO", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
                             code.getstatic(zeroFieldRef);
                             int equalsRef = cp.addMethodRef("java/math/BigInteger", "equals", "(Ljava/lang/Object;)Z");
                             code.invokevirtual(equalsRef);

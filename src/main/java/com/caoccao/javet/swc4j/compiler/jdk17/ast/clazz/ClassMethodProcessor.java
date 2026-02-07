@@ -33,6 +33,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -278,17 +279,18 @@ public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMe
         }
 
         String returnDescriptor = switch (returnTypeInfo.type()) {
-            case VOID -> "V";
-            case INT -> "I";
-            case BOOLEAN -> "Z";
-            case BYTE -> "B";
-            case CHAR -> "C";
-            case SHORT -> "S";
-            case LONG -> "J";
-            case FLOAT -> "F";
-            case DOUBLE -> "D";
-            case STRING -> "Ljava/lang/String;";
-            case OBJECT -> returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : "Ljava/lang/Object;";
+            case VOID -> TypeConversionUtils.ABBR_VOID;
+            case INT -> TypeConversionUtils.ABBR_INTEGER;
+            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
+            case BYTE -> TypeConversionUtils.ABBR_BYTE;
+            case CHAR -> TypeConversionUtils.ABBR_CHARACTER;
+            case SHORT -> TypeConversionUtils.ABBR_SHORT;
+            case LONG -> TypeConversionUtils.ABBR_LONG;
+            case FLOAT -> TypeConversionUtils.ABBR_FLOAT;
+            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
+            case STRING -> TypeConversionUtils.LJAVA_LANG_STRING;
+            case OBJECT ->
+                    returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : TypeConversionUtils.LJAVA_LANG_OBJECT;
         };
 
         return "(" + paramDescriptors + ")" + returnDescriptor;

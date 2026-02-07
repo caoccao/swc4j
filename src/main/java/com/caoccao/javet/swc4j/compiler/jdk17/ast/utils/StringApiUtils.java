@@ -69,49 +69,51 @@ public final class StringApiUtils {
             int appendChar) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
         switch (operandType) {
-            case "Ljava/lang/String;" -> code.invokevirtual(appendString);
-            case "I", "B", "S" -> code.invokevirtual(appendInt); // int, byte, short all use append(int)
-            case "C" -> code.invokevirtual(appendChar);
-            case "J" -> {
+            case TypeConversionUtils.LJAVA_LANG_STRING -> code.invokevirtual(appendString);
+            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BYTE, TypeConversionUtils.ABBR_SHORT ->
+                    code.invokevirtual(appendInt); // int, byte, short all use append(int)
+            case TypeConversionUtils.ABBR_CHARACTER -> code.invokevirtual(appendChar);
+            case TypeConversionUtils.ABBR_LONG -> {
                 // long
                 int appendLong = cp.addMethodRef("java/lang/StringBuilder", "append", "(J)Ljava/lang/StringBuilder;");
                 code.invokevirtual(appendLong);
             }
-            case "F" -> {
+            case TypeConversionUtils.ABBR_FLOAT -> {
                 // float
                 int appendFloat = cp.addMethodRef("java/lang/StringBuilder", "append", "(F)Ljava/lang/StringBuilder;");
                 code.invokevirtual(appendFloat);
             }
-            case "D" -> {
+            case TypeConversionUtils.ABBR_DOUBLE -> {
                 // double
                 int appendDouble = cp.addMethodRef("java/lang/StringBuilder", "append", "(D)Ljava/lang/StringBuilder;");
                 code.invokevirtual(appendDouble);
             }
-            case "Z" -> {
+            case TypeConversionUtils.ABBR_BOOLEAN -> {
                 // boolean
                 int appendBoolean = cp.addMethodRef("java/lang/StringBuilder", "append", "(Z)Ljava/lang/StringBuilder;");
                 code.invokevirtual(appendBoolean);
             }
-            case "Ljava/lang/Character;" -> {
+            case TypeConversionUtils.LJAVA_LANG_CHARACTER -> {
                 // Unbox Character to char
                 int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
                 code.invokevirtual(charValueRef);
                 code.invokevirtual(appendChar);
             }
-            case "Ljava/lang/Byte;", "Ljava/lang/Short;", "Ljava/lang/Integer;" -> {
+            case TypeConversionUtils.LJAVA_LANG_BYTE, TypeConversionUtils.LJAVA_LANG_SHORT,
+                 TypeConversionUtils.LJAVA_LANG_INTEGER -> {
                 // Unbox to int, then append
                 String wrapperClass = operandType.substring(1, operandType.length() - 1); // Remove L and ;
                 String methodName = switch (operandType) {
-                    case "Ljava/lang/Byte;" -> "byteValue";
-                    case "Ljava/lang/Short;" -> "shortValue";
-                    case "Ljava/lang/Integer;" -> "intValue";
+                    case TypeConversionUtils.LJAVA_LANG_BYTE -> "byteValue";
+                    case TypeConversionUtils.LJAVA_LANG_SHORT -> "shortValue";
+                    case TypeConversionUtils.LJAVA_LANG_INTEGER -> "intValue";
                     default ->
                             throw new Swc4jByteCodeCompilerException(sourceCode, operand, "Unexpected type: " + operandType);
                 };
                 String returnType = switch (operandType) {
-                    case "Ljava/lang/Byte;" -> "B";
-                    case "Ljava/lang/Short;" -> "S";
-                    case "Ljava/lang/Integer;" -> "I";
+                    case TypeConversionUtils.LJAVA_LANG_BYTE -> TypeConversionUtils.ABBR_BYTE;
+                    case TypeConversionUtils.LJAVA_LANG_SHORT -> TypeConversionUtils.ABBR_SHORT;
+                    case TypeConversionUtils.LJAVA_LANG_INTEGER -> TypeConversionUtils.ABBR_INTEGER;
                     default ->
                             throw new Swc4jByteCodeCompilerException(sourceCode, operand, "Unexpected type: " + operandType);
                 };
@@ -119,28 +121,28 @@ public final class StringApiUtils {
                 code.invokevirtual(unboxRef);
                 code.invokevirtual(appendInt); // byte, short, int all use append(int)
             }
-            case "Ljava/lang/Long;" -> {
+            case TypeConversionUtils.LJAVA_LANG_LONG -> {
                 // Unbox Long to long
                 int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
                 code.invokevirtual(longValueRef);
                 int appendLong = cp.addMethodRef("java/lang/StringBuilder", "append", "(J)Ljava/lang/StringBuilder;");
                 code.invokevirtual(appendLong);
             }
-            case "Ljava/lang/Float;" -> {
+            case TypeConversionUtils.LJAVA_LANG_FLOAT -> {
                 // Unbox Float to float
                 int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
                 code.invokevirtual(floatValueRef);
                 int appendFloat = cp.addMethodRef("java/lang/StringBuilder", "append", "(F)Ljava/lang/StringBuilder;");
                 code.invokevirtual(appendFloat);
             }
-            case "Ljava/lang/Double;" -> {
+            case TypeConversionUtils.LJAVA_LANG_DOUBLE -> {
                 // Unbox Double to double
                 int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
                 code.invokevirtual(doubleValueRef);
                 int appendDouble = cp.addMethodRef("java/lang/StringBuilder", "append", "(D)Ljava/lang/StringBuilder;");
                 code.invokevirtual(appendDouble);
             }
-            case "Ljava/lang/Boolean;" -> {
+            case TypeConversionUtils.LJAVA_LANG_BOOLEAN -> {
                 // Unbox Boolean to boolean
                 int booleanValueRef = cp.addMethodRef("java/lang/Boolean", "booleanValue", "()Z");
                 code.invokevirtual(booleanValueRef);
@@ -202,7 +204,7 @@ public final class StringApiUtils {
         // If this expression is a binary Add that results in a String, collect its operands
         if (expr instanceof Swc4jAstBinExpr binExpr && binExpr.getOp() == Swc4jAstBinaryOp.Add) {
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
-            if ("Ljava/lang/String;".equals(exprType)) {
+            if (TypeConversionUtils.LJAVA_LANG_STRING.equals(exprType)) {
                 // This is a string concatenation - collect operands recursively
                 collectOperands(compiler, binExpr.getLeft(), operands, operandTypes);
                 collectOperands(compiler, binExpr.getRight(), operands, operandTypes);
@@ -213,7 +215,7 @@ public final class StringApiUtils {
         operands.add(expr);
         String operandType = compiler.getTypeResolver().inferTypeFromExpr(expr);
         // If type is null (e.g., for null literal), default to Object
-        operandTypes.add(operandType != null ? operandType : "Ljava/lang/Object;");
+        operandTypes.add(operandType != null ? operandType : TypeConversionUtils.LJAVA_LANG_OBJECT);
     }
 
     /**

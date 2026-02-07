@@ -16,6 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.asm;
 
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+
 import java.util.*;
 
 /**
@@ -559,7 +561,7 @@ public class StackMapProcessor {
         if (parenIndex >= 0 && parenIndex + 1 < descriptor.length()) {
             return descriptor.substring(parenIndex + 1);
         }
-        return "V"; // Default to void
+        return TypeConversionUtils.ABBR_VOID; // Default to void
     }
 
     private int getTableSwitchSize(int pc) {
@@ -667,7 +669,7 @@ public class StackMapProcessor {
      * Push the appropriate verification type onto the stack based on return type.
      */
     private void pushReturnType(List<VerificationType> stack, String returnType) {
-        if (returnType == null || returnType.isEmpty() || returnType.equals("V")) {
+        if (returnType == null || returnType.isEmpty() || returnType.equals(TypeConversionUtils.ABBR_VOID)) {
             // Void return - don't push anything
             return;
         }

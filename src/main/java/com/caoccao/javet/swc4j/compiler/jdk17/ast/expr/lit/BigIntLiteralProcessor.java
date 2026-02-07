@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.math.BigInteger;
@@ -53,34 +54,34 @@ public final class BigIntLiteralProcessor extends BaseAstProcessor<Swc4jAstBigIn
         if (descriptor == null) return;
 
         switch (descriptor) {
-            case "I": // int
+            case TypeConversionUtils.ABBR_INTEGER: // int
                 int intValueRef = cp.addMethodRef("java/math/BigInteger", "intValue", "()I");
                 code.invokevirtual(intValueRef);
                 break;
-            case "J": // long
+            case TypeConversionUtils.ABBR_LONG: // long
                 int longValueRef = cp.addMethodRef("java/math/BigInteger", "longValue", "()J");
                 code.invokevirtual(longValueRef);
                 break;
-            case "D": // double
+            case TypeConversionUtils.ABBR_DOUBLE: // double
                 int doubleValueRef = cp.addMethodRef("java/math/BigInteger", "doubleValue", "()D");
                 code.invokevirtual(doubleValueRef);
                 break;
-            case "F": // float
+            case TypeConversionUtils.ABBR_FLOAT: // float
                 int floatValueRef = cp.addMethodRef("java/math/BigInteger", "floatValue", "()F");
                 code.invokevirtual(floatValueRef);
                 break;
-            case "B": // byte
+            case TypeConversionUtils.ABBR_BYTE: // byte
                 int byteValueRef = cp.addMethodRef("java/math/BigInteger", "byteValue", "()B");
                 code.invokevirtual(byteValueRef);
                 break;
-            case "S": // short
+            case TypeConversionUtils.ABBR_SHORT: // short
                 int shortValueRef = cp.addMethodRef("java/math/BigInteger", "shortValue", "()S");
                 code.invokevirtual(shortValueRef);
                 break;
-            case "Z": // boolean
+            case TypeConversionUtils.ABBR_BOOLEAN: // boolean
                 // BigInteger.signum() returns -1, 0, or 1; non-zero is true
                 // Use BigInteger.equals(ZERO) to check if zero
-                int zeroFieldRef = cp.addFieldRef("java/math/BigInteger", "ZERO", "Ljava/math/BigInteger;");
+                int zeroFieldRef = cp.addFieldRef("java/math/BigInteger", "ZERO", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
                 code.getstatic(zeroFieldRef); // Push BigInteger.ZERO
                 // Stack: [BigInteger, BigInteger.ZERO]
                 int equalsRef = cp.addMethodRef("java/math/BigInteger", "equals", "(Ljava/lang/Object;)Z");
@@ -125,13 +126,13 @@ public final class BigIntLiteralProcessor extends BaseAstProcessor<Swc4jAstBigIn
         var cp = classWriter.getConstantPool();
         // Optimize for common values using static constants
         if (BigInteger.ZERO.equals(value)) {
-            int zeroFieldRef = cp.addFieldRef("java/math/BigInteger", "ZERO", "Ljava/math/BigInteger;");
+            int zeroFieldRef = cp.addFieldRef("java/math/BigInteger", "ZERO", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
             code.getstatic(zeroFieldRef);
         } else if (BigInteger.ONE.equals(value)) {
-            int oneFieldRef = cp.addFieldRef("java/math/BigInteger", "ONE", "Ljava/math/BigInteger;");
+            int oneFieldRef = cp.addFieldRef("java/math/BigInteger", "ONE", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
             code.getstatic(oneFieldRef);
         } else if (BigInteger.TEN.equals(value)) {
-            int tenFieldRef = cp.addFieldRef("java/math/BigInteger", "TEN", "Ljava/math/BigInteger;");
+            int tenFieldRef = cp.addFieldRef("java/math/BigInteger", "TEN", TypeConversionUtils.LJAVA_MATH_BIGINTEGER);
             code.getstatic(tenFieldRef);
         } else {
             // General case: new BigInteger(String)

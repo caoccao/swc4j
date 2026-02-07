@@ -26,6 +26,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -207,7 +208,7 @@ public final class ClassCollector {
                             returnDescriptor = returnTypeInfo.getPrimitiveTypeDescriptor();
                             if (returnDescriptor == null) {
                                 // VOID type or unknown
-                                returnDescriptor = "V";
+                                returnDescriptor = TypeConversionUtils.ABBR_VOID;
                             }
                         }
 
@@ -244,7 +245,7 @@ public final class ClassCollector {
                         } else {
                             returnDescriptor = returnTypeInfo.getPrimitiveTypeDescriptor();
                             if (returnDescriptor == null) {
-                                returnDescriptor = "V";
+                                returnDescriptor = TypeConversionUtils.ABBR_VOID;
                             }
                         }
 
@@ -266,7 +267,7 @@ public final class ClassCollector {
         boolean isStatic = prop.isStatic();
 
         // Determine field type from type annotation or initializer
-        String fieldDescriptor = "Ljava/lang/Object;"; // default
+        String fieldDescriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // default
 
         // Check type annotation first
         if (prop.getTypeAnn().isPresent()) {
@@ -294,7 +295,7 @@ public final class ClassCollector {
         boolean isStatic = privateProp.isStatic();
 
         // Determine field type from type annotation or initializer
-        String fieldDescriptor = "Ljava/lang/Object;"; // default
+        String fieldDescriptor = TypeConversionUtils.LJAVA_LANG_OBJECT; // default
 
         // Check type annotation first
         if (privateProp.getTypeAnn().isPresent()) {

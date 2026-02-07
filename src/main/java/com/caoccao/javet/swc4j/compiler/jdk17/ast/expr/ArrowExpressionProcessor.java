@@ -86,7 +86,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
      *
      * @param context     compilation context
      * @param pat         the pattern to allocate variables for
-     * @param elementType the type descriptor for elements (e.g., "I" for int from List<int>)
+     * @param elementType the type descriptor for elements (e.g., TypeConversionUtils.ABBR_INTEGER for int from List<int>)
      */
     private void allocateNestedPatternVariables(CompilationContext context, ISwc4jAstPat pat, String elementType) {
         if (pat instanceof Swc4jAstBindingIdent bindingIdent) {
@@ -178,7 +178,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             String paramName = extractParamName(param);
 
             // If parameter type is Object and we have target type info, try to infer from target
-            if ("Ljava/lang/Object;".equals(paramType) && targetParamTypes != null && i < targetParamTypes.size()) {
+            if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(paramType) && targetParamTypes != null && i < targetParamTypes.size()) {
                 paramType = targetParamTypes.get(i);
             }
 
@@ -353,7 +353,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                             localVar.holderIndex(),    // slot of the holder array
                             isSelfRef,
                             true,                       // isHolder = true
-                            localVar.type()            // original type e.g., "I"
+                            localVar.type()            // original type e.g., TypeConversionUtils.ABBR_INTEGER
                     ));
                 } else {
                     captured.add(new CapturedVariable(varName, localVar.type(), localVar.index(), isSelfRef));
@@ -393,15 +393,15 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     private String boxedDescriptor(String descriptor) {
         return switch (descriptor) {
-            case "I" -> "Ljava/lang/Integer;";
-            case "J" -> "Ljava/lang/Long;";
-            case "D" -> "Ljava/lang/Double;";
-            case "F" -> "Ljava/lang/Float;";
-            case "Z" -> "Ljava/lang/Boolean;";
-            case "B" -> "Ljava/lang/Byte;";
-            case "C" -> "Ljava/lang/Character;";
-            case "S" -> "Ljava/lang/Short;";
-            case "V" -> "Ljava/lang/Void;";
+            case TypeConversionUtils.ABBR_INTEGER -> TypeConversionUtils.LJAVA_LANG_INTEGER;
+            case TypeConversionUtils.ABBR_LONG -> TypeConversionUtils.LJAVA_LANG_LONG;
+            case TypeConversionUtils.ABBR_DOUBLE -> TypeConversionUtils.LJAVA_LANG_DOUBLE;
+            case TypeConversionUtils.ABBR_FLOAT -> TypeConversionUtils.LJAVA_LANG_FLOAT;
+            case TypeConversionUtils.ABBR_BOOLEAN -> TypeConversionUtils.LJAVA_LANG_BOOLEAN;
+            case TypeConversionUtils.ABBR_BYTE -> TypeConversionUtils.LJAVA_LANG_BYTE;
+            case TypeConversionUtils.ABBR_CHARACTER -> TypeConversionUtils.LJAVA_LANG_CHARACTER;
+            case TypeConversionUtils.ABBR_SHORT -> TypeConversionUtils.LJAVA_LANG_SHORT;
+            case TypeConversionUtils.ABBR_VOID -> "Ljava/lang/Void;";
             default -> descriptor;
         };
     }
@@ -470,10 +470,10 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     /**
      * Extract element type from a parameter's type annotation.
-     * For List<int>, returns "I". For Map<String, int>, returns "I" (value type).
+     * For List<int>, returns TypeConversionUtils.ABBR_INTEGER. For Map<String, int>, returns TypeConversionUtils.ABBR_INTEGER (value type).
      *
      * @param param the parameter pattern
-     * @return element type descriptor, or "Ljava/lang/Object;" if cannot determine
+     * @return element type descriptor, or TypeConversionUtils.LJAVA_LANG_OBJECT if cannot determine
      */
     private String extractElementType(ISwc4jAstPat param) {
         if (param instanceof Swc4jAstArrayPat arrayPat) {
@@ -489,7 +489,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 return extractTypeFromAnnotation(typeAnn.get().getTypeAnn(), false);
             }
         }
-        return "Ljava/lang/Object;";
+        return TypeConversionUtils.LJAVA_LANG_OBJECT;
     }
 
     private String extractParamName(ISwc4jAstPat param) {
@@ -545,7 +545,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 }
             }
         }
-        return "Ljava/lang/Object;";
+        return TypeConversionUtils.LJAVA_LANG_OBJECT;
     }
 
     private ReturnTypeInfo findReturnType(ISwc4jAstStmt stmt, Map<String, String> varTypes)
@@ -563,7 +563,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 // Fall back to type inference
                 String type = compiler.getTypeResolver().inferTypeFromExpr(arg);
                 if (type == null) {
-                    type = "Ljava/lang/Object;";
+                    type = TypeConversionUtils.LJAVA_LANG_OBJECT;
                 }
                 return compiler.getTypeResolver().createReturnTypeInfoFromDescriptor(type);
             }
@@ -720,14 +720,14 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         code.iconst(0);
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
             int typeCode = switch (componentType) {
-                case "Z" -> 4;
-                case "C" -> 5;
-                case "F" -> 6;
-                case "D" -> 7;
-                case "B" -> 8;
-                case "S" -> 9;
-                case "I" -> 10;
-                case "J" -> 11;
+                case TypeConversionUtils.ABBR_BOOLEAN -> 4;
+                case TypeConversionUtils.ABBR_CHARACTER -> 5;
+                case TypeConversionUtils.ABBR_FLOAT -> 6;
+                case TypeConversionUtils.ABBR_DOUBLE -> 7;
+                case TypeConversionUtils.ABBR_BYTE -> 8;
+                case TypeConversionUtils.ABBR_SHORT -> 9;
+                case TypeConversionUtils.ABBR_INTEGER -> 10;
+                case TypeConversionUtils.ABBR_LONG -> 11;
                 default -> 10;
             };
             code.newarray(typeCode);
@@ -961,11 +961,11 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         for (int i = 0; i < descriptorParams.size() && i < typeInfo.paramTypes().size(); i++) {
             String descriptorParam = descriptorParams.get(i);
             String paramType = typeInfo.paramTypes().get(i);
-            if ("Ljava/lang/Object;".equals(descriptorParam) && !"Ljava/lang/Object;".equals(paramType)) {
+            if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(descriptorParam) && !TypeConversionUtils.LJAVA_LANG_OBJECT.equals(paramType)) {
                 String paramName = typeInfo.paramNames().get(i);
                 LocalVariable paramVar = lambdaContext.getLocalVariableTable().getVariable(paramName);
                 code.aload(paramVar.index());
-                int classRef = cp.addClass(paramType.startsWith("[") ? paramType : paramType.substring(1, paramType.length() - 1));
+                int classRef = cp.addClass(paramType.startsWith(TypeConversionUtils.ARRAY_PREFIX) ? paramType : paramType.substring(1, paramType.length() - 1));
                 code.checkcast(classRef);
                 code.astore(paramVar.index());
             }
@@ -997,7 +997,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 String paramName = typeInfo.paramNames().get(i);
                 LocalVariable paramVar = lambdaContext.getLocalVariableTable().getVariable(paramName);
                 String paramType = typeInfo.paramTypes().get(i);
-                if (paramType.startsWith("[")) {
+                if (paramType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
                     code.aload(paramVar.index());
                     code.ifnonnull(0);
                     int ifnonnullOffsetPos = code.getCurrentOffset() - 2;
@@ -1228,7 +1228,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         // Get key from entry
         code.aload(entrySlot);
         code.invokeinterface(entryGetKeyRef, 1);
-        int keySlot = getOrAllocateTempSlot(context, "$key" + context.getNextTempId(), "Ljava/lang/Object;");
+        int keySlot = getOrAllocateTempSlot(context, "$key" + context.getNextTempId(), TypeConversionUtils.LJAVA_LANG_OBJECT);
         code.astore(keySlot);
 
         // Check if key is in extracted keys - if so, skip adding to rest map
@@ -1309,11 +1309,11 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         // Get list size
         code.aload(tempListSlot);
         code.invokeinterface(listSizeRef, 1);
-        int sizeSlot = getOrAllocateTempSlot(context, "$size" + context.getNextTempId(), "I");
+        int sizeSlot = getOrAllocateTempSlot(context, "$size" + context.getNextTempId(), TypeConversionUtils.ABBR_INTEGER);
         code.istore(sizeSlot);
 
         // Loop from restStartIndex to size, adding elements to rest array
-        int indexSlot = getOrAllocateTempSlot(context, "$index" + context.getNextTempId(), "I");
+        int indexSlot = getOrAllocateTempSlot(context, "$index" + context.getNextTempId(), TypeConversionUtils.ABBR_INTEGER);
         code.iconst(restStartIndex);
         code.istore(indexSlot);
 
@@ -1365,49 +1365,49 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
     private void generateUnboxingIfNeeded(CodeBuilder code, ClassWriter classWriter, String targetType) {
         var cp = classWriter.getConstantPool();
         switch (targetType) {
-            case "I" -> { // int
+            case TypeConversionUtils.ABBR_INTEGER -> { // int
                 int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 int integerClass = cp.addClass("java/lang/Integer");
                 code.checkcast(integerClass);
                 code.invokevirtual(intValueRef);
             }
-            case "J" -> { // long
+            case TypeConversionUtils.ABBR_LONG -> { // long
                 int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
                 int longClass = cp.addClass("java/lang/Long");
                 code.checkcast(longClass);
                 code.invokevirtual(longValueRef);
             }
-            case "D" -> { // double
+            case TypeConversionUtils.ABBR_DOUBLE -> { // double
                 int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
                 int doubleClass = cp.addClass("java/lang/Double");
                 code.checkcast(doubleClass);
                 code.invokevirtual(doubleValueRef);
             }
-            case "F" -> { // float
+            case TypeConversionUtils.ABBR_FLOAT -> { // float
                 int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
                 int floatClass = cp.addClass("java/lang/Float");
                 code.checkcast(floatClass);
                 code.invokevirtual(floatValueRef);
             }
-            case "Z" -> { // boolean
+            case TypeConversionUtils.ABBR_BOOLEAN -> { // boolean
                 int booleanValueRef = cp.addMethodRef("java/lang/Boolean", "booleanValue", "()Z");
                 int booleanClass = cp.addClass("java/lang/Boolean");
                 code.checkcast(booleanClass);
                 code.invokevirtual(booleanValueRef);
             }
-            case "B" -> { // byte
+            case TypeConversionUtils.ABBR_BYTE -> { // byte
                 int byteValueRef = cp.addMethodRef("java/lang/Byte", "byteValue", "()B");
                 int byteClass = cp.addClass("java/lang/Byte");
                 code.checkcast(byteClass);
                 code.invokevirtual(byteValueRef);
             }
-            case "C" -> { // char
+            case TypeConversionUtils.ABBR_CHARACTER -> { // char
                 int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
                 int charClass = cp.addClass("java/lang/Character");
                 code.checkcast(charClass);
                 code.invokevirtual(charValueRef);
             }
-            case "S" -> { // short
+            case TypeConversionUtils.ABBR_SHORT -> { // short
                 int shortValueRef = cp.addMethodRef("java/lang/Short", "shortValue", "()S");
                 int shortClass = cp.addClass("java/lang/Short");
                 code.checkcast(shortClass);
@@ -1430,15 +1430,15 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
      */
     private String getBinaryOperatorInfo(String param1Type, String param2Type, ReturnTypeInfo returnInfo) {
         // IntBinaryOperator: (int, int) => int
-        if (param1Type.equals("I") && param2Type.equals("I") && returnInfo.type() == ReturnType.INT) {
+        if (param1Type.equals(TypeConversionUtils.ABBR_INTEGER) && param2Type.equals(TypeConversionUtils.ABBR_INTEGER) && returnInfo.type() == ReturnType.INT) {
             return "java/util/function/IntBinaryOperator|applyAsInt|(II)I";
         }
         // LongBinaryOperator: (long, long) => long
-        if (param1Type.equals("J") && param2Type.equals("J") && returnInfo.type() == ReturnType.LONG) {
+        if (param1Type.equals(TypeConversionUtils.ABBR_LONG) && param2Type.equals(TypeConversionUtils.ABBR_LONG) && returnInfo.type() == ReturnType.LONG) {
             return "java/util/function/LongBinaryOperator|applyAsLong|(JJ)J";
         }
         // DoubleBinaryOperator: (double, double) => double
-        if (param1Type.equals("D") && param2Type.equals("D") && returnInfo.type() == ReturnType.DOUBLE) {
+        if (param1Type.equals(TypeConversionUtils.ABBR_DOUBLE) && param2Type.equals(TypeConversionUtils.ABBR_DOUBLE) && returnInfo.type() == ReturnType.DOUBLE) {
             return "java/util/function/DoubleBinaryOperator|applyAsDouble|(DD)D";
         }
         return null;
@@ -1446,9 +1446,9 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     private String getConsumerInterface(String paramType) {
         return switch (paramType) {
-            case "I" -> "java/util/function/IntConsumer";
-            case "J" -> "java/util/function/LongConsumer";
-            case "D" -> "java/util/function/DoubleConsumer";
+            case TypeConversionUtils.ABBR_INTEGER -> "java/util/function/IntConsumer";
+            case TypeConversionUtils.ABBR_LONG -> "java/util/function/LongConsumer";
+            case TypeConversionUtils.ABBR_DOUBLE -> "java/util/function/DoubleConsumer";
             default -> "java/util/function/Consumer";
         };
     }
@@ -1470,35 +1470,35 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         // For primitive supplier interfaces, return the primitive descriptor
         // For generic Supplier<T>, return Object due to type erasure
         return switch (returnInfo.type()) {
-            case INT -> "I";
-            case LONG -> "J";
-            case DOUBLE -> "D";
-            case BOOLEAN -> "Z";
-            default -> "Ljava/lang/Object;";
+            case INT -> TypeConversionUtils.ABBR_INTEGER;
+            case LONG -> TypeConversionUtils.ABBR_LONG;
+            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
+            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
+            default -> TypeConversionUtils.LJAVA_LANG_OBJECT;
         };
     }
 
     private String getFunctionInterface(String paramType, ReturnTypeInfo returnInfo) {
         // Check for primitive specializations
-        if (paramType.equals("I") && returnInfo.type() == ReturnType.INT) {
+        if (paramType.equals(TypeConversionUtils.ABBR_INTEGER) && returnInfo.type() == ReturnType.INT) {
             return "java/util/function/IntUnaryOperator";
         }
-        if (paramType.equals("I") && returnInfo.type() == ReturnType.BOOLEAN) {
+        if (paramType.equals(TypeConversionUtils.ABBR_INTEGER) && returnInfo.type() == ReturnType.BOOLEAN) {
             return "java/util/function/IntPredicate";
         }
-        if (paramType.equals("J") && returnInfo.type() == ReturnType.LONG) {
+        if (paramType.equals(TypeConversionUtils.ABBR_LONG) && returnInfo.type() == ReturnType.LONG) {
             return "java/util/function/LongUnaryOperator";
         }
-        if (paramType.equals("D") && returnInfo.type() == ReturnType.DOUBLE) {
+        if (paramType.equals(TypeConversionUtils.ABBR_DOUBLE) && returnInfo.type() == ReturnType.DOUBLE) {
             return "java/util/function/DoubleUnaryOperator";
         }
-        if (paramType.equals("I")) {
+        if (paramType.equals(TypeConversionUtils.ABBR_INTEGER)) {
             return "java/util/function/IntFunction";
         }
-        if (paramType.equals("J")) {
+        if (paramType.equals(TypeConversionUtils.ABBR_LONG)) {
             return "java/util/function/LongFunction";
         }
-        if (paramType.equals("D")) {
+        if (paramType.equals(TypeConversionUtils.ABBR_DOUBLE)) {
             return "java/util/function/DoubleFunction";
         }
         if (returnInfo.type() == ReturnType.BOOLEAN) {
@@ -1508,13 +1508,13 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
     }
 
     private String getFunctionMethodName(String paramType, ReturnTypeInfo returnInfo) {
-        if (paramType.equals("I") && returnInfo.type() == ReturnType.INT) {
+        if (paramType.equals(TypeConversionUtils.ABBR_INTEGER) && returnInfo.type() == ReturnType.INT) {
             return "applyAsInt";
         }
-        if (paramType.equals("J") && returnInfo.type() == ReturnType.LONG) {
+        if (paramType.equals(TypeConversionUtils.ABBR_LONG) && returnInfo.type() == ReturnType.LONG) {
             return "applyAsLong";
         }
-        if (paramType.equals("D") && returnInfo.type() == ReturnType.DOUBLE) {
+        if (paramType.equals(TypeConversionUtils.ABBR_DOUBLE) && returnInfo.type() == ReturnType.DOUBLE) {
             return "applyAsDouble";
         }
         if (returnInfo.type() == ReturnType.BOOLEAN) {
@@ -1610,22 +1610,23 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     private String getReturnDescriptor(ReturnTypeInfo returnInfo) {
         return switch (returnInfo.type()) {
-            case VOID -> "V";
-            case INT -> "I";
-            case BOOLEAN -> "Z";
-            case BYTE -> "B";
-            case CHAR -> "C";
-            case SHORT -> "S";
-            case LONG -> "J";
-            case FLOAT -> "F";
-            case DOUBLE -> "D";
-            case STRING -> "Ljava/lang/String;";
-            case OBJECT -> returnInfo.descriptor() != null ? returnInfo.descriptor() : "Ljava/lang/Object;";
+            case VOID -> TypeConversionUtils.ABBR_VOID;
+            case INT -> TypeConversionUtils.ABBR_INTEGER;
+            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
+            case BYTE -> TypeConversionUtils.ABBR_BYTE;
+            case CHAR -> TypeConversionUtils.ABBR_CHARACTER;
+            case SHORT -> TypeConversionUtils.ABBR_SHORT;
+            case LONG -> TypeConversionUtils.ABBR_LONG;
+            case FLOAT -> TypeConversionUtils.ABBR_FLOAT;
+            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
+            case STRING -> TypeConversionUtils.LJAVA_LANG_STRING;
+            case OBJECT ->
+                    returnInfo.descriptor() != null ? returnInfo.descriptor() : TypeConversionUtils.LJAVA_LANG_OBJECT;
         };
     }
 
     private int getSlotSize(String type) {
-        return ("J".equals(type) || "D".equals(type)) ? 2 : 1;
+        return (TypeConversionUtils.ABBR_LONG.equals(type) || TypeConversionUtils.ABBR_DOUBLE.equals(type)) ? 2 : 1;
     }
 
     private String getSupplierInterface(ReturnTypeInfo returnInfo) {
@@ -1670,10 +1671,11 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     private void loadVariable(CodeBuilder code, int slot, String type) {
         switch (type) {
-            case "I", "Z", "B", "C", "S" -> code.iload(slot);
-            case "J" -> code.lload(slot);
-            case "F" -> code.fload(slot);
-            case "D" -> code.dload(slot);
+            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE,
+                 TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_SHORT -> code.iload(slot);
+            case TypeConversionUtils.ABBR_LONG -> code.lload(slot);
+            case TypeConversionUtils.ABBR_FLOAT -> code.fload(slot);
+            case TypeConversionUtils.ABBR_DOUBLE -> code.dload(slot);
             default -> code.aload(slot);
         }
     }
@@ -1713,16 +1715,17 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
      */
     private void storeValueByType(CodeBuilder code, int slot, String type) {
         switch (type) {
-            case "I", "Z", "B", "C", "S" -> code.istore(slot);
-            case "J" -> code.lstore(slot);
-            case "F" -> code.fstore(slot);
-            case "D" -> code.dstore(slot);
+            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE,
+                 TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_SHORT -> code.istore(slot);
+            case TypeConversionUtils.ABBR_LONG -> code.lstore(slot);
+            case TypeConversionUtils.ABBR_FLOAT -> code.fstore(slot);
+            case TypeConversionUtils.ABBR_DOUBLE -> code.dstore(slot);
             default -> code.astore(slot);
         }
     }
 
     private String toInternalName(String typeDescriptor) {
-        if (typeDescriptor.startsWith("[")) {
+        if (typeDescriptor.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
             return typeDescriptor;
         }
         if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {

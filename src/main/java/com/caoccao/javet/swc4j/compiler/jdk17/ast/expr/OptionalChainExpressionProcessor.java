@@ -92,7 +92,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
         int resultSlot = compiler.getMemory().getCompilationContext()
                 .getLocalVariableTable()
                 .allocateVariable("$optChainResult" + compiler.getMemory().getCompilationContext().getNextTempId(),
-                        "Ljava/lang/Object;");
+                        TypeConversionUtils.LJAVA_LANG_OBJECT);
 
         // Generate the chain with null checks
         generateChain(code, classWriter, optChainExpr, nullJumpPositions);
@@ -181,26 +181,26 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     "Cannot infer object type for optional member access");
         }
 
-        if (objType.startsWith("[")) {
+        if (objType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName computedProp) {
                 compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null);
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-                if (indexType != null && !"I".equals(indexType)) {
-                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
+                if (indexType != null && !TypeConversionUtils.ABBR_INTEGER.equals(indexType)) {
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), TypeConversionUtils.ABBR_INTEGER);
                 }
                 String elemType = objType.substring(1);
                 switch (elemType) {
-                    case "Z", "B" -> code.baload();
-                    case "C" -> code.caload();
-                    case "S" -> code.saload();
-                    case "I" -> code.iaload();
-                    case "J" -> code.laload();
-                    case "F" -> code.faload();
-                    case "D" -> code.daload();
+                    case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.baload();
+                    case TypeConversionUtils.ABBR_CHARACTER -> code.caload();
+                    case TypeConversionUtils.ABBR_SHORT -> code.saload();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.iaload();
+                    case TypeConversionUtils.ABBR_LONG -> code.laload();
+                    case TypeConversionUtils.ABBR_FLOAT -> code.faload();
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.daload();
                     default -> {
                         code.aaload();
                         if (elemType.startsWith("L") && elemType.endsWith(";")
-                                && !"Ljava/lang/Object;".equals(elemType)) {
+                                && !TypeConversionUtils.LJAVA_LANG_OBJECT.equals(elemType)) {
                             int classIndex = cp.addClass(elemType.substring(1, elemType.length() - 1));
                             code.checkcast(classIndex);
                         }
@@ -215,7 +215,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
                 if ("length".equals(propIdent.getSym())) {
                     code.arraylength();
-                    TypeConversionUtils.boxPrimitiveType(code, classWriter, "I", "Ljava/lang/Integer;");
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_INTEGER);
                     return;
                 }
             }
@@ -223,7 +223,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName computedProp) {
                 compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null);
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-                if ("Ljava/lang/String;".equals(indexType)) {
+                if (TypeConversionUtils.LJAVA_LANG_STRING.equals(indexType)) {
                     int parseIntMethod = cp.addMethodRef("java/lang/Integer", "parseInt", "(Ljava/lang/String;)I");
                     code.invokestatic(parseIntMethod);
                 }
@@ -235,20 +235,20 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                 if ("length".equals(propIdent.getSym())) {
                     int sizeMethod = cp.addInterfaceMethodRef("java/util/List", "size", "()I");
                     code.invokeinterface(sizeMethod, 1);
-                    TypeConversionUtils.boxPrimitiveType(code, classWriter, "I", "Ljava/lang/Integer;");
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_INTEGER);
                     return;
                 }
             }
-        } else if ("Ljava/lang/String;".equals(objType)) {
+        } else if (TypeConversionUtils.LJAVA_LANG_STRING.equals(objType)) {
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
                 if ("length".equals(propIdent.getSym())) {
                     int lengthMethod = cp.addMethodRef("java/lang/String", "length", "()I");
                     code.invokevirtual(lengthMethod);
-                    TypeConversionUtils.boxPrimitiveType(code, classWriter, "I", "Ljava/lang/Integer;");
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_INTEGER);
                     return;
                 }
             }
-        } else if ("Ljava/util/LinkedHashMap;".equals(objType) || "Ljava/lang/Object;".equals(objType)) {
+        } else if ("Ljava/util/LinkedHashMap;".equals(objType) || TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
             int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
             code.checkcast(linkedHashMapClass);
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName computedProp) {
@@ -284,10 +284,10 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     int fieldRef = cp.addFieldRef(
                             "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray",
                             "length",
-                            "I"
+                            TypeConversionUtils.ABBR_INTEGER
                     );
                     code.getfield(fieldRef);
-                    TypeConversionUtils.boxPrimitiveType(code, classWriter, "I", "Ljava/lang/Integer;");
+                    TypeConversionUtils.boxPrimitiveType(code, classWriter, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_INTEGER);
                     return;
                 }
             }
@@ -433,7 +433,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
         for (Swc4jAstExprOrSpread arg : args) {
             ISwc4jAstExpr argExpr = arg.getExpr();
             String argType = compiler.getTypeResolver().inferTypeFromExpr(argExpr);
-            argTypes.add(argType != null ? argType : "Ljava/lang/Object;");
+            argTypes.add(argType != null ? argType : TypeConversionUtils.LJAVA_LANG_OBJECT);
         }
 
         var typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
@@ -470,7 +470,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
             if (methodInfo.isVarArgs() && !expectedTypes.isEmpty()) {
                 int fixedCount = expectedTypes.size() - 1;
                 String varargArrayType = expectedTypes.get(expectedTypes.size() - 1);
-                String componentType = varargArrayType.startsWith("[") ? varargArrayType.substring(1) : varargArrayType;
+                String componentType = varargArrayType.startsWith(TypeConversionUtils.ARRAY_PREFIX) ? varargArrayType.substring(1) : varargArrayType;
 
                 invokeArgCount = fixedCount + 2;
 
@@ -598,14 +598,14 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
 
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
             int typeCode = switch (componentType) {
-                case "Z" -> 4;
-                case "C" -> 5;
-                case "F" -> 6;
-                case "D" -> 7;
-                case "B" -> 8;
-                case "S" -> 9;
-                case "I" -> 10;
-                case "J" -> 11;
+                case TypeConversionUtils.ABBR_BOOLEAN -> 4;
+                case TypeConversionUtils.ABBR_CHARACTER -> 5;
+                case TypeConversionUtils.ABBR_FLOAT -> 6;
+                case TypeConversionUtils.ABBR_DOUBLE -> 7;
+                case TypeConversionUtils.ABBR_BYTE -> 8;
+                case TypeConversionUtils.ABBR_SHORT -> 9;
+                case TypeConversionUtils.ABBR_INTEGER -> 10;
+                case TypeConversionUtils.ABBR_LONG -> 11;
                 default -> 10;
             };
             code.newarray(typeCode);
@@ -623,20 +623,20 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
             convertType(code, classWriter, argType, componentType);
 
             switch (componentType) {
-                case "Z", "B" -> code.bastore();
-                case "C" -> code.castore();
-                case "S" -> code.sastore();
-                case "I" -> code.iastore();
-                case "J" -> code.lastore();
-                case "F" -> code.fastore();
-                case "D" -> code.dastore();
+                case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.bastore();
+                case TypeConversionUtils.ABBR_CHARACTER -> code.castore();
+                case TypeConversionUtils.ABBR_SHORT -> code.sastore();
+                case TypeConversionUtils.ABBR_INTEGER -> code.iastore();
+                case TypeConversionUtils.ABBR_LONG -> code.lastore();
+                case TypeConversionUtils.ABBR_FLOAT -> code.fastore();
+                case TypeConversionUtils.ABBR_DOUBLE -> code.dastore();
                 default -> code.aastore();
             }
         }
     }
 
     private String toInternalName(String typeDescriptor) {
-        if (typeDescriptor.startsWith("[")) {
+        if (typeDescriptor.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
             return typeDescriptor;
         }
         if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {

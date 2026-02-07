@@ -36,6 +36,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ArrowExpressionProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -62,7 +63,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
      */
     private void allocateNestedPatternVariables(CompilationContext context, ISwc4jAstPat pat, boolean allowShadow) {
         if (pat instanceof Swc4jAstBindingIdent bindingIdent) {
-            allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), "Ljava/lang/Object;", allowShadow);
+            allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), TypeConversionUtils.LJAVA_LANG_OBJECT, allowShadow);
         } else if (pat instanceof Swc4jAstArrayPat arrayPat) {
             for (var optElem : arrayPat.getElems()) {
                 if (optElem.isPresent()) {
@@ -77,7 +78,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
         } else if (pat instanceof Swc4jAstObjectPat objectPat) {
             for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
                 if (prop instanceof Swc4jAstAssignPatProp assignProp) {
-                    allocateVariableIfNeeded(context, assignProp.getKey().getId().getSym(), "Ljava/lang/Object;", allowShadow);
+                    allocateVariableIfNeeded(context, assignProp.getKey().getId().getSym(), TypeConversionUtils.LJAVA_LANG_OBJECT, allowShadow);
                 } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
                     allocateNestedPatternVariables(context, keyValueProp.getValue(), allowShadow);
                 } else if (prop instanceof Swc4jAstRestPat restPat) {
@@ -243,7 +244,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             ISwc4jAstPat elem = optElem.get();
             if (elem instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
-                allocateVariableIfNeeded(context, varName, "Ljava/lang/Object;", allowShadow);
+                allocateVariableIfNeeded(context, varName, TypeConversionUtils.LJAVA_LANG_OBJECT, allowShadow);
                 restStartIndex++;
             } else if (elem instanceof Swc4jAstArrayPat || elem instanceof Swc4jAstObjectPat) {
                 // Nested pattern - allocate variables recursively
@@ -352,19 +353,21 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 // Pre-initialize to null (for reference types) or default value (for primitives)
                 // This ensures the variable slot is initialized when captured by the lambda
                 switch (localVar.type()) {
-                    case "I", "S", "C", "Z", "B" -> {
+                    case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_SHORT,
+                         TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_BOOLEAN,
+                         TypeConversionUtils.ABBR_BYTE -> {
                         code.iconst(0);
                         code.istore(localVar.index());
                     }
-                    case "J" -> {
+                    case TypeConversionUtils.ABBR_LONG -> {
                         code.lconst(0);
                         code.lstore(localVar.index());
                     }
-                    case "F" -> {
+                    case TypeConversionUtils.ABBR_FLOAT -> {
                         code.fconst(0);
                         code.fstore(localVar.index());
                     }
-                    case "D" -> {
+                    case TypeConversionUtils.ABBR_DOUBLE -> {
                         code.dconst(0);
                         code.dstore(localVar.index());
                     }
@@ -401,10 +404,12 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
 
                 // Store the value in the local variable
                 switch (localVar.type()) {
-                    case "I", "S", "C", "Z", "B" -> code.istore(localVar.index());
-                    case "J" -> code.lstore(localVar.index());
-                    case "F" -> code.fstore(localVar.index());
-                    case "D" -> code.dstore(localVar.index());
+                    case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_SHORT,
+                         TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_BOOLEAN,
+                         TypeConversionUtils.ABBR_BYTE -> code.istore(localVar.index());
+                    case TypeConversionUtils.ABBR_LONG -> code.lstore(localVar.index());
+                    case TypeConversionUtils.ABBR_FLOAT -> code.fstore(localVar.index());
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.dstore(localVar.index());
                     default -> code.astore(localVar.index());
                 }
             }
@@ -416,19 +421,21 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 // Generate default initialization for variables without initializers
                 // This is required by the JVM verifier to track variable initialization
                 switch (localVar.type()) {
-                    case "I", "S", "C", "Z", "B" -> {
+                    case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_SHORT,
+                         TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_BOOLEAN,
+                         TypeConversionUtils.ABBR_BYTE -> {
                         code.iconst(0);
                         code.istore(localVar.index());
                     }
-                    case "J" -> {
+                    case TypeConversionUtils.ABBR_LONG -> {
                         code.lconst(0);
                         code.lstore(localVar.index());
                     }
-                    case "F" -> {
+                    case TypeConversionUtils.ABBR_FLOAT -> {
                         code.fconst(0);
                         code.fstore(localVar.index());
                     }
-                    case "D" -> {
+                    case TypeConversionUtils.ABBR_DOUBLE -> {
                         code.dconst(0);
                         code.dstore(localVar.index());
                     }
@@ -454,42 +461,42 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
         int holderSlot = localVar.holderIndex();
 
         switch (type) {
-            case "I" -> {
+            case TypeConversionUtils.ABBR_INTEGER -> {
                 code.iconst(1);
                 code.newarray(10); // T_INT
                 code.astore(holderSlot);
             }
-            case "J" -> {
+            case TypeConversionUtils.ABBR_LONG -> {
                 code.iconst(1);
                 code.newarray(11); // T_LONG
                 code.astore(holderSlot);
             }
-            case "D" -> {
+            case TypeConversionUtils.ABBR_DOUBLE -> {
                 code.iconst(1);
                 code.newarray(7); // T_DOUBLE
                 code.astore(holderSlot);
             }
-            case "F" -> {
+            case TypeConversionUtils.ABBR_FLOAT -> {
                 code.iconst(1);
                 code.newarray(6); // T_FLOAT
                 code.astore(holderSlot);
             }
-            case "Z" -> {
+            case TypeConversionUtils.ABBR_BOOLEAN -> {
                 code.iconst(1);
                 code.newarray(4); // T_BOOLEAN
                 code.astore(holderSlot);
             }
-            case "B" -> {
+            case TypeConversionUtils.ABBR_BYTE -> {
                 code.iconst(1);
                 code.newarray(8); // T_BYTE
                 code.astore(holderSlot);
             }
-            case "C" -> {
+            case TypeConversionUtils.ABBR_CHARACTER -> {
                 code.iconst(1);
                 code.newarray(5); // T_CHAR
                 code.astore(holderSlot);
             }
-            case "S" -> {
+            case TypeConversionUtils.ABBR_SHORT -> {
                 code.iconst(1);
                 code.newarray(9); // T_SHORT
                 code.astore(holderSlot);
@@ -526,7 +533,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
         int holderSlot = localVar.holderIndex();
 
         switch (type) {
-            case "I" -> {
+            case TypeConversionUtils.ABBR_INTEGER -> {
                 code.iconst(1);
                 code.newarray(10); // T_INT
                 code.dup();
@@ -535,7 +542,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.iastore();
                 code.astore(holderSlot);
             }
-            case "J" -> {
+            case TypeConversionUtils.ABBR_LONG -> {
                 code.iconst(1);
                 code.newarray(11); // T_LONG
                 code.dup();
@@ -544,7 +551,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.lastore();
                 code.astore(holderSlot);
             }
-            case "D" -> {
+            case TypeConversionUtils.ABBR_DOUBLE -> {
                 code.iconst(1);
                 code.newarray(7); // T_DOUBLE
                 code.dup();
@@ -553,7 +560,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.dastore();
                 code.astore(holderSlot);
             }
-            case "F" -> {
+            case TypeConversionUtils.ABBR_FLOAT -> {
                 code.iconst(1);
                 code.newarray(6); // T_FLOAT
                 code.dup();
@@ -562,7 +569,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.fastore();
                 code.astore(holderSlot);
             }
-            case "Z" -> {
+            case TypeConversionUtils.ABBR_BOOLEAN -> {
                 code.iconst(1);
                 code.newarray(4); // T_BOOLEAN
                 code.dup();
@@ -571,7 +578,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.bastore();
                 code.astore(holderSlot);
             }
-            case "B" -> {
+            case TypeConversionUtils.ABBR_BYTE -> {
                 code.iconst(1);
                 code.newarray(8); // T_BYTE
                 code.dup();
@@ -580,7 +587,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.bastore();
                 code.astore(holderSlot);
             }
-            case "C" -> {
+            case TypeConversionUtils.ABBR_CHARACTER -> {
                 code.iconst(1);
                 code.newarray(5); // T_CHAR
                 code.dup();
@@ -589,7 +596,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.castore();
                 code.astore(holderSlot);
             }
-            case "S" -> {
+            case TypeConversionUtils.ABBR_SHORT -> {
                 code.iconst(1);
                 code.newarray(9); // T_SHORT
                 code.dup();
@@ -668,13 +675,13 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             if (prop instanceof Swc4jAstAssignPatProp assignProp) {
                 String varName = assignProp.getKey().getId().getSym();
                 extractedKeys.add(varName);
-                allocateVariableIfNeeded(context, varName, "Ljava/lang/Object;", allowShadow);
+                allocateVariableIfNeeded(context, varName, TypeConversionUtils.LJAVA_LANG_OBJECT, allowShadow);
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
                 String keyName = extractPropertyName(keyValueProp.getKey());
                 extractedKeys.add(keyName);
                 ISwc4jAstPat valuePat = keyValueProp.getValue();
                 if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
-                    allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), "Ljava/lang/Object;", allowShadow);
+                    allocateVariableIfNeeded(context, bindingIdent.getId().getSym(), TypeConversionUtils.LJAVA_LANG_OBJECT, allowShadow);
                 } else if (valuePat instanceof Swc4jAstArrayPat || valuePat instanceof Swc4jAstObjectPat) {
                     // Nested pattern - allocate variables recursively
                     allocateNestedPatternVariables(context, valuePat, allowShadow);
@@ -815,12 +822,12 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 // Get source list size
                 code.aload(sourceSlot);
                 code.invokeinterface(listSizeRef, 1);
-                int sizeSlot = getOrAllocateTempSlot(context, "$restSize" + context.getNextTempId(), "I");
+                int sizeSlot = getOrAllocateTempSlot(context, "$restSize" + context.getNextTempId(), TypeConversionUtils.ABBR_INTEGER);
                 code.istore(sizeSlot);
 
                 // Initialize loop counter at restStartIndex
                 code.iconst(restStartIndex);
-                int iSlot = getOrAllocateTempSlot(context, "$restI" + context.getNextTempId(), "I");
+                int iSlot = getOrAllocateTempSlot(context, "$restI" + context.getNextTempId(), TypeConversionUtils.ABBR_INTEGER);
                 code.istore(iSlot);
 
                 // Loop to copy remaining elements

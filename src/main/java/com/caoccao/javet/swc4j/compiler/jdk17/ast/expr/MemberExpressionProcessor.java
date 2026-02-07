@@ -69,55 +69,6 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 "Computed super property expressions not yet supported");
     }
 
-    /**
-     * Generate bytecode for super property reads (e.g. super.value).
-     *
-     * @param code           the code builder
-     * @param classWriter    the class writer
-     * @param superPropExpr  the super property expression
-     * @param returnTypeInfo the return type info
-     * @throws Swc4jByteCodeCompilerException if generation fails
-     */
-    public void generateSuperProperty(
-            CodeBuilder code,
-            ClassWriter classWriter,
-            Swc4jAstSuperPropExpr superPropExpr,
-            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        String fieldName = extractSuperPropertyName(superPropExpr);
-        String currentClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
-        if (currentClassName == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    superPropExpr,
-                    "super property access outside of class context");
-        }
-        String superClassInternalName = resolveSuperClassInternalName(currentClassName);
-        if (superClassInternalName == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    superPropExpr,
-                    "Cannot resolve superclass for " + currentClassName);
-        }
-        JavaTypeInfo superTypeInfo = resolveTypeInfoByInternalName(superClassInternalName);
-        if (superTypeInfo == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    superPropExpr,
-                    "Cannot resolve superclass type info for " + superClassInternalName);
-        }
-        FieldLookupResult lookupResult = lookupFieldInHierarchy(superTypeInfo, fieldName);
-        if (lookupResult == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    superPropExpr,
-                    "Field not found in super hierarchy: " + fieldName);
-        }
-        var cp = classWriter.getConstantPool();
-        code.aload(0);
-        int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, lookupResult.fieldInfo.descriptor());
-        code.getfield(fieldRef);
-    }
-
     @Override
     public void generate(
             CodeBuilder code,
@@ -251,14 +202,14 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
 
         // Handle member access on arrays (e.g., arr.length or arr[index])
         String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
-        if ("Ljava/lang/Object;".equals(objType)) {
+        if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
             String classExprType = inferTypeFromNewClassExpr(memberExpr.getObj());
             if (classExprType != null) {
                 objType = classExprType;
             }
         }
 
-        if (objType != null && objType.startsWith("[")) {
+        if (objType != null && objType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
             // Java array operations
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                 // arr[index] - array element access
@@ -267,26 +218,27 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
 
                 // Convert index to int if needed
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-                if (indexType != null && !"I".equals(indexType)) {
-                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
+                if (indexType != null && !TypeConversionUtils.ABBR_INTEGER.equals(indexType)) {
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), TypeConversionUtils.ABBR_INTEGER);
                 }
 
                 // Use appropriate array load instruction based on element type
-                String elemType = objType.substring(1); // Remove leading "["
+                String elemType = objType.substring(1); // Remove leading TypeConversionUtils.ARRAY_PREFIX
                 switch (elemType) {
-                    case "Z", "B" -> code.baload(); // boolean and byte
-                    case "C" -> code.caload(); // char
-                    case "S" -> code.saload(); // short
-                    case "I" -> code.iaload(); // int
-                    case "J" -> code.laload(); // long
-                    case "F" -> code.faload(); // float
-                    case "D" -> code.daload(); // double
+                    case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE ->
+                            code.baload(); // boolean and byte
+                    case TypeConversionUtils.ABBR_CHARACTER -> code.caload(); // char
+                    case TypeConversionUtils.ABBR_SHORT -> code.saload(); // short
+                    case TypeConversionUtils.ABBR_INTEGER -> code.iaload(); // int
+                    case TypeConversionUtils.ABBR_LONG -> code.laload(); // long
+                    case TypeConversionUtils.ABBR_FLOAT -> code.faload(); // float
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.daload(); // double
                     default -> {
                         // reference types
                         code.aaload();
                         // Add checkcast for non-Object element types to ensure type safety
                         if (elemType.startsWith("L") && elemType.endsWith(";") &&
-                                !elemType.equals("Ljava/lang/Object;")) {
+                                !elemType.equals(TypeConversionUtils.LJAVA_LANG_OBJECT)) {
                             String elementInternalName = elemType.substring(1, elemType.length() - 1);
                             int classIndex = cp.addClass(elementInternalName);
                             code.checkcast(classIndex);
@@ -316,7 +268,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
 
                 // Convert index to int if it's a String (for-in returns string indices in JS semantics)
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-                if ("Ljava/lang/String;".equals(indexType)) {
+                if (TypeConversionUtils.LJAVA_LANG_STRING.equals(indexType)) {
                     // String index -> Integer.parseInt(index)
                     int parseIntMethod = cp.addMethodRef("java/lang/Integer", "parseInt", "(Ljava/lang/String;)I");
                     code.invokestatic(parseIntMethod); // Stack: [ArrayList/List, int]
@@ -339,7 +291,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                     return;
                 }
             }
-        } else if ("Ljava/lang/String;".equals(objType)) {
+        } else if (TypeConversionUtils.LJAVA_LANG_STRING.equals(objType)) {
             // String operations
             if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                 String propName = propIdent.getSym();
@@ -351,7 +303,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                     return;
                 }
             }
-        } else if ("Ljava/util/LinkedHashMap;".equals(objType) || "Ljava/lang/Object;".equals(objType)) {
+        } else if ("Ljava/util/LinkedHashMap;".equals(objType) || TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
             // LinkedHashMap operations (object literal member access)
             // Also handle Object type (for nested properties where map values are typed as Object)
             // Check if it's a computed property (obj[key]) or named property (obj.prop)
@@ -360,7 +312,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [LinkedHashMap or Object]
 
                 // Cast to LinkedHashMap if type is Object
-                if ("Ljava/lang/Object;".equals(objType)) {
+                if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
                     int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
                     code.checkcast(linkedHashMapClass); // Stack: [LinkedHashMap]
                 }
@@ -387,7 +339,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [LinkedHashMap or Object]
 
                 // Cast to LinkedHashMap if type is Object
-                if ("Ljava/lang/Object;".equals(objType)) {
+                if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(objType)) {
                     int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
                     code.checkcast(linkedHashMapClass); // Stack: [LinkedHashMap]
                 }
@@ -448,7 +400,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                     int fieldRef = cp.addFieldRef(
                             "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray",
                             "length",
-                            "I"
+                            TypeConversionUtils.ABBR_INTEGER
                     );
                     code.getfield(fieldRef);
                     return;
@@ -496,6 +448,55 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
         throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "Member expression not yet supported: " + memberExpr.getProp());
     }
 
+    /**
+     * Generate bytecode for super property reads (e.g. super.value).
+     *
+     * @param code           the code builder
+     * @param classWriter    the class writer
+     * @param superPropExpr  the super property expression
+     * @param returnTypeInfo the return type info
+     * @throws Swc4jByteCodeCompilerException if generation fails
+     */
+    public void generateSuperProperty(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            Swc4jAstSuperPropExpr superPropExpr,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        String fieldName = extractSuperPropertyName(superPropExpr);
+        String currentClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
+        if (currentClassName == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "super property access outside of class context");
+        }
+        String superClassInternalName = resolveSuperClassInternalName(currentClassName);
+        if (superClassInternalName == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Cannot resolve superclass for " + currentClassName);
+        }
+        JavaTypeInfo superTypeInfo = resolveTypeInfoByInternalName(superClassInternalName);
+        if (superTypeInfo == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Cannot resolve superclass type info for " + superClassInternalName);
+        }
+        FieldLookupResult lookupResult = lookupFieldInHierarchy(superTypeInfo, fieldName);
+        if (lookupResult == null) {
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(),
+                    superPropExpr,
+                    "Field not found in super hierarchy: " + fieldName);
+        }
+        var cp = classWriter.getConstantPool();
+        code.aload(0);
+        int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, lookupResult.fieldInfo.descriptor());
+        code.getfield(fieldRef);
+    }
+
     private String inferTypeFromNewClassExpr(ISwc4jAstExpr expr) throws Swc4jByteCodeCompilerException {
         if (expr instanceof Swc4jAstNewExpr newExpr) {
             Swc4jAstClassExpr classExpr = extractClassExpr(newExpr.getCallee());
@@ -504,6 +505,31 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 return "L" + info.internalName() + ";";
             }
         }
+        return null;
+    }
+
+    /**
+     * Looks up a field in the class hierarchy, starting from the given class and traversing up to parent classes.
+     *
+     * @param typeInfo  the starting class type info
+     * @param fieldName the field name to look up
+     * @return the lookup result containing the field info and owner class, or null if not found
+     */
+    private FieldLookupResult lookupFieldInHierarchy(JavaTypeInfo typeInfo, String fieldName) {
+        // First check in current class
+        FieldInfo fieldInfo = typeInfo.getField(fieldName);
+        if (fieldInfo != null) {
+            return new FieldLookupResult(fieldInfo, typeInfo.getInternalName());
+        }
+
+        // Check in parent classes
+        for (JavaTypeInfo parentInfo : typeInfo.getParentTypeInfos()) {
+            FieldLookupResult result = lookupFieldInHierarchy(parentInfo, fieldName);
+            if (result != null) {
+                return result;
+            }
+        }
+
         return null;
     }
 
@@ -530,31 +556,6 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
         }
         return typeInfo;
-    }
-
-    /**
-     * Looks up a field in the class hierarchy, starting from the given class and traversing up to parent classes.
-     *
-     * @param typeInfo  the starting class type info
-     * @param fieldName the field name to look up
-     * @return the lookup result containing the field info and owner class, or null if not found
-     */
-    private FieldLookupResult lookupFieldInHierarchy(JavaTypeInfo typeInfo, String fieldName) {
-        // First check in current class
-        FieldInfo fieldInfo = typeInfo.getField(fieldName);
-        if (fieldInfo != null) {
-            return new FieldLookupResult(fieldInfo, typeInfo.getInternalName());
-        }
-
-        // Check in parent classes
-        for (JavaTypeInfo parentInfo : typeInfo.getParentTypeInfos()) {
-            FieldLookupResult result = lookupFieldInHierarchy(parentInfo, fieldName);
-            if (result != null) {
-                return result;
-            }
-        }
-
-        return null;
     }
 
     /**

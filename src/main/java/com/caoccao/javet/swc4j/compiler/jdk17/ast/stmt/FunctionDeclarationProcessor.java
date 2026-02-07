@@ -34,6 +34,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.ScopedStandaloneFunctionRegistry;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -317,7 +318,7 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
             return returnTypeInfo.descriptor();
         }
         String primitiveDescriptor = returnTypeInfo.getPrimitiveTypeDescriptor();
-        return primitiveDescriptor != null ? primitiveDescriptor : "V";
+        return primitiveDescriptor != null ? primitiveDescriptor : TypeConversionUtils.ABBR_VOID;
     }
 
     private boolean isClassNameTaken(String fullClassName) {

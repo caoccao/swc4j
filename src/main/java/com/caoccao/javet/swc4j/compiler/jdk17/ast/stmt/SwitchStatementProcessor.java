@@ -33,6 +33,7 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
@@ -578,54 +579,54 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
         // 2. Route to appropriate generator based on type
 
         // String switches use 2-phase hash approach
-        if ("Ljava/lang/String;".equals(discriminantType)) {
+        if (TypeConversionUtils.LJAVA_LANG_STRING.equals(discriminantType)) {
             generateStringSwitch(code, classWriter, switchStmt, labelName, returnTypeInfo);
             return;
         }
 
         // Boxed type switches: unbox then use integer switch
-        if ("Ljava/lang/Integer;".equals(discriminantType)) {
+        if (TypeConversionUtils.LJAVA_LANG_INTEGER.equals(discriminantType)) {
             generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Integer", "intValue", "()I", labelName, returnTypeInfo);
             return;
         }
-        if ("Ljava/lang/Byte;".equals(discriminantType)) {
+        if (TypeConversionUtils.LJAVA_LANG_BYTE.equals(discriminantType)) {
             generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Byte", "byteValue", "()B", labelName, returnTypeInfo);
             return;
         }
-        if ("Ljava/lang/Short;".equals(discriminantType)) {
+        if (TypeConversionUtils.LJAVA_LANG_SHORT.equals(discriminantType)) {
             generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Short", "shortValue", "()S", labelName, returnTypeInfo);
             return;
         }
-        if ("Ljava/lang/Character;".equals(discriminantType)) {
+        if (TypeConversionUtils.LJAVA_LANG_CHARACTER.equals(discriminantType)) {
             generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Character", "charValue", "()C", labelName, returnTypeInfo);
             return;
         }
-        if ("Ljava/lang/Boolean;".equals(discriminantType)) {
+        if (TypeConversionUtils.LJAVA_LANG_BOOLEAN.equals(discriminantType)) {
             generateBoxedIntegerSwitch(code, classWriter, switchStmt, "java/lang/Boolean", "booleanValue", "()Z", labelName, returnTypeInfo);
             return;
         }
-        if ("Ljava/lang/Long;".equals(discriminantType)) {
+        if (TypeConversionUtils.LJAVA_LANG_LONG.equals(discriminantType)) {
             generateBoxedLongSwitch(code, classWriter, switchStmt, "java/lang/Long", "longValue", "()J", labelName, returnTypeInfo);
             return;
         }
-        if ("Ljava/lang/Float;".equals(discriminantType)) {
+        if (TypeConversionUtils.LJAVA_LANG_FLOAT.equals(discriminantType)) {
             generateBoxedFloatSwitch(code, classWriter, switchStmt, "java/lang/Float", "floatValue", "()F", labelName, returnTypeInfo);
             return;
         }
-        if ("Ljava/lang/Double;".equals(discriminantType)) {
+        if (TypeConversionUtils.LJAVA_LANG_DOUBLE.equals(discriminantType)) {
             generateBoxedDoubleSwitch(code, classWriter, switchStmt, "java/lang/Double", "doubleValue", "()D", labelName, returnTypeInfo);
             return;
         }
 
-        if ("J".equals(discriminantType)) {
+        if (TypeConversionUtils.ABBR_LONG.equals(discriminantType)) {
             generateLongSwitch(code, classWriter, switchStmt, labelName, returnTypeInfo);
             return;
         }
-        if ("F".equals(discriminantType)) {
+        if (TypeConversionUtils.ABBR_FLOAT.equals(discriminantType)) {
             generateFloatSwitch(code, classWriter, switchStmt, labelName, returnTypeInfo);
             return;
         }
-        if ("D".equals(discriminantType)) {
+        if (TypeConversionUtils.ABBR_DOUBLE.equals(discriminantType)) {
             generateDoubleSwitch(code, classWriter, switchStmt, labelName, returnTypeInfo);
             return;
         }
@@ -742,7 +743,7 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
         }
 
         int tempIndex = context.getLocalVariableTable().allocateVariable(
-                "$switch$double$" + context.getNextTempId(), "D");
+                "$switch$double$" + context.getNextTempId(), TypeConversionUtils.ABBR_DOUBLE);
         code.dstore(tempIndex);
 
         List<CaseJumpInfo<DoubleCaseInfo>> caseJumps = new ArrayList<>();
@@ -856,7 +857,7 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
         }
 
         int tempIndex = context.getLocalVariableTable().allocateVariable(
-                "$switch$float$" + context.getNextTempId(), "F");
+                "$switch$float$" + context.getNextTempId(), TypeConversionUtils.ABBR_FLOAT);
         code.fstore(tempIndex);
 
         List<CaseJumpInfo<FloatCaseInfo>> caseJumps = new ArrayList<>();
@@ -1121,7 +1122,7 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
         }
 
         int tempIndex = context.getLocalVariableTable().allocateVariable(
-                "$switch$long$" + context.getNextTempId(), "J");
+                "$switch$long$" + context.getNextTempId(), TypeConversionUtils.ABBR_LONG);
         code.lstore(tempIndex);
 
         List<CaseJumpInfo<LongCaseInfo>> caseJumps = new ArrayList<>();
@@ -1417,12 +1418,12 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
         }
 
         // 3. Store discriminant in local variable
-        int strLocal = context.getLocalVariableTable().allocateVariable("$switch$str", "Ljava/lang/String;");
+        int strLocal = context.getLocalVariableTable().allocateVariable("$switch$str", TypeConversionUtils.LJAVA_LANG_STRING);
         compiler.getExpressionProcessor().generate(code, classWriter, switchStmt.getDiscriminant(), null);
         code.astore(strLocal);
 
         // 4. Create temp variable for position, initialized to -1
-        int posLocal = context.getLocalVariableTable().allocateVariable("$switch$pos", "I");
+        int posLocal = context.getLocalVariableTable().allocateVariable("$switch$pos", TypeConversionUtils.ABBR_INTEGER);
         code.iconst(-1);
         code.istore(posLocal);
 

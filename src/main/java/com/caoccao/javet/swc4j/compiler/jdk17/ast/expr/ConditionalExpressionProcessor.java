@@ -109,7 +109,7 @@ public final class ConditionalExpressionProcessor extends BaseAstProcessor<Swc4j
         // Find common supertype (may default to Object)
 
         // For now, if types don't match and aren't both primitives, use Object
-        return "Ljava/lang/Object;";
+        return TypeConversionUtils.LJAVA_LANG_OBJECT;
     }
 
     @Override
@@ -186,13 +186,13 @@ public final class ConditionalExpressionProcessor extends BaseAstProcessor<Swc4j
      */
     private int getPrimitiveRank(String type) {
         return switch (type) {
-            case "B" -> 1; // byte
-            case "S" -> 2; // short
-            case "C" -> 2; // char (same rank as short, can widen to int)
-            case "I" -> 3; // int
-            case "J" -> 4; // long
-            case "F" -> 5; // float
-            case "D" -> 6; // double
+            case TypeConversionUtils.ABBR_BYTE -> 1; // byte
+            case TypeConversionUtils.ABBR_SHORT -> 2; // short
+            case TypeConversionUtils.ABBR_CHARACTER -> 2; // char (same rank as short, can widen to int)
+            case TypeConversionUtils.ABBR_INTEGER -> 3; // int
+            case TypeConversionUtils.ABBR_LONG -> 4; // long
+            case TypeConversionUtils.ABBR_FLOAT -> 5; // float
+            case TypeConversionUtils.ABBR_DOUBLE -> 6; // double
             default -> 0;
         };
     }
@@ -209,8 +209,8 @@ public final class ConditionalExpressionProcessor extends BaseAstProcessor<Swc4j
         }
 
         // Boolean can't be widened
-        if ("Z".equals(type1) || "Z".equals(type2)) {
-            return "Z"; // This will likely cause issues, but matches current behavior
+        if (TypeConversionUtils.ABBR_BOOLEAN.equals(type1) || TypeConversionUtils.ABBR_BOOLEAN.equals(type2)) {
+            return TypeConversionUtils.ABBR_BOOLEAN; // This will likely cause issues, but matches current behavior
         }
 
         // Create widening order (higher number = wider type)

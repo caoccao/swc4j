@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.memory;
 
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
 
 import java.util.ArrayList;
@@ -348,7 +349,7 @@ public final class JavaTypeInfo {
             // Score varargs parameters
             String varargType = paramTypes.get(paramTypes.size() - 1);
             // Vararg type is an array, get the component type
-            String componentType = varargType.startsWith("[") ? varargType.substring(1) : varargType;
+            String componentType = varargType.startsWith(TypeConversionUtils.ARRAY_PREFIX) ? varargType.substring(1) : varargType;
 
             for (int i = regularParamCount; i < argTypes.size(); i++) {
                 // Varargs match gets a slightly lower score (0.95 * actual score)

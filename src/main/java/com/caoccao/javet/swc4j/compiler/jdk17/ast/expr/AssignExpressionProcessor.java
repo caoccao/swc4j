@@ -81,18 +81,18 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         boolean valueIsPrimitive = TypeConversionUtils.isPrimitiveType(primitiveValueType) &&
                 TypeConversionUtils.isPrimitiveType(valueType);
 
-        if ("Ljava/lang/String;".equals(targetType)) {
+        if (TypeConversionUtils.LJAVA_LANG_STRING.equals(targetType)) {
             if (valueIsPrimitive) {
                 generateStringValueOf(code, classWriter, primitiveValueType);
-            } else if (!"Ljava/lang/String;".equals(valueType)) {
-                generateStringValueOf(code, classWriter, "Ljava/lang/Object;");
+            } else if (!TypeConversionUtils.LJAVA_LANG_STRING.equals(valueType)) {
+                generateStringValueOf(code, classWriter, TypeConversionUtils.LJAVA_LANG_OBJECT);
             }
             return;
         }
 
         if (valueIsPrimitive) {
             String wrapperType = TypeConversionUtils.getWrapperType(primitiveValueType);
-            if ("Ljava/lang/Object;".equals(targetType) || targetType.equals(wrapperType)) {
+            if (TypeConversionUtils.LJAVA_LANG_OBJECT.equals(targetType) || targetType.equals(wrapperType)) {
                 TypeConversionUtils.boxPrimitiveType(code, classWriter, primitiveValueType, wrapperType);
                 return;
             }
@@ -127,6 +127,21 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
             throw new Swc4jByteCodeCompilerException(getSourceCode(), propName,
                     "Unsupported property name type: " + propName.getClass().getName());
         }
+    }
+
+    private String extractSuperPropertyName(
+            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
+        if (superPropExpr.getProp() instanceof Swc4jAstIdentName identName) {
+            return identName.getSym();
+        }
+        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp
+                && computedProp.getExpr() instanceof Swc4jAstStr str) {
+            return str.getValue();
+        }
+        throw new Swc4jByteCodeCompilerException(
+                getSourceCode(),
+                superPropExpr,
+                "Computed super property expressions not yet supported");
     }
 
     /**
@@ -182,7 +197,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                             // Duplicate value for assignment expression result (assignment returns the assigned value)
                             String fieldDesc = fieldInfo.descriptor();
-                            if ("D".equals(fieldDesc) || "J".equals(fieldDesc)) {
+                            if (TypeConversionUtils.ABBR_DOUBLE.equals(fieldDesc) || TypeConversionUtils.ABBR_LONG.equals(fieldDesc)) {
                                 code.dup2_x1(); // For wide types (double, long)
                             } else {
                                 code.dup_x1(); // For single-slot types
@@ -222,7 +237,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                             // Duplicate value for assignment expression result
                             String fieldDesc = fieldInfo.descriptor();
-                            if ("D".equals(fieldDesc) || "J".equals(fieldDesc)) {
+                            if (TypeConversionUtils.ABBR_DOUBLE.equals(fieldDesc) || TypeConversionUtils.ABBR_LONG.equals(fieldDesc)) {
                                 code.dup2_x1();
                             } else {
                                 code.dup_x1();
@@ -255,7 +270,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                         // Duplicate value for assignment expression result
                         String fieldDesc = fieldInfo.descriptor();
-                        if ("D".equals(fieldDesc) || "J".equals(fieldDesc)) {
+                        if (TypeConversionUtils.ABBR_DOUBLE.equals(fieldDesc) || TypeConversionUtils.ABBR_LONG.equals(fieldDesc)) {
                             code.dup2(); // For wide types (double, long)
                         } else {
                             code.dup(); // For single-slot types
@@ -287,7 +302,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                         // Duplicate value for assignment expression result
                         String fieldDesc = fieldInfo.descriptor();
-                        if ("D".equals(fieldDesc) || "J".equals(fieldDesc)) {
+                        if (TypeConversionUtils.ABBR_DOUBLE.equals(fieldDesc) || TypeConversionUtils.ABBR_LONG.equals(fieldDesc)) {
                             code.dup2(); // For wide types (double, long)
                         } else {
                             code.dup(); // For single-slot types
@@ -302,7 +317,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
             String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
 
-            if (objType != null && objType.startsWith("[")) {
+            if (objType != null && objType.startsWith(TypeConversionUtils.ARRAY_PREFIX)) {
                 // Java array operations
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                     // arr[index] = value - array element assignment
@@ -311,8 +326,8 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                     // Convert index to int if needed
                     String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-                    if (indexType != null && !"I".equals(indexType)) {
-                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
+                    if (indexType != null && !TypeConversionUtils.ABBR_INTEGER.equals(indexType)) {
+                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), TypeConversionUtils.ABBR_INTEGER);
                     }
 
                     // Generate the value to store
@@ -323,13 +338,13 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     TypeConversionUtils.unboxWrapperType(code, classWriter, valueType);
 
                     // Convert to target element type if needed
-                    String elemType = objType.substring(1); // Remove leading "["
+                    String elemType = objType.substring(1); // Remove leading TypeConversionUtils.ARRAY_PREFIX
                     String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
                     TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, elemType);
 
                     // Duplicate value and place it below array and index so it's left after store
                     // Stack: [array, index, value] -> [value, array, index, value]
-                    if ("D".equals(elemType) || "J".equals(elemType)) {
+                    if (TypeConversionUtils.ABBR_DOUBLE.equals(elemType) || TypeConversionUtils.ABBR_LONG.equals(elemType)) {
                         code.dup2_x2(); // For wide types (double, long)
                     } else {
                         code.dup_x2(); // For single-slot types
@@ -338,13 +353,14 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     // Use appropriate array store instruction
                     // Stack: [value, array, index, value] -> [value] after store
                     switch (elemType) {
-                        case "Z", "B" -> code.bastore(); // boolean and byte
-                        case "C" -> code.castore(); // char
-                        case "S" -> code.sastore(); // short
-                        case "I" -> code.iastore(); // int
-                        case "J" -> code.lastore(); // long
-                        case "F" -> code.fastore(); // float
-                        case "D" -> code.dastore(); // double
+                        case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE ->
+                                code.bastore(); // boolean and byte
+                        case TypeConversionUtils.ABBR_CHARACTER -> code.castore(); // char
+                        case TypeConversionUtils.ABBR_SHORT -> code.sastore(); // short
+                        case TypeConversionUtils.ABBR_INTEGER -> code.iastore(); // int
+                        case TypeConversionUtils.ABBR_LONG -> code.lastore(); // long
+                        case TypeConversionUtils.ABBR_FLOAT -> code.fastore(); // float
+                        case TypeConversionUtils.ABBR_DOUBLE -> code.dastore(); // double
                         default -> code.aastore(); // reference types
                     }
                     // The duplicated value is now on the stack as the assignment result
@@ -367,7 +383,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                     // Convert index to int if it's a String (for-in returns string indices in JS semantics)
                     String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-                    if ("Ljava/lang/String;".equals(indexType)) {
+                    if (TypeConversionUtils.LJAVA_LANG_STRING.equals(indexType)) {
                         // String index -> Integer.parseInt(index)
                         int parseIntMethod = cp.addMethodRef("java/lang/Integer", "parseInt", "(Ljava/lang/String;)I");
                         code.invokestatic(parseIntMethod); // Stack: [ArrayList/List, int]
@@ -531,13 +547,13 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     code.aload(var.holderIndex());
                     code.iconst(0);
                     switch (varType) {
-                        case "I" -> code.iaload();
-                        case "J" -> code.laload();
-                        case "F" -> code.faload();
-                        case "D" -> code.daload();
-                        case "Z", "B" -> code.baload();
-                        case "C" -> code.caload();
-                        case "S" -> code.saload();
+                        case TypeConversionUtils.ABBR_INTEGER -> code.iaload();
+                        case TypeConversionUtils.ABBR_LONG -> code.laload();
+                        case TypeConversionUtils.ABBR_FLOAT -> code.faload();
+                        case TypeConversionUtils.ABBR_DOUBLE -> code.daload();
+                        case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.baload();
+                        case TypeConversionUtils.ABBR_CHARACTER -> code.caload();
+                        case TypeConversionUtils.ABBR_SHORT -> code.saload();
                         default -> code.aaload();
                     }
 
@@ -550,7 +566,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 }
 
                 // Duplicate for expression result, then store
-                if ("D".equals(varType) || "J".equals(varType)) {
+                if (TypeConversionUtils.ABBR_DOUBLE.equals(varType) || TypeConversionUtils.ABBR_LONG.equals(varType)) {
                     code.dup2_x2();
                 } else {
                     code.dup_x2();
@@ -558,13 +574,13 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                 // Store into holder array
                 switch (varType) {
-                    case "I" -> code.iastore();
-                    case "J" -> code.lastore();
-                    case "F" -> code.fastore();
-                    case "D" -> code.dastore();
-                    case "Z", "B" -> code.bastore();
-                    case "C" -> code.castore();
-                    case "S" -> code.sastore();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.iastore();
+                    case TypeConversionUtils.ABBR_LONG -> code.lastore();
+                    case TypeConversionUtils.ABBR_FLOAT -> code.fastore();
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.dastore();
+                    case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.bastore();
+                    case TypeConversionUtils.ABBR_CHARACTER -> code.castore();
+                    case TypeConversionUtils.ABBR_SHORT -> code.sastore();
                     default -> code.aastore();
                 }
                 return;
@@ -581,10 +597,12 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 // Compound assignment: x += value, x -= value, etc.
                 // Load current value of variable
                 switch (varType) {
-                    case "I", "Z", "B", "C", "S" -> code.iload(var.index());
-                    case "J" -> code.lload(var.index());
-                    case "F" -> code.fload(var.index());
-                    case "D" -> code.dload(var.index());
+                    case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN,
+                         TypeConversionUtils.ABBR_BYTE, TypeConversionUtils.ABBR_CHARACTER,
+                         TypeConversionUtils.ABBR_SHORT -> code.iload(var.index());
+                    case TypeConversionUtils.ABBR_LONG -> code.lload(var.index());
+                    case TypeConversionUtils.ABBR_FLOAT -> code.fload(var.index());
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.dload(var.index());
                     default -> code.aload(var.index());
                 }
 
@@ -595,16 +613,16 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
 
                 // Special handling for String += (need to convert value to String)
-                if ("Ljava/lang/String;".equals(varType) && op == Swc4jAstAssignOp.AddAssign) {
+                if (TypeConversionUtils.LJAVA_LANG_STRING.equals(varType) && op == Swc4jAstAssignOp.AddAssign) {
                     // Convert value to String using String.valueOf() if it's not already a String
-                    if (!"Ljava/lang/String;".equals(valueType)) {
+                    if (!TypeConversionUtils.LJAVA_LANG_STRING.equals(valueType)) {
                         String valueOfDescriptor = switch (valueType) {
-                            case "I" -> "(I)Ljava/lang/String;";
-                            case "J" -> "(J)Ljava/lang/String;";
-                            case "F" -> "(F)Ljava/lang/String;";
-                            case "D" -> "(D)Ljava/lang/String;";
-                            case "Z" -> "(Z)Ljava/lang/String;";
-                            case "C" -> "(C)Ljava/lang/String;";
+                            case TypeConversionUtils.ABBR_INTEGER -> "(I)Ljava/lang/String;";
+                            case TypeConversionUtils.ABBR_LONG -> "(J)Ljava/lang/String;";
+                            case TypeConversionUtils.ABBR_FLOAT -> "(F)Ljava/lang/String;";
+                            case TypeConversionUtils.ABBR_DOUBLE -> "(D)Ljava/lang/String;";
+                            case TypeConversionUtils.ABBR_BOOLEAN -> "(Z)Ljava/lang/String;";
+                            case TypeConversionUtils.ABBR_CHARACTER -> "(C)Ljava/lang/String;";
                             default -> "(Ljava/lang/Object;)Ljava/lang/String;";
                         };
                         int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", valueOfDescriptor);
@@ -619,7 +637,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
             }
 
             // Duplicate the value on the stack before storing (assignment returns the value)
-            if ("D".equals(varType) || "J".equals(varType)) {
+            if (TypeConversionUtils.ABBR_DOUBLE.equals(varType) || TypeConversionUtils.ABBR_LONG.equals(varType)) {
                 code.dup2(); // For wide types (double, long)
             } else {
                 code.dup(); // For single-slot types
@@ -627,10 +645,11 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
             // Store into local variable
             switch (varType) {
-                case "I", "Z", "B", "C", "S" -> code.istore(var.index());
-                case "J" -> code.lstore(var.index());
-                case "F" -> code.fstore(var.index());
-                case "D" -> code.dstore(var.index());
+                case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE,
+                     TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_SHORT -> code.istore(var.index());
+                case TypeConversionUtils.ABBR_LONG -> code.lstore(var.index());
+                case TypeConversionUtils.ABBR_FLOAT -> code.fstore(var.index());
+                case TypeConversionUtils.ABBR_DOUBLE -> code.dstore(var.index());
                 default -> code.astore(var.index()); // Reference types
             }
             // The duplicated value is now on the stack as the assignment result
@@ -731,12 +750,12 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     // Get source list size
                     code.aload(tempListSlot);
                     code.invokeinterface(listSizeRef, 1);
-                    int sizeSlot = getOrAllocateTempSlot(context, "$restSize", "I");
+                    int sizeSlot = getOrAllocateTempSlot(context, "$restSize", TypeConversionUtils.ABBR_INTEGER);
                     code.istore(sizeSlot);
 
                     // Initialize loop counter at restStartIndex
                     code.iconst(restStartIndex);
-                    int iSlot = getOrAllocateTempSlot(context, "$restI", "I");
+                    int iSlot = getOrAllocateTempSlot(context, "$restI", TypeConversionUtils.ABBR_INTEGER);
                     code.istore(iSlot);
 
                     // Loop to copy remaining elements
@@ -813,13 +832,13 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 code.getfield(fieldRef);
                 code.iconst(0);
                 switch (varType) {
-                    case "I" -> code.iaload();
-                    case "J" -> code.laload();
-                    case "F" -> code.faload();
-                    case "D" -> code.daload();
-                    case "Z", "B" -> code.baload();
-                    case "C" -> code.caload();
-                    case "S" -> code.saload();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.iaload();
+                    case TypeConversionUtils.ABBR_LONG -> code.laload();
+                    case TypeConversionUtils.ABBR_FLOAT -> code.faload();
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.daload();
+                    case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.baload();
+                    case TypeConversionUtils.ABBR_CHARACTER -> code.caload();
+                    case TypeConversionUtils.ABBR_SHORT -> code.saload();
                     default -> code.aaload();
                 }
 
@@ -832,7 +851,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
             }
 
             // Duplicate for expression result, then store into holder array
-            if ("D".equals(varType) || "J".equals(varType)) {
+            if (TypeConversionUtils.ABBR_DOUBLE.equals(varType) || TypeConversionUtils.ABBR_LONG.equals(varType)) {
                 code.dup2_x2();
             } else {
                 code.dup_x2();
@@ -840,13 +859,13 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
             // Store into holder array
             switch (varType) {
-                case "I" -> code.iastore();
-                case "J" -> code.lastore();
-                case "F" -> code.fastore();
-                case "D" -> code.dastore();
-                case "Z", "B" -> code.bastore();
-                case "C" -> code.castore();
-                case "S" -> code.sastore();
+                case TypeConversionUtils.ABBR_INTEGER -> code.iastore();
+                case TypeConversionUtils.ABBR_LONG -> code.lastore();
+                case TypeConversionUtils.ABBR_FLOAT -> code.fastore();
+                case TypeConversionUtils.ABBR_DOUBLE -> code.dastore();
+                case TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE -> code.bastore();
+                case TypeConversionUtils.ABBR_CHARACTER -> code.castore();
+                case TypeConversionUtils.ABBR_SHORT -> code.sastore();
                 default -> code.aastore();
             }
         } else {
@@ -877,7 +896,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
             }
 
             // Duplicate for expression result, then store
-            if ("D".equals(varType) || "J".equals(varType)) {
+            if (TypeConversionUtils.ABBR_DOUBLE.equals(varType) || TypeConversionUtils.ABBR_LONG.equals(varType)) {
                 code.dup2_x1();
             } else {
                 code.dup_x1();
@@ -895,11 +914,11 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         switch (op) {
             case AddAssign -> {
                 switch (varType) {
-                    case "I" -> code.iadd();
-                    case "J" -> code.ladd();
-                    case "F" -> code.fadd();
-                    case "D" -> code.dadd();
-                    case "Ljava/lang/String;" -> {
+                    case TypeConversionUtils.ABBR_INTEGER -> code.iadd();
+                    case TypeConversionUtils.ABBR_LONG -> code.ladd();
+                    case TypeConversionUtils.ABBR_FLOAT -> code.fadd();
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.dadd();
+                    case TypeConversionUtils.LJAVA_LANG_STRING -> {
                         int concatMethod = cp.addMethodRef("java/lang/String", "concat", "(Ljava/lang/String;)Ljava/lang/String;");
                         code.invokevirtual(concatMethod);
                     }
@@ -907,70 +926,70 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
             }
             case SubAssign -> {
                 switch (varType) {
-                    case "I" -> code.isub();
-                    case "J" -> code.lsub();
-                    case "F" -> code.fsub();
-                    case "D" -> code.dsub();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.isub();
+                    case TypeConversionUtils.ABBR_LONG -> code.lsub();
+                    case TypeConversionUtils.ABBR_FLOAT -> code.fsub();
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.dsub();
                 }
             }
             case MulAssign -> {
                 switch (varType) {
-                    case "I" -> code.imul();
-                    case "J" -> code.lmul();
-                    case "F" -> code.fmul();
-                    case "D" -> code.dmul();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.imul();
+                    case TypeConversionUtils.ABBR_LONG -> code.lmul();
+                    case TypeConversionUtils.ABBR_FLOAT -> code.fmul();
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.dmul();
                 }
             }
             case DivAssign -> {
                 switch (varType) {
-                    case "I" -> code.idiv();
-                    case "J" -> code.ldiv();
-                    case "F" -> code.fdiv();
-                    case "D" -> code.ddiv();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.idiv();
+                    case TypeConversionUtils.ABBR_LONG -> code.ldiv();
+                    case TypeConversionUtils.ABBR_FLOAT -> code.fdiv();
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.ddiv();
                 }
             }
             case ModAssign -> {
                 switch (varType) {
-                    case "I" -> code.irem();
-                    case "J" -> code.lrem();
-                    case "F" -> code.frem();
-                    case "D" -> code.drem();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.irem();
+                    case TypeConversionUtils.ABBR_LONG -> code.lrem();
+                    case TypeConversionUtils.ABBR_FLOAT -> code.frem();
+                    case TypeConversionUtils.ABBR_DOUBLE -> code.drem();
                 }
             }
             case BitAndAssign -> {
                 switch (varType) {
-                    case "I" -> code.iand();
-                    case "J" -> code.land();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.iand();
+                    case TypeConversionUtils.ABBR_LONG -> code.land();
                 }
             }
             case BitOrAssign -> {
                 switch (varType) {
-                    case "I" -> code.ior();
-                    case "J" -> code.lor();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.ior();
+                    case TypeConversionUtils.ABBR_LONG -> code.lor();
                 }
             }
             case BitXorAssign -> {
                 switch (varType) {
-                    case "I" -> code.ixor();
-                    case "J" -> code.lxor();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.ixor();
+                    case TypeConversionUtils.ABBR_LONG -> code.lxor();
                 }
             }
             case LShiftAssign -> {
                 switch (varType) {
-                    case "I" -> code.ishl();
-                    case "J" -> code.lshl();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.ishl();
+                    case TypeConversionUtils.ABBR_LONG -> code.lshl();
                 }
             }
             case RShiftAssign -> {
                 switch (varType) {
-                    case "I" -> code.ishr();
-                    case "J" -> code.lshr();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.ishr();
+                    case TypeConversionUtils.ABBR_LONG -> code.lshr();
                 }
             }
             case ZeroFillRShiftAssign -> {
                 switch (varType) {
-                    case "I" -> code.iushr();
-                    case "J" -> code.lushr();
+                    case TypeConversionUtils.ABBR_INTEGER -> code.iushr();
+                    case TypeConversionUtils.ABBR_LONG -> code.lushr();
                 }
             }
             default -> {
@@ -1111,19 +1130,32 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         code.aload(tempMapSlot);
     }
 
-    private String extractSuperPropertyName(
-            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
-        if (superPropExpr.getProp() instanceof Swc4jAstIdentName identName) {
-            return identName.getSym();
+    private void generateStringValueOf(CodeBuilder code, ClassWriter classWriter, String valueType) {
+        var cp = classWriter.getConstantPool();
+        String descriptor = switch (valueType) {
+            case TypeConversionUtils.ABBR_INTEGER -> "(I)Ljava/lang/String;";
+            case TypeConversionUtils.ABBR_LONG -> "(J)Ljava/lang/String;";
+            case TypeConversionUtils.ABBR_FLOAT -> "(F)Ljava/lang/String;";
+            case TypeConversionUtils.ABBR_DOUBLE -> "(D)Ljava/lang/String;";
+            case TypeConversionUtils.ABBR_BOOLEAN -> "(Z)Ljava/lang/String;";
+            case TypeConversionUtils.ABBR_CHARACTER -> "(C)Ljava/lang/String;";
+            case TypeConversionUtils.ABBR_BYTE -> "(B)Ljava/lang/String;";
+            case TypeConversionUtils.ABBR_SHORT -> "(S)Ljava/lang/String;";
+            default -> "(Ljava/lang/Object;)Ljava/lang/String;";
+        };
+        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", descriptor);
+        code.invokestatic(valueOfRef);
+    }
+
+    /**
+     * Get or allocate a temp variable slot.
+     */
+    private int getOrAllocateTempSlot(CompilationContext context, String name, String type) {
+        LocalVariable existing = context.getLocalVariableTable().getVariable(name);
+        if (existing != null) {
+            return existing.index();
         }
-        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp
-                && computedProp.getExpr() instanceof Swc4jAstStr str) {
-            return str.getValue();
-        }
-        throw new Swc4jByteCodeCompilerException(
-                getSourceCode(),
-                superPropExpr,
-                "Computed super property expressions not yet supported");
+        return context.getLocalVariableTable().allocateVariable(name, type);
     }
 
     private void handleSuperPropertyAssignment(
@@ -1173,7 +1205,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         String valueType = compiler.getTypeResolver().inferTypeFromExpr(assignExpr.getRight());
         coerceAssignmentValue(code, classWriter, assignExpr, valueType, fieldDescriptor);
 
-        if ("D".equals(fieldDescriptor) || "J".equals(fieldDescriptor)) {
+        if (TypeConversionUtils.ABBR_DOUBLE.equals(fieldDescriptor) || TypeConversionUtils.ABBR_LONG.equals(fieldDescriptor)) {
             code.dup2_x1();
         } else {
             code.dup_x1();
@@ -1183,32 +1215,12 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         code.putfield(fieldRef);
     }
 
-    private void generateStringValueOf(CodeBuilder code, ClassWriter classWriter, String valueType) {
-        var cp = classWriter.getConstantPool();
-        String descriptor = switch (valueType) {
-            case "I" -> "(I)Ljava/lang/String;";
-            case "J" -> "(J)Ljava/lang/String;";
-            case "F" -> "(F)Ljava/lang/String;";
-            case "D" -> "(D)Ljava/lang/String;";
-            case "Z" -> "(Z)Ljava/lang/String;";
-            case "C" -> "(C)Ljava/lang/String;";
-            case "B" -> "(B)Ljava/lang/String;";
-            case "S" -> "(S)Ljava/lang/String;";
-            default -> "(Ljava/lang/Object;)Ljava/lang/String;";
-        };
-        int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf", descriptor);
-        code.invokestatic(valueOfRef);
-    }
-
-    /**
-     * Get or allocate a temp variable slot.
-     */
-    private int getOrAllocateTempSlot(CompilationContext context, String name, String type) {
-        LocalVariable existing = context.getLocalVariableTable().getVariable(name);
-        if (existing != null) {
-            return existing.index();
+    private boolean isWrapperType(String type) {
+        if (type == null) {
+            return false;
         }
-        return context.getLocalVariableTable().allocateVariable(name, type);
+        String primitive = TypeConversionUtils.getPrimitiveType(type);
+        return !type.equals(primitive) && TypeConversionUtils.isPrimitiveType(primitive);
     }
 
     private FieldLookupResult lookupFieldInHierarchy(JavaTypeInfo typeInfo, String fieldName) {
@@ -1248,14 +1260,6 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
             typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
         }
         return typeInfo;
-    }
-
-    private boolean isWrapperType(String type) {
-        if (type == null) {
-            return false;
-        }
-        String primitive = TypeConversionUtils.getPrimitiveType(type);
-        return !type.equals(primitive) && TypeConversionUtils.isPrimitiveType(primitive);
     }
 
     private record FieldLookupResult(FieldInfo fieldInfo, String ownerInternalName) {

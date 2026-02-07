@@ -55,8 +55,8 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
         String primitiveType = TypeConversionUtils.getPrimitiveType(fromType);
 
         // Convert to long first if needed
-        if (!"J".equals(primitiveType)) {
-            TypeConversionUtils.convertPrimitiveType(code, primitiveType, "J");
+        if (!TypeConversionUtils.ABBR_LONG.equals(primitiveType)) {
+            TypeConversionUtils.convertPrimitiveType(code, primitiveType, TypeConversionUtils.ABBR_LONG);
         }
 
         // Call BigInteger.valueOf(long)
@@ -80,7 +80,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
         }
 
         // Check for String type
-        if ("Ljava/lang/String;".equals(typeDescriptor)) {
+        if (TypeConversionUtils.LJAVA_LANG_STRING.equals(typeDescriptor)) {
             return InContainerType.STRING;
         }
 
@@ -142,14 +142,14 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 // Check if this is string concatenation
                 // Treat Object + anything or anything + Object as string concatenation
                 // (JavaScript semantics: + operator with non-numeric types converts to string)
-                if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)
-                        || "Ljava/lang/Object;".equals(leftType) || "Ljava/lang/Object;".equals(rightType)) {
+                if (TypeConversionUtils.LJAVA_LANG_STRING.equals(leftType) || TypeConversionUtils.LJAVA_LANG_STRING.equals(rightType)
+                        || TypeConversionUtils.LJAVA_LANG_OBJECT.equals(leftType) || TypeConversionUtils.LJAVA_LANG_OBJECT.equals(rightType)) {
                     StringApiUtils.generateConcat(
                             getSourceCode(),
                             compiler,
@@ -158,10 +158,10 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                             binExpr.getLeft(), binExpr.getRight(),
                             leftType,
                             rightType);
-                    resultType = "Ljava/lang/String;";
+                    resultType = TypeConversionUtils.LJAVA_LANG_STRING;
                 } else if (isBigInteger(leftType) || isBigInteger(rightType)) {
                     // BigInteger addition
-                    resultType = "Ljava/math/BigInteger;";
+                    resultType = TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
 
                     // Generate left operand
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
@@ -196,10 +196,10 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                     // Generate appropriate add instruction based on result type
                     switch (resultType) {
-                        case "I" -> code.iadd();
-                        case "J" -> code.ladd();
-                        case "F" -> code.fadd();
-                        case "D" -> code.dadd();
+                        case TypeConversionUtils.ABBR_INTEGER -> code.iadd();
+                        case TypeConversionUtils.ABBR_LONG -> code.ladd();
+                        case TypeConversionUtils.ABBR_FLOAT -> code.fadd();
+                        case TypeConversionUtils.ABBR_DOUBLE -> code.dadd();
                     }
                 }
             }
@@ -207,12 +207,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
                     // BigInteger subtraction
-                    resultType = "Ljava/math/BigInteger;";
+                    resultType = TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
 
                     // Generate left operand
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
@@ -247,10 +247,10 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                     // Generate appropriate sub instruction based on result type
                     switch (resultType) {
-                        case "I" -> code.isub();
-                        case "J" -> code.lsub();
-                        case "F" -> code.fsub();
-                        case "D" -> code.dsub();
+                        case TypeConversionUtils.ABBR_INTEGER -> code.isub();
+                        case TypeConversionUtils.ABBR_LONG -> code.lsub();
+                        case TypeConversionUtils.ABBR_FLOAT -> code.fsub();
+                        case TypeConversionUtils.ABBR_DOUBLE -> code.dsub();
                     }
                 }
             }
@@ -258,12 +258,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
                     // BigInteger multiplication
-                    resultType = "Ljava/math/BigInteger;";
+                    resultType = TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
 
                     // Generate left operand
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
@@ -298,10 +298,10 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                     // Generate appropriate mul instruction based on result type
                     switch (resultType) {
-                        case "I" -> code.imul();
-                        case "J" -> code.lmul();
-                        case "F" -> code.fmul();
-                        case "D" -> code.dmul();
+                        case TypeConversionUtils.ABBR_INTEGER -> code.imul();
+                        case TypeConversionUtils.ABBR_LONG -> code.lmul();
+                        case TypeConversionUtils.ABBR_FLOAT -> code.fmul();
+                        case TypeConversionUtils.ABBR_DOUBLE -> code.dmul();
                     }
                 }
             }
@@ -309,12 +309,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
                     // BigInteger division
-                    resultType = "Ljava/math/BigInteger;";
+                    resultType = TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
 
                     // Generate left operand
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
@@ -349,10 +349,10 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                     // Generate appropriate div instruction based on result type
                     switch (resultType) {
-                        case "I" -> code.idiv();
-                        case "J" -> code.ldiv();
-                        case "F" -> code.fdiv();
-                        case "D" -> code.ddiv();
+                        case TypeConversionUtils.ABBR_INTEGER -> code.idiv();
+                        case TypeConversionUtils.ABBR_LONG -> code.ldiv();
+                        case TypeConversionUtils.ABBR_FLOAT -> code.fdiv();
+                        case TypeConversionUtils.ABBR_DOUBLE -> code.ddiv();
                     }
                 }
             }
@@ -360,12 +360,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
                     // BigInteger modulo
-                    resultType = "Ljava/math/BigInteger;";
+                    resultType = TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
 
                     // Generate left operand
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
@@ -400,10 +400,10 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                     // Generate appropriate rem instruction based on result type
                     switch (resultType) {
-                        case "I" -> code.irem();
-                        case "J" -> code.lrem();
-                        case "F" -> code.frem();
-                        case "D" -> code.drem();
+                        case TypeConversionUtils.ABBR_INTEGER -> code.irem();
+                        case TypeConversionUtils.ABBR_LONG -> code.lrem();
+                        case TypeConversionUtils.ABBR_FLOAT -> code.frem();
+                        case TypeConversionUtils.ABBR_DOUBLE -> code.drem();
                     }
                 }
             }
@@ -411,12 +411,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 if (isBigInteger(leftType)) {
                     // BigInteger exponentiation
-                    resultType = "Ljava/math/BigInteger;";
+                    resultType = TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
 
                     // Generate left operand (base)
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
@@ -429,24 +429,24 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         code.invokevirtual(intValueRef);
                     } else {
                         TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
-                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), TypeConversionUtils.ABBR_INTEGER);
                     }
 
                     // Call BigInteger.pow(int)
                     int powRef = cp.addMethodRef("java/math/BigInteger", "pow", "(I)Ljava/math/BigInteger;");
                     code.invokevirtual(powRef);
                 } else {
-                    resultType = "D"; // Math.pow returns double
+                    resultType = TypeConversionUtils.ABBR_DOUBLE; // Math.pow returns double
 
                     // Generate left operand (base) and convert to double
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
                     TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
-                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), "D");
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), TypeConversionUtils.ABBR_DOUBLE);
 
                     // Generate right operand (exponent) and convert to double
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
                     TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
-                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "D");
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), TypeConversionUtils.ABBR_DOUBLE);
 
                     // Call Math.pow(double, double)
                     int mathPowRef = cp.addMethodRef("java/lang/Math", "pow", "(DD)D");
@@ -457,12 +457,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 if (isBigInteger(leftType)) {
                     // BigInteger left shift
-                    resultType = "Ljava/math/BigInteger;";
+                    resultType = TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
 
                     // Generate left operand
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
@@ -475,7 +475,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         code.invokevirtual(intValueRef);
                     } else {
                         TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
-                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), TypeConversionUtils.ABBR_INTEGER);
                     }
 
                     // Call BigInteger.shiftLeft(int)
@@ -493,12 +493,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     // Generate right operand (shift amount) and convert to int
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
                     TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
-                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), TypeConversionUtils.ABBR_INTEGER);
 
                     // Generate appropriate shift instruction based on result type
                     switch (resultType) {
-                        case "I" -> code.ishl();
-                        case "J" -> code.lshl();
+                        case TypeConversionUtils.ABBR_INTEGER -> code.ishl();
+                        case TypeConversionUtils.ABBR_LONG -> code.lshl();
                         default -> {
                             // For other types (byte, short, char, float, double), convert to int first
                             // This matches JavaScript ToInt32 semantics
@@ -511,12 +511,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 if (isBigInteger(leftType)) {
                     // BigInteger right shift
-                    resultType = "Ljava/math/BigInteger;";
+                    resultType = TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
 
                     // Generate left operand
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
@@ -529,7 +529,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         code.invokevirtual(intValueRef);
                     } else {
                         TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
-                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), TypeConversionUtils.ABBR_INTEGER);
                     }
 
                     // Call BigInteger.shiftRight(int)
@@ -547,12 +547,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     // Generate right operand (shift amount) and convert to int
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
                     TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
-                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), TypeConversionUtils.ABBR_INTEGER);
 
                     // Generate appropriate shift instruction based on result type
                     switch (resultType) {
-                        case "I" -> code.ishr();
-                        case "J" -> code.lshr();
+                        case TypeConversionUtils.ABBR_INTEGER -> code.ishr();
+                        case TypeConversionUtils.ABBR_LONG -> code.lshr();
                         default -> {
                             // For other types (byte, short, char, float, double), convert to int first
                             // This matches JavaScript ToInt32 semantics
@@ -565,13 +565,13 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 if (isBigInteger(leftType)) {
                     // BigInteger unsigned right shift - not directly supported
                     // Use shiftRight for signed shift (limitation documented)
-                    resultType = "Ljava/math/BigInteger;";
+                    resultType = TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
 
                     // Generate left operand
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
@@ -584,7 +584,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         code.invokevirtual(intValueRef);
                     } else {
                         TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
-                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), TypeConversionUtils.ABBR_INTEGER);
                     }
 
                     // Call BigInteger.shiftRight(int) - note: this is signed shift
@@ -602,12 +602,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     // Generate right operand (shift amount) and convert to int
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
                     TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
-                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), TypeConversionUtils.ABBR_INTEGER);
 
                     // Generate appropriate unsigned shift instruction based on result type
                     switch (resultType) {
-                        case "I" -> code.iushr();
-                        case "J" -> code.lushr();
+                        case TypeConversionUtils.ABBR_INTEGER -> code.iushr();
+                        case TypeConversionUtils.ABBR_LONG -> code.lushr();
                         default -> {
                             // For other types (byte, short, char, float, double), convert to int first
                             // This matches JavaScript ToInt32 semantics
@@ -620,12 +620,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
                     // BigInteger bitwise AND
-                    resultType = "Ljava/math/BigInteger;";
+                    resultType = TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
 
                     // Generate left operand
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
@@ -660,8 +660,8 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                     // Generate appropriate bitwise AND instruction based on result type
                     switch (resultType) {
-                        case "I" -> code.iand();
-                        case "J" -> code.land();
+                        case TypeConversionUtils.ABBR_INTEGER -> code.iand();
+                        case TypeConversionUtils.ABBR_LONG -> code.land();
                     }
                 }
             }
@@ -669,12 +669,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
                     // BigInteger bitwise OR
-                    resultType = "Ljava/math/BigInteger;";
+                    resultType = TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
 
                     // Generate left operand
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
@@ -709,8 +709,8 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                     // Generate appropriate bitwise OR instruction based on result type
                     switch (resultType) {
-                        case "I" -> code.ior();
-                        case "J" -> code.lor();
+                        case TypeConversionUtils.ABBR_INTEGER -> code.ior();
+                        case TypeConversionUtils.ABBR_LONG -> code.lor();
                     }
                 }
             }
@@ -718,12 +718,12 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
                     // BigInteger bitwise XOR
-                    resultType = "Ljava/math/BigInteger;";
+                    resultType = TypeConversionUtils.LJAVA_MATH_BIGINTEGER;
 
                     // Generate left operand
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
@@ -758,8 +758,8 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                     // Generate appropriate bitwise XOR instruction based on result type
                     switch (resultType) {
-                        case "I" -> code.ixor();
-                        case "J" -> code.lxor();
+                        case TypeConversionUtils.ABBR_INTEGER -> code.ixor();
+                        case TypeConversionUtils.ABBR_LONG -> code.lxor();
                     }
                 }
             }
@@ -767,11 +767,11 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 // Result type for comparison is always boolean
-                resultType = "Z";
+                resultType = TypeConversionUtils.ABBR_BOOLEAN;
 
                 // Check for BigInteger comparison
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
@@ -802,10 +802,10 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     // Check if both are primitive types (NOT wrappers - those use Objects.equals)
                     boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
                             rightType.equals(rightPrimitive) &&
-                            (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
-                                    leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
-                                    leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
-                                    leftPrimitive.equals("C") || leftPrimitive.equals("Z"));
+                            (leftPrimitive.equals(TypeConversionUtils.ABBR_INTEGER) || leftPrimitive.equals(TypeConversionUtils.ABBR_LONG) ||
+                                    leftPrimitive.equals(TypeConversionUtils.ABBR_FLOAT) || leftPrimitive.equals(TypeConversionUtils.ABBR_DOUBLE) ||
+                                    leftPrimitive.equals(TypeConversionUtils.ABBR_BYTE) || leftPrimitive.equals(TypeConversionUtils.ABBR_SHORT) ||
+                                    leftPrimitive.equals(TypeConversionUtils.ABBR_CHARACTER) || leftPrimitive.equals(TypeConversionUtils.ABBR_BOOLEAN));
 
                     if (isPrimitiveComparison) {
                         // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
@@ -830,7 +830,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         // Use direct bytecode comparison instructions
                         // Pattern: if not equal, jump to iconst_0, else fall through to iconst_1
                         switch (comparisonType) {
-                            case "I", "Z" -> {
+                            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN -> {
                                 // int/boolean comparison: use if_icmpne (boolean values are represented as int on stack)
                                 // if a != b, jump to push 0, else push 1
                                 code.if_icmpne(7); // if not equal, jump to iconst_0
@@ -838,7 +838,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                                 code.gotoLabel(4); // jump over iconst_0
                                 code.iconst(0);    // not equal: push 0
                             }
-                            case "J" -> {
+                            case TypeConversionUtils.ABBR_LONG -> {
                                 // long comparison: use lcmp then ifne
                                 code.lcmp();       // compare longs, result is 0 if equal
                                 code.ifne(7);      // if non-zero (not equal), jump to iconst_0
@@ -846,7 +846,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                                 code.gotoLabel(4); // jump over iconst_0
                                 code.iconst(0);    // not equal: push 0
                             }
-                            case "F" -> {
+                            case TypeConversionUtils.ABBR_FLOAT -> {
                                 // float comparison: use fcmpl then ifne
                                 code.fcmpl();      // compare floats, result is 0 if equal
                                 code.ifne(7);      // if non-zero (not equal), jump to iconst_0
@@ -854,7 +854,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                                 code.gotoLabel(4); // jump over iconst_0
                                 code.iconst(0);    // not equal: push 0
                             }
-                            case "D" -> {
+                            case TypeConversionUtils.ABBR_DOUBLE -> {
                                 // double comparison: use dcmpl then ifne
                                 code.dcmpl();      // compare doubles, result is 0 if equal
                                 code.ifne(7);      // if non-zero (not equal), jump to iconst_0
@@ -887,11 +887,11 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 // Result type for comparison is always boolean
-                resultType = "Z";
+                resultType = TypeConversionUtils.ABBR_BOOLEAN;
 
                 // Check for BigInteger comparison
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
@@ -925,10 +925,10 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     // Check if both are primitive types (NOT wrappers - those use Objects.equals)
                     boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
                             rightType.equals(rightPrimitive) &&
-                            (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
-                                    leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
-                                    leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
-                                    leftPrimitive.equals("C") || leftPrimitive.equals("Z"));
+                            (leftPrimitive.equals(TypeConversionUtils.ABBR_INTEGER) || leftPrimitive.equals(TypeConversionUtils.ABBR_LONG) ||
+                                    leftPrimitive.equals(TypeConversionUtils.ABBR_FLOAT) || leftPrimitive.equals(TypeConversionUtils.ABBR_DOUBLE) ||
+                                    leftPrimitive.equals(TypeConversionUtils.ABBR_BYTE) || leftPrimitive.equals(TypeConversionUtils.ABBR_SHORT) ||
+                                    leftPrimitive.equals(TypeConversionUtils.ABBR_CHARACTER) || leftPrimitive.equals(TypeConversionUtils.ABBR_BOOLEAN));
 
                     if (isPrimitiveComparison) {
                         // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
@@ -953,7 +953,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         // Use direct bytecode comparison instructions (inverted logic from EqEq)
                         // Pattern: if equal, jump to iconst_0, else fall through to iconst_1
                         switch (comparisonType) {
-                            case "I", "Z" -> {
+                            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN -> {
                                 // int/boolean comparison: use if_icmpeq (boolean values are represented as int on stack)
                                 // if a == b, jump to push 0, else push 1
                                 code.if_icmpeq(7); // if equal, jump to iconst_0
@@ -961,7 +961,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                                 code.gotoLabel(4); // jump over iconst_0
                                 code.iconst(0);    // equal: push 0
                             }
-                            case "J" -> {
+                            case TypeConversionUtils.ABBR_LONG -> {
                                 // long comparison: use lcmp then ifeq (opposite of ifne)
                                 code.lcmp();       // compare longs, result is 0 if equal
                                 code.ifeq(7);      // if zero (equal), jump to iconst_0
@@ -969,7 +969,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                                 code.gotoLabel(4); // jump over iconst_0
                                 code.iconst(0);    // equal: push 0
                             }
-                            case "F" -> {
+                            case TypeConversionUtils.ABBR_FLOAT -> {
                                 // float comparison: use fcmpl then ifeq (opposite of ifne)
                                 code.fcmpl();      // compare floats, result is 0 if equal
                                 code.ifeq(7);      // if zero (equal), jump to iconst_0
@@ -977,7 +977,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                                 code.gotoLabel(4); // jump over iconst_0
                                 code.iconst(0);    // equal: push 0
                             }
-                            case "D" -> {
+                            case TypeConversionUtils.ABBR_DOUBLE -> {
                                 // double comparison: use dcmpl then ifeq (opposite of ifne)
                                 code.dcmpl();      // compare doubles, result is 0 if equal
                                 code.ifeq(7);      // if zero (equal), jump to iconst_0
@@ -1015,11 +1015,11 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 // Result type for comparison is always boolean
-                resultType = "Z";
+                resultType = TypeConversionUtils.ABBR_BOOLEAN;
 
                 // Check for BigInteger comparison
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
@@ -1065,10 +1065,10 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     // Check if both are primitive types (NOT wrappers)
                     boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
                             rightType.equals(rightPrimitive) &&
-                            (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
-                                    leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
-                                    leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
-                                    leftPrimitive.equals("C"));
+                            (leftPrimitive.equals(TypeConversionUtils.ABBR_INTEGER) || leftPrimitive.equals(TypeConversionUtils.ABBR_LONG) ||
+                                    leftPrimitive.equals(TypeConversionUtils.ABBR_FLOAT) || leftPrimitive.equals(TypeConversionUtils.ABBR_DOUBLE) ||
+                                    leftPrimitive.equals(TypeConversionUtils.ABBR_BYTE) || leftPrimitive.equals(TypeConversionUtils.ABBR_SHORT) ||
+                                    leftPrimitive.equals(TypeConversionUtils.ABBR_CHARACTER));
 
                     if (isPrimitiveComparison) {
                         // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
@@ -1094,7 +1094,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         // Pattern: if condition is FALSE, jump to iconst_0, else fall through to iconst_1
                         boolean isLtEq = binExpr.getOp() == Swc4jAstBinaryOp.LtEq;
                         switch (comparisonType) {
-                            case "I", "Z" -> {
+                            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN -> {
                                 // int/boolean comparison: use if_icmpge/if_icmpgt (boolean values are represented as int on stack)
                                 if (isLtEq) {
                                     code.if_icmpgt(7); // if a > b (NOT <=), jump to iconst_0
@@ -1105,7 +1105,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                                 code.gotoLabel(4); // jump over iconst_0
                                 code.iconst(0);    // condition false: push 0
                             }
-                            case "J" -> {
+                            case TypeConversionUtils.ABBR_LONG -> {
                                 // long comparison: use lcmp then ifge or ifgt
                                 code.lcmp();       // compare longs, result is -1, 0, or 1
                                 if (isLtEq) {
@@ -1117,7 +1117,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                                 code.gotoLabel(4); // jump over iconst_0
                                 code.iconst(0);    // condition false: push 0
                             }
-                            case "F" -> {
+                            case TypeConversionUtils.ABBR_FLOAT -> {
                                 // float comparison: use fcmpl then ifge or ifgt
                                 code.fcmpl();      // compare floats, result is -1, 0, or 1 (NaN -> 1)
                                 if (isLtEq) {
@@ -1129,7 +1129,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                                 code.gotoLabel(4); // jump over iconst_0
                                 code.iconst(0);    // condition false: push 0
                             }
-                            case "D" -> {
+                            case TypeConversionUtils.ABBR_DOUBLE -> {
                                 // double comparison: use dcmpl then ifge or ifgt
                                 code.dcmpl();      // compare doubles, result is -1, 0, or 1 (NaN -> 1)
                                 if (isLtEq) {
@@ -1154,11 +1154,11 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
                 // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 // Result type for comparison is always boolean
-                resultType = "Z";
+                resultType = TypeConversionUtils.ABBR_BOOLEAN;
 
                 // Check for BigInteger comparison
                 if (isBigInteger(leftType) || isBigInteger(rightType)) {
@@ -1204,10 +1204,10 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     // Check if both are primitive types (NOT wrappers)
                     boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
                             rightType.equals(rightPrimitive) &&
-                            (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
-                                    leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
-                                    leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
-                                    leftPrimitive.equals("C"));
+                            (leftPrimitive.equals(TypeConversionUtils.ABBR_INTEGER) || leftPrimitive.equals(TypeConversionUtils.ABBR_LONG) ||
+                                    leftPrimitive.equals(TypeConversionUtils.ABBR_FLOAT) || leftPrimitive.equals(TypeConversionUtils.ABBR_DOUBLE) ||
+                                    leftPrimitive.equals(TypeConversionUtils.ABBR_BYTE) || leftPrimitive.equals(TypeConversionUtils.ABBR_SHORT) ||
+                                    leftPrimitive.equals(TypeConversionUtils.ABBR_CHARACTER));
 
                     if (isPrimitiveComparison) {
                         // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
@@ -1233,7 +1233,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         // Pattern: if condition is FALSE, jump to iconst_0, else fall through to iconst_1
                         boolean isGtEq = binExpr.getOp() == Swc4jAstBinaryOp.GtEq;
                         switch (comparisonType) {
-                            case "I", "Z" -> {
+                            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN -> {
                                 // int/boolean comparison: use if_icmple/if_icmplt (boolean values are represented as int on stack)
                                 if (isGtEq) {
                                     code.if_icmplt(7); // if a < b (NOT >=), jump to iconst_0
@@ -1244,7 +1244,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                                 code.gotoLabel(4); // jump over iconst_0
                                 code.iconst(0);    // condition false: push 0
                             }
-                            case "J" -> {
+                            case TypeConversionUtils.ABBR_LONG -> {
                                 // long comparison: use lcmp then iflt or ifle
                                 code.lcmp();       // compare longs, result is -1, 0, or 1
                                 if (isGtEq) {
@@ -1256,7 +1256,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                                 code.gotoLabel(4); // jump over iconst_0
                                 code.iconst(0);    // condition false: push 0
                             }
-                            case "F" -> {
+                            case TypeConversionUtils.ABBR_FLOAT -> {
                                 // float comparison: use fcmpl then iflt or ifle
                                 code.fcmpl();      // compare floats, result is -1, 0, or 1 (NaN -> 1)
                                 if (isGtEq) {
@@ -1268,7 +1268,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                                 code.gotoLabel(4); // jump over iconst_0
                                 code.iconst(0);    // condition false: push 0
                             }
-                            case "D" -> {
+                            case TypeConversionUtils.ABBR_DOUBLE -> {
                                 // double comparison: use dcmpl then iflt or ifle
                                 code.dcmpl();      // compare doubles, result is -1, 0, or 1 (NaN -> 1)
                                 if (isGtEq) {
@@ -1295,7 +1295,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 // If left is true, return the right operand value
 
                 // Result type is always boolean
-                resultType = "Z";
+                resultType = TypeConversionUtils.ABBR_BOOLEAN;
 
                 // Get types of operands
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
@@ -1353,7 +1353,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 // The right operand must be an identifier (class name)
 
                 // Result type is always boolean
-                resultType = "Z";
+                resultType = TypeConversionUtils.ABBR_BOOLEAN;
 
                 // Get the class name from the right operand
                 ISwc4jAstExpr rightExpr = binExpr.getRight();
@@ -1378,7 +1378,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
             case In -> {
                 // In operator checks if a key exists in a container (Map, List, or String)
                 // Result type is always boolean
-                resultType = "Z";
+                resultType = TypeConversionUtils.ABBR_BOOLEAN;
 
                 // Determine the container type from the right operand
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
@@ -1392,7 +1392,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
 
                         // Convert to String if not already a String
-                        if (!"Ljava/lang/String;".equals(leftType)) {
+                        if (!TypeConversionUtils.LJAVA_LANG_STRING.equals(leftType)) {
                             int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf",
                                     "(Ljava/lang/Object;)Ljava/lang/String;");
                             code.invokestatic(valueOfRef);
@@ -1459,8 +1459,8 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
             case NullishCoalescing -> {
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
                 String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
+                if (leftType == null) leftType = TypeConversionUtils.LJAVA_LANG_OBJECT;
+                if (rightType == null) rightType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                 boolean leftPrimitive = TypeConversionUtils.isPrimitiveType(leftType);
                 boolean rightPrimitive = TypeConversionUtils.isPrimitiveType(rightType);
@@ -1471,7 +1471,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     TypeConversionUtils.unboxWrapperType(code, classWriter, leftType);
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
                 } else {
-                    resultType = "Ljava/lang/Object;";
+                    resultType = TypeConversionUtils.LJAVA_LANG_OBJECT;
 
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getLeft(), null);
                     if (leftPrimitive) {
@@ -1500,7 +1500,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                 // If left is false, evaluate and return the right operand value
 
                 // Result type is always boolean
-                resultType = "Z";
+                resultType = TypeConversionUtils.ABBR_BOOLEAN;
 
                 // Get types of operands
                 String leftType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getLeft());
@@ -1591,46 +1591,46 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
     private void generateConvertToIntForIndex(CodeBuilder code, ClassWriter classWriter, String leftType) {
         var cp = classWriter.getConstantPool();
         switch (leftType) {
-            case "I" -> {
+            case TypeConversionUtils.ABBR_INTEGER -> {
                 // Already int, no conversion needed
             }
-            case "J" -> {
+            case TypeConversionUtils.ABBR_LONG -> {
                 // long to int
                 code.l2i();
             }
-            case "F" -> {
+            case TypeConversionUtils.ABBR_FLOAT -> {
                 // float to int with whole number check
                 generateFloatToIntWithWholeCheck(code, classWriter);
             }
-            case "D" -> {
+            case TypeConversionUtils.ABBR_DOUBLE -> {
                 // double to int with whole number check
                 generateDoubleToIntWithWholeCheck(code, classWriter);
             }
-            case "B", "S", "C" -> {
+            case TypeConversionUtils.ABBR_BYTE, TypeConversionUtils.ABBR_SHORT, TypeConversionUtils.ABBR_CHARACTER -> {
                 // byte, short, char are already int-compatible on stack
             }
-            case "Ljava/lang/String;" -> {
+            case TypeConversionUtils.LJAVA_LANG_STRING -> {
                 // Safely parse string to int, returning MIN_VALUE for invalid formats
                 generateSafeStringToInt(code, classWriter);
             }
-            case "Ljava/lang/Integer;" -> {
+            case TypeConversionUtils.LJAVA_LANG_INTEGER -> {
                 // Unbox Integer to int
                 int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueRef);
             }
-            case "Ljava/lang/Long;" -> {
+            case TypeConversionUtils.LJAVA_LANG_LONG -> {
                 // Unbox Long to long, then convert to int
                 int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
                 code.invokevirtual(longValueRef);
                 code.l2i();
             }
-            case "Ljava/lang/Float;" -> {
+            case TypeConversionUtils.LJAVA_LANG_FLOAT -> {
                 // Unbox Float to float, then check for whole number and convert to int
                 int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
                 code.invokevirtual(floatValueRef);
                 generateFloatToIntWithWholeCheck(code, classWriter);
             }
-            case "Ljava/lang/Double;" -> {
+            case TypeConversionUtils.LJAVA_LANG_DOUBLE -> {
                 // Unbox Double to double, then check for whole number and convert to int
                 int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
                 code.invokevirtual(doubleValueRef);
@@ -1870,7 +1870,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
      * Check if a type is BigInteger.
      */
     private boolean isBigInteger(String type) {
-        return "Ljava/math/BigInteger;".equals(type);
+        return TypeConversionUtils.LJAVA_MATH_BIGINTEGER.equals(type);
     }
 
     /**
@@ -1881,8 +1881,8 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
     private boolean isNumberLiteralWithTypeHint(ISwc4jAstExpr expr, String targetType) {
         // Number literals are generated directly in the target type when a primitive type hint is given
         return expr instanceof Swc4jAstNumber &&
-                (targetType.equals("I") || targetType.equals("J") ||
-                        targetType.equals("F") || targetType.equals("D"));
+                (targetType.equals(TypeConversionUtils.ABBR_INTEGER) || targetType.equals(TypeConversionUtils.ABBR_LONG) ||
+                        targetType.equals(TypeConversionUtils.ABBR_FLOAT) || targetType.equals(TypeConversionUtils.ABBR_DOUBLE));
     }
 
     /**

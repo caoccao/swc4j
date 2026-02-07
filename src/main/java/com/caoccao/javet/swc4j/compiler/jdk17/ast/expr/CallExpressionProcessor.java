@@ -19,8 +19,8 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstTsInstantiation;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -70,11 +70,10 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
             Swc4jAstCallExpr callExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         var callee = callExpr.getCallee();
-        ISwc4jAst calleeAst = (ISwc4jAst) callee;
-        if (calleeAst instanceof Swc4jAstTsInstantiation) {
-            Swc4jAstTsInstantiation instantiation = (Swc4jAstTsInstantiation) calleeAst;
+        ISwc4jAst calleeAst = callee;
+        if (calleeAst instanceof Swc4jAstTsInstantiation instantiation) {
             if (instantiation.getExpr() instanceof ISwc4jAstCallee) {
-                ISwc4jAstCallee innerCallee = (ISwc4jAstCallee) instantiation.getExpr();
+                ISwc4jAstCallee innerCallee = instantiation.getExpr();
                 callExpr.setCallee(innerCallee);
                 callee = innerCallee;
             }

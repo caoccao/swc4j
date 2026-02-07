@@ -16,6 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.memory;
 
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+
 import java.util.*;
 
 /**
@@ -99,17 +101,17 @@ public final class ScopedJavaTypeRegistry {
      * @return the type descriptor
      */
     private String getDescriptor(Class<?> clazz) {
-        if (clazz == void.class) return "V";
-        if (clazz == boolean.class) return "Z";
-        if (clazz == byte.class) return "B";
-        if (clazz == char.class) return "C";
-        if (clazz == short.class) return "S";
-        if (clazz == int.class) return "I";
-        if (clazz == long.class) return "J";
-        if (clazz == float.class) return "F";
-        if (clazz == double.class) return "D";
+        if (clazz == void.class) return TypeConversionUtils.ABBR_VOID;
+        if (clazz == boolean.class) return TypeConversionUtils.ABBR_BOOLEAN;
+        if (clazz == byte.class) return TypeConversionUtils.ABBR_BYTE;
+        if (clazz == char.class) return TypeConversionUtils.ABBR_CHARACTER;
+        if (clazz == short.class) return TypeConversionUtils.ABBR_SHORT;
+        if (clazz == int.class) return TypeConversionUtils.ABBR_INTEGER;
+        if (clazz == long.class) return TypeConversionUtils.ABBR_LONG;
+        if (clazz == float.class) return TypeConversionUtils.ABBR_FLOAT;
+        if (clazz == double.class) return TypeConversionUtils.ABBR_DOUBLE;
         if (clazz.isArray()) {
-            return "[" + getDescriptor(clazz.getComponentType());
+            return TypeConversionUtils.ARRAY_PREFIX + getDescriptor(clazz.getComponentType());
         }
         return "L" + clazz.getName().replace('.', '/') + ";";
     }

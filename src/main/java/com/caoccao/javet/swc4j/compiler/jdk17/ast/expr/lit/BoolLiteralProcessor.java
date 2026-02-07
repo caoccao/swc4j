@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -57,7 +58,7 @@ public final class BoolLiteralProcessor extends BaseAstProcessor<Swc4jAstBool> {
         boolean value = bool.isValue();
         // Check if we need to box to Boolean
         if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && "Ljava/lang/Boolean;".equals(returnTypeInfo.descriptor())) {
+                && TypeConversionUtils.LJAVA_LANG_BOOLEAN.equals(returnTypeInfo.descriptor())) {
             // Box boolean to Boolean
             code.iconst(value ? 1 : 0);
             int valueOfRef = cp.addMethodRef("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");

@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -74,28 +75,28 @@ public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumbe
                 code.ldc2_w(longIndex);
             }
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && "Ljava/lang/Integer;".equals(returnTypeInfo.descriptor())) {
+                && TypeConversionUtils.LJAVA_LANG_INTEGER.equals(returnTypeInfo.descriptor())) {
             // Box integer to Integer
             int intValue = (int) value;
             code.iconst(intValue);
             int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && "Ljava/lang/Byte;".equals(returnTypeInfo.descriptor())) {
+                && TypeConversionUtils.LJAVA_LANG_BYTE.equals(returnTypeInfo.descriptor())) {
             // Box byte to Byte
             byte byteValue = (byte) value;
             code.iconst(byteValue);
             int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && "Ljava/lang/Short;".equals(returnTypeInfo.descriptor())) {
+                && TypeConversionUtils.LJAVA_LANG_SHORT.equals(returnTypeInfo.descriptor())) {
             // Box short to Short
             short shortValue = (short) value;
             code.iconst(shortValue);
             int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && "Ljava/lang/Long;".equals(returnTypeInfo.descriptor())) {
+                && TypeConversionUtils.LJAVA_LANG_LONG.equals(returnTypeInfo.descriptor())) {
             // Box long to Long
             long longValue = (long) value;
             if (longValue == 0L || longValue == 1L) {
@@ -107,7 +108,7 @@ public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumbe
             int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && "Ljava/lang/Float;".equals(returnTypeInfo.descriptor())) {
+                && TypeConversionUtils.LJAVA_LANG_FLOAT.equals(returnTypeInfo.descriptor())) {
             // Box float to Float
             float floatValue = (float) value;
             if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
@@ -119,7 +120,7 @@ public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumbe
             int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
             code.invokestatic(valueOfRef);
         } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
-                && "Ljava/lang/Double;".equals(returnTypeInfo.descriptor())) {
+                && TypeConversionUtils.LJAVA_LANG_DOUBLE.equals(returnTypeInfo.descriptor())) {
             // Box double to Double
             if (value == 0.0 || value == 1.0) {
                 code.dconst(value);

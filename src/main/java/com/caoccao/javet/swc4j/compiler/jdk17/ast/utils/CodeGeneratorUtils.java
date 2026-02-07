@@ -32,20 +32,20 @@ public final class CodeGeneratorUtils {
     /**
      * Creates a ReturnTypeInfo from a type descriptor string.
      *
-     * @param descriptor the type descriptor (e.g., "I", "Z", "Ljava/lang/String;")
+     * @param descriptor the type descriptor (e.g., TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.LJAVA_LANG_STRING)
      * @return the corresponding ReturnTypeInfo
      */
     public static ReturnTypeInfo createReturnTypeInfoFromDescriptor(String descriptor) {
         return switch (descriptor) {
-            case "I" -> new ReturnTypeInfo(ReturnType.INT, 1, null, null);
-            case "Z" -> new ReturnTypeInfo(ReturnType.BOOLEAN, 1, null, null);
-            case "B" -> new ReturnTypeInfo(ReturnType.BYTE, 1, null, null);
-            case "C" -> new ReturnTypeInfo(ReturnType.CHAR, 1, null, null);
-            case "S" -> new ReturnTypeInfo(ReturnType.SHORT, 1, null, null);
-            case "J" -> new ReturnTypeInfo(ReturnType.LONG, 2, null, null);
-            case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null, null);
-            case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null, null);
-            case "Ljava/lang/String;" -> new ReturnTypeInfo(ReturnType.STRING, 1, null, null);
+            case TypeConversionUtils.ABBR_INTEGER -> new ReturnTypeInfo(ReturnType.INT, 1, null, null);
+            case TypeConversionUtils.ABBR_BOOLEAN -> new ReturnTypeInfo(ReturnType.BOOLEAN, 1, null, null);
+            case TypeConversionUtils.ABBR_BYTE -> new ReturnTypeInfo(ReturnType.BYTE, 1, null, null);
+            case TypeConversionUtils.ABBR_CHARACTER -> new ReturnTypeInfo(ReturnType.CHAR, 1, null, null);
+            case TypeConversionUtils.ABBR_SHORT -> new ReturnTypeInfo(ReturnType.SHORT, 1, null, null);
+            case TypeConversionUtils.ABBR_LONG -> new ReturnTypeInfo(ReturnType.LONG, 2, null, null);
+            case TypeConversionUtils.ABBR_FLOAT -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null, null);
+            case TypeConversionUtils.ABBR_DOUBLE -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null, null);
+            case TypeConversionUtils.LJAVA_LANG_STRING -> new ReturnTypeInfo(ReturnType.STRING, 1, null, null);
             default -> new ReturnTypeInfo(ReturnType.OBJECT, 1, descriptor, null);
         };
     }
@@ -84,21 +84,22 @@ public final class CodeGeneratorUtils {
      * Converts a ReturnTypeInfo to its descriptor string.
      *
      * @param returnTypeInfo the return type information
-     * @return the descriptor string (e.g., "V", "I", "Ljava/lang/String;")
+     * @return the descriptor string (e.g., TypeConversionUtils.ABBR_VOID, TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.LJAVA_LANG_STRING)
      */
     public static String getReturnDescriptor(ReturnTypeInfo returnTypeInfo) {
         return switch (returnTypeInfo.type()) {
-            case VOID -> "V";
-            case INT -> "I";
-            case BOOLEAN -> "Z";
-            case BYTE -> "B";
-            case CHAR -> "C";
-            case SHORT -> "S";
-            case LONG -> "J";
-            case FLOAT -> "F";
-            case DOUBLE -> "D";
-            case STRING -> "Ljava/lang/String;";
-            case OBJECT -> returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : "Ljava/lang/Object;";
+            case VOID -> TypeConversionUtils.ABBR_VOID;
+            case INT -> TypeConversionUtils.ABBR_INTEGER;
+            case BOOLEAN -> TypeConversionUtils.ABBR_BOOLEAN;
+            case BYTE -> TypeConversionUtils.ABBR_BYTE;
+            case CHAR -> TypeConversionUtils.ABBR_CHARACTER;
+            case SHORT -> TypeConversionUtils.ABBR_SHORT;
+            case LONG -> TypeConversionUtils.ABBR_LONG;
+            case FLOAT -> TypeConversionUtils.ABBR_FLOAT;
+            case DOUBLE -> TypeConversionUtils.ABBR_DOUBLE;
+            case STRING -> TypeConversionUtils.LJAVA_LANG_STRING;
+            case OBJECT ->
+                    returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : TypeConversionUtils.LJAVA_LANG_OBJECT;
         };
     }
 
@@ -109,7 +110,7 @@ public final class CodeGeneratorUtils {
      * @return 2 for long/double, 1 for all other types
      */
     public static int getSlotSize(String type) {
-        return ("J".equals(type) || "D".equals(type)) ? 2 : 1;
+        return (TypeConversionUtils.ABBR_LONG.equals(type) || TypeConversionUtils.ABBR_DOUBLE.equals(type)) ? 2 : 1;
     }
 
     /**
@@ -142,10 +143,11 @@ public final class CodeGeneratorUtils {
      */
     public static void loadParameter(CodeBuilder code, int slot, String paramType) {
         switch (paramType) {
-            case "I", "Z", "B", "C", "S" -> code.iload(slot);
-            case "J" -> code.lload(slot);
-            case "F" -> code.fload(slot);
-            case "D" -> code.dload(slot);
+            case TypeConversionUtils.ABBR_INTEGER, TypeConversionUtils.ABBR_BOOLEAN, TypeConversionUtils.ABBR_BYTE,
+                 TypeConversionUtils.ABBR_CHARACTER, TypeConversionUtils.ABBR_SHORT -> code.iload(slot);
+            case TypeConversionUtils.ABBR_LONG -> code.lload(slot);
+            case TypeConversionUtils.ABBR_FLOAT -> code.fload(slot);
+            case TypeConversionUtils.ABBR_DOUBLE -> code.dload(slot);
             default -> code.aload(slot);
         }
     }

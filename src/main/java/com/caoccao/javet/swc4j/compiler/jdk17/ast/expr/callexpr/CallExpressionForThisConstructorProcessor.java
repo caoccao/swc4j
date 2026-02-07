@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -66,7 +67,7 @@ public final class CallExpressionForThisConstructorProcessor extends BaseAstProc
             compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
             String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
             if (argType == null) {
-                argType = "Ljava/lang/Object;";
+                argType = TypeConversionUtils.LJAVA_LANG_OBJECT;
             }
             paramDescriptors.append(argType);
         }

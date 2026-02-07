@@ -291,7 +291,7 @@ public final class ForStatementProcessor extends BaseAstProcessor<Swc4jAstForStm
         String rightType = compiler.getTypeResolver().inferTypeFromExpr(binExpr.getRight());
 
         // Only handle int comparisons for now (most common case)
-        if (!"I".equals(leftType) || !"I".equals(rightType)) {
+        if (!TypeConversionUtils.ABBR_INTEGER.equals(leftType) || !TypeConversionUtils.ABBR_INTEGER.equals(rightType)) {
             return false;
         }
 

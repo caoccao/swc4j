@@ -16,6 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+
 import java.util.*;
 
 /**
@@ -110,7 +112,7 @@ public class LocalVariableTable {
         scopes.get(scopes.size() - 1).put(name, var);
         allVariables.add(var);
         // Doubles and longs take 2 slots
-        nextIndex += (type.equals("D") || type.equals("J")) ? 2 : 1;
+        nextIndex += (type.equals(TypeConversionUtils.ABBR_DOUBLE) || type.equals(TypeConversionUtils.ABBR_LONG)) ? 2 : 1;
         return index;
     }
 

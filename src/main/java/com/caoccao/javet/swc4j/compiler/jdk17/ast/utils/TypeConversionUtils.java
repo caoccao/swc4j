@@ -25,9 +25,222 @@ import java.util.Set;
  * The type Type conversion utils.
  */
 public final class TypeConversionUtils {
-    private static final Set<String> INTEGER_PRIMITIVES = Set.of("I", "J", "B", "S", "C");
-    private static final Set<String> NUMERIC_PRIMITIVES = Set.of("I", "J", "F", "D", "B", "S", "C");
-    private static final Set<String> PRIMITIVE_TYPES = Set.of("I", "Z", "B", "C", "S", "J", "F", "D");
+    /**
+     * The constant ABBR_BOOLEAN.
+     */
+    public static final String ABBR_BOOLEAN = "Z";
+    /**
+     * The constant ABBR_BYTE.
+     */
+    public static final String ABBR_BYTE = "B";
+    /**
+     * The constant ABBR_CHARACTER.
+     */
+    public static final String ABBR_CHARACTER = "C";
+    /**
+     * The constant ABBR_DOUBLE.
+     */
+    public static final String ABBR_DOUBLE = "D";
+    /**
+     * The constant ABBR_FLOAT.
+     */
+    public static final String ABBR_FLOAT = "F";
+    /**
+     * The constant ABBR_INTEGER.
+     */
+    public static final String ABBR_INTEGER = "I";
+    /**
+     * The constant ABBR_LONG.
+     */
+    public static final String ABBR_LONG = "J";
+    /**
+     * The constant ABBR_SHORT.
+     */
+    public static final String ABBR_SHORT = "S";
+    /**
+     * The constant ABBR_VOID.
+     */
+    public static final String ABBR_VOID = "V";
+    /**
+     * The constant ARRAY_PREFIX.
+     */
+    public static final String ARRAY_PREFIX = "[";
+    /**
+     * The constant DESCRIPTER_B__LJAVA_LANG_BYTE.
+     */
+    public static final String DESCRIPTER_B__LJAVA_LANG_BYTE = "(B)Ljava/lang/Byte;";
+    /**
+     * The constant DESCRIPTER_C__LJAVA_LANG_CHARACTER.
+     */
+    public static final String DESCRIPTER_C__LJAVA_LANG_CHARACTER = "(C)Ljava/lang/Character;";
+    /**
+     * The constant DESCRIPTER_D__LJAVA_LANG_DOUBLE.
+     */
+    public static final String DESCRIPTER_D__LJAVA_LANG_DOUBLE = "(D)Ljava/lang/Double;";
+    /**
+     * The constant DESCRIPTER_F__LJAVA_LANG_FLOAT.
+     */
+    public static final String DESCRIPTER_F__LJAVA_LANG_FLOAT = "(F)Ljava/lang/Float;";
+    /**
+     * The constant DESCRIPTER_I__LJAVA_LANG_INTEGER.
+     */
+    public static final String DESCRIPTER_I__LJAVA_LANG_INTEGER = "(I)Ljava/lang/Integer;";
+    /**
+     * The constant DESCRIPTER_J__LJAVA_LANG_LONG.
+     */
+    public static final String DESCRIPTER_J__LJAVA_LANG_LONG = "(J)Ljava/lang/Long;";
+    /**
+     * The constant DESCRIPTER_S__LJAVA_LANG_SHORT.
+     */
+    public static final String DESCRIPTER_S__LJAVA_LANG_SHORT = "(S)Ljava/lang/Short;";
+    /**
+     * The constant DESCRIPTER_Z__LJAVA_LANG_BOOLEAN.
+     */
+    public static final String DESCRIPTER_Z__LJAVA_LANG_BOOLEAN = "(Z)Ljava/lang/Boolean;";
+    /**
+     * The constant DESCRIPTER___B.
+     */
+    public static final String DESCRIPTER___B = "()B";
+    /**
+     * The constant DESCRIPTER___C.
+     */
+    public static final String DESCRIPTER___C = "()C";
+    /**
+     * The constant DESCRIPTER___D.
+     */
+    public static final String DESCRIPTER___D = "()D";
+    /**
+     * The constant DESCRIPTER___F.
+     */
+    public static final String DESCRIPTER___F = "()F";
+    /**
+     * The constant DESCRIPTER___I.
+     */
+    public static final String DESCRIPTER___I = "()I";
+    /**
+     * The constant DESCRIPTER___J.
+     */
+    public static final String DESCRIPTER___J = "()J";
+    /**
+     * The constant DESCRIPTER___S.
+     */
+    public static final String DESCRIPTER___S = "()S";
+    /**
+     * The constant DESCRIPTER___Z.
+     */
+    public static final String DESCRIPTER___Z = "()Z";
+    /**
+     * The constant JAVA_LANG_BOOLEAN.
+     */
+    public static final String JAVA_LANG_BOOLEAN = "java/lang/Boolean";
+    /**
+     * The constant JAVA_LANG_BYTE.
+     */
+    public static final String JAVA_LANG_BYTE = "java/lang/Byte";
+    /**
+     * The constant JAVA_LANG_CHARACTER.
+     */
+    public static final String JAVA_LANG_CHARACTER = "java/lang/Character";
+    /**
+     * The constant JAVA_LANG_DOUBLE.
+     */
+    public static final String JAVA_LANG_DOUBLE = "java/lang/Double";
+    /**
+     * The constant JAVA_LANG_FLOAT.
+     */
+    public static final String JAVA_LANG_FLOAT = "java/lang/Float";
+    /**
+     * The constant JAVA_LANG_INTEGER.
+     */
+    public static final String JAVA_LANG_INTEGER = "java/lang/Integer";
+    /**
+     * The constant JAVA_LANG_LONG.
+     */
+    public static final String JAVA_LANG_LONG = "java/lang/Long";
+    /**
+     * The constant JAVA_LANG_SHORT.
+     */
+    public static final String JAVA_LANG_SHORT = "java/lang/Short";
+    /**
+     * The constant LJAVA_LANG_.
+     */
+    public static final String LJAVA_LANG_ = "Ljava/lang/";
+    /**
+     * The constant LJAVA_LANG_BOOLEAN.
+     */
+    public static final String LJAVA_LANG_BOOLEAN = "Ljava/lang/Boolean;";
+    /**
+     * The constant LJAVA_LANG_BYTE.
+     */
+    public static final String LJAVA_LANG_BYTE = "Ljava/lang/Byte;";
+    /**
+     * The constant LJAVA_LANG_CHARACTER.
+     */
+    public static final String LJAVA_LANG_CHARACTER = "Ljava/lang/Character;";
+    /**
+     * The constant LJAVA_LANG_DOUBLE.
+     */
+    public static final String LJAVA_LANG_DOUBLE = "Ljava/lang/Double;";
+    /**
+     * The constant LJAVA_LANG_FLOAT.
+     */
+    public static final String LJAVA_LANG_FLOAT = "Ljava/lang/Float;";
+    /**
+     * The constant LJAVA_LANG_INTEGER.
+     */
+    public static final String LJAVA_LANG_INTEGER = "Ljava/lang/Integer;";
+    /**
+     * The constant LJAVA_LANG_LONG.
+     */
+    public static final String LJAVA_LANG_LONG = "Ljava/lang/Long;";
+    /**
+     * The constant LJAVA_LANG_OBJECT.
+     */
+    public static final String LJAVA_LANG_OBJECT = "Ljava/lang/Object;";
+    /**
+     * The constant LJAVA_LANG_SHORT.
+     */
+    public static final String LJAVA_LANG_SHORT = "Ljava/lang/Short;";
+    /**
+     * The constant LJAVA_LANG_STRING.
+     */
+    public static final String LJAVA_LANG_STRING = "Ljava/lang/String;";
+    /**
+     * The constant LJAVA_MATH_BIGINTEGER.
+     */
+    public static final String LJAVA_MATH_BIGINTEGER = "Ljava/math/BigInteger;";
+    /**
+     * The constant TYPEOF_BOOLEAN.
+     */
+    public static final String TYPEOF_BOOLEAN = "boolean";
+    /**
+     * The constant TYPEOF_NUMBER.
+     */
+    public static final String TYPEOF_NUMBER = "number";
+    /**
+     * The constant TYPEOF_OBJECT.
+     */
+    public static final String TYPEOF_OBJECT = "object";
+    /**
+     * The constant TYPEOF_STRING.
+     */
+    public static final String TYPEOF_STRING = "string";
+    /**
+     * The constant TYPEOF_UNDEFINED.
+     */
+    public static final String TYPEOF_UNDEFINED = "undefined";
+    private static final String BOOLEAN_VALUE = "booleanValue";
+    private static final String BYTE_VALUE = "byteValue";
+    private static final String CHAR_VALUE = "charValue";
+    private static final String DOUBLE_VALUE = "doubleValue";
+    private static final String FLOAT_VALUE = "floatValue";
+    private static final Set<String> INTEGER_PRIMITIVES = Set.of(ABBR_INTEGER, ABBR_LONG, ABBR_BYTE, ABBR_SHORT, ABBR_CHARACTER);
+    private static final String INT_VALUE = "intValue";
+    private static final String LONG_VALUE = "longValue";
+    private static final Set<String> NUMERIC_PRIMITIVES = Set.of(ABBR_INTEGER, ABBR_LONG, ABBR_FLOAT, ABBR_DOUBLE, ABBR_BYTE, ABBR_SHORT, ABBR_CHARACTER);
+    private static final Set<String> PRIMITIVE_TYPES = Set.of(ABBR_INTEGER, ABBR_BOOLEAN, ABBR_BYTE, ABBR_CHARACTER, ABBR_SHORT, ABBR_LONG, ABBR_FLOAT, ABBR_DOUBLE);
+    private static final String SHORT_VALUE = "shortValue";
+    private static final String VALUE_OF = "valueOf";
 
     private TypeConversionUtils() {
     }
@@ -43,56 +256,56 @@ public final class TypeConversionUtils {
     public static void boxPrimitiveType(CodeBuilder code, ClassWriter classWriter, String primitiveType, String targetType) {
         var cp = classWriter.getConstantPool();
         // Only box if targetType is a wrapper
-        if (!targetType.startsWith("Ljava/lang/")) {
+        if (!targetType.startsWith(LJAVA_LANG_)) {
             return; // Target is primitive, no boxing needed
         }
 
         switch (primitiveType) {
-            case "I" -> {
-                if ("Ljava/lang/Integer;".equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+            case ABBR_INTEGER -> {
+                if (LJAVA_LANG_INTEGER.equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_INTEGER, VALUE_OF, DESCRIPTER_I__LJAVA_LANG_INTEGER);
                     code.invokestatic(valueOfRef);
                 }
             }
-            case "Z" -> {
-                if ("Ljava/lang/Boolean;".equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
+            case ABBR_BOOLEAN -> {
+                if (LJAVA_LANG_BOOLEAN.equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_BOOLEAN, VALUE_OF, DESCRIPTER_Z__LJAVA_LANG_BOOLEAN);
                     code.invokestatic(valueOfRef);
                 }
             }
-            case "B" -> {
-                if ("Ljava/lang/Byte;".equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+            case ABBR_BYTE -> {
+                if (LJAVA_LANG_BYTE.equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_BYTE, VALUE_OF, DESCRIPTER_B__LJAVA_LANG_BYTE);
                     code.invokestatic(valueOfRef);
                 }
             }
-            case "C" -> {
-                if ("Ljava/lang/Character;".equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
+            case ABBR_CHARACTER -> {
+                if (LJAVA_LANG_CHARACTER.equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_CHARACTER, VALUE_OF, DESCRIPTER_C__LJAVA_LANG_CHARACTER);
                     code.invokestatic(valueOfRef);
                 }
             }
-            case "S" -> {
-                if ("Ljava/lang/Short;".equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+            case ABBR_SHORT -> {
+                if (LJAVA_LANG_SHORT.equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_SHORT, VALUE_OF, DESCRIPTER_S__LJAVA_LANG_SHORT);
                     code.invokestatic(valueOfRef);
                 }
             }
-            case "J" -> {
-                if ("Ljava/lang/Long;".equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+            case ABBR_LONG -> {
+                if (LJAVA_LANG_LONG.equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_LONG, VALUE_OF, DESCRIPTER_J__LJAVA_LANG_LONG);
                     code.invokestatic(valueOfRef);
                 }
             }
-            case "F" -> {
-                if ("Ljava/lang/Float;".equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+            case ABBR_FLOAT -> {
+                if (LJAVA_LANG_FLOAT.equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_FLOAT, VALUE_OF, DESCRIPTER_F__LJAVA_LANG_FLOAT);
                     code.invokestatic(valueOfRef);
                 }
             }
-            case "D" -> {
-                if ("Ljava/lang/Double;".equals(targetType)) {
-                    int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
+            case ABBR_DOUBLE -> {
+                if (LJAVA_LANG_DOUBLE.equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef(JAVA_LANG_DOUBLE, VALUE_OF, DESCRIPTER_D__LJAVA_LANG_DOUBLE);
                     code.invokestatic(valueOfRef);
                 }
             }
@@ -113,44 +326,63 @@ public final class TypeConversionUtils {
 
         // byte, short, char are stored as int on the stack, so they start as "I" after unboxing
         String stackFromType = switch (fromType) {
-            case "B", "S", "C" -> "I";
+            case ABBR_BYTE, ABBR_SHORT, ABBR_CHARACTER -> ABBR_INTEGER;
             default -> fromType;
         };
 
         // Convert from stack type to target type
         switch (stackFromType) {
-            case "I" -> {
+            case ABBR_INTEGER -> {
                 switch (toType) {
-                    case "B" -> code.i2b();
-                    case "C" -> code.i2c();
-                    case "S" -> code.i2s();
-                    case "J" -> code.i2l();
-                    case "F" -> code.i2f();
-                    case "D" -> code.i2d();
+                    case ABBR_BYTE -> code.i2b();
+                    case ABBR_CHARACTER -> code.i2c();
+                    case ABBR_SHORT -> code.i2s();
+                    case ABBR_LONG -> code.i2l();
+                    case ABBR_FLOAT -> code.i2f();
+                    case ABBR_DOUBLE -> code.i2d();
                 }
             }
-            case "J" -> {
+            case ABBR_LONG -> {
                 switch (toType) {
-                    case "I" -> code.l2i();
-                    case "F" -> code.l2f();
-                    case "D" -> code.l2d();
+                    case ABBR_INTEGER -> code.l2i();
+                    case ABBR_FLOAT -> code.l2f();
+                    case ABBR_DOUBLE -> code.l2d();
                 }
             }
-            case "F" -> {
+            case ABBR_FLOAT -> {
                 switch (toType) {
-                    case "I" -> code.f2i();
-                    case "J" -> code.f2l();
-                    case "D" -> code.f2d();
+                    case ABBR_INTEGER -> code.f2i();
+                    case ABBR_LONG -> code.f2l();
+                    case ABBR_DOUBLE -> code.f2d();
                 }
             }
-            case "D" -> {
+            case ABBR_DOUBLE -> {
                 switch (toType) {
-                    case "I" -> code.d2i();
-                    case "J" -> code.d2l();
-                    case "F" -> code.d2f();
+                    case ABBR_INTEGER -> code.d2i();
+                    case ABBR_LONG -> code.d2l();
+                    case ABBR_FLOAT -> code.d2f();
                 }
             }
         }
+    }
+
+    /**
+     * Gets primitive type.
+     *
+     * @param type the type
+     * @return the primitive type
+     */
+    public static String getPrimitiveType(String type) {
+        return switch (type) {
+            case LJAVA_LANG_BYTE -> ABBR_BYTE;
+            case LJAVA_LANG_SHORT -> ABBR_SHORT;
+            case LJAVA_LANG_INTEGER -> ABBR_INTEGER;
+            case LJAVA_LANG_LONG -> ABBR_LONG;
+            case LJAVA_LANG_FLOAT -> ABBR_FLOAT;
+            case LJAVA_LANG_DOUBLE -> ABBR_DOUBLE;
+            case LJAVA_LANG_CHARACTER -> ABBR_CHARACTER;
+            default -> type;
+        };
     }
 
     /**
@@ -162,33 +394,14 @@ public final class TypeConversionUtils {
      */
     public static String getTypeOfResult(String type) {
         if (type == null) return null;
-        if ("V".equals(type)) return "undefined";
-        if ("Ljava/lang/String;".equals(type)) return "string";
-        if ("Ljava/math/BigInteger;".equals(type)) return "number";
-        if (type.startsWith("[")) return "object";
+        if (ABBR_VOID.equals(type)) return TYPEOF_UNDEFINED;
+        if (LJAVA_LANG_STRING.equals(type)) return TYPEOF_STRING;
+        if (LJAVA_MATH_BIGINTEGER.equals(type)) return TYPEOF_NUMBER;
+        if (type.startsWith(ARRAY_PREFIX)) return TYPEOF_OBJECT;
         String primitiveType = getPrimitiveType(type);
-        if ("Z".equals(primitiveType)) return "boolean";
-        if (isNumericPrimitive(primitiveType)) return "number";
+        if (ABBR_BOOLEAN.equals(primitiveType)) return TYPEOF_BOOLEAN;
+        if (isNumericPrimitive(primitiveType)) return TYPEOF_NUMBER;
         return null;
-    }
-
-    /**
-     * Gets primitive type.
-     *
-     * @param type the type
-     * @return the primitive type
-     */
-    public static String getPrimitiveType(String type) {
-        return switch (type) {
-            case "Ljava/lang/Byte;" -> "B";
-            case "Ljava/lang/Short;" -> "S";
-            case "Ljava/lang/Integer;" -> "I";
-            case "Ljava/lang/Long;" -> "J";
-            case "Ljava/lang/Float;" -> "F";
-            case "Ljava/lang/Double;" -> "D";
-            case "Ljava/lang/Character;" -> "C";
-            default -> type;
-        };
     }
 
     /**
@@ -199,14 +412,14 @@ public final class TypeConversionUtils {
      */
     public static String getWrapperType(String primitiveType) {
         return switch (primitiveType) {
-            case "B" -> "Ljava/lang/Byte;";
-            case "S" -> "Ljava/lang/Short;";
-            case "I" -> "Ljava/lang/Integer;";
-            case "J" -> "Ljava/lang/Long;";
-            case "F" -> "Ljava/lang/Float;";
-            case "D" -> "Ljava/lang/Double;";
-            case "C" -> "Ljava/lang/Character;";
-            case "Z" -> "Ljava/lang/Boolean;";
+            case ABBR_BYTE -> LJAVA_LANG_BYTE;
+            case ABBR_SHORT -> LJAVA_LANG_SHORT;
+            case ABBR_INTEGER -> LJAVA_LANG_INTEGER;
+            case ABBR_LONG -> LJAVA_LANG_LONG;
+            case ABBR_FLOAT -> LJAVA_LANG_FLOAT;
+            case ABBR_DOUBLE -> LJAVA_LANG_DOUBLE;
+            case ABBR_CHARACTER -> LJAVA_LANG_CHARACTER;
+            case ABBR_BOOLEAN -> LJAVA_LANG_BOOLEAN;
             default -> primitiveType; // Already a wrapper or reference type
         };
     }
@@ -249,8 +462,8 @@ public final class TypeConversionUtils {
      * @param type the JVM type descriptor
      */
     public static void popByType(CodeBuilder code, String type) {
-        if ("V".equals(type)) return;
-        if ("J".equals(type) || "D".equals(type)) {
+        if (ABBR_VOID.equals(type)) return;
+        if (ABBR_LONG.equals(type) || ABBR_DOUBLE.equals(type)) {
             code.pop2();
         } else {
             code.pop();
@@ -267,36 +480,36 @@ public final class TypeConversionUtils {
     public static void unboxWrapperType(CodeBuilder code, ClassWriter classWriter, String type) {
         var cp = classWriter.getConstantPool();
         switch (type) {
-            case "Ljava/lang/Boolean;" -> {
-                int booleanValueRef = cp.addMethodRef("java/lang/Boolean", "booleanValue", "()Z");
+            case LJAVA_LANG_BOOLEAN -> {
+                int booleanValueRef = cp.addMethodRef(JAVA_LANG_BOOLEAN, BOOLEAN_VALUE, DESCRIPTER___Z);
                 code.invokevirtual(booleanValueRef);
             }
-            case "Ljava/lang/Integer;" -> {
-                int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+            case LJAVA_LANG_INTEGER -> {
+                int intValueRef = cp.addMethodRef(JAVA_LANG_INTEGER, INT_VALUE, DESCRIPTER___I);
                 code.invokevirtual(intValueRef);
             }
-            case "Ljava/lang/Character;" -> {
-                int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
+            case LJAVA_LANG_CHARACTER -> {
+                int charValueRef = cp.addMethodRef(JAVA_LANG_CHARACTER, CHAR_VALUE, DESCRIPTER___C);
                 code.invokevirtual(charValueRef);
             }
-            case "Ljava/lang/Byte;" -> {
-                int byteValueRef = cp.addMethodRef("java/lang/Byte", "byteValue", "()B");
+            case LJAVA_LANG_BYTE -> {
+                int byteValueRef = cp.addMethodRef(JAVA_LANG_BYTE, BYTE_VALUE, DESCRIPTER___B);
                 code.invokevirtual(byteValueRef);
             }
-            case "Ljava/lang/Long;" -> {
-                int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
+            case LJAVA_LANG_LONG -> {
+                int longValueRef = cp.addMethodRef(JAVA_LANG_LONG, LONG_VALUE, DESCRIPTER___J);
                 code.invokevirtual(longValueRef);
             }
-            case "Ljava/lang/Short;" -> {
-                int shortValueRef = cp.addMethodRef("java/lang/Short", "shortValue", "()S");
+            case LJAVA_LANG_SHORT -> {
+                int shortValueRef = cp.addMethodRef(JAVA_LANG_SHORT, SHORT_VALUE, DESCRIPTER___S);
                 code.invokevirtual(shortValueRef);
             }
-            case "Ljava/lang/Float;" -> {
-                int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
+            case LJAVA_LANG_FLOAT -> {
+                int floatValueRef = cp.addMethodRef(JAVA_LANG_FLOAT, FLOAT_VALUE, DESCRIPTER___F);
                 code.invokevirtual(floatValueRef);
             }
-            case "Ljava/lang/Double;" -> {
-                int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
+            case LJAVA_LANG_DOUBLE -> {
+                int doubleValueRef = cp.addMethodRef(JAVA_LANG_DOUBLE, DOUBLE_VALUE, DESCRIPTER___D);
                 code.invokevirtual(doubleValueRef);
             }
         }
