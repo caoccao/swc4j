@@ -278,7 +278,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
 
         // Call ArrayList.get(int)
-        int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
+        int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.I__LJAVA_LANG_OBJECT);
         code.invokevirtual(getMethod); // [Object]
 
         // Assume Integer type for now
@@ -286,7 +286,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         code.checkcast(integerClass); // [Integer]
 
         // Unbox to primitive
-        int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
+        int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
         code.invokevirtual(intValueMethod); // [int] - old value
 
         // Step 2: Increment/decrement to get new value
@@ -298,7 +298,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         } // [new_int]
 
         // Step 3: Box the new value
-        int valueOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_INTEGER);
+        int valueOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.I__LJAVA_LANG_INTEGER);
         code.invokestatic(valueOfMethod); // [new_Integer]
 
         // Step 4: For postfix, we need to return the old value, so get it from ArrayList.set()'s return
@@ -345,7 +345,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
 
         // Call ArrayList.set(int, Object)
-        int setMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_SET, ConstantJavaDescriptor.DESCRIPTOR_I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int setMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_SET, ConstantJavaDescriptor.I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
         code.invokevirtual(setMethod); // [return_value, old_value_from_set] or [old_value_from_set]
 
         // For prefix, we already have the return value on stack, pop the set result
@@ -478,7 +478,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
 
         // Call map.get(key)
-        int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
         code.invokevirtual(getMethod); // [Object]
 
         // Assume Integer type for now (we'll need to infer this properly later)
@@ -487,7 +487,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         code.checkcast(integerClass); // [Integer]
 
         // Unbox to primitive
-        int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
+        int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
         code.invokevirtual(intValueMethod); // [int] - old value
 
         // Step 2: Increment/decrement to get new value
@@ -499,7 +499,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         } // [new_int]
 
         // Step 3: Box the new value
-        int valueOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_INTEGER);
+        int valueOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.I__LJAVA_LANG_INTEGER);
         code.invokestatic(valueOfMethod); // [new_Integer]
 
         // Step 4: For postfix, we need to return the old value, so get it from map.put()'s return
@@ -560,7 +560,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
 
         // Call map.put(key, value)
-        int putMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, "put", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int putMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, "put", ConstantJavaDescriptor.LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
         code.invokevirtual(putMethod); // [return_value, old_value_from_put] or [old_value_from_put]
 
         // For prefix, we already have the return value on stack, pop the put result

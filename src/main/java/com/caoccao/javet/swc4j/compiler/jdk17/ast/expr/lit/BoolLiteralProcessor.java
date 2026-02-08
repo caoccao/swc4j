@@ -64,7 +64,7 @@ public final class BoolLiteralProcessor extends BaseAstProcessor<Swc4jAstBool> {
                 && ConstantJavaType.LJAVA_LANG_BOOLEAN.equals(returnTypeInfo.descriptor())) {
             // Box boolean to Boolean
             code.iconst(value ? 1 : 0);
-            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_Z__LJAVA_LANG_BOOLEAN);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.Z__LJAVA_LANG_BOOLEAN);
             code.invokestatic(valueOfRef);
         } else {
             // Primitive boolean

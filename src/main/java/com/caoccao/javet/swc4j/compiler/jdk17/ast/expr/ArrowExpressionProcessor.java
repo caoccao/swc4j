@@ -235,7 +235,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             // () => void -> Runnable
             interfaceName = ConstantJavaType.JAVA_LANG_RUNNABLE;
             methodName = "run";
-            methodDescriptor = ConstantJavaDescriptor.DESCRIPTOR___V;
+            methodDescriptor = ConstantJavaDescriptor.__V;
         } else if (params.isEmpty()) {
             // () => T -> Supplier<T>
             interfaceName = getSupplierInterface(returnInfo);
@@ -643,9 +643,9 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         int tempListSlot = getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_LIST);
         code.astore(tempListSlot);
 
-        int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
-        int listSizeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
-        int listAddRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+        int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.I__LJAVA_LANG_OBJECT);
+        int listSizeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.__I);
+        int listAddRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
 
         // Extract element type from the array pattern's type annotation
         String elementType = extractElementType(arrayPat);
@@ -882,7 +882,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
         // Call super()
         code.aload(0);
-        int superInit = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+        int superInit = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
         code.invokespecial(superInit);
 
         // Initialize captured variable fields
@@ -1081,8 +1081,8 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_MAP);
         code.astore(tempMapSlot);
 
-        int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        int mapRemoveRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapRemoveRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
 
         // Extract value type from the object pattern's type annotation (Map<K, V> -> V)
         String valueType = extractElementType(objectPat);
@@ -1181,20 +1181,20 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         int linkedHashMapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP);
         code.newInstance(linkedHashMapClass);
         code.dup();
-        int linkedHashMapInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+        int linkedHashMapInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
         code.invokespecial(linkedHashMapInitRef);
         int restMapSlot = getOrAllocateTempSlot(context, "$restMap" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_LINKEDHASHMAP);
         code.astore(restMapSlot);
 
         // Copy all entries from original map except extracted keys
-        int mapEntrySetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_ENTRY_SET, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_UTIL_SET);
-        int setIteratorRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_SET, ConstantJavaMethod.METHOD_ITERATOR, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_UTIL_ITERATOR);
-        int iteratorHasNextRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_ITERATOR, ConstantJavaMethod.METHOD_HAS_NEXT, ConstantJavaDescriptor.DESCRIPTOR___Z);
-        int iteratorNextRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_ITERATOR, ConstantJavaMethod.METHOD_NEXT, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
-        int entryGetKeyRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP_ENTRY, ConstantJavaMethod.METHOD_GET_KEY, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
-        int entryGetValueRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP_ENTRY, ConstantJavaMethod.METHOD_GET_VALUE, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
-        int mapPutRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, "put", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        int objectEqualsRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+        int mapEntrySetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_ENTRY_SET, ConstantJavaDescriptor.__LJAVA_UTIL_SET);
+        int setIteratorRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_SET, ConstantJavaMethod.METHOD_ITERATOR, ConstantJavaDescriptor.__LJAVA_UTIL_ITERATOR);
+        int iteratorHasNextRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_ITERATOR, ConstantJavaMethod.METHOD_HAS_NEXT, ConstantJavaDescriptor.__Z);
+        int iteratorNextRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_ITERATOR, ConstantJavaMethod.METHOD_NEXT, ConstantJavaDescriptor.__LJAVA_LANG_OBJECT);
+        int entryGetKeyRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP_ENTRY, ConstantJavaMethod.METHOD_GET_KEY, ConstantJavaDescriptor.__LJAVA_LANG_OBJECT);
+        int entryGetValueRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP_ENTRY, ConstantJavaMethod.METHOD_GET_VALUE, ConstantJavaDescriptor.__LJAVA_LANG_OBJECT);
+        int mapPutRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, "put", ConstantJavaDescriptor.LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int objectEqualsRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
 
         // Get iterator from original map's entry set
         code.aload(tempMapSlot);
@@ -1295,7 +1295,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         int arrayListClass = cp.addClass(ConstantJavaType.JAVA_UTIL_ARRAYLIST);
         code.newInstance(arrayListClass);
         code.dup();
-        int arrayListInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+        int arrayListInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
         code.invokespecial(arrayListInitRef);
         code.astore(restVar.index());
 
@@ -1359,49 +1359,49 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         var cp = classWriter.getConstantPool();
         switch (targetType) {
             case ConstantJavaType.ABBR_INTEGER -> { // int
-                int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
                 int integerClass = cp.addClass(ConstantJavaType.JAVA_LANG_INTEGER);
                 code.checkcast(integerClass);
                 code.invokevirtual(intValueRef);
             }
             case ConstantJavaType.ABBR_LONG -> { // long
-                int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.DESCRIPTOR___J);
+                int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.__J);
                 int longClass = cp.addClass(ConstantJavaType.JAVA_LANG_LONG);
                 code.checkcast(longClass);
                 code.invokevirtual(longValueRef);
             }
             case ConstantJavaType.ABBR_DOUBLE -> { // double
-                int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___D);
+                int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.__D);
                 int doubleClass = cp.addClass(ConstantJavaType.JAVA_LANG_DOUBLE);
                 code.checkcast(doubleClass);
                 code.invokevirtual(doubleValueRef);
             }
             case ConstantJavaType.ABBR_FLOAT -> { // float
-                int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___F);
+                int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.__F);
                 int floatClass = cp.addClass(ConstantJavaType.JAVA_LANG_FLOAT);
                 code.checkcast(floatClass);
                 code.invokevirtual(floatValueRef);
             }
             case ConstantJavaType.ABBR_BOOLEAN -> { // boolean
-                int booleanValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_BOOLEAN_VALUE, ConstantJavaDescriptor.DESCRIPTOR___Z);
+                int booleanValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_BOOLEAN_VALUE, ConstantJavaDescriptor.__Z);
                 int booleanClass = cp.addClass(ConstantJavaType.JAVA_LANG_BOOLEAN);
                 code.checkcast(booleanClass);
                 code.invokevirtual(booleanValueRef);
             }
             case ConstantJavaType.ABBR_BYTE -> { // byte
-                int byteValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_BYTE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___B);
+                int byteValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_BYTE_VALUE, ConstantJavaDescriptor.__B);
                 int byteClass = cp.addClass(ConstantJavaType.JAVA_LANG_BYTE);
                 code.checkcast(byteClass);
                 code.invokevirtual(byteValueRef);
             }
             case ConstantJavaType.ABBR_CHARACTER -> { // char
-                int charValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_CHAR_VALUE, ConstantJavaDescriptor.DESCRIPTOR___C);
+                int charValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_CHAR_VALUE, ConstantJavaDescriptor.__C);
                 int charClass = cp.addClass(ConstantJavaType.JAVA_LANG_CHARACTER);
                 code.checkcast(charClass);
                 code.invokevirtual(charValueRef);
             }
             case ConstantJavaType.ABBR_SHORT -> { // short
-                int shortValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_SHORT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___S);
+                int shortValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_SHORT_VALUE, ConstantJavaDescriptor.__S);
                 int shortClass = cp.addClass(ConstantJavaType.JAVA_LANG_SHORT);
                 code.checkcast(shortClass);
                 code.invokevirtual(shortValueRef);
@@ -1452,15 +1452,15 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     private String getErasedFunctionDescriptor(String interfaceName) {
         if (interfaceName.equals(ConstantJavaType.JAVA_UTIL_FUNCTION_INT_FUNCTION)) {
-            return ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT;
+            return ConstantJavaDescriptor.I__LJAVA_LANG_OBJECT;
         }
         if (interfaceName.equals(ConstantJavaType.JAVA_UTIL_FUNCTION_LONG_FUNCTION)) {
-            return ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_OBJECT;
+            return ConstantJavaDescriptor.J__LJAVA_LANG_OBJECT;
         }
         if (interfaceName.equals(ConstantJavaType.JAVA_UTIL_FUNCTION_DOUBLE_FUNCTION)) {
-            return ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_OBJECT;
+            return ConstantJavaDescriptor.D__LJAVA_LANG_OBJECT;
         }
-        return ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT;
+        return ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT;
     }
 
     private String getErasedSupplierReturnDescriptor(ReturnTypeInfo returnInfo) {
@@ -1560,39 +1560,39 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             // UnaryOperator<T> - single param, same return type
             case ConstantJavaType.JAVA_UTIL_FUNCTION_UNARY_OPERATOR ->
                 // UnaryOperator.apply(Object): Object
-                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_APPLY, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_APPLY, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
             // Function<T, R> - single param, different return type
             case ConstantJavaType.JAVA_UTIL_FUNCTION_FUNCTION ->
                 // Function.apply(Object): Object
-                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_APPLY, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_APPLY, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
             // Supplier<T> - no params, returns T
             case ConstantJavaType.JAVA_UTIL_FUNCTION_SUPPLIER ->
                 // Supplier.get(): Object
-                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.__LJAVA_LANG_OBJECT);
             // Consumer<T> - single param, void return
             case ConstantJavaType.JAVA_UTIL_FUNCTION_CONSUMER ->
                 // Consumer.accept(Object): void
-                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_ACCEPT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__V);
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_ACCEPT, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__V);
             // Predicate<T> - single param, boolean return
             case ConstantJavaType.JAVA_UTIL_FUNCTION_PREDICATE ->
                 // Predicate.test(Object): boolean
-                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_TEST, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_TEST, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
             // BiFunction<T, U, R> - two params, returns R
             case ConstantJavaType.JAVA_UTIL_FUNCTION_BI_FUNCTION ->
                 // BiFunction.apply(Object, Object): Object
-                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_APPLY, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_APPLY, ConstantJavaDescriptor.LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
             // BinaryOperator<T> - two params same type, returns same type
             case ConstantJavaType.JAVA_UTIL_FUNCTION_BINARY_OPERATOR ->
                 // BinaryOperator.apply(Object, Object): Object
-                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_APPLY, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_APPLY, ConstantJavaDescriptor.LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
             // BiConsumer<T, U> - two params, void return
             case ConstantJavaType.JAVA_UTIL_FUNCTION_BI_CONSUMER ->
                 // BiConsumer.accept(Object, Object): void
-                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_ACCEPT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__V);
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_ACCEPT, ConstantJavaDescriptor.LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__V);
             // BiPredicate<T, U> - two params, boolean return
             case ConstantJavaType.JAVA_UTIL_FUNCTION_BI_PREDICATE ->
                 // BiPredicate.test(Object, Object): boolean
-                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_TEST, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__Z);
+                    new FunctionalInterfaceInfo(interfaceName, ConstantJavaMethod.METHOD_TEST, ConstantJavaDescriptor.LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__Z);
             default -> null;
         };
 

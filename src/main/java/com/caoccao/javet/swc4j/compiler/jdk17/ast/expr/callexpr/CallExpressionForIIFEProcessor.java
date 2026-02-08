@@ -437,7 +437,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         // Call super()
         code.aload(0);
         var cp = classWriter.getConstantPool();
-        int superInit = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+        int superInit = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
         code.invokespecial(superInit);
 
         // Initialize captured variable fields

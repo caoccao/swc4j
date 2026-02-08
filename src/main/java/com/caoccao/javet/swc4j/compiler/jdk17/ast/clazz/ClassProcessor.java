@@ -66,7 +66,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
     private static void generateDefaultConstructor(ClassWriter classWriter, String superClassInternalName) {
         var cp = classWriter.getConstantPool();
         // Generate: public <init>() { super(); }
-        int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+        int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
 
         CodeBuilder code = new CodeBuilder();
         code.aload(0)                    // load this
@@ -76,7 +76,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
         classWriter.addMethod(
                 0x0001, // ACC_PUBLIC
                 ConstantJavaMethod.METHOD_INIT,
-                ConstantJavaDescriptor.DESCRIPTOR___V,
+                ConstantJavaDescriptor.__V,
                 code.toByteArray(),
                 1, // max stack
                 1  // max locals (this)
@@ -367,7 +367,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
                 Math.max(maxLocals, 1),
                 true, // isStatic
                 internalClassName,
-                ConstantJavaDescriptor.DESCRIPTOR___V,
+                ConstantJavaDescriptor.__V,
                 cp
         );
         var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
@@ -375,7 +375,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
         classWriter.addMethod(
                 0x0008, // ACC_STATIC
                 "<clinit>",
-                ConstantJavaDescriptor.DESCRIPTOR___V,
+                ConstantJavaDescriptor.__V,
                 code.toByteArray(),
                 10, // max stack
                 Math.max(maxLocals, 1), // max locals (at least 1 for static blocks with local vars)
@@ -393,7 +393,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
             List<FieldInfo> fieldsToInit) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
         // Generate: public <init>() { super(); this.field1 = value1; ... }
-        int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+        int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
 
         // Reset compilation context for constructor code generation
         compiler.getMemory().resetCompilationContext(false); // not static
@@ -419,7 +419,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
         classWriter.addMethod(
                 0x0001, // ACC_PUBLIC
                 ConstantJavaMethod.METHOD_INIT,
-                ConstantJavaDescriptor.DESCRIPTOR___V,
+                ConstantJavaDescriptor.__V,
                 code.toByteArray(),
                 10, // max stack (increased for field initialization)
                 1   // max locals (this)
@@ -481,7 +481,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
 
             // If first statement is not super() or this(), inject an implicit super() call
             if (!firstIsSuperOrThisCall) {
-                int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+                int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
                 code.aload(0).invokespecial(superCtorRef);
             }
 
@@ -494,7 +494,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
             }
         } else {
             // No body - generate default super() call
-            int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+            int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
             code.aload(0).invokespecial(superCtorRef);
         }
 

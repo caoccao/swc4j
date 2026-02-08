@@ -65,8 +65,8 @@ public final class ArrayLiteralProcessor extends BaseAstProcessor<Swc4jAstArrayL
         } else {
             // Array literal - convert to ArrayList
             int arrayListClass = cp.addClass(ConstantJavaType.JAVA_UTIL_ARRAYLIST);
-            int arrayListInit = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
-            int arrayListAdd = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+            int arrayListInit = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
+            int arrayListAdd = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
             int arrayListAddAll = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, "addAll", "(Ljava/util/Collection;)Z");
 
             // Create new ArrayList instance

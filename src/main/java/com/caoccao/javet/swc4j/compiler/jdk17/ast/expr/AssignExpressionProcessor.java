@@ -389,7 +389,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                     if (ConstantJavaType.LJAVA_LANG_STRING.equals(indexType)) {
                         // String index -> Integer.parseInt(index)
-                        int parseIntMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_PARSE_INT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__I);
+                        int parseIntMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_PARSE_INT, ConstantJavaDescriptor.LJAVA_LANG_STRING__I);
                         code.invokestatic(parseIntMethod); // Stack: [ArrayList/List, int]
                     }
 
@@ -406,7 +406,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     }
 
                     // Call List.set(int, Object) via interface method
-                    int setMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SET, ConstantJavaDescriptor.DESCRIPTOR_I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                    int setMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SET, ConstantJavaDescriptor.I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                     code.invokeinterface(setMethod, 3); // Stack: [oldValue] - the return value of set() is the previous value
                     // Leave the value on stack for expression statements to pop
                     return;
@@ -420,7 +420,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                         // Special case: arr.length = 0 -> arr.clear()
                         if (assignExpr.getRight() instanceof Swc4jAstNumber number && number.getValue() == 0.0) {
                             compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [List]
-                            int clearMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, "clear", ConstantJavaDescriptor.DESCRIPTOR___V);
+                            int clearMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, "clear", ConstantJavaDescriptor.__V);
                             code.invokeinterface(clearMethod, 1); // Stack: []
                             // Assignment expression should return the assigned value (0 in this case)
                             code.iconst(0); // Stack: [0]
@@ -439,15 +439,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
 
                             // Get arr.size() - need to load List again
                             compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [List, List, newLength, List]
-                            int sizeMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                            int sizeMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.__I);
                             code.invokeinterface(sizeMethod, 1); // Stack: [List, List, newLength, size]
 
                             // Call subList(newLength, size) on the second List
-                            int subListMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, "subList", ConstantJavaDescriptor.DESCRIPTOR_I_I__LJAVA_UTIL_LIST);
+                            int subListMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, "subList", ConstantJavaDescriptor.I_I__LJAVA_UTIL_LIST);
                             code.invokeinterface(subListMethod, 3); // Stack: [List, List]
 
                             // Call clear() on the returned subList
-                            int clearMethod2 = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, "clear", ConstantJavaDescriptor.DESCRIPTOR___V);
+                            int clearMethod2 = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, "clear", ConstantJavaDescriptor.__V);
                             code.invokeinterface(clearMethod2, 1); // Stack: [List]
 
                             // Assignment expression returns the assigned value (newLength), not the List
@@ -485,7 +485,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     }
 
                     // Call LinkedHashMap.put(Object, Object)
-                    int putMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, "put", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                    int putMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, "put", ConstantJavaDescriptor.LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                     code.invokevirtual(putMethod); // Stack: [oldValue] - the return value is the previous value (or null)
                     // Leave the value on stack for expression statements to pop
                     return;
@@ -509,7 +509,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     }
 
                     // Call LinkedHashMap.put(Object, Object)
-                    int putMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, "put", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                    int putMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, "put", ConstantJavaDescriptor.LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                     code.invokevirtual(putMethod); // Stack: [oldValue]
                     // Leave the value on stack for expression statements to pop
                     return;
@@ -622,15 +622,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     if (!ConstantJavaType.LJAVA_LANG_STRING.equals(valueType)) {
                         String valueOfDescriptor = switch (valueType) {
                             case ConstantJavaType.ABBR_INTEGER ->
-                                    ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_STRING;
-                            case ConstantJavaType.ABBR_LONG -> ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_STRING;
-                            case ConstantJavaType.ABBR_FLOAT -> ConstantJavaDescriptor.DESCRIPTOR_F__LJAVA_LANG_STRING;
-                            case ConstantJavaType.ABBR_DOUBLE -> ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_STRING;
+                                    ConstantJavaDescriptor.I__LJAVA_LANG_STRING;
+                            case ConstantJavaType.ABBR_LONG -> ConstantJavaDescriptor.J__LJAVA_LANG_STRING;
+                            case ConstantJavaType.ABBR_FLOAT -> ConstantJavaDescriptor.F__LJAVA_LANG_STRING;
+                            case ConstantJavaType.ABBR_DOUBLE -> ConstantJavaDescriptor.D__LJAVA_LANG_STRING;
                             case ConstantJavaType.ABBR_BOOLEAN ->
-                                    ConstantJavaDescriptor.DESCRIPTOR_Z__LJAVA_LANG_STRING;
+                                    ConstantJavaDescriptor.Z__LJAVA_LANG_STRING;
                             case ConstantJavaType.ABBR_CHARACTER ->
-                                    ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_STRING;
-                            default -> ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING;
+                                    ConstantJavaDescriptor.C__LJAVA_LANG_STRING;
+                            default -> ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_STRING;
                         };
                         int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_VALUE_OF, valueOfDescriptor);
                         code.invokestatic(valueOfRef);
@@ -692,10 +692,10 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         int tempListSlot = getOrAllocateTempSlot(context, "$tempList", ConstantJavaType.LJAVA_UTIL_LIST);
         code.astore(tempListSlot);
 
-        int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
-        int listSizeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
-        int listAddRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
-        int listClearRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, "clear", ConstantJavaDescriptor.DESCRIPTOR___V);
+        int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.I__LJAVA_LANG_OBJECT);
+        int listSizeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.__I);
+        int listAddRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
+        int listClearRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, "clear", ConstantJavaDescriptor.__V);
 
         // First pass: count elements before rest to get restStartIndex
         int restStartIndex = 0;
@@ -926,7 +926,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     case ConstantJavaType.ABBR_FLOAT -> code.fadd();
                     case ConstantJavaType.ABBR_DOUBLE -> code.dadd();
                     case ConstantJavaType.LJAVA_LANG_STRING -> {
-                        int concatMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_CONCAT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
+                        int concatMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_CONCAT, ConstantJavaDescriptor.LJAVA_LANG_STRING__LJAVA_LANG_STRING);
                         code.invokevirtual(concatMethod);
                     }
                 }
@@ -1024,10 +1024,10 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap", ConstantJavaType.LJAVA_UTIL_MAP);
         code.astore(tempMapSlot);
 
-        int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        int mapRemoveRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        int mapClearRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, "clear", ConstantJavaDescriptor.DESCRIPTOR___V);
-        int mapPutAllRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, "putAll", ConstantJavaDescriptor.DESCRIPTOR_LJAVA_UTIL_MAP__V);
+        int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapRemoveRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapClearRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, "clear", ConstantJavaDescriptor.__V);
+        int mapPutAllRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, "putAll", ConstantJavaDescriptor.LJAVA_UTIL_MAP__V);
 
         List<String> extractedKeys = new ArrayList<>();
 
@@ -1140,15 +1140,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
     private void generateStringValueOf(CodeBuilder code, ClassWriter classWriter, String valueType) {
         var cp = classWriter.getConstantPool();
         String descriptor = switch (valueType) {
-            case ConstantJavaType.ABBR_INTEGER -> ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_STRING;
-            case ConstantJavaType.ABBR_LONG -> ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_STRING;
-            case ConstantJavaType.ABBR_FLOAT -> ConstantJavaDescriptor.DESCRIPTOR_F__LJAVA_LANG_STRING;
-            case ConstantJavaType.ABBR_DOUBLE -> ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_STRING;
-            case ConstantJavaType.ABBR_BOOLEAN -> ConstantJavaDescriptor.DESCRIPTOR_Z__LJAVA_LANG_STRING;
-            case ConstantJavaType.ABBR_CHARACTER -> ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_STRING;
-            case ConstantJavaType.ABBR_BYTE -> ConstantJavaDescriptor.DESCRIPTOR_B__LJAVA_LANG_STRING;
-            case ConstantJavaType.ABBR_SHORT -> ConstantJavaDescriptor.DESCRIPTOR_S__LJAVA_LANG_STRING;
-            default -> ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_INTEGER -> ConstantJavaDescriptor.I__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_LONG -> ConstantJavaDescriptor.J__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_FLOAT -> ConstantJavaDescriptor.F__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_DOUBLE -> ConstantJavaDescriptor.D__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_BOOLEAN -> ConstantJavaDescriptor.Z__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_CHARACTER -> ConstantJavaDescriptor.C__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_BYTE -> ConstantJavaDescriptor.B__LJAVA_LANG_STRING;
+            case ConstantJavaType.ABBR_SHORT -> ConstantJavaDescriptor.S__LJAVA_LANG_STRING;
+            default -> ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_STRING;
         };
         int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_VALUE_OF, descriptor);
         code.invokestatic(valueOfRef);

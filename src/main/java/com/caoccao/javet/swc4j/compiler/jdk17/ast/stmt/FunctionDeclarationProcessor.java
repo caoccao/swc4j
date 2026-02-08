@@ -220,7 +220,7 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
     private void generateDefaultConstructor(ClassWriter classWriter, String superClassInternalName) {
         var cp = classWriter.getConstantPool();
         // Generate: public <init>() { super(); }
-        int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+        int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
 
         CodeBuilder code = new CodeBuilder();
         code.aload(0)                    // load this
@@ -230,7 +230,7 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
         classWriter.addMethod(
                 0x0001, // ACC_PUBLIC
                 ConstantJavaMethod.METHOD_INIT,
-                ConstantJavaDescriptor.DESCRIPTOR___V,
+                ConstantJavaDescriptor.__V,
                 code.toByteArray(),
                 1, // max stack
                 1  // max locals (this)

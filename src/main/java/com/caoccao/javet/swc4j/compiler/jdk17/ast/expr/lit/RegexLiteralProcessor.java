@@ -167,7 +167,7 @@ public final class RegexLiteralProcessor extends BaseAstProcessor<Swc4jAstRegex>
         int compileMethodRef = cp.addMethodRef(
                 ConstantJavaType.JAVA_UTIL_REGEX_PATTERN,
                 ConstantJavaMethod.METHOD_COMPILE,
-                ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__LJAVA_UTIL_REGEX_PATTERN);
+                ConstantJavaDescriptor.LJAVA_LANG_STRING_I__LJAVA_UTIL_REGEX_PATTERN);
         code.invokestatic(compileMethodRef);
 
         // Stack: [Pattern]

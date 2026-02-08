@@ -79,27 +79,27 @@ public final class StringApiUtils {
             case ConstantJavaType.ABBR_CHARACTER -> code.invokevirtual(appendChar);
             case ConstantJavaType.ABBR_LONG -> {
                 // long
-                int appendLong = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_STRINGBUILDER);
+                int appendLong = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.J__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendLong);
             }
             case ConstantJavaType.ABBR_FLOAT -> {
                 // float
-                int appendFloat = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.DESCRIPTOR_F__LJAVA_LANG_STRINGBUILDER);
+                int appendFloat = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.F__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendFloat);
             }
             case ConstantJavaType.ABBR_DOUBLE -> {
                 // double
-                int appendDouble = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_STRINGBUILDER);
+                int appendDouble = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.D__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendDouble);
             }
             case ConstantJavaType.ABBR_BOOLEAN -> {
                 // boolean
-                int appendBoolean = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.DESCRIPTOR_Z__LJAVA_LANG_STRINGBUILDER);
+                int appendBoolean = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.Z__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendBoolean);
             }
             case ConstantJavaType.LJAVA_LANG_CHARACTER -> {
                 // Unbox Character to char
-                int charValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_CHAR_VALUE, ConstantJavaDescriptor.DESCRIPTOR___C);
+                int charValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_CHAR_VALUE, ConstantJavaDescriptor.__C);
                 code.invokevirtual(charValueRef);
                 code.invokevirtual(appendChar);
             }
@@ -127,30 +127,30 @@ public final class StringApiUtils {
             }
             case ConstantJavaType.LJAVA_LANG_LONG -> {
                 // Unbox Long to long
-                int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.DESCRIPTOR___J);
+                int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.__J);
                 code.invokevirtual(longValueRef);
-                int appendLong = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_STRINGBUILDER);
+                int appendLong = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.J__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendLong);
             }
             case ConstantJavaType.LJAVA_LANG_FLOAT -> {
                 // Unbox Float to float
-                int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___F);
+                int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.__F);
                 code.invokevirtual(floatValueRef);
-                int appendFloat = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.DESCRIPTOR_F__LJAVA_LANG_STRINGBUILDER);
+                int appendFloat = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.F__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendFloat);
             }
             case ConstantJavaType.LJAVA_LANG_DOUBLE -> {
                 // Unbox Double to double
-                int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___D);
+                int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.__D);
                 code.invokevirtual(doubleValueRef);
-                int appendDouble = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_STRINGBUILDER);
+                int appendDouble = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.D__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendDouble);
             }
             case ConstantJavaType.LJAVA_LANG_BOOLEAN -> {
                 // Unbox Boolean to boolean
-                int booleanValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_BOOLEAN_VALUE, ConstantJavaDescriptor.DESCRIPTOR___Z);
+                int booleanValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_BOOLEAN_VALUE, ConstantJavaDescriptor.__Z);
                 code.invokevirtual(booleanValueRef);
-                int appendBoolean = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.DESCRIPTOR_Z__LJAVA_LANG_STRINGBUILDER);
+                int appendBoolean = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.Z__LJAVA_LANG_STRINGBUILDER);
                 code.invokevirtual(appendBoolean);
             }
             default -> {
@@ -248,11 +248,11 @@ public final class StringApiUtils {
         // Use StringBuilder for string concatenation
         // new StringBuilder
         int stringBuilderClass = cp.addClass(ConstantJavaType.JAVA_LANG_STRINGBUILDER);
-        int stringBuilderInit = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+        int stringBuilderInit = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
         int appendString = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
-        int appendInt = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_STRINGBUILDER);
-        int appendChar = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_STRINGBUILDER);
-        int toString = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_TO_STRING, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
+        int appendInt = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.I__LJAVA_LANG_STRINGBUILDER);
+        int appendChar = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.C__LJAVA_LANG_STRINGBUILDER);
+        int toString = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_TO_STRING, ConstantJavaDescriptor.__LJAVA_LANG_STRING);
 
         code.newInstance(stringBuilderClass)
                 .dup()

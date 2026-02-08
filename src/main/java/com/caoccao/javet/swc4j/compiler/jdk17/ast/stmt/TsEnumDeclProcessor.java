@@ -422,7 +422,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         int continueTarget; // save for later use in loopEnd frame calculation
         if (enumInfo.isStringEnum) {
             // String comparison: if (e.getValue().equals(value))
-            int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+            int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
             code.aload(0)               // load value parameter
                     .invokevirtual(equalsRef) // call equals()
                     .ifeq(0);               // if false, continue loop
@@ -508,10 +508,10 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
 
         // Build error message
         int sbClassRef = cp.addClass(ConstantJavaType.JAVA_LANG_STRINGBUILDER);
-        int sbCtorRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+        int sbCtorRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
         int sbAppendStringRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
-        int sbAppendIntRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_STRINGBUILDER);
-        int sbToStringRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_TO_STRING, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
+        int sbAppendIntRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_APPEND, ConstantJavaDescriptor.I__LJAVA_LANG_STRINGBUILDER);
+        int sbToStringRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_TO_STRING, ConstantJavaDescriptor.__LJAVA_LANG_STRING);
 
         code.newInstance(sbClassRef)    // new StringBuilder
                 .dup()                      // duplicate
@@ -677,7 +677,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         classWriter.addMethod(
                 0x0008, // ACC_STATIC
                 "<clinit>",
-                ConstantJavaDescriptor.DESCRIPTOR___V,
+                ConstantJavaDescriptor.__V,
                 code.toByteArray(),
                 maxStack,
                 0  // max locals (static method)
@@ -720,7 +720,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         // Generate: public static EnumType[] values()
         String arrayDescriptor = "[L" + internalClassName + ";";
         int arrayFieldRef = cp.addFieldRef(internalClassName, "$VALUES", arrayDescriptor);
-        int cloneRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, "clone", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_OBJECT);
+        int cloneRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, "clone", ConstantJavaDescriptor.__LJAVA_LANG_OBJECT);
 
         CodeBuilder code = new CodeBuilder();
         code.getstatic(arrayFieldRef)   // load $VALUES

@@ -116,49 +116,49 @@ public final class IdentifierProcessor extends BaseAstProcessor<Swc4jAstIdent> {
                 switch (localVar.type()) {
                     case ConstantJavaType.ABBR_INTEGER -> {
                         if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_INTEGER);
+                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.I__LJAVA_LANG_INTEGER);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case ConstantJavaType.ABBR_BOOLEAN -> {
                         if (ConstantJavaType.LJAVA_LANG_BOOLEAN.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_Z__LJAVA_LANG_BOOLEAN);
+                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.Z__LJAVA_LANG_BOOLEAN);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case ConstantJavaType.ABBR_BYTE -> {
                         if (ConstantJavaType.LJAVA_LANG_BYTE.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_B__LJAVA_LANG_BYTE);
+                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.B__LJAVA_LANG_BYTE);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case ConstantJavaType.ABBR_CHARACTER -> {
                         if (ConstantJavaType.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_CHARACTER);
+                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.C__LJAVA_LANG_CHARACTER);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case ConstantJavaType.ABBR_SHORT -> {
                         if (ConstantJavaType.LJAVA_LANG_SHORT.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_S__LJAVA_LANG_SHORT);
+                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.S__LJAVA_LANG_SHORT);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case ConstantJavaType.ABBR_LONG -> {
                         if (ConstantJavaType.LJAVA_LANG_LONG.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_LONG);
+                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.J__LJAVA_LANG_LONG);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case ConstantJavaType.ABBR_FLOAT -> {
                         if (ConstantJavaType.LJAVA_LANG_FLOAT.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_F__LJAVA_LANG_FLOAT);
+                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.F__LJAVA_LANG_FLOAT);
                             code.invokestatic(valueOfRef);
                         }
                     }
                     case ConstantJavaType.ABBR_DOUBLE -> {
                         if (ConstantJavaType.LJAVA_LANG_DOUBLE.equals(returnTypeInfo.descriptor())) {
-                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_DOUBLE);
+                            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.D__LJAVA_LANG_DOUBLE);
                             code.invokestatic(valueOfRef);
                         }
                     }
@@ -173,34 +173,34 @@ public final class IdentifierProcessor extends BaseAstProcessor<Swc4jAstIdent> {
                     String targetDescriptor = returnTypeInfo.type().getPrimitiveDescriptor();
                     switch (targetDescriptor) {
                         case ConstantJavaType.ABBR_INTEGER: // int
-                            int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                            int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
                             code.invokevirtual(intValueRef);
                             break;
                         case ConstantJavaType.ABBR_LONG: // long
-                            int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.DESCRIPTOR___J);
+                            int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.__J);
                             code.invokevirtual(longValueRef);
                             break;
                         case ConstantJavaType.ABBR_DOUBLE: // double
-                            int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___D);
+                            int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.__D);
                             code.invokevirtual(doubleValueRef);
                             break;
                         case ConstantJavaType.ABBR_FLOAT: // float
-                            int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___F);
+                            int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.__F);
                             code.invokevirtual(floatValueRef);
                             break;
                         case ConstantJavaType.ABBR_BYTE: // byte
-                            int byteValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_BYTE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___B);
+                            int byteValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_BYTE_VALUE, ConstantJavaDescriptor.__B);
                             code.invokevirtual(byteValueRef);
                             break;
                         case ConstantJavaType.ABBR_SHORT: // short
-                            int shortValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_SHORT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___S);
+                            int shortValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_SHORT_VALUE, ConstantJavaDescriptor.__S);
                             code.invokevirtual(shortValueRef);
                             break;
                         case ConstantJavaType.ABBR_BOOLEAN: // boolean
                             // BigInteger.equals(ZERO) - zero is false, non-zero is true
                             int zeroFieldRef = cp.addFieldRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, "ZERO", ConstantJavaType.LJAVA_MATH_BIGINTEGER);
                             code.getstatic(zeroFieldRef);
-                            int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+                            int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
                             code.invokevirtual(equalsRef);
                             // Invert: equals returns 1 for zero (false), 0 for non-zero (true)
                             code.iconst(1);

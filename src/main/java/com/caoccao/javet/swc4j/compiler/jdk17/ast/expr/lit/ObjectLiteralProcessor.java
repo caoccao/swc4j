@@ -85,9 +85,9 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
 
         // Create new LinkedHashMap instance
         int hashMapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP);
-        int hashMapInit = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+        int hashMapInit = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
         int hashMapPut = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_PUT,
-                ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                ConstantJavaDescriptor.LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
 
         // Stack: []
         code.newInstance(hashMapClass);  // Stack: [map]
@@ -191,7 +191,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
 
                 // Call map.putAll(spreadMap) to merge all properties
                 int putAllRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_PUT_ALL,
-                        ConstantJavaDescriptor.DESCRIPTOR_LJAVA_UTIL_MAP__V);
+                        ConstantJavaDescriptor.LJAVA_UTIL_MAP__V);
                 code.invokevirtual(putAllRef); // Stack: [map]
                 // Note: putAll returns void, so no need to pop
             } else if (prop instanceof Swc4jAstMethodProp methodProp) {
@@ -305,7 +305,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
 
                     // Call String.valueOf(Object) to convert to String
                     int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_VALUE_OF,
-                            ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
+                            ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
                     code.invokestatic(valueOfRef);
                     // Stack: [String]
                 }
@@ -343,21 +343,21 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
         if (ConstantJavaType.LJAVA_LANG_LONG.equals(expectedKeyType) || ConstantJavaType.ABBR_LONG.equals(expectedKeyType)) {
             long longValue = (long) value;
             code.ldc2_w(cp.addLong(longValue));
-            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_LONG);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.J__LJAVA_LANG_LONG);
             code.invokestatic(valueOfRef);
         }
         // For explicit Short type annotation, always use Short
         else if (ConstantJavaType.LJAVA_LANG_SHORT.equals(expectedKeyType) || ConstantJavaType.ABBR_SHORT.equals(expectedKeyType)) {
             short shortValue = (short) value;
             code.iconst(shortValue);
-            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_S__LJAVA_LANG_SHORT);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.S__LJAVA_LANG_SHORT);
             code.invokestatic(valueOfRef);
         }
         // For explicit Byte type annotation, always use Byte
         else if (ConstantJavaType.LJAVA_LANG_BYTE.equals(expectedKeyType) || ConstantJavaType.ABBR_BYTE.equals(expectedKeyType)) {
             byte byteValue = (byte) value;
             code.iconst(byteValue);
-            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_B__LJAVA_LANG_BYTE);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.B__LJAVA_LANG_BYTE);
             code.invokestatic(valueOfRef);
         }
         // For explicit Float type annotation, always use Float
@@ -368,7 +368,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
             } else {
                 code.ldc(cp.addFloat(floatValue));
             }
-            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_F__LJAVA_LANG_FLOAT);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.F__LJAVA_LANG_FLOAT);
             code.invokestatic(valueOfRef);
         }
         // For explicit Double type annotation, always use Double
@@ -378,7 +378,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
             } else {
                 code.ldc2_w(cp.addDouble(value));
             }
-            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_DOUBLE);
+            int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.D__LJAVA_LANG_DOUBLE);
             code.invokestatic(valueOfRef);
         }
         // For generic number type (primitive D) or Integer, infer from actual value
@@ -396,12 +396,12 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
                     } else {
                         code.ldc(cp.addInteger(intValue));
                     }
-                    int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_INTEGER);
+                    int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.I__LJAVA_LANG_INTEGER);
                     code.invokestatic(valueOfRef);
                 } else {
                     // Doesn't fit in int → Long
                     code.ldc2_w(cp.addLong(longValue));
-                    int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_LONG);
+                    int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.J__LJAVA_LANG_LONG);
                     code.invokestatic(valueOfRef);
                 }
             } else {
@@ -411,7 +411,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
                 } else {
                     code.ldc2_w(cp.addDouble(value));
                 }
-                int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_DOUBLE);
+                int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.D__LJAVA_LANG_DOUBLE);
                 code.invokestatic(valueOfRef);
             }
         }

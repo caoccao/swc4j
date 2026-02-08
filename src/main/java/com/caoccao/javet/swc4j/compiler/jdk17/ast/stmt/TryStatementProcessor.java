@@ -233,7 +233,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
             case "message" -> {
                 // exception.getMessage() -> String
                 code.aload(exceptionSlot);
-                int getMessageRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, "getMessage", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
+                int getMessageRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, "getMessage", ConstantJavaDescriptor.__LJAVA_LANG_STRING);
                 code.invokevirtual(getMessageRef);
                 code.astore(variable.index());
             }
@@ -241,7 +241,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
                 // Arrays.toString(exception.getStackTrace()) -> String
                 code.aload(exceptionSlot);
                 int getStackTraceRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, "getStackTrace",
-                        ConstantJavaDescriptor.DESCRIPTOR___ARRAY_LJAVA_LANG_STACKTRACEELEMENT);
+                        ConstantJavaDescriptor.__ARRAY_LJAVA_LANG_STACKTRACEELEMENT);
                 code.invokevirtual(getStackTraceRef);
                 int arraysToStringRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYS, ConstantJavaMethod.METHOD_TO_STRING,
                         "([Ljava/lang/Object;)Ljava/lang/String;");
@@ -251,7 +251,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
             case "cause" -> {
                 // exception.getCause() -> Throwable
                 code.aload(exceptionSlot);
-                int getCauseRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, "getCause", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_THROWABLE);
+                int getCauseRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, "getCause", ConstantJavaDescriptor.__LJAVA_LANG_THROWABLE);
                 code.invokevirtual(getCauseRef);
                 code.astore(variable.index());
             }
@@ -271,7 +271,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
                 code.aload(exceptionSlot);
                 code.checkcast(jsErrorClass);
                 int getNameRef = cp.addMethodRef("com/caoccao/javet/swc4j/exceptions/JsError", "getName",
-                        ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
+                        ConstantJavaDescriptor.__LJAVA_LANG_STRING);
                 code.invokevirtual(getNameRef);
                 code.astore(variable.index());
                 code.gotoLabel(0); // Jump to end
@@ -282,9 +282,9 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
                 int elseLabel = code.getCurrentOffset();
                 code.patchShort(elseJumpPos, elseLabel - elseJumpOpcodePos);
                 code.aload(exceptionSlot);
-                int getClassRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, "getClass", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_CLASS);
+                int getClassRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, "getClass", ConstantJavaDescriptor.__LJAVA_LANG_CLASS);
                 code.invokevirtual(getClassRef);
-                int getSimpleNameRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CLASS, "getSimpleName", ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
+                int getSimpleNameRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CLASS, "getSimpleName", ConstantJavaDescriptor.__LJAVA_LANG_STRING);
                 code.invokevirtual(getSimpleNameRef);
                 code.astore(variable.index());
 

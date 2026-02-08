@@ -69,49 +69,49 @@ public final class TsAsExpressionProcessor extends BaseAstProcessor<Swc4jAstTsAs
                 case ConstantJavaType.ABBR_INTEGER -> {
                     int integerClass = cp.addClass(ConstantJavaType.JAVA_LANG_INTEGER);
                     code.checkcast(integerClass);
-                    int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                    int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
                     code.invokevirtual(intValueRef);
                 }
                 case ConstantJavaType.ABBR_LONG -> {
                     int longClass = cp.addClass(ConstantJavaType.JAVA_LANG_LONG);
                     code.checkcast(longClass);
-                    int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.DESCRIPTOR___J);
+                    int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.__J);
                     code.invokevirtual(longValueRef);
                 }
                 case ConstantJavaType.ABBR_DOUBLE -> {
                     int doubleClass = cp.addClass(ConstantJavaType.JAVA_LANG_DOUBLE);
                     code.checkcast(doubleClass);
-                    int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___D);
+                    int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.__D);
                     code.invokevirtual(doubleValueRef);
                 }
                 case ConstantJavaType.ABBR_FLOAT -> {
                     int floatClass = cp.addClass(ConstantJavaType.JAVA_LANG_FLOAT);
                     code.checkcast(floatClass);
-                    int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___F);
+                    int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.__F);
                     code.invokevirtual(floatValueRef);
                 }
                 case ConstantJavaType.ABBR_BYTE -> {
                     int byteClass = cp.addClass(ConstantJavaType.JAVA_LANG_BYTE);
                     code.checkcast(byteClass);
-                    int byteValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_BYTE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___B);
+                    int byteValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_BYTE_VALUE, ConstantJavaDescriptor.__B);
                     code.invokevirtual(byteValueRef);
                 }
                 case ConstantJavaType.ABBR_SHORT -> {
                     int shortClass = cp.addClass(ConstantJavaType.JAVA_LANG_SHORT);
                     code.checkcast(shortClass);
-                    int shortValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_SHORT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___S);
+                    int shortValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_SHORT_VALUE, ConstantJavaDescriptor.__S);
                     code.invokevirtual(shortValueRef);
                 }
                 case ConstantJavaType.ABBR_CHARACTER -> {
                     int characterClass = cp.addClass(ConstantJavaType.JAVA_LANG_CHARACTER);
                     code.checkcast(characterClass);
-                    int charValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_CHAR_VALUE, ConstantJavaDescriptor.DESCRIPTOR___C);
+                    int charValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_CHAR_VALUE, ConstantJavaDescriptor.__C);
                     code.invokevirtual(charValueRef);
                 }
                 case ConstantJavaType.ABBR_BOOLEAN -> {
                     int booleanClass = cp.addClass(ConstantJavaType.JAVA_LANG_BOOLEAN);
                     code.checkcast(booleanClass);
-                    int booleanValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_BOOLEAN_VALUE, ConstantJavaDescriptor.DESCRIPTOR___Z);
+                    int booleanValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_BOOLEAN_VALUE, ConstantJavaDescriptor.__Z);
                     code.invokevirtual(booleanValueRef);
                 }
             }

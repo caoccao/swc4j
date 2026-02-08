@@ -228,16 +228,16 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null);
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                 if (ConstantJavaType.LJAVA_LANG_STRING.equals(indexType)) {
-                    int parseIntMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_PARSE_INT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__I);
+                    int parseIntMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_PARSE_INT, ConstantJavaDescriptor.LJAVA_LANG_STRING__I);
                     code.invokestatic(parseIntMethod);
                 }
-                int getMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
+                int getMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.I__LJAVA_LANG_OBJECT);
                 code.invokeinterface(getMethod, 2);
                 return;
             }
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
                 if (ConstantJavaMethod.METHOD_LENGTH.equals(propIdent.getSym())) {
-                    int sizeMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                    int sizeMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.__I);
                     code.invokeinterface(sizeMethod, 1);
                     TypeConversionUtils.boxPrimitiveType(code, classWriter, ConstantJavaType.ABBR_INTEGER, ConstantJavaType.LJAVA_LANG_INTEGER);
                     return;
@@ -246,7 +246,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
         } else if (ConstantJavaType.LJAVA_LANG_STRING.equals(objType)) {
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
                 if (ConstantJavaMethod.METHOD_LENGTH.equals(propIdent.getSym())) {
-                    int lengthMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LENGTH, ConstantJavaDescriptor.DESCRIPTOR___I);
+                    int lengthMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LENGTH, ConstantJavaDescriptor.__I);
                     code.invokevirtual(lengthMethod);
                     TypeConversionUtils.boxPrimitiveType(code, classWriter, ConstantJavaType.ABBR_INTEGER, ConstantJavaType.LJAVA_LANG_INTEGER);
                     return;
@@ -262,14 +262,14 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     String wrapperType = TypeConversionUtils.getWrapperType(keyType);
                     TypeConversionUtils.boxPrimitiveType(code, classWriter, keyType, wrapperType);
                 }
-                int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                 code.invokevirtual(getMethod);
                 return;
             }
             if (memberExpr.getProp() instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName propIdent) {
                 int keyIndex = cp.addString(propIdent.getSym());
                 code.ldc(keyIndex);
-                int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                 code.invokevirtual(getMethod);
                 return;
             }

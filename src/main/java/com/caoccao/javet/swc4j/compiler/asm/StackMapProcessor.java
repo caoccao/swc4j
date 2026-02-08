@@ -917,7 +917,7 @@ public class StackMapProcessor {
                 String methodDescriptor = (constantPool != null) ? constantPool.getMethodDescriptor(methodIndex) : null;
                 if (methodDescriptor != null) {
                     // Parse descriptor to get argument count and return type
-                    // Format: (args)return e.g., ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__LJAVA_LANG_STRING
+                    // Format: (args)return e.g., ConstantJavaDescriptor.LJAVA_LANG_STRING__LJAVA_LANG_STRING
                     int argCount = countMethodArgSlots(methodDescriptor);
                     String returnType = getReturnType(methodDescriptor);
                     // Pop arguments (and receiver for non-static)

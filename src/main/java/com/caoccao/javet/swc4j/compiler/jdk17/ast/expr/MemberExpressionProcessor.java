@@ -273,12 +273,12 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
                 if (ConstantJavaType.LJAVA_LANG_STRING.equals(indexType)) {
                     // String index -> Integer.parseInt(index)
-                    int parseIntMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_PARSE_INT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__I);
+                    int parseIntMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_PARSE_INT, ConstantJavaDescriptor.LJAVA_LANG_STRING__I);
                     code.invokestatic(parseIntMethod); // Stack: [ArrayList/List, int]
                 }
 
                 // Call List.get(int) via interface method
-                int getMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
+                int getMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.I__LJAVA_LANG_OBJECT);
                 code.invokeinterface(getMethod, 2); // Stack: [Object]
                 return;
             }
@@ -289,7 +289,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 if (ConstantJavaMethod.METHOD_LENGTH.equals(propName)) {
                     // arr.length -> arr.size()
                     compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [ArrayList/List]
-                    int sizeMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                    int sizeMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.__I);
                     code.invokeinterface(sizeMethod, 1); // Stack: [int]
                     return;
                 }
@@ -301,7 +301,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 if (ConstantJavaMethod.METHOD_LENGTH.equals(propName)) {
                     // str.length -> str.length()
                     compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // Stack: [String]
-                    int lengthMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LENGTH, ConstantJavaDescriptor.DESCRIPTOR___I);
+                    int lengthMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LENGTH, ConstantJavaDescriptor.__I);
                     code.invokevirtual(lengthMethod); // Stack: [int]
                     return;
                 }
@@ -330,7 +330,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 }
 
                 // Call LinkedHashMap.get(Object)
-                int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                 code.invokevirtual(getMethod); // Stack: [Object]
                 return;
             }
@@ -351,7 +351,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 code.ldc(keyIndex); // Stack: [LinkedHashMap, "prop"]
 
                 // Call LinkedHashMap.get(Object)
-                int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                 code.invokevirtual(getMethod); // Stack: [Object]
                 return;
             }

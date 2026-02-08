@@ -83,7 +83,7 @@ public final class TemplateLiteralProcessor extends BaseAstProcessor<Swc4jAstTpl
         int sbClass = cp.addClass(ConstantJavaType.JAVA_LANG_STRINGBUILDER);
         code.newInstance(sbClass);
         code.dup();
-        int sbInit = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+        int sbInit = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
         code.invokespecial(sbInit);
 
         // Append all quasis and expressions
@@ -116,7 +116,7 @@ public final class TemplateLiteralProcessor extends BaseAstProcessor<Swc4jAstTpl
                 }
 
                 // Convert to String using String.valueOf(Object)
-                int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
+                int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
                 code.invokestatic(valueOfRef);
 
                 // Append the String
@@ -126,7 +126,7 @@ public final class TemplateLiteralProcessor extends BaseAstProcessor<Swc4jAstTpl
         }
 
         // Call toString() to get the final String
-        int toStringRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_TO_STRING, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_LANG_STRING);
+        int toStringRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRINGBUILDER, ConstantJavaMethod.METHOD_TO_STRING, ConstantJavaDescriptor.__LJAVA_LANG_STRING);
         code.invokevirtual(toStringRef);
     }
 }

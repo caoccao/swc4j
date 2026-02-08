@@ -64,7 +64,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
         }
 
         // Call BigInteger.valueOf(long)
-        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_MATH_BIGINTEGER);
+        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.J__LJAVA_MATH_BIGINTEGER);
         code.invokestatic(valueOfRef);
     }
 
@@ -429,7 +429,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
                     if (isBigInteger(rightType)) {
                         // Convert BigInteger to int using intValue()
-                        int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                        int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
                         code.invokevirtual(intValueRef);
                     } else {
                         TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
@@ -437,7 +437,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.pow(int)
-                    int powRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_POW, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_MATH_BIGINTEGER);
+                    int powRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_POW, ConstantJavaDescriptor.I__LJAVA_MATH_BIGINTEGER);
                     code.invokevirtual(powRef);
                 } else {
                     resultType = ConstantJavaType.ABBR_DOUBLE; // Math.pow returns double
@@ -453,7 +453,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), ConstantJavaType.ABBR_DOUBLE);
 
                     // Call Math.pow(double, double)
-                    int mathPowRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_MATH, ConstantJavaMethod.METHOD_POW, ConstantJavaDescriptor.DESCRIPTOR_D_D__D);
+                    int mathPowRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_MATH, ConstantJavaMethod.METHOD_POW, ConstantJavaDescriptor.D_D__D);
                     code.invokestatic(mathPowRef);
                 }
             }
@@ -475,7 +475,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
                     if (isBigInteger(rightType)) {
                         // Convert BigInteger to int using intValue()
-                        int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                        int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
                         code.invokevirtual(intValueRef);
                     } else {
                         TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
@@ -483,7 +483,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.shiftLeft(int)
-                    int shiftLeftRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_SHIFT_LEFT, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_MATH_BIGINTEGER);
+                    int shiftLeftRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_SHIFT_LEFT, ConstantJavaDescriptor.I__LJAVA_MATH_BIGINTEGER);
                     code.invokevirtual(shiftLeftRef);
                 } else {
                     // Determine the result type based on left operand
@@ -529,7 +529,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
                     if (isBigInteger(rightType)) {
                         // Convert BigInteger to int using intValue()
-                        int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                        int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
                         code.invokevirtual(intValueRef);
                     } else {
                         TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
@@ -537,7 +537,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.shiftRight(int)
-                    int shiftRightRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_SHIFT_RIGHT, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_MATH_BIGINTEGER);
+                    int shiftRightRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_SHIFT_RIGHT, ConstantJavaDescriptor.I__LJAVA_MATH_BIGINTEGER);
                     code.invokevirtual(shiftRightRef);
                 } else {
                     // Determine the result type based on left operand
@@ -584,7 +584,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
                     if (isBigInteger(rightType)) {
                         // Convert BigInteger to int using intValue()
-                        int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                        int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
                         code.invokevirtual(intValueRef);
                     } else {
                         TypeConversionUtils.unboxWrapperType(code, classWriter, rightType);
@@ -592,7 +592,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.shiftRight(int) - note: this is signed shift
-                    int shiftRightRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_SHIFT_RIGHT, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_MATH_BIGINTEGER);
+                    int shiftRightRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_SHIFT_RIGHT, ConstantJavaDescriptor.I__LJAVA_MATH_BIGINTEGER);
                     code.invokevirtual(shiftRightRef);
                 } else {
                     // Determine the result type based on left operand
@@ -795,7 +795,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.equals()
-                    int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+                    int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
                     code.invokevirtual(equalsRef);
                 } else {
                     // Determine the comparison type (widen to common type for primitives)
@@ -915,7 +915,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                     }
 
                     // Call BigInteger.equals() and invert result
-                    int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+                    int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
                     code.invokevirtual(equalsRef);
                     // Invert: 0 -> 1, 1 -> 0
                     code.iconst(1);
@@ -1398,7 +1398,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         // Convert to String if not already a String
                         if (!ConstantJavaType.LJAVA_LANG_STRING.equals(leftType)) {
                             int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_VALUE_OF,
-                                    ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
+                                    ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
                             code.invokestatic(valueOfRef);
                         }
 
@@ -1410,7 +1410,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
                         // Call Map.containsKey(Object) -> boolean
                         int containsKeyRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, "containsKey",
-                                ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+                                ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
                         code.invokeinterface(containsKeyRef, 2);
                     }
                     case LIST -> {
@@ -1428,7 +1428,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
 
                         // Get list size: List.size() -> int
-                        int sizeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                        int sizeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.__I);
                         code.invokeinterface(sizeRef, 1);
 
                         // Now stack has: [index, size]
@@ -1451,7 +1451,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
                         compiler.getExpressionProcessor().generate(code, classWriter, binExpr.getRight(), null);
 
                         // Get string length: String.length() -> int
-                        int lengthRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LENGTH, ConstantJavaDescriptor.DESCRIPTOR___I);
+                        int lengthRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LENGTH, ConstantJavaDescriptor.__I);
                         code.invokevirtual(lengthRef);
 
                         // Now stack has: [index, length]
@@ -1619,31 +1619,31 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
             }
             case ConstantJavaType.LJAVA_LANG_INTEGER -> {
                 // Unbox Integer to int
-                int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
                 code.invokevirtual(intValueRef);
             }
             case ConstantJavaType.LJAVA_LANG_LONG -> {
                 // Unbox Long to long, then convert to int
-                int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.DESCRIPTOR___J);
+                int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.__J);
                 code.invokevirtual(longValueRef);
                 code.l2i();
             }
             case ConstantJavaType.LJAVA_LANG_FLOAT -> {
                 // Unbox Float to float, then check for whole number and convert to int
-                int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___F);
+                int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.__F);
                 code.invokevirtual(floatValueRef);
                 generateFloatToIntWithWholeCheck(code, classWriter);
             }
             case ConstantJavaType.LJAVA_LANG_DOUBLE -> {
                 // Unbox Double to double, then check for whole number and convert to int
-                int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___D);
+                int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.__D);
                 code.invokevirtual(doubleValueRef);
                 generateDoubleToIntWithWholeCheck(code, classWriter);
             }
             default -> {
                 // For other object types, convert to String first, then safely parse
                 int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_VALUE_OF,
-                        ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
+                        ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
                 code.invokestatic(valueOfRef);
                 generateSafeStringToInt(code, classWriter);
             }
@@ -1844,7 +1844,7 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
 
         // Try block: call Integer.parseInt
         int tryStart = code.getCurrentOffset();
-        int parseIntRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_PARSE_INT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__I);
+        int parseIntRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_PARSE_INT, ConstantJavaDescriptor.LJAVA_LANG_STRING__I);
         code.invokestatic(parseIntRef);                  // [int]
         int tryEnd = code.getCurrentOffset();
 

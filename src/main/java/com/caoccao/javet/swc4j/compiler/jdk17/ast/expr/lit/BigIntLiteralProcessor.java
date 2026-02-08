@@ -57,27 +57,27 @@ public final class BigIntLiteralProcessor extends BaseAstProcessor<Swc4jAstBigIn
 
         switch (descriptor) {
             case ConstantJavaType.ABBR_INTEGER: // int
-                int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I);
+                int intValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
                 code.invokevirtual(intValueRef);
                 break;
             case ConstantJavaType.ABBR_LONG: // long
-                int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.DESCRIPTOR___J);
+                int longValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.__J);
                 code.invokevirtual(longValueRef);
                 break;
             case ConstantJavaType.ABBR_DOUBLE: // double
-                int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___D);
+                int doubleValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.__D);
                 code.invokevirtual(doubleValueRef);
                 break;
             case ConstantJavaType.ABBR_FLOAT: // float
-                int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___F);
+                int floatValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.__F);
                 code.invokevirtual(floatValueRef);
                 break;
             case ConstantJavaType.ABBR_BYTE: // byte
-                int byteValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_BYTE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___B);
+                int byteValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_BYTE_VALUE, ConstantJavaDescriptor.__B);
                 code.invokevirtual(byteValueRef);
                 break;
             case ConstantJavaType.ABBR_SHORT: // short
-                int shortValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_SHORT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___S);
+                int shortValueRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_SHORT_VALUE, ConstantJavaDescriptor.__S);
                 code.invokevirtual(shortValueRef);
                 break;
             case ConstantJavaType.ABBR_BOOLEAN: // boolean
@@ -86,7 +86,7 @@ public final class BigIntLiteralProcessor extends BaseAstProcessor<Swc4jAstBigIn
                 int zeroFieldRef = cp.addFieldRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, "ZERO", ConstantJavaType.LJAVA_MATH_BIGINTEGER);
                 code.getstatic(zeroFieldRef); // Push BigInteger.ZERO
                 // Stack: [BigInteger, BigInteger.ZERO]
-                int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+                int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
                 code.invokevirtual(equalsRef); // Returns 1 if equal, 0 if not
                 // Stack: [boolean] where 1=equal (false for our purposes), 0=not equal (true for our purposes)
                 // We need to invert: 1→0, 0→1

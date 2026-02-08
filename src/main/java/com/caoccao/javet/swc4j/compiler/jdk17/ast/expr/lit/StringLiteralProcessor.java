@@ -67,14 +67,14 @@ public final class StringLiteralProcessor extends BaseAstProcessor<Swc4jAstStr> 
                 }
                 // Box to Character if needed
                 if (returnTypeInfo.type() == ReturnType.OBJECT && ConstantJavaType.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())) {
-                    int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_CHARACTER);
+                    int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.C__LJAVA_LANG_CHARACTER);
                     code.invokestatic(valueOfRef);
                 }
             } else {
                 // Empty string, use null character
                 code.iconst(0);
                 if (returnTypeInfo.type() == ReturnType.OBJECT && ConstantJavaType.LJAVA_LANG_CHARACTER.equals(returnTypeInfo.descriptor())) {
-                    int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_C__LJAVA_LANG_CHARACTER);
+                    int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.C__LJAVA_LANG_CHARACTER);
                     code.invokestatic(valueOfRef);
                 }
             }

@@ -122,7 +122,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                             compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null); // Stack: [ArrayList, index]
 
                             // Call ArrayList.remove(int)
-                            int removeMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
+                            int removeMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.I__LJAVA_LANG_OBJECT);
                             code.invokevirtual(removeMethod); // Stack: [removedObject]
                             // Delete expression returns true in JavaScript, but we'll just leave the removed object
                             // Actually, delete should return boolean true
@@ -146,7 +146,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                                 }
                             }
 
-                            int removeMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+                            int removeMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
                             code.invokeinterface(removeMethod, 2); // Stack: [removedObject]
                             code.pop(); // Pop the removed object
                             code.iconst(1); // Push true (1)
@@ -183,7 +183,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                             int longIndex = cp.addLong(longValue);
                             code.ldc2_w(longIndex);
                         }
-                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_J__LJAVA_LANG_LONG);
+                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.J__LJAVA_LANG_LONG);
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && ConstantJavaType.LJAVA_LANG_INTEGER.equals(returnTypeInfo.descriptor())) {
@@ -195,21 +195,21 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                             int intIndex = cp.addInteger(intValue);
                             code.ldc(intIndex);
                         }
-                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_INTEGER);
+                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.I__LJAVA_LANG_INTEGER);
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && ConstantJavaType.LJAVA_LANG_BYTE.equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with a Byte wrapper
                         byte byteValue = (byte) -(int) value;
                         code.iconst(byteValue);
-                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_B__LJAVA_LANG_BYTE);
+                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.B__LJAVA_LANG_BYTE);
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && ConstantJavaType.LJAVA_LANG_SHORT.equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with a Short wrapper
                         short shortValue = (short) -(int) value;
                         code.iconst(shortValue);
-                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_S__LJAVA_LANG_SHORT);
+                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.S__LJAVA_LANG_SHORT);
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && ConstantJavaType.LJAVA_LANG_FLOAT.equals(returnTypeInfo.descriptor())) {
@@ -221,7 +221,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                             int floatIndex = cp.addFloat(floatValue);
                             code.ldc(floatIndex);
                         }
-                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_F__LJAVA_LANG_FLOAT);
+                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.F__LJAVA_LANG_FLOAT);
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && ConstantJavaType.LJAVA_LANG_DOUBLE.equals(returnTypeInfo.descriptor())) {
@@ -233,7 +233,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                             int doubleIndex = cp.addDouble(doubleValue);
                             code.ldc2_w(doubleIndex);
                         }
-                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.DESCRIPTOR_D__LJAVA_LANG_DOUBLE);
+                        int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.D__LJAVA_LANG_DOUBLE);
                         code.invokestatic(valueOfRef);
                     } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
                         // Integer value
@@ -317,7 +317,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                     // Handle BigInteger negation
                     if (ConstantJavaType.LJAVA_MATH_BIGINTEGER.equals(argType)) {
                         // Call BigInteger.negate() method
-                        int negateRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_NEGATE, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_MATH_BIGINTEGER);
+                        int negateRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_NEGATE, ConstantJavaDescriptor.__LJAVA_MATH_BIGINTEGER);
                         code.invokevirtual(negateRef);
                     } else {
                         // Check if argType is a wrapper before unboxing
@@ -415,7 +415,7 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
 
                 if (ConstantJavaType.LJAVA_MATH_BIGINTEGER.equals(argType)) {
                     compiler.getExpressionProcessor().generate(code, classWriter, arg, null);
-                    int notRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_NOT, ConstantJavaDescriptor.DESCRIPTOR___LJAVA_MATH_BIGINTEGER);
+                    int notRef = cp.addMethodRef(ConstantJavaType.JAVA_MATH_BIGINTEGER, ConstantJavaMethod.METHOD_NOT, ConstantJavaDescriptor.__LJAVA_MATH_BIGINTEGER);
                     code.invokevirtual(notRef);
                     return;
                 }

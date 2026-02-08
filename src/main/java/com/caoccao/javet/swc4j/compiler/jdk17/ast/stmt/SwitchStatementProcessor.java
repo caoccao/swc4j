@@ -590,35 +590,35 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
 
         // Boxed type switches: unbox then use integer switch
         if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___I, labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I, labelName, returnTypeInfo);
             return;
         }
         if (ConstantJavaType.LJAVA_LANG_BYTE.equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_BYTE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___B, labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_BYTE, ConstantJavaMethod.METHOD_BYTE_VALUE, ConstantJavaDescriptor.__B, labelName, returnTypeInfo);
             return;
         }
         if (ConstantJavaType.LJAVA_LANG_SHORT.equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_SHORT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___S, labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_SHORT, ConstantJavaMethod.METHOD_SHORT_VALUE, ConstantJavaDescriptor.__S, labelName, returnTypeInfo);
             return;
         }
         if (ConstantJavaType.LJAVA_LANG_CHARACTER.equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_CHAR_VALUE, ConstantJavaDescriptor.DESCRIPTOR___C, labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_CHARACTER, ConstantJavaMethod.METHOD_CHAR_VALUE, ConstantJavaDescriptor.__C, labelName, returnTypeInfo);
             return;
         }
         if (ConstantJavaType.LJAVA_LANG_BOOLEAN.equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_BOOLEAN_VALUE, ConstantJavaDescriptor.DESCRIPTOR___Z, labelName, returnTypeInfo);
+            generateBoxedIntegerSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_BOOLEAN, ConstantJavaMethod.METHOD_BOOLEAN_VALUE, ConstantJavaDescriptor.__Z, labelName, returnTypeInfo);
             return;
         }
         if (ConstantJavaType.LJAVA_LANG_LONG.equals(discriminantType)) {
-            generateBoxedLongSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.DESCRIPTOR___J, labelName, returnTypeInfo);
+            generateBoxedLongSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_LONG, ConstantJavaMethod.METHOD_LONG_VALUE, ConstantJavaDescriptor.__J, labelName, returnTypeInfo);
             return;
         }
         if (ConstantJavaType.LJAVA_LANG_FLOAT.equals(discriminantType)) {
-            generateBoxedFloatSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.DESCRIPTOR___F, labelName, returnTypeInfo);
+            generateBoxedFloatSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_FLOAT, ConstantJavaMethod.METHOD_FLOAT_VALUE, ConstantJavaDescriptor.__F, labelName, returnTypeInfo);
             return;
         }
         if (ConstantJavaType.LJAVA_LANG_DOUBLE.equals(discriminantType)) {
-            generateBoxedDoubleSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.DESCRIPTOR___D, labelName, returnTypeInfo);
+            generateBoxedDoubleSwitch(code, classWriter, switchStmt, ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_DOUBLE_VALUE, ConstantJavaDescriptor.__D, labelName, returnTypeInfo);
             return;
         }
 
@@ -829,7 +829,7 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
 
         // Call ordinal() method to get int value
         // ordinal() is defined in java.lang.Enum and returns int
-        int ordinalRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_ENUM, "ordinal", ConstantJavaDescriptor.DESCRIPTOR___I);
+        int ordinalRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_ENUM, "ordinal", ConstantJavaDescriptor.__I);
         code.invokevirtual(ordinalRef);
 
         // Now use integer switch with the ordinal value on stack
@@ -1203,8 +1203,8 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
             Map<String, Integer> caseLabelToPosition) {
         var cp = classWriter.getConstantPool();
 
-        int hashCodeRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "hashCode", ConstantJavaDescriptor.DESCRIPTOR___I);
-        int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+        int hashCodeRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "hashCode", ConstantJavaDescriptor.__I);
+        int equalsRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_EQUALS, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
 
         // Generate hashCode() call
         code.aload(strLocal);

@@ -232,9 +232,9 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
         int tempListSlot = getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_LIST);
         code.astore(tempListSlot);
 
-        int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_I__LJAVA_LANG_OBJECT);
-        int listSizeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.DESCRIPTOR___I);
-        int listAddRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__Z);
+        int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.I__LJAVA_LANG_OBJECT);
+        int listSizeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SIZE, ConstantJavaDescriptor.__I);
+        int listAddRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
 
         int restStartIndex = 0;
 
@@ -668,8 +668,8 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
         int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_MAP);
         code.astore(tempMapSlot);
 
-        int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        int mapRemoveRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
+        int mapRemoveRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_REMOVE, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
 
         List<String> extractedKeys = new ArrayList<>();
 
@@ -771,7 +771,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
 
             // Create new LinkedHashMap as copy of source map
             int linkedHashMapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP);
-            int linkedHashMapInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_UTIL_MAP__V);
+            int linkedHashMapInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.LJAVA_UTIL_MAP__V);
             code.newInstance(linkedHashMapClass);
             code.dup();
             code.aload(sourceSlot);
@@ -816,7 +816,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             if (isArrayRest) {
                 // Create new ArrayList
                 int arrayListClass = cp.addClass(ConstantJavaType.JAVA_UTIL_ARRAYLIST);
-                int arrayListInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.DESCRIPTOR___V);
+                int arrayListInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
                 code.newInstance(arrayListClass);
                 code.dup();
                 code.invokespecial(arrayListInitRef);

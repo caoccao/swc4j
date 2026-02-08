@@ -110,7 +110,7 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
         // aload <resource>
         code.aload(resourceSlot);
         // invokeinterface AutoCloseable.close:()V
-        int closeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_LANG_AUTOCLOSEABLE, "close", ConstantJavaDescriptor.DESCRIPTOR___V);
+        int closeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_LANG_AUTOCLOSEABLE, "close", ConstantJavaDescriptor.__V);
         code.invokeinterface(closeRef, 1);
         // skip:
         int skipPc = code.getCurrentOffset();
@@ -133,7 +133,7 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
         // try { resource.close() }
         int tryCloseStartPc = code.getCurrentOffset();
         code.aload(resourceSlot);
-        int closeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_LANG_AUTOCLOSEABLE, "close", ConstantJavaDescriptor.DESCRIPTOR___V);
+        int closeRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_LANG_AUTOCLOSEABLE, "close", ConstantJavaDescriptor.__V);
         code.invokeinterface(closeRef, 1);
         int tryCloseEndPc = code.getCurrentOffset();
 
