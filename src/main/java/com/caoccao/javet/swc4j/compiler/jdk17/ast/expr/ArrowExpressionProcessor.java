@@ -19,8 +19,6 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.pat.*;
 import com.caoccao.javet.swc4j.ast.stmt.*;
@@ -36,6 +34,8 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
@@ -513,18 +513,6 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
     }
 
     /**
-     * Extract property name from ISwc4jAstPropName.
-     */
-    private String extractPropertyName(ISwc4jAstPropName propName) {
-        if (propName instanceof Swc4jAstIdentName identName) {
-            return identName.getSym();
-        } else if (propName instanceof Swc4jAstStr str) {
-            return str.getValue();
-        }
-        return null;
-    }
-
-    /**
      * Extract element/value type from a type annotation.
      *
      * @param tsType  the TypeScript type
@@ -691,7 +679,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
                 // Add type conversion/unboxing if needed
                 generateUnboxingIfNeeded(code, classWriter, elementType);
-                storeValueByType(code, localVar.index(), elementType);
+                CodeGeneratorUtils.storeVariable(code, localVar.index(), elementType);
                 currentIndex++;
 
             } else if (elem instanceof Swc4jAstArrayPat nestedArrayPat) {
@@ -761,7 +749,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         // Load captured variables onto stack (skip self-references for now)
         for (CapturedVariable captured : capturedVariables) {
             if (!captured.isSelfReference()) {
-                loadVariable(code, captured.outerSlot(), captured.type());
+                CodeGeneratorUtils.loadParameter(code, captured.outerSlot(), captured.type());
             } else {
                 // For self-references, load null initially
                 code.aconst_null();
@@ -889,7 +877,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         int slot = 1;
         for (CapturedVariable captured : capturedVariables) {
             code.aload(0); // this
-            loadVariable(code, slot, captured.type());
+            CodeGeneratorUtils.loadParameter(code, slot, captured.type());
             int fieldRef = cp.addFieldRef(lambdaClassName, "captured$" + captured.name(), captured.type());
             code.putfield(fieldRef);
             slot += getSlotSize(captured.type());
@@ -980,7 +968,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
                     ReturnTypeInfo defaultTypeInfo = ReturnTypeInfo.of(getSourceCode(), assignPat, paramType);
                     compiler.getExpressionProcessor().generate(code, classWriter, assignPat.getRight(), defaultTypeInfo);
-                    storeValueByType(code, paramVar.index(), paramType);
+                    CodeGeneratorUtils.storeVariable(code, paramVar.index(), paramType);
 
                     int endLabel = code.getCurrentOffset();
                     int ifnonnullOffset = endLabel - ifnonnullOpcodePos;
@@ -1096,7 +1084,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 extractedKeys.add(varName);
                 allocateVariableIfNeeded(context, varName, valueType);
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
-                String keyName = extractPropertyName(keyValueProp.getKey());
+                String keyName = AstUtils.extractPropertyName(keyValueProp.getKey());
                 extractedKeys.add(keyName);
                 ISwc4jAstPat valuePat = keyValueProp.getValue();
                 if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
@@ -1124,10 +1112,10 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
                 // Add type conversion/unboxing if needed
                 generateUnboxingIfNeeded(code, classWriter, valueType);
-                storeValueByType(code, localVar.index(), valueType);
+                CodeGeneratorUtils.storeVariable(code, localVar.index(), valueType);
 
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
-                String keyName = extractPropertyName(keyValueProp.getKey());
+                String keyName = AstUtils.extractPropertyName(keyValueProp.getKey());
                 ISwc4jAstPat valuePat = keyValueProp.getValue();
 
                 // Load map and call get(key)
@@ -1141,7 +1129,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                     LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
                     // Add type conversion/unboxing if needed
                     generateUnboxingIfNeeded(code, classWriter, valueType);
-                    storeValueByType(code, localVar.index(), valueType);
+                    CodeGeneratorUtils.storeVariable(code, localVar.index(), valueType);
                 } else if (valuePat instanceof Swc4jAstArrayPat nestedArrayPat) {
                     // Nested array pattern: { arr: [a, ...rest] }
                     generateArrayPatternExtraction(code, classWriter, context, nestedArrayPat);
@@ -1663,17 +1651,6 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 || interfaceName.equals(ConstantJavaType.JAVA_UTIL_FUNCTION_DOUBLE_FUNCTION);
     }
 
-    private void loadVariable(CodeBuilder code, int slot, String type) {
-        switch (type) {
-            case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE,
-                 ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_SHORT -> code.iload(slot);
-            case ConstantJavaType.ABBR_LONG -> code.lload(slot);
-            case ConstantJavaType.ABBR_FLOAT -> code.fload(slot);
-            case ConstantJavaType.ABBR_DOUBLE -> code.dload(slot);
-            default -> code.aload(slot);
-        }
-    }
-
     private boolean referencesThis(ISwc4jAstBlockStmtOrExpr body) {
         if (body instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr) {
             return true;
@@ -1702,20 +1679,6 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
      */
     public void reset() {
         lambdaCounter = 0;
-    }
-
-    /**
-     * Store value to local variable slot based on type.
-     */
-    private void storeValueByType(CodeBuilder code, int slot, String type) {
-        switch (type) {
-            case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE,
-                 ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_SHORT -> code.istore(slot);
-            case ConstantJavaType.ABBR_LONG -> code.lstore(slot);
-            case ConstantJavaType.ABBR_FLOAT -> code.fstore(slot);
-            case ConstantJavaType.ABBR_DOUBLE -> code.dstore(slot);
-            default -> code.astore(slot);
-        }
     }
 
     private String toInternalName(String typeDescriptor) {

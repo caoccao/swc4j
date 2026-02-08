@@ -22,17 +22,17 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
-import com.caoccao.javet.swc4j.ast.stmt.*;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstDoWhileStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ControlFlowUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
-import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -63,50 +63,6 @@ public final class DoWhileStatementProcessor extends BaseAstProcessor<Swc4jAstDo
      */
     public DoWhileStatementProcessor(ByteCodeCompiler compiler) {
         super(compiler);
-    }
-
-    /**
-     * Check if a statement can fall through (complete normally).
-     * A statement cannot fall through if it always ends with break, return, or throw.
-     * Note: continue CAN fall through to the test, so it's not considered terminal here.
-     */
-    private boolean canFallThrough(ISwc4jAstStmt stmt) {
-        if (stmt instanceof Swc4jAstBreakStmt) {
-            return false; // break always exits
-        }
-        if (stmt instanceof Swc4jAstReturnStmt) {
-            return false; // return always exits
-        }
-        if (stmt instanceof Swc4jAstContinueStmt) {
-            return false; // continue jumps to test, but we handle this separately
-        }
-        if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
-            // Block can fall through if its last statement can fall through
-            var stmts = blockStmt.getStmts();
-            if (stmts.isEmpty()) {
-                return true; // empty block falls through
-            }
-            // Check each statement - if any is terminal, the block doesn't fall through from that point
-            for (ISwc4jAstStmt s : stmts) {
-                if (!canFallThrough(s)) {
-                    return false; // found terminal statement
-                }
-            }
-            return true;
-        }
-        if (stmt instanceof Swc4jAstIfStmt ifStmt) {
-            // If statement falls through if:
-            // - No else branch (then branch might not execute)
-            // - OR both branches can fall through
-            if (ifStmt.getAlt().isEmpty()) {
-                return true; // no else, condition might be false
-            }
-            boolean thenFallsThrough = canFallThrough(ifStmt.getCons());
-            boolean elseFallsThrough = canFallThrough(ifStmt.getAlt().get());
-            return thenFallsThrough || elseFallsThrough;
-        }
-        // Other statements (expressions, var decls, etc.) can fall through
-        return true;
     }
 
     /**
@@ -159,7 +115,7 @@ public final class DoWhileStatementProcessor extends BaseAstProcessor<Swc4jAstDo
 
         // 3. Generate body and check if it can fall through
         compiler.getStatementProcessor().generate(code, classWriter, doWhileStmt.getBody(), returnTypeInfo);
-        boolean bodyCanFallThrough = canFallThrough(doWhileStmt.getBody());
+        boolean bodyCanFallThrough = ControlFlowUtils.canFallThrough(doWhileStmt.getBody());
 
         // 4. Mark test label (continue target - before test evaluation)
         int testLabel = code.getCurrentOffset();
@@ -197,11 +153,7 @@ public final class DoWhileStatementProcessor extends BaseAstProcessor<Swc4jAstDo
                 }
             } else {
                 // Infinite loop: unconditional jump back to body
-                code.gotoLabel(0); // Placeholder
-                int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
-                int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
-                int backwardGotoOffset = bodyLabel - backwardGotoOpcodePos;
-                code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
+                CodeGeneratorUtils.emitBackwardGoto(code, bodyLabel);
             }
         }
         // If body cannot fall through and has no continue, no test or backward jump needed
@@ -211,16 +163,10 @@ public final class DoWhileStatementProcessor extends BaseAstProcessor<Swc4jAstDo
         breakLabel.setTargetOffset(endLabel);
 
         // 7. Patch all break statements to jump to end label
-        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, breakLabel, endLabel);
 
         // 8. Patch all continue statements to jump to test label
-        for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
-            int offset = testLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, continueLabel, testLabel);
 
         // 9. Pop labels from stack
         context.popBreakLabel();

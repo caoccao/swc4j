@@ -25,7 +25,6 @@ import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.pat.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -36,6 +35,9 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ClassHierarchyUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
@@ -112,24 +114,6 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 TypeConversionUtils.convertPrimitiveType(code, fromPrimitive, toPrimitive);
             }
             TypeConversionUtils.boxPrimitiveType(code, classWriter, toPrimitive, targetType);
-        }
-    }
-
-    /**
-     * Extract property name from ISwc4jAstPropName.
-     *
-     * @param propName the property name AST node
-     * @return the extracted property name string
-     * @throws Swc4jByteCodeCompilerException if the property name type is unsupported
-     */
-    private String extractPropertyName(ISwc4jAstPropName propName) throws Swc4jByteCodeCompilerException {
-        if (propName instanceof Swc4jAstIdentName identName) {
-            return identName.getSym();
-        } else if (propName instanceof Swc4jAstStr str) {
-            return str.getValue();
-        } else {
-            throw new Swc4jByteCodeCompilerException(getSourceCode(), propName,
-                    "Unsupported property name type: " + propName.getClass().getName());
         }
     }
 
@@ -781,11 +765,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     code.iinc(iSlot, 1);
 
                     // goto loop start
-                    code.gotoLabel(0);
-                    int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
-                    int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
-                    int backwardGotoOffset = loopStart - backwardGotoOpcodePos;
-                    code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
+                    CodeGeneratorUtils.emitBackwardGoto(code, loopStart);
 
                     // Patch loop exit
                     int loopEnd = code.getCurrentOffset();
@@ -1034,7 +1014,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 String varName = assignProp.getKey().getId().getSym();
                 extractedKeys.add(varName);
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
-                String keyName = extractPropertyName(keyValueProp.getKey());
+                String keyName = AstUtils.extractPropertyName(keyValueProp.getKey());
                 extractedKeys.add(keyName);
             }
             // Rest pattern doesn't add to extracted keys
@@ -1075,7 +1055,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                 }
 
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
-                String keyName = extractPropertyName(keyValueProp.getKey());
+                String keyName = AstUtils.extractPropertyName(keyValueProp.getKey());
                 ISwc4jAstPat valuePat = keyValueProp.getValue();
                 if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
                     String varName = bindingIdent.getId().getSym();
@@ -1177,7 +1157,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     "super property assignment outside of class context");
         }
 
-        String superClassInternalName = resolveSuperClassInternalName(currentClassName);
+        String superClassInternalName = ClassHierarchyUtils.resolveSuperClassInternalName(compiler, currentClassName);
         if (superClassInternalName == null) {
             throw new Swc4jByteCodeCompilerException(
                     getSourceCode(),
@@ -1239,20 +1219,6 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
             }
         }
         return null;
-    }
-
-    private String resolveSuperClassInternalName(String currentClassInternalName) {
-        String qualifiedClassName = currentClassInternalName.replace('/', '.');
-        String superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry()
-                .resolveSuperClass(qualifiedClassName);
-        if (superClassInternalName == null) {
-            int lastSlash = currentClassInternalName.lastIndexOf('/');
-            String simpleName = lastSlash >= 0
-                    ? currentClassInternalName.substring(lastSlash + 1)
-                    : currentClassInternalName;
-            superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
-        }
-        return superClassInternalName;
     }
 
     private JavaTypeInfo resolveTypeInfoByInternalName(String internalName) {

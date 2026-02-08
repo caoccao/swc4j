@@ -28,6 +28,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -105,10 +106,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             // Unbox if Integer wrapper
             String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(indexType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, indexType);
 
             // Call StringApiUtils.charAt(String, int) -> String
             int charAtMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_CHAR_AT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__LJAVA_LANG_STRING);
@@ -133,10 +131,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             compiler.getExpressionProcessor().generate(code, classWriter, indexArg.getExpr(), null);
 
             String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(indexType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, indexType);
 
             // Call StringApiUtils.charCodeAt(String, int) -> int
             int charCodeAtMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_CHAR_CODE_AT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__I);
@@ -156,10 +151,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             compiler.getExpressionProcessor().generate(code, classWriter, indexArg.getExpr(), null);
 
             String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(indexType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, indexType);
 
             // Call String.codePointAt(int) -> int
             int codePointAtMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_CODE_POINT_AT, ConstantJavaDescriptor.I__I);
@@ -232,10 +224,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
                 // Unbox if Integer
                 String fromIndexType = compiler.getTypeResolver().inferTypeFromExpr(fromIndexArg.getExpr());
-                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(fromIndexType)) {
-                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                    code.invokevirtual(intValueMethod);
-                }
+                CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, fromIndexType);
 
                 // Call indexOf(String, int)
                 int indexOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_INDEX_OF, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__I);
@@ -264,10 +253,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, fromIndexArg.getExpr(), null);
 
                 String fromIndexType = compiler.getTypeResolver().inferTypeFromExpr(fromIndexArg.getExpr());
-                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(fromIndexType)) {
-                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                    code.invokevirtual(intValueMethod);
-                }
+                CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, fromIndexType);
 
                 int lastIndexOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LAST_INDEX_OF, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__I);
                 code.invokevirtual(lastIndexOfMethod);
@@ -326,10 +312,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             var cp = classWriter.getConstantPool();
             String lengthType = compiler.getTypeResolver().inferTypeFromExpr(targetLengthArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(lengthType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, lengthType);
 
             if (callExpr.getArgs().size() > 1) {
                 // Custom pad string
@@ -360,10 +343,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             var cp = classWriter.getConstantPool();
             String lengthType = compiler.getTypeResolver().inferTypeFromExpr(targetLengthArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(lengthType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, lengthType);
 
             if (callExpr.getArgs().size() > 1) {
                 // Custom pad string
@@ -398,10 +378,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             // Unbox if Integer
             String countType = compiler.getTypeResolver().inferTypeFromExpr(countArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(countType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, countType);
 
             // Call String.repeat(int) - Available in JDK 11+
             int repeatMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_REPEAT, ConstantJavaDescriptor.I__LJAVA_LANG_STRING);
@@ -472,10 +449,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             var cp = classWriter.getConstantPool();
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, startType);
 
             if (callExpr.getArgs().size() > 1) {
                 // Two arguments: slice(start, end)
@@ -483,10 +457,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, endArg.getExpr(), null);
 
                 String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(endType)) {
-                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                    code.invokevirtual(intValueMethod);
-                }
+                CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, endType);
 
                 // Call StringApiUtils.slice(String, int, int)
                 int sliceMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SLICE, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_II__LJAVA_LANG_STRING);
@@ -519,10 +490,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, limitArg.getExpr(), null);
 
                 String limitType = compiler.getTypeResolver().inferTypeFromExpr(limitArg.getExpr());
-                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(limitType)) {
-                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                    code.invokevirtual(intValueMethod);
-                }
+                CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, limitType);
 
                 // Call StringApiUtils.split(String, String, int) -> ArrayList<String>
                 int splitMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SPLIT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_LJAVA_LANG_STRING_I__LJAVA_UTIL_ARRAYLIST);
@@ -552,10 +520,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, posArg.getExpr(), null);
 
                 String posType = compiler.getTypeResolver().inferTypeFromExpr(posArg.getExpr());
-                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(posType)) {
-                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                    code.invokevirtual(intValueMethod);
-                }
+                CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, posType);
 
                 int startsWithMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_STARTS_WITH, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__Z);
                 code.invokevirtual(startsWithMethod);
@@ -577,10 +542,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             var cp = classWriter.getConstantPool();
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, startType);
 
             if (callExpr.getArgs().size() > 1) {
                 // Two arguments: substr(start, length)
@@ -588,10 +550,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, lengthArg.getExpr(), null);
 
                 String lengthType = compiler.getTypeResolver().inferTypeFromExpr(lengthArg.getExpr());
-                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(lengthType)) {
-                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                    code.invokevirtual(intValueMethod);
-                }
+                CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, lengthType);
 
                 // Call StringApiUtils.substr(String, int, int)
                 int substrMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SUBSTR, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_II__LJAVA_LANG_STRING);
@@ -616,10 +575,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
             var cp = classWriter.getConstantPool();
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, startType);
 
             if (callExpr.getArgs().size() > 1) {
                 // Two arguments: substring(start, end)
@@ -627,10 +583,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, endArg.getExpr(), null);
 
                 String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-                if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(endType)) {
-                    int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                    code.invokevirtual(intValueMethod);
-                }
+                CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, endType);
 
                 // Call StringApiUtils.substring(String, int, int)
                 int substringMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SUBSTRING, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_II__LJAVA_LANG_STRING);

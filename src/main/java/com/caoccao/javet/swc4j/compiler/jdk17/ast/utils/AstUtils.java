@@ -19,7 +19,9 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEntityName;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsQualifiedName;
 
@@ -32,22 +34,18 @@ public final class AstUtils {
     }
 
     /**
-     * Extracts a fully qualified name from an expression.
-     * Handles both simple identifiers and member expressions (e.g., com.example.MyClass).
+     * Extracts a property name string from an AST property name node.
      *
-     * @param expr the expression to extract the qualified name from
-     * @return the fully qualified name, or null if cannot be extracted
+     * @param propName the property name AST node
+     * @return the string representation of the property name
      */
-    public static String extractQualifiedName(ISwc4jAstExpr expr) {
-        if (expr instanceof Swc4jAstIdent ident) {
-            return ident.getSym();
-        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
-            String objPart = extractQualifiedName(memberExpr.getObj());
-            if (objPart != null && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-                return objPart + "." + propIdent.getSym();
-            }
+    public static String extractPropertyName(ISwc4jAstPropName propName) {
+        if (propName instanceof Swc4jAstIdentName identName) {
+            return identName.getSym();
+        } else if (propName instanceof Swc4jAstStr str) {
+            return str.getValue();
         }
-        return null;
+        return propName.toString();
     }
 
     /**
@@ -64,6 +62,25 @@ public final class AstUtils {
             String leftPart = extractQualifiedName(qualifiedName.getLeft());
             if (leftPart != null) {
                 return leftPart + "." + qualifiedName.getRight().getSym();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Extracts a fully qualified name from an expression.
+     * Handles both simple identifiers and member expressions (e.g., com.example.MyClass).
+     *
+     * @param expr the expression to extract the qualified name from
+     * @return the fully qualified name, or null if cannot be extracted
+     */
+    public static String extractQualifiedName(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstIdent ident) {
+            return ident.getSym();
+        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
+            String objPart = extractQualifiedName(memberExpr.getObj());
+            if (objPart != null && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                return objPart + "." + propIdent.getSym();
             }
         }
         return null;

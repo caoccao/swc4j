@@ -17,7 +17,6 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
@@ -32,11 +31,10 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.IterationUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
-import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
-import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
-import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -95,55 +93,6 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         super(compiler);
     }
 
-    private IterationType determineIterationType(ISwc4jAstExpr astExpr) throws Swc4jByteCodeCompilerException {
-        String typeDescriptor = compiler.getTypeResolver().inferTypeFromExpr(astExpr);
-        if (typeDescriptor == null) {
-            throw new Swc4jByteCodeCompilerException(getSourceCode(), astExpr,
-                    "Cannot determine type of for-in expression. Please add explicit type annotation.");
-        }
-
-        // Check for String type (String doesn't implement List or Map)
-        if (ConstantJavaType.LJAVA_LANG_STRING.equals(typeDescriptor)) {
-            return IterationType.STRING;
-        }
-
-        // For object types, use isAssignableTo() for unified checking
-        if (TypeConversionUtils.isObjectDescriptor(typeDescriptor)) {
-            String internalName = TypeConversionUtils.descriptorToInternalName(typeDescriptor);
-            String qualifiedName = TypeConversionUtils.descriptorToQualifiedName(typeDescriptor);
-
-            // Try to resolve from the registry first
-            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
-            if (typeInfo == null) {
-                // Try simple name
-                int lastSlash = internalName.lastIndexOf('/');
-                String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
-                typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
-            }
-
-            if (typeInfo == null) {
-                // Create a temporary JavaTypeInfo for JDK types not in registry
-                // isAssignableTo() will use Class.forName-based checking for these
-                int lastSlash = internalName.lastIndexOf('/');
-                String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
-                int lastDot = qualifiedName.lastIndexOf('.');
-                String packageName = lastDot >= 0 ? qualifiedName.substring(0, lastDot) : "";
-                typeInfo = new JavaTypeInfo(simpleName, packageName, internalName);
-            }
-
-            // Check assignability using the unified type hierarchy
-            if (typeInfo.isAssignableTo(ConstantJavaType.LJAVA_UTIL_LIST)) {
-                return IterationType.LIST;
-            }
-            if (typeInfo.isAssignableTo(ConstantJavaType.LJAVA_UTIL_MAP)) {
-                return IterationType.MAP;
-            }
-        }
-
-        throw new Swc4jByteCodeCompilerException(getSourceCode(), astExpr,
-                "For-in loops require List, Map, or String type, but got: " + typeDescriptor);
-    }
-
     /**
      * Generate bytecode for a for-in statement (potentially labeled).
      * <p>
@@ -166,7 +115,16 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
             String labelName,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // Determine iteration strategy based on compile-time type
-        IterationType iterationType = determineIterationType(forInStmt.getRight());
+        String typeDescriptor = compiler.getTypeResolver().inferTypeFromExpr(forInStmt.getRight());
+        if (typeDescriptor == null) {
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), forInStmt.getRight(),
+                    "Cannot determine type of for-in expression. Please add explicit type annotation.");
+        }
+        IterationUtils.IterationType iterationType = IterationUtils.resolveIterationType(compiler, typeDescriptor);
+        if (iterationType == null || iterationType == IterationUtils.IterationType.SET || iterationType == IterationUtils.IterationType.ARRAY) {
+            throw new Swc4jByteCodeCompilerException(getSourceCode(), forInStmt.getRight(),
+                    "For-in loops require List, Map, or String type, but got: " + typeDescriptor);
+        }
 
         // Generate the appropriate iteration code
         switch (iterationType) {
@@ -267,11 +225,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         code.iinc(counterSlot, 1);
 
         // 15. Jump back to test
-        code.gotoLabel(0); // Placeholder
-        int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
-        int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
-        int backwardGotoOffset = testLabel - backwardGotoOpcodePos;
-        code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
+        CodeGeneratorUtils.emitBackwardGoto(code, testLabel);
 
         // 16. Mark end label
         int endLabel = code.getCurrentOffset();
@@ -282,16 +236,10 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         code.patchShort(exitJumpPos, (short) exitOffset);
 
         // 18. Patch all break statements
-        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, breakLabel, endLabel);
 
         // 19. Patch all continue statements
-        for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
-            int offset = updateLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, continueLabel, updateLabel);
     }
 
     /**
@@ -364,11 +312,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         context.popBreakLabel();
 
         // 14. Jump back to test
-        code.gotoLabel(0); // Placeholder
-        int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
-        int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
-        int backwardGotoOffset = testLabel - backwardGotoOpcodePos;
-        code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
+        CodeGeneratorUtils.emitBackwardGoto(code, testLabel);
 
         // 15. Mark end label
         int endLabel = code.getCurrentOffset();
@@ -379,16 +323,10 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         code.patchShort(exitJumpPos, (short) exitOffset);
 
         // 17. Patch all break statements
-        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, breakLabel, endLabel);
 
         // 18. Patch all continue statements
-        for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
-            int offset = testLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, continueLabel, testLabel);
     }
 
     /**
@@ -464,11 +402,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         code.iinc(counterSlot, 1);
 
         // 15. Jump back to test
-        code.gotoLabel(0); // Placeholder
-        int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
-        int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
-        int backwardGotoOffset = testLabel - backwardGotoOpcodePos;
-        code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
+        CodeGeneratorUtils.emitBackwardGoto(code, testLabel);
 
         // 16. Mark end label
         int endLabel = code.getCurrentOffset();
@@ -479,16 +413,10 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         code.patchShort(exitJumpPos, (short) exitOffset);
 
         // 18. Patch all break statements
-        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, breakLabel, endLabel);
 
         // 19. Patch all continue statements
-        for (PatchInfo patchInfo : continueLabel.getPatchPositions()) {
-            int offset = updateLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, continueLabel, updateLabel);
     }
 
     /**
@@ -531,23 +459,5 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         } else {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), left, "Unsupported for-in left type: " + left.getClass().getName());
         }
-    }
-
-    /**
-     * Enum representing the type of iteration to perform.
-     */
-    private enum IterationType {
-        /**
-         * List iteration type.
-         */
-        LIST,
-        /**
-         * Map iteration type.
-         */
-        MAP,
-        /**
-         * String iteration type.
-         */
-        STRING
     }
 }

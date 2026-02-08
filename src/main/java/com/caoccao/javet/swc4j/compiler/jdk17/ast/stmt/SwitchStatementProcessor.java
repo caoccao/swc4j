@@ -38,9 +38,9 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
-import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -789,10 +789,7 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
 
         int endLabel = code.getCurrentOffset();
 
-        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, breakLabel, endLabel);
 
         context.popBreakLabel();
 
@@ -903,10 +900,7 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
 
         int endLabel = code.getCurrentOffset();
 
-        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, breakLabel, endLabel);
 
         context.popBreakLabel();
 
@@ -977,10 +971,7 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
         int endLabel = code.getCurrentOffset();
 
         // Patch break statements
-        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, breakLabel, endLabel);
 
         context.popBreakLabel();
 
@@ -1094,10 +1085,7 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
         }
 
         // Patch break statements
-        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, breakLabel, endLabel);
 
         context.popBreakLabel();
     }
@@ -1168,10 +1156,7 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
 
         int endLabel = code.getCurrentOffset();
 
-        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, breakLabel, endLabel);
 
         context.popBreakLabel();
 
@@ -1365,10 +1350,7 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
         }
 
         // Patch break statements
-        for (PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchInt(patchInfo.offsetPos(), offset);
-        }
+        CodeGeneratorUtils.patchLabelPositions(code, breakLabel, endLabel);
 
         context.popBreakLabel();
     }

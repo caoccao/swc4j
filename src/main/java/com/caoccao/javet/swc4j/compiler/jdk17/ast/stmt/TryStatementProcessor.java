@@ -17,11 +17,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstCatchClause;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPatProp;
@@ -39,6 +36,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -86,17 +84,6 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
             }
         }
         return false;
-    }
-
-    private String extractPropertyName(ISwc4jAstPropName propName) throws Swc4jByteCodeCompilerException {
-        if (propName instanceof Swc4jAstIdentName identName) {
-            return identName.getSym();
-        } else if (propName instanceof Swc4jAstStr str) {
-            return str.getValue();
-        } else {
-            throw new Swc4jByteCodeCompilerException(getSourceCode(), propName,
-                    "Unsupported property name type in catch destructuring: " + propName.getClass().getName());
-        }
     }
 
     /**
@@ -184,7 +171,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
 
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
                 // Renamed property: { message: msg }
-                String propertyName = extractPropertyName(keyValueProp.getKey());
+                String propertyName = AstUtils.extractPropertyName(keyValueProp.getKey());
                 ISwc4jAstPat valuePat = keyValueProp.getValue();
 
                 if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {

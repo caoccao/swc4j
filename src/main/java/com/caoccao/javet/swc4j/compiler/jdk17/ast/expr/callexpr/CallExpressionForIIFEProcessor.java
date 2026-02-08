@@ -33,6 +33,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CapturedVariable;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
@@ -444,7 +445,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         int slot = 1;
         for (IIFECapturedVariable captured : capturedVariables) {
             code.aload(0); // this
-            loadVariable(code, slot, captured.type());
+            CodeGeneratorUtils.loadParameter(code, slot, captured.type());
             int fieldRef = cp.addFieldRef(implClassName, "captured$" + captured.name(), captured.type());
             code.putfield(fieldRef);
             slot += getSlotSize(captured.type());
@@ -589,7 +590,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
 
         // Load captured variables onto stack
         for (IIFECapturedVariable captured : capturedVariables) {
-            loadVariable(code, captured.outerSlot(), captured.type());
+            CodeGeneratorUtils.loadParameter(code, captured.outerSlot(), captured.type());
         }
 
         // Build constructor descriptor
@@ -653,17 +654,6 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
             return extractArrowExpr(expr) != null || extractFunctionExpr(expr) != null;
         }
         return false;
-    }
-
-    private void loadVariable(CodeBuilder code, int slot, String type) {
-        switch (type) {
-            case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE,
-                 ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_SHORT -> code.iload(slot);
-            case ConstantJavaType.ABBR_LONG -> code.lload(slot);
-            case ConstantJavaType.ABBR_FLOAT -> code.fload(slot);
-            case ConstantJavaType.ABBR_DOUBLE -> code.dload(slot);
-            default -> code.aload(slot);
-        }
     }
 
     private boolean referencesThis(ISwc4jAstBlockStmtOrExpr body) {

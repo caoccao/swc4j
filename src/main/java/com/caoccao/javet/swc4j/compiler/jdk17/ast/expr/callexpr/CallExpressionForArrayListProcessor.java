@@ -30,6 +30,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -147,10 +148,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         // Unbox target if needed
         String targetType = compiler.getTypeResolver().inferTypeFromExpr(targetArg.getExpr());
         var cp = classWriter.getConstantPool();
-        if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(targetType)) {
-            int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-            code.invokevirtual(intValueMethod);
-        }
+        CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, targetType);
 
         // Generate the start argument
         var startArg = callExpr.getArgs().get(1);
@@ -158,10 +156,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
         // Unbox start if needed
         String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-        if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
-            int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-            code.invokevirtual(intValueMethod);
-        }
+        CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, startType);
 
         if (argCount == 2) {
             // copyWithin(target, start) - copy from start to end
@@ -176,10 +171,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox end if needed
             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(endType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, endType);
 
             // Call ArrayListApiUtils.copyWithin(ArrayList, int, int, int)
             int copyWithinMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAYLIST_API_UTILS, ConstantJavaMethod.METHOD_COPY_WITHIN,
@@ -244,10 +236,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if needed
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, startType);
 
             // Call ArrayListApiUtils.fill(ArrayList, Object, int)
             int fillMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAYLIST_API_UTILS, ConstantJavaMethod.METHOD_FILL,
@@ -261,20 +250,14 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox start if needed
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, startType);
 
             var endArg = callExpr.getArgs().get(2);
             compiler.getExpressionProcessor().generate(code, classWriter, endArg.getExpr(), null);
 
             // Unbox end if needed
             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(endType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, endType);
 
             // Call ArrayListApiUtils.fill(ArrayList, Object, int, int)
             int fillMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAYLIST_API_UTILS, ConstantJavaMethod.METHOD_FILL,
@@ -331,10 +314,8 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         var depthArg = callExpr.getArgs().get(0);
         compiler.getExpressionProcessor().generate(code, classWriter, depthArg.getExpr(), null);
         String depthType = compiler.getTypeResolver().inferTypeFromExpr(depthArg.getExpr());
-        if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(depthType)) {
-            int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-            code.invokevirtual(intValueMethod);
-        } else if (depthType != null && TypeConversionUtils.isPrimitiveType(depthType) && !ConstantJavaType.ABBR_INTEGER.equals(depthType)) {
+        CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, depthType);
+        if (!ConstantJavaType.LJAVA_LANG_INTEGER.equals(depthType) && depthType != null && TypeConversionUtils.isPrimitiveType(depthType) && !ConstantJavaType.ABBR_INTEGER.equals(depthType)) {
             TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(depthType), ConstantJavaType.ABBR_INTEGER);
         }
         int flatMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAYLIST_API_UTILS, ConstantJavaMethod.METHOD_FLAT,
@@ -652,10 +633,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Need to unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, startType);
 
             code.dup_x1();  // Duplicate start
             code.pop();  // Remove top start
@@ -681,20 +659,14 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, startType);
 
             var endArg = callExpr.getArgs().get(1);
             compiler.getExpressionProcessor().generate(code, classWriter, endArg.getExpr(), null);
 
             // Unbox if Integer
             String endType = compiler.getTypeResolver().inferTypeFromExpr(endArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(endType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, endType);
         }
 
         // Call ArrayListApiUtils.slice(ArrayList, int, int)
@@ -748,10 +720,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, startType);
 
             // deleteCount = array.length - start (remove all after start)
             code.ldc(cp.addInteger(Integer.MAX_VALUE));
@@ -763,10 +732,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, startType);
 
             // Generate deleteCount parameter
             var deleteCountArg = callExpr.getArgs().get(1);
@@ -774,10 +740,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String deleteCountType = compiler.getTypeResolver().inferTypeFromExpr(deleteCountArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(deleteCountType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, deleteCountType);
 
             // Create ArrayList for items to insert (if any)
             if (argCount > 2) {
@@ -868,10 +831,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, startType);
 
             // deleteCount = Integer.MAX_VALUE (remove all after start)
             code.ldc(cp.addInteger(Integer.MAX_VALUE));
@@ -883,10 +843,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String startType = compiler.getTypeResolver().inferTypeFromExpr(startArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(startType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, startType);
 
             // Generate deleteCount parameter
             var deleteCountArg = callExpr.getArgs().get(1);
@@ -894,10 +851,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
 
             // Unbox if Integer
             String deleteCountType = compiler.getTypeResolver().inferTypeFromExpr(deleteCountArg.getExpr());
-            if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(deleteCountType)) {
-                int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-                code.invokevirtual(intValueMethod);
-            }
+            CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, deleteCountType);
 
             // Create ArrayList for items to insert (if any)
             if (argCount > 2) {
@@ -990,10 +944,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         var cp = classWriter.getConstantPool();
         // Unbox index if needed
         String indexType = compiler.getTypeResolver().inferTypeFromExpr(indexArg.getExpr());
-        if (ConstantJavaType.LJAVA_LANG_INTEGER.equals(indexType)) {
-            int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-            code.invokevirtual(intValueMethod);
-        }
+        CodeGeneratorUtils.unboxIntegerIfNeeded(code, classWriter, indexType);
 
         // Generate value argument
         var valueArg = callExpr.getArgs().get(1);
@@ -1037,10 +988,6 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
         }
     }
 
-    private boolean isNumericPrimitive(String type) {
-        return ConstantJavaType.ABBR_INTEGER.equals(type) || ConstantJavaType.ABBR_LONG.equals(type) || ConstantJavaType.ABBR_DOUBLE.equals(type);
-    }
-
     /**
      * Checks if the given type is supported by this processor.
      *
@@ -1049,6 +996,18 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
      */
     public boolean isTypeSupported(String type) {
         return ConstantJavaType.LJAVA_UTIL_ARRAYLIST.equals(type);
+    }
+
+    /**
+     * Checks if the type is a wide numeric primitive (int, long, or double).
+     * This is intentionally narrower than {@code TypeConversionUtils.isWideNumericPrimitive()},
+     * which also includes byte, short, char, and float.
+     *
+     * @param type the primitive type abbreviation
+     * @return true if the type is I, J, or D
+     */
+    private boolean isWideNumericPrimitive(String type) {
+        return ConstantJavaType.ABBR_INTEGER.equals(type) || ConstantJavaType.ABBR_LONG.equals(type) || ConstantJavaType.ABBR_DOUBLE.equals(type);
     }
 
     private String resolveArrayElementType(Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
@@ -1094,7 +1053,7 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
     private String resolveReductionPrimitiveType(Swc4jAstCallExpr callExpr, String initType) throws Swc4jByteCodeCompilerException {
         String elementType = resolvePrimitiveElementType(callExpr);
         String initPrimitive = initType == null ? null : TypeConversionUtils.getPrimitiveType(initType);
-        if (!isNumericPrimitive(initPrimitive)) {
+        if (!isWideNumericPrimitive(initPrimitive)) {
             initPrimitive = null;
         }
         if (elementType != null && initPrimitive != null) {

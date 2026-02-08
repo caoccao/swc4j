@@ -20,12 +20,9 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.pat.*;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
@@ -40,6 +37,8 @@ import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ArrowExpressionProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -152,20 +151,6 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
             for (var child : ast.getChildNodes()) {
                 collectIdentifiersRecursive(child, identifiers);
             }
-        }
-    }
-
-    /**
-     * Extract property name from ISwc4jAstPropName.
-     */
-    private String extractPropertyName(ISwc4jAstPropName propName) throws Swc4jByteCodeCompilerException {
-        if (propName instanceof Swc4jAstIdentName identName) {
-            return identName.getSym();
-        } else if (propName instanceof Swc4jAstStr str) {
-            return str.getValue();
-        } else {
-            throw new Swc4jByteCodeCompilerException(getSourceCode(), propName,
-                    "Unsupported property name type: " + propName.getClass().getName());
         }
     }
 
@@ -681,7 +666,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 extractedKeys.add(varName);
                 allocateVariableIfNeeded(context, varName, ConstantJavaType.LJAVA_LANG_OBJECT, allowShadow);
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
-                String keyName = extractPropertyName(keyValueProp.getKey());
+                String keyName = AstUtils.extractPropertyName(keyValueProp.getKey());
                 extractedKeys.add(keyName);
                 ISwc4jAstPat valuePat = keyValueProp.getValue();
                 if (valuePat instanceof Swc4jAstBindingIdent bindingIdent) {
@@ -725,7 +710,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 }
 
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
-                String keyName = extractPropertyName(keyValueProp.getKey());
+                String keyName = AstUtils.extractPropertyName(keyValueProp.getKey());
                 ISwc4jAstPat valuePat = keyValueProp.getValue();
 
                 // Load map and call get(key)
@@ -853,11 +838,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.iinc(iSlot, 1);
 
                 // goto loop start
-                code.gotoLabel(0);
-                int backwardGotoOffsetPos = code.getCurrentOffset() - 2;
-                int backwardGotoOpcodePos = code.getCurrentOffset() - 3;
-                int backwardGotoOffset = loopStart - backwardGotoOpcodePos;
-                code.patchShort(backwardGotoOffsetPos, backwardGotoOffset);
+                CodeGeneratorUtils.emitBackwardGoto(code, loopStart);
 
                 // Patch loop exit
                 int loopEnd = code.getCurrentOffset();

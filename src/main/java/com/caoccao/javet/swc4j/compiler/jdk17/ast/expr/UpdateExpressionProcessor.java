@@ -31,6 +31,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ClassHierarchyUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
@@ -879,7 +880,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
                     "super property update outside of class context");
         }
 
-        String superClassInternalName = resolveSuperClassInternalName(currentClassName);
+        String superClassInternalName = ClassHierarchyUtils.resolveSuperClassInternalName(compiler, currentClassName);
         if (superClassInternalName == null) {
             throw new Swc4jByteCodeCompilerException(
                     getSourceCode(),
@@ -945,20 +946,6 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
             }
         }
         return null;
-    }
-
-    private String resolveSuperClassInternalName(String currentClassInternalName) {
-        String qualifiedClassName = currentClassInternalName.replace('/', '.');
-        String superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry()
-                .resolveSuperClass(qualifiedClassName);
-        if (superClassInternalName == null) {
-            int lastSlash = currentClassInternalName.lastIndexOf('/');
-            String simpleName = lastSlash >= 0
-                    ? currentClassInternalName.substring(lastSlash + 1)
-                    : currentClassInternalName;
-            superClassInternalName = compiler.getMemory().getScopedJavaTypeRegistry().resolveSuperClass(simpleName);
-        }
-        return superClassInternalName;
     }
 
     private JavaTypeInfo resolveTypeInfoByInternalName(String internalName) {
