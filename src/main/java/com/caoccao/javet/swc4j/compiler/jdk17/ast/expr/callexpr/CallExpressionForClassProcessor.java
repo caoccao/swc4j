@@ -28,10 +28,10 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.lang.reflect.Method;
@@ -76,7 +76,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
         // Handle reference type casting (e.g., AbstractStringBuilder -> StringBuilder)
         else if (fromType.startsWith("L") && toType.startsWith("L") && !fromType.equals(toType)) {
             // Extract internal class names
-            String toInternalName = toType.substring(1, toType.length() - 1);
+            String toInternalName = TypeConversionUtils.descriptorToInternalName(toType);
             // Add checkcast instruction to downcast to the target type
             int classIndex = cp.addClass(toInternalName);
             code.checkcast(classIndex);
@@ -194,7 +194,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             }
 
             if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
-                String internalName = objType.substring(1, objType.length() - 1);
+                String internalName = TypeConversionUtils.descriptorToInternalName(objType);
                 instanceJavaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolveByInternalName(internalName);
             }
 
@@ -237,7 +237,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
                     // Check if the return type is assignable to the class type
                     // If so, cast to the class type for proper method chaining
                     try {
-                        Class<?> returnClass = Class.forName(returnType.substring(1, returnType.length() - 1).replace('/', '.'));
+                        Class<?> returnClass = Class.forName(TypeConversionUtils.descriptorToQualifiedName(returnType));
                         Class<?> expectedClass = Class.forName(qualifiedClassName);
                         if (returnClass.isAssignableFrom(expectedClass)) {
                             // Return type is a parent of the expected type, cast down
@@ -274,8 +274,8 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             }
 
             // Get internal and qualified class names
-            internalClassName = objType.substring(1, objType.length() - 1);
-            String qualifiedClassName = internalClassName.replace('/', '.');
+            internalClassName = TypeConversionUtils.descriptorToInternalName(objType);
+            String qualifiedClassName = TypeConversionUtils.descriptorToQualifiedName(objType);
 
             // Look up method return type
             String paramDescriptor = "(" + paramDescriptors + ")";
@@ -389,7 +389,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
             code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
         } else {
-            String internalName = componentType.substring(1, componentType.length() - 1);
+            String internalName = TypeConversionUtils.descriptorToInternalName(componentType);
             int classIndex = cp.addClass(internalName);
             code.anewarray(classIndex);
         }
@@ -546,8 +546,8 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
                 if (descriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
                     yield Class.forName(descriptor.replace('/', '.'));
                 }
-                if (descriptor.startsWith("L") && descriptor.endsWith(";")) {
-                    yield Class.forName(descriptor.substring(1, descriptor.length() - 1).replace('/', '.'));
+                if (TypeConversionUtils.isObjectDescriptor(descriptor)) {
+                    yield Class.forName(TypeConversionUtils.descriptorToQualifiedName(descriptor));
                 }
                 yield Class.forName(descriptor.replace('/', '.'));
             }

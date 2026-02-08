@@ -36,8 +36,8 @@ import com.caoccao.javet.swc4j.compiler.jdk17.GenericTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -60,6 +60,54 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
      */
     public ObjectLiteralProcessor(ByteCodeCompiler compiler) {
         super(compiler);
+    }
+
+    /**
+     * Create a type mismatch exception for object literal properties.
+     * <p>
+     * Generates clear, actionable error messages like:
+     * - "Property 'name' has type String, but Record requires double"
+     * - "Key 'count' has type String, but Record requires Integer"
+     * - "Nested property 'outer.inner' has type String, but Record requires double"
+     *
+     * @param ast          the AST node that caused the exception
+     * @param propertyName Property name (or nested path like "outer.inner")
+     * @param expectedType JVM type descriptor of expected type (e.g., "D", "Ljava/lang/Integer;")
+     * @param actualType   JVM type descriptor of actual type (e.g., "Ljava/lang/String;")
+     * @param isKey        true if this is a key type mismatch, false for value type mismatch
+     * @return Swc4jByteCodeCompilerException with formatted error message
+     */
+    private Swc4jByteCodeCompilerException createTypeMismatchException(
+            ISwc4jAst ast,
+            String propertyName,
+            String expectedType,
+            String actualType,
+            boolean isKey) {
+        String propertyKind = isKey ? "Key" : "Property";
+        String expectedTypeName = TypeConversionUtils.descriptorToTypeName(expectedType);
+        String actualTypeName = TypeConversionUtils.descriptorToTypeName(actualType);
+
+        boolean isNested = propertyName != null && propertyName.contains(".");
+
+        String message;
+        if (isNested) {
+            message = String.format(
+                    "Nested property '%s' has type %s, but Record requires %s",
+                    propertyName,
+                    actualTypeName,
+                    expectedTypeName
+            );
+        } else {
+            message = String.format(
+                    "%s '%s' has type %s, but Record requires %s",
+                    propertyKind,
+                    propertyName != null ? propertyName : "<unknown>",
+                    actualTypeName,
+                    expectedTypeName
+            );
+        }
+
+        return new Swc4jByteCodeCompilerException(getSourceCode(), ast, message);
     }
 
     /**
@@ -755,53 +803,5 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
         }
         // If spread source doesn't have generic type info, we can't validate at compile time
         // Runtime will handle any type mismatches
-    }
-
-    /**
-     * Create a type mismatch exception for object literal properties.
-     * <p>
-     * Generates clear, actionable error messages like:
-     * - "Property 'name' has type String, but Record requires double"
-     * - "Key 'count' has type String, but Record requires Integer"
-     * - "Nested property 'outer.inner' has type String, but Record requires double"
-     *
-     * @param ast          the AST node that caused the exception
-     * @param propertyName Property name (or nested path like "outer.inner")
-     * @param expectedType JVM type descriptor of expected type (e.g., "D", "Ljava/lang/Integer;")
-     * @param actualType   JVM type descriptor of actual type (e.g., "Ljava/lang/String;")
-     * @param isKey        true if this is a key type mismatch, false for value type mismatch
-     * @return Swc4jByteCodeCompilerException with formatted error message
-     */
-    private Swc4jByteCodeCompilerException createTypeMismatchException(
-            ISwc4jAst ast,
-            String propertyName,
-            String expectedType,
-            String actualType,
-            boolean isKey) {
-        String propertyKind = isKey ? "Key" : "Property";
-        String expectedTypeName = TypeConversionUtils.descriptorToTypeName(expectedType);
-        String actualTypeName = TypeConversionUtils.descriptorToTypeName(actualType);
-
-        boolean isNested = propertyName != null && propertyName.contains(".");
-
-        String message;
-        if (isNested) {
-            message = String.format(
-                    "Nested property '%s' has type %s, but Record requires %s",
-                    propertyName,
-                    actualTypeName,
-                    expectedTypeName
-            );
-        } else {
-            message = String.format(
-                    "%s '%s' has type %s, but Record requires %s",
-                    propertyKind,
-                    propertyName != null ? propertyName : "<unknown>",
-                    actualTypeName,
-                    expectedTypeName
-            );
-        }
-
-        return new Swc4jByteCodeCompilerException(getSourceCode(), ast, message);
     }
 }

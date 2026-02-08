@@ -32,6 +32,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.UsingResourceInfo;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
@@ -371,11 +372,11 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
 
     private void validateAutoCloseableType(String varType, Swc4jAstVarDeclarator declarator)
             throws Swc4jByteCodeCompilerException {
-        if (!varType.startsWith("L") || !varType.endsWith(";")) {
+        if (!TypeConversionUtils.isObjectDescriptor(varType)) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), declarator,
                     "Resource type in 'using' declaration must be an object type implementing AutoCloseable");
         }
-        String internalName = varType.substring(1, varType.length() - 1);
+        String internalName = TypeConversionUtils.descriptorToInternalName(varType);
         // AutoCloseable itself always passes
         if (ConstantJavaType.JAVA_LANG_AUTOCLOSEABLE.equals(internalName)) {
             return;
@@ -385,7 +386,7 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
         if (typeInfo != null) {
             if (!typeInfo.isAssignableTo(ConstantJavaType.LJAVA_LANG_AUTOCLOSEABLE)) {
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), declarator,
-                        "Resource type '" + internalName.replace('/', '.')
+                        "Resource type '" + TypeConversionUtils.descriptorToQualifiedName(varType)
                                 + "' does not implement java.lang.AutoCloseable. "
                                 + "The 'using' declaration requires resources that implement AutoCloseable.");
             }
@@ -393,16 +394,16 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
         }
         // Not in registry — try Java reflection as fallback for standard library types
         try {
-            Class<?> clazz = Class.forName(internalName.replace('/', '.'));
+            Class<?> clazz = Class.forName(TypeConversionUtils.descriptorToQualifiedName(varType));
             if (!AutoCloseable.class.isAssignableFrom(clazz)) {
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), declarator,
-                        "Resource type '" + internalName.replace('/', '.')
+                        "Resource type '" + TypeConversionUtils.descriptorToQualifiedName(varType)
                                 + "' does not implement java.lang.AutoCloseable. "
                                 + "The 'using' declaration requires resources that implement AutoCloseable.");
             }
         } catch (ClassNotFoundException e) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), declarator,
-                    "Resource type '" + internalName.replace('/', '.')
+                    "Resource type '" + TypeConversionUtils.descriptorToQualifiedName(varType)
                             + "' could not be resolved. "
                             + "The 'using' declaration requires resources that implement AutoCloseable.");
         }

@@ -90,6 +90,10 @@ public final class ConstantJavaType {
      */
     public static final String ARRAY_PREFIX = "[";
     /**
+     * The constant ARRAY_SUFFIX_NAME - array type name suffix.
+     */
+    public static final String ARRAY_SUFFIX_NAME = "[]";
+    /**
      * The constant CHAR_ARRAY - array type descriptor character.
      */
     public static final char CHAR_ARRAY = '[';
@@ -133,66 +137,6 @@ public final class ConstantJavaType {
      * The constant CHAR_VOID - void type descriptor character.
      */
     public static final char CHAR_VOID = 'V';
-    /**
-     * The constant DESCRIPTOR_PREFIX_REF - reference type descriptor prefix.
-     */
-    public static final String DESCRIPTOR_PREFIX_REF = "L";
-    /**
-     * The constant DESCRIPTOR_SUFFIX - type descriptor suffix.
-     */
-    public static final String DESCRIPTOR_SUFFIX = ";";
-    /**
-     * The constant PATH_SEPARATOR - internal class name separator.
-     */
-    public static final String PATH_SEPARATOR = "/";
-    /**
-     * The constant PACKAGE_SEPARATOR - package/class name separator.
-     */
-    public static final String PACKAGE_SEPARATOR = ".";
-    /**
-     * The constant ARRAY_SUFFIX_NAME - array type name suffix.
-     */
-    public static final String ARRAY_SUFFIX_NAME = "[]";
-    /**
-     * The constant TYPE_NAME_BOOLEAN - human-readable boolean type name.
-     */
-    public static final String TYPE_NAME_BOOLEAN = "boolean";
-    /**
-     * The constant TYPE_NAME_BYTE - human-readable byte type name.
-     */
-    public static final String TYPE_NAME_BYTE = "byte";
-    /**
-     * The constant TYPE_NAME_CHAR - human-readable char type name.
-     */
-    public static final String TYPE_NAME_CHAR = "char";
-    /**
-     * The constant TYPE_NAME_SHORT - human-readable short type name.
-     */
-    public static final String TYPE_NAME_SHORT = "short";
-    /**
-     * The constant TYPE_NAME_INT - human-readable int type name.
-     */
-    public static final String TYPE_NAME_INT = "int";
-    /**
-     * The constant TYPE_NAME_LONG - human-readable long type name.
-     */
-    public static final String TYPE_NAME_LONG = "long";
-    /**
-     * The constant TYPE_NAME_FLOAT - human-readable float type name.
-     */
-    public static final String TYPE_NAME_FLOAT = "float";
-    /**
-     * The constant TYPE_NAME_DOUBLE - human-readable double type name.
-     */
-    public static final String TYPE_NAME_DOUBLE = "double";
-    /**
-     * The constant TYPE_NAME_VOID - human-readable void type name.
-     */
-    public static final String TYPE_NAME_VOID = "void";
-    /**
-     * The constant TYPE_NAME_UNKNOWN - human-readable unknown type name.
-     */
-    public static final String TYPE_NAME_UNKNOWN = "unknown";
     /**
      * The constant CLASS_JAVA_LANG_BOOLEAN - Boolean fully qualified class name.
      */
@@ -269,6 +213,14 @@ public final class ConstantJavaType {
      * The constant COM_CAOCCAO_JAVET_SWC4J_EXCEPTIONS_JS_ERROR - JsError exception class internal name.
      */
     public static final String COM_CAOCCAO_JAVET_SWC4J_EXCEPTIONS_JS_ERROR = "com/caoccao/javet/swc4j/exceptions/JsError";
+    /**
+     * The constant DESCRIPTOR_PREFIX_REF - reference type descriptor prefix.
+     */
+    public static final String DESCRIPTOR_PREFIX_REF = "L";
+    /**
+     * The constant DESCRIPTOR_SUFFIX - type descriptor suffix.
+     */
+    public static final String DESCRIPTOR_SUFFIX = ";";
     /**
      * The constant JAVA_LANG_AUTOCLOSEABLE - AutoCloseable class internal name.
      */
@@ -730,6 +682,14 @@ public final class ConstantJavaType {
      */
     public static final String LJAVA_UTIL_SET = "Ljava/util/Set;";
     /**
+     * The constant PACKAGE_SEPARATOR - package/class name separator.
+     */
+    public static final String PACKAGE_SEPARATOR = ".";
+    /**
+     * The constant PATH_SEPARATOR - internal class name separator.
+     */
+    public static final String PATH_SEPARATOR = "/";
+    /**
      * The constant PRIMITIVE_BOOLEAN - Java primitive type name for boolean.
      */
     public static final String PRIMITIVE_BOOLEAN = "boolean";
@@ -857,6 +817,46 @@ public final class ConstantJavaType {
      * The constant TYPE_ALIAS_UNKNOWN - TypeScript 'unknown' type alias.
      */
     public static final String TYPE_ALIAS_UNKNOWN = "unknown";
+    /**
+     * The constant TYPE_NAME_BOOLEAN - human-readable boolean type name.
+     */
+    public static final String TYPE_NAME_BOOLEAN = "boolean";
+    /**
+     * The constant TYPE_NAME_BYTE - human-readable byte type name.
+     */
+    public static final String TYPE_NAME_BYTE = "byte";
+    /**
+     * The constant TYPE_NAME_CHAR - human-readable char type name.
+     */
+    public static final String TYPE_NAME_CHAR = "char";
+    /**
+     * The constant TYPE_NAME_DOUBLE - human-readable double type name.
+     */
+    public static final String TYPE_NAME_DOUBLE = "double";
+    /**
+     * The constant TYPE_NAME_FLOAT - human-readable float type name.
+     */
+    public static final String TYPE_NAME_FLOAT = "float";
+    /**
+     * The constant TYPE_NAME_INT - human-readable int type name.
+     */
+    public static final String TYPE_NAME_INT = "int";
+    /**
+     * The constant TYPE_NAME_LONG - human-readable long type name.
+     */
+    public static final String TYPE_NAME_LONG = "long";
+    /**
+     * The constant TYPE_NAME_SHORT - human-readable short type name.
+     */
+    public static final String TYPE_NAME_SHORT = "short";
+    /**
+     * The constant TYPE_NAME_UNKNOWN - human-readable unknown type name.
+     */
+    public static final String TYPE_NAME_UNKNOWN = "unknown";
+    /**
+     * The constant TYPE_NAME_VOID - human-readable void type name.
+     */
+    public static final String TYPE_NAME_VOID = "void";
 
     private ConstantJavaType() {
     }

@@ -27,6 +27,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.*;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -123,7 +124,7 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
             // This takes priority over special handlers like ArrayList/String
             boolean isImportedJavaClass = false;
             if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
-                String internalName = objType.substring(1, objType.length() - 1);
+                String internalName = TypeConversionUtils.descriptorToInternalName(objType);
                 var javaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolveByInternalName(internalName);
                 // Check if it's a Java class (has methods populated via reflection)
                 // TypeScript classes are also registered but have empty methods map

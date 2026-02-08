@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.memory;
 
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -258,7 +259,7 @@ public final class JavaTypeInfo {
      */
     public boolean isAssignableTo(String typeDescriptor) {
         try {
-            return isAssignableTo(Class.forName(typeDescriptor.substring(1, typeDescriptor.length() - 1).replace('/', '.')));
+            return isAssignableTo(Class.forName(TypeConversionUtils.descriptorToQualifiedName(typeDescriptor)));
         } catch (ClassNotFoundException e) {
             return isAssignableTo(typeDescriptor, true);
         }

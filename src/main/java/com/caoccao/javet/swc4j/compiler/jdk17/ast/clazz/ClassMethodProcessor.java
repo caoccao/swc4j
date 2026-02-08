@@ -34,8 +34,8 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;

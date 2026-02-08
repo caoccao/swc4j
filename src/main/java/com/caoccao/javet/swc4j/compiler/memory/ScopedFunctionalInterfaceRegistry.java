@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.memory;
 
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -136,7 +137,7 @@ public final class ScopedFunctionalInterfaceRegistry {
         if (interfaceDescriptor == null || !interfaceDescriptor.startsWith("L") || !interfaceDescriptor.endsWith(";")) {
             return null;
         }
-        String interfaceName = interfaceDescriptor.substring(1, interfaceDescriptor.length() - 1);
+        String interfaceName = TypeConversionUtils.descriptorToInternalName(interfaceDescriptor);
         SamMethodInfo info = getSamMethodInfo(interfaceName);
         return info != null ? info.paramTypes() : null;
     }
@@ -151,7 +152,7 @@ public final class ScopedFunctionalInterfaceRegistry {
         if (interfaceDescriptor == null || !interfaceDescriptor.startsWith("L") || !interfaceDescriptor.endsWith(";")) {
             return null;
         }
-        String interfaceName = interfaceDescriptor.substring(1, interfaceDescriptor.length() - 1);
+        String interfaceName = TypeConversionUtils.descriptorToInternalName(interfaceDescriptor);
         SamMethodInfo info = getSamMethodInfo(interfaceName);
         return info != null ? info.returnType() : null;
     }

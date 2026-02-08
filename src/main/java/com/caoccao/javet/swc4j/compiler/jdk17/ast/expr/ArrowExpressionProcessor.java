@@ -36,9 +36,9 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
@@ -214,7 +214,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             String targetDesc = targetTypeInfo.descriptor();
             // Extract interface name from descriptor (e.g., "Ljava/util/function/UnaryOperator;" -> "java/util/function/UnaryOperator")
             if (targetDesc.startsWith("L") && targetDesc.endsWith(";")) {
-                String targetInterface = targetDesc.substring(1, targetDesc.length() - 1);
+                String targetInterface = TypeConversionUtils.descriptorToInternalName(targetDesc);
                 FunctionalInterfaceInfo info = getFunctionalInterfaceInfo(targetInterface, paramTypes, returnInfo);
                 if (info != null) {
                     interfaceName = info.interfaceName;
@@ -958,7 +958,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 String paramName = typeInfo.paramNames().get(i);
                 LocalVariable paramVar = lambdaContext.getLocalVariableTable().getVariable(paramName);
                 code.aload(paramVar.index());
-                int classRef = cp.addClass(paramType.startsWith(ConstantJavaType.ARRAY_PREFIX) ? paramType : paramType.substring(1, paramType.length() - 1));
+                int classRef = cp.addClass(paramType.startsWith(ConstantJavaType.ARRAY_PREFIX) ? paramType : TypeConversionUtils.descriptorToInternalName(paramType));
                 code.checkcast(classRef);
                 code.astore(paramVar.index());
             }
@@ -1409,7 +1409,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             default -> {
                 // Reference type or Object - just cast
                 if (targetType.startsWith("L") && targetType.endsWith(";")) {
-                    String className = targetType.substring(1, targetType.length() - 1);
+                    String className = TypeConversionUtils.descriptorToInternalName(targetType);
                     int classRef = cp.addClass(className);
                     code.checkcast(classRef);
                 }
@@ -1722,8 +1722,8 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         if (typeDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
             return typeDescriptor;
         }
-        if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {
-            return typeDescriptor.substring(1, typeDescriptor.length() - 1);
+        if (TypeConversionUtils.isObjectDescriptor(typeDescriptor)) {
+            return TypeConversionUtils.descriptorToInternalName(typeDescriptor);
         }
         return typeDescriptor;
     }

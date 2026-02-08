@@ -36,6 +36,7 @@ import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -107,9 +108,9 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
         }
 
         // For object types, use isAssignableTo() for unified checking
-        if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {
-            String internalName = typeDescriptor.substring(1, typeDescriptor.length() - 1);
-            String qualifiedName = internalName.replace('/', '.');
+        if (TypeConversionUtils.isObjectDescriptor(typeDescriptor)) {
+            String internalName = TypeConversionUtils.descriptorToInternalName(typeDescriptor);
+            String qualifiedName = TypeConversionUtils.descriptorToQualifiedName(typeDescriptor);
 
             // Try to resolve from the registry first
             JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);

@@ -27,7 +27,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.Optional;
@@ -145,7 +145,7 @@ public final class ArrayLiteralProcessor extends BaseAstProcessor<Swc4jAstArrayL
             case ConstantJavaType.ABBR_LONG -> code.newarray(11); // T_LONG
             default -> {
                 // Reference type array - use anewarray
-                String className = elemType.substring(1, elemType.length() - 1); // Remove "L" and ";"
+                String className = TypeConversionUtils.descriptorToInternalName(elemType);
                 int classIndex = cp.addClass(className);
                 code.anewarray(classIndex);
             }

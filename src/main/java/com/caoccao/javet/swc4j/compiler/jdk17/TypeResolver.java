@@ -37,10 +37,10 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaField;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
@@ -1107,12 +1107,12 @@ public final class TypeResolver {
 
             // General case: Handle field access on any custom class type (chained member access)
             // This handles cases like obj.field where obj is any expression returning a custom class type
-            if (objType != null && objType.startsWith("L") && objType.endsWith(";") && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+            if (TypeConversionUtils.isObjectDescriptor(objType) && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                 String fieldName = propIdent.getSym();
 
                 // Extract the class name from the descriptor
-                String className = objType.substring(1, objType.length() - 1);
-                String qualifiedName = className.replace('/', '.');
+                String className = TypeConversionUtils.descriptorToInternalName(objType);
+                String qualifiedName = TypeConversionUtils.descriptorToQualifiedName(objType);
 
                 // Try to resolve the class in the type registry
                 JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
@@ -1403,7 +1403,7 @@ public final class TypeResolver {
                     }
                 }
 
-                if (varType != null && varType.startsWith("L") && varType.endsWith(";")) {
+                if (TypeConversionUtils.isObjectDescriptor(varType)) {
                     // Get return type from functional interface using reflection
                     String returnType = compiler.getMemory().getScopedFunctionalInterfaceRegistry().getReturnType(varType);
                     if (returnType != null) {
@@ -1584,8 +1584,8 @@ public final class TypeResolver {
                 }
 
                 // Check if it's an object method call (Java or TypeScript class)
-                if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
-                    String qualifiedClassName = objType.substring(1, objType.length() - 1).replace('/', '.');
+                if (TypeConversionUtils.isObjectDescriptor(objType)) {
+                    String qualifiedClassName = TypeConversionUtils.descriptorToQualifiedName(objType);
                     String methodName = null;
 
                     // Handle public methods (IdentName) and private methods (PrivateName)

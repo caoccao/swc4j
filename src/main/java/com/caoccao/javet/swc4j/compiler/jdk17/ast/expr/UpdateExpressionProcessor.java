@@ -31,10 +31,10 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -140,7 +140,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
     private void generateBox(CodeBuilder code, ClassWriter classWriter, String primitiveType, String wrapperType) {
         var cp = classWriter.getConstantPool();
-        String className = wrapperType.substring(1, wrapperType.length() - 1); // Remove L and ;
+        String className = TypeConversionUtils.descriptorToInternalName(wrapperType);
         String descriptor = "(" + primitiveType + ")" + wrapperType;
         int methodRef = cp.addMethodRef(className, ConstantJavaMethod.METHOD_VALUE_OF, descriptor);
         code.invokestatic(methodRef);
@@ -242,7 +242,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         };
 
         String descriptor = "()" + primitiveType;
-        String className = wrapperType.substring(1, wrapperType.length() - 1); // Remove L and ;
+        String className = TypeConversionUtils.descriptorToInternalName(wrapperType);
         int methodRef = cp.addMethodRef(className, methodName, descriptor);
         code.invokevirtual(methodRef);
     }
@@ -383,7 +383,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         var cp = classWriter.getConstantPool();
         var capturedThis = context.getCapturedVariable("this");
         if (capturedThis != null) {
-            String outerClassName = capturedThis.type().substring(1, capturedThis.type().length() - 1);
+            String outerClassName = TypeConversionUtils.descriptorToInternalName(capturedThis.type());
             code.aload(0);
             int capturedThisRef = cp.addFieldRef(currentClassName, capturedThis.fieldName(), capturedThis.type());
             code.getfield(capturedThisRef);

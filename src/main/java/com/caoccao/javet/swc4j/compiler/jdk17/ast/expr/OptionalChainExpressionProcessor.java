@@ -31,9 +31,9 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaType;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.ArrayList;
@@ -203,9 +203,9 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     case ConstantJavaType.ABBR_DOUBLE -> code.daload();
                     default -> {
                         code.aaload();
-                        if (elemType.startsWith("L") && elemType.endsWith(";")
+                        if (TypeConversionUtils.isObjectDescriptor(elemType)
                                 && !ConstantJavaType.LJAVA_LANG_OBJECT.equals(elemType)) {
-                            int classIndex = cp.addClass(elemType.substring(1, elemType.length() - 1));
+                            int classIndex = cp.addClass(TypeConversionUtils.descriptorToInternalName(elemType));
                             code.checkcast(classIndex);
                         }
                     }
@@ -304,9 +304,9 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     "Cannot extract field name from optional member access");
         }
 
-        if (objType.startsWith("L") && objType.endsWith(";")) {
-            String className = objType.substring(1, objType.length() - 1);
-            String qualifiedName = className.replace('/', '.');
+        if (TypeConversionUtils.isObjectDescriptor(objType)) {
+            String className = TypeConversionUtils.descriptorToInternalName(objType);
+            String qualifiedName = TypeConversionUtils.descriptorToQualifiedName(objType);
 
             var typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
             if (typeInfo == null) {
@@ -345,7 +345,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     "Cannot infer callee type for optional call");
         }
 
-        String interfaceName = calleeType.substring(1, calleeType.length() - 1);
+        String interfaceName = TypeConversionUtils.descriptorToInternalName(calleeType);
         var samInfo = compiler.getMemory().getScopedFunctionalInterfaceRegistry().getSamMethodInfo(interfaceName);
         if (samInfo == null) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), optChainExpr,
@@ -426,8 +426,8 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     "Cannot infer object type for optional call");
         }
 
-        String className = objType.substring(1, objType.length() - 1);
-        String qualifiedName = className.replace('/', '.');
+        String className = TypeConversionUtils.descriptorToInternalName(objType);
+        String qualifiedName = TypeConversionUtils.descriptorToQualifiedName(objType);
 
         int classRef = cp.addClass(className);
         code.checkcast(classRef);
@@ -632,8 +632,8 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
         if (typeDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
             return typeDescriptor;
         }
-        if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {
-            return typeDescriptor.substring(1, typeDescriptor.length() - 1);
+        if (TypeConversionUtils.isObjectDescriptor(typeDescriptor)) {
+            return TypeConversionUtils.descriptorToInternalName(typeDescriptor);
         }
         return typeDescriptor;
     }

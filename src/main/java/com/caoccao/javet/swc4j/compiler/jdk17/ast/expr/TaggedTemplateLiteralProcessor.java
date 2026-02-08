@@ -27,7 +27,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.ArrayList;
@@ -128,8 +128,8 @@ public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4j
                     "Cannot infer object type for tagged template tag: " + objType);
         }
 
-        String internalClassName = objType.substring(1, objType.length() - 1);
-        String qualifiedClassName = internalClassName.replace('/', '.');
+        String internalClassName = TypeConversionUtils.descriptorToInternalName(objType);
+        String qualifiedClassName = TypeConversionUtils.descriptorToQualifiedName(objType);
 
         // Build expression parameter descriptors (everything after the first String[] or TemplateStringsArray)
         StringBuilder exprParamDescriptors = new StringBuilder();

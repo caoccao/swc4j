@@ -41,6 +41,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.*;
@@ -637,7 +638,7 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
 
         // Enum switches: call ordinal() to get int, then use integer switch
         // Check if it's an object type (starts with L) but not a known type
-        if (discriminantType != null && discriminantType.startsWith("L") && discriminantType.endsWith(";")) {
+        if (TypeConversionUtils.isObjectDescriptor(discriminantType)) {
             // Likely an enum type - call ordinal()
             generateEnumSwitch(code, classWriter, switchStmt, discriminantType, labelName, returnTypeInfo);
             return;

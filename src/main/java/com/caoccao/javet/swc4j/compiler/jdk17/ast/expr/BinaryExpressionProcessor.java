@@ -32,8 +32,8 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringApiUtils;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -89,9 +89,9 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
         }
 
         // For object types, use isAssignableTo() for unified checking
-        if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {
-            String internalName = typeDescriptor.substring(1, typeDescriptor.length() - 1);
-            String qualifiedName = internalName.replace('/', '.');
+        if (TypeConversionUtils.isObjectDescriptor(typeDescriptor)) {
+            String internalName = TypeConversionUtils.descriptorToInternalName(typeDescriptor);
+            String qualifiedName = TypeConversionUtils.descriptorToQualifiedName(typeDescriptor);
 
             // Try to resolve from the registry first
             JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);

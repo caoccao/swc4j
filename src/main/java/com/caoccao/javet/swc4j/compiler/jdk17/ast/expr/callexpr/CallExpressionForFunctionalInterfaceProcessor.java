@@ -28,9 +28,9 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CapturedVariable;
 import com.caoccao.javet.swc4j.compiler.memory.ScopedFunctionalInterfaceRegistry.SamMethodInfo;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
@@ -81,7 +81,7 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
         }
 
         // Get SAM method info for the functional interface using reflection
-        String interfaceName = varType.substring(1, varType.length() - 1);
+        String interfaceName = TypeConversionUtils.descriptorToInternalName(varType);
         var registry = compiler.getMemory().getScopedFunctionalInterfaceRegistry();
         SamMethodInfo samInfo = registry.getSamMethodInfo(interfaceName);
         if (samInfo == null) {
@@ -238,7 +238,7 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
         }
 
         // Check if it's a functional interface using the scoped registry
-        String interfaceName = varType.substring(1, varType.length() - 1);
+        String interfaceName = TypeConversionUtils.descriptorToInternalName(varType);
         return compiler.getMemory().getScopedFunctionalInterfaceRegistry().isFunctionalInterface(interfaceName);
     }
 
@@ -272,8 +272,8 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
         if (typeDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
             return typeDescriptor;
         }
-        if (typeDescriptor.startsWith("L") && typeDescriptor.endsWith(";")) {
-            return typeDescriptor.substring(1, typeDescriptor.length() - 1);
+        if (TypeConversionUtils.isObjectDescriptor(typeDescriptor)) {
+            return TypeConversionUtils.descriptorToInternalName(typeDescriptor);
         }
         return typeDescriptor;
     }

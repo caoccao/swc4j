@@ -26,6 +26,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.ArrayList;
@@ -106,7 +107,7 @@ public final class StringApiUtils {
             case ConstantJavaType.LJAVA_LANG_BYTE, ConstantJavaType.LJAVA_LANG_SHORT,
                  ConstantJavaType.LJAVA_LANG_INTEGER -> {
                 // Unbox to int, then append
-                String wrapperClass = operandType.substring(1, operandType.length() - 1); // Remove L and ;
+                String wrapperClass = TypeConversionUtils.descriptorToInternalName(operandType);
                 String methodName = switch (operandType) {
                     case ConstantJavaType.LJAVA_LANG_BYTE -> ConstantJavaMethod.METHOD_BYTE_VALUE;
                     case ConstantJavaType.LJAVA_LANG_SHORT -> ConstantJavaMethod.METHOD_SHORT_VALUE;

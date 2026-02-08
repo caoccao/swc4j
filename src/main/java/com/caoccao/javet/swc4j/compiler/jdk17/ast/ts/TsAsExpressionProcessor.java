@@ -26,7 +26,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -121,7 +121,7 @@ public final class TsAsExpressionProcessor extends BaseAstProcessor<Swc4jAstTsAs
         // Handle Object to reference type cast (e.g., Object as string)
         if (ConstantJavaType.LJAVA_LANG_OBJECT.equals(innerType) && targetType.startsWith("L") && !targetType.equals(innerType)) {
             // Cast Object to target reference type
-            String targetClass = targetType.substring(1, targetType.length() - 1);
+            String targetClass = TypeConversionUtils.descriptorToInternalName(targetType);
             int classRef = cp.addClass(targetClass);
             code.checkcast(classRef);
             return;

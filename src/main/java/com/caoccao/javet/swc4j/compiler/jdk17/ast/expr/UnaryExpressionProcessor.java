@@ -36,7 +36,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.math.BigInteger;
@@ -456,8 +456,8 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                 String typeOfResult = TypeConversionUtils.getTypeOfResult(argType);
 
                 // Check functional interface registry
-                if (typeOfResult == null && argType.startsWith("L") && argType.endsWith(";")) {
-                    String internalName = argType.substring(1, argType.length() - 1);
+                if (typeOfResult == null && TypeConversionUtils.isObjectDescriptor(argType)) {
+                    String internalName = TypeConversionUtils.descriptorToInternalName(argType);
                     if (compiler.getMemory().getScopedFunctionalInterfaceRegistry().isFunctionalInterface(internalName)) {
                         typeOfResult = "function";
                     }

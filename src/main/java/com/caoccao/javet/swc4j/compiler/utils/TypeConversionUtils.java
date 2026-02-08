@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026. caoccao.com Sam Cao
+ * Copyright (c) 2026-2026. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
+package com.caoccao.javet.swc4j.compiler.utils;
 
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -159,6 +159,92 @@ public final class TypeConversionUtils {
     }
 
     /**
+     * Convert a JVM type descriptor to internal class name.
+     * <p>
+     * Examples:
+     * - "Ljava/lang/String;" → "java/lang/String"
+     * - "Ljava/lang/Integer;" → "java/lang/Integer"
+     *
+     * @param descriptor JVM type descriptor (must be object type starting with "L" and ending with ";")
+     * @return Internal class name with slashes, or null if descriptor is invalid
+     */
+    public static String descriptorToInternalName(String descriptor) {
+        if (!isObjectDescriptor(descriptor)) {
+            return null;
+        }
+        return descriptor.substring(1, descriptor.length() - 1);
+    }
+
+    /**
+     * Convert a JVM type descriptor to qualified class name.
+     * <p>
+     * Examples:
+     * - "Ljava/lang/String;" → "java.lang.String"
+     * - "Ljava/lang/Integer;" → "java.lang.Integer"
+     *
+     * @param descriptor JVM type descriptor (must be object type starting with "L" and ending with ";")
+     * @return Qualified class name with dots, or null if descriptor is invalid
+     */
+    public static String descriptorToQualifiedName(String descriptor) {
+        String internalName = descriptorToInternalName(descriptor);
+        if (internalName == null) {
+            return null;
+        }
+        return internalName.replace(ConstantJavaType.PATH_SEPARATOR.charAt(0), ConstantJavaType.PACKAGE_SEPARATOR.charAt(0));
+    }
+
+    /**
+     * Convert a JVM type descriptor to a human-readable type name.
+     * <p>
+     * Examples:
+     * - "I" → "int"
+     * - "D" → "double"
+     * - "Ljava/lang/String;" → "String"
+     * - "Ljava/lang/Integer;" → "Integer"
+     * - "[I" → "int[]"
+     *
+     * @param descriptor JVM type descriptor
+     * @return Human-readable type name
+     */
+    public static String descriptorToTypeName(String descriptor) {
+        if (descriptor == null || descriptor.isEmpty()) {
+            return ConstantJavaType.TYPE_NAME_UNKNOWN;
+        }
+
+        // Primitive types
+        return switch (descriptor) {
+            case ConstantJavaType.ABBR_BOOLEAN -> ConstantJavaType.TYPE_NAME_BOOLEAN;
+            case ConstantJavaType.ABBR_BYTE -> ConstantJavaType.TYPE_NAME_BYTE;
+            case ConstantJavaType.ABBR_CHARACTER -> ConstantJavaType.TYPE_NAME_CHAR;
+            case ConstantJavaType.ABBR_SHORT -> ConstantJavaType.TYPE_NAME_SHORT;
+            case ConstantJavaType.ABBR_INTEGER -> ConstantJavaType.TYPE_NAME_INT;
+            case ConstantJavaType.ABBR_LONG -> ConstantJavaType.TYPE_NAME_LONG;
+            case ConstantJavaType.ABBR_FLOAT -> ConstantJavaType.TYPE_NAME_FLOAT;
+            case ConstantJavaType.ABBR_DOUBLE -> ConstantJavaType.TYPE_NAME_DOUBLE;
+            case ConstantJavaType.ABBR_VOID -> ConstantJavaType.TYPE_NAME_VOID;
+            default -> {
+                // Object types: "Ljava/lang/String;" → "String"
+                if (descriptor.startsWith(ConstantJavaType.DESCRIPTOR_PREFIX_REF) && descriptor.endsWith(ConstantJavaType.DESCRIPTOR_SUFFIX)) {
+                    String className = descriptor.substring(1, descriptor.length() - 1);
+                    // Get simple name (after last slash)
+                    int lastSlash = className.lastIndexOf(ConstantJavaType.PATH_SEPARATOR.charAt(0));
+                    if (lastSlash >= 0 && lastSlash < className.length() - 1) {
+                        yield className.substring(lastSlash + 1);
+                    }
+                    yield className.replace(ConstantJavaType.PATH_SEPARATOR.charAt(0), ConstantJavaType.PACKAGE_SEPARATOR.charAt(0));
+                }
+                // Array types: "[I" → "int[]"
+                if (descriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
+                    String componentDescriptor = descriptor.substring(1);
+                    String componentType = descriptorToTypeName(componentDescriptor);
+                    yield componentType + ConstantJavaType.ARRAY_SUFFIX_NAME;
+                }
+                yield descriptor;
+            }
+        };
+    }
+
+    /**
      * Gets the JVM newarray type code for a primitive type descriptor.
      * These are the standard JVM type codes used by the newarray bytecode instruction.
      *
@@ -269,6 +355,18 @@ public final class TypeConversionUtils {
     }
 
     /**
+     * Check if a descriptor represents an object type (starts with "L" and ends with ";").
+     *
+     * @param descriptor JVM type descriptor
+     * @return true if the descriptor represents an object type
+     */
+    public static boolean isObjectDescriptor(String descriptor) {
+        return descriptor != null
+                && descriptor.startsWith(ConstantJavaType.DESCRIPTOR_PREFIX_REF)
+                && descriptor.endsWith(ConstantJavaType.DESCRIPTOR_SUFFIX);
+    }
+
+    /**
      * Is primitive type boolean.
      *
      * @param type the type
@@ -337,56 +435,5 @@ public final class TypeConversionUtils {
                 code.invokevirtual(doubleValueRef);
             }
         }
-    }
-
-    /**
-     * Convert a JVM type descriptor to a human-readable type name.
-     * <p>
-     * Examples:
-     * - "I" → "int"
-     * - "D" → "double"
-     * - "Ljava/lang/String;" → "String"
-     * - "Ljava/lang/Integer;" → "Integer"
-     * - "[I" → "int[]"
-     *
-     * @param descriptor JVM type descriptor
-     * @return Human-readable type name
-     */
-    public static String descriptorToTypeName(String descriptor) {
-        if (descriptor == null || descriptor.isEmpty()) {
-            return ConstantJavaType.TYPE_NAME_UNKNOWN;
-        }
-
-        // Primitive types
-        return switch (descriptor) {
-            case ConstantJavaType.ABBR_BOOLEAN -> ConstantJavaType.TYPE_NAME_BOOLEAN;
-            case ConstantJavaType.ABBR_BYTE -> ConstantJavaType.TYPE_NAME_BYTE;
-            case ConstantJavaType.ABBR_CHARACTER -> ConstantJavaType.TYPE_NAME_CHAR;
-            case ConstantJavaType.ABBR_SHORT -> ConstantJavaType.TYPE_NAME_SHORT;
-            case ConstantJavaType.ABBR_INTEGER -> ConstantJavaType.TYPE_NAME_INT;
-            case ConstantJavaType.ABBR_LONG -> ConstantJavaType.TYPE_NAME_LONG;
-            case ConstantJavaType.ABBR_FLOAT -> ConstantJavaType.TYPE_NAME_FLOAT;
-            case ConstantJavaType.ABBR_DOUBLE -> ConstantJavaType.TYPE_NAME_DOUBLE;
-            case ConstantJavaType.ABBR_VOID -> ConstantJavaType.TYPE_NAME_VOID;
-            default -> {
-                // Object types: "Ljava/lang/String;" → "String"
-                if (descriptor.startsWith(ConstantJavaType.DESCRIPTOR_PREFIX_REF) && descriptor.endsWith(ConstantJavaType.DESCRIPTOR_SUFFIX)) {
-                    String className = descriptor.substring(1, descriptor.length() - 1);
-                    // Get simple name (after last slash)
-                    int lastSlash = className.lastIndexOf(ConstantJavaType.PATH_SEPARATOR.charAt(0));
-                    if (lastSlash >= 0 && lastSlash < className.length() - 1) {
-                        yield className.substring(lastSlash + 1);
-                    }
-                    yield className.replace(ConstantJavaType.PATH_SEPARATOR.charAt(0), ConstantJavaType.PACKAGE_SEPARATOR.charAt(0));
-                }
-                // Array types: "[I" → "int[]"
-                if (descriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
-                    String componentDescriptor = descriptor.substring(1);
-                    String componentType = descriptorToTypeName(componentDescriptor);
-                    yield componentType + ConstantJavaType.ARRAY_SUFFIX_NAME;
-                }
-                yield descriptor;
-            }
-        };
     }
 }

@@ -86,8 +86,10 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 case ConstantJavaMethod.METHOD_TO_LOWER_CASE -> generateToLowerCase(code, classWriter);
                 case ConstantJavaMethod.METHOD_TO_UPPER_CASE -> generateToUpperCase(code, classWriter);
                 case ConstantJavaMethod.METHOD_TRIM -> generateTrim(code, classWriter);
-                case ConstantJavaMethod.METHOD_TRIM_END, ConstantJavaMethod.METHOD_TRIM_RIGHT -> generateTrimEnd(code, classWriter);
-                case ConstantJavaMethod.METHOD_TRIM_START, ConstantJavaMethod.METHOD_TRIM_LEFT -> generateTrimStart(code, classWriter);
+                case ConstantJavaMethod.METHOD_TRIM_END, ConstantJavaMethod.METHOD_TRIM_RIGHT ->
+                        generateTrimEnd(code, classWriter);
+                case ConstantJavaMethod.METHOD_TRIM_START, ConstantJavaMethod.METHOD_TRIM_LEFT ->
+                        generateTrimStart(code, classWriter);
                 default ->
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "Method '" + methodName + "()' not supported on String");
             }

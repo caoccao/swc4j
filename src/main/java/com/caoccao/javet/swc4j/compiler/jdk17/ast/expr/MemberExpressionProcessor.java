@@ -30,9 +30,9 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -91,7 +91,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 if (capturedThis != null) {
                     // We're in a lambda - need to access field via captured$this
                     // Extract the outer class name from the captured type (e.g., "Lcom/A;" -> "com/A")
-                    String outerClassName = capturedThis.type().substring(1, capturedThis.type().length() - 1);
+                    String outerClassName = TypeConversionUtils.descriptorToInternalName(capturedThis.type());
 
                     // Load captured$this
                     code.aload(0); // load lambda's this
@@ -242,7 +242,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                         // Add checkcast for non-Object element types to ensure type safety
                         if (elemType.startsWith("L") && elemType.endsWith(";") &&
                                 !elemType.equals(ConstantJavaType.LJAVA_LANG_OBJECT)) {
-                            String elementInternalName = elemType.substring(1, elemType.length() - 1);
+                            String elementInternalName = TypeConversionUtils.descriptorToInternalName(elemType);
                             int classIndex = cp.addClass(elementInternalName);
                             code.checkcast(classIndex);
                         }
@@ -361,8 +361,8 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
         if (objType != null && objType.startsWith("L") && objType.endsWith(";")
                 && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
             String fieldName = propIdent.getSym();
-            String internalName = objType.substring(1, objType.length() - 1);
-            String qualifiedName = internalName.replace('/', '.');
+            String internalName = TypeConversionUtils.descriptorToInternalName(objType);
+            String qualifiedName = TypeConversionUtils.descriptorToQualifiedName(objType);
 
             JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
             if (typeInfo == null) {
@@ -422,8 +422,8 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             // Infer the type of the object expression
             if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
                 // Extract the class name from the descriptor
-                String className = objType.substring(1, objType.length() - 1);
-                String qualifiedName = className.replace('/', '.');
+                String className = TypeConversionUtils.descriptorToInternalName(objType);
+                String qualifiedName = TypeConversionUtils.descriptorToQualifiedName(objType);
 
                 // Try to resolve the class in the type registry
                 JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);

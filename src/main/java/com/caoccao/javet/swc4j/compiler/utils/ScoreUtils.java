@@ -18,7 +18,6 @@
 package com.caoccao.javet.swc4j.compiler.utils;
 
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

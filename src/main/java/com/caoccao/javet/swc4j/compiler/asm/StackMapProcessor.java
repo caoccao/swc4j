@@ -18,6 +18,7 @@
 package com.caoccao.javet.swc4j.compiler.asm;
 
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 
 import java.util.*;
 
@@ -684,7 +685,7 @@ public class StackMapProcessor {
             case ConstantJavaType.CHAR_DOUBLE -> stack.add(VerificationType.double_());
             case ConstantJavaType.CHAR_REFERENCE -> {
                 // Object type - extract class name (remove L and ;)
-                String className = returnType.substring(1, returnType.length() - 1);
+                String className = TypeConversionUtils.descriptorToInternalName(returnType);
                 stack.add(VerificationType.object(className));
             }
             case ConstantJavaType.CHAR_ARRAY -> {

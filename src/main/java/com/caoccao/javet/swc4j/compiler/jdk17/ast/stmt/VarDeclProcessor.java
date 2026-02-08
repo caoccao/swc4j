@@ -41,6 +41,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ArrowExpressionProcessor;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.ArrayList;
@@ -509,8 +510,8 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.iconst(1);
                 // Extract element type from descriptor (e.g., ConstantJavaType.LJAVA_LANG_STRING -> ConstantJavaType.JAVA_LANG_STRING)
                 String elementType;
-                if (type.startsWith("L") && type.endsWith(";")) {
-                    elementType = type.substring(1, type.length() - 1);
+                if (TypeConversionUtils.isObjectDescriptor(type)) {
+                    elementType = TypeConversionUtils.descriptorToInternalName(type);
                 } else {
                     elementType = ConstantJavaType.JAVA_LANG_OBJECT;
                 }
@@ -613,8 +614,8 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 code.iconst(1);
                 // Extract element type from descriptor (e.g., ConstantJavaType.LJAVA_LANG_STRING -> ConstantJavaType.JAVA_LANG_STRING)
                 String elementType;
-                if (type.startsWith("L") && type.endsWith(";")) {
-                    elementType = type.substring(1, type.length() - 1);
+                if (TypeConversionUtils.isObjectDescriptor(type)) {
+                    elementType = TypeConversionUtils.descriptorToInternalName(type);
                 } else {
                     elementType = ConstantJavaType.JAVA_LANG_OBJECT;
                 }

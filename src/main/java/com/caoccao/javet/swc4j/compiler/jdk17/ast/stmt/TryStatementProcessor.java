@@ -39,6 +39,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
@@ -152,7 +153,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         var context = compiler.getMemory().getCompilationContext();
 
         // Determine the exception class for method refs (remove L and ; from descriptor)
-        String exceptionClassName = exceptionType.substring(1, exceptionType.length() - 1);
+        String exceptionClassName = TypeConversionUtils.descriptorToInternalName(exceptionType);
 
         for (ISwc4jAstObjectPatProp prop : objectPat.getProps()) {
             if (prop instanceof Swc4jAstAssignPatProp assignProp) {
@@ -398,7 +399,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         // Add exception table entry - use the type from annotation if provided
         // Only add if there's actual code to protect
         if (tryStartPc < tryEndPc) {
-            String catchClassName = catchType.substring(1, catchType.length() - 1);  // Remove L and ;
+            String catchClassName = TypeConversionUtils.descriptorToInternalName(catchType);
             int catchClassIndex = cp.addClass(catchClassName);
             code.addExceptionHandler(tryStartPc, tryEndPc, catchStartPc, catchClassIndex);
         }
@@ -569,7 +570,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         // Only add entries if there's actually code to protect
         if (tryStartPc < tryEndPc) {
             // Catch specified type in the try block
-            String catchClassName = catchType.substring(1, catchType.length() - 1);  // Remove L and ;
+            String catchClassName = TypeConversionUtils.descriptorToInternalName(catchType);
             int catchClassIndex = cp.addClass(catchClassName);
             code.addExceptionHandler(tryStartPc, tryEndPc, catchStartPc, catchClassIndex);
         }
@@ -667,7 +668,8 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
 
     private String getPropertyType(String propertyName) {
         return switch (propertyName) {
-            case ConstantJavaField.PROPERTY_MESSAGE, ConstantJavaField.PROPERTY_STACK, ConstantJavaField.PROPERTY_NAME -> ConstantJavaType.LJAVA_LANG_STRING;
+            case ConstantJavaField.PROPERTY_MESSAGE, ConstantJavaField.PROPERTY_STACK,
+                 ConstantJavaField.PROPERTY_NAME -> ConstantJavaType.LJAVA_LANG_STRING;
             case ConstantJavaField.PROPERTY_CAUSE -> ConstantJavaType.LJAVA_LANG_THROWABLE;
             default -> ConstantJavaType.LJAVA_LANG_OBJECT;
         };
