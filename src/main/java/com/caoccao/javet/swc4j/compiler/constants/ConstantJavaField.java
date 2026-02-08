@@ -19,7 +19,8 @@ package com.caoccao.javet.swc4j.compiler.constants;
 /**
  * Java field name constants for bytecode generation.
  * <p>
- * This class contains constants for field names used in bytecode operations.
+ * This class contains constants for field names and property names used in bytecode operations,
+ * including exception destructuring and other runtime operations.
  *
  * @since 1.7.0
  */
@@ -30,6 +31,42 @@ public final class ConstantJavaField {
      * @since 1.7.0
      */
     public static final String FIELD_RAW = "raw";
+    /**
+     * The constant PROPERTY_CAUSE - exception cause property name.
+     *
+     * @since 1.7.0
+     */
+    public static final String PROPERTY_CAUSE = "cause";
+    /**
+     * The constant PROPERTY_MESSAGE - exception message property name.
+     *
+     * @since 1.7.0
+     */
+    public static final String PROPERTY_MESSAGE = "message";
+    /**
+     * The constant PROPERTY_NAME - exception name property name.
+     *
+     * @since 1.7.0
+     */
+    public static final String PROPERTY_NAME = "name";
+    /**
+     * The constant PROPERTY_STACK - exception stack property name.
+     *
+     * @since 1.7.0
+     */
+    public static final String PROPERTY_STACK = "stack";
+    /**
+     * The constant TEMP_VAR_CATCH_EXCEPTION - temporary variable prefix for catch exception.
+     *
+     * @since 1.7.0
+     */
+    public static final String TEMP_VAR_CATCH_EXCEPTION = "$catchException$";
+    /**
+     * The constant TEMP_VAR_FINALLY_EXCEPTION - temporary variable prefix for finally exception.
+     *
+     * @since 1.7.0
+     */
+    public static final String TEMP_VAR_FINALLY_EXCEPTION = "$finallyException$";
 
     private ConstantJavaField() {
     }

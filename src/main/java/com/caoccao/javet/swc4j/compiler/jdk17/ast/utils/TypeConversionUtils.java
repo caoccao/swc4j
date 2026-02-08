@@ -338,4 +338,55 @@ public final class TypeConversionUtils {
             }
         }
     }
+
+    /**
+     * Convert a JVM type descriptor to a human-readable type name.
+     * <p>
+     * Examples:
+     * - "I" → "int"
+     * - "D" → "double"
+     * - "Ljava/lang/String;" → "String"
+     * - "Ljava/lang/Integer;" → "Integer"
+     * - "[I" → "int[]"
+     *
+     * @param descriptor JVM type descriptor
+     * @return Human-readable type name
+     */
+    public static String descriptorToTypeName(String descriptor) {
+        if (descriptor == null || descriptor.isEmpty()) {
+            return ConstantJavaType.TYPE_NAME_UNKNOWN;
+        }
+
+        // Primitive types
+        return switch (descriptor) {
+            case ConstantJavaType.ABBR_BOOLEAN -> ConstantJavaType.TYPE_NAME_BOOLEAN;
+            case ConstantJavaType.ABBR_BYTE -> ConstantJavaType.TYPE_NAME_BYTE;
+            case ConstantJavaType.ABBR_CHARACTER -> ConstantJavaType.TYPE_NAME_CHAR;
+            case ConstantJavaType.ABBR_SHORT -> ConstantJavaType.TYPE_NAME_SHORT;
+            case ConstantJavaType.ABBR_INTEGER -> ConstantJavaType.TYPE_NAME_INT;
+            case ConstantJavaType.ABBR_LONG -> ConstantJavaType.TYPE_NAME_LONG;
+            case ConstantJavaType.ABBR_FLOAT -> ConstantJavaType.TYPE_NAME_FLOAT;
+            case ConstantJavaType.ABBR_DOUBLE -> ConstantJavaType.TYPE_NAME_DOUBLE;
+            case ConstantJavaType.ABBR_VOID -> ConstantJavaType.TYPE_NAME_VOID;
+            default -> {
+                // Object types: "Ljava/lang/String;" → "String"
+                if (descriptor.startsWith(ConstantJavaType.DESCRIPTOR_PREFIX_REF) && descriptor.endsWith(ConstantJavaType.DESCRIPTOR_SUFFIX)) {
+                    String className = descriptor.substring(1, descriptor.length() - 1);
+                    // Get simple name (after last slash)
+                    int lastSlash = className.lastIndexOf(ConstantJavaType.PATH_SEPARATOR.charAt(0));
+                    if (lastSlash >= 0 && lastSlash < className.length() - 1) {
+                        yield className.substring(lastSlash + 1);
+                    }
+                    yield className.replace(ConstantJavaType.PATH_SEPARATOR.charAt(0), ConstantJavaType.PACKAGE_SEPARATOR.charAt(0));
+                }
+                // Array types: "[I" → "int[]"
+                if (descriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
+                    String componentDescriptor = descriptor.substring(1);
+                    String componentType = descriptorToTypeName(componentDescriptor);
+                    yield componentType + ConstantJavaType.ARRAY_SUFFIX_NAME;
+                }
+                yield descriptor;
+            }
+        };
+    }
 }

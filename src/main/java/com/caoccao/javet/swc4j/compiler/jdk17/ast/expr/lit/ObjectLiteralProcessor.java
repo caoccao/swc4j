@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
@@ -524,8 +525,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
                 // Check if the actual element type is assignable to the expected element type
                 if (!TypeResolver.isAssignable(actualElementType, expectedElementType)) {
                     String keyName = getPropertyName(kvProp.getKey());
-                    throw Swc4jByteCodeCompilerException.typeMismatch(
-                            getSourceCode(),
+                    throw createTypeMismatchException(
                             elemExpr,
                             keyName + " (array element)",
                             expectedElementType,
@@ -571,8 +571,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
                 // Compatible - will be converted during generation
             } else {
                 String keyName = getPropertyName(key);
-                throw Swc4jByteCodeCompilerException.typeMismatch(
-                        getSourceCode(),
+                throw createTypeMismatchException(
                         key,
                         keyName,
                         expectedKeyType,
@@ -617,8 +616,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
 
         if (!TypeResolver.isAssignable(actualValueType, expectedValueType)) {
             String keyName = getPropertyName(key);
-            throw Swc4jByteCodeCompilerException.typeMismatch(
-                    getSourceCode(),
+            throw createTypeMismatchException(
                     valueExpr,
                     keyName,
                     expectedValueType,
@@ -638,8 +636,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
         String expectedKeyType = genericTypeInfo.getKeyType();
 
         if (!TypeResolver.isAssignable(actualKeyType, expectedKeyType)) {
-            throw Swc4jByteCodeCompilerException.typeMismatch(
-                    getSourceCode(),
+            throw createTypeMismatchException(
                     ident,
                     propertyName,
                     expectedKeyType,
@@ -657,8 +654,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
         String expectedValueType = genericTypeInfo.getValueType();
 
         if (!TypeResolver.isAssignable(actualValueType, expectedValueType)) {
-            throw Swc4jByteCodeCompilerException.typeMismatch(
-                    getSourceCode(),
+            throw createTypeMismatchException(
                     ident,
                     propertyName,
                     expectedValueType,
@@ -759,5 +755,53 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
         }
         // If spread source doesn't have generic type info, we can't validate at compile time
         // Runtime will handle any type mismatches
+    }
+
+    /**
+     * Create a type mismatch exception for object literal properties.
+     * <p>
+     * Generates clear, actionable error messages like:
+     * - "Property 'name' has type String, but Record requires double"
+     * - "Key 'count' has type String, but Record requires Integer"
+     * - "Nested property 'outer.inner' has type String, but Record requires double"
+     *
+     * @param ast          the AST node that caused the exception
+     * @param propertyName Property name (or nested path like "outer.inner")
+     * @param expectedType JVM type descriptor of expected type (e.g., "D", "Ljava/lang/Integer;")
+     * @param actualType   JVM type descriptor of actual type (e.g., "Ljava/lang/String;")
+     * @param isKey        true if this is a key type mismatch, false for value type mismatch
+     * @return Swc4jByteCodeCompilerException with formatted error message
+     */
+    private Swc4jByteCodeCompilerException createTypeMismatchException(
+            ISwc4jAst ast,
+            String propertyName,
+            String expectedType,
+            String actualType,
+            boolean isKey) {
+        String propertyKind = isKey ? "Key" : "Property";
+        String expectedTypeName = TypeConversionUtils.descriptorToTypeName(expectedType);
+        String actualTypeName = TypeConversionUtils.descriptorToTypeName(actualType);
+
+        boolean isNested = propertyName != null && propertyName.contains(".");
+
+        String message;
+        if (isNested) {
+            message = String.format(
+                    "Nested property '%s' has type %s, but Record requires %s",
+                    propertyName,
+                    actualTypeName,
+                    expectedTypeName
+            );
+        } else {
+            message = String.format(
+                    "%s '%s' has type %s, but Record requires %s",
+                    propertyKind,
+                    propertyName != null ? propertyName : "<unknown>",
+                    actualTypeName,
+                    expectedTypeName
+            );
+        }
+
+        return new Swc4jByteCodeCompilerException(getSourceCode(), ast, message);
     }
 }

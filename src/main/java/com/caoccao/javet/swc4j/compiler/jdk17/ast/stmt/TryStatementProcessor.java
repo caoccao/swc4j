@@ -33,6 +33,7 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaField;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
@@ -230,35 +231,35 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
             LocalVariable variable) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
         switch (propertyName) {
-            case "message" -> {
+            case ConstantJavaField.PROPERTY_MESSAGE -> {
                 // exception.getMessage() -> String
                 code.aload(exceptionSlot);
-                int getMessageRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, "getMessage", ConstantJavaDescriptor.__LJAVA_LANG_STRING);
+                int getMessageRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, ConstantJavaMethod.METHOD_GET_MESSAGE, ConstantJavaDescriptor.__LJAVA_LANG_STRING);
                 code.invokevirtual(getMessageRef);
                 code.astore(variable.index());
             }
-            case "stack" -> {
+            case ConstantJavaField.PROPERTY_STACK -> {
                 // Arrays.toString(exception.getStackTrace()) -> String
                 code.aload(exceptionSlot);
-                int getStackTraceRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, "getStackTrace",
+                int getStackTraceRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, ConstantJavaMethod.METHOD_GET_STACK_TRACE,
                         ConstantJavaDescriptor.__ARRAY_LJAVA_LANG_STACKTRACEELEMENT);
                 code.invokevirtual(getStackTraceRef);
                 int arraysToStringRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYS, ConstantJavaMethod.METHOD_TO_STRING,
-                        "([Ljava/lang/Object;)Ljava/lang/String;");
+                        ConstantJavaDescriptor.ARRAY_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
                 code.invokestatic(arraysToStringRef);
                 code.astore(variable.index());
             }
-            case "cause" -> {
+            case ConstantJavaField.PROPERTY_CAUSE -> {
                 // exception.getCause() -> Throwable
                 code.aload(exceptionSlot);
-                int getCauseRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, "getCause", ConstantJavaDescriptor.__LJAVA_LANG_THROWABLE);
+                int getCauseRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_THROWABLE, ConstantJavaMethod.METHOD_GET_CAUSE, ConstantJavaDescriptor.__LJAVA_LANG_THROWABLE);
                 code.invokevirtual(getCauseRef);
                 code.astore(variable.index());
             }
-            case "name" -> {
+            case ConstantJavaField.PROPERTY_NAME -> {
                 // For JsError types, use getName(); for others, use class simple name
                 // Use runtime instanceof check since catch type may be Throwable
-                int jsErrorClass = cp.addClass("com/caoccao/javet/swc4j/exceptions/JsError");
+                int jsErrorClass = cp.addClass(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_EXCEPTIONS_JS_ERROR);
 
                 // Check if exception instanceof JsError
                 code.aload(exceptionSlot);
@@ -270,7 +271,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
                 // True branch: cast to JsError and call getName()
                 code.aload(exceptionSlot);
                 code.checkcast(jsErrorClass);
-                int getNameRef = cp.addMethodRef("com/caoccao/javet/swc4j/exceptions/JsError", "getName",
+                int getNameRef = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_EXCEPTIONS_JS_ERROR, ConstantJavaMethod.METHOD_GET_NAME,
                         ConstantJavaDescriptor.__LJAVA_LANG_STRING);
                 code.invokevirtual(getNameRef);
                 code.astore(variable.index());
@@ -282,9 +283,9 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
                 int elseLabel = code.getCurrentOffset();
                 code.patchShort(elseJumpPos, elseLabel - elseJumpOpcodePos);
                 code.aload(exceptionSlot);
-                int getClassRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, "getClass", ConstantJavaDescriptor.__LJAVA_LANG_CLASS);
+                int getClassRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_OBJECT, ConstantJavaMethod.METHOD_GET_CLASS, ConstantJavaDescriptor.__LJAVA_LANG_CLASS);
                 code.invokevirtual(getClassRef);
-                int getSimpleNameRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CLASS, "getSimpleName", ConstantJavaDescriptor.__LJAVA_LANG_STRING);
+                int getSimpleNameRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_CLASS, ConstantJavaMethod.METHOD_GET_SIMPLE_NAME, ConstantJavaDescriptor.__LJAVA_LANG_STRING);
                 code.invokevirtual(getSimpleNameRef);
                 code.astore(variable.index());
 
@@ -365,7 +366,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
                 }
 
                 // Store exception in temporary variable for destructuring
-                String tempName = "$catchException$" + System.identityHashCode(catchClause);
+                String tempName = ConstantJavaField.TEMP_VAR_CATCH_EXCEPTION + System.identityHashCode(catchClause);
                 context.getLocalVariableTable().allocateVariable(tempName, catchType);
                 LocalVariable tempVar = context.getLocalVariableTable().getVariable(tempName);
                 code.astore(tempVar.index());
@@ -482,7 +483,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
                 }
 
                 // Store exception in temporary variable for destructuring
-                String tempName = "$catchException$" + System.identityHashCode(catchClause);
+                String tempName = ConstantJavaField.TEMP_VAR_CATCH_EXCEPTION + System.identityHashCode(catchClause);
                 context.getLocalVariableTable().allocateVariable(tempName, catchType);
                 LocalVariable tempVar = context.getLocalVariableTable().getVariable(tempName);
                 code.astore(tempVar.index());
@@ -529,7 +530,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         // Allocate temp slot for exception (only if we might rethrow)
         LocalVariable tempException = null;
         if (!finallyEndsWithTerminal) {
-            String tempName = "$finallyException$" + System.identityHashCode(tryStmt);
+            String tempName = ConstantJavaField.TEMP_VAR_FINALLY_EXCEPTION + System.identityHashCode(tryStmt);
             context.getLocalVariableTable().allocateVariable(tempName, ConstantJavaType.LJAVA_LANG_THROWABLE);
             tempException = context.getLocalVariableTable().getVariable(tempName);
 
@@ -627,7 +628,7 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         // Allocate temp slot for exception (only if we might rethrow)
         LocalVariable tempException = null;
         if (!finallyEndsWithTerminal) {
-            String tempName = "$finallyException$" + System.identityHashCode(tryStmt);
+            String tempName = ConstantJavaField.TEMP_VAR_FINALLY_EXCEPTION + System.identityHashCode(tryStmt);
             context.getLocalVariableTable().allocateVariable(tempName, ConstantJavaType.LJAVA_LANG_THROWABLE);
             tempException = context.getLocalVariableTable().getVariable(tempName);
 
@@ -666,8 +667,8 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
 
     private String getPropertyType(String propertyName) {
         return switch (propertyName) {
-            case "message", "stack", "name" -> ConstantJavaType.LJAVA_LANG_STRING;
-            case "cause" -> ConstantJavaType.LJAVA_LANG_THROWABLE;
+            case ConstantJavaField.PROPERTY_MESSAGE, ConstantJavaField.PROPERTY_STACK, ConstantJavaField.PROPERTY_NAME -> ConstantJavaType.LJAVA_LANG_STRING;
+            case ConstantJavaField.PROPERTY_CAUSE -> ConstantJavaType.LJAVA_LANG_THROWABLE;
             default -> ConstantJavaType.LJAVA_LANG_OBJECT;
         };
     }

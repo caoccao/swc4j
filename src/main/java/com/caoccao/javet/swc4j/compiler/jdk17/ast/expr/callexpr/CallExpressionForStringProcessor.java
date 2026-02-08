@@ -61,33 +61,33 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             }
 
             switch (methodName) {
-                case "charAt" -> generateCharAt(code, classWriter, callExpr);
-                case "charCodeAt" -> generateCharCodeAt(code, classWriter, callExpr);
-                case "codePointAt" -> generateCodePointAt(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_CHAR_AT -> generateCharAt(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_CHAR_CODE_AT -> generateCharCodeAt(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_CODE_POINT_AT -> generateCodePointAt(code, classWriter, callExpr);
                 case ConstantJavaMethod.METHOD_CONCAT -> generateConcat(code, classWriter, callExpr);
-                case "endsWith" -> generateEndsWith(code, classWriter, callExpr);
-                case "includes" -> generateIncludes(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_ENDS_WITH -> generateEndsWith(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_INCLUDES -> generateIncludes(code, classWriter, callExpr);
                 case ConstantJavaMethod.METHOD_INDEX_OF -> generateIndexOf(code, classWriter, callExpr);
                 case ConstantJavaMethod.METHOD_LAST_INDEX_OF -> generateLastIndexOf(code, classWriter, callExpr);
-                case "match" -> generateMatch(code, classWriter, callExpr);
-                case "matchAll" -> generateMatchAll(code, classWriter, callExpr);
-                case "padEnd" -> generatePadEnd(code, classWriter, callExpr);
-                case "padStart" -> generatePadStart(code, classWriter, callExpr);
-                case "repeat" -> generateRepeat(code, classWriter, callExpr);
-                case "replace" -> generateReplace(code, classWriter, callExpr);
-                case "replaceAll" -> generateReplaceAll(code, classWriter, callExpr);
-                case "search" -> generateSearch(code, classWriter, callExpr);
-                case "slice" -> generateSlice(code, classWriter, callExpr);
-                case "split" -> generateSplit(code, classWriter, callExpr);
-                case "startsWith" -> generateStartsWith(code, classWriter, callExpr);
-                case "substr" -> generateSubstr(code, classWriter, callExpr);
-                case "substring" -> generateSubstring(code, classWriter, callExpr);
-                case "test" -> generateTest(code, classWriter, callExpr);
-                case "toLowerCase" -> generateToLowerCase(code, classWriter);
-                case "toUpperCase" -> generateToUpperCase(code, classWriter);
-                case "trim" -> generateTrim(code, classWriter);
-                case "trimEnd", "trimRight" -> generateTrimEnd(code, classWriter);
-                case "trimStart", "trimLeft" -> generateTrimStart(code, classWriter);
+                case ConstantJavaMethod.METHOD_MATCH -> generateMatch(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_MATCH_ALL -> generateMatchAll(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_PAD_END -> generatePadEnd(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_PAD_START -> generatePadStart(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_REPEAT -> generateRepeat(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_REPLACE -> generateReplace(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_REPLACE_ALL -> generateReplaceAll(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_SEARCH -> generateSearch(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_SLICE -> generateSlice(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_SPLIT -> generateSplit(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_STARTS_WITH -> generateStartsWith(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_SUBSTR -> generateSubstr(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_SUBSTRING -> generateSubstring(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_TEST -> generateTest(code, classWriter, callExpr);
+                case ConstantJavaMethod.METHOD_TO_LOWER_CASE -> generateToLowerCase(code, classWriter);
+                case ConstantJavaMethod.METHOD_TO_UPPER_CASE -> generateToUpperCase(code, classWriter);
+                case ConstantJavaMethod.METHOD_TRIM -> generateTrim(code, classWriter);
+                case ConstantJavaMethod.METHOD_TRIM_END, ConstantJavaMethod.METHOD_TRIM_RIGHT -> generateTrimEnd(code, classWriter);
+                case ConstantJavaMethod.METHOD_TRIM_START, ConstantJavaMethod.METHOD_TRIM_LEFT -> generateTrimStart(code, classWriter);
                 default ->
                         throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "Method '" + methodName + "()' not supported on String");
             }
@@ -109,7 +109,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             }
 
             // Call StringApiUtils.charAt(String, int) -> String
-            int charAtMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "charAt", "(Ljava/lang/String;I)Ljava/lang/String;");
+            int charAtMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_CHAR_AT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__LJAVA_LANG_STRING);
             code.invokestatic(charAtMethod);
         } else {
             // No argument - pop string and push empty string
@@ -137,7 +137,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             }
 
             // Call StringApiUtils.charCodeAt(String, int) -> int
-            int charCodeAtMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "charCodeAt", "(Ljava/lang/String;I)I");
+            int charCodeAtMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_CHAR_CODE_AT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__I);
             code.invokestatic(charCodeAtMethod);
         }
     }
@@ -160,7 +160,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             }
 
             // Call String.codePointAt(int) -> int
-            int codePointAtMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "codePointAt", ConstantJavaDescriptor.I__I);
+            int codePointAtMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_CODE_POINT_AT, ConstantJavaDescriptor.I__I);
             code.invokevirtual(codePointAtMethod);
         }
     }
@@ -191,7 +191,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             compiler.getExpressionProcessor().generate(code, classWriter, searchArg.getExpr(), null);
 
             var cp = classWriter.getConstantPool();
-            int endsWithMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "endsWith", "(Ljava/lang/String;)Z");
+            int endsWithMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_ENDS_WITH, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__Z);
             code.invokevirtual(endsWithMethod);
         }
     }
@@ -206,7 +206,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             compiler.getExpressionProcessor().generate(code, classWriter, searchArg.getExpr(), null);
 
             var cp = classWriter.getConstantPool();
-            int containsMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "contains", "(Ljava/lang/CharSequence;)Z");
+            int containsMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_CONTAINS, ConstantJavaDescriptor.LJAVA_LANG_CHAR_SEQUENCE__Z);
             code.invokevirtual(containsMethod);
         }
     }
@@ -236,7 +236,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 }
 
                 // Call indexOf(String, int)
-                int indexOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_INDEX_OF, "(Ljava/lang/String;I)I");
+                int indexOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_INDEX_OF, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__I);
                 code.invokevirtual(indexOfMethod);
             } else {
                 // Call indexOf(String)
@@ -267,7 +267,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                     code.invokevirtual(intValueMethod);
                 }
 
-                int lastIndexOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LAST_INDEX_OF, "(Ljava/lang/String;I)I");
+                int lastIndexOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LAST_INDEX_OF, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__I);
                 code.invokevirtual(lastIndexOfMethod);
             } else {
                 int lastIndexOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_LAST_INDEX_OF, ConstantJavaDescriptor.LJAVA_LANG_STRING__I);
@@ -288,7 +288,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             // Call StringApiUtils.match(String, String) -> ArrayList<String>
             var cp = classWriter.getConstantPool();
-            int matchMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "match", "(Ljava/lang/String;Ljava/lang/String;)Ljava/util/ArrayList;");
+            int matchMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_MATCH, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_LJAVA_LANG_STRING__LJAVA_UTIL_ARRAYLIST);
             code.invokestatic(matchMethod);
         }
     }
@@ -309,7 +309,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             compiler.getExpressionProcessor().generate(code, classWriter, patternArg.getExpr(), null);
 
             // Call StringApiUtils.matchAll(String, String) -> ArrayList<ArrayList<String>>
-            int matchAllMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "matchAll", "(Ljava/lang/String;Ljava/lang/String;)Ljava/util/ArrayList;");
+            int matchAllMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_MATCH_ALL, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_LJAVA_LANG_STRING__LJAVA_UTIL_ARRAYLIST);
             code.invokestatic(matchAllMethod);
         }
     }
@@ -335,14 +335,14 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, padStringArg.getExpr(), null);
 
                 // Call StringApiUtils.padEnd(String, int, String)
-                int padEndMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "padEnd", "(Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;");
+                int padEndMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_PAD_END, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
                 code.invokestatic(padEndMethod);
             } else {
                 // Default pad string " "
                 int spaceIndex = cp.addString(" ");
                 code.ldc(spaceIndex);
 
-                int padEndMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "padEnd", "(Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;");
+                int padEndMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_PAD_END, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
                 code.invokestatic(padEndMethod);
             }
         }
@@ -369,14 +369,14 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 compiler.getExpressionProcessor().generate(code, classWriter, padStringArg.getExpr(), null);
 
                 // Call StringApiUtils.padStart(String, int, String)
-                int padStartMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "padStart", "(Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;");
+                int padStartMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_PAD_START, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
                 code.invokestatic(padStartMethod);
             } else {
                 // Default pad string " "
                 int spaceIndex = cp.addString(" ");
                 code.ldc(spaceIndex);
 
-                int padStartMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "padStart", "(Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;");
+                int padStartMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_PAD_START, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
                 code.invokestatic(padStartMethod);
             }
         }
@@ -402,7 +402,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             }
 
             // Call String.repeat(int) - Available in JDK 11+
-            int repeatMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "repeat", ConstantJavaDescriptor.I__LJAVA_LANG_STRING);
+            int repeatMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_REPEAT, ConstantJavaDescriptor.I__LJAVA_LANG_STRING);
             code.invokevirtual(repeatMethod);
         }
     }
@@ -420,7 +420,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             // Call StringApiUtils.replace(String, String, String)
             var cp = classWriter.getConstantPool();
-            int replaceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "replace", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+            int replaceMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_REPLACE, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_LJAVA_LANG_STRING_LJAVA_LANG_STRING__LJAVA_LANG_STRING);
             code.invokestatic(replaceMethod);
         }
     }
@@ -438,7 +438,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             compiler.getExpressionProcessor().generate(code, classWriter, replacementArg.getExpr(), null);
 
             var cp = classWriter.getConstantPool();
-            int replaceMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "replace", "(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Ljava/lang/String;");
+            int replaceMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_REPLACE, ConstantJavaDescriptor.LJAVA_LANG_CHAR_SEQUENCE_LJAVA_LANG_CHAR_SEQUENCE__LJAVA_LANG_STRING);
             code.invokevirtual(replaceMethod);
         }
     }
@@ -455,7 +455,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             // Call StringApiUtils.search(String, String) -> int
             var cp = classWriter.getConstantPool();
-            int searchMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "search", "(Ljava/lang/String;Ljava/lang/String;)I");
+            int searchMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SEARCH, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_LJAVA_LANG_STRING__I);
             code.invokestatic(searchMethod);
         }
     }
@@ -487,11 +487,11 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 }
 
                 // Call StringApiUtils.slice(String, int, int)
-                int sliceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "slice", "(Ljava/lang/String;II)Ljava/lang/String;");
+                int sliceMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SLICE, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_II__LJAVA_LANG_STRING);
                 code.invokestatic(sliceMethod);
             } else {
                 // One argument: slice(start)
-                int sliceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "slice", "(Ljava/lang/String;I)Ljava/lang/String;");
+                int sliceMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SLICE, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__LJAVA_LANG_STRING);
                 code.invokestatic(sliceMethod);
             }
         }
@@ -505,7 +505,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
             code.aconst_null();
 
             // Call StringApiUtils.split(String, String) -> ArrayList<String>
-            int splitMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "split", "(Ljava/lang/String;Ljava/lang/String;)Ljava/util/ArrayList;");
+            int splitMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SPLIT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_LJAVA_LANG_STRING__LJAVA_UTIL_ARRAYLIST);
             code.invokestatic(splitMethod);
         } else {
             var separatorArg = callExpr.getArgs().get(0);
@@ -523,12 +523,12 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 }
 
                 // Call StringApiUtils.split(String, String, int) -> ArrayList<String>
-                int splitMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "split", "(Ljava/lang/String;Ljava/lang/String;I)Ljava/util/ArrayList;");
+                int splitMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SPLIT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_LJAVA_LANG_STRING_I__LJAVA_UTIL_ARRAYLIST);
                 code.invokestatic(splitMethod);
             } else {
                 // Without limit
                 // Call StringApiUtils.split(String, String) -> ArrayList<String>
-                int splitMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "split", "(Ljava/lang/String;Ljava/lang/String;)Ljava/util/ArrayList;");
+                int splitMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SPLIT, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_LJAVA_LANG_STRING__LJAVA_UTIL_ARRAYLIST);
                 code.invokestatic(splitMethod);
             }
         }
@@ -555,10 +555,10 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                     code.invokevirtual(intValueMethod);
                 }
 
-                int startsWithMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "startsWith", "(Ljava/lang/String;I)Z");
+                int startsWithMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_STARTS_WITH, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__Z);
                 code.invokevirtual(startsWithMethod);
             } else {
-                int startsWithMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "startsWith", "(Ljava/lang/String;)Z");
+                int startsWithMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_STARTS_WITH, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING__Z);
                 code.invokevirtual(startsWithMethod);
             }
         }
@@ -592,13 +592,13 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 }
 
                 // Call StringApiUtils.substr(String, int, int)
-                int substrMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "substr", "(Ljava/lang/String;II)Ljava/lang/String;");
+                int substrMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SUBSTR, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_II__LJAVA_LANG_STRING);
                 code.invokestatic(substrMethod);
             } else {
                 // One argument only: substr(start) - extract to end of string
                 code.ldc(cp.addInteger(Integer.MAX_VALUE));
 
-                int substrMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "substr", "(Ljava/lang/String;II)Ljava/lang/String;");
+                int substrMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SUBSTR, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_II__LJAVA_LANG_STRING);
                 code.invokestatic(substrMethod);
             }
         }
@@ -631,11 +631,11 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
                 }
 
                 // Call StringApiUtils.substring(String, int, int)
-                int substringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "substring", "(Ljava/lang/String;II)Ljava/lang/String;");
+                int substringMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SUBSTRING, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_II__LJAVA_LANG_STRING);
                 code.invokestatic(substringMethod);
             } else {
                 // One argument: substring(start)
-                int substringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "substring", "(Ljava/lang/String;I)Ljava/lang/String;");
+                int substringMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_SUBSTRING, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_I__LJAVA_LANG_STRING);
                 code.invokestatic(substringMethod);
             }
         }
@@ -653,7 +653,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
 
             // Call StringApiUtils.test(String, String) -> boolean
             var cp = classWriter.getConstantPool();
-            int testMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "test", "(Ljava/lang/String;Ljava/lang/String;)Z");
+            int testMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_TEST, ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_STRING_LJAVA_LANG_STRING__Z);
             code.invokestatic(testMethod);
         }
     }
@@ -661,21 +661,21 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
     private void generateToLowerCase(CodeBuilder code, ClassWriter classWriter) {
         // str.toLowerCase()
         var cp = classWriter.getConstantPool();
-        int toLowerMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "toLowerCase", ConstantJavaDescriptor.__LJAVA_LANG_STRING);
+        int toLowerMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_TO_LOWER_CASE, ConstantJavaDescriptor.__LJAVA_LANG_STRING);
         code.invokevirtual(toLowerMethod);
     }
 
     private void generateToUpperCase(CodeBuilder code, ClassWriter classWriter) {
         // str.toUpperCase()
         var cp = classWriter.getConstantPool();
-        int toUpperMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "toUpperCase", ConstantJavaDescriptor.__LJAVA_LANG_STRING);
+        int toUpperMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_TO_UPPER_CASE, ConstantJavaDescriptor.__LJAVA_LANG_STRING);
         code.invokevirtual(toUpperMethod);
     }
 
     private void generateTrim(CodeBuilder code, ClassWriter classWriter) {
         // str.trim()
         var cp = classWriter.getConstantPool();
-        int trimMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, "trim", ConstantJavaDescriptor.__LJAVA_LANG_STRING);
+        int trimMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_STRING, ConstantJavaMethod.METHOD_TRIM, ConstantJavaDescriptor.__LJAVA_LANG_STRING);
         code.invokevirtual(trimMethod);
     }
 
@@ -683,7 +683,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
         // str.trimEnd() or str.trimRight() (alias)
         // Use StringApiUtils.trimEnd which uses stripTrailing() (JDK 11+)
         var cp = classWriter.getConstantPool();
-        int trimEndMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "trimEnd", ConstantJavaDescriptor.LJAVA_LANG_STRING__LJAVA_LANG_STRING);
+        int trimEndMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_TRIM_END, ConstantJavaDescriptor.LJAVA_LANG_STRING__LJAVA_LANG_STRING);
         code.invokestatic(trimEndMethod);
     }
 
@@ -691,7 +691,7 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
         // str.trimStart() or str.trimLeft() (alias)
         // Use StringApiUtils.trimStart which uses stripLeading() (JDK 11+)
         var cp = classWriter.getConstantPool();
-        int trimStartMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/StringApiUtils", "trimStart", ConstantJavaDescriptor.LJAVA_LANG_STRING__LJAVA_LANG_STRING);
+        int trimStartMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_STRING_API_UTILS, ConstantJavaMethod.METHOD_TRIM_START, ConstantJavaDescriptor.LJAVA_LANG_STRING__LJAVA_LANG_STRING);
         code.invokestatic(trimStartMethod);
     }
 

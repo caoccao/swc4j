@@ -75,16 +75,16 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
             compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null);
 
             switch (methodName) {
-                case "fill" -> generateFill(code, classWriter, callExpr, elementType);
-                case "includes" -> generateIncludes(code, classWriter, callExpr, elementType);
+                case ConstantJavaMethod.METHOD_FILL -> generateFill(code, classWriter, callExpr, elementType);
+                case ConstantJavaMethod.METHOD_INCLUDES -> generateIncludes(code, classWriter, callExpr, elementType);
                 case ConstantJavaMethod.METHOD_INDEX_OF -> generateIndexOf(code, classWriter, callExpr, elementType);
-                case "join" -> generateJoin(code, classWriter, callExpr, elementType);
+                case ConstantJavaMethod.METHOD_JOIN -> generateJoin(code, classWriter, callExpr, elementType);
                 case ConstantJavaMethod.METHOD_LAST_INDEX_OF ->
                         generateLastIndexOf(code, classWriter, callExpr, elementType);
-                case "reverse" -> generateReverse(code, classWriter, elementType);
-                case "sort" -> generateSort(code, classWriter, elementType);
-                case "toReversed" -> generateToReversed(code, classWriter, elementType);
-                case "toSorted" -> generateToSorted(code, classWriter, elementType);
+                case ConstantJavaMethod.METHOD_REVERSE -> generateReverse(code, classWriter, elementType);
+                case ConstantJavaMethod.METHOD_SORT -> generateSort(code, classWriter, elementType);
+                case ConstantJavaMethod.METHOD_TO_REVERSED -> generateToReversed(code, classWriter, elementType);
+                case ConstantJavaMethod.METHOD_TO_SORTED -> generateToSorted(code, classWriter, elementType);
                 case ConstantJavaMethod.METHOD_TO_STRING -> generateToString(code, classWriter, elementType);
                 default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                         "Method '" + methodName + "()' is not supported on Java arrays (" + arrayTypeName + "). " +
@@ -126,7 +126,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
 
         // Call ArrayApiUtils.fill
         String methodSignature = getArrayApiUtilsFillSignature(elementType);
-        int fillMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "fill", methodSignature);
+        int fillMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_API_UTILS, ConstantJavaMethod.METHOD_FILL, methodSignature);
         code.invokestatic(fillMethod);
 
         // Cast back to original type if reference type
@@ -167,8 +167,8 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         }
 
         // Call ArrayApiUtils.includes
-        String methodSignature = getArrayApiUtilsSearchSignature("includes", elementType, ConstantJavaType.ABBR_BOOLEAN);
-        int includesMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "includes", methodSignature);
+        String methodSignature = getArrayApiUtilsSearchSignature(ConstantJavaMethod.METHOD_INCLUDES, elementType, ConstantJavaType.ABBR_BOOLEAN);
+        int includesMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_API_UTILS, ConstantJavaMethod.METHOD_INCLUDES, methodSignature);
         code.invokestatic(includesMethod);
     }
 
@@ -203,7 +203,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
 
         // Call ArrayApiUtils.indexOf
         String methodSignature = getArrayApiUtilsSearchSignature(ConstantJavaMethod.METHOD_INDEX_OF, elementType, ConstantJavaType.ABBR_INTEGER);
-        int indexOfMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", ConstantJavaMethod.METHOD_INDEX_OF, methodSignature);
+        int indexOfMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_API_UTILS, ConstantJavaMethod.METHOD_INDEX_OF, methodSignature);
         code.invokestatic(indexOfMethod);
     }
 
@@ -227,7 +227,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
 
         // Call ArrayApiUtils.join
         String methodSignature = getArrayApiUtilsJoinSignature(elementType);
-        int joinMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "join", methodSignature);
+        int joinMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_API_UTILS, ConstantJavaMethod.METHOD_JOIN, methodSignature);
         code.invokestatic(joinMethod);
     }
 
@@ -262,7 +262,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
 
         // Call ArrayApiUtils.lastIndexOf
         String methodSignature = getArrayApiUtilsSearchSignature(ConstantJavaMethod.METHOD_LAST_INDEX_OF, elementType, ConstantJavaType.ABBR_INTEGER);
-        int lastIndexOfMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", ConstantJavaMethod.METHOD_LAST_INDEX_OF, methodSignature);
+        int lastIndexOfMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_API_UTILS, ConstantJavaMethod.METHOD_LAST_INDEX_OF, methodSignature);
         code.invokestatic(lastIndexOfMethod);
     }
 
@@ -275,8 +275,8 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
             code.checkcast(objectArrayClass);
         }
 
-        String methodSignature = getArrayApiUtilsSignature("reverse", elementType);
-        int reverseMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "reverse", methodSignature);
+        String methodSignature = getArrayApiUtilsSignature(ConstantJavaMethod.METHOD_REVERSE, elementType);
+        int reverseMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_API_UTILS, ConstantJavaMethod.METHOD_REVERSE, methodSignature);
         code.invokestatic(reverseMethod);
 
         // Cast back to original type if reference type
@@ -296,8 +296,8 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
             code.checkcast(objectArrayClass);
         }
 
-        String methodSignature = getArrayApiUtilsSignature("sort", elementType);
-        int sortMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "sort", methodSignature);
+        String methodSignature = getArrayApiUtilsSignature(ConstantJavaMethod.METHOD_SORT, elementType);
+        int sortMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_API_UTILS, ConstantJavaMethod.METHOD_SORT, methodSignature);
         code.invokestatic(sortMethod);
 
         // Cast back to original type if reference type
@@ -317,8 +317,8 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
             code.checkcast(objectArrayClass);
         }
 
-        String methodSignature = getArrayApiUtilsSignature("toReversed", elementType);
-        int toReversedMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "toReversed", methodSignature);
+        String methodSignature = getArrayApiUtilsSignature(ConstantJavaMethod.METHOD_TO_REVERSED, elementType);
+        int toReversedMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_API_UTILS, ConstantJavaMethod.METHOD_TO_REVERSED, methodSignature);
         code.invokestatic(toReversedMethod);
 
         // Cast back to original type if reference type
@@ -338,8 +338,8 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
             code.checkcast(objectArrayClass);
         }
 
-        String methodSignature = getArrayApiUtilsSignature("toSorted", elementType);
-        int toSortedMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "toSorted", methodSignature);
+        String methodSignature = getArrayApiUtilsSignature(ConstantJavaMethod.METHOD_TO_SORTED, elementType);
+        int toSortedMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_API_UTILS, ConstantJavaMethod.METHOD_TO_SORTED, methodSignature);
         code.invokestatic(toSortedMethod);
 
         // Cast back to original type if reference type
@@ -360,7 +360,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         }
 
         String methodSignature = getArrayApiUtilsToStringSignature(elementType);
-        int toStringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", ConstantJavaMethod.METHOD_TO_STRING, methodSignature);
+        int toStringMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_API_UTILS, ConstantJavaMethod.METHOD_TO_STRING, methodSignature);
         code.invokestatic(toStringMethod);
     }
 
@@ -396,7 +396,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
             // Primitive type
             arrayDescriptor = ConstantJavaType.ARRAY_PREFIX + elementType;
         }
-        return "(" + arrayDescriptor + "Ljava/lang/String;)Ljava/lang/String;";
+        return "(" + arrayDescriptor + ConstantJavaType.LJAVA_LANG_STRING + ")" + ConstantJavaType.LJAVA_LANG_STRING;
     }
 
     /**
@@ -450,7 +450,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
             // Primitive type
             arrayDescriptor = ConstantJavaType.ARRAY_PREFIX + elementType;
         }
-        return "(" + arrayDescriptor + ")Ljava/lang/String;";
+        return "(" + arrayDescriptor + ")" + ConstantJavaType.LJAVA_LANG_STRING;
     }
 
     /**

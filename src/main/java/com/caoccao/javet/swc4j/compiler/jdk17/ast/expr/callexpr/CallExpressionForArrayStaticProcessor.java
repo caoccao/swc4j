@@ -25,6 +25,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
@@ -63,9 +64,9 @@ public final class CallExpressionForArrayStaticProcessor extends BaseAstProcesso
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Array static method name not supported");
         }
         switch (methodName) {
-            case "isArray" -> generateIsArray(code, classWriter, callExpr);
-            case "from" -> generateFrom(code, classWriter, callExpr);
-            case "of" -> generateOf(code, classWriter, callExpr);
+            case ConstantJavaMethod.METHOD_IS_ARRAY -> generateIsArray(code, classWriter, callExpr);
+            case ConstantJavaMethod.METHOD_FROM -> generateFrom(code, classWriter, callExpr);
+            case ConstantJavaMethod.METHOD_OF -> generateOf(code, classWriter, callExpr);
             default ->
                     throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Array." + methodName + "() not supported");
         }
@@ -92,9 +93,9 @@ public final class CallExpressionForArrayStaticProcessor extends BaseAstProcesso
         }
         var cp = classWriter.getConstantPool();
         int fromMethod = cp.addMethodRef(
-                "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayStaticApiUtils",
-                "from",
-                "(Ljava/lang/Object;)Ljava/util/ArrayList;");
+                ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_STATIC_API_UTILS,
+                ConstantJavaMethod.METHOD_FROM,
+                ConstantJavaDescriptor.DESCRIPTOR_LJAVA_LANG_OBJECT__LJAVA_UTIL_ARRAYLIST);
         code.invokestatic(fromMethod);
     }
 
@@ -117,9 +118,9 @@ public final class CallExpressionForArrayStaticProcessor extends BaseAstProcesso
         }
         var cp = classWriter.getConstantPool();
         int isArrayMethod = cp.addMethodRef(
-                "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayStaticApiUtils",
-                "isArray",
-                "(Ljava/lang/Object;)Z");
+                ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAY_STATIC_API_UTILS,
+                ConstantJavaMethod.METHOD_IS_ARRAY,
+                ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
         code.invokestatic(isArrayMethod);
     }
 
@@ -129,8 +130,8 @@ public final class CallExpressionForArrayStaticProcessor extends BaseAstProcesso
             Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
         int arrayListClass = cp.addClass(ConstantJavaType.JAVA_UTIL_ARRAYLIST);
-        int arrayListInit = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, "()V");
-        int arrayListAdd = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_ADD, "(Ljava/lang/Object;)Z");
+        int arrayListInit = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
+        int arrayListAdd = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_ADD, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__Z);
 
         code.newInstance(arrayListClass);
         code.dup();
@@ -162,7 +163,7 @@ public final class CallExpressionForArrayStaticProcessor extends BaseAstProcesso
             return false;
         }
         if (memberExpr.getObj() instanceof Swc4jAstIdent ident) {
-            return "Array".equals(ident.getSym());
+            return ConstantJavaType.TYPE_ALIAS_ARRAY.equals(ident.getSym());
         }
         return false;
     }
