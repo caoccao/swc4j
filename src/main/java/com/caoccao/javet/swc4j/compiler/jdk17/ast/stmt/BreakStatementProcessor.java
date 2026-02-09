@@ -25,6 +25,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ControlFlowUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.UsingResourceUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.UsingResourceInfo;
@@ -103,7 +104,7 @@ public final class BreakStatementProcessor extends BaseAstProcessor<Swc4jAstBrea
             // Check if this is a using resource sentinel
             UsingResourceInfo usingInfo = context.getUsingResourceInfo(finallyBlock);
             if (usingInfo != null) {
-                compiler.getUsingDeclProcessor().generateInlineClose(
+                UsingResourceUtils.generateInlineClose(
                         code, classWriter, usingInfo.resourceSlot());
                 continue;
             }

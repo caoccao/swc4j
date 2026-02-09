@@ -80,6 +80,7 @@ public final class FunctionExpressionProcessor extends BaseAstProcessor<Swc4jAst
                 function.getSpan()
         );
 
-        compiler.getArrowExpressionProcessor().generateForFunctionExpr(code, classWriter, arrowExpr, returnTypeInfo);
+        compiler.getMemory().getCompilationContext().pushCaptureThisOverride(false);
+        compiler.getArrowExpressionProcessor().generate(code, classWriter, arrowExpr, returnTypeInfo);
     }
 }

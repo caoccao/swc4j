@@ -989,16 +989,6 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
     }
 
     /**
-     * Checks if the given type is supported by this processor.
-     *
-     * @param type the JVM type descriptor to check
-     * @return true if the type is ArrayList
-     */
-    public boolean isTypeSupported(String type) {
-        return ConstantJavaType.LJAVA_UTIL_ARRAYLIST.equals(type);
-    }
-
-    /**
      * Checks if the type is a wide numeric primitive (int, long, or double).
      * This is intentionally narrower than {@code TypeConversionUtils.isWideNumericPrimitive()},
      * which also includes byte, short, char, and float.

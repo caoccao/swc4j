@@ -557,20 +557,21 @@ public final class SwitchStatementProcessor extends BaseAstProcessor<Swc4jAstSwi
             ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(code, classWriter, switchStmt, null, returnTypeInfo);
+        String labelName = compiler.getMemory().getCompilationContext().popPendingLabelName();
+        generate(code, classWriter, switchStmt, labelName, returnTypeInfo);
     }
 
     /**
-     * Generate.
+     * Generate bytecode for a switch statement (potentially labeled).
      *
-     * @param code           the code
+     * @param code           the code builder
      * @param classWriter    the class writer
-     * @param switchStmt     the switch stmt
-     * @param labelName      the label name
-     * @param returnTypeInfo the return type info
-     * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
+     * @param switchStmt     the switch statement AST node
+     * @param labelName      the label name (null for unlabeled switches)
+     * @param returnTypeInfo return type information for the enclosing method
+     * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public void generate(
+    private void generate(
             CodeBuilder code,
             ClassWriter classWriter,
             Swc4jAstSwitchStmt switchStmt,

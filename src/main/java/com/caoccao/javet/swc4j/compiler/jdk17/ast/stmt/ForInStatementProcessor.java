@@ -108,7 +108,7 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public void generate(
+    private void generate(
             CodeBuilder code,
             ClassWriter classWriter,
             Swc4jAstForInStmt forInStmt,
@@ -149,7 +149,8 @@ public final class ForInStatementProcessor extends BaseAstProcessor<Swc4jAstForI
             ClassWriter classWriter,
             Swc4jAstForInStmt forInStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(code, classWriter, forInStmt, null, returnTypeInfo);
+        String labelName = compiler.getMemory().getCompilationContext().popPendingLabelName();
+        generate(code, classWriter, forInStmt, labelName, returnTypeInfo);
     }
 
     /**

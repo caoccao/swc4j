@@ -28,6 +28,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ClassExprUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
@@ -342,51 +343,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             TypeConversionUtils.convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
         }
 
-        generateVarargsArray(code, classWriter, args, argTypes, fixedCount, varargArrayType, componentType);
-    }
-
-    private void generateVarargsArray(
-            CodeBuilder code,
-            ClassWriter classWriter,
-            List<Swc4jAstExprOrSpread> args,
-            List<String> argTypes,
-            int startIndex,
-            String arrayType,
-            String componentType) throws Swc4jByteCodeCompilerException {
-        int varargCount = args.size() - startIndex;
-        code.iconst(varargCount);
-
-        var cp = classWriter.getConstantPool();
-        if (TypeConversionUtils.isPrimitiveType(componentType)) {
-            code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
-        } else {
-            String internalName = TypeConversionUtils.descriptorToInternalName(componentType);
-            int classIndex = cp.addClass(internalName);
-            code.anewarray(classIndex);
-        }
-
-        for (int i = 0; i < varargCount; i++) {
-            code.dup();
-            code.iconst(i);
-            Swc4jAstExprOrSpread arg = args.get(startIndex + i);
-            if (arg.getSpread().isPresent()) {
-                throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported in varargs calls");
-            }
-            compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
-            String argType = argTypes.get(startIndex + i);
-            TypeConversionUtils.convertType(code, classWriter, argType, componentType);
-
-            switch (componentType) {
-                case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
-                case ConstantJavaType.ABBR_CHARACTER -> code.castore();
-                case ConstantJavaType.ABBR_SHORT -> code.sastore();
-                case ConstantJavaType.ABBR_INTEGER -> code.iastore();
-                case ConstantJavaType.ABBR_LONG -> code.lastore();
-                case ConstantJavaType.ABBR_FLOAT -> code.fastore();
-                case ConstantJavaType.ABBR_DOUBLE -> code.dastore();
-                default -> code.aastore();
-            }
-        }
+        CodeGeneratorUtils.generateVarargsArray(compiler, code, classWriter, args, argTypes, fixedCount, varargArrayType, componentType);
     }
 
     private String getDescriptor(Class<?> clazz) {
@@ -421,7 +378,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
         if (expr instanceof Swc4jAstNewExpr newExpr) {
             Swc4jAstClassExpr classExpr = extractClassExpr(newExpr.getCallee());
             if (classExpr != null) {
-                var info = compiler.getClassExpressionProcessor().prepareClassExpr(classExpr);
+                var info = ClassExprUtils.prepareClassExpr(compiler, classExpr);
                 return "L" + info.internalName() + ";";
             }
         }
@@ -450,18 +407,6 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
      */
     private boolean isPrivateMethod(ISwc4jAstMemberProp prop) {
         return prop instanceof Swc4jAstPrivateName;
-    }
-
-    /**
-     * Checks if the given object type is a TypeScript/JavaScript class.
-     *
-     * @param objType the JVM type descriptor to check
-     * @return true if the type is a TypeScript/JavaScript class
-     */
-    public boolean isTypeSupported(String objType) {
-        // A TS class type is an object type (starts with L and ends with ;)
-        // that is not a known Java built-in type
-        return objType != null && objType.startsWith("L") && objType.endsWith(";");
     }
 
     private void loadObjectReference(

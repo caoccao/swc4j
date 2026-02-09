@@ -17,8 +17,10 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
@@ -30,6 +32,10 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
+import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
+import java.util.List;
 
 /**
  * Utility class for code generation helpers.
@@ -111,6 +117,65 @@ public final class CodeGeneratorUtils {
             case FLOAT -> code.freturn();
             case DOUBLE -> code.dreturn();
             case STRING, OBJECT -> code.areturn();
+        }
+    }
+
+    /**
+     * Generates bytecode to create and populate a varargs array from the given arguments.
+     * <p>
+     * This method creates an array of the specified type, then iterates over the arguments
+     * starting at {@code startIndex}, generating each argument expression and storing it
+     * into the array with the appropriate array store instruction.
+     *
+     * @param compiler      the bytecode compiler
+     * @param code          the code builder
+     * @param classWriter   the class writer (for constant pool access)
+     * @param args          the list of argument expressions
+     * @param argTypes      the inferred type descriptors for each argument
+     * @param startIndex    the index in {@code args} where varargs begin
+     * @param arrayType     the JVM type descriptor of the varargs array (e.g., {@code "[Ljava/lang/String;"})
+     * @param componentType the JVM type descriptor of the array component (e.g., {@code "Ljava/lang/String;"})
+     * @throws Swc4jByteCodeCompilerException if code generation fails
+     */
+    public static void generateVarargsArray(
+            ByteCodeCompiler compiler,
+            CodeBuilder code,
+            ClassWriter classWriter,
+            List<Swc4jAstExprOrSpread> args,
+            List<String> argTypes,
+            int startIndex,
+            String arrayType,
+            String componentType) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
+        int varargCount = args.size() - startIndex;
+        code.iconst(varargCount);
+
+        if (TypeConversionUtils.isPrimitiveType(componentType)) {
+            code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
+        } else {
+            String internalName = TypeConversionUtils.descriptorToInternalName(componentType);
+            int classIndex = cp.addClass(internalName);
+            code.anewarray(classIndex);
+        }
+
+        for (int i = 0; i < varargCount; i++) {
+            code.dup();
+            code.iconst(i);
+            Swc4jAstExprOrSpread arg = args.get(startIndex + i);
+            compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
+            String argType = argTypes.get(startIndex + i);
+            TypeConversionUtils.convertType(code, classWriter, argType, componentType);
+
+            switch (componentType) {
+                case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
+                case ConstantJavaType.ABBR_CHARACTER -> code.castore();
+                case ConstantJavaType.ABBR_SHORT -> code.sastore();
+                case ConstantJavaType.ABBR_INTEGER -> code.iastore();
+                case ConstantJavaType.ABBR_LONG -> code.lastore();
+                case ConstantJavaType.ABBR_FLOAT -> code.fastore();
+                case ConstantJavaType.ABBR_DOUBLE -> code.dastore();
+                default -> code.aastore();
+            }
         }
     }
 

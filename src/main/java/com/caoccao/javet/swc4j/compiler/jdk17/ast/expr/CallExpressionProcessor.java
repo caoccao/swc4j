@@ -16,17 +16,20 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstTsInstantiation;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstSuper;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr.*;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -81,36 +84,40 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
         }
 
         // Handle super() constructor calls
-        if (superConstructorGenerator.isCalleeSupported(callee)) {
+        if (callee instanceof Swc4jAstSuper) {
             superConstructorGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
 
-        // Handle this() constructor calls (constructor chaining)
-        if (thisConstructorGenerator.isCalleeSupported(callee)) {
+        // Handle this() constructor calls
+        if (callee instanceof Swc4jAstThisExpr) {
             thisConstructorGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
 
         // Handle super.method() calls
-        if (superMethodGenerator.isCalleeSupported(callee)) {
+        if (callee instanceof Swc4jAstSuperPropExpr) {
             superMethodGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
 
-        // Handle IIFE (Immediately Invoked Function Expression)
-        if (iifeGenerator.isCalleeSupported(callee)) {
+        // Handle IIFE
+        if (callee instanceof ISwc4jAstExpr calleeExpr
+                && (AstUtils.extractArrowExpr(calleeExpr) != null || AstUtils.extractFunctionExpr(calleeExpr) != null)) {
             iifeGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
 
-        // Handle direct calls to functional interface variables (e.g., factorial(n - 1))
-        if (functionalInterfaceGenerator.isCalleeSupported(callee)) {
+        // Handle direct calls to functional interface variables
+        if (isFunctionalInterfaceCall(callee)) {
             functionalInterfaceGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
 
-        if (arrayStaticGenerator.isCalleeSupported(callee)) {
+        // Handle Array.from(), Array.of(), etc.
+        if (callee instanceof Swc4jAstMemberExpr arrayStaticMember
+                && arrayStaticMember.getObj() instanceof Swc4jAstIdent arrayStaticId
+                && ConstantJavaType.TYPE_ALIAS_ARRAY.equals(arrayStaticId.getSym())) {
             arrayStaticGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
@@ -120,14 +127,10 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
             String objType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
 
             // Check if this is an explicitly imported Java class
-            // If so, use the class generator which has full reflection-based method support
-            // This takes priority over special handlers like ArrayList/String
             boolean isImportedJavaClass = false;
             if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
                 String internalName = TypeConversionUtils.descriptorToInternalName(objType);
                 var javaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolveByInternalName(internalName);
-                // Check if it's a Java class (has methods populated via reflection)
-                // TypeScript classes are also registered but have empty methods map
                 if (javaTypeInfo != null && !javaTypeInfo.getMethods().isEmpty()) {
                     isImportedJavaClass = true;
                 }
@@ -136,21 +139,40 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
             if (isImportedJavaClass) {
                 classProcessor.generate(code, classWriter, callExpr, returnTypeInfo);
                 return;
-            } else if (arrayGenerator.isTypeSupported(objType)) {
+            } else if (objType != null && objType.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
                 arrayGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
                 return;
-            } else if (arrayListGenerator.isTypeSupported(objType)) {
+            } else if (ConstantJavaType.LJAVA_UTIL_ARRAYLIST.equals(objType)) {
                 arrayListGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
                 return;
-            } else if (stringGenerator.isTypeSupported(objType)) {
+            } else if (ConstantJavaType.LJAVA_LANG_STRING.equals(objType)) {
                 stringGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
                 return;
-            } else if (classProcessor.isTypeSupported(objType)) {
+            } else if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
                 classProcessor.generate(code, classWriter, callExpr, returnTypeInfo);
                 return;
             }
         }
-        // For unsupported call expressions, throw an error for now
         throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Call expression not yet supported");
+    }
+
+    private boolean isFunctionalInterfaceCall(ISwc4jAstCallee callee) {
+        if (!(callee instanceof Swc4jAstIdent ident)) {
+            return false;
+        }
+        String varName = ident.getSym();
+        var context = compiler.getMemory().getCompilationContext();
+        String varType = context.getInferredTypes().get(varName);
+        if (varType == null) {
+            LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
+            if (localVar != null) {
+                varType = localVar.type();
+            }
+        }
+        if (varType == null || !varType.startsWith("L") || !varType.endsWith(";")) {
+            return false;
+        }
+        String interfaceName = TypeConversionUtils.descriptorToInternalName(varType);
+        return compiler.getMemory().getScopedFunctionalInterfaceRegistry().isFunctionalInterface(interfaceName);
     }
 }

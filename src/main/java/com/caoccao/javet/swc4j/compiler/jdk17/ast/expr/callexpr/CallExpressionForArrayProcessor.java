@@ -504,13 +504,4 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         return elementType + brackets;
     }
 
-    /**
-     * Checks if this generator supports the given type.
-     *
-     * @param type the type descriptor
-     * @return true if the type is a Java array (starts with '[')
-     */
-    public boolean isTypeSupported(String type) {
-        return type != null && type.startsWith(ConstantJavaType.ARRAY_PREFIX);
-    }
 }

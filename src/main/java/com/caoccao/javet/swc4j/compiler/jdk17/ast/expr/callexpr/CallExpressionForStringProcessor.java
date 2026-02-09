@@ -650,13 +650,4 @@ public final class CallExpressionForStringProcessor extends BaseAstProcessor<Swc
         code.invokestatic(trimStartMethod);
     }
 
-    /**
-     * Checks if the given type is supported by this processor.
-     *
-     * @param type the JVM type descriptor to check
-     * @return true if the type is String
-     */
-    public boolean isTypeSupported(String type) {
-        return ConstantJavaType.LJAVA_LANG_STRING.equals(type);
-    }
 }

@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
-import com.caoccao.javet.swc4j.ast.stmt.*;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstLabeledStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -65,32 +65,12 @@ public final class LabeledStatementProcessor extends BaseAstProcessor<Swc4jAstLa
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // Extract label name
         String labelName = labeledStmt.getLabel().getSym();
-
-        // Dispatch based on body type
         var body = labeledStmt.getBody();
 
-        if (body instanceof Swc4jAstForStmt forStmt) {
-            // Generate labeled for loop
-            compiler.getForStatementProcessor().generate(code, classWriter, forStmt, labelName, returnTypeInfo);
-        } else if (body instanceof Swc4jAstForInStmt forInStmt) {
-            // Generate labeled for-in loop
-            compiler.getForInStatementProcessor().generate(code, classWriter, forInStmt, labelName, returnTypeInfo);
-        } else if (body instanceof Swc4jAstForOfStmt forOfStmt) {
-            // Generate labeled for-of loop
-            compiler.getForOfStatementProcessor().generate(code, classWriter, forOfStmt, labelName, returnTypeInfo);
-        } else if (body instanceof Swc4jAstWhileStmt whileStmt) {
-            // Generate labeled while loop
-            compiler.getWhileStatementProcessor().generate(code, classWriter, whileStmt, labelName, returnTypeInfo);
-        } else if (body instanceof Swc4jAstDoWhileStmt doWhileStmt) {
-            // Generate labeled do-while loop
-            compiler.getDoWhileStatementProcessor().generate(code, classWriter, doWhileStmt, labelName, returnTypeInfo);
-        } else if (body instanceof Swc4jAstSwitchStmt switchStmt) {
-            // Generate labeled switch statement
-            compiler.getSwitchStatementProcessor().generate(code, classWriter, switchStmt, labelName, returnTypeInfo);
-        } else {
-            // For other statement types, just generate the body
-            // (labels on non-loop statements are allowed but don't affect code generation)
-            compiler.getStatementProcessor().generate(code, classWriter, body, returnTypeInfo);
-        }
+        // Set pending label on context for loop/switch processors to consume
+        compiler.getMemory().getCompilationContext().pushPendingLabelName(labelName);
+
+        // Generate the body - loop/switch processors will consume the label
+        compiler.getStatementProcessor().generate(code, classWriter, body, returnTypeInfo);
     }
 }

@@ -78,7 +78,8 @@ public final class DoWhileStatementProcessor extends BaseAstProcessor<Swc4jAstDo
             ClassWriter classWriter,
             Swc4jAstDoWhileStmt doWhileStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(code, classWriter, doWhileStmt, null, returnTypeInfo);
+        String labelName = compiler.getMemory().getCompilationContext().popPendingLabelName();
+        generate(code, classWriter, doWhileStmt, labelName, returnTypeInfo);
     }
 
     /**
@@ -91,7 +92,7 @@ public final class DoWhileStatementProcessor extends BaseAstProcessor<Swc4jAstDo
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public void generate(
+    private void generate(
             CodeBuilder code,
             ClassWriter classWriter,
             Swc4jAstDoWhileStmt doWhileStmt,

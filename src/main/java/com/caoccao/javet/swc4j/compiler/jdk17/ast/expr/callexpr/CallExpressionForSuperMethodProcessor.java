@@ -20,7 +20,6 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSuperPropExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstSuperProp;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -126,13 +125,4 @@ public final class CallExpressionForSuperMethodProcessor extends BaseAstProcesso
         code.invokespecial(methodRef);
     }
 
-    /**
-     * Checks if the callee is a super property expression.
-     *
-     * @param callee the callee expression
-     * @return true if this generator can handle the call
-     */
-    public boolean isCalleeSupported(ISwc4jAstCallee callee) {
-        return callee instanceof Swc4jAstSuperPropExpr;
-    }
 }

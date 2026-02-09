@@ -81,7 +81,8 @@ public final class ForStatementProcessor extends BaseAstProcessor<Swc4jAstForStm
             ClassWriter classWriter,
             Swc4jAstForStmt forStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(code, classWriter, forStmt, null, returnTypeInfo);
+        String labelName = compiler.getMemory().getCompilationContext().popPendingLabelName();
+        generate(code, classWriter, forStmt, labelName, returnTypeInfo);
     }
 
     /**
@@ -94,7 +95,7 @@ public final class ForStatementProcessor extends BaseAstProcessor<Swc4jAstForStm
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public void generate(
+    private void generate(
             CodeBuilder code,
             ClassWriter classWriter,
             Swc4jAstForStmt forStmt,

@@ -18,10 +18,8 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -152,19 +150,4 @@ public final class CallExpressionForArrayStaticProcessor extends BaseAstProcesso
         }
     }
 
-    /**
-     * Checks if the given callee is supported by this processor.
-     *
-     * @param callee the callee to check
-     * @return true if the callee is an Array static method call
-     */
-    public boolean isCalleeSupported(ISwc4jAstCallee callee) {
-        if (!(callee instanceof Swc4jAstMemberExpr memberExpr)) {
-            return false;
-        }
-        if (memberExpr.getObj() instanceof Swc4jAstIdent ident) {
-            return ConstantJavaType.TYPE_ALIAS_ARRAY.equals(ident.getSym());
-        }
-        return false;
-    }
 }

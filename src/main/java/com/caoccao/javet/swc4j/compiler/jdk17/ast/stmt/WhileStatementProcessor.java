@@ -72,7 +72,8 @@ public final class WhileStatementProcessor extends BaseAstProcessor<Swc4jAstWhil
             ClassWriter classWriter,
             Swc4jAstWhileStmt whileStmt,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        generate(code, classWriter, whileStmt, null, returnTypeInfo);
+        String labelName = compiler.getMemory().getCompilationContext().popPendingLabelName();
+        generate(code, classWriter, whileStmt, labelName, returnTypeInfo);
     }
 
     /**
@@ -85,7 +86,7 @@ public final class WhileStatementProcessor extends BaseAstProcessor<Swc4jAstWhil
      * @param returnTypeInfo return type information for the enclosing method
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    public void generate(
+    private void generate(
             CodeBuilder code,
             ClassWriter classWriter,
             Swc4jAstWhileStmt whileStmt,

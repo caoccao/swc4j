@@ -20,12 +20,13 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
 import com.caoccao.javet.swc4j.ast.expr.*;
-import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstBlockStmtOrExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstArrayPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstObjectPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstIfStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -33,11 +34,12 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
-import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ArrowExprUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.PatternExtractionUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CapturedVariable;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
@@ -64,23 +66,6 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
      */
     public CallExpressionForIIFEProcessor(ByteCodeCompiler compiler) {
         super(compiler);
-    }
-
-    private ReturnTypeInfo analyzeBlockReturnType(Swc4jAstBlockStmt blockStmt)
-            throws Swc4jByteCodeCompilerException {
-        // Build a map of variable names to their declared types
-        Map<String, String> varTypes = new HashMap<>();
-        AstUtils.collectVariableTypes(compiler, blockStmt.getStmts(), varTypes);
-
-        // Find return statement and infer type
-        for (ISwc4jAstStmt stmt : blockStmt.getStmts()) {
-            ReturnTypeInfo result = findReturnType(stmt, varTypes);
-            if (result != null) {
-                return result;
-            }
-        }
-
-        return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
     }
 
     private List<IIFECapturedVariable> analyzeCapturedVariables(Swc4jAstArrowExpr arrowExpr, boolean captureThis) {
@@ -115,7 +100,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
 
         // Check if 'this' is captured
         String currentClass = context.getCurrentClassInternalName();
-        if (captureThis && currentClass != null && referencesThis(arrowExpr.getBody())) {
+        if (captureThis && currentClass != null && ArrowExprUtils.referencesThis(arrowExpr.getBody())) {
             captured.add(0, new IIFECapturedVariable("this", "L" + currentClass + ";", 0));
         }
 
@@ -145,7 +130,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         }
 
         // Determine return type
-        ReturnTypeInfo returnInfo = analyzeReturnType(arrowExpr, body);
+        ReturnTypeInfo returnInfo = ArrowExprUtils.analyzeReturnType(compiler, arrowExpr, body);
 
         // Pop the parameter types scope
         context.popInferredTypesScope();
@@ -161,42 +146,6 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
 
         return new IIFETypeInfo(interfaceName, methodName, methodDescriptor.toString(),
                 paramTypes, paramNames, returnInfo);
-    }
-
-    private ReturnTypeInfo analyzeReturnType(Swc4jAstArrowExpr arrowExpr, ISwc4jAstBlockStmtOrExpr body)
-            throws Swc4jByteCodeCompilerException {
-        // Check explicit return type annotation
-        if (arrowExpr.getReturnType().isPresent()) {
-            return compiler.getTypeResolver().analyzeReturnTypeFromAnnotation(arrowExpr.getReturnType().get());
-        }
-
-        // Infer from body
-        if (body instanceof ISwc4jAstExpr expr) {
-            // Expression body - infer from expression type
-            String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
-            return compiler.getTypeResolver().createReturnTypeInfoFromDescriptor(exprType);
-        } else if (body instanceof Swc4jAstBlockStmt blockStmt) {
-            // Block body - analyze return statements with variable type context
-            return analyzeBlockReturnType(blockStmt);
-        }
-
-        // Default to void
-        return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
-    }
-
-    private boolean containsThis(ISwc4jAst ast) {
-        if (ast instanceof Swc4jAstThisExpr) {
-            return true;
-        }
-        for (var child : ast.getChildNodes()) {
-            if (child instanceof Swc4jAstThisExpr) {
-                return true;
-            }
-            if (containsThis(child)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -218,44 +167,6 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         }
         if (expr instanceof Swc4jAstParenExpr parenExpr) {
             return extractFunctionExpr(parenExpr.getExpr());
-        }
-        return null;
-    }
-
-    private ReturnTypeInfo findReturnType(ISwc4jAstStmt stmt, Map<String, String> varTypes)
-            throws Swc4jByteCodeCompilerException {
-        if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
-            if (returnStmt.getArg().isPresent()) {
-                ISwc4jAstExpr arg = returnStmt.getArg().get();
-                if (arg instanceof Swc4jAstIdent ident) {
-                    String type = varTypes.get(ident.getSym());
-                    if (type != null) {
-                        return compiler.getTypeResolver().createReturnTypeInfoFromDescriptor(type);
-                    }
-                }
-                String type = compiler.getTypeResolver().inferTypeFromExpr(arg);
-                if (type == null) {
-                    type = ConstantJavaType.LJAVA_LANG_OBJECT;
-                }
-                return compiler.getTypeResolver().createReturnTypeInfoFromDescriptor(type);
-            }
-            return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
-        } else if (stmt instanceof Swc4jAstBlockStmt inner) {
-            for (ISwc4jAstStmt child : inner.getStmts()) {
-                ReturnTypeInfo result = findReturnType(child, varTypes);
-                if (result != null) {
-                    return result;
-                }
-            }
-        } else if (stmt instanceof Swc4jAstIfStmt ifStmt) {
-            if (ifStmt.getCons() instanceof Swc4jAstBlockStmt consBlock) {
-                for (ISwc4jAstStmt child : consBlock.getStmts()) {
-                    ReturnTypeInfo result = findReturnType(child, varTypes);
-                    if (result != null) {
-                        return result;
-                    }
-                }
-            }
         }
         return null;
     }
@@ -434,14 +345,14 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
                 LocalVariable paramVar = methodContext.getLocalVariableTable().getVariable(paramName);
                 code.aload(paramVar.index());
                 // Generate array destructuring extraction
-                compiler.getArrowExpressionProcessor().generateArrayPatternExtraction(code, classWriter, methodContext, arrayPat);
+                PatternExtractionUtils.generateArrayPatternExtraction(compiler, code, classWriter, methodContext, arrayPat);
             } else if (param instanceof Swc4jAstObjectPat objectPat) {
                 // Load the parameter value onto the stack
                 String paramName = typeInfo.paramNames().get(i);
                 LocalVariable paramVar = methodContext.getLocalVariableTable().getVariable(paramName);
                 code.aload(paramVar.index());
                 // Generate object destructuring extraction
-                compiler.getArrowExpressionProcessor().generateObjectPatternExtraction(code, classWriter, methodContext, objectPat);
+                PatternExtractionUtils.generateObjectPatternExtraction(compiler, code, classWriter, methodContext, objectPat);
             }
         }
 
@@ -550,47 +461,6 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
             stackSlots += CodeGeneratorUtils.getSlotSize(paramType);
         }
         code.invokeinterface(methodRef, stackSlots);
-    }
-
-    /**
-     * Check if the callee is an IIFE pattern (parenthesized arrow expression).
-     *
-     * @param callee the callee to check
-     * @return true if the callee is an IIFE
-     */
-    public boolean isCalleeSupported(ISwc4jAstCallee callee) {
-        if (callee instanceof ISwc4jAstExpr expr) {
-            return extractArrowExpr(expr) != null || extractFunctionExpr(expr) != null;
-        }
-        return false;
-    }
-
-    private boolean referencesThis(ISwc4jAstBlockStmtOrExpr body) {
-        if (body instanceof Swc4jAstThisExpr) {
-            return true;
-        }
-        for (var child : body.getChildNodes()) {
-            if (child instanceof Swc4jAstThisExpr) {
-                return true;
-            }
-            if (child instanceof ISwc4jAstBlockStmtOrExpr childBody) {
-                if (referencesThis(childBody)) {
-                    return true;
-                }
-            } else {
-                if (containsThis(child)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Reset the interface counter. Call this when starting a new compilation.
-     */
-    public void reset() {
-        interfaceCounter = 0;
     }
 
     private Swc4jAstArrowExpr toArrowExpr(Swc4jAstFnExpr fnExpr) {

@@ -33,6 +33,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ClassHierarchyUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.FieldLookupUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
@@ -375,10 +376,10 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
                 typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
             }
             if (typeInfo != null) {
-                FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                FieldLookupUtils.FieldLookupResult lookupResult = FieldLookupUtils.lookupFieldInHierarchy(typeInfo, fieldName);
                 if (lookupResult != null) {
-                    fieldInfo = lookupResult.fieldInfo;
-                    ownerInternalName = lookupResult.ownerInternalName;
+                    fieldInfo = lookupResult.fieldInfo();
+                    ownerInternalName = lookupResult.ownerInternalName();
                 }
             }
         } else {
@@ -391,10 +392,10 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
                 typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
             }
             if (typeInfo != null) {
-                FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                FieldLookupUtils.FieldLookupResult lookupResult = FieldLookupUtils.lookupFieldInHierarchy(typeInfo, fieldName);
                 if (lookupResult != null) {
-                    fieldInfo = lookupResult.fieldInfo;
-                    ownerInternalName = lookupResult.ownerInternalName;
+                    fieldInfo = lookupResult.fieldInfo();
+                    ownerInternalName = lookupResult.ownerInternalName();
                 }
             }
         }
@@ -866,7 +867,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
                     "Cannot resolve superclass for " + currentClassName);
         }
 
-        JavaTypeInfo superTypeInfo = resolveTypeInfoByInternalName(superClassInternalName);
+        JavaTypeInfo superTypeInfo = FieldLookupUtils.resolveTypeInfoByInternalName(compiler, superClassInternalName);
         if (superTypeInfo == null) {
             throw new Swc4jByteCodeCompilerException(
                     getSourceCode(),
@@ -874,7 +875,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
                     "Cannot resolve superclass type info for " + superClassInternalName);
         }
 
-        FieldLookupResult lookupResult = lookupFieldInHierarchy(superTypeInfo, fieldName);
+        FieldLookupUtils.FieldLookupResult lookupResult = FieldLookupUtils.lookupFieldInHierarchy(superTypeInfo, fieldName);
         if (lookupResult == null) {
             throw new Swc4jByteCodeCompilerException(
                     getSourceCode(),
@@ -887,9 +888,9 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
                 code,
                 classWriter,
                 updateExpr,
-                lookupResult.ownerInternalName,
+                lookupResult.ownerInternalName(),
                 fieldName,
-                lookupResult.fieldInfo.descriptor());
+                lookupResult.fieldInfo().descriptor());
     }
 
     private void loadOne(CodeBuilder code, String primitiveType) {
@@ -912,30 +913,6 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
     }
 
-    private FieldLookupResult lookupFieldInHierarchy(JavaTypeInfo typeInfo, String fieldName) {
-        FieldInfo fieldInfo = typeInfo.getField(fieldName);
-        if (fieldInfo != null) {
-            return new FieldLookupResult(fieldInfo, typeInfo.getInternalName());
-        }
-        for (JavaTypeInfo parentInfo : typeInfo.getParentTypeInfos()) {
-            FieldLookupResult result = lookupFieldInHierarchy(parentInfo, fieldName);
-            if (result != null) {
-                return result;
-            }
-        }
-        return null;
-    }
-
-    private JavaTypeInfo resolveTypeInfoByInternalName(String internalName) {
-        String qualifiedName = internalName.replace('/', '.');
-        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
-        if (typeInfo == null) {
-            int lastSlash = internalName.lastIndexOf('/');
-            String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
-            typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
-        }
-        return typeInfo;
-    }
 
     private void storePrimitive(CodeBuilder code, String primitiveType, int varIndex) {
         switch (primitiveType) {
@@ -1123,6 +1100,4 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
     }
 
-    private record FieldLookupResult(FieldInfo fieldInfo, String ownerInternalName) {
-    }
 }

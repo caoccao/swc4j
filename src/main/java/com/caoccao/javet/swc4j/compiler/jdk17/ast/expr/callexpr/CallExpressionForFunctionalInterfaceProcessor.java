@@ -20,7 +20,6 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -208,38 +207,6 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
                 default -> code.aastore();
             }
         }
-    }
-
-    /**
-     * Checks if the callee is an identifier that refers to a functional interface variable.
-     *
-     * @param callee the callee expression
-     * @return true if this generator can handle the call
-     */
-    public boolean isCalleeSupported(ISwc4jAstCallee callee) {
-        if (!(callee instanceof Swc4jAstIdent ident)) {
-            return false;
-        }
-
-        String varName = ident.getSym();
-        var context = compiler.getMemory().getCompilationContext();
-
-        // Get the type of the variable
-        String varType = context.getInferredTypes().get(varName);
-        if (varType == null) {
-            LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
-            if (localVar != null) {
-                varType = localVar.type();
-            }
-        }
-
-        if (varType == null || !varType.startsWith("L") || !varType.endsWith(";")) {
-            return false;
-        }
-
-        // Check if it's a functional interface using the scoped registry
-        String interfaceName = TypeConversionUtils.descriptorToInternalName(varType);
-        return compiler.getMemory().getScopedFunctionalInterfaceRegistry().isFunctionalInterface(interfaceName);
     }
 
     private void pushMissingArg(CodeBuilder code, ClassWriter classWriter, String expectedType) {

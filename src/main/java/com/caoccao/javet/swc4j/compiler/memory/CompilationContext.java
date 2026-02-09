@@ -31,6 +31,7 @@ import java.util.*;
 public class CompilationContext {
     private final Map<String, String> arrayElementTypes;
     private final Stack<LoopLabelInfo> breakLabels;
+    private final Stack<Boolean> captureThisOverrides;
     private final Map<String, CapturedVariable> capturedVariables;
     private final Stack<String> classStack;
     private final Stack<LoopLabelInfo> continueLabels;
@@ -39,8 +40,10 @@ public class CompilationContext {
     private final Set<Swc4jAstBlockStmt> inlineExecutingFinallyBlocks;
     private final LocalVariableTable localVariableTable;
     private final Stack<Swc4jAstBlockStmt> pendingFinallyBlocks;
+    private final Stack<String> pendingLabelNames;
     private final Stack<TypeParameterScope> typeParameterScopes;
     private final IdentityHashMap<Swc4jAstBlockStmt, UsingResourceInfo> usingResourceMap;
+    private int classExprCounter;
     private int tempIdCounter;
 
     /**
@@ -60,6 +63,9 @@ public class CompilationContext {
         localVariableTable = new LocalVariableTable();
         typeParameterScopes = new Stack<>();
         usingResourceMap = new IdentityHashMap<>();
+        captureThisOverrides = new Stack<>();
+        classExprCounter = 0;
+        pendingLabelNames = new Stack<>();
         tempIdCounter = 0;
     }
 
@@ -71,6 +77,7 @@ public class CompilationContext {
     public Map<String, String> getArrayElementTypes() {
         return arrayElementTypes;
     }
+
 
     /**
      * Get a captured variable by name.
@@ -258,6 +265,16 @@ public class CompilationContext {
     }
 
     /**
+     * Increments and returns the class expression counter.
+     * Used for generating unique class names for anonymous class expressions.
+     *
+     * @return the next class expression counter value
+     */
+    public int incrementAndGetClassExprCounter() {
+        return ++classExprCounter;
+    }
+
+    /**
      * Check if a specific finally block is currently being executed inline.
      *
      * @param block the finally block to check
@@ -302,6 +319,18 @@ public class CompilationContext {
     }
 
     /**
+     * Pops the captureThis override flag from the stack.
+     *
+     * @return the override value, or null if the stack is empty
+     */
+    public Boolean popCaptureThisOverride() {
+        if (!captureThisOverrides.isEmpty()) {
+            return captureThisOverrides.pop();
+        }
+        return null;
+    }
+
+    /**
      * Pop the current class from the class stack.
      * Call this when exiting a class scope.
      */
@@ -342,6 +371,18 @@ public class CompilationContext {
     }
 
     /**
+     * Pops the pending label name from the stack.
+     *
+     * @return the label name, or null if the stack is empty
+     */
+    public String popPendingLabelName() {
+        if (!pendingLabelNames.isEmpty()) {
+            return pendingLabelNames.pop();
+        }
+        return null;
+    }
+
+    /**
      * Pop the current type parameter scope from the stack.
      * Call this when exiting a generic class or method.
      */
@@ -358,6 +399,15 @@ public class CompilationContext {
      */
     public void pushBreakLabel(LoopLabelInfo labelInfo) {
         breakLabels.push(labelInfo);
+    }
+
+    /**
+     * Pushes a captureThis override flag onto the stack.
+     *
+     * @param value the override value
+     */
+    public void pushCaptureThisOverride(boolean value) {
+        captureThisOverrides.push(value);
     }
 
     /**
@@ -400,6 +450,15 @@ public class CompilationContext {
         Map<String, String> newScope = new HashMap<>();
         inferredTypesScopes.push(newScope);
         return newScope;
+    }
+
+    /**
+     * Pushes a pending label name onto the stack.
+     *
+     * @param labelName the label name
+     */
+    public void pushPendingLabelName(String labelName) {
+        pendingLabelNames.push(labelName);
     }
 
     /**
@@ -448,6 +507,7 @@ public class CompilationContext {
         inferredTypesScopes.clear();
         inferredTypesScopes.push(new HashMap<>());
         localVariableTable.reset(isStatic);
+        classExprCounter = 0;
         tempIdCounter = 0;
         inlineExecutingFinallyBlocks.clear();
         usingResourceMap.clear();

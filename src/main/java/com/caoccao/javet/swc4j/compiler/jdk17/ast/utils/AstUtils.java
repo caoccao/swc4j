@@ -17,10 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSuperPropExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.pat.*;
@@ -108,6 +105,54 @@ public final class AstUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Extracts an arrow expression from possibly parenthesized expression.
+     *
+     * @param expr the expression to unwrap
+     * @return the arrow expression, or null if not an arrow expression
+     */
+    public static Swc4jAstArrowExpr extractArrowExpr(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstArrowExpr arrowExpr) {
+            return arrowExpr;
+        }
+        if (expr instanceof Swc4jAstParenExpr parenExpr) {
+            return extractArrowExpr(parenExpr.getExpr());
+        }
+        return null;
+    }
+
+    /**
+     * Extracts a class expression from possibly parenthesized expression.
+     *
+     * @param expr the expression to unwrap
+     * @return the class expression, or null if not a class expression
+     */
+    public static Swc4jAstClassExpr extractClassExpr(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstClassExpr classExpr) {
+            return classExpr;
+        }
+        if (expr instanceof Swc4jAstParenExpr parenExpr) {
+            return extractClassExpr(parenExpr.getExpr());
+        }
+        return null;
+    }
+
+    /**
+     * Extracts a function expression from possibly parenthesized expression.
+     *
+     * @param expr the expression to unwrap
+     * @return the function expression, or null if not a function expression
+     */
+    public static Swc4jAstFnExpr extractFunctionExpr(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstFnExpr fnExpr) {
+            return fnExpr;
+        }
+        if (expr instanceof Swc4jAstParenExpr parenExpr) {
+            return extractFunctionExpr(parenExpr.getExpr());
+        }
+        return null;
     }
 
     /**

@@ -32,6 +32,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ControlFlowUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.UsingResourceUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.UsingResourceInfo;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
@@ -150,11 +151,11 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
         for (int i = 0; i < stmts.size(); i++) {
             ISwc4jAstStmt stmt = stmts.get(i);
             if (stmt instanceof Swc4jAstUsingDecl usingDecl) {
-                // Delegate to UsingDeclProcessor with remaining statements
+                // Delegate to UsingResourceUtils with remaining statements
                 List<ISwc4jAstStmt> remaining = stmts.subList(i + 1, stmts.size());
-                compiler.getUsingDeclProcessor().generateWithRemainingStatements(
-                        code, classWriter, usingDecl, remaining, returnTypeInfo);
-                return; // UsingDeclProcessor handles all remaining statements
+                UsingResourceUtils.generateWithRemainingStatements(
+                        compiler, code, classWriter, usingDecl, remaining, returnTypeInfo);
+                return; // UsingResourceUtils handles all remaining statements
             }
             generate(code, classWriter, stmt, returnTypeInfo);
             if (ControlFlowUtils.isTerminalStatement(stmt)) {
@@ -270,7 +271,7 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
                     // Check if this is a using resource sentinel
                     UsingResourceInfo usingInfo = context.getUsingResourceInfo(finallyBlock);
                     if (usingInfo != null) {
-                        compiler.getUsingDeclProcessor().generateInlineClose(
+                        UsingResourceUtils.generateInlineClose(
                                 code, classWriter, usingInfo.resourceSlot());
                         continue;
                     }
@@ -300,7 +301,7 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
                 // Check if this is a using resource sentinel
                 UsingResourceInfo usingInfo = context.getUsingResourceInfo(finallyBlock);
                 if (usingInfo != null) {
-                    compiler.getUsingDeclProcessor().generateInlineClose(
+                    UsingResourceUtils.generateInlineClose(
                             code, classWriter, usingInfo.resourceSlot());
                     continue;
                 }

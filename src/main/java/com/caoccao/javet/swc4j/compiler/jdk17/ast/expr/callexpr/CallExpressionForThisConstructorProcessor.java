@@ -18,8 +18,6 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.callexpr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -81,13 +79,4 @@ public final class CallExpressionForThisConstructorProcessor extends BaseAstProc
         code.invokespecial(ctorRef);
     }
 
-    /**
-     * Checks if the callee is a this expression (used for constructor chaining).
-     *
-     * @param callee the callee expression
-     * @return true if this generator can handle the call
-     */
-    public boolean isCalleeSupported(ISwc4jAstCallee callee) {
-        return callee instanceof Swc4jAstThisExpr;
-    }
 }

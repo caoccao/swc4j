@@ -29,8 +29,8 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ClassHierarchyUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ClassExprUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.FieldLookupUtils;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
@@ -94,9 +94,9 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                     }
 
                     if (typeInfo != null) {
-                        FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                        FieldLookupUtils.FieldLookupResult lookupResult = FieldLookupUtils.lookupFieldInHierarchy(typeInfo, fieldName);
                         if (lookupResult != null) {
-                            int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, lookupResult.fieldInfo.descriptor());
+                            int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName(), fieldName, lookupResult.fieldInfo().descriptor());
                             code.getfield(fieldRef);
                             return;
                         }
@@ -116,11 +116,11 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
 
                 if (typeInfo != null) {
                     // Look up field in current class or parent classes
-                    FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                    FieldLookupUtils.FieldLookupResult lookupResult = FieldLookupUtils.lookupFieldInHierarchy(typeInfo, fieldName);
                     if (lookupResult != null) {
                         // Generate getfield instruction using the owner class
                         code.aload(0); // load this
-                        int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, lookupResult.fieldInfo.descriptor());
+                        int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName(), fieldName, lookupResult.fieldInfo().descriptor());
                         code.getfield(fieldRef);
                         return;
                     }
@@ -358,11 +358,11 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             }
 
             if (typeInfo != null) {
-                FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                FieldLookupUtils.FieldLookupResult lookupResult = FieldLookupUtils.lookupFieldInHierarchy(typeInfo, fieldName);
                 if (lookupResult != null) {
-                    FieldInfo fieldInfo = lookupResult.fieldInfo;
+                    FieldInfo fieldInfo = lookupResult.fieldInfo();
                     compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null);
-                    int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, fieldInfo.descriptor());
+                    int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName(), fieldName, fieldInfo.descriptor());
                     code.getfield(fieldRef);
                     return;
                 }
@@ -422,10 +422,10 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
 
                 if (typeInfo != null) {
                     // Look up field in class hierarchy
-                    FieldLookupResult lookupResult = lookupFieldInHierarchy(typeInfo, fieldName);
+                    FieldLookupUtils.FieldLookupResult lookupResult = FieldLookupUtils.lookupFieldInHierarchy(typeInfo, fieldName);
                     if (lookupResult != null) {
                         // Generate getfield instruction
-                        int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, lookupResult.fieldInfo.descriptor());
+                        int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName(), fieldName, lookupResult.fieldInfo().descriptor());
                         code.getfield(fieldRef);
                         return;
                     }
@@ -437,105 +437,15 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
         throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "Member expression not yet supported: " + memberExpr.getProp());
     }
 
-    /**
-     * Generate bytecode for super property reads (e.g. super.value).
-     *
-     * @param code           the code builder
-     * @param classWriter    the class writer
-     * @param superPropExpr  the super property expression
-     * @param returnTypeInfo the return type info
-     * @throws Swc4jByteCodeCompilerException if generation fails
-     */
-    public void generateSuperProperty(
-            CodeBuilder code,
-            ClassWriter classWriter,
-            Swc4jAstSuperPropExpr superPropExpr,
-            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        String fieldName = AstUtils.extractSuperPropertyName(getSourceCode(), superPropExpr);
-        String currentClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
-        if (currentClassName == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    superPropExpr,
-                    "super property access outside of class context");
-        }
-        String superClassInternalName = ClassHierarchyUtils.resolveSuperClassInternalName(compiler, currentClassName);
-        if (superClassInternalName == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    superPropExpr,
-                    "Cannot resolve superclass for " + currentClassName);
-        }
-        JavaTypeInfo superTypeInfo = resolveTypeInfoByInternalName(superClassInternalName);
-        if (superTypeInfo == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    superPropExpr,
-                    "Cannot resolve superclass type info for " + superClassInternalName);
-        }
-        FieldLookupResult lookupResult = lookupFieldInHierarchy(superTypeInfo, fieldName);
-        if (lookupResult == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    getSourceCode(),
-                    superPropExpr,
-                    "Field not found in super hierarchy: " + fieldName);
-        }
-        var cp = classWriter.getConstantPool();
-        code.aload(0);
-        int fieldRef = cp.addFieldRef(lookupResult.ownerInternalName, fieldName, lookupResult.fieldInfo.descriptor());
-        code.getfield(fieldRef);
-    }
-
     private String inferTypeFromNewClassExpr(ISwc4jAstExpr expr) throws Swc4jByteCodeCompilerException {
         if (expr instanceof Swc4jAstNewExpr newExpr) {
             Swc4jAstClassExpr classExpr = extractClassExpr(newExpr.getCallee());
             if (classExpr != null) {
-                var info = compiler.getClassExpressionProcessor().prepareClassExpr(classExpr);
+                var info = ClassExprUtils.prepareClassExpr(compiler, classExpr);
                 return "L" + info.internalName() + ";";
             }
         }
         return null;
     }
 
-    /**
-     * Looks up a field in the class hierarchy, starting from the given class and traversing up to parent classes.
-     *
-     * @param typeInfo  the starting class type info
-     * @param fieldName the field name to look up
-     * @return the lookup result containing the field info and owner class, or null if not found
-     */
-    private FieldLookupResult lookupFieldInHierarchy(JavaTypeInfo typeInfo, String fieldName) {
-        // First check in current class
-        FieldInfo fieldInfo = typeInfo.getField(fieldName);
-        if (fieldInfo != null) {
-            return new FieldLookupResult(fieldInfo, typeInfo.getInternalName());
-        }
-
-        // Check in parent classes
-        for (JavaTypeInfo parentInfo : typeInfo.getParentTypeInfos()) {
-            FieldLookupResult result = lookupFieldInHierarchy(parentInfo, fieldName);
-            if (result != null) {
-                return result;
-            }
-        }
-
-        return null;
-    }
-
-    private JavaTypeInfo resolveTypeInfoByInternalName(String internalName) {
-        String qualifiedName = internalName.replace('/', '.');
-        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
-        if (typeInfo == null) {
-            int lastSlash = internalName.lastIndexOf('/');
-            String simpleName = lastSlash >= 0 ? internalName.substring(lastSlash + 1) : internalName;
-            typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
-        }
-        return typeInfo;
-    }
-
-    /**
-     * Result of a field lookup in the class hierarchy.
-     */
-    private record FieldLookupResult(FieldInfo fieldInfo, String ownerInternalName) {
-    }
 }

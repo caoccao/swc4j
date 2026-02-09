@@ -26,6 +26,8 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ClassExprUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
@@ -73,7 +75,7 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
         String className;
         Swc4jAstClassExpr classExpr = extractClassExpr(callee);
         if (classExpr != null) {
-            var info = compiler.getClassExpressionProcessor().ensureClassGenerated(classExpr, classWriter);
+            var info = ClassExprUtils.ensureClassGenerated(compiler, classExpr, classWriter);
             className = info.className();
             internalClassName = info.internalName();
         } else if (callee instanceof Swc4jAstIdent ident) {
@@ -133,7 +135,7 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
                         compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
                         TypeConversionUtils.convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                     }
-                    generateVarargsArray(code, classWriter, args, argTypes, fixedCount, varargArrayType, componentType);
+                    CodeGeneratorUtils.generateVarargsArray(compiler, code, classWriter, args, argTypes, fixedCount, varargArrayType, componentType);
                 } else {
                     for (int i = 0; i < args.size(); i++) {
                         Swc4jAstExprOrSpread arg = args.get(i);
@@ -168,44 +170,4 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
         // After this, the new object reference is on the stack
     }
 
-    private void generateVarargsArray(
-            CodeBuilder code,
-            ClassWriter classWriter,
-            List<Swc4jAstExprOrSpread> args,
-            List<String> argTypes,
-            int startIndex,
-            String arrayType,
-            String componentType) throws Swc4jByteCodeCompilerException {
-        var cp = classWriter.getConstantPool();
-        int varargCount = args.size() - startIndex;
-        code.iconst(varargCount);
-
-        if (TypeConversionUtils.isPrimitiveType(componentType)) {
-            code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
-        } else {
-            String internalName = TypeConversionUtils.descriptorToInternalName(componentType);
-            int classIndex = cp.addClass(internalName);
-            code.anewarray(classIndex);
-        }
-
-        for (int i = 0; i < varargCount; i++) {
-            code.dup();
-            code.iconst(i);
-            Swc4jAstExprOrSpread arg = args.get(startIndex + i);
-            compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
-            String argType = argTypes.get(startIndex + i);
-            TypeConversionUtils.convertType(code, classWriter, argType, componentType);
-
-            switch (componentType) {
-                case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
-                case ConstantJavaType.ABBR_CHARACTER -> code.castore();
-                case ConstantJavaType.ABBR_SHORT -> code.sastore();
-                case ConstantJavaType.ABBR_INTEGER -> code.iastore();
-                case ConstantJavaType.ABBR_LONG -> code.lastore();
-                case ConstantJavaType.ABBR_FLOAT -> code.fastore();
-                case ConstantJavaType.ABBR_DOUBLE -> code.dastore();
-                default -> code.aastore();
-            }
-        }
-    }
 }

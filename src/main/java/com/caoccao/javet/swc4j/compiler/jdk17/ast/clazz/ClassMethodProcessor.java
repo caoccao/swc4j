@@ -269,7 +269,7 @@ public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMe
      * @return the method descriptor string
      * @throws Swc4jByteCodeCompilerException the swc4j byte code compiler exception
      */
-    public String generateDescriptor(
+    private String generateDescriptor(
             Swc4jAstFunction function,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         // Build parameter descriptors

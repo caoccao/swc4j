@@ -37,6 +37,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaField;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ClassExprUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ClassHierarchyUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
@@ -582,7 +583,7 @@ public final class TypeResolver {
                 classExpr = parenClassExpr;
             }
             if (classExpr != null) {
-                var info = compiler.getClassExpressionProcessor().prepareClassExpr(classExpr);
+                var info = ClassExprUtils.prepareClassExpr(compiler, classExpr);
                 return "L" + info.internalName() + ";";
             }
         }
@@ -909,11 +910,11 @@ public final class TypeResolver {
             // Constructor call - infer type from the callee (class name)
             ISwc4jAstExpr callee = newExpr.getCallee();
             if (callee instanceof Swc4jAstClassExpr classExpr) {
-                var info = compiler.getClassExpressionProcessor().prepareClassExpr(classExpr);
+                var info = ClassExprUtils.prepareClassExpr(compiler, classExpr);
                 return "L" + info.internalName() + ";";
             }
             if (callee instanceof Swc4jAstParenExpr parenExpr && parenExpr.getExpr() instanceof Swc4jAstClassExpr classExpr) {
-                var info = compiler.getClassExpressionProcessor().prepareClassExpr(classExpr);
+                var info = ClassExprUtils.prepareClassExpr(compiler, classExpr);
                 return "L" + info.internalName() + ";";
             }
             if (callee instanceof Swc4jAstIdent ident) {
