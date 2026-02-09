@@ -1066,7 +1066,7 @@ public final class TypeResolver {
                 // Java array operations
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
                     // arr[index] returns the element type
-                    return objType.substring(1); // Remove leading "["
+                    return TypeConversionUtils.getArrayElementType(objType);
                 }
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
@@ -1528,7 +1528,7 @@ public final class TypeResolver {
                 if (objType != null && objType.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
                     if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                         String methodName = propIdent.getSym();
-                        String elementType = objType.substring(1); // Remove leading ConstantJavaType.ARRAY_PREFIX
+                        String elementType = TypeConversionUtils.getArrayElementType(objType);
                         switch (methodName) {
                             case ConstantJavaMethod.METHOD_REVERSE, ConstantJavaMethod.METHOD_SORT,
                                  ConstantJavaMethod.METHOD_FILL -> {
@@ -1736,7 +1736,7 @@ public final class TypeResolver {
 
         String objDescriptor = mapTsTypeToDescriptor(objType);
         if (objDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
-            return objDescriptor.substring(1);
+            return TypeConversionUtils.getArrayElementType(objDescriptor);
         }
         return ConstantJavaType.LJAVA_LANG_OBJECT;
     }

@@ -170,7 +170,7 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
             List<Swc4jAstExprOrSpread> args,
             int startIndex,
             String arrayType) throws Swc4jByteCodeCompilerException {
-        String componentType = arrayType.substring(1);
+        String componentType = TypeConversionUtils.getArrayElementType(arrayType);
         int restCount = Math.max(0, args.size() - startIndex);
 
         var cp = classWriter.getConstantPool();
@@ -178,7 +178,7 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
             code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
         } else {
-            int classRef = cp.addClass(toInternalName(componentType));
+            int classRef = cp.addClass(TypeConversionUtils.toInternalName(componentType));
             code.anewarray(classRef);
         }
 
@@ -245,12 +245,12 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
     private void pushMissingArg(CodeBuilder code, ClassWriter classWriter, String expectedType) {
         var cp = classWriter.getConstantPool();
         if (expectedType.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
-            String componentType = expectedType.substring(1);
+            String componentType = TypeConversionUtils.getArrayElementType(expectedType);
             code.iconst(0);
             if (TypeConversionUtils.isPrimitiveType(componentType)) {
                 code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
             } else {
-                int classRef = cp.addClass(toInternalName(componentType));
+                int classRef = cp.addClass(TypeConversionUtils.toInternalName(componentType));
                 code.anewarray(classRef);
             }
         } else if (TypeConversionUtils.isPrimitiveType(expectedType)) {
@@ -268,13 +268,4 @@ public final class CallExpressionForFunctionalInterfaceProcessor extends BaseAst
         }
     }
 
-    private String toInternalName(String typeDescriptor) {
-        if (typeDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
-            return typeDescriptor;
-        }
-        if (TypeConversionUtils.isObjectDescriptor(typeDescriptor)) {
-            return TypeConversionUtils.descriptorToInternalName(typeDescriptor);
-        }
-        return typeDescriptor;
-    }
 }

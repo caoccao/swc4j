@@ -49,20 +49,6 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
         super(compiler);
     }
 
-    private void convertType(CodeBuilder code, ClassWriter classWriter, String fromType, String toType) {
-        if (fromType.equals(toType)) {
-            return;
-        }
-        if (TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
-            TypeConversionUtils.convertPrimitiveType(code, fromType, toType);
-        } else if (TypeConversionUtils.isPrimitiveType(fromType) && !TypeConversionUtils.isPrimitiveType(toType)) {
-            String wrapperType = TypeConversionUtils.getWrapperType(fromType);
-            TypeConversionUtils.boxPrimitiveType(code, classWriter, fromType, wrapperType);
-        } else if (!TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
-            TypeConversionUtils.unboxWrapperType(code, classWriter, fromType);
-        }
-    }
-
     private Swc4jAstClassExpr extractClassExpr(ISwc4jAstExpr callee) {
         if (callee instanceof Swc4jAstClassExpr classExpr) {
             return classExpr;
@@ -145,14 +131,14 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
                     for (int i = 0; i < fixedCount; i++) {
                         Swc4jAstExprOrSpread arg = args.get(i);
                         compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
-                        convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
+                        TypeConversionUtils.convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                     }
                     generateVarargsArray(code, classWriter, args, argTypes, fixedCount, varargArrayType, componentType);
                 } else {
                     for (int i = 0; i < args.size(); i++) {
                         Swc4jAstExprOrSpread arg = args.get(i);
                         compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
-                        convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
+                        TypeConversionUtils.convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                     }
                 }
             } else {
@@ -160,7 +146,7 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
                     Swc4jAstExprOrSpread arg = args.get(i);
                     compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
                     if (i < expectedTypes.size()) {
-                        convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
+                        TypeConversionUtils.convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                     }
                 }
             }
@@ -208,7 +194,7 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
             Swc4jAstExprOrSpread arg = args.get(startIndex + i);
             compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
             String argType = argTypes.get(startIndex + i);
-            convertType(code, classWriter, argType, componentType);
+            TypeConversionUtils.convertType(code, classWriter, argType, componentType);
 
             switch (componentType) {
                 case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();

@@ -21,8 +21,11 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
-import com.caoccao.javet.swc4j.ast.pat.*;
-import com.caoccao.javet.swc4j.ast.stmt.*;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstArrayPat;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstObjectPat;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstIfStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -33,6 +36,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CapturedVariable;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
@@ -62,34 +66,11 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         super(compiler);
     }
 
-    private void addReturnIfNeeded(CodeBuilder code, ReturnTypeInfo returnTypeInfo) {
-        byte[] bytecode = code.toByteArray();
-        if (bytecode.length == 0) {
-            code.returnVoid();
-            return;
-        }
-
-        // Check if the last instruction is already a return
-        int lastByte = bytecode[bytecode.length - 1] & 0xFF;
-        boolean hasReturn = lastByte == 0xAC || // ireturn
-                lastByte == 0xAD || // lreturn
-                lastByte == 0xAE || // freturn
-                lastByte == 0xAF || // dreturn
-                lastByte == 0xB0 || // areturn
-                lastByte == 0xB1;   // return (void)
-
-        if (!hasReturn) {
-            if (returnTypeInfo.type() == ReturnType.VOID) {
-                code.returnVoid();
-            }
-        }
-    }
-
     private ReturnTypeInfo analyzeBlockReturnType(Swc4jAstBlockStmt blockStmt)
             throws Swc4jByteCodeCompilerException {
         // Build a map of variable names to their declared types
         Map<String, String> varTypes = new HashMap<>();
-        collectVariableTypes(blockStmt.getStmts(), varTypes);
+        AstUtils.collectVariableTypes(compiler, blockStmt.getStmts(), varTypes);
 
         // Find return statement and infer type
         for (ISwc4jAstStmt stmt : blockStmt.getStmts()) {
@@ -108,14 +89,14 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         // Get the parameter names (these are NOT captured)
         Set<String> paramNames = new HashSet<>();
         for (ISwc4jAstPat param : arrowExpr.getParams()) {
-            String paramName = extractParamName(param);
+            String paramName = AstUtils.extractParamName(param);
             if (paramName != null) {
                 paramNames.add(paramName);
             }
         }
 
         // Analyze the body for referenced variables
-        Set<String> referencedVars = collectReferencedIdentifiers(arrowExpr.getBody());
+        Set<String> referencedVars = AstUtils.collectReferencedIdentifiers(arrowExpr.getBody());
 
         // Check which referenced variables are from the outer scope
         CompilationContext context = compiler.getMemory().getCompilationContext();
@@ -151,7 +132,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         List<String> paramNames = new ArrayList<>();
         for (ISwc4jAstPat param : params) {
             String paramType = compiler.getTypeResolver().extractParameterType(param);
-            String paramName = extractParamName(param);
+            String paramName = AstUtils.extractParamName(param);
             paramTypes.add(paramType);
             paramNames.add(paramName != null ? paramName : "arg" + paramTypes.size());
         }
@@ -203,52 +184,6 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
     }
 
-    private void collectIdentifiersRecursive(Object node, Set<String> identifiers) {
-        if (node == null) {
-            return;
-        }
-
-        if (node instanceof Swc4jAstIdent ident) {
-            identifiers.add(ident.getSym());
-        } else if (node instanceof ISwc4jAst ast) {
-            for (var child : ast.getChildNodes()) {
-                collectIdentifiersRecursive(child, identifiers);
-            }
-        }
-    }
-
-    private Set<String> collectReferencedIdentifiers(ISwc4jAstBlockStmtOrExpr body) {
-        Set<String> identifiers = new HashSet<>();
-        collectIdentifiersRecursive(body, identifiers);
-        return identifiers;
-    }
-
-    private void collectVariableTypes(List<ISwc4jAstStmt> stmts, Map<String, String> varTypes) throws Swc4jByteCodeCompilerException {
-        for (ISwc4jAstStmt stmt : stmts) {
-            if (stmt instanceof Swc4jAstVarDecl varDecl) {
-                for (Swc4jAstVarDeclarator decl : varDecl.getDecls()) {
-                    if (decl.getName() instanceof Swc4jAstBindingIdent bindingIdent) {
-                        String varName = bindingIdent.getId().getSym();
-                        if (bindingIdent.getTypeAnn().isPresent()) {
-                            String varType = compiler.getTypeResolver().mapTsTypeToDescriptor(
-                                    bindingIdent.getTypeAnn().get().getTypeAnn());
-                            varTypes.put(varName, varType);
-                        }
-                    }
-                }
-            } else if (stmt instanceof Swc4jAstBlockStmt inner) {
-                collectVariableTypes(inner.getStmts(), varTypes);
-            } else if (stmt instanceof Swc4jAstIfStmt ifStmt) {
-                if (ifStmt.getCons() instanceof Swc4jAstBlockStmt consBlock) {
-                    collectVariableTypes(consBlock.getStmts(), varTypes);
-                }
-                if (ifStmt.getAlt().isPresent() && ifStmt.getAlt().get() instanceof Swc4jAstBlockStmt altBlock) {
-                    collectVariableTypes(altBlock.getStmts(), varTypes);
-                }
-            }
-        }
-    }
-
     private boolean containsThis(ISwc4jAst ast) {
         if (ast instanceof Swc4jAstThisExpr) {
             return true;
@@ -283,17 +218,6 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         }
         if (expr instanceof Swc4jAstParenExpr parenExpr) {
             return extractFunctionExpr(parenExpr.getExpr());
-        }
-        return null;
-    }
-
-    private String extractParamName(ISwc4jAstPat param) {
-        if (param instanceof Swc4jAstBindingIdent bindingIdent) {
-            return bindingIdent.getId().getSym();
-        } else if (param instanceof Swc4jAstRestPat restPat) {
-            return extractParamName(restPat.getArg());
-        } else if (param instanceof Swc4jAstAssignPat assignPat) {
-            return extractParamName(assignPat.getLeft());
         }
         return null;
     }
@@ -448,7 +372,7 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
             CodeGeneratorUtils.loadParameter(code, slot, captured.type());
             int fieldRef = cp.addFieldRef(implClassName, "captured$" + captured.name(), captured.type());
             code.putfield(fieldRef);
-            slot += getSlotSize(captured.type());
+            slot += CodeGeneratorUtils.getSlotSize(captured.type());
         }
 
         code.returnVoid();
@@ -528,11 +452,11 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
             for (ISwc4jAstStmt stmt : blockStmt.getStmts()) {
                 compiler.getStatementProcessor().generate(code, classWriter, stmt, typeInfo.returnTypeInfo());
             }
-            addReturnIfNeeded(code, typeInfo.returnTypeInfo());
+            CodeGeneratorUtils.addReturnIfNeeded(code, typeInfo.returnTypeInfo());
         } else if (body instanceof ISwc4jAstExpr expr) {
             // Expression body - implicit return
             compiler.getExpressionProcessor().generate(code, classWriter, expr, typeInfo.returnTypeInfo());
-            generateReturn(code, typeInfo.returnTypeInfo());
+            CodeGeneratorUtils.generateReturn(code, typeInfo.returnTypeInfo());
         }
 
         // Pop impl class context
@@ -623,24 +547,9 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         // Calculate stack slots: 1 for 'this' + slots for all parameters
         int stackSlots = 1; // 'this'
         for (String paramType : typeInfo.paramTypes()) {
-            stackSlots += getSlotSize(paramType);
+            stackSlots += CodeGeneratorUtils.getSlotSize(paramType);
         }
         code.invokeinterface(methodRef, stackSlots);
-    }
-
-    private void generateReturn(CodeBuilder code, ReturnTypeInfo returnTypeInfo) {
-        switch (returnTypeInfo.type()) {
-            case VOID -> code.returnVoid();
-            case INT, BOOLEAN, BYTE, CHAR, SHORT -> code.ireturn();
-            case LONG -> code.lreturn();
-            case FLOAT -> code.freturn();
-            case DOUBLE -> code.dreturn();
-            case STRING, OBJECT -> code.areturn();
-        }
-    }
-
-    private int getSlotSize(String type) {
-        return (ConstantJavaType.ABBR_LONG.equals(type) || ConstantJavaType.ABBR_DOUBLE.equals(type)) ? 2 : 1;
     }
 
     /**

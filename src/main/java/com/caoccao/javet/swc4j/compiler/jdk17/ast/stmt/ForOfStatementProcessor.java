@@ -348,8 +348,8 @@ public final class ForOfStatementProcessor extends BaseAstProcessor<Swc4jAstForO
                     "Cannot determine array type");
         }
 
-        // Extract element type (skip the '[' prefix)
-        String elementTypeDescriptor = arrayTypeDescriptor.substring(1);
+        // Extract element type
+        String elementTypeDescriptor = TypeConversionUtils.getArrayElementType(arrayTypeDescriptor);
 
         // Initialize loop variable with element type
         int elementSlot = initializeLoopVariable(code, forOfStmt.getLeft(), elementTypeDescriptor);

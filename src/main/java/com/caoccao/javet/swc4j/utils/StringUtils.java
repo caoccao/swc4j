@@ -35,6 +35,19 @@ public final class StringUtils {
     }
 
     /**
+     * Capitalizes the first character of a string.
+     *
+     * @param str the string to capitalize
+     * @return the capitalized string, or the original if null or empty
+     */
+    public static String capitalize(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
+
+    /**
      * Is blank.
      *
      * @param str the str

@@ -20,7 +20,9 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
-import com.caoccao.javet.swc4j.ast.stmt.*;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstUsingDecl;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -29,6 +31,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ControlFlowUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.UsingResourceInfo;
@@ -238,7 +241,7 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
             // which handles nested using declarations properly
             compiler.getStatementProcessor().generate(code, classWriter, remainingStmts, returnTypeInfo);
             for (ISwc4jAstStmt s : remainingStmts) {
-                if (isTerminalStatement(s)) {
+                if (ControlFlowUtils.isTerminalStatement(s)) {
                     tryEndsWithTerminal = true;
                     break;
                 }
@@ -347,27 +350,6 @@ public final class UsingDeclProcessor extends BaseAstProcessor<Swc4jAstUsingDecl
 
         // Start recursive chain from the first declarator
         generateDeclaratorChain(code, classWriter, decls, 0, remainingStmts, returnTypeInfo);
-    }
-
-    /**
-     * Check if a statement is a terminal control flow statement.
-     *
-     * @param stmt the statement to check
-     * @return true if the statement is terminal
-     */
-    private boolean isTerminalStatement(ISwc4jAstStmt stmt) {
-        if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
-            for (ISwc4jAstStmt s : blockStmt.getStmts()) {
-                if (isTerminalStatement(s)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        return stmt instanceof Swc4jAstBreakStmt
-                || stmt instanceof Swc4jAstContinueStmt
-                || stmt instanceof Swc4jAstReturnStmt
-                || stmt instanceof Swc4jAstThrowStmt;
     }
 
     private void validateAutoCloseableType(String varType, Swc4jAstVarDeclarator declarator)

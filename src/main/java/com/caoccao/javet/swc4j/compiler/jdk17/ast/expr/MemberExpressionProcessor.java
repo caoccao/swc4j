@@ -20,7 +20,6 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.expr.*;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -30,6 +29,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ClassHierarchyUtils;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
@@ -57,21 +57,6 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             return extractClassExpr(parenExpr.getExpr());
         }
         return null;
-    }
-
-    private String extractSuperPropertyName(
-            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
-        if (superPropExpr.getProp() instanceof Swc4jAstIdentName identName) {
-            return identName.getSym();
-        }
-        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp
-                && computedProp.getExpr() instanceof Swc4jAstStr str) {
-            return str.getValue();
-        }
-        throw new Swc4jByteCodeCompilerException(
-                getSourceCode(),
-                superPropExpr,
-                "Computed super property expressions not yet supported");
     }
 
     @Override
@@ -228,7 +213,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
                 }
 
                 // Use appropriate array load instruction based on element type
-                String elemType = objType.substring(1); // Remove leading ConstantJavaType.ARRAY_PREFIX
+                String elemType = TypeConversionUtils.getArrayElementType(objType);
                 switch (elemType) {
                     case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.baload(); // boolean and byte
                     case ConstantJavaType.ABBR_CHARACTER -> code.caload(); // char
@@ -466,7 +451,7 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             ClassWriter classWriter,
             Swc4jAstSuperPropExpr superPropExpr,
             ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
-        String fieldName = extractSuperPropertyName(superPropExpr);
+        String fieldName = AstUtils.extractSuperPropertyName(getSourceCode(), superPropExpr);
         String currentClassName = compiler.getMemory().getCompilationContext().getCurrentClassInternalName();
         if (currentClassName == null) {
             throw new Swc4jByteCodeCompilerException(

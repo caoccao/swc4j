@@ -22,7 +22,6 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.pat.*;
@@ -115,21 +114,6 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
             }
             TypeConversionUtils.boxPrimitiveType(code, classWriter, toPrimitive, targetType);
         }
-    }
-
-    private String extractSuperPropertyName(
-            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
-        if (superPropExpr.getProp() instanceof Swc4jAstIdentName identName) {
-            return identName.getSym();
-        }
-        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp
-                && computedProp.getExpr() instanceof Swc4jAstStr str) {
-            return str.getValue();
-        }
-        throw new Swc4jByteCodeCompilerException(
-                getSourceCode(),
-                superPropExpr,
-                "Computed super property expressions not yet supported");
     }
 
     /**
@@ -326,7 +310,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     TypeConversionUtils.unboxWrapperType(code, classWriter, valueType);
 
                     // Convert to target element type if needed
-                    String elemType = objType.substring(1); // Remove leading ConstantJavaType.ARRAY_PREFIX
+                    String elemType = TypeConversionUtils.getArrayElementType(objType);
                     String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
                     TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, elemType);
 
@@ -670,7 +654,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         compiler.getExpressionProcessor().generate(code, classWriter, assignExpr.getRight(), null);
         int listClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LIST);
         code.checkcast(listClass);
-        int tempListSlot = getOrAllocateTempSlot(context, "$tempList", ConstantJavaType.LJAVA_UTIL_LIST);
+        int tempListSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$tempList", ConstantJavaType.LJAVA_UTIL_LIST);
         code.astore(tempListSlot);
 
         int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.I__LJAVA_LANG_OBJECT);
@@ -738,12 +722,12 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                     // Get source list size
                     code.aload(tempListSlot);
                     code.invokeinterface(listSizeRef, 1);
-                    int sizeSlot = getOrAllocateTempSlot(context, "$restSize", ConstantJavaType.ABBR_INTEGER);
+                    int sizeSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$restSize", ConstantJavaType.ABBR_INTEGER);
                     code.istore(sizeSlot);
 
                     // Initialize loop counter at restStartIndex
                     code.iconst(restStartIndex);
-                    int iSlot = getOrAllocateTempSlot(context, "$restI", ConstantJavaType.ABBR_INTEGER);
+                    int iSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$restI", ConstantJavaType.ABBR_INTEGER);
                     code.istore(iSlot);
 
                     // Loop to copy remaining elements
@@ -998,7 +982,7 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         compiler.getExpressionProcessor().generate(code, classWriter, assignExpr.getRight(), null);
         int mapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_MAP);
         code.checkcast(mapClass);
-        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap", ConstantJavaType.LJAVA_UTIL_MAP);
+        int tempMapSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$tempMap", ConstantJavaType.LJAVA_UTIL_MAP);
         code.astore(tempMapSlot);
 
         int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
@@ -1131,23 +1115,12 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         code.invokestatic(valueOfRef);
     }
 
-    /**
-     * Get or allocate a temp variable slot.
-     */
-    private int getOrAllocateTempSlot(CompilationContext context, String name, String type) {
-        LocalVariable existing = context.getLocalVariableTable().getVariable(name);
-        if (existing != null) {
-            return existing.index();
-        }
-        return context.getLocalVariableTable().allocateVariable(name, type);
-    }
-
     private void handleSuperPropertyAssignment(
             CodeBuilder code,
             ClassWriter classWriter,
             Swc4jAstAssignExpr assignExpr,
             Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
-        String fieldName = extractSuperPropertyName(superPropExpr);
+        String fieldName = AstUtils.extractSuperPropertyName(getSourceCode(), superPropExpr);
         CompilationContext context = compiler.getMemory().getCompilationContext();
         String currentClassName = context.getCurrentClassInternalName();
         if (currentClassName == null) {

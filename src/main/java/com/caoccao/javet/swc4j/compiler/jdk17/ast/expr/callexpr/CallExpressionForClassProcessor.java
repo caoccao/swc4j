@@ -28,6 +28,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
@@ -51,36 +52,6 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
      */
     public CallExpressionForClassProcessor(ByteCodeCompiler compiler) {
         super(compiler);
-    }
-
-    /**
-     * Converts between types when needed.
-     */
-    private void convertType(CodeBuilder code, ClassWriter classWriter, String fromType, String toType) {
-        if (fromType.equals(toType)) {
-            return;
-        }
-
-        var cp = classWriter.getConstantPool();
-        // Handle primitive conversions
-        if (TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
-            TypeConversionUtils.convertPrimitiveType(code, fromType, toType);
-        }
-        // Handle boxing/unboxing
-        else if (TypeConversionUtils.isPrimitiveType(fromType) && !TypeConversionUtils.isPrimitiveType(toType)) {
-            String wrapperType = TypeConversionUtils.getWrapperType(fromType);
-            TypeConversionUtils.boxPrimitiveType(code, classWriter, fromType, wrapperType);
-        } else if (!TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
-            TypeConversionUtils.unboxWrapperType(code, classWriter, fromType);
-        }
-        // Handle reference type casting (e.g., AbstractStringBuilder -> StringBuilder)
-        else if (fromType.startsWith("L") && toType.startsWith("L") && !fromType.equals(toType)) {
-            // Extract internal class names
-            String toInternalName = TypeConversionUtils.descriptorToInternalName(toType);
-            // Add checkcast instruction to downcast to the target type
-            int classIndex = cp.addClass(toInternalName);
-            code.checkcast(classIndex);
-        }
     }
 
     private Swc4jAstClassExpr extractClassExpr(ISwc4jAstExpr callee) {
@@ -251,7 +222,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
                 }
 
                 if (returnTypeInfo != null && returnTypeInfo.descriptor() != null) {
-                    convertType(code, classWriter, returnType, returnTypeInfo.descriptor());
+                    TypeConversionUtils.convertType(code, classWriter, returnType, returnTypeInfo.descriptor());
                 }
                 return;
             }
@@ -327,7 +298,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
 
         // Type conversion for return value (Java static calls only)
         if (isJavaStaticCall && returnTypeInfo != null && returnTypeInfo.descriptor() != null) {
-            convertType(code, classWriter, returnType, returnTypeInfo.descriptor());
+            TypeConversionUtils.convertType(code, classWriter, returnType, returnTypeInfo.descriptor());
         }
     }
 
@@ -343,7 +314,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
                 Swc4jAstExprOrSpread arg = args.get(i);
                 compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
                 if (i < expectedTypes.size()) {
-                    convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
+                    TypeConversionUtils.convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                 }
             }
             return;
@@ -360,7 +331,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             for (int i = 0; i < args.size(); i++) {
                 Swc4jAstExprOrSpread arg = args.get(i);
                 compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
-                convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
+                TypeConversionUtils.convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
             }
             return;
         }
@@ -368,7 +339,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
         for (int i = 0; i < fixedCount; i++) {
             Swc4jAstExprOrSpread arg = args.get(i);
             compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
-            convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
+            TypeConversionUtils.convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
         }
 
         generateVarargsArray(code, classWriter, args, argTypes, fixedCount, varargArrayType, componentType);
@@ -403,7 +374,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             }
             compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
             String argType = argTypes.get(startIndex + i);
-            convertType(code, classWriter, argType, componentType);
+            TypeConversionUtils.convertType(code, classWriter, argType, componentType);
 
             switch (componentType) {
                 case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
@@ -501,15 +472,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             var context = compiler.getMemory().getCompilationContext();
             LocalVariable localVar = context.getLocalVariableTable().getVariable(ident.getSym());
             if (localVar != null) {
-                switch (localVar.type()) {
-                    case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_SHORT,
-                         ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_BOOLEAN,
-                         ConstantJavaType.ABBR_BYTE -> code.iload(localVar.index());
-                    case ConstantJavaType.ABBR_LONG -> code.lload(localVar.index());
-                    case ConstantJavaType.ABBR_FLOAT -> code.fload(localVar.index());
-                    case ConstantJavaType.ABBR_DOUBLE -> code.dload(localVar.index());
-                    default -> code.aload(localVar.index());
-                }
+                CodeGeneratorUtils.loadParameter(code, localVar.index(), localVar.type());
                 return;
             }
         }

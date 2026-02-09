@@ -125,7 +125,7 @@ public final class ArrayLiteralProcessor extends BaseAstProcessor<Swc4jAstArrayL
             String arrayDescriptor) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
         // Extract element type from array descriptor (e.g., ConstantJavaType.ARRAY_I -> ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ARRAY_LJAVA_LANG_STRING -> ConstantJavaType.LJAVA_LANG_STRING)
-        String elemType = arrayDescriptor.substring(1);
+        String elemType = TypeConversionUtils.getArrayElementType(arrayDescriptor);
 
         // Count non-empty elements
         int size = (int) arrayLit.getElems().stream().filter(Optional::isPresent).count();

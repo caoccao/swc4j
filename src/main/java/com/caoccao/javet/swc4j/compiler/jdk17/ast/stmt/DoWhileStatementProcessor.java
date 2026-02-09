@@ -19,8 +19,6 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstDoWhileStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
@@ -127,7 +125,7 @@ public final class DoWhileStatementProcessor extends BaseAstProcessor<Swc4jAstDo
 
         if (bodyCanFallThrough || hasContinue) {
             ISwc4jAstExpr testExpr = doWhileStmt.getTest();
-            boolean isInfiniteLoop = isConstantTrue(testExpr);
+            boolean isInfiniteLoop = ControlFlowUtils.isConstantTrue(testExpr);
 
             if (!isInfiniteLoop) {
                 // Generate conditional test - jump BACK to body if TRUE (inverted from while)
@@ -189,7 +187,7 @@ public final class DoWhileStatementProcessor extends BaseAstProcessor<Swc4jAstDo
         Swc4jAstBinaryOp op = binExpr.getOp();
 
         // Only handle comparison operators
-        if (!isComparisonOp(op)) {
+        if (!op.isLogicalCompareOperator()) {
             return false;
         }
 
@@ -231,32 +229,4 @@ public final class DoWhileStatementProcessor extends BaseAstProcessor<Swc4jAstDo
         return true;
     }
 
-    /**
-     * Check if the operator is a comparison operator.
-     */
-    private boolean isComparisonOp(Swc4jAstBinaryOp op) {
-        return op == Swc4jAstBinaryOp.Lt ||
-                op == Swc4jAstBinaryOp.LtEq ||
-                op == Swc4jAstBinaryOp.Gt ||
-                op == Swc4jAstBinaryOp.GtEq ||
-                op == Swc4jAstBinaryOp.EqEq ||
-                op == Swc4jAstBinaryOp.EqEqEq ||
-                op == Swc4jAstBinaryOp.NotEq ||
-                op == Swc4jAstBinaryOp.NotEqEq;
-    }
-
-    /**
-     * Check if the test expression is a constant true.
-     * This includes boolean literal true and numeric constant 1.
-     */
-    private boolean isConstantTrue(ISwc4jAstExpr testExpr) {
-        if (testExpr instanceof Swc4jAstBool bool) {
-            return bool.isValue();
-        }
-        if (testExpr instanceof Swc4jAstNumber number) {
-            // Any non-zero number is truthy
-            return number.getRaw().equals("1");
-        }
-        return false;
-    }
 }

@@ -34,6 +34,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -104,13 +105,6 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         }
 
         return signature.toString();
-    }
-
-    private String capitalize(String str) {
-        if (str == null || str.isEmpty()) {
-            return str;
-        }
-        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
 
     /**
@@ -534,7 +528,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
 
         // Generate setter (if not readonly)
         if (!prop.isReadonly()) {
-            String setterName = ConstantJavaMethod.METHOD_SET + capitalize(propName);
+            String setterName = ConstantJavaMethod.METHOD_SET + StringUtils.capitalize(propName);
             String setterDescriptor = "(" + descriptor + ")V";
             classWriter.addMethod(
                     METHOD_ACCESS_FLAGS,
@@ -575,7 +569,7 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
         }
 
         // Generate setter method
-        String setterName = ConstantJavaMethod.METHOD_SET + capitalize(propName);
+        String setterName = ConstantJavaMethod.METHOD_SET + StringUtils.capitalize(propName);
         String setterDescriptor = "(" + descriptor + ")V";
         classWriter.addMethod(
                 METHOD_ACCESS_FLAGS,
@@ -600,9 +594,9 @@ public final class TsInterfaceDeclProcessor extends BaseAstProcessor<Swc4jAstTsI
             if (propName.startsWith("is") || propName.startsWith("has") || propName.startsWith("can")) {
                 return propName;
             }
-            return "is" + capitalize(propName);
+            return "is" + StringUtils.capitalize(propName);
         }
-        return ConstantJavaMethod.METHOD_GET + capitalize(propName);
+        return ConstantJavaMethod.METHOD_GET + StringUtils.capitalize(propName);
     }
 
     /**

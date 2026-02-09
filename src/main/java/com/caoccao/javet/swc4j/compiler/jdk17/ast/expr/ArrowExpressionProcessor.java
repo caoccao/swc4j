@@ -21,7 +21,9 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.pat.*;
-import com.caoccao.javet.swc4j.ast.stmt.*;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstIfStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -60,29 +62,6 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
      */
     public ArrowExpressionProcessor(ByteCodeCompiler compiler) {
         super(compiler);
-    }
-
-    private void addReturnIfNeeded(CodeBuilder code, ReturnTypeInfo returnTypeInfo) {
-        byte[] bytecode = code.toByteArray();
-        if (bytecode.length == 0) {
-            code.returnVoid();
-            return;
-        }
-
-        // Check if the last instruction is already a return
-        int lastByte = bytecode[bytecode.length - 1] & 0xFF;
-        boolean hasReturn = lastByte == 0xAC || // ireturn
-                lastByte == 0xAD || // lreturn
-                lastByte == 0xAE || // freturn
-                lastByte == 0xAF || // dreturn
-                lastByte == 0xB0 || // areturn
-                lastByte == 0xB1;   // return (void)
-
-        if (!hasReturn) {
-            if (returnTypeInfo.type() == ReturnType.VOID) {
-                code.returnVoid();
-            }
-        }
     }
 
     /**
@@ -179,7 +158,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         for (int i = 0; i < params.size(); i++) {
             ISwc4jAstPat param = params.get(i);
             String paramType = compiler.getTypeResolver().extractParameterType(param);
-            String paramName = extractParamName(param);
+            String paramName = AstUtils.extractParamName(param);
 
             // If parameter type is Object and we have target type info, try to infer from target
             if (ConstantJavaType.LJAVA_LANG_OBJECT.equals(paramType) && targetParamTypes != null && i < targetParamTypes.size()) {
@@ -297,7 +276,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             throws Swc4jByteCodeCompilerException {
         // Build a map of variable names to their declared types
         Map<String, String> varTypes = new HashMap<>();
-        collectVariableTypes(blockStmt.getStmts(), varTypes);
+        AstUtils.collectVariableTypes(compiler, blockStmt.getStmts(), varTypes);
 
         // Find return statement and infer type
         for (ISwc4jAstStmt stmt : blockStmt.getStmts()) {
@@ -326,14 +305,14 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         // Get the parameter names (these are NOT captured)
         Set<String> paramNames = new HashSet<>();
         for (ISwc4jAstPat param : arrowExpr.getParams()) {
-            String paramName = extractParamName(param);
+            String paramName = AstUtils.extractParamName(param);
             if (paramName != null) {
                 paramNames.add(paramName);
             }
         }
 
         // Analyze the body for referenced variables
-        Set<String> referencedVars = collectReferencedIdentifiers(arrowExpr.getBody());
+        Set<String> referencedVars = AstUtils.collectReferencedIdentifiers(arrowExpr.getBody());
 
         // Check which referenced variables are from the outer scope
         CompilationContext context = compiler.getMemory().getCompilationContext();
@@ -410,52 +389,6 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         };
     }
 
-    private void collectIdentifiersRecursive(Object node, Set<String> identifiers) {
-        if (node == null) {
-            return;
-        }
-
-        if (node instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent ident) {
-            identifiers.add(ident.getSym());
-        } else if (node instanceof com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst ast) {
-            for (var child : ast.getChildNodes()) {
-                collectIdentifiersRecursive(child, identifiers);
-            }
-        }
-    }
-
-    private Set<String> collectReferencedIdentifiers(ISwc4jAstBlockStmtOrExpr body) {
-        Set<String> identifiers = new HashSet<>();
-        collectIdentifiersRecursive(body, identifiers);
-        return identifiers;
-    }
-
-    private void collectVariableTypes(List<ISwc4jAstStmt> stmts, Map<String, String> varTypes) throws Swc4jByteCodeCompilerException {
-        for (ISwc4jAstStmt stmt : stmts) {
-            if (stmt instanceof Swc4jAstVarDecl varDecl) {
-                for (Swc4jAstVarDeclarator decl : varDecl.getDecls()) {
-                    if (decl.getName() instanceof Swc4jAstBindingIdent bindingIdent) {
-                        String varName = bindingIdent.getId().getSym();
-                        if (bindingIdent.getTypeAnn().isPresent()) {
-                            String varType = compiler.getTypeResolver().mapTsTypeToDescriptor(
-                                    bindingIdent.getTypeAnn().get().getTypeAnn());
-                            varTypes.put(varName, varType);
-                        }
-                    }
-                }
-            } else if (stmt instanceof Swc4jAstBlockStmt inner) {
-                collectVariableTypes(inner.getStmts(), varTypes);
-            } else if (stmt instanceof Swc4jAstIfStmt ifStmt) {
-                if (ifStmt.getCons() instanceof Swc4jAstBlockStmt consBlock) {
-                    collectVariableTypes(consBlock.getStmts(), varTypes);
-                }
-                if (ifStmt.getAlt().isPresent() && ifStmt.getAlt().get() instanceof Swc4jAstBlockStmt altBlock) {
-                    collectVariableTypes(altBlock.getStmts(), varTypes);
-                }
-            }
-        }
-    }
-
     private boolean containsThis(com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst ast) {
         if (ast instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr) {
             return true;
@@ -494,22 +427,6 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             }
         }
         return ConstantJavaType.LJAVA_LANG_OBJECT;
-    }
-
-    private String extractParamName(ISwc4jAstPat param) {
-        if (param instanceof Swc4jAstBindingIdent bindingIdent) {
-            return bindingIdent.getId().getSym();
-        } else if (param instanceof Swc4jAstRestPat restPat) {
-            // Rest parameter: ...args -> extract "args"
-            return extractParamName(restPat.getArg());
-        } else if (param instanceof Swc4jAstAssignPat assignPat) {
-            // Default parameter: x = 10 -> extract "x"
-            return extractParamName(assignPat.getLeft());
-        } else if (param instanceof Swc4jAstArrayPat || param instanceof Swc4jAstObjectPat) {
-            // Destructuring parameter - will use temporary parameter name
-            return null;
-        }
-        return null;
     }
 
     /**
@@ -628,7 +545,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
         int listClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LIST);
         code.checkcast(listClass);
-        int tempListSlot = getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_LIST);
+        int tempListSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_LIST);
         code.astore(tempListSlot);
 
         int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.I__LJAVA_LANG_OBJECT);
@@ -708,12 +625,12 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
     private void generateEmptyArray(CodeBuilder code, ClassWriter classWriter, String arrayType) {
         var cp = classWriter.getConstantPool();
-        String componentType = arrayType.substring(1);
+        String componentType = TypeConversionUtils.getArrayElementType(arrayType);
         code.iconst(0);
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
             code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
         } else {
-            int classRef = cp.addClass(toInternalName(componentType));
+            int classRef = cp.addClass(TypeConversionUtils.toInternalName(componentType));
             code.anewarray(classRef);
         }
     }
@@ -880,7 +797,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             CodeGeneratorUtils.loadParameter(code, slot, captured.type());
             int fieldRef = cp.addFieldRef(lambdaClassName, "captured$" + captured.name(), captured.type());
             code.putfield(fieldRef);
-            slot += getSlotSize(captured.type());
+            slot += CodeGeneratorUtils.getSlotSize(captured.type());
         }
 
         code.returnVoid();
@@ -1022,11 +939,11 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
                 compiler.getStatementProcessor().generate(code, classWriter, stmt, typeInfo.returnTypeInfo());
             }
             // Add return if needed
-            addReturnIfNeeded(code, typeInfo.returnTypeInfo());
+            CodeGeneratorUtils.addReturnIfNeeded(code, typeInfo.returnTypeInfo());
         } else if (body instanceof ISwc4jAstExpr expr) {
             // Expression body - implicit return
             compiler.getExpressionProcessor().generate(code, classWriter, expr, typeInfo.returnTypeInfo());
-            generateReturn(code, typeInfo.returnTypeInfo());
+            CodeGeneratorUtils.generateReturn(code, typeInfo.returnTypeInfo());
         }
 
         // Pop lambda class context
@@ -1066,7 +983,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
         int mapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_MAP);
         code.checkcast(mapClass);
-        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_MAP);
+        int tempMapSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_MAP);
         code.astore(tempMapSlot);
 
         int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
@@ -1171,7 +1088,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         code.dup();
         int linkedHashMapInitRef = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
         code.invokespecial(linkedHashMapInitRef);
-        int restMapSlot = getOrAllocateTempSlot(context, "$restMap" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_LINKEDHASHMAP);
+        int restMapSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$restMap" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_LINKEDHASHMAP);
         code.astore(restMapSlot);
 
         // Copy all entries from original map except extracted keys
@@ -1188,7 +1105,7 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         code.aload(tempMapSlot);
         code.invokeinterface(mapEntrySetRef, 1);
         code.invokeinterface(setIteratorRef, 1);
-        int iteratorSlot = getOrAllocateTempSlot(context, "$iterator" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_ITERATOR);
+        int iteratorSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$iterator" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_ITERATOR);
         code.astore(iteratorSlot);
 
         // Loop through entries
@@ -1203,13 +1120,13 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         code.invokeinterface(iteratorNextRef, 1);
         int entryClass = cp.addClass(ConstantJavaType.JAVA_UTIL_MAP_ENTRY);
         code.checkcast(entryClass);
-        int entrySlot = getOrAllocateTempSlot(context, "$entry" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_MAP_ENTRY);
+        int entrySlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$entry" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_MAP_ENTRY);
         code.astore(entrySlot);
 
         // Get key from entry
         code.aload(entrySlot);
         code.invokeinterface(entryGetKeyRef, 1);
-        int keySlot = getOrAllocateTempSlot(context, "$key" + context.getNextTempId(), ConstantJavaType.LJAVA_LANG_OBJECT);
+        int keySlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$key" + context.getNextTempId(), ConstantJavaType.LJAVA_LANG_OBJECT);
         code.astore(keySlot);
 
         // Check if key is in extracted keys - if so, skip adding to rest map
@@ -1290,11 +1207,11 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         // Get list size
         code.aload(tempListSlot);
         code.invokeinterface(listSizeRef, 1);
-        int sizeSlot = getOrAllocateTempSlot(context, "$size" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
+        int sizeSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$size" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
         code.istore(sizeSlot);
 
         // Loop from restStartIndex to size, adding elements to rest array
-        int indexSlot = getOrAllocateTempSlot(context, "$index" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
+        int indexSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$index" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
         code.iconst(restStartIndex);
         code.istore(indexSlot);
 
@@ -1326,17 +1243,6 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         int loopEnd = code.getCurrentOffset();
         int exitOffset = loopEnd - (loopExitPos - 1);
         code.patchShort(loopExitPos, exitOffset);
-    }
-
-    private void generateReturn(CodeBuilder code, ReturnTypeInfo returnTypeInfo) {
-        switch (returnTypeInfo.type()) {
-            case VOID -> code.returnVoid();
-            case INT, BOOLEAN, BYTE, CHAR, SHORT -> code.ireturn();
-            case LONG -> code.lreturn();
-            case FLOAT -> code.freturn();
-            case DOUBLE -> code.dreturn();
-            case STRING, OBJECT -> code.areturn();
-        }
     }
 
     /**
@@ -1598,19 +1504,6 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         return null;
     }
 
-    private int getOrAllocateTempSlot(CompilationContext context, String tempName, String type) {
-        LocalVariable tempVar = context.getLocalVariableTable().getVariable(tempName);
-        if (tempVar == null) {
-            context.getLocalVariableTable().allocateVariable(tempName, type);
-            tempVar = context.getLocalVariableTable().getVariable(tempName);
-        }
-        return tempVar.index();
-    }
-
-    private int getSlotSize(String type) {
-        return (ConstantJavaType.ABBR_LONG.equals(type) || ConstantJavaType.ABBR_DOUBLE.equals(type)) ? 2 : 1;
-    }
-
     private String getSupplierInterface(ReturnTypeInfo returnInfo) {
         return switch (returnInfo.type()) {
             case INT -> ConstantJavaType.JAVA_UTIL_FUNCTION_INT_SUPPLIER;
@@ -1679,16 +1572,6 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
      */
     public void reset() {
         lambdaCounter = 0;
-    }
-
-    private String toInternalName(String typeDescriptor) {
-        if (typeDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
-            return typeDescriptor;
-        }
-        if (TypeConversionUtils.isObjectDescriptor(typeDescriptor)) {
-            return TypeConversionUtils.descriptorToInternalName(typeDescriptor);
-        }
-        return typeDescriptor;
     }
 
     /**

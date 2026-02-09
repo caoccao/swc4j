@@ -24,8 +24,10 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
 
@@ -34,6 +36,29 @@ import com.caoccao.javet.swc4j.compiler.memory.PatchInfo;
  */
 public final class CodeGeneratorUtils {
     private CodeGeneratorUtils() {
+    }
+
+    /**
+     * Adds a return instruction if the last bytecode is not already a return.
+     * For void methods, adds returnVoid(). For non-void methods, assumes the
+     * code generator has already added the appropriate return.
+     *
+     * @param code           the code builder
+     * @param returnTypeInfo the return type information
+     */
+    public static void addReturnIfNeeded(CodeBuilder code, ReturnTypeInfo returnTypeInfo) {
+        byte[] bytecode = code.toByteArray();
+        if (bytecode.length == 0) {
+            code.returnVoid();
+            return;
+        }
+
+        int lastByte = bytecode[bytecode.length - 1] & 0xFF;
+        if (!isTerminalBytecode(lastByte)) {
+            if (returnTypeInfo.type() == ReturnType.VOID) {
+                code.returnVoid();
+            }
+        }
     }
 
     /**
@@ -100,6 +125,22 @@ public final class CodeGeneratorUtils {
             return str.getValue();
         }
         return propName.toString();
+    }
+
+    /**
+     * Gets or allocates a temporary variable slot in the local variable table.
+     *
+     * @param context the compilation context
+     * @param name    the variable name
+     * @param type    the variable type descriptor
+     * @return the slot index
+     */
+    public static int getOrAllocateTempSlot(CompilationContext context, String name, String type) {
+        LocalVariable existing = context.getLocalVariableTable().getVariable(name);
+        if (existing != null) {
+            return existing.index();
+        }
+        return context.getLocalVariableTable().allocateVariable(name, type);
     }
 
     /**

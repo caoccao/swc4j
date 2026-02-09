@@ -70,20 +70,6 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
         nullJumpPositions.add(code.getCurrentOffset() - 3);
     }
 
-    private void convertType(CodeBuilder code, ClassWriter classWriter, String fromType, String toType) {
-        if (fromType.equals(toType)) {
-            return;
-        }
-        if (TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
-            TypeConversionUtils.convertPrimitiveType(code, fromType, toType);
-        } else if (TypeConversionUtils.isPrimitiveType(fromType) && !TypeConversionUtils.isPrimitiveType(toType)) {
-            String wrapperType = TypeConversionUtils.getWrapperType(fromType);
-            TypeConversionUtils.boxPrimitiveType(code, classWriter, fromType, wrapperType);
-        } else if (!TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
-            TypeConversionUtils.unboxWrapperType(code, classWriter, fromType);
-        }
-    }
-
     @Override
     public void generate(
             CodeBuilder code,
@@ -192,7 +178,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                 if (indexType != null && !ConstantJavaType.ABBR_INTEGER.equals(indexType)) {
                     TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), ConstantJavaType.ABBR_INTEGER);
                 }
-                String elemType = objType.substring(1);
+                String elemType = TypeConversionUtils.getArrayElementType(objType);
                 switch (elemType) {
                     case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.baload();
                     case ConstantJavaType.ABBR_CHARACTER -> code.caload();
@@ -481,7 +467,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                 for (int i = 0; i < fixedCount; i++) {
                     Swc4jAstExprOrSpread arg = args.get(i);
                     compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
-                    convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
+                    TypeConversionUtils.convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                 }
                 generateVarargsArray(code, classWriter, args, argTypes, fixedCount, varargArrayType, componentType);
             } else {
@@ -489,7 +475,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
                     Swc4jAstExprOrSpread arg = args.get(i);
                     compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
                     if (i < expectedTypes.size()) {
-                        convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
+                        TypeConversionUtils.convertType(code, classWriter, argTypes.get(i), expectedTypes.get(i));
                     }
                 }
             }
@@ -603,7 +589,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
         if (TypeConversionUtils.isPrimitiveType(componentType)) {
             code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
         } else {
-            int classIndex = cp.addClass(toInternalName(componentType));
+            int classIndex = cp.addClass(TypeConversionUtils.toInternalName(componentType));
             code.anewarray(classIndex);
         }
 
@@ -613,7 +599,7 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
             Swc4jAstExprOrSpread arg = args.get(startIndex + i);
             compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
             String argType = argTypes.get(startIndex + i);
-            convertType(code, classWriter, argType, componentType);
+            TypeConversionUtils.convertType(code, classWriter, argType, componentType);
 
             switch (componentType) {
                 case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
@@ -628,13 +614,4 @@ public final class OptionalChainExpressionProcessor extends BaseAstProcessor<Swc
         }
     }
 
-    private String toInternalName(String typeDescriptor) {
-        if (typeDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
-            return typeDescriptor;
-        }
-        if (TypeConversionUtils.isObjectDescriptor(typeDescriptor)) {
-            return TypeConversionUtils.descriptorToInternalName(typeDescriptor);
-        }
-        return typeDescriptor;
-    }
 }

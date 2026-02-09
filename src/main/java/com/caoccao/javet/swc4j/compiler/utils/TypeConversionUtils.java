@@ -159,6 +159,36 @@ public final class TypeConversionUtils {
     }
 
     /**
+     * Converts between types when needed, handling primitive conversions, boxing, unboxing,
+     * and reference type casting.
+     *
+     * @param code        the code builder
+     * @param classWriter the class writer
+     * @param fromType    the source type descriptor
+     * @param toType      the target type descriptor
+     */
+    public static void convertType(CodeBuilder code, ClassWriter classWriter, String fromType, String toType) {
+        if (fromType.equals(toType)) {
+            return;
+        }
+        var cp = classWriter.getConstantPool();
+        if (isPrimitiveType(fromType) && isPrimitiveType(toType)) {
+            convertPrimitiveType(code, fromType, toType);
+        } else if (isPrimitiveType(fromType) && !isPrimitiveType(toType)) {
+            String wrapperType = getWrapperType(fromType);
+            boxPrimitiveType(code, classWriter, fromType, wrapperType);
+        } else if (!isPrimitiveType(fromType) && isPrimitiveType(toType)) {
+            unboxWrapperType(code, classWriter, fromType);
+        } else if (fromType.startsWith(ConstantJavaType.DESCRIPTOR_PREFIX_REF)
+                && toType.startsWith(ConstantJavaType.DESCRIPTOR_PREFIX_REF)
+                && !fromType.equals(toType)) {
+            String toInternalName = descriptorToInternalName(toType);
+            int classIndex = cp.addClass(toInternalName);
+            code.checkcast(classIndex);
+        }
+    }
+
+    /**
      * Convert a JVM type descriptor to internal class name.
      * <p>
      * Examples:
@@ -242,6 +272,16 @@ public final class TypeConversionUtils {
                 yield descriptor;
             }
         };
+    }
+
+    /**
+     * Gets the element type descriptor from an array type descriptor by removing the leading "[" prefix.
+     *
+     * @param arrayDescriptor the array type descriptor (e.g., "[I", "[Ljava/lang/String;")
+     * @return the element type descriptor (e.g., "I", "Ljava/lang/String;")
+     */
+    public static String getArrayElementType(String arrayDescriptor) {
+        return arrayDescriptor.substring(1);
     }
 
     /**
@@ -335,6 +375,16 @@ public final class TypeConversionUtils {
     }
 
     /**
+     * Checks if a descriptor represents an array type (starts with "[").
+     *
+     * @param descriptor JVM type descriptor
+     * @return true if the descriptor represents an array type
+     */
+    public static boolean isArrayDescriptor(String descriptor) {
+        return descriptor != null && descriptor.startsWith(ConstantJavaType.ARRAY_PREFIX);
+    }
+
+    /**
      * Checks if the given primitive type descriptor is an integer-category type (I, J, B, S, C).
      *
      * @param primitiveType the primitive type descriptor
@@ -390,6 +440,24 @@ public final class TypeConversionUtils {
         } else {
             code.pop();
         }
+    }
+
+    /**
+     * Converts a type descriptor to an internal name suitable for bytecode instructions.
+     * Array descriptors and primitive descriptors are returned as-is.
+     * Object descriptors (L...;) are converted to internal name format (e.g., java/lang/String).
+     *
+     * @param typeDescriptor the type descriptor
+     * @return the internal name for bytecode use
+     */
+    public static String toInternalName(String typeDescriptor) {
+        if (typeDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
+            return typeDescriptor;
+        }
+        if (isObjectDescriptor(typeDescriptor)) {
+            return descriptorToInternalName(typeDescriptor);
+        }
+        return typeDescriptor;
     }
 
     /**

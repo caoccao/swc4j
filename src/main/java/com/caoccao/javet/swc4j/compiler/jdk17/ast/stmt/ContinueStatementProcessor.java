@@ -17,12 +17,14 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
-import com.caoccao.javet.swc4j.ast.stmt.*;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstContinueStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ControlFlowUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.compiler.memory.UsingResourceInfo;
@@ -112,7 +114,7 @@ public final class ContinueStatementProcessor extends BaseAstProcessor<Swc4jAstC
                 for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
                     compiler.getStatementProcessor().generate(code, classWriter, stmt, returnTypeInfo);
                     // If finally has its own terminal statement, it takes precedence
-                    if (isTerminalStatement(stmt)) {
+                    if (ControlFlowUtils.isTerminalStatement(stmt)) {
                         return; // Finally's return/throw supersedes the continue
                     }
                 }
@@ -130,13 +132,4 @@ public final class ContinueStatementProcessor extends BaseAstProcessor<Swc4jAstC
         continueLabel.addPatchPosition(gotoOffsetPos, gotoOpcodePos);
     }
 
-    /**
-     * Check if a statement is a terminal control flow statement.
-     */
-    private boolean isTerminalStatement(ISwc4jAstStmt stmt) {
-        return stmt instanceof Swc4jAstBreakStmt ||
-                stmt instanceof Swc4jAstContinueStmt ||
-                stmt instanceof Swc4jAstReturnStmt ||
-                stmt instanceof Swc4jAstThrowStmt;
-    }
 }

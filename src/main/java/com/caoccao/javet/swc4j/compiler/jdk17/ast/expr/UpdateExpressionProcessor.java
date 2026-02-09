@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUpdateOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -31,7 +30,9 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ClassHierarchyUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
@@ -67,21 +68,6 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
                     code.dup2(); // long and double take 2 stack slots
             default -> code.dup();         // all others take 1 slot
         }
-    }
-
-    private String extractSuperPropertyName(
-            Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
-        if (superPropExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
-            return propIdent.getSym();
-        }
-        if (superPropExpr.getProp() instanceof Swc4jAstComputedPropName computedProp
-                && computedProp.getExpr() instanceof Swc4jAstStr str) {
-            return str.getValue();
-        }
-        throw new Swc4jByteCodeCompilerException(
-                getSourceCode(),
-                superPropExpr,
-                "Computed super property expressions not yet supported");
     }
 
     @Override
@@ -246,14 +232,6 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         String className = TypeConversionUtils.descriptorToInternalName(wrapperType);
         int methodRef = cp.addMethodRef(className, methodName, descriptor);
         code.invokevirtual(methodRef);
-    }
-
-    private int getOrAllocateTempSlot(CompilationContext context, String name, String type) {
-        LocalVariable existing = context.getLocalVariableTable().getVariable(name);
-        if (existing != null) {
-            return existing.index();
-        }
-        return context.getLocalVariableTable().allocateVariable(name, type);
     }
 
     /**
@@ -701,7 +679,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
         // Determine element type from array type descriptor
         // e.g., ConstantJavaType.ARRAY_I -> ConstantJavaType.ABBR_INTEGER (int), ConstantJavaType.ARRAY_J -> ConstantJavaType.ABBR_LONG (long)
-        String elementType = arrayType.substring(1);
+        String elementType = TypeConversionUtils.getArrayElementType(arrayType);
 
         // Only support primitive element types for now
         if (!TypeConversionUtils.isPrimitiveType(elementType)) {
@@ -711,13 +689,13 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
         if (!isPrefix && (ConstantJavaType.ABBR_LONG.equals(elementType) || ConstantJavaType.ABBR_DOUBLE.equals(elementType))) {
             CompilationContext context = compiler.getMemory().getCompilationContext();
-            int arraySlot = getOrAllocateTempSlot(context,
+            int arraySlot = CodeGeneratorUtils.getOrAllocateTempSlot(context,
                     "$tempUpdateArray" + context.getNextTempId(), arrayType);
-            int indexSlot = getOrAllocateTempSlot(context,
+            int indexSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context,
                     "$tempUpdateIndex" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
-            int valueSlot = getOrAllocateTempSlot(context,
+            int valueSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context,
                     "$tempUpdateValue" + context.getNextTempId(), elementType);
-            int newValueSlot = getOrAllocateTempSlot(context,
+            int newValueSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context,
                     "$tempUpdateNewValue" + context.getNextTempId(), elementType);
 
             compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null);
@@ -801,7 +779,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
             if (ConstantJavaType.ABBR_LONG.equals(elementType) || ConstantJavaType.ABBR_DOUBLE.equals(elementType)) {
                 // Category 2 - use temp local to avoid complex stack manipulation
                 CompilationContext context = compiler.getMemory().getCompilationContext();
-                int tempSlot = getOrAllocateTempSlot(context,
+                int tempSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context,
                         "$tempUpdate" + context.getNextTempId(), elementType);
                 storePrimitive(code, elementType, tempSlot); // [array, index]
 
@@ -870,7 +848,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
             ClassWriter classWriter,
             Swc4jAstUpdateExpr updateExpr,
             Swc4jAstSuperPropExpr superPropExpr) throws Swc4jByteCodeCompilerException {
-        String fieldName = extractSuperPropertyName(superPropExpr);
+        String fieldName = AstUtils.extractSuperPropertyName(getSourceCode(), superPropExpr);
         CompilationContext context = compiler.getMemory().getCompilationContext();
         String currentClassName = context.getCurrentClassInternalName();
         if (currentClassName == null) {
@@ -1017,7 +995,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         code.getfield(fieldRef); // [obj, old]
 
         CompilationContext context = compiler.getMemory().getCompilationContext();
-        int tempSlot = getOrAllocateTempSlot(context,
+        int tempSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context,
                 "$tempUpdate" + context.getNextTempId(), fieldType);
 
         if (!isPrefix) {
@@ -1095,7 +1073,7 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         code.getstatic(fieldRef); // [old]
 
         CompilationContext context = compiler.getMemory().getCompilationContext();
-        int tempSlot = getOrAllocateTempSlot(context,
+        int tempSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context,
                 "$tempUpdate" + context.getNextTempId(), fieldType);
 
         if (!isPrefix) {

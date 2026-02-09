@@ -25,7 +25,8 @@ import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPatProp;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstKeyValuePatProp;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstObjectPat;
-import com.caoccao.javet.swc4j.ast.stmt.*;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTryStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -37,6 +38,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ControlFlowUtils;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -74,12 +76,12 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         if (stmts.isEmpty()) {
             return false;
         }
-        return isTerminalStatement(stmts.get(stmts.size() - 1));
+        return ControlFlowUtils.isTerminalStatement(stmts.get(stmts.size() - 1));
     }
 
     private boolean containsTerminalStatement(List<ISwc4jAstStmt> stmts) {
         for (ISwc4jAstStmt stmt : stmts) {
-            if (isTerminalStatement(stmt)) {
+            if (ControlFlowUtils.isTerminalStatement(stmt)) {
                 return true;
             }
         }
@@ -683,13 +685,4 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
         code.patchShort(skipDefaultPos, (short) skipOffset);
     }
 
-    private boolean isTerminalStatement(ISwc4jAstStmt stmt) {
-        if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
-            return containsTerminalStatement(blockStmt.getStmts());
-        }
-        return stmt instanceof Swc4jAstBreakStmt ||
-                stmt instanceof Swc4jAstContinueStmt ||
-                stmt instanceof Swc4jAstReturnStmt ||
-                stmt instanceof Swc4jAstThrowStmt;
-    }
 }

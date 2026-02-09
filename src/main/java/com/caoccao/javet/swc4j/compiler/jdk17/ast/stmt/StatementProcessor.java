@@ -31,6 +31,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ControlFlowUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.UsingResourceInfo;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
@@ -61,7 +62,7 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
         if (stmts.isEmpty()) {
             return false;
         }
-        return isTerminalStatement(stmts.get(stmts.size() - 1));
+        return ControlFlowUtils.isTerminalStatement(stmts.get(stmts.size() - 1));
     }
 
     /**
@@ -156,7 +157,7 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
                 return; // UsingDeclProcessor handles all remaining statements
             }
             generate(code, classWriter, stmt, returnTypeInfo);
-            if (isTerminalStatement(stmt)) {
+            if (ControlFlowUtils.isTerminalStatement(stmt)) {
                 break;
             }
         }
@@ -278,7 +279,7 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
                         for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
                             generate(code, classWriter, stmt, returnTypeInfo);
                             // If finally has its own return/throw, that takes precedence
-                            if (isTerminalStatement(stmt)) {
+                            if (ControlFlowUtils.isTerminalStatement(stmt)) {
                                 return; // Finally's return/throw supersedes the original return
                             }
                         }
@@ -307,7 +308,7 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
                 try {
                     for (ISwc4jAstStmt stmt : finallyBlock.getStmts()) {
                         generate(code, classWriter, stmt, returnTypeInfo);
-                        if (isTerminalStatement(stmt)) {
+                        if (ControlFlowUtils.isTerminalStatement(stmt)) {
                             return; // Finally's return/throw supersedes the original return
                         }
                     }
@@ -317,20 +318,6 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
             }
             code.returnVoid();
         }
-    }
-
-    /**
-     * Check if a statement is a terminal control flow statement (break, continue, return).
-     * Statements after a terminal statement are unreachable and should not be generated.
-     *
-     * @param stmt the statement to check
-     * @return true if the statement is terminal
-     */
-    private boolean isTerminalStatement(ISwc4jAstStmt stmt) {
-        return stmt instanceof Swc4jAstBreakStmt ||
-                stmt instanceof Swc4jAstContinueStmt ||
-                stmt instanceof Swc4jAstReturnStmt ||
-                stmt instanceof Swc4jAstThrowStmt;
     }
 
     /**

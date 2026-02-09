@@ -231,7 +231,7 @@ public final class ForStatementProcessor extends BaseAstProcessor<Swc4jAstForStm
         Swc4jAstBinaryOp op = binExpr.getOp();
 
         // Only handle comparison operators
-        if (!isComparisonOp(op)) {
+        if (!op.isLogicalCompareOperator()) {
             return false;
         }
 
@@ -317,17 +317,4 @@ public final class ForStatementProcessor extends BaseAstProcessor<Swc4jAstForStm
         }
     }
 
-    /**
-     * Check if the operator is a comparison operator.
-     */
-    private boolean isComparisonOp(Swc4jAstBinaryOp op) {
-        return op == Swc4jAstBinaryOp.Lt ||
-                op == Swc4jAstBinaryOp.LtEq ||
-                op == Swc4jAstBinaryOp.Gt ||
-                op == Swc4jAstBinaryOp.GtEq ||
-                op == Swc4jAstBinaryOp.EqEq ||
-                op == Swc4jAstBinaryOp.EqEqEq ||
-                op == Swc4jAstBinaryOp.NotEq ||
-                op == Swc4jAstBinaryOp.NotEqEq;
-    }
 }

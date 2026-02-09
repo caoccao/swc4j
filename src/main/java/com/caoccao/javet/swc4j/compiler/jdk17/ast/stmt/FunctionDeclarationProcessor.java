@@ -34,10 +34,10 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
-import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.memory.ScopedStandaloneFunctionRegistry;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
@@ -63,30 +63,6 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
      */
     public FunctionDeclarationProcessor(ByteCodeCompiler compiler) {
         super(compiler);
-    }
-
-    private void addReturnIfNeeded(CodeBuilder code, ReturnTypeInfo returnTypeInfo) {
-        byte[] bytecode = code.toByteArray();
-        if (bytecode.length == 0) {
-            code.returnVoid();
-            return;
-        }
-
-        // Check if the last instruction is already a return
-        int lastByte = bytecode[bytecode.length - 1] & 0xFF;
-        boolean hasReturn = lastByte == 0xAC || // ireturn
-                lastByte == 0xAD || // lreturn
-                lastByte == 0xAE || // freturn
-                lastByte == 0xAF || // dreturn
-                lastByte == 0xB0 || // areturn
-                lastByte == 0xB1;   // return (void)
-
-        if (!hasReturn) {
-            if (returnTypeInfo.type() == ReturnType.VOID) {
-                code.returnVoid();
-            }
-            // For non-void methods, we assume the code generator has already added the return
-        }
     }
 
     /**
@@ -292,7 +268,7 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
             }
 
             // Add return if needed
-            addReturnIfNeeded(code, returnTypeInfo);
+            CodeGeneratorUtils.addReturnIfNeeded(code, returnTypeInfo);
 
             int maxLocals = context.getLocalVariableTable().getMaxLocals();
 

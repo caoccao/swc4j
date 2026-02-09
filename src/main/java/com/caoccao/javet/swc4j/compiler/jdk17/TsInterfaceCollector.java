@@ -33,6 +33,7 @@ import com.caoccao.javet.swc4j.compiler.memory.JavaType;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.util.List;
 
@@ -50,13 +51,6 @@ public final class TsInterfaceCollector {
      */
     public TsInterfaceCollector(ByteCodeCompiler compiler) {
         this.compiler = compiler;
-    }
-
-    private String capitalize(String str) {
-        if (str == null || str.isEmpty()) {
-            return str;
-        }
-        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
 
     /**
@@ -126,9 +120,9 @@ public final class TsInterfaceCollector {
             if (propName.startsWith("is") || propName.startsWith("has") || propName.startsWith("can")) {
                 return propName;
             }
-            return "is" + capitalize(propName);
+            return "is" + StringUtils.capitalize(propName);
         }
-        return ConstantJavaMethod.METHOD_GET + capitalize(propName);
+        return ConstantJavaMethod.METHOD_GET + StringUtils.capitalize(propName);
     }
 
     private String getModuleName(Swc4jAstTsModuleDecl moduleDecl) {
@@ -318,7 +312,7 @@ public final class TsInterfaceCollector {
 
         // Register setter method (if not readonly)
         if (!prop.isReadonly()) {
-            String setterName = ConstantJavaMethod.METHOD_SET + capitalize(propName);
+            String setterName = ConstantJavaMethod.METHOD_SET + StringUtils.capitalize(propName);
             String setterDescriptor = "(" + descriptor + ")V";
             MethodInfo setterInfo = new MethodInfo(setterName, setterDescriptor, ConstantJavaType.ABBR_VOID, false, false);
             typeInfo.addMethod(setterName, setterInfo);
@@ -345,7 +339,7 @@ public final class TsInterfaceCollector {
         }
 
         // Register setter method
-        String setterName = ConstantJavaMethod.METHOD_SET + capitalize(propName);
+        String setterName = ConstantJavaMethod.METHOD_SET + StringUtils.capitalize(propName);
         String setterDescriptor = "(" + descriptor + ")V";
         MethodInfo setterInfo = new MethodInfo(setterName, setterDescriptor, ConstantJavaType.ABBR_VOID, false, false);
         typeInfo.addMethod(setterName, setterInfo);

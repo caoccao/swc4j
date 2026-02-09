@@ -19,8 +19,6 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.pat.*;
@@ -134,24 +132,8 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
      */
     private boolean arrowReferencesSelf(Swc4jAstArrowExpr arrowExpr, String varName) {
         Set<String> identifiers = new HashSet<>();
-        collectIdentifiersRecursive(arrowExpr.getBody(), identifiers);
+        AstUtils.collectIdentifiers(arrowExpr.getBody(), identifiers);
         return identifiers.contains(varName);
-    }
-
-    /**
-     * Recursively collects all identifier names from an AST node.
-     */
-    private void collectIdentifiersRecursive(Object node, Set<String> identifiers) {
-        if (node == null) {
-            return;
-        }
-        if (node instanceof Swc4jAstIdent ident) {
-            identifiers.add(ident.getSym());
-        } else if (node instanceof ISwc4jAst ast) {
-            for (var child : ast.getChildNodes()) {
-                collectIdentifiersRecursive(child, identifiers);
-            }
-        }
     }
 
     @Override
@@ -215,7 +197,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
 
         int listClass = cp.addClass(ConstantJavaType.JAVA_UTIL_LIST);
         code.checkcast(listClass);
-        int tempListSlot = getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_LIST);
+        int tempListSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$tempList" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_LIST);
         code.astore(tempListSlot);
 
         int listGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.I__LJAVA_LANG_OBJECT);
@@ -651,7 +633,7 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
 
         int mapClass = cp.addClass(ConstantJavaType.JAVA_UTIL_MAP);
         code.checkcast(mapClass);
-        int tempMapSlot = getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_MAP);
+        int tempMapSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$tempMap" + context.getNextTempId(), ConstantJavaType.LJAVA_UTIL_MAP);
         code.astore(tempMapSlot);
 
         int mapGetRef = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_MAP, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
@@ -811,12 +793,12 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
                 // Get source list size
                 code.aload(sourceSlot);
                 code.invokeinterface(listSizeRef, 1);
-                int sizeSlot = getOrAllocateTempSlot(context, "$restSize" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
+                int sizeSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$restSize" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
                 code.istore(sizeSlot);
 
                 // Initialize loop counter at restStartIndex
                 code.iconst(restStartIndex);
-                int iSlot = getOrAllocateTempSlot(context, "$restI" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
+                int iSlot = CodeGeneratorUtils.getOrAllocateTempSlot(context, "$restI" + context.getNextTempId(), ConstantJavaType.ABBR_INTEGER);
                 code.istore(iSlot);
 
                 // Loop to copy remaining elements
@@ -851,14 +833,4 @@ public final class VarDeclProcessor extends BaseAstProcessor<Swc4jAstVarDecl> {
         }
     }
 
-    /**
-     * Get or allocate a temp variable slot.
-     */
-    private int getOrAllocateTempSlot(CompilationContext context, String name, String type) {
-        LocalVariable existing = context.getLocalVariableTable().getVariable(name);
-        if (existing != null) {
-            return existing.index();
-        }
-        return context.getLocalVariableTable().allocateVariable(name, type);
-    }
 }

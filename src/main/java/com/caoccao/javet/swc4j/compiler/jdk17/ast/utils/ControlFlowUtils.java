@@ -17,6 +17,9 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 
@@ -65,5 +68,44 @@ public final class ControlFlowUtils {
             return thenFallsThrough || elseFallsThrough;
         }
         return true;
+    }
+
+    /**
+     * Check if the test expression is a constant true.
+     * This includes boolean literal true and numeric constant 1.
+     *
+     * @param testExpr the expression to check
+     * @return true if the expression is a constant truthy value
+     */
+    public static boolean isConstantTrue(ISwc4jAstExpr testExpr) {
+        if (testExpr instanceof Swc4jAstBool bool) {
+            return bool.isValue();
+        }
+        if (testExpr instanceof Swc4jAstNumber number) {
+            return number.getRaw().equals("1");
+        }
+        return false;
+    }
+
+    /**
+     * Check if a statement is a terminal control flow statement (break, continue, return, throw).
+     * Recursively checks block statements for terminal statements within them.
+     *
+     * @param stmt the statement to check
+     * @return true if the statement is terminal
+     */
+    public static boolean isTerminalStatement(ISwc4jAstStmt stmt) {
+        if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
+            for (ISwc4jAstStmt s : blockStmt.getStmts()) {
+                if (isTerminalStatement(s)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return stmt instanceof Swc4jAstBreakStmt
+                || stmt instanceof Swc4jAstContinueStmt
+                || stmt instanceof Swc4jAstReturnStmt
+                || stmt instanceof Swc4jAstThrowStmt;
     }
 }

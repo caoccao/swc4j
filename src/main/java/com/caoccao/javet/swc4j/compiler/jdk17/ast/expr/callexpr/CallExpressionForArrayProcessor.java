@@ -68,7 +68,7 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
 
             // Get array type
             String arrayType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
-            String elementType = arrayType.substring(1); // Remove leading "["
+            String elementType = TypeConversionUtils.getArrayElementType(arrayType);
             String arrayTypeName = getArrayTypeName(arrayType);
 
             // Generate code for the array object
