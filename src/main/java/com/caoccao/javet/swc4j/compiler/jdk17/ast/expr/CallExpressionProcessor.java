@@ -127,7 +127,7 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
         // Handle JSON.stringify(), JSON.parse()
         if (callee instanceof Swc4jAstMemberExpr jsonStaticMember
                 && jsonStaticMember.getObj() instanceof Swc4jAstIdent jsonStaticId
-                && ConstantJavaType.TYPE_ALIAS_JSON.equals(jsonStaticId.getSym())) {
+                && isBuiltinJsonGlobal(jsonStaticId)) {
             jsonStaticGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
@@ -184,5 +184,20 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
         }
         String interfaceName = TypeConversionUtils.descriptorToInternalName(varType);
         return compiler.getMemory().getScopedFunctionalInterfaceRegistry().isFunctionalInterface(interfaceName);
+    }
+
+    private boolean isBuiltinJsonGlobal(Swc4jAstIdent ident) {
+        if (!ConstantJavaType.TYPE_ALIAS_JSON.equals(ident.getSym())) {
+            return false;
+        }
+        var memory = compiler.getMemory();
+        // Respect local and class/type alias shadowing before treating JSON as the built-in global.
+        if (memory.getCompilationContext().getLocalVariableTable().getVariable(ident.getSym()) != null) {
+            return false;
+        }
+        if (memory.getScopedJavaTypeRegistry().resolve(ident.getSym()) != null) {
+            return false;
+        }
+        return memory.getScopedTypeAliasRegistry().resolve(ident.getSym()) == null;
     }
 }

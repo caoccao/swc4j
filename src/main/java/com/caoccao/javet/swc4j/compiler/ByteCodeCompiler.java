@@ -343,8 +343,8 @@ public sealed abstract class ByteCodeCompiler permits
         memory = new ByteCodeCompilerMemory();
         // Inject type aliases from options into the global scope
         memory.getScopedTypeAliasRegistry().getGlobalScope().putAll(options.typeAliasMap());
-        // Initialize JSON provider if configured
-        options.optionalJsonProvider().ifPresent(JsonUtils::setProvider);
+        // Initialize JSON provider. Absent provider resets to default.
+        JsonUtils.setProvider(options.optionalJsonProvider().orElse(null));
         parseOptions = new Swc4jParseOptions()
                 .setCaptureAst(true);
         swc4j = new Swc4j();

@@ -17,9 +17,12 @@
 package com.caoccao.javet.swc4j.compiler.utils.json;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import com.caoccao.javet.swc4j.utils.SimpleMap;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -38,6 +41,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Covers all applicable edge cases from the JSON plan (edge cases #1-57).
  */
 public class TestJsonUtilsBytecode extends BaseTestCompileSuite {
+    @AfterEach
+    public void resetProvider() {
+        JsonUtils.setProvider(null);
+    }
+
 
     // ========================================================================
     // JSON.stringify — Primitive types (edge cases #2-#6, #49)
@@ -3270,5 +3278,111 @@ public class TestJsonUtilsBytecode extends BaseTestCompileSuite {
                 throw e.getCause();
             }
         }).isInstanceOf(RuntimeException.class);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testJsonIdentifierShadowedByLocalVariable(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      const JSON: String = "shadowed"
+                      return JSON.substring(2)
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("adowed");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParseExtraArgsStillEvaluatesSideEffects(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let x: int = 0
+                      JSON.parse("1", x = x + 1, x = x + 1)
+                      return x
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testParseNullCoercion(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return JSON.stringify(JSON.parse(null))
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("null");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testProviderResetBetweenCompilers(JdkVersion jdkVersion) throws Exception {
+        JsonProvider customProvider = new JsonProvider() {
+            @Override
+            public Object parse(String json) {
+                return null;
+            }
+
+            @Override
+            public String stringify(Object value) {
+                return "custom";
+            }
+
+            @Override
+            public String stringify(Object value, Object replacer, Object space) {
+                return "custom";
+            }
+        };
+        ByteCodeCompiler customCompiler = ByteCodeCompiler.of(ByteCodeCompilerOptions.builder()
+                .jdkVersion(jdkVersion)
+                .debug(true)
+                .jsonProvider(customProvider)
+                .build());
+        var customRunner = customCompiler.compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return JSON.stringify(1)
+                    }
+                  }
+                }""");
+        assertThat(customRunner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("custom");
+
+        var defaultRunner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): String {
+                      return JSON.stringify(1)
+                    }
+                  }
+                }""");
+        assertThat(defaultRunner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testStringifyExtraArgsStillEvaluatesSideEffects(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let x: int = 0
+                      JSON.stringify({ a: 1 }, null, 2, x = x + 1, x = x + 1)
+                      return x
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2);
     }
 }

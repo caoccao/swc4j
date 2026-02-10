@@ -323,9 +323,6 @@ public final class ConstantJavaMethod {
     /**
      * The constant METHOD_PAD_END.
      */
-    /**
-     * The constant METHOD_PAD_END.
-     */
     public static final String METHOD_PAD_END = "padEnd";
     /**
      * The constant METHOD_PAD_START.
@@ -443,9 +440,6 @@ public final class ConstantJavaMethod {
      * The constant METHOD_SPLIT.
      */
     public static final String METHOD_SPLIT = "split";
-    /**
-     * The constant METHOD_STARTS_WITH.
-     */
     /**
      * The constant METHOD_STARTS_WITH.
      */

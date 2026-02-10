@@ -225,9 +225,6 @@ public final class ConstantJavaDescriptor {
      */
     public static final String LJAVA_LANG_OBJECT__I = "(Ljava/lang/Object;)I";
     /**
-     * The constant LJAVA_LANG_OBJECT__LJAVA_LANG_STRING.
-     */
-    /**
      * The constant LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT.
      */
     public static final String LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT = "(Ljava/lang/Object;)Ljava/lang/Object;";

@@ -1466,7 +1466,7 @@ public final class TypeResolver {
                     }
                 }
                 if (memberExpr.getObj() instanceof Swc4jAstIdent jsonIdent
-                        && ConstantJavaType.TYPE_ALIAS_JSON.equals(jsonIdent.getSym())
+                        && isBuiltinJsonGlobal(jsonIdent)
                         && memberExpr.getProp() instanceof Swc4jAstIdentName jsonPropIdent) {
                     String jsonMethodName = jsonPropIdent.getSym();
                     switch (jsonMethodName) {
@@ -1705,6 +1705,20 @@ public final class TypeResolver {
         }
 
         return null;
+    }
+
+    private boolean isBuiltinJsonGlobal(Swc4jAstIdent ident) {
+        if (!ConstantJavaType.TYPE_ALIAS_JSON.equals(ident.getSym())) {
+            return false;
+        }
+        var memory = compiler.getMemory();
+        if (memory.getCompilationContext().getLocalVariableTable().getVariable(ident.getSym()) != null) {
+            return false;
+        }
+        if (memory.getScopedJavaTypeRegistry().resolve(ident.getSym()) != null) {
+            return false;
+        }
+        return memory.getScopedTypeAliasRegistry().resolve(ident.getSym()) == null;
     }
 
     private String mapImportTypeToDescriptor(Swc4jAstTsImportType importType) throws Swc4jByteCodeCompilerException {

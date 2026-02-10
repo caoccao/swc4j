@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.function.BiFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -130,6 +131,16 @@ public class TestJsonUtilsStringify {
         replacer.add("a");
         replacer.add("c");
         assertThat(JsonUtils.stringify(map, replacer, null)).isEqualTo("{\"a\":1,\"c\":3}");
+    }
+
+    @Test
+    public void testEdgeCase10ReplacerArrayListKeepsOrder() {
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
+        ArrayList<Object> replacer = new ArrayList<>(List.of("c", "a", "c", "b"));
+        assertThat(JsonUtils.stringify(map, replacer, null)).isEqualTo("{\"c\":3,\"a\":1,\"b\":2}");
     }
 
     @Test

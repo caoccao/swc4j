@@ -316,7 +316,7 @@ public final class DefaultJsonProvider implements JsonProvider {
 
     private static Set<String> resolveReplacer(Object replacer) {
         if (replacer instanceof ArrayList<?> list) {
-            Set<String> set = new HashSet<>();
+            Set<String> set = new LinkedHashSet<>();
             for (Object item : list) {
                 if (item != null) {
                     set.add(String.valueOf(item));

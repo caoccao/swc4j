@@ -70,28 +70,33 @@ public final class CallExpressionForJsonStaticProcessor extends BaseAstProcessor
             CodeBuilder code,
             ClassWriter classWriter,
             Swc4jAstCallExpr callExpr) throws Swc4jByteCodeCompilerException {
-        if (callExpr.getArgs().isEmpty()) {
+        var args = callExpr.getArgs();
+        if (args.isEmpty()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "JSON.parse() requires at least one argument");
         }
-        var arg = callExpr.getArgs().get(0);
+        var arg = args.get(0);
         if (arg.getSpread().isPresent()) {
             throw new Swc4jByteCodeCompilerException(getSourceCode(), arg, "Spread arguments not supported for JSON.parse");
         }
         compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
-        // Ensure the argument is a String on the stack
+
+        // Ensure the first argument is a String on the stack.
         String argType = compiler.getTypeResolver().inferTypeFromExpr(arg.getExpr());
-        if (argType != null && !ConstantJavaType.LJAVA_LANG_STRING.equals(argType)) {
-            if (TypeConversionUtils.isPrimitiveType(argType)) {
+        if (!ConstantJavaType.LJAVA_LANG_STRING.equals(argType)) {
+            if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
                 TypeConversionUtils.boxPrimitiveType(code, classWriter, argType, TypeConversionUtils.getWrapperType(argType));
             }
-            // Convert to String via toString
             var cp = classWriter.getConstantPool();
-            int toStringRef = cp.addMethodRef(
-                    ConstantJavaType.JAVA_LANG_OBJECT,
-                    ConstantJavaMethod.METHOD_TO_STRING,
-                    ConstantJavaDescriptor.__LJAVA_LANG_STRING);
-            code.invokevirtual(toStringRef);
+            int valueOfRef = cp.addMethodRef(
+                    ConstantJavaType.JAVA_LANG_STRING,
+                    ConstantJavaMethod.METHOD_VALUE_OF,
+                    ConstantJavaDescriptor.LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
+            code.invokestatic(valueOfRef);
         }
+
+        // Evaluate and discard extra arguments, preserving side effects.
+        evaluateAndDiscardExtraArgs(code, classWriter, callExpr, 1, "JSON.parse");
+
         var cp = classWriter.getConstantPool();
         int parseMethod = cp.addMethodRef(
                 ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_UTILS_JSON_JSON_UTILS,
@@ -180,6 +185,40 @@ public final class CallExpressionForJsonStaticProcessor extends BaseAstProcessor
                 ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_UTILS_JSON_JSON_UTILS,
                 ConstantJavaMethod.METHOD_STRINGIFY,
                 ConstantJavaDescriptor.LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING);
+
+        // Evaluate and discard extra arguments, preserving side effects.
+        evaluateAndDiscardExtraArgs(code, classWriter, callExpr, 3, "JSON.stringify");
+
         code.invokestatic(stringifyMethod);
+    }
+
+    private void evaluateAndDiscardExtraArgs(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            Swc4jAstCallExpr callExpr,
+            int startIndex,
+            String methodName) throws Swc4jByteCodeCompilerException {
+        var args = callExpr.getArgs();
+        for (int i = startIndex; i < args.size(); i++) {
+            var extraArg = args.get(i);
+            if (extraArg.getSpread().isPresent()) {
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), extraArg, "Spread arguments not supported for " + methodName);
+            }
+            ISwc4jAstExpr extraExpr = extraArg.getExpr();
+            compiler.getExpressionProcessor().generate(code, classWriter, extraExpr, null);
+            discardExpressionValue(code, extraExpr);
+        }
+    }
+
+    private void discardExpressionValue(CodeBuilder code, ISwc4jAstExpr expr) throws Swc4jByteCodeCompilerException {
+        String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
+        if (ConstantJavaType.ABBR_VOID.equals(exprType)) {
+            return;
+        }
+        if (ConstantJavaType.ABBR_LONG.equals(exprType) || ConstantJavaType.ABBR_DOUBLE.equals(exprType)) {
+            code.pop2();
+        } else {
+            code.pop();
+        }
     }
 }
