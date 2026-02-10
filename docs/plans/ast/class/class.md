@@ -41,9 +41,10 @@ class Circle implements IShape {
 
 **Implementation Files:**
 - `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/ClassProcessor.java`
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/MethodGenerator.java`
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/ConstructorGenerator.java`
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/FieldGenerator.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/ClassMethodProcessor.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/PrivateMethodProcessor.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ClassCollector.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/ClassDeclProcessor.java`
 
 **Test Files:**
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassBasic.java`
@@ -57,10 +58,9 @@ class Circle implements IShape {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassAccessibility.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassPrivateFields.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassPrivateMethod.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassDecorators.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassGenerics.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassEdgeCases.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/classexpr/TestCompileAstClassExpr.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassStaticMembers.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/TestCompileAstClassWithoutNamespace.java`
 
 **AST Definition:** [Swc4jAstClass.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass.java)
 
@@ -114,9 +114,9 @@ public class Swc4jAstClass extends Swc4jAst {
 
 ### Current State
 
-Existing tests in `TestCompileAstClass.java`:
-1. `testMultipleClassesWithTypeInfer` - Tests class calling another class without explicit types
-2. `testMultipleClassesWithoutTypeInfer` - Tests class calling another class with explicit types
+Class tests are already split under
+`src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/clazz/`.
+Use those files as the source of truth for current coverage.
 
 ### Proposed Split
 
@@ -358,7 +358,7 @@ class A {
   - Set ACC_PRIVATE access flag
   - Generate method body using same pattern as regular methods
 - Updated `ClassCollector` to register private method signatures for return type lookup
-- Updated `MethodGenerator` to generate private methods with full support for:
+- Updated `PrivateMethodProcessor` to generate private methods with full support for:
   - Instance and static private methods
   - Default parameter overloads
   - Return type inference
@@ -391,7 +391,7 @@ JVM generics use type erasure - generic type parameters are replaced with Object
 - `CompilationContext` maintains a stack of type parameter scopes for nested generic classes/methods
 - `TypeResolver.mapTypeNameToDescriptor()` checks for type parameters and erases to Object or constraint type
 - `ClassProcessor` pushes type parameter scope when compiling generic classes
-- `MethodGenerator` pushes type parameter scope when compiling generic methods
+- `ClassMethodProcessor` and `PrivateMethodProcessor` push type parameter scope when compiling generic methods
 - `ClassCollector` also pushes type parameter scope during field/method analysis
 
 Test coverage in `TestCompileAstClassGenerics.java`: 8 tests
@@ -1200,7 +1200,7 @@ Field:
 
 **Abstract Classes Support (2026-01-25):**
 - Updated `ClassProcessor.generateBytecode()` to set ACC_ABSTRACT (0x0400) flag when `clazz.isAbstract()` is true
-- Added `generateAbstractMethod()` in `MethodGenerator` for abstract method declarations
+- Added `generateAbstractMethod()` in `ClassMethodProcessor` for abstract method declarations
 - Abstract methods have ACC_ABSTRACT flag and no Code attribute (code = null)
 - Updated `TypeResolver.analyzeReturnType()` to handle null body for abstract methods
 - JVM validates at runtime that abstract classes cannot be instantiated and concrete subclasses implement all abstract methods
@@ -1212,15 +1212,15 @@ Field:
   - Updated `toByteArray()` to pre-add interfaces to constant pool and write interface indexes
 - Added `resolveInterfaces()` method in `ClassProcessor`:
   - Iterates over `clazz.getImplements()` list of `Swc4jAstTsExprWithTypeArgs`
-  - Extracts interface name from `expr` (Swc4jAstIdent)
-  - Resolves via type alias registry, Java type registry, or uses simple name as fallback
+  - Extracts interface name from `expr` (identifier or qualified/member expression)
+  - Resolves via type alias registry, Java type registry, or falls back to the qualified internal name
   - Calls `classWriter.addInterface()` with the resolved internal name
 - Interface resolution requires interfaces to be registered in the type alias map (e.g., `"Runnable" -> "java.lang.Runnable"`)
-- Supports single interface, multiple interfaces, and class extends + implements
-- Test coverage in `TestCompileAstClassImplements.java`: 4 tests covering single/multiple interfaces, extends+implements, and method implementation
+- Supports single interface, multiple interfaces, qualified interfaces, and class extends + implements
+- Test coverage in `TestCompileAstClassImplements.java`: single/multiple interfaces, extends+implements, qualified interfaces, and method implementation
 
 **Access Modifiers (Phase 8) Support (2026-01-25):**
-- Updated `MethodGenerator`:
+- Updated `ClassMethodProcessor`:
   - Added import for `Swc4jAstAccessibility`
   - Added `getAccessFlags()` helper method to convert `Swc4jAstAccessibility` enum to JVM access flags:
     - `Public` → `ACC_PUBLIC` (0x0001)
@@ -1252,15 +1252,14 @@ Field:
 ## Known Limitations
 
 1. **Nested Classes**: Inner classes may have limited support
-2. **Anonymous Classes**: Class expressions may not be fully supported
-3. **Decorators**: Intentionally not supported
-4. **Generics**: Fully supported with type erasure (type parameters erase to Object or constraint type)
-5. **Private Fields (#)**: ES2022 private fields fully supported (both instance and static)
-6. **Private Methods (#)**: ES2022 private methods fully supported (both instance and static)
-7. **Static Blocks**: Explicit static blocks (`static { ... }`) fully supported
-8. **Multiple Inheritance**: Only single class inheritance (Java limitation)
-9. **Dynamic Class Loading**: Not supported at compile time
-10. **Generic Type Constraints**: Simple constraints (T extends SomeType) are supported; complex constraints may need fully qualified class names
+2. **Decorators**: Intentionally not supported
+3. **Generics**: Fully supported with type erasure (type parameters erase to Object or constraint type)
+4. **Private Fields (#)**: ES2022 private fields fully supported (both instance and static)
+5. **Private Methods (#)**: ES2022 private methods fully supported (both instance and static)
+6. **Static Blocks**: Explicit static blocks (`static { ... }`) fully supported
+7. **Multiple Inheritance**: Only single class inheritance (Java limitation)
+8. **Dynamic Class Loading**: Not supported at compile time
+9. **Generic Type Constraints**: Simple constraints (T extends SomeType) are supported; complex constraints may need fully qualified class names
 
 ---
 
@@ -1271,4 +1270,4 @@ Field:
 - **JVM Specification:** Chapter 4.6 - Methods
 - **TypeScript Specification:** Classes
 - **ECMAScript Specification:** Class Definitions
-- **Existing Implementation:** ClassProcessor.java, MethodGenerator.java
+- **Existing Implementation:** ClassProcessor.java, ClassMethodProcessor.java, PrivateMethodProcessor.java

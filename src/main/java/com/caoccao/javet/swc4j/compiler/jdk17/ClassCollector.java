@@ -21,10 +21,13 @@ import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPat;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsParamProp;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
@@ -177,6 +180,8 @@ public final class ClassCollector {
                 processFieldProp(prop, typeInfo);
             } else if (member instanceof Swc4jAstPrivateProp privateProp) {
                 processPrivateFieldProp(privateProp, typeInfo);
+            } else if (member instanceof Swc4jAstConstructor constructor) {
+                processConstructorParamProps(constructor, typeInfo);
             }
         }
 
@@ -253,6 +258,35 @@ public final class ClassCollector {
                     // Ignore methods that can't be analyzed
                 }
             }
+        }
+    }
+
+    private void processConstructorParamProps(Swc4jAstConstructor constructor, JavaTypeInfo typeInfo) throws Swc4jByteCodeCompilerException {
+        for (ISwc4jAstParamOrTsParamProp paramOrProp : constructor.getParams()) {
+            if (!(paramOrProp instanceof Swc4jAstTsParamProp tsParamProp)) {
+                continue;
+            }
+
+            // tsParamProp.getParam() is restricted to BindingIdent or AssignPat.
+            String fieldName;
+            String fieldDescriptor;
+            if (tsParamProp.getParam() instanceof Swc4jAstBindingIdent bindingIdent) {
+                fieldName = bindingIdent.getId().getSym();
+                fieldDescriptor = compiler.getTypeResolver().extractParameterType(bindingIdent);
+            } else if (tsParamProp.getParam() instanceof Swc4jAstAssignPat assignPat) {
+                fieldName = compiler.getTypeResolver().extractParameterName(assignPat);
+                fieldDescriptor = compiler.getTypeResolver().extractParameterType(assignPat);
+            } else {
+                throw new Swc4jByteCodeCompilerException(
+                        null,
+                        tsParamProp,
+                        "Unsupported constructor parameter property pattern");
+            }
+
+            if (fieldName == null || fieldName.isEmpty() || typeInfo.getField(fieldName) != null) {
+                continue;
+            }
+            typeInfo.addField(fieldName, new FieldInfo(fieldName, fieldDescriptor, false));
         }
     }
 

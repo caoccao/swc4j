@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
@@ -360,6 +361,40 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
                 )
         ).isEqualTo(
                 List.of(10, 20, 30)
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testConstructorWithParameterProperties(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class Point {
+                    constructor(public x: int, private y: int) {
+                    }
+                    getX(): int { return this.x }
+                    getY(): int { return this.y }
+                    sum(): int { return this.x + this.y }
+                  }
+                }""");
+        Class<?> classPoint = runner.getClass("com.Point");
+        assertThat(
+                Map.of(
+                        "xPublic", Modifier.isPublic(classPoint.getDeclaredField("x").getModifiers()),
+                        "yPrivate", Modifier.isPrivate(classPoint.getDeclaredField("y").getModifiers()))
+        ).isEqualTo(
+                Map.of("xPublic", true, "yPrivate", true)
+        );
+
+        var instanceRunner = runner.createInstanceRunner("com.Point", 7, 9);
+        assertThat(
+                List.of(
+                        instanceRunner.invoke("getX"),
+                        instanceRunner.invoke("getY"),
+                        (int) instanceRunner.invoke("sum")
+                )
+        ).isEqualTo(
+                List.of(7, 9, 16)
         );
     }
 

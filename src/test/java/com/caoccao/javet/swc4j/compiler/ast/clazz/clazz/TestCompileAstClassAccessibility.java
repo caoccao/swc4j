@@ -22,11 +22,51 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.Modifier;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class TestCompileAstClassAccessibility extends BaseTestCompileSuite {
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPrivateAndProtectedConstructors(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class PrivateCtor {
+                    value: int = 1
+                    private constructor() {
+                    }
+                    static create(): PrivateCtor {
+                      return new PrivateCtor()
+                    }
+                    getValue(): int {
+                      return this.value
+                    }
+                  }
+                  export class ProtectedCtor {
+                    protected constructor() {
+                    }
+                    static create(): ProtectedCtor {
+                      return new ProtectedCtor()
+                    }
+                  }
+                }""");
+
+        Class<?> privateCtorClass = runner.getClass("com.PrivateCtor");
+        Class<?> protectedCtorClass = runner.getClass("com.ProtectedCtor");
+        assertThat(
+                Map.of(
+                        "privateCtor", Modifier.isPrivate(privateCtorClass.getDeclaredConstructor().getModifiers()),
+                        "protectedCtor", Modifier.isProtected(protectedCtorClass.getDeclaredConstructor().getModifiers()))
+        ).isEqualTo(
+                Map.of("privateCtor", true, "protectedCtor", true)
+        );
+
+        Object privateInstance = privateCtorClass.getDeclaredMethod("create").invoke(null);
+        assertThat(privateCtorClass.getDeclaredMethod("getValue").invoke(privateInstance)).isEqualTo(1);
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

@@ -160,6 +160,52 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testFieldWithInitializerAndExplicitConstructor(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    value: int = 10
+                    constructor() {
+                      this.value = this.value + 5
+                    }
+                    getValue(): int {
+                      return this.value
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("getValue")).isEqualTo(15);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testFieldWithInitializerInThisConstructorChaining(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class Counter {
+                    count: int = 2
+                    constructor(step: int) {
+                      this.count = this.count + step
+                    }
+                    constructor() {
+                      this(3)
+                    }
+                    getCount(): int {
+                      return this.count
+                    }
+                  }
+                }""");
+        assertThat(
+                List.of(
+                        runner.createInstanceRunner("com.Counter").invoke("getCount"),
+                        runner.createInstanceRunner("com.Counter", 4).invoke("getCount")
+                )
+        ).isEqualTo(
+                List.of(5, 6)
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testFieldWithTypeAnnotationOnly(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

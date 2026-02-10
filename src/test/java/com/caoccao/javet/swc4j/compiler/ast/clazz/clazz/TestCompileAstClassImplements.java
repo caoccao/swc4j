@@ -105,6 +105,35 @@ public class TestCompileAstClassImplements extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testQualifiedInterfaceImplementation(JdkVersion jdkVersion) throws Exception {
+        var compiler = createCompilerWithInterfaces(jdkVersion);
+        var runner = compiler.compile("""
+                namespace com {
+                  export class Qualified implements java.lang.Runnable, java.io.Serializable {
+                    count: int = 0
+                    run(): void {
+                      this.count = this.count + 1
+                    }
+                    getCount(): int { return this.count }
+                  }
+                }""");
+        Class<?> classQualified = runner.getClass("com.Qualified");
+        assertThat(
+                Map.of(
+                        "runnable", Runnable.class.isAssignableFrom(classQualified),
+                        "serializable", Serializable.class.isAssignableFrom(classQualified))
+        ).isEqualTo(
+                Map.of("runnable", true, "serializable", true)
+        );
+
+        var instanceRunner = runner.createInstanceRunner("com.Qualified");
+        assertThat((int) instanceRunner.invoke("getCount")).isEqualTo(0);
+        instanceRunner.invoke("run");
+        assertThat((int) instanceRunner.invoke("getCount")).isEqualTo(1);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testSingleInterfaceImplementation(JdkVersion jdkVersion) throws Exception {
         var compiler = createCompilerWithInterfaces(jdkVersion);
         var runner = compiler.compile("""

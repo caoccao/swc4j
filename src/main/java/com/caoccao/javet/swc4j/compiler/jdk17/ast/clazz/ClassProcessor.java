@@ -20,16 +20,13 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsParamProp;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -40,14 +37,14 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeParameterScope;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.compiler.memory.ScopedTemplateCacheRegistry;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Processes class definitions, generating bytecode for class files.
@@ -81,6 +78,49 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
                 1, // max stack
                 1  // max locals (this)
         );
+    }
+
+    private void declareParameterPropertyFields(
+            ClassWriter classWriter,
+            JavaTypeInfo typeInfo,
+            List<Swc4jAstConstructor> constructors,
+            Set<String> declaredFieldNames) throws Swc4jByteCodeCompilerException {
+        for (Swc4jAstConstructor constructor : constructors) {
+            for (ISwc4jAstParamOrTsParamProp paramOrProp : constructor.getParams()) {
+                if (!(paramOrProp instanceof Swc4jAstTsParamProp tsParamProp)) {
+                    continue;
+                }
+                ISwc4jAstPat paramPat = extractParameterPropertyPattern(tsParamProp);
+                String fieldName = compiler.getTypeResolver().extractParameterName(paramPat);
+                if (fieldName == null || fieldName.isEmpty() || declaredFieldNames.contains(fieldName)) {
+                    continue;
+                }
+                String fieldDescriptor = null;
+                if (typeInfo != null) {
+                    FieldInfo fieldInfo = typeInfo.getField(fieldName);
+                    if (fieldInfo != null) {
+                        fieldDescriptor = fieldInfo.descriptor();
+                    }
+                }
+                if (fieldDescriptor == null) {
+                    fieldDescriptor = compiler.getTypeResolver().extractParameterType(paramPat);
+                }
+                int accessFlags = getAccessFlags(tsParamProp.getAccessibility());
+                classWriter.addField(accessFlags, fieldName, fieldDescriptor);
+                declaredFieldNames.add(fieldName);
+            }
+        }
+    }
+
+    private ISwc4jAstPat extractParameterPropertyPattern(Swc4jAstTsParamProp tsParamProp) throws Swc4jByteCodeCompilerException {
+        ISwc4jAstTsParamPropParam param = tsParamProp.getParam();
+        if (param instanceof ISwc4jAstPat pat) {
+            return pat;
+        }
+        throw new Swc4jByteCodeCompilerException(
+                getSourceCode(),
+                tsParamProp,
+                "Unsupported constructor parameter property pattern");
     }
 
     @Override
@@ -122,6 +162,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
         try {
             // Collect fields from the class body and from the registry
             List<FieldInfo> instanceFields = new ArrayList<>();
+            Set<String> declaredFieldNames = new HashSet<>();
 
             // Get class info from registry to access collected field metadata
             // Try qualified name first, then fall back to simple name
@@ -151,6 +192,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
                             }
                         }
                         classWriter.addField(accessFlags, fieldInfo.name(), fieldInfo.descriptor());
+                        declaredFieldNames.add(fieldInfo.name());
 
                         // Collect instance fields for constructor initialization
                         if (!fieldInfo.isStatic() && fieldInfo.initializer().isPresent()) {
@@ -172,6 +214,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
                             }
                         }
                         classWriter.addField(accessFlags, fieldInfo.name(), fieldInfo.descriptor());
+                        declaredFieldNames.add(fieldInfo.name());
 
                         // Collect instance fields for constructor initialization
                         if (!fieldInfo.isStatic() && fieldInfo.initializer().isPresent()) {
@@ -194,8 +237,14 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
 
             // Generate constructors
             if (!constructors.isEmpty()) {
+                declareParameterPropertyFields(classWriter, typeInfo, constructors, declaredFieldNames);
                 for (Swc4jAstConstructor ctor : constructors) {
-                    generateExplicitConstructor(classWriter, internalClassName, superClassInternalName, ctor);
+                    generateExplicitConstructor(
+                            classWriter,
+                            internalClassName,
+                            superClassInternalName,
+                            ctor,
+                            instanceFields);
                 }
             } else if (!instanceFields.isEmpty()) {
                 generateConstructorWithFieldInit(classWriter, internalClassName, superClassInternalName, instanceFields);
@@ -402,17 +451,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
         code.aload(0)                    // load this
                 .invokespecial(superCtorRef); // call super()
 
-        // Initialize fields with their initializers
-        for (FieldInfo field : fieldsToInit) {
-            if (field.initializer().isPresent()) {
-                code.aload(0); // load this for putfield
-                // Generate code for the initializer expression
-                compiler.getExpressionProcessor().generate(code, classWriter, field.initializer().get(), null);
-                // Store to field
-                int fieldRef = cp.addFieldRef(internalClassName, field.name(), field.descriptor());
-                code.putfield(fieldRef);
-            }
-        }
+        generateInstanceFieldInitializers(code, classWriter, internalClassName, fieldsToInit);
 
         code.returnVoid(); // return
 
@@ -433,13 +472,15 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
             ClassWriter classWriter,
             String internalClassName,
             String superClassInternalName,
-            Swc4jAstConstructor constructor) throws Swc4jByteCodeCompilerException {
+            Swc4jAstConstructor constructor,
+            List<FieldInfo> instanceFields) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
         // Reset compilation context for constructor code generation (not static)
         compiler.getMemory().resetCompilationContext(false);
 
         // Build parameter descriptor and allocate parameter slots
         StringBuilder paramDescriptors = new StringBuilder();
+        List<ParameterPropertyInfo> parameterProperties = new ArrayList<>();
         for (ISwc4jAstParamOrTsParamProp paramOrProp : constructor.getParams()) {
             if (paramOrProp instanceof Swc4jAstParam param) {
                 String paramType = compiler.getTypeResolver().extractParameterType(param.getPat());
@@ -452,50 +493,77 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
                     compiler.getMemory().getCompilationContext()
                             .getInferredTypes().put(paramName, paramType);
                 }
+            } else if (paramOrProp instanceof Swc4jAstTsParamProp tsParamProp) {
+                ISwc4jAstPat paramPat = extractParameterPropertyPattern(tsParamProp);
+                String paramType = compiler.getTypeResolver().extractParameterType(paramPat);
+                String paramName = compiler.getTypeResolver().extractParameterName(paramPat);
+                if (paramName == null || paramName.isEmpty()) {
+                    throw new Swc4jByteCodeCompilerException(
+                            getSourceCode(),
+                            tsParamProp,
+                            "Unsupported constructor parameter property pattern");
+                }
+                paramDescriptors.append(paramType);
+                int slot = compiler.getMemory().getCompilationContext()
+                        .getLocalVariableTable().allocateVariable(paramName, paramType);
+                compiler.getMemory().getCompilationContext()
+                        .getInferredTypes().put(paramName, paramType);
+                parameterProperties.add(new ParameterPropertyInfo(paramName, paramType, slot));
             }
-            // TODO: Handle TsParamProp (parameter properties) later
         }
 
         String descriptor = "(" + paramDescriptors + ")V";
 
         // Generate constructor body
         CodeBuilder code = new CodeBuilder();
+        ConstructorCallType firstConstructorCallType = ConstructorCallType.None;
+        List<ISwc4jAstStmt> stmts = List.of();
+        int startStmtIndex = 0;
 
         if (constructor.getBody().isPresent()) {
             Swc4jAstBlockStmt body = constructor.getBody().get();
-            List<ISwc4jAstStmt> stmts = body.getStmts();
+            stmts = body.getStmts();
 
             // Check if first statement is a super() or this() call
-            boolean firstIsSuperOrThisCall = false;
             if (!stmts.isEmpty()) {
                 ISwc4jAstStmt firstStmt = stmts.get(0);
                 if (firstStmt instanceof Swc4jAstExprStmt exprStmt) {
                     if (exprStmt.getExpr() instanceof Swc4jAstCallExpr callExpr) {
                         if (callExpr.getCallee() instanceof Swc4jAstSuper
                                 || callExpr.getCallee() instanceof Swc4jAstThisExpr) {
-                            firstIsSuperOrThisCall = true;
+                            firstConstructorCallType = callExpr.getCallee() instanceof Swc4jAstSuper
+                                    ? ConstructorCallType.Super
+                                    : ConstructorCallType.This;
                         }
                     }
                 }
             }
 
-            // If first statement is not super() or this(), inject an implicit super() call
-            if (!firstIsSuperOrThisCall) {
-                int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
-                code.aload(0).invokespecial(superCtorRef);
-            }
-
             // Analyze variable declarations in the body
             compiler.getVariableAnalyzer().analyzeVariableDeclarations(body);
-
-            // Process statements in the constructor body
-            for (ISwc4jAstStmt stmt : stmts) {
-                compiler.getStatementProcessor().generate(code, classWriter, stmt, null);
-            }
         } else {
-            // No body - generate default super() call
+            firstConstructorCallType = ConstructorCallType.None;
+        }
+
+        if (firstConstructorCallType == ConstructorCallType.None) {
             int superCtorRef = cp.addMethodRef(superClassInternalName, ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V);
             code.aload(0).invokespecial(superCtorRef);
+        } else {
+            compiler.getStatementProcessor().generate(code, classWriter, stmts.get(0), null);
+            startStmtIndex = 1;
+        }
+
+        // this() delegates to another constructor where instance field initializers run.
+        if (firstConstructorCallType != ConstructorCallType.This) {
+            generateParameterPropertyInitializers(code, classWriter, internalClassName, parameterProperties);
+            generateInstanceFieldInitializers(code, classWriter, internalClassName, instanceFields);
+        } else {
+            generateParameterPropertyInitializers(code, classWriter, internalClassName, parameterProperties);
+        }
+
+        // Process remaining statements in the constructor body
+        for (int i = startStmtIndex; i < stmts.size(); i++) {
+            compiler.getStatementProcessor().generate(code, classWriter, stmts.get(i), null);
         }
 
         // Add return if not already present
@@ -507,7 +575,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
         int maxLocals = compiler.getMemory().getCompilationContext().getLocalVariableTable().getMaxLocals();
 
         classWriter.addMethod(
-                0x0001, // ACC_PUBLIC
+                getAccessFlags(constructor.getAccessibility()),
                 ConstantJavaMethod.METHOD_INIT,
                 descriptor,
                 code.toByteArray(),
@@ -516,13 +584,48 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
         );
     }
 
+    private void generateInstanceFieldInitializers(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            String internalClassName,
+            List<FieldInfo> fieldsToInit) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
+        for (FieldInfo field : fieldsToInit) {
+            if (field.initializer().isEmpty()) {
+                continue;
+            }
+            code.aload(0); // load this for putfield
+            ReturnTypeInfo expectedType = CodeGeneratorUtils.createReturnTypeInfoFromDescriptor(field.descriptor());
+            compiler.getExpressionProcessor().generate(code, classWriter, field.initializer().get(), expectedType);
+            int fieldRef = cp.addFieldRef(internalClassName, field.name(), field.descriptor());
+            code.putfield(fieldRef);
+        }
+    }
+
+    private void generateParameterPropertyInitializers(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            String internalClassName,
+            List<ParameterPropertyInfo> parameterProperties) {
+        if (parameterProperties.isEmpty()) {
+            return;
+        }
+        var cp = classWriter.getConstantPool();
+        for (ParameterPropertyInfo parameterProperty : parameterProperties) {
+            code.aload(0);
+            CodeGeneratorUtils.loadParameter(code, parameterProperty.slot(), parameterProperty.descriptor());
+            int fieldRef = cp.addFieldRef(internalClassName, parameterProperty.name(), parameterProperty.descriptor());
+            code.putfield(fieldRef);
+        }
+    }
+
     /**
      * Converts TypeScript/ES accessibility to JVM access flags.
      *
      * @param accessibility the accessibility modifier (Public, Protected, Private)
      * @return JVM access flags (ACC_PUBLIC=0x0001, ACC_PROTECTED=0x0004, ACC_PRIVATE=0x0002)
      */
-    private int getAccessFlags(java.util.Optional<Swc4jAstAccessibility> accessibility) {
+    private int getAccessFlags(Optional<Swc4jAstAccessibility> accessibility) {
         if (accessibility.isEmpty()) {
             return 0x0001; // Default to ACC_PUBLIC
         }
@@ -531,6 +634,32 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
             case Protected -> 0x0004; // ACC_PROTECTED
             case Private -> 0x0002;   // ACC_PRIVATE
         };
+    }
+
+    private String resolveInterfaceInternalName(String qualifiedName) {
+        String resolvedAlias = compiler.getMemory().getScopedTypeAliasRegistry().resolve(qualifiedName);
+        if (resolvedAlias != null) {
+            return resolvedAlias.replace('.', '/');
+        }
+
+        JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(qualifiedName);
+        if (typeInfo != null) {
+            return typeInfo.getInternalName();
+        }
+
+        int lastDot = qualifiedName.lastIndexOf('.');
+        String simpleName = lastDot >= 0 ? qualifiedName.substring(lastDot + 1) : qualifiedName;
+        resolvedAlias = compiler.getMemory().getScopedTypeAliasRegistry().resolve(simpleName);
+        if (resolvedAlias != null) {
+            return resolvedAlias.replace('.', '/');
+        }
+
+        typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName);
+        if (typeInfo != null) {
+            return typeInfo.getInternalName();
+        }
+
+        return qualifiedName.replace('.', '/');
     }
 
     /**
@@ -542,26 +671,11 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
     private void resolveInterfaces(Swc4jAstClass clazz, ClassWriter classWriter) {
         for (Swc4jAstTsExprWithTypeArgs exprWithTypeArgs : clazz.getImplements()) {
             ISwc4jAstExpr expr = exprWithTypeArgs.getExpr();
-            if (expr instanceof Swc4jAstIdent ident) {
-                String interfaceName = ident.getSym();
-
-                // Try to resolve from type alias registry
-                String resolvedName = compiler.getMemory().getScopedTypeAliasRegistry().resolve(interfaceName);
-                if (resolvedName != null) {
-                    classWriter.addInterface(resolvedName.replace('.', '/'));
-                    continue;
-                }
-
-                // Try to resolve from Java type registry
-                JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(interfaceName);
-                if (typeInfo != null) {
-                    classWriter.addInterface(typeInfo.getInternalName());
-                    continue;
-                }
-
-                // Default to simple name (might be in same package)
-                classWriter.addInterface(interfaceName);
+            String qualifiedName = AstUtils.extractQualifiedName(expr);
+            if (qualifiedName == null) {
+                continue;
             }
+            classWriter.addInterface(resolveInterfaceInternalName(qualifiedName));
         }
     }
 
@@ -606,6 +720,12 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
         return qualifiedName.replace('.', '/');
     }
 
+    private enum ConstructorCallType {
+        None,
+        Super,
+        This
+    }
+
     /**
      * Represents an item to be initialized in the static initializer (&lt;clinit&gt;).
      * Can be either a static field initializer or a static block.
@@ -622,6 +742,9 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
          */
         record FieldInit(FieldInfo fieldInfo) implements StaticInitItem {
         }
+    }
+
+    private record ParameterPropertyInfo(String name, String descriptor, int slot) {
     }
 
 }
