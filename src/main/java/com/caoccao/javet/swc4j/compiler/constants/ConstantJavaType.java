@@ -210,6 +210,10 @@ public final class ConstantJavaType {
      */
     public static final String COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_TEMPLATE_STRINGS_ARRAY = "com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/TemplateStringsArray";
     /**
+     * The constant COM_CAOCCAO_JAVET_SWC4J_COMPILER_UTILS_JSON_JSON_UTILS - JsonUtils utility class internal name.
+     */
+    public static final String COM_CAOCCAO_JAVET_SWC4J_COMPILER_UTILS_JSON_JSON_UTILS = "com/caoccao/javet/swc4j/compiler/utils/json/JsonUtils";
+    /**
      * The constant COM_CAOCCAO_JAVET_SWC4J_EXCEPTIONS_JS_ERROR - JsError exception class internal name.
      */
     public static final String COM_CAOCCAO_JAVET_SWC4J_EXCEPTIONS_JS_ERROR = "com/caoccao/javet/swc4j/exceptions/JsError";
@@ -805,6 +809,10 @@ public final class ConstantJavaType {
      * The constant TYPE_ALIAS_ARRAY - TypeScript/JavaScript 'Array' type name.
      */
     public static final String TYPE_ALIAS_ARRAY = "Array";
+    /**
+     * The constant TYPE_ALIAS_JSON - JavaScript 'JSON' global object name.
+     */
+    public static final String TYPE_ALIAS_JSON = "JSON";
     /**
      * The constant TYPE_ALIAS_NUMBER - TypeScript 'number' type alias (lowercase).
      */

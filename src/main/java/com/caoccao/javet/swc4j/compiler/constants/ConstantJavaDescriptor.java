@@ -205,6 +205,10 @@ public final class ConstantJavaDescriptor {
      */
     public static final String LJAVA_LANG_CHAR_SEQUENCE__Z = "(Ljava/lang/CharSequence;)Z";
     /**
+     * The constant LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING.
+     */
+    public static final String LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_STRING = "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;";
+    /**
      * The constant LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT.
      */
     public static final String LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT = "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;";
@@ -220,6 +224,9 @@ public final class ConstantJavaDescriptor {
      * The constant LJAVA_LANG_OBJECT__I.
      */
     public static final String LJAVA_LANG_OBJECT__I = "(Ljava/lang/Object;)I";
+    /**
+     * The constant LJAVA_LANG_OBJECT__LJAVA_LANG_STRING.
+     */
     /**
      * The constant LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT.
      */
@@ -244,6 +251,10 @@ public final class ConstantJavaDescriptor {
      * The constant LJAVA_LANG_STRING__I.
      */
     public static final String LJAVA_LANG_STRING__I = "(Ljava/lang/String;)I";
+    /**
+     * The constant LJAVA_LANG_STRING__LJAVA_LANG_OBJECT.
+     */
+    public static final String LJAVA_LANG_STRING__LJAVA_LANG_OBJECT = "(Ljava/lang/String;)Ljava/lang/Object;";
     /**
      * The constant LJAVA_LANG_STRING__LJAVA_LANG_STRING.
      */

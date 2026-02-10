@@ -32,6 +32,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ExportDeclProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ImportDeclProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.ts.*;
+import com.caoccao.javet.swc4j.compiler.utils.json.JsonUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
@@ -342,6 +343,8 @@ public sealed abstract class ByteCodeCompiler permits
         memory = new ByteCodeCompilerMemory();
         // Inject type aliases from options into the global scope
         memory.getScopedTypeAliasRegistry().getGlobalScope().putAll(options.typeAliasMap());
+        // Initialize JSON provider if configured
+        options.optionalJsonProvider().ifPresent(JsonUtils::setProvider);
         parseOptions = new Swc4jParseOptions()
                 .setCaptureAst(true);
         swc4j = new Swc4j();

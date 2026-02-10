@@ -323,11 +323,18 @@ public final class ConstantJavaMethod {
     /**
      * The constant METHOD_PAD_END.
      */
+    /**
+     * The constant METHOD_PAD_END.
+     */
     public static final String METHOD_PAD_END = "padEnd";
     /**
      * The constant METHOD_PAD_START.
      */
     public static final String METHOD_PAD_START = "padStart";
+    /**
+     * The constant METHOD_PARSE.
+     */
+    public static final String METHOD_PARSE = "parse";
     /**
      * The constant METHOD_PARSE_INT.
      */
@@ -439,7 +446,14 @@ public final class ConstantJavaMethod {
     /**
      * The constant METHOD_STARTS_WITH.
      */
+    /**
+     * The constant METHOD_STARTS_WITH.
+     */
     public static final String METHOD_STARTS_WITH = "startsWith";
+    /**
+     * The constant METHOD_STRINGIFY.
+     */
+    public static final String METHOD_STRINGIFY = "stringify";
     /**
      * The constant METHOD_SUBSTR.
      */

@@ -1465,6 +1465,19 @@ public final class TypeResolver {
                         }
                     }
                 }
+                if (memberExpr.getObj() instanceof Swc4jAstIdent jsonIdent
+                        && ConstantJavaType.TYPE_ALIAS_JSON.equals(jsonIdent.getSym())
+                        && memberExpr.getProp() instanceof Swc4jAstIdentName jsonPropIdent) {
+                    String jsonMethodName = jsonPropIdent.getSym();
+                    switch (jsonMethodName) {
+                        case ConstantJavaMethod.METHOD_STRINGIFY -> {
+                            return ConstantJavaType.LJAVA_LANG_STRING;
+                        }
+                        case ConstantJavaMethod.METHOD_PARSE -> {
+                            return ConstantJavaType.LJAVA_LANG_OBJECT;
+                        }
+                    }
+                }
                 String objType = inferTypeFromExpr(memberExpr.getObj());
 
                 // Check if the object is a Java class identifier

@@ -1,5 +1,28 @@
 # JSON.stringify and JSON.parse Plan
 
+## Status
+
+**COMPLETED** — All files created/modified, all 78 tests pass, javadoc passes.
+
+### Files Created
+- `src/main/java/com/caoccao/javet/swc4j/compiler/utils/json/JsonProvider.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/utils/json/DefaultJsonProvider.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/utils/json/JsonUtils.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/callexpr/CallExpressionForJsonStaticProcessor.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/utils/json/TestJsonUtilsStringify.java` (edge cases #1-20)
+- `src/test/java/com/caoccao/javet/swc4j/compiler/utils/json/TestJsonUtilsParse.java` (edge cases #21-46)
+- `src/test/java/com/caoccao/javet/swc4j/compiler/utils/json/TestJsonUtilsBytecode.java` (edge cases #47-52)
+- `src/test/java/com/caoccao/javet/swc4j/compiler/utils/json/TestJsonUtilsProvider.java` (edge cases #53-57)
+
+### Files Modified
+- `ConstantJavaType.java` — added `TYPE_ALIAS_JSON`, `COM_CAOCCAO_JAVET_SWC4J_COMPILER_UTILS_JSON_JSON_UTILS`
+- `ConstantJavaMethod.java` — added `METHOD_STRINGIFY`, `METHOD_PARSE`
+- `ConstantJavaDescriptor.java` — added 3-arg stringify descriptor, `String→Object` descriptor
+- `CallExpressionProcessor.java` — added `jsonStaticGenerator` field + dispatch block
+- `TypeResolver.java` — added return type inference for `JSON.stringify` / `JSON.parse`
+- `ByteCodeCompilerOptions.java` — added `optionalJsonProvider` field + builder method
+- `ByteCodeCompiler.java` — added `JsonUtils.setProvider()` call in constructor
+
 ## Goal
 
 Support `JSON.stringify()` and `JSON.parse()` in the bytecode compiler. These two methods convert between JSON strings and Java `LinkedHashMap` (for JSON objects) or `ArrayList` (for JSON arrays). The serialization/parsing logic is behind a `JsonProvider` interface so that alternative implementations (e.g., Jackson) can be injected. The default implementation uses no external libraries.

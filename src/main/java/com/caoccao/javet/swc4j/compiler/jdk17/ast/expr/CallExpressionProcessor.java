@@ -43,6 +43,7 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
     private final CallExpressionForClassProcessor classProcessor;
     private final CallExpressionForFunctionalInterfaceProcessor functionalInterfaceGenerator;
     private final CallExpressionForIIFEProcessor iifeGenerator;
+    private final CallExpressionForJsonStaticProcessor jsonStaticGenerator;
     private final CallExpressionForStringProcessor stringGenerator;
     private final CallExpressionForSuperConstructorProcessor superConstructorGenerator;
     private final CallExpressionForSuperMethodProcessor superMethodGenerator;
@@ -61,6 +62,7 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
         classProcessor = new CallExpressionForClassProcessor(compiler);
         functionalInterfaceGenerator = new CallExpressionForFunctionalInterfaceProcessor(compiler);
         iifeGenerator = new CallExpressionForIIFEProcessor(compiler);
+        jsonStaticGenerator = new CallExpressionForJsonStaticProcessor(compiler);
         stringGenerator = new CallExpressionForStringProcessor(compiler);
         superConstructorGenerator = new CallExpressionForSuperConstructorProcessor(compiler);
         superMethodGenerator = new CallExpressionForSuperMethodProcessor(compiler);
@@ -119,6 +121,14 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
                 && arrayStaticMember.getObj() instanceof Swc4jAstIdent arrayStaticId
                 && ConstantJavaType.TYPE_ALIAS_ARRAY.equals(arrayStaticId.getSym())) {
             arrayStaticGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
+            return;
+        }
+
+        // Handle JSON.stringify(), JSON.parse()
+        if (callee instanceof Swc4jAstMemberExpr jsonStaticMember
+                && jsonStaticMember.getObj() instanceof Swc4jAstIdent jsonStaticId
+                && ConstantJavaType.TYPE_ALIAS_JSON.equals(jsonStaticId.getSym())) {
+            jsonStaticGenerator.generate(code, classWriter, callExpr, returnTypeInfo);
             return;
         }
 

@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler;
 
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.compiler.utils.json.JsonProvider;
 import com.caoccao.javet.swc4j.exceptions.*;
 
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import java.util.Optional;
  * @param typeAliasMap              a map of type aliases for resolving JavaScript/TypeScript types to Java types
  * @param packagePrefix             the package prefix for generated classes
  * @param optionalParentClassLoader the optional parent class loader
+ * @param optionalJsonProvider      the optional JSON provider for JSON.stringify/parse
  * @param debug                     whether to enable debug mode
  */
 public record ByteCodeCompilerOptions(
@@ -37,6 +39,7 @@ public record ByteCodeCompilerOptions(
         Map<String, String> typeAliasMap,
         String packagePrefix,
         Optional<ClassLoader> optionalParentClassLoader,
+        Optional<JsonProvider> optionalJsonProvider,
         boolean debug) {
     private static final Map<String, String> DEFAULT_TYPE_ALIAS_MAP = new HashMap<>();
 
@@ -94,7 +97,7 @@ public record ByteCodeCompilerOptions(
      * @param typeAliasMap the type alias map
      */
     public ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap) {
-        this(jdkVersion, typeAliasMap, "", Optional.empty(), false);
+        this(jdkVersion, typeAliasMap, "", Optional.empty(), Optional.empty(), false);
     }
 
     /**
@@ -121,6 +124,7 @@ public record ByteCodeCompilerOptions(
     public static class Builder {
         private boolean debug = false;
         private JdkVersion jdkVersion = JdkVersion.JDK_17;
+        private JsonProvider jsonProvider = null;
         private String packagePrefix = "";
         private ClassLoader parentClassLoader = null;
         private Map<String, String> typeAliasMap = new HashMap<>(DEFAULT_TYPE_ALIAS_MAP);
@@ -137,7 +141,8 @@ public record ByteCodeCompilerOptions(
          * @return a new ByteCodeCompilerOptions instance
          */
         public ByteCodeCompilerOptions build() {
-            return new ByteCodeCompilerOptions(jdkVersion, typeAliasMap, packagePrefix, Optional.ofNullable(parentClassLoader), debug);
+            return new ByteCodeCompilerOptions(jdkVersion, typeAliasMap, packagePrefix,
+                    Optional.ofNullable(parentClassLoader), Optional.ofNullable(jsonProvider), debug);
         }
 
         /**
@@ -159,6 +164,17 @@ public record ByteCodeCompilerOptions(
          */
         public Builder jdkVersion(JdkVersion jdkVersion) {
             this.jdkVersion = jdkVersion;
+            return this;
+        }
+
+        /**
+         * Sets the JSON provider for JSON.stringify/parse support.
+         *
+         * @param jsonProvider the JSON provider, or null for the default implementation
+         * @return this Builder instance
+         */
+        public Builder jsonProvider(JsonProvider jsonProvider) {
+            this.jsonProvider = jsonProvider;
             return this;
         }
 
