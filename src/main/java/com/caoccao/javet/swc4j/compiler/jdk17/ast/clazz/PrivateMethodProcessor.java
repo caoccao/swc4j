@@ -213,6 +213,7 @@ public final class PrivateMethodProcessor extends BaseAstProcessor<Swc4jAstPriva
             ReturnTypeInfo returnTypeInfo,
             int baseAccessFlags) throws Swc4jByteCodeCompilerException {
         List<Swc4jAstParam> params = function.getParams();
+        validateDefaultParameterOrder(params);
 
         int firstDefaultIndex = -1;
         for (int i = 0; i < params.size(); i++) {
@@ -328,5 +329,22 @@ public final class PrivateMethodProcessor extends BaseAstProcessor<Swc4jAstPriva
 
         classWriter.addMethod(baseAccessFlags, methodName, overloadDescriptor, code.toByteArray(),
                 10, maxLocals);
+    }
+
+    private void validateDefaultParameterOrder(List<Swc4jAstParam> params) throws Swc4jByteCodeCompilerException {
+        boolean seenDefaultParameter = false;
+        for (Swc4jAstParam param : params) {
+            boolean hasDefault = compiler.getTypeResolver().hasDefaultValue(param.getPat());
+            if (hasDefault) {
+                seenDefaultParameter = true;
+                continue;
+            }
+            if (seenDefaultParameter) {
+                throw new Swc4jByteCodeCompilerException(
+                        getSourceCode(),
+                        param,
+                        "Default parameters must come after all required parameters");
+            }
+        }
     }
 }

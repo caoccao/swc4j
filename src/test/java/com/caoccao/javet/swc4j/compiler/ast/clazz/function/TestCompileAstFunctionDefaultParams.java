@@ -18,12 +18,15 @@ package com.caoccao.javet.swc4j.compiler.ast.clazz.function;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
@@ -100,6 +103,75 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
                 )
         ).isEqualTo(
                 List.of(15, 15)
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDefaultParameterBeforeRequiredParameterShouldFail(JdkVersion jdkVersion) {
+        assertThatThrownBy(() -> getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class InvalidDefaultOrder {
+                    test(a: int = 1, b: int): int {
+                      return a + b
+                    }
+                  }
+                }"""))
+                .isInstanceOf(Swc4jByteCodeCompilerException.class)
+                .hasRootCauseMessage("Default parameters must come after all required parameters");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDefaultParameterInPrivateMethod(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class SecretMath {
+                    private add(a: int, b: int = 7): int {
+                      return a + b
+                    }
+                    calc(a: int): int {
+                      return this.add(a)
+                    }
+                    calc2(a: int, b: int): int {
+                      return this.add(a, b)
+                    }
+                  }
+                }""");
+        var instanceRunner = runner.createInstanceRunner("com.SecretMath");
+        assertThat(
+                Map.of(
+                        "defaultCall", instanceRunner.invoke("calc", 5),
+                        "fullCall", instanceRunner.invoke("calc2", 5, 9))
+        ).isEqualTo(
+                Map.of("defaultCall", 12, "fullCall", 14)
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDefaultParameterMethodCallTypeInference(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class ChainMath {
+                    add(a: int, b: int = 7): int {
+                      return a + b
+                    }
+                    calc(a: int): int {
+                      return this.add(a)
+                    }
+                    calc2(a: int, b: int): int {
+                      return this.add(a, b)
+                    }
+                  }
+                }""");
+        var instanceRunner = runner.createInstanceRunner("com.ChainMath");
+        assertThat(
+                Map.of(
+                        "defaultCall", instanceRunner.invoke("calc", 5),
+                        "fullCall", instanceRunner.invoke("calc2", 5, 9))
+        ).isEqualTo(
+                Map.of("defaultCall", 12, "fullCall", 14)
         );
     }
 

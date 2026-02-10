@@ -42,6 +42,36 @@ public final class CallExpressionForJsonStaticProcessor extends BaseAstProcessor
         super(compiler);
     }
 
+    private void discardExpressionValue(CodeBuilder code, ISwc4jAstExpr expr) throws Swc4jByteCodeCompilerException {
+        String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
+        if (ConstantJavaType.ABBR_VOID.equals(exprType)) {
+            return;
+        }
+        if (ConstantJavaType.ABBR_LONG.equals(exprType) || ConstantJavaType.ABBR_DOUBLE.equals(exprType)) {
+            code.pop2();
+        } else {
+            code.pop();
+        }
+    }
+
+    private void evaluateAndDiscardExtraArgs(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            Swc4jAstCallExpr callExpr,
+            int startIndex,
+            String methodName) throws Swc4jByteCodeCompilerException {
+        var args = callExpr.getArgs();
+        for (int i = startIndex; i < args.size(); i++) {
+            var extraArg = args.get(i);
+            if (extraArg.getSpread().isPresent()) {
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), extraArg, "Spread arguments not supported for " + methodName);
+            }
+            ISwc4jAstExpr extraExpr = extraArg.getExpr();
+            compiler.getExpressionProcessor().generate(code, classWriter, extraExpr, null);
+            discardExpressionValue(code, extraExpr);
+        }
+    }
+
     @Override
     public void generate(
             CodeBuilder code,
@@ -190,35 +220,5 @@ public final class CallExpressionForJsonStaticProcessor extends BaseAstProcessor
         evaluateAndDiscardExtraArgs(code, classWriter, callExpr, 3, "JSON.stringify");
 
         code.invokestatic(stringifyMethod);
-    }
-
-    private void evaluateAndDiscardExtraArgs(
-            CodeBuilder code,
-            ClassWriter classWriter,
-            Swc4jAstCallExpr callExpr,
-            int startIndex,
-            String methodName) throws Swc4jByteCodeCompilerException {
-        var args = callExpr.getArgs();
-        for (int i = startIndex; i < args.size(); i++) {
-            var extraArg = args.get(i);
-            if (extraArg.getSpread().isPresent()) {
-                throw new Swc4jByteCodeCompilerException(getSourceCode(), extraArg, "Spread arguments not supported for " + methodName);
-            }
-            ISwc4jAstExpr extraExpr = extraArg.getExpr();
-            compiler.getExpressionProcessor().generate(code, classWriter, extraExpr, null);
-            discardExpressionValue(code, extraExpr);
-        }
-    }
-
-    private void discardExpressionValue(CodeBuilder code, ISwc4jAstExpr expr) throws Swc4jByteCodeCompilerException {
-        String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
-        if (ConstantJavaType.ABBR_VOID.equals(exprType)) {
-            return;
-        }
-        if (ConstantJavaType.ABBR_LONG.equals(exprType) || ConstantJavaType.ABBR_DOUBLE.equals(exprType)) {
-            code.pop2();
-        } else {
-            code.pop();
-        }
     }
 }

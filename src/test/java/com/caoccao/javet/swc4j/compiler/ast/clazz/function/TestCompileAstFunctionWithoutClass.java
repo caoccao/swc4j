@@ -18,10 +18,14 @@ package com.caoccao.javet.swc4j.compiler.ast.clazz.function;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
@@ -153,5 +157,46 @@ public class TestCompileAstFunctionWithoutClass extends BaseTestCompileSuite {
         // Standalone function in $
         var staticRunner = runner.createStaticRunner("$");
         assertThat((int) staticRunner.invoke("helper", 10)).isEqualTo(20);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testStandaloneFunctionWithDefaultParameters(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                export function add(a: int, b: int = 10, c: int = 20): int {
+                  return a + b + c
+                }""");
+        var staticRunner = runner.createStaticRunner("$");
+        assertThat(
+                Map.of(
+                        "all", staticRunner.invoke("add", 1, 2, 3),
+                        "oneDefault", staticRunner.invoke("add", 1, 2),
+                        "twoDefaults", staticRunner.invoke("add", 1))
+        ).isEqualTo(
+                Map.of("all", 6, "oneDefault", 23, "twoDefaults", 31)
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testStandaloneFunctionWithInvalidDefaultOrderShouldFail(JdkVersion jdkVersion) {
+        assertThatThrownBy(() -> getCompiler(jdkVersion).compile("""
+                export function add(a: int = 1, b: int): int {
+                  return a + b
+                }"""))
+                .isInstanceOf(Swc4jByteCodeCompilerException.class)
+                .hasMessageContaining("Default parameters must come after all required parameters");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testStandaloneVarargsFunctionHasVarargsFlag(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                export function sum(...values: int[]): int {
+                  return values.length
+                }""");
+        Class<?> dummyClass = runner.getClass("$");
+        assertThat(dummyClass.getDeclaredMethod("sum", int[].class).isVarArgs()).isTrue();
+        assertThat((int) runner.createStaticRunner("$").invoke("sum", new int[]{1, 2, 3})).isEqualTo(3);
     }
 }

@@ -166,6 +166,21 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
         throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr, "Call expression not yet supported");
     }
 
+    private boolean isBuiltinJsonGlobal(Swc4jAstIdent ident) {
+        if (!ConstantJavaType.TYPE_ALIAS_JSON.equals(ident.getSym())) {
+            return false;
+        }
+        var memory = compiler.getMemory();
+        // Respect local and class/type alias shadowing before treating JSON as the built-in global.
+        if (memory.getCompilationContext().getLocalVariableTable().getVariable(ident.getSym()) != null) {
+            return false;
+        }
+        if (memory.getScopedJavaTypeRegistry().resolve(ident.getSym()) != null) {
+            return false;
+        }
+        return memory.getScopedTypeAliasRegistry().resolve(ident.getSym()) == null;
+    }
+
     private boolean isFunctionalInterfaceCall(ISwc4jAstCallee callee) {
         if (!(callee instanceof Swc4jAstIdent ident)) {
             return false;
@@ -184,20 +199,5 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
         }
         String interfaceName = TypeConversionUtils.descriptorToInternalName(varType);
         return compiler.getMemory().getScopedFunctionalInterfaceRegistry().isFunctionalInterface(interfaceName);
-    }
-
-    private boolean isBuiltinJsonGlobal(Swc4jAstIdent ident) {
-        if (!ConstantJavaType.TYPE_ALIAS_JSON.equals(ident.getSym())) {
-            return false;
-        }
-        var memory = compiler.getMemory();
-        // Respect local and class/type alias shadowing before treating JSON as the built-in global.
-        if (memory.getCompilationContext().getLocalVariableTable().getVariable(ident.getSym()) != null) {
-            return false;
-        }
-        if (memory.getScopedJavaTypeRegistry().resolve(ident.getSym()) != null) {
-            return false;
-        }
-        return memory.getScopedTypeAliasRegistry().resolve(ident.getSym()) == null;
     }
 }

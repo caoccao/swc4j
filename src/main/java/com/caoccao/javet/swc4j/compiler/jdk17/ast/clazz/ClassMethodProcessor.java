@@ -39,6 +39,7 @@ import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Processes class method declarations.
@@ -232,6 +233,7 @@ public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMe
             ReturnTypeInfo returnTypeInfo,
             int baseAccessFlags) throws Swc4jByteCodeCompilerException {
         List<Swc4jAstParam> params = function.getParams();
+        validateDefaultParameterOrder(params);
 
         // Find the index of the first default parameter
         int firstDefaultIndex = -1;
@@ -349,6 +351,10 @@ public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMe
         int methodRef = cp.addMethodRef(internalClassName, methodName, fullDescriptor);
         if (isStatic) {
             code.invokestatic(methodRef);
+        } else if (method.getAccessibility()
+                .map(a -> a == Swc4jAstAccessibility.Private)
+                .orElse(false)) {
+            code.invokespecial(methodRef);
         } else {
             code.invokevirtual(methodRef);
         }
@@ -374,7 +380,7 @@ public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMe
      * @param accessibility the accessibility modifier (Public, Protected, Private)
      * @return JVM access flags (ACC_PUBLIC=0x0001, ACC_PROTECTED=0x0004, ACC_PRIVATE=0x0002)
      */
-    private int getAccessFlags(java.util.Optional<Swc4jAstAccessibility> accessibility) {
+    private int getAccessFlags(Optional<Swc4jAstAccessibility> accessibility) {
         if (accessibility.isEmpty()) {
             return 0x0001; // Default to ACC_PUBLIC
         }
@@ -383,5 +389,22 @@ public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMe
             case Protected -> 0x0004; // ACC_PROTECTED
             case Private -> 0x0002;   // ACC_PRIVATE
         };
+    }
+
+    private void validateDefaultParameterOrder(List<Swc4jAstParam> params) throws Swc4jByteCodeCompilerException {
+        boolean seenDefaultParameter = false;
+        for (Swc4jAstParam param : params) {
+            boolean hasDefault = compiler.getTypeResolver().hasDefaultValue(param.getPat());
+            if (hasDefault) {
+                seenDefaultParameter = true;
+                continue;
+            }
+            if (seenDefaultParameter) {
+                throw new Swc4jByteCodeCompilerException(
+                        getSourceCode(),
+                        param,
+                        "Default parameters must come after all required parameters");
+            }
+        }
     }
 }

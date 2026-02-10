@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting `Swc4jAstFunction` in TypeScript to JVM bytecode compilation. Functions are the core executable units containing parameters, body statements, and return types.
 
-**Current Status:** PARTIAL - Basic function with parameters, return types, overloading, standalone functions working; function expressions are supported via FunctionExpressionProcessor
+**Current Status:** IMPLEMENTED for the supported subset (class methods + standalone functions, parameters, returns, varargs, default params, overloading, type inference). Async/generator/decorator features are intentionally not supported.
 
 **Syntax:**
 ```typescript
@@ -40,7 +40,10 @@ class A {
 ```
 
 **Implementation Files:**
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/MethodGenerator.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/ClassMethodProcessor.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/PrivateMethodProcessor.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/FunctionDeclarationProcessor.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ClassCollector.java`
 - `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/VariableAnalyzer.java`
 - `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/TypeResolver.java`
 
@@ -53,11 +56,7 @@ class A {
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionComplexInference.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionOverloading.java`
 - `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionDefaultParams.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionAsync.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionGenerator.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionDecorators.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionEdgeCases.java`
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/fnexpr/TestCompileAstFnExpr.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionWithoutClass.java`
 
 **AST Definition:** [Swc4jAstFunction.java](../../../../src/main/java/com/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction.java)
 
@@ -111,16 +110,9 @@ public class Swc4jAstParam extends Swc4jAst {
 
 ### Current State
 
-Existing tests in `TestCompileAstFunction.java`:
-1. `testSingleParameter` - Single int parameter, returns int
-2. `testMultipleParameters` - Three int parameters, returns sum
-3. `testParameterTypeInference` - Return type inferred from expression
-4. `testParameterUsedInExpression` - Parameter used in const declaration
-5. `testParameterWithDifferentTypes` - int, String, double parameters
-6. `testVarargs` - Rest parameter with int[]
-7. `testVarargsDoubleType` - Rest parameter with double[]
-8. `testVarargsStringType` - Rest parameter with String[]
-9. `testArray` - Array<Integer> parameter
+Function tests are already split under
+`src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/`.
+Use those files as the source of truth for current coverage.
 
 ### Proposed Split
 
@@ -369,18 +361,16 @@ function helper(): int {
 ```
 
 **Implementation Details:**
-- `StandaloneFunctionCollector`: Stateless collector that identifies standalone functions in AST
+- `FunctionDeclarationProcessor`: Collects standalone function declarations and generates dummy class bytecode
 - `ScopedStandaloneFunctionRegistry`: Stores function declarations and dummy class names per scope (file)
-- `StandaloneFunctionGenerator`: Generates dummy class bytecode with functions as static methods
 - Scoping ensures functions from different files don't leak into each other
 
 **Implementation Files:**
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/StandaloneFunctionCollector.java`
-- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/clazz/StandaloneFunctionGenerator.java`
+- `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/FunctionDeclarationProcessor.java`
 - `src/main/java/com/caoccao/javet/swc4j/compiler/memory/ScopedStandaloneFunctionRegistry.java`
 
 **Test Files:**
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionBasic.java`
+- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/clazz/function/TestCompileAstFunctionWithoutClass.java`
 
 ---
 
@@ -1245,7 +1235,7 @@ return   // void
 - [x] Phase 9: Generator functions - NOT SUPPORTED (intentionally excluded)
 - [x] Phase 10: Decorators - NOT SUPPORTED (intentionally excluded)
 - [x] Phase 11: Standalone functions working (compiled into dummy class `$`, `$1`, etc.)
-- [x] All current tests passing (3403 tests)
+- [x] All current tests passing
 - [x] Javadoc builds successfully
 
 ### Implementation Notes (2026-01-25)
@@ -1265,24 +1255,27 @@ return   // void
 - Key implementation files:
   - `TypeResolver.java`: Added `extractDefaultValue()` and `hasDefaultValue()` methods for `Swc4jAstAssignPat`
   - `VariableAnalyzer.java`: Updated `analyzeParameters()` to handle `Swc4jAstAssignPat` for slot allocation
-  - `MethodGenerator.java`: Added `generateDefaultParameterOverloads()` to create overload methods
+  - `ClassMethodProcessor.java`: Added default-parameter overload generation for class methods
+  - `PrivateMethodProcessor.java`: Added default-parameter overload generation for private methods
+  - `FunctionDeclarationProcessor.java`: Added default-parameter overload generation for standalone functions
+  - `ClassCollector.java`: Registers overload method signatures so type inference resolves calls that omit defaulted parameters
 - Proper type handling: Each overload generates correct bytecode for its default value type (e.g., double literals generate dconst/ldc2_w, not integer constants)
-- Works for both instance methods and static methods
-- Test coverage in `TestCompileAstFunctionDefaultParams.java`: 6 tests covering int, double, String, boolean, multiple defaults, and static methods
+- Works for instance methods, static methods, and standalone functions
+- Includes validation that required parameters cannot follow default parameters
+- Test coverage in `TestCompileAstFunctionDefaultParams.java` and `TestCompileAstFunctionWithoutClass.java`
 
 **Standalone Functions (Phase 11) Implementation (2026-01-26):**
 - Standalone functions are compiled into a dummy class as public static methods
-- **Architecture** (Stateless Collector Pattern):
-  - `StandaloneFunctionCollector`: Stateless - traverses AST and collects functions into registry
+- **Architecture**:
+  - `FunctionDeclarationProcessor`: Traverses AST, collects standalone declarations, and generates dummy class bytecode
   - `ScopedStandaloneFunctionRegistry`: Scoped storage in `ByteCodeCompilerMemory` - stores function declarations and dummy class names per file scope
-  - `StandaloneFunctionGenerator`: Generates bytecode for dummy class containing all functions as static methods
 - **Scoping**: Each file gets its own scope via `memory.enterScope()` / `memory.exitScope()` - prevents functions from different files leaking into each other
 - **Dummy Class Naming**:
   - Default name is `$`
   - If `$` conflicts with an existing class, tries `$1`, `$2`, etc.
   - Naming is determined after all classes are collected to avoid conflicts
-- **Bytecode Generation**: Dummy class extends `java/lang/Object`, has default constructor, and all functions are `ACC_PUBLIC | ACC_STATIC`
-- Test coverage in `TestCompileAstFunctionBasic.java`: 7 tests covering basic functions, namespaces, class conflicts, and coexistence with classes
+- **Bytecode Generation**: Dummy class extends `java/lang/Object`, has default constructor, and functions are `ACC_PUBLIC | ACC_STATIC` (plus `ACC_VARARGS` when applicable)
+- Test coverage in `TestCompileAstFunctionWithoutClass.java`: namespace handling, naming conflict handling, standalone/default params, and varargs flag behavior
 
 **Complex Return Type Inference (Phase 5) Implementation (2026-01-31):**
 - Extended `TypeResolver.analyzeReturnType()` to perform comprehensive recursive block analysis instead of analyzing only the first return statement
@@ -1334,4 +1327,4 @@ return   // void
 - **JVM Specification:** ACC_VARARGS access flag (0x0080)
 - **TypeScript Specification:** Functions
 - **ECMAScript Specification:** Function Definitions
-- **Existing Implementation:** MethodGenerator.java, VariableAnalyzer.java
+- **Existing Implementation:** ClassMethodProcessor.java, PrivateMethodProcessor.java, FunctionDeclarationProcessor.java, ClassCollector.java, VariableAnalyzer.java, TypeResolver.java

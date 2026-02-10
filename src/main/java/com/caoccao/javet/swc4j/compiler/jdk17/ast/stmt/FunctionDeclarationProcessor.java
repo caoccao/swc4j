@@ -19,12 +19,10 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsModuleName;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstFnDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
@@ -213,6 +211,42 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
         );
     }
 
+    private void generateDefaultParameterOverloadsForStaticMethod(
+            ClassWriter classWriter,
+            Swc4jAstFnDecl fnDecl,
+            String methodName,
+            Swc4jAstFunction function,
+            ReturnTypeInfo returnTypeInfo,
+            int baseAccessFlags,
+            String internalClassName,
+            String fullDescriptor) throws Swc4jByteCodeCompilerException {
+        List<Swc4jAstParam> params = function.getParams();
+
+        int firstDefaultIndex = -1;
+        for (int i = 0; i < params.size(); i++) {
+            if (compiler.getTypeResolver().hasDefaultValue(params.get(i).getPat())) {
+                firstDefaultIndex = i;
+                break;
+            }
+        }
+        if (firstDefaultIndex == -1) {
+            return;
+        }
+
+        for (int paramCount = firstDefaultIndex; paramCount < params.size(); paramCount++) {
+            generateStaticOverloadMethod(
+                    classWriter,
+                    fnDecl,
+                    methodName,
+                    function,
+                    returnTypeInfo,
+                    baseAccessFlags,
+                    paramCount,
+                    internalClassName,
+                    fullDescriptor);
+        }
+    }
+
     private void generateStaticMethod(ClassWriter classWriter, Swc4jAstFnDecl fnDecl, String internalClassName) throws Swc4jByteCodeCompilerException {
         String methodName = fnDecl.getIdent().getSym();
         Swc4jAstFunction function = fnDecl.getFunction();
@@ -233,6 +267,7 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
 
         try {
             Swc4jAstBlockStmt body = bodyOpt.get();
+            validateDefaultParameterOrder(function.getParams(), fnDecl);
 
             // Reset compilation context for this method (static = true)
             compiler.getMemory().resetCompilationContext(true);
@@ -260,20 +295,19 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
 
             // Analyze variable declarations in the body
             compiler.getVariableAnalyzer().analyzeVariableDeclarations(body);
+            // Analyze mutable captures in function body (same behavior as class methods)
+            compiler.getMutableCaptureAnalyzer().analyze(body);
 
             // Generate method body
             CodeBuilder code = new CodeBuilder();
-            for (ISwc4jAstStmt stmt : body.getStmts()) {
-                compiler.getStatementProcessor().generate(code, classWriter, stmt, returnTypeInfo);
-            }
+            compiler.getStatementProcessor().generate(code, classWriter, body.getStmts(), returnTypeInfo);
 
             // Add return if needed
             CodeGeneratorUtils.addReturnIfNeeded(code, returnTypeInfo);
 
             int maxLocals = context.getLocalVariableTable().getMaxLocals();
 
-            // ACC_PUBLIC | ACC_STATIC = 0x0009
-            int accessFlags = 0x0009;
+            int accessFlags = getStaticMethodAccessFlags(function);
             boolean isStatic = true;
 
             // Generate stack map table for methods with branches (required for Java 7+)
@@ -282,6 +316,15 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
 
             classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), 10, maxLocals,
                     null, null, stackMapTable, exceptionTable);
+            generateDefaultParameterOverloadsForStaticMethod(
+                    classWriter,
+                    fnDecl,
+                    methodName,
+                    function,
+                    returnTypeInfo,
+                    accessFlags,
+                    internalClassName,
+                    descriptor);
         } finally {
             if (methodTypeParamScope != null) {
                 compiler.getMemory().getCompilationContext().popTypeParameterScope();
@@ -289,8 +332,72 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
         }
     }
 
+    private void generateStaticOverloadMethod(
+            ClassWriter classWriter,
+            Swc4jAstFnDecl fnDecl,
+            String methodName,
+            Swc4jAstFunction function,
+            ReturnTypeInfo returnTypeInfo,
+            int baseAccessFlags,
+            int paramCount,
+            String internalClassName,
+            String fullDescriptor) throws Swc4jByteCodeCompilerException {
+        compiler.getMemory().resetCompilationContext(true);
+
+        var cp = classWriter.getConstantPool();
+        List<Swc4jAstParam> params = function.getParams();
+
+        StringBuilder overloadParamDescriptors = new StringBuilder();
+        for (int i = 0; i < paramCount; i++) {
+            overloadParamDescriptors.append(compiler.getTypeResolver().extractParameterType(params.get(i).getPat()));
+        }
+        String overloadDescriptor = "(" + overloadParamDescriptors + ")" + TypeConversionUtils.getReturnDescriptor(returnTypeInfo);
+
+        CodeBuilder code = new CodeBuilder();
+        int slot = 0;
+        for (int i = 0; i < paramCount; i++) {
+            String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
+            CodeGeneratorUtils.loadParameter(code, slot, paramType);
+            slot += CodeGeneratorUtils.getSlotSize(paramType);
+        }
+
+        for (int i = paramCount; i < params.size(); i++) {
+            ISwc4jAstExpr defaultValue = compiler.getTypeResolver().extractDefaultValue(params.get(i).getPat());
+            if (defaultValue == null) {
+                throw new Swc4jByteCodeCompilerException(
+                        getSourceCode(),
+                        fnDecl,
+                        "Expected default value for parameter at index " + i);
+            }
+            String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
+            ReturnTypeInfo expectedType = CodeGeneratorUtils.createReturnTypeInfoFromDescriptor(paramType);
+            compiler.getExpressionProcessor().generate(code, classWriter, defaultValue, expectedType);
+        }
+
+        int methodRef = cp.addMethodRef(internalClassName, methodName, fullDescriptor);
+        code.invokestatic(methodRef);
+        CodeGeneratorUtils.generateReturn(code, returnTypeInfo);
+
+        int maxLocals = 0;
+        for (int i = 0; i < paramCount; i++) {
+            String paramType = compiler.getTypeResolver().extractParameterType(params.get(i).getPat());
+            maxLocals += CodeGeneratorUtils.getSlotSize(paramType);
+        }
+
+        classWriter.addMethod(baseAccessFlags, methodName, overloadDescriptor, code.toByteArray(), 10, maxLocals);
+    }
+
     private ScopedStandaloneFunctionRegistry getRegistry() {
         return compiler.getMemory().getScopedStandaloneFunctionRegistry();
+    }
+
+    private int getStaticMethodAccessFlags(Swc4jAstFunction function) {
+        int accessFlags = 0x0009; // ACC_PUBLIC | ACC_STATIC
+        if (!function.getParams().isEmpty()
+                && function.getParams().get(function.getParams().size() - 1).getPat() instanceof Swc4jAstRestPat) {
+            accessFlags |= 0x0080; // ACC_VARARGS
+        }
+        return accessFlags;
     }
 
     private boolean isClassNameTaken(String fullClassName) {
@@ -298,5 +405,22 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
         String simpleName = fullClassName.contains(".") ?
                 fullClassName.substring(fullClassName.lastIndexOf('.') + 1) : fullClassName;
         return compiler.getMemory().getScopedJavaTypeRegistry().resolve(simpleName) != null;
+    }
+
+    private void validateDefaultParameterOrder(List<Swc4jAstParam> params, Swc4jAstFnDecl fnDecl) throws Swc4jByteCodeCompilerException {
+        boolean seenDefaultParameter = false;
+        for (Swc4jAstParam param : params) {
+            boolean hasDefault = compiler.getTypeResolver().hasDefaultValue(param.getPat());
+            if (hasDefault) {
+                seenDefaultParameter = true;
+                continue;
+            }
+            if (seenDefaultParameter) {
+                throw new Swc4jByteCodeCompilerException(
+                        getSourceCode(),
+                        fnDecl,
+                        "Default parameters must come after all required parameters");
+            }
+        }
     }
 }

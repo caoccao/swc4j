@@ -1682,6 +1682,20 @@ public final class TypeResolver {
         return ConstantJavaType.LJAVA_LANG_OBJECT;
     }
 
+    private boolean isBuiltinJsonGlobal(Swc4jAstIdent ident) {
+        if (!ConstantJavaType.TYPE_ALIAS_JSON.equals(ident.getSym())) {
+            return false;
+        }
+        var memory = compiler.getMemory();
+        if (memory.getCompilationContext().getLocalVariableTable().getVariable(ident.getSym()) != null) {
+            return false;
+        }
+        if (memory.getScopedJavaTypeRegistry().resolve(ident.getSym()) != null) {
+            return false;
+        }
+        return memory.getScopedTypeAliasRegistry().resolve(ident.getSym()) == null;
+    }
+
     /**
      * Looks up a field in the class hierarchy, starting from the given class and traversing up to parent classes.
      *
@@ -1705,20 +1719,6 @@ public final class TypeResolver {
         }
 
         return null;
-    }
-
-    private boolean isBuiltinJsonGlobal(Swc4jAstIdent ident) {
-        if (!ConstantJavaType.TYPE_ALIAS_JSON.equals(ident.getSym())) {
-            return false;
-        }
-        var memory = compiler.getMemory();
-        if (memory.getCompilationContext().getLocalVariableTable().getVariable(ident.getSym()) != null) {
-            return false;
-        }
-        if (memory.getScopedJavaTypeRegistry().resolve(ident.getSym()) != null) {
-            return false;
-        }
-        return memory.getScopedTypeAliasRegistry().resolve(ident.getSym()) == null;
     }
 
     private String mapImportTypeToDescriptor(Swc4jAstTsImportType importType) throws Swc4jByteCodeCompilerException {

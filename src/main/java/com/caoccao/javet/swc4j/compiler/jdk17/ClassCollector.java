@@ -111,6 +111,13 @@ public final class ClassCollector {
         return moduleDecl.getId().toString();
     }
 
+    private String getReturnDescriptor(ReturnTypeInfo returnTypeInfo) {
+        if (returnTypeInfo.descriptor() != null) {
+            return returnTypeInfo.descriptor();
+        }
+        return returnTypeInfo.type().getPrimitiveDescriptor();
+    }
+
     private void processClassDecl(Swc4jAstClassDecl classDecl, String currentPackage) throws Swc4jByteCodeCompilerException {
         String className = classDecl.getIdent().getSym();
         String qualifiedName = currentPackage.isEmpty() ? className : currentPackage + "." + className;
@@ -197,28 +204,7 @@ public final class ClassCollector {
                         Swc4jAstBlockStmt blockStmt = bodyOpt.get();
                         ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, blockStmt);
 
-                        // Build full method descriptor with parameters
-                        StringBuilder paramDescriptors = new StringBuilder();
-                        for (var param : function.getParams()) {
-                            String paramType = compiler.getTypeResolver().extractParameterType(param.getPat());
-                            paramDescriptors.append(paramType);
-                        }
-
-                        // Get return descriptor from ReturnTypeInfo
-                        String returnDescriptor;
-                        if (returnTypeInfo.descriptor() != null) {
-                            // Object types have descriptor set
-                            returnDescriptor = returnTypeInfo.descriptor();
-                        } else {
-                            // Primitive types use type().getPrimitiveDescriptor()
-                            returnDescriptor = returnTypeInfo.type().getPrimitiveDescriptor();
-                        }
-
-                        String fullDescriptor = "(" + paramDescriptors + ")" + returnDescriptor;
-
-                        // Register method signature in ScopedJavaClassRegistry
-                        compiler.getMemory().getScopedJavaTypeRegistry()
-                                .registerClassMethod(qualifiedName, methodName, fullDescriptor);
+                        registerMethodSignatures(qualifiedName, methodName, function, returnTypeInfo);
                     }
                 } catch (Swc4jByteCodeCompilerException e) {
                     // Ignore methods that can't be analyzed
@@ -233,26 +219,7 @@ public final class ClassCollector {
                         Swc4jAstBlockStmt blockStmt = bodyOpt.get();
                         ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, blockStmt);
 
-                        // Build full method descriptor with parameters
-                        StringBuilder paramDescriptors = new StringBuilder();
-                        for (var param : function.getParams()) {
-                            String paramType = compiler.getTypeResolver().extractParameterType(param.getPat());
-                            paramDescriptors.append(paramType);
-                        }
-
-                        // Get return descriptor from ReturnTypeInfo
-                        String returnDescriptor;
-                        if (returnTypeInfo.descriptor() != null) {
-                            returnDescriptor = returnTypeInfo.descriptor();
-                        } else {
-                            returnDescriptor = returnTypeInfo.type().getPrimitiveDescriptor();
-                        }
-
-                        String fullDescriptor = "(" + paramDescriptors + ")" + returnDescriptor;
-
-                        // Register private method signature in ScopedJavaClassRegistry
-                        compiler.getMemory().getScopedJavaTypeRegistry()
-                                .registerClassMethod(qualifiedName, methodName, fullDescriptor);
+                        registerMethodSignatures(qualifiedName, methodName, function, returnTypeInfo);
                     }
                 } catch (Swc4jByteCodeCompilerException e) {
                     // Ignore methods that can't be analyzed
@@ -354,6 +321,43 @@ public final class ClassCollector {
      */
     public void registerClassExpr(Swc4jAstClassDecl classDecl, String currentPackage) throws Swc4jByteCodeCompilerException {
         processClassDecl(classDecl, currentPackage);
+    }
+
+    private void registerMethodSignatures(
+            String qualifiedName,
+            String methodName,
+            Swc4jAstFunction function,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+        List<Swc4jAstParam> params = function.getParams();
+        String returnDescriptor = getReturnDescriptor(returnTypeInfo);
+        StringBuilder fullParamDescriptors = new StringBuilder();
+        for (Swc4jAstParam param : params) {
+            fullParamDescriptors.append(compiler.getTypeResolver().extractParameterType(param.getPat()));
+        }
+        compiler.getMemory().getScopedJavaTypeRegistry().registerClassMethod(
+                qualifiedName,
+                methodName,
+                "(" + fullParamDescriptors + ")" + returnDescriptor);
+        int firstDefaultIndex = -1;
+        for (int i = 0; i < params.size(); i++) {
+            if (compiler.getTypeResolver().hasDefaultValue(params.get(i).getPat())) {
+                firstDefaultIndex = i;
+                break;
+            }
+        }
+        if (firstDefaultIndex == -1) {
+            return;
+        }
+        for (int i = firstDefaultIndex; i < params.size(); i++) {
+            StringBuilder overloadParamDescriptors = new StringBuilder();
+            for (int j = 0; j < i; j++) {
+                overloadParamDescriptors.append(compiler.getTypeResolver().extractParameterType(params.get(j).getPat()));
+            }
+            compiler.getMemory().getScopedJavaTypeRegistry().registerClassMethod(
+                    qualifiedName,
+                    methodName,
+                    "(" + overloadParamDescriptors + ")" + returnDescriptor);
+        }
     }
 
     /**
