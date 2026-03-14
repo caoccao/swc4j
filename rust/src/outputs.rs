@@ -19,8 +19,10 @@ use anyhow::Result;
 use deno_ast::swc::ast::*;
 use deno_ast::swc::parser::token::TokenAndSpan;
 use deno_ast::{MultiThreadedComments, ParsedSource, TranspileResult};
-use jni::objects::{GlobalRef, JMethodID, JObject};
-use jni::JNIEnv;
+use jni::objects::{Global, JClass, JMethodID, JObject};
+use jni::strings::JNIString;
+use jni::signature::RuntimeMethodSignature;
+use jni::Env;
 
 use std::sync::{Arc, OnceLock};
 
@@ -34,17 +36,15 @@ use crate::token_utils;
 /* JavaSwc4jParseOutput Begin */
 #[allow(dead_code)]
 struct JavaSwc4jParseOutput {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_construct: JMethodID,
 }
-unsafe impl Send for JavaSwc4jParseOutput {}
-unsafe impl Sync for JavaSwc4jParseOutput {}
 
 #[allow(dead_code)]
 impl JavaSwc4jParseOutput {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/outputs/Swc4jParseOutput")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/outputs/Swc4jParseOutput"))
       .expect("Couldn't find class Swc4jParseOutput");
     let class = env
       .new_global_ref(class)
@@ -52,8 +52,8 @@ impl JavaSwc4jParseOutput {
     let method_construct = env
       .get_method_id(
         &class,
-        "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstProgram;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;Ljava/lang/String;Ljava/util/List;Lcom/caoccao/javet/swc4j/comments/Swc4jComments;)V",
+        JNIString::from("<init>"),
+        RuntimeMethodSignature::from_str("(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstProgram;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;Ljava/lang/String;Ljava/util/List;Lcom/caoccao/javet/swc4j/comments/Swc4jComments;)V").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jParseOutput::new");
     JavaSwc4jParseOutput {
@@ -64,7 +64,7 @@ impl JavaSwc4jParseOutput {
 
   pub fn construct<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     program: &JObject<'_>,
     media_type: &JObject<'_>,
     parse_mode: &JObject<'_>,
@@ -98,17 +98,15 @@ impl JavaSwc4jParseOutput {
 /* JavaSwc4jTransformOutput Begin */
 #[allow(dead_code)]
 struct JavaSwc4jTransformOutput {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_construct: JMethodID,
 }
-unsafe impl Send for JavaSwc4jTransformOutput {}
-unsafe impl Sync for JavaSwc4jTransformOutput {}
 
 #[allow(dead_code)]
 impl JavaSwc4jTransformOutput {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/outputs/Swc4jTransformOutput")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/outputs/Swc4jTransformOutput"))
       .expect("Couldn't find class Swc4jTransformOutput");
     let class = env
       .new_global_ref(class)
@@ -116,8 +114,8 @@ impl JavaSwc4jTransformOutput {
     let method_construct = env
       .get_method_id(
         &class,
-        "<init>",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;Ljava/lang/String;)V",
+        JNIString::from("<init>"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;Ljava/lang/String;)V").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOutput::new");
     JavaSwc4jTransformOutput {
@@ -128,7 +126,7 @@ impl JavaSwc4jTransformOutput {
 
   pub fn construct<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     code: &str,
     media_type: &JObject<'_>,
     parse_mode: &JObject<'_>,
@@ -160,17 +158,15 @@ impl JavaSwc4jTransformOutput {
 /* JavaSwc4jTranspileOutput Begin */
 #[allow(dead_code)]
 struct JavaSwc4jTranspileOutput {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_construct: JMethodID,
 }
-unsafe impl Send for JavaSwc4jTranspileOutput {}
-unsafe impl Sync for JavaSwc4jTranspileOutput {}
 
 #[allow(dead_code)]
 impl JavaSwc4jTranspileOutput {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/outputs/Swc4jTranspileOutput")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/outputs/Swc4jTranspileOutput"))
       .expect("Couldn't find class Swc4jTranspileOutput");
     let class = env
       .new_global_ref(class)
@@ -178,8 +174,8 @@ impl JavaSwc4jTranspileOutput {
     let method_construct = env
       .get_method_id(
         &class,
-        "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstProgram;Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lcom/caoccao/javet/swc4j/comments/Swc4jComments;)V",
+        JNIString::from("<init>"),
+        RuntimeMethodSignature::from_str("(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstProgram;Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lcom/caoccao/javet/swc4j/comments/Swc4jComments;)V").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOutput::new");
     JavaSwc4jTranspileOutput {
@@ -190,7 +186,7 @@ impl JavaSwc4jTranspileOutput {
 
   pub fn construct<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     program: &JObject<'_>,
     code: &str,
     media_type: &JObject<'_>,
@@ -233,7 +229,7 @@ static JAVA_PARSE_OUTPUT: OnceLock<JavaSwc4jParseOutput> = OnceLock::new();
 static JAVA_TRANSFORM_OUTPUT: OnceLock<JavaSwc4jTransformOutput> = OnceLock::new();
 static JAVA_TRANSPILE_OUTPUT: OnceLock<JavaSwc4jTranspileOutput> = OnceLock::new();
 
-pub fn init<'local>(env: &mut JNIEnv<'local>) {
+pub fn init<'local>(env: &mut Env<'local>) {
   log::debug!("init()");
   unsafe {
     JAVA_PARSE_OUTPUT.set(JavaSwc4jParseOutput::new(env)).unwrap_unchecked();
@@ -315,7 +311,7 @@ impl ParseOutput {
 }
 
 impl ToJava for ParseOutput {
-  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> Result<JObject<'a>>
+  fn to_java<'local, 'a>(&self, env: &mut Env<'local>) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -375,7 +371,7 @@ impl TransformOutput {
 }
 
 impl ToJava for TransformOutput {
-  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> Result<JObject<'a>>
+  fn to_java<'local, 'a>(&self, env: &mut Env<'local>) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -451,7 +447,7 @@ impl TranspileOutput {
 }
 
 impl ToJava for TranspileOutput {
-  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> Result<JObject<'a>>
+  fn to_java<'local, 'a>(&self, env: &mut Env<'local>) -> Result<JObject<'a>>
   where
     'local: 'a,
   {

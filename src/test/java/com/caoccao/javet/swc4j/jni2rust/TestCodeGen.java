@@ -81,14 +81,14 @@ public class TestCodeGen {
                     registrationLines.add("  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {");
                     registrationLines.add("    match self {");
                     toJavaLines.add(String.format("impl ToJavaWithMap<ByteToIndexMap> for %s {", enumName));
-                    toJavaLines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>");
+                    toJavaLines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut Env<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>");
                     toJavaLines.add("  where");
                     toJavaLines.add("    'local: 'a,");
                     toJavaLines.add("  {");
                     toJavaLines.add("    match self {");
                     fromJavaLines.add(String.format("impl<'local> FromJava<'local> for %s {", enumName));
                     fromJavaLines.add("  #[allow(unused_variables)]");
-                    fromJavaLines.add("  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {");
+                    fromJavaLines.add("  fn from_java(env: &mut Env<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {");
                     fromJavaLines.add("    let return_value = ");
                     final AtomicInteger mappingCounter = new AtomicInteger();
                     Stream.of(jni2RustClassUtils.getMappings())
@@ -223,7 +223,7 @@ public class TestCodeGen {
                 });
         assertThat(structCounter.get()).isPositive();
         lines.addAll(declarationLines);
-        lines.add("\npub fn init<'local>(env: &mut JNIEnv<'local>) {");
+        lines.add("\npub fn init<'local>(env: &mut Env<'local>) {");
         lines.add("  log::debug!(\"init()\");");
         lines.add("  unsafe {");
         lines.addAll(initLines);
@@ -342,7 +342,7 @@ public class TestCodeGen {
                         final List<String> javaVars = new ArrayList<>();
                         final List<String> javaOptionalVars = new ArrayList<>();
                         lines.add(String.format("impl ToJavaWithMap<ByteToIndexMap> for %s {", className));
-                        lines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>");
+                        lines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut Env<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>");
                         lines.add("  where");
                         lines.add("    'local: 'a,");
                         lines.add("  {");
@@ -510,7 +510,7 @@ public class TestCodeGen {
                     if (!jni2RustClassUtils.isCustomFromJava()) {
                         lines.add(String.format("impl<'local> FromJava<'local> for %s {", className));
                         lines.add("  #[allow(unused_variables)]");
-                        lines.add("  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {");
+                        lines.add("  fn from_java(env: &mut Env<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {");
                         List<Field> fields = ReflectionUtils.getDeclaredFields(clazz).values().stream()
                                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                                 .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())

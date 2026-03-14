@@ -23,8 +23,10 @@ use deno_ast::swc::atoms::Atom;
 use deno_ast::swc::common::source_map::SmallPos;
 use deno_ast::swc::parser::error::Error;
 use deno_ast::swc::parser::token::{IdentLike, Token, TokenAndSpan, Word};
-use jni::objects::{GlobalRef, JObject, JStaticMethodID};
-use jni::JNIEnv;
+use jni::objects::{Global, JClass, JObject, JStaticMethodID};
+use jni::strings::JNIString;
+use jni::signature::RuntimeMethodSignature;
+use jni::Env;
 
 use crate::enums::*;
 use crate::jni_utils::*;
@@ -33,7 +35,7 @@ use crate::span_utils::ByteToIndexMap;
 /* JavaSwc4jTokenFactory Begin */
 #[allow(dead_code)]
 struct JavaSwc4jTokenFactory {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_create_assign_operator: JStaticMethodID,
   method_create_big_int: JStaticMethodID,
   method_create_binary_operator: JStaticMethodID,
@@ -54,14 +56,12 @@ struct JavaSwc4jTokenFactory {
   method_create_true: JStaticMethodID,
   method_create_unknown: JStaticMethodID,
 }
-unsafe impl Send for JavaSwc4jTokenFactory {}
-unsafe impl Sync for JavaSwc4jTokenFactory {}
 
 #[allow(dead_code)]
 impl JavaSwc4jTokenFactory {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/tokens/Swc4jTokenFactory")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/tokens/Swc4jTokenFactory"))
       .expect("Couldn't find class Swc4jTokenFactory");
     let class = env
       .new_global_ref(class)
@@ -69,134 +69,134 @@ impl JavaSwc4jTokenFactory {
     let method_create_assign_operator = env
       .get_static_method_id(
         &class,
-        "createAssignOperator",
-        "(ILcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        JNIString::from("createAssignOperator"),
+        RuntimeMethodSignature::from_str("(ILcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createAssignOperator");
     let method_create_big_int = env
       .get_static_method_id(
         &class,
-        "createBigInt",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        JNIString::from("createBigInt"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createBigInt");
     let method_create_binary_operator = env
       .get_static_method_id(
         &class,
-        "createBinaryOperator",
-        "(ILcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        JNIString::from("createBinaryOperator"),
+        RuntimeMethodSignature::from_str("(ILcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createBinaryOperator");
     let method_create_error = env
       .get_static_method_id(
         &class,
-        "createError",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        JNIString::from("createError"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createError");
     let method_create_false = env
       .get_static_method_id(
         &class,
-        "createFalse",
-        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        JNIString::from("createFalse"),
+        RuntimeMethodSignature::from_str("(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createFalse");
     let method_create_generic_operator = env
       .get_static_method_id(
         &class,
-        "createGenericOperator",
-        "(ILcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        JNIString::from("createGenericOperator"),
+        RuntimeMethodSignature::from_str("(ILcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createGenericOperator");
     let method_create_ident_known = env
       .get_static_method_id(
         &class,
-        "createIdentKnown",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        JNIString::from("createIdentKnown"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createIdentKnown");
     let method_create_ident_other = env
       .get_static_method_id(
         &class,
-        "createIdentOther",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        JNIString::from("createIdentOther"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createIdentOther");
     let method_create_jsx_tag_name = env
       .get_static_method_id(
         &class,
-        "createJsxTagName",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        JNIString::from("createJsxTagName"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createJsxTagName");
     let method_create_jsx_tag_text = env
       .get_static_method_id(
         &class,
-        "createJsxTagText",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        JNIString::from("createJsxTagText"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createJsxTagText");
     let method_create_keyword = env
       .get_static_method_id(
         &class,
-        "createKeyword",
-        "(ILcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        JNIString::from("createKeyword"),
+        RuntimeMethodSignature::from_str("(ILcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createKeyword");
     let method_create_null = env
       .get_static_method_id(
         &class,
-        "createNull",
-        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        JNIString::from("createNull"),
+        RuntimeMethodSignature::from_str("(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createNull");
     let method_create_number = env
       .get_static_method_id(
         &class,
-        "createNumber",
-        "(Ljava/lang/String;DLcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        JNIString::from("createNumber"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;DLcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createNumber");
     let method_create_regex = env
       .get_static_method_id(
         &class,
-        "createRegex",
-        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValueFlags;",
+        JNIString::from("createRegex"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValueFlags;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createRegex");
     let method_create_shebang = env
       .get_static_method_id(
         &class,
-        "createShebang",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        JNIString::from("createShebang"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createShebang");
     let method_create_string = env
       .get_static_method_id(
         &class,
-        "createString",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        JNIString::from("createString"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createString");
     let method_create_template = env
       .get_static_method_id(
         &class,
-        "createTemplate",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        JNIString::from("createTemplate"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createTemplate");
     let method_create_true = env
       .get_static_method_id(
         &class,
-        "createTrue",
-        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        JNIString::from("createTrue"),
+        RuntimeMethodSignature::from_str("(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createTrue");
     let method_create_unknown = env
       .get_static_method_id(
         &class,
-        "createUnknown",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        JNIString::from("createUnknown"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTokenFactory.createUnknown");
     JavaSwc4jTokenFactory {
@@ -225,7 +225,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_assign_operator<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     token_type: &TokenType,
     span: &JObject<'_>,
     line_break_ahead: bool,
@@ -248,7 +248,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_big_int<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
@@ -273,7 +273,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_binary_operator<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     token_type: &TokenType,
     span: &JObject<'_>,
     line_break_ahead: bool,
@@ -296,7 +296,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_error<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     error: &Error,
     span: &JObject<'_>,
@@ -325,7 +325,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_false<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> Result<JObject<'a>>
@@ -346,7 +346,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_generic_operator<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     token_type: &TokenType,
     span: &JObject<'_>,
     line_break_ahead: bool,
@@ -369,7 +369,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_ident_known<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
@@ -394,7 +394,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_ident_other<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
@@ -419,7 +419,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_jsx_tag_name<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
@@ -444,7 +444,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_jsx_tag_text<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     value: &str,
     span: &JObject<'_>,
@@ -473,7 +473,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_keyword<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     token_type: &TokenType,
     span: &JObject<'_>,
     line_break_ahead: bool,
@@ -496,7 +496,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_null<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> Result<JObject<'a>>
@@ -517,7 +517,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_number<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     value: f64,
     span: &JObject<'_>,
@@ -544,7 +544,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_regex<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     value: &str,
     flags: &str,
@@ -577,7 +577,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_shebang<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     value: &str,
     span: &JObject<'_>,
@@ -606,7 +606,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_string<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     value: &str,
     span: &JObject<'_>,
@@ -635,7 +635,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_template<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     value: &Option<String>,
     span: &JObject<'_>,
@@ -664,7 +664,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_true<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> Result<JObject<'a>>
@@ -685,7 +685,7 @@ impl JavaSwc4jTokenFactory {
 
   pub fn create_unknown<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
@@ -712,7 +712,7 @@ impl JavaSwc4jTokenFactory {
 
 static JAVA_TOKEN_FACTORY: OnceLock<JavaSwc4jTokenFactory> = OnceLock::new();
 
-pub fn init<'local>(env: &mut JNIEnv<'local>) {
+pub fn init<'local>(env: &mut Env<'local>) {
   log::debug!("init()");
   unsafe {
     JAVA_TOKEN_FACTORY
@@ -722,7 +722,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 }
 
 pub fn token_and_spans_to_java_list<'local, 'a>(
-  env: &mut JNIEnv<'local>,
+  env: &mut Env<'local>,
   map: &ByteToIndexMap,
   source_text: &str,
   token_and_spans: Option<Arc<Vec<TokenAndSpan>>>,

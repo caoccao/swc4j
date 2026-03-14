@@ -16,16 +16,15 @@
 */
 
 use anyhow::Result;
+use jni::errors::ThrowRuntimeExAndDefault;
 use jni::objects::{JClass, JObject, JString};
 #[cfg(target_os = "android")]
 use jni::sys::JNI_VERSION_1_6;
 #[cfg(not(target_os = "android"))]
 use jni::sys::JNI_VERSION_1_8;
 use jni::sys::{jint, jobject, jstring};
-use jni::{JNIEnv, JavaVM};
+use jni::{Env, EnvUnowned, JavaVM};
 use jni_utils::FromJava;
-
-use std::ffi::c_void;
 
 pub mod ast_utils;
 pub mod comment_utils;
@@ -42,104 +41,127 @@ pub mod token_utils;
 use crate::jni_utils::{jstring_to_optional_string, jstring_to_string, string_to_jstring, ToJava};
 
 #[unsafe(no_mangle)]
-pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
+#[allow(improper_ctypes_definitions)]
+pub extern "system" fn JNI_OnLoad(java_vm: JavaVM, _: *const std::ffi::c_void) -> jint {
   env_logger::init();
   log::debug!("JNI_OnLoad()");
-  let mut env = java_vm.get_env().expect("Cannot get JNI env");
-  ast_utils::init(&mut env);
-  comment_utils::init(&mut env);
-  enums::init(&mut env);
-  error::init(&mut env);
-  jni_utils::init(&mut env);
-  options::init(&mut env);
-  outputs::init(&mut env);
-  plugin_utils::init(&mut env);
-  span_utils::init(&mut env);
-  token_utils::init(&mut env);
-  #[cfg(target_os = "android")]
-  let jni_version = JNI_VERSION_1_6;
-  #[cfg(not(target_os = "android"))]
-  let jni_version = JNI_VERSION_1_8;
-  jni_version
+  java_vm
+    .attach_current_thread(|env| {
+      ast_utils::init(env);
+      comment_utils::init(env);
+      enums::init(env);
+      error::init(env);
+      jni_utils::init(env);
+      options::init(env);
+      outputs::init(env);
+      plugin_utils::init(env);
+      span_utils::init(env);
+      token_utils::init(env);
+      #[cfg(target_os = "android")]
+      let jni_version = JNI_VERSION_1_6;
+      #[cfg(not(target_os = "android"))]
+      let jni_version = JNI_VERSION_1_8;
+      Ok::<_, jni::errors::Error>(jni_version)
+    })
+    .expect("Failed to initialize JNI")
 }
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'local>(
-  env: JNIEnv<'local>,
+  mut env: EnvUnowned<'local>,
   _: JClass<'local>,
 ) -> jstring {
   log::debug!("Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion()");
-  string_to_jstring!(env, core::get_version()).as_raw()
+  env
+    .with_env(|env| -> jni::errors::Result<jstring> {
+      Ok(string_to_jstring!(env, core::get_version()).as_raw())
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
 }
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local>(
-  mut env: JNIEnv<'local>,
+  mut env: EnvUnowned<'local>,
   _: JClass<'local>,
   code: jstring,
   options: jobject,
 ) -> jobject {
   log::debug!("Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse()");
-  match core_parse(&mut env, code, options) {
-    Ok(output) => output,
-    Err(err) => error::throw_parse_error(&mut env, err.to_string().as_str()),
-  }
+  env
+    .with_env(|env| -> jni::errors::Result<jobject> {
+      Ok(match core_parse(env, code, options) {
+        Ok(output) => output,
+        Err(err) => error::throw_parse_error(env, err.to_string().as_str()),
+      })
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
 }
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTransform<'local>(
-  mut env: JNIEnv<'local>,
+  mut env: EnvUnowned<'local>,
   _: JClass<'local>,
   code: jstring,
   options: jobject,
 ) -> jobject {
   log::debug!("Java_com_caoccao_javet_swc4j_Swc4jNative_coreTransform()");
-  match core_transform(&mut env, code, options) {
-    Ok(output) => output,
-    Err(err) => error::throw_transform_error(&mut env, err.to_string().as_str()),
-  }
+  env
+    .with_env(|env| -> jni::errors::Result<jobject> {
+      Ok(match core_transform(env, code, options) {
+        Ok(output) => output,
+        Err(err) => error::throw_transform_error(env, err.to_string().as_str()),
+      })
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
 }
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'local>(
-  mut env: JNIEnv<'local>,
+  mut env: EnvUnowned<'local>,
   _: JClass<'local>,
   code: jstring,
   options: jobject,
 ) -> jobject {
   log::debug!("Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile()");
-  match core_transpile(&mut env, code, options) {
-    Ok(output) => output,
-    Err(err) => error::throw_transpile_error(&mut env, err.to_string().as_str()),
-  }
+  env
+    .with_env(|env| -> jni::errors::Result<jobject> {
+      Ok(match core_transpile(env, code, options) {
+        Ok(output) => output,
+        Err(err) => error::throw_transpile_error(env, err.to_string().as_str()),
+      })
+    })
+    .resolve::<ThrowRuntimeExAndDefault>()
 }
 
-fn core_parse<'local>(env: &mut JNIEnv<'local>, code: jstring, options: jobject) -> Result<jobject> {
+fn core_parse<'local>(env: &mut Env<'local>, code: jstring, options: jobject) -> Result<jobject> {
   let code: Result<String> = jstring_to_string!(env, code);
   let code = code?;
-  let options = unsafe { JObject::from_raw(options) };
-  let options = options::ParseOptions::from_java(env, &options)?;
-  let output = core::parse(code, *options)?;
+  let options = unsafe { JObject::from_raw(env, options) };
+  let mut options = *options::ParseOptions::from_java(env, &options)?;
+  let mut plugin_host = options.plugin_host.take();
+  let output = core::parse(Some(env), code, &options, &mut plugin_host)?;
   let output = output.to_java(env)?;
   Ok(output.as_raw())
 }
 
-fn core_transform<'local>(env: &mut JNIEnv<'local>, code: jstring, options: jobject) -> Result<jobject> {
+fn core_transform<'local>(env: &mut Env<'local>, code: jstring, options: jobject) -> Result<jobject> {
   let code: Result<String> = jstring_to_string!(env, code);
   let code = code?;
-  let options = unsafe { JObject::from_raw(options) };
-  let options = options::TransformOptions::from_java(env, &options)?;
-  let output = core::transform(code, *options)?;
+  let options = unsafe { JObject::from_raw(env, options) };
+  let mut options = *options::TransformOptions::from_java(env, &options)?;
+  let mut plugin_host = options.plugin_host.take();
+  let output = core::transform(Some(env), code, &options, &mut plugin_host)?;
   let output = output.to_java(env)?;
   Ok(output.as_raw())
 }
 
-fn core_transpile<'local>(env: &mut JNIEnv<'local>, code: jstring, options: jobject) -> Result<jobject> {
+fn core_transpile<'local>(env: &mut Env<'local>, code: jstring, options: jobject) -> Result<jobject> {
   let code: Result<String> = jstring_to_string!(env, code);
   let code = code?;
-  let options = unsafe { JObject::from_raw(options) };
-  let options = options::TranspileOptions::from_java(env, &options)?;
-  let output = core::transpile(code, *options)?;
+  let options = unsafe { JObject::from_raw(env, options) };
+  let mut options = *options::TranspileOptions::from_java(env, &options)?;
+  let mut plugin_host = options.plugin_host.take();
+  let output = core::transpile(Some(env), code, &options, &mut plugin_host)?;
   let output = output.to_java(env)?;
   Ok(output.as_raw())
 }

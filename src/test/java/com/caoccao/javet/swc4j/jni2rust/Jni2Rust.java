@@ -95,7 +95,7 @@ public class Jni2Rust<T> {
                         lines.add(String.format("  pub fn %s<'local, 'a>(", methodName));
                     }
                     lines.add("    &self,");
-                    lines.add("    env: &mut JNIEnv<'local>,");
+                    lines.add("    env: &mut Env<'local>,");
                     if (!isStatic) {
                         if (!isConstructor) {
                             lines.add("    obj: &JObject<'_>,");
@@ -283,9 +283,9 @@ public class Jni2Rust<T> {
     }
 
     protected void getCodeNew(List<String> lines) {
-        lines.add("  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {");
+        lines.add("  pub fn new<'local>(env: &mut Env<'local>) -> Self {");
         lines.add("    let class = env");
-        lines.add(String.format("      .find_class(\"%s\")", clazz.getName().replace('.', '/')));
+        lines.add(String.format("      .find_class(JNIString::from(\"%s\"))", clazz.getName().replace('.', '/')));
         lines.add(String.format("      .expect(\"Couldn't find class %s\");", clazz.getSimpleName()));
         lines.add("    let class = env");
         lines.add("      .new_global_ref(class)");
@@ -310,9 +310,9 @@ public class Jni2Rust<T> {
             }
             lines.add("        &class,");
             if (executable instanceof Method) {
-                lines.add(String.format("        \"%s\",", executable.getName()));
+                lines.add(String.format("        JNIString::from(\"%s\"),", executable.getName()));
             } else if (isConstructor) {
-                lines.add("        \"<init>\",");
+                lines.add("        JNIString::from(\"<init>\"),");
             }
             StringBuilder sb = new StringBuilder("(");
             for (Class<?> parameterClass : executable.getParameterTypes()) {
@@ -324,7 +324,7 @@ public class Jni2Rust<T> {
             } else if (isConstructor) {
                 sb.append("V");
             }
-            lines.add(String.format("        \"%s\",", sb));
+            lines.add(String.format("        RuntimeMethodSignature::from_str(\"%s\").unwrap().method_signature(),", sb));
             lines.add("      )");
             if (executable instanceof Method) {
                 lines.add(String.format("      .expect(\"Couldn't find method %s.%s\");", clazz.getSimpleName(), executable.getName()));
@@ -347,7 +347,7 @@ public class Jni2Rust<T> {
     protected void getCodeStruct(List<String> lines) {
         lines.add("#[allow(dead_code)]");
         lines.add(String.format("struct %s {", structName));
-        lines.add("  class: GlobalRef,");
+        lines.add("  class: Global<JClass<'static>>,");
         if (constructor != null) {
             lines.add("  method_construct: JMethodID,");
         }
@@ -360,8 +360,6 @@ public class Jni2Rust<T> {
             }
         });
         lines.add("}");
-        lines.add(String.format("unsafe impl Send for %s {}", structName));
-        lines.add(String.format("unsafe impl Sync for %s {}", structName));
     }
 
     public Constructor<T> getConstructor() {

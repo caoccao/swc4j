@@ -16,8 +16,10 @@
 */
 
 use anyhow::Result;
-use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID};
-use jni::JNIEnv;
+use jni::objects::{Global, JClass, JMethodID, JObject, JStaticMethodID};
+use jni::signature::RuntimeMethodSignature;
+use jni::strings::JNIString;
+use jni::Env;
 
 pub use deno_ast::swc::ast::EsVersion;
 use deno_ast::swc::ast::*;
@@ -37,29 +39,33 @@ macro_rules! declare_identifiable_enum {
   ($struct_name:ident, $static_name:ident, $enum_name:ident, $package:literal, $java_class_name:literal) => {
     pub struct $struct_name {
       #[allow(dead_code)]
-      class: GlobalRef,
+      class: Global<JClass<'static>>,
       method_get_id: JMethodID,
       method_parse: JStaticMethodID,
     }
-    unsafe impl Send for $struct_name {}
-    unsafe impl Sync for $struct_name {}
 
     impl $struct_name {
-      pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+      pub fn new<'local>(env: &mut Env<'local>) -> Self {
         let class = env
-          .find_class(format!("com/caoccao/javet/swc4j/{}{}", $package, $java_class_name))
+          .find_class(JNIString::from(format!("com/caoccao/javet/swc4j/{}{}", $package, $java_class_name)))
           .expect(format!("Couldn't find class {}", $java_class_name).as_str());
         let class = env
           .new_global_ref(class)
           .expect(format!("Couldn't globalize class {}", $java_class_name).as_str());
         let method_get_id = env
-          .get_method_id(&class, "getId", "()I")
+          .get_method_id(
+            &class,
+            JNIString::from("getId"),
+            RuntimeMethodSignature::from_str("()I").unwrap().method_signature(),
+          )
           .expect(format!("Couldn't find method {}.getId", $java_class_name).as_str());
         let method_parse = env
           .get_static_method_id(
             &class,
-            "parse",
-            format!("(I)Lcom/caoccao/javet/swc4j/{}{};", $package, $java_class_name),
+            JNIString::from("parse"),
+            RuntimeMethodSignature::from_str(
+              &format!("(I)Lcom/caoccao/javet/swc4j/{}{};", $package, $java_class_name)
+            ).unwrap().method_signature(),
           )
           .expect(format!("Couldn't find static method {}.parse", $java_class_name).as_str());
         $struct_name {
@@ -69,7 +75,7 @@ macro_rules! declare_identifiable_enum {
         }
       }
 
-      pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> Result<JObject<'a>>
+      pub fn parse<'local, 'a>(&self, env: &mut Env<'local>, id: i32) -> Result<JObject<'a>>
       where
         'local: 'a,
       {
@@ -81,7 +87,7 @@ macro_rules! declare_identifiable_enum {
     static $static_name: std::sync::OnceLock<$struct_name> = std::sync::OnceLock::new();
 
     impl<'local> FromJava<'local> for $enum_name {
-      fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<$enum_name>> {
+      fn from_java(env: &mut Env<'local>, obj: &JObject<'_>) -> Result<Box<$enum_name>> {
         let id = call_as_int!(
           env,
           obj.as_ref(),
@@ -94,7 +100,7 @@ macro_rules! declare_identifiable_enum {
     }
 
     impl ToJava for $enum_name {
-      fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> Result<JObject<'a>>
+      fn to_java<'local, 'a>(&self, env: &mut Env<'local>) -> Result<JObject<'a>>
       where
         'local: 'a,
       {
@@ -275,7 +281,7 @@ declare_identifiable_enum!(
   "Swc4jAstVarDeclKind"
 );
 
-pub fn init<'local>(env: &mut JNIEnv<'local>) {
+pub fn init<'local>(env: &mut Env<'local>) {
   log::debug!("init()");
   unsafe {
     JAVA_CLASS_ACCESSIBILITY

@@ -20,14 +20,16 @@ use std::sync::OnceLock;
 use anyhow::{Error, Result};
 use deno_ast::swc::common::comments::Comment;
 use deno_ast::MultiThreadedComments;
-use jni::objects::{GlobalRef, JMethodID, JObject};
-use jni::JNIEnv;
+use jni::objects::{Global, JClass, JMethodID, JObject};
+use jni::strings::JNIString;
+use jni::signature::RuntimeMethodSignature;
+use jni::Env;
 
 use crate::jni_utils::*;
 use crate::span_utils::{ByteToIndexMap, ToJavaWithMap};
 
 impl ToJavaWithMap<ByteToIndexMap> for Comment {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut Env<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -46,7 +48,7 @@ impl ToJavaWithMap<ByteToIndexMap> for Comment {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for MultiThreadedComments {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut Env<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -95,17 +97,15 @@ impl ToJavaWithMap<ByteToIndexMap> for MultiThreadedComments {
 /* JavaSwc4jComment Begin */
 #[allow(dead_code)]
 struct JavaSwc4jComment {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_construct: JMethodID,
 }
-unsafe impl Send for JavaSwc4jComment {}
-unsafe impl Sync for JavaSwc4jComment {}
 
 #[allow(dead_code)]
 impl JavaSwc4jComment {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/comments/Swc4jComment")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/comments/Swc4jComment"))
       .expect("Couldn't find class Swc4jComment");
     let class = env
       .new_global_ref(class)
@@ -113,8 +113,8 @@ impl JavaSwc4jComment {
     let method_construct = env
       .get_method_id(
         &class,
-        "<init>",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/comments/Swc4jCommentKind;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        JNIString::from("<init>"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/String;Lcom/caoccao/javet/swc4j/comments/Swc4jCommentKind;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jComment::new");
     JavaSwc4jComment {
@@ -125,7 +125,7 @@ impl JavaSwc4jComment {
 
   pub fn construct<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     text: &str,
     kind: &JObject<'_>,
     span: &JObject<'_>,
@@ -153,17 +153,15 @@ impl JavaSwc4jComment {
 /* JavaSwc4jComments Begin */
 #[allow(dead_code)]
 struct JavaSwc4jComments {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_construct: JMethodID,
 }
-unsafe impl Send for JavaSwc4jComments {}
-unsafe impl Sync for JavaSwc4jComments {}
 
 #[allow(dead_code)]
 impl JavaSwc4jComments {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/comments/Swc4jComments")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/comments/Swc4jComments"))
       .expect("Couldn't find class Swc4jComments");
     let class = env
       .new_global_ref(class)
@@ -171,8 +169,8 @@ impl JavaSwc4jComments {
     let method_construct = env
       .get_method_id(
         &class,
-        "<init>",
-        "(Ljava/util/Map;Ljava/util/Map;)V",
+        JNIString::from("<init>"),
+        RuntimeMethodSignature::from_str("(Ljava/util/Map;Ljava/util/Map;)V").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jComments::new");
     JavaSwc4jComments {
@@ -183,7 +181,7 @@ impl JavaSwc4jComments {
 
   pub fn construct<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     leading: &JObject<'_>,
     trailing: &JObject<'_>,
   ) -> Result<JObject<'a>>
@@ -207,7 +205,7 @@ impl JavaSwc4jComments {
 static JAVA_COMMENT: OnceLock<JavaSwc4jComment> = OnceLock::new();
 static JAVA_COMMENTS: OnceLock<JavaSwc4jComments> = OnceLock::new();
 
-pub fn init<'local>(env: &mut JNIEnv<'local>) {
+pub fn init<'local>(env: &mut Env<'local>) {
   log::debug!("init()");
   unsafe {
     JAVA_COMMENT.set(JavaSwc4jComment::new(env)).unwrap_unchecked();
@@ -216,7 +214,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 }
 
 pub fn comments_new<'local, 'a>(
-  env: &mut JNIEnv<'local>,
+  env: &mut Env<'local>,
   comments: &MultiThreadedComments,
   map: &ByteToIndexMap,
 ) -> Result<JObject<'a>>

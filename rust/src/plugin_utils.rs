@@ -19,107 +19,96 @@ use std::sync::OnceLock;
 
 use anyhow::Result;
 use deno_ast::swc::ast::{Module, Program, Script};
-use jni::objects::{GlobalRef, JMethodID, JObject};
-use jni::JNIEnv;
+use jni::objects::{Global, JClass, JMethodID, JObject};
+use jni::signature::RuntimeMethodSignature;
+use jni::strings::JNIString;
+use jni::Env;
 
 use crate::jni_utils::*;
 use crate::span_utils::{ByteToIndexMap, RegisterWithMap, ToJavaWithMap};
 
 #[derive(Debug)]
-pub struct PluginHost<'local> {
-  env: JNIEnv<'local>,
-  host: GlobalRef,
+pub struct PluginHost {
+  host: Global<JObject<'static>>,
 }
 
-impl<'local> PluginHost<'local> {
-  pub fn new(env: &mut JNIEnv<'local>, host: GlobalRef) -> Self {
-    PluginHost {
-      env: unsafe { env.unsafe_clone() },
-      host,
-    }
+impl PluginHost {
+  pub fn new(host: Global<JObject<'static>>) -> Self {
+    PluginHost { host }
   }
 
-  pub fn process_module(&mut self, s: &str, module: Module) -> Result<Module> {
+  pub fn process_module(&mut self, env: &mut Env<'_>, s: &str, module: Module) -> Result<Module> {
     log::debug!("process_module()");
     let java_class = JAVA_CLASS_I_PLUGIN_HOST.get().unwrap();
     let mut map = ByteToIndexMap::new();
     module.register_with_map(&mut map);
     map.update_by_str(s);
-    let java_module = module.to_java_with_map(&mut self.env, &map)?;
-    match java_class.process(&mut self.env, &self.host, &java_module) {
+    let java_module = module.to_java_with_map(env, &map)?;
+    match java_class.process(env, &self.host, &java_module) {
       Ok(result) => {
         if result {
-          let module = Module::from_java(&mut self.env, &java_module);
-          delete_local_ref!(self.env, java_module);
+          let module = Module::from_java(env, &java_module);
+          delete_local_ref!(env, java_module);
           Ok(*module?)
         } else {
-          delete_local_ref!(self.env, java_module);
+          delete_local_ref!(env, java_module);
           Ok(module)
         }
       }
       Err(err) => {
-        delete_local_ref!(self.env, java_module);
+        delete_local_ref!(env, java_module);
         Err(err)
       }
     }
   }
 
-  pub fn process_program(&mut self, s: &str, program: Program) -> Result<Program> {
+  pub fn process_program(&mut self, env: &mut Env<'_>, s: &str, program: Program) -> Result<Program> {
     log::debug!("process_program()");
     let java_class = JAVA_CLASS_I_PLUGIN_HOST.get().unwrap();
     let mut map = ByteToIndexMap::new();
     program.register_with_map(&mut map);
     map.update_by_str(s);
-    let java_program = program.to_java_with_map(&mut self.env, &map)?;
-    match java_class.process(&mut self.env, &self.host, &java_program) {
+    let java_program = program.to_java_with_map(env, &map)?;
+    match java_class.process(env, &self.host, &java_program) {
       Ok(result) => {
         if result {
-          let program = Program::from_java(&mut self.env, &java_program);
-          delete_local_ref!(self.env, java_program);
+          let program = Program::from_java(env, &java_program);
+          delete_local_ref!(env, java_program);
           Ok(*program?)
         } else {
-          delete_local_ref!(self.env, java_program);
+          delete_local_ref!(env, java_program);
           Ok(program)
         }
       }
       Err(err) => {
-        delete_local_ref!(self.env, java_program);
+        delete_local_ref!(env, java_program);
         Err(err)
       }
     }
   }
 
-  pub fn process_script(&mut self, s: &str, script: Script) -> Result<Script> {
+  pub fn process_script(&mut self, env: &mut Env<'_>, s: &str, script: Script) -> Result<Script> {
     log::debug!("process_script()");
     let java_class = JAVA_CLASS_I_PLUGIN_HOST.get().unwrap();
     let mut map = ByteToIndexMap::new();
     script.register_with_map(&mut map);
     map.update_by_str(s);
-    let java_script = script.to_java_with_map(&mut self.env, &map)?;
-    match java_class.process(&mut self.env, &self.host, &java_script) {
+    let java_script = script.to_java_with_map(env, &map)?;
+    match java_class.process(env, &self.host, &java_script) {
       Ok(result) => {
         if result {
-          let script = Script::from_java(&mut self.env, &java_script);
-          delete_local_ref!(self.env, java_script);
+          let script = Script::from_java(env, &java_script);
+          delete_local_ref!(env, java_script);
           Ok(*script?)
         } else {
-          delete_local_ref!(self.env, java_script);
+          delete_local_ref!(env, java_script);
           Ok(script)
         }
       }
       Err(err) => {
-        delete_local_ref!(self.env, java_script);
+        delete_local_ref!(env, java_script);
         Err(err)
       }
-    }
-  }
-}
-
-impl<'local> Clone for PluginHost<'local> {
-  fn clone(&self) -> Self {
-    PluginHost {
-      env: unsafe { self.env.unsafe_clone() },
-      host: self.host.clone(),
     }
   }
 }
@@ -127,17 +116,15 @@ impl<'local> Clone for PluginHost<'local> {
 /* JavaISwc4jPluginHost Begin */
 #[allow(dead_code)]
 struct JavaISwc4jPluginHost {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_process: JMethodID,
 }
-unsafe impl Send for JavaISwc4jPluginHost {}
-unsafe impl Sync for JavaISwc4jPluginHost {}
 
 #[allow(dead_code)]
 impl JavaISwc4jPluginHost {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/plugins/ISwc4jPluginHost")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/plugins/ISwc4jPluginHost"))
       .expect("Couldn't find class ISwc4jPluginHost");
     let class = env
       .new_global_ref(class)
@@ -145,8 +132,8 @@ impl JavaISwc4jPluginHost {
     let method_process = env
       .get_method_id(
         &class,
-        "process",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstProgram;)Z",
+        JNIString::from("process"),
+        RuntimeMethodSignature::from_str("(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstProgram;)Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method ISwc4jPluginHost.process");
     JavaISwc4jPluginHost {
@@ -157,7 +144,7 @@ impl JavaISwc4jPluginHost {
 
   pub fn process<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
     program: &JObject<'_>,
   ) -> Result<bool>
@@ -177,7 +164,7 @@ impl JavaISwc4jPluginHost {
 
 static JAVA_CLASS_I_PLUGIN_HOST: OnceLock<JavaISwc4jPluginHost> = OnceLock::new();
 
-pub fn init<'local>(env: &mut JNIEnv<'local>) {
+pub fn init<'local>(env: &mut Env<'local>) {
   log::debug!("init()");
   unsafe {
     JAVA_CLASS_I_PLUGIN_HOST

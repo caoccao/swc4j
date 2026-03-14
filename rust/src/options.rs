@@ -21,8 +21,10 @@ use anyhow::{Error, Result};
 use deno_ast::{
   DecoratorsTranspileOption, JsxAutomaticOptions, JsxClassicOptions, JsxPrecompileOptions, JsxRuntime, ModuleSpecifier,
 };
-use jni::objects::{GlobalRef, JMethodID, JObject, JString};
-use jni::JNIEnv;
+use jni::objects::{Global, JClass, JMethodID, JObject, JString};
+use jni::strings::JNIString;
+use jni::signature::RuntimeMethodSignature;
+use jni::Env;
 
 use crate::enums::*;
 use crate::jni_utils::*;
@@ -31,7 +33,7 @@ use crate::plugin_utils::PluginHost;
 /* JavaSwc4jParseOptions Begin */
 #[allow(dead_code)]
 struct JavaSwc4jParseOptions {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_get_media_type: JMethodID,
   method_get_parse_mode: JMethodID,
   method_get_plugin_host: JMethodID,
@@ -41,14 +43,12 @@ struct JavaSwc4jParseOptions {
   method_is_capture_tokens: JMethodID,
   method_is_scope_analysis: JMethodID,
 }
-unsafe impl Send for JavaSwc4jParseOptions {}
-unsafe impl Sync for JavaSwc4jParseOptions {}
 
 #[allow(dead_code)]
 impl JavaSwc4jParseOptions {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/options/Swc4jParseOptions")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/options/Swc4jParseOptions"))
       .expect("Couldn't find class Swc4jParseOptions");
     let class = env
       .new_global_ref(class)
@@ -56,57 +56,57 @@ impl JavaSwc4jParseOptions {
     let method_get_media_type = env
       .get_method_id(
         &class,
-        "getMediaType",
-        "()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;",
+        JNIString::from("getMediaType"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jParseOptions.getMediaType");
     let method_get_parse_mode = env
       .get_method_id(
         &class,
-        "getParseMode",
-        "()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;",
+        JNIString::from("getParseMode"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jParseOptions.getParseMode");
     let method_get_plugin_host = env
       .get_method_id(
         &class,
-        "getPluginHost",
-        "()Lcom/caoccao/javet/swc4j/plugins/ISwc4jPluginHost;",
+        JNIString::from("getPluginHost"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/plugins/ISwc4jPluginHost;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jParseOptions.getPluginHost");
     let method_get_specifier = env
       .get_method_id(
         &class,
-        "getSpecifier",
-        "()Ljava/net/URL;",
+        JNIString::from("getSpecifier"),
+        RuntimeMethodSignature::from_str("()Ljava/net/URL;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jParseOptions.getSpecifier");
     let method_is_capture_ast = env
       .get_method_id(
         &class,
-        "isCaptureAst",
-        "()Z",
+        JNIString::from("isCaptureAst"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jParseOptions.isCaptureAst");
     let method_is_capture_comments = env
       .get_method_id(
         &class,
-        "isCaptureComments",
-        "()Z",
+        JNIString::from("isCaptureComments"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jParseOptions.isCaptureComments");
     let method_is_capture_tokens = env
       .get_method_id(
         &class,
-        "isCaptureTokens",
-        "()Z",
+        JNIString::from("isCaptureTokens"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jParseOptions.isCaptureTokens");
     let method_is_scope_analysis = env
       .get_method_id(
         &class,
-        "isScopeAnalysis",
-        "()Z",
+        JNIString::from("isScopeAnalysis"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jParseOptions.isScopeAnalysis");
     JavaSwc4jParseOptions {
@@ -124,7 +124,7 @@ impl JavaSwc4jParseOptions {
 
   pub fn get_media_type<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -142,7 +142,7 @@ impl JavaSwc4jParseOptions {
 
   pub fn get_parse_mode<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -160,7 +160,7 @@ impl JavaSwc4jParseOptions {
 
   pub fn get_plugin_host<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<Option<JObject<'a>>>
   where
@@ -183,7 +183,7 @@ impl JavaSwc4jParseOptions {
 
   pub fn get_specifier<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -201,7 +201,7 @@ impl JavaSwc4jParseOptions {
 
   pub fn is_capture_ast<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -217,7 +217,7 @@ impl JavaSwc4jParseOptions {
 
   pub fn is_capture_comments<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -233,7 +233,7 @@ impl JavaSwc4jParseOptions {
 
   pub fn is_capture_tokens<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -249,7 +249,7 @@ impl JavaSwc4jParseOptions {
 
   pub fn is_scope_analysis<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -268,7 +268,7 @@ impl JavaSwc4jParseOptions {
 /* JavaSwc4jTransformOptions Begin */
 #[allow(dead_code)]
 struct JavaSwc4jTransformOptions {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_get_media_type: JMethodID,
   method_get_parse_mode: JMethodID,
   method_get_plugin_host: JMethodID,
@@ -282,14 +282,12 @@ struct JavaSwc4jTransformOptions {
   method_is_minify: JMethodID,
   method_is_omit_last_semi: JMethodID,
 }
-unsafe impl Send for JavaSwc4jTransformOptions {}
-unsafe impl Sync for JavaSwc4jTransformOptions {}
 
 #[allow(dead_code)]
 impl JavaSwc4jTransformOptions {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/options/Swc4jTransformOptions")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/options/Swc4jTransformOptions"))
       .expect("Couldn't find class Swc4jTransformOptions");
     let class = env
       .new_global_ref(class)
@@ -297,85 +295,85 @@ impl JavaSwc4jTransformOptions {
     let method_get_media_type = env
       .get_method_id(
         &class,
-        "getMediaType",
-        "()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;",
+        JNIString::from("getMediaType"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOptions.getMediaType");
     let method_get_parse_mode = env
       .get_method_id(
         &class,
-        "getParseMode",
-        "()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;",
+        JNIString::from("getParseMode"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOptions.getParseMode");
     let method_get_plugin_host = env
       .get_method_id(
         &class,
-        "getPluginHost",
-        "()Lcom/caoccao/javet/swc4j/plugins/ISwc4jPluginHost;",
+        JNIString::from("getPluginHost"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/plugins/ISwc4jPluginHost;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOptions.getPluginHost");
     let method_get_source_map = env
       .get_method_id(
         &class,
-        "getSourceMap",
-        "()Lcom/caoccao/javet/swc4j/enums/Swc4jSourceMapOption;",
+        JNIString::from("getSourceMap"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/enums/Swc4jSourceMapOption;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOptions.getSourceMap");
     let method_get_specifier = env
       .get_method_id(
         &class,
-        "getSpecifier",
-        "()Ljava/net/URL;",
+        JNIString::from("getSpecifier"),
+        RuntimeMethodSignature::from_str("()Ljava/net/URL;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOptions.getSpecifier");
     let method_get_target = env
       .get_method_id(
         &class,
-        "getTarget",
-        "()Lcom/caoccao/javet/swc4j/enums/Swc4jEsVersion;",
+        JNIString::from("getTarget"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/enums/Swc4jEsVersion;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOptions.getTarget");
     let method_is_ascii_only = env
       .get_method_id(
         &class,
-        "isAsciiOnly",
-        "()Z",
+        JNIString::from("isAsciiOnly"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOptions.isAsciiOnly");
     let method_is_emit_assert_for_import_attributes = env
       .get_method_id(
         &class,
-        "isEmitAssertForImportAttributes",
-        "()Z",
+        JNIString::from("isEmitAssertForImportAttributes"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOptions.isEmitAssertForImportAttributes");
     let method_is_inline_sources = env
       .get_method_id(
         &class,
-        "isInlineSources",
-        "()Z",
+        JNIString::from("isInlineSources"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOptions.isInlineSources");
     let method_is_keep_comments = env
       .get_method_id(
         &class,
-        "isKeepComments",
-        "()Z",
+        JNIString::from("isKeepComments"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOptions.isKeepComments");
     let method_is_minify = env
       .get_method_id(
         &class,
-        "isMinify",
-        "()Z",
+        JNIString::from("isMinify"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOptions.isMinify");
     let method_is_omit_last_semi = env
       .get_method_id(
         &class,
-        "isOmitLastSemi",
-        "()Z",
+        JNIString::from("isOmitLastSemi"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTransformOptions.isOmitLastSemi");
     JavaSwc4jTransformOptions {
@@ -397,7 +395,7 @@ impl JavaSwc4jTransformOptions {
 
   pub fn get_media_type<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -415,7 +413,7 @@ impl JavaSwc4jTransformOptions {
 
   pub fn get_parse_mode<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -433,7 +431,7 @@ impl JavaSwc4jTransformOptions {
 
   pub fn get_plugin_host<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<Option<JObject<'a>>>
   where
@@ -456,7 +454,7 @@ impl JavaSwc4jTransformOptions {
 
   pub fn get_source_map<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -474,7 +472,7 @@ impl JavaSwc4jTransformOptions {
 
   pub fn get_specifier<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -492,7 +490,7 @@ impl JavaSwc4jTransformOptions {
 
   pub fn get_target<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -510,7 +508,7 @@ impl JavaSwc4jTransformOptions {
 
   pub fn is_ascii_only<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -526,7 +524,7 @@ impl JavaSwc4jTransformOptions {
 
   pub fn is_emit_assert_for_import_attributes<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -542,7 +540,7 @@ impl JavaSwc4jTransformOptions {
 
   pub fn is_inline_sources<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -558,7 +556,7 @@ impl JavaSwc4jTransformOptions {
 
   pub fn is_keep_comments<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -574,7 +572,7 @@ impl JavaSwc4jTransformOptions {
 
   pub fn is_minify<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -590,7 +588,7 @@ impl JavaSwc4jTransformOptions {
 
   pub fn is_omit_last_semi<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -609,7 +607,7 @@ impl JavaSwc4jTransformOptions {
 /* JavaSwc4jTranspileOptions Begin */
 #[allow(dead_code)]
 struct JavaSwc4jTranspileOptions {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_get_decorators: JMethodID,
   method_get_imports_not_used_as_values: JMethodID,
   method_get_jsx: JMethodID,
@@ -628,14 +626,12 @@ struct JavaSwc4jTranspileOptions {
   method_is_var_decl_imports: JMethodID,
   method_is_verbatim_module_syntax: JMethodID,
 }
-unsafe impl Send for JavaSwc4jTranspileOptions {}
-unsafe impl Sync for JavaSwc4jTranspileOptions {}
 
 #[allow(dead_code)]
 impl JavaSwc4jTranspileOptions {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/options/Swc4jTranspileOptions")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/options/Swc4jTranspileOptions"))
       .expect("Couldn't find class Swc4jTranspileOptions");
     let class = env
       .new_global_ref(class)
@@ -643,120 +639,120 @@ impl JavaSwc4jTranspileOptions {
     let method_get_decorators = env
       .get_method_id(
         &class,
-        "getDecorators",
-        "()Lcom/caoccao/javet/swc4j/options/Swc4jDecoratorsTranspileOption;",
+        JNIString::from("getDecorators"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/options/Swc4jDecoratorsTranspileOption;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getDecorators");
     let method_get_imports_not_used_as_values = env
       .get_method_id(
         &class,
-        "getImportsNotUsedAsValues",
-        "()Lcom/caoccao/javet/swc4j/enums/Swc4jImportsNotUsedAsValues;",
+        JNIString::from("getImportsNotUsedAsValues"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/enums/Swc4jImportsNotUsedAsValues;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getImportsNotUsedAsValues");
     let method_get_jsx = env
       .get_method_id(
         &class,
-        "getJsx",
-        "()Lcom/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOption;",
+        JNIString::from("getJsx"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOption;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getJsx");
     let method_get_media_type = env
       .get_method_id(
         &class,
-        "getMediaType",
-        "()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;",
+        JNIString::from("getMediaType"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getMediaType");
     let method_get_module_kind = env
       .get_method_id(
         &class,
-        "getModuleKind",
-        "()Lcom/caoccao/javet/swc4j/enums/Swc4jModuleKind;",
+        JNIString::from("getModuleKind"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/enums/Swc4jModuleKind;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getModuleKind");
     let method_get_parse_mode = env
       .get_method_id(
         &class,
-        "getParseMode",
-        "()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;",
+        JNIString::from("getParseMode"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getParseMode");
     let method_get_plugin_host = env
       .get_method_id(
         &class,
-        "getPluginHost",
-        "()Lcom/caoccao/javet/swc4j/plugins/ISwc4jPluginHost;",
+        JNIString::from("getPluginHost"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/plugins/ISwc4jPluginHost;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getPluginHost");
     let method_get_source_map = env
       .get_method_id(
         &class,
-        "getSourceMap",
-        "()Lcom/caoccao/javet/swc4j/enums/Swc4jSourceMapOption;",
+        JNIString::from("getSourceMap"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/enums/Swc4jSourceMapOption;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getSourceMap");
     let method_get_specifier = env
       .get_method_id(
         &class,
-        "getSpecifier",
-        "()Ljava/net/URL;",
+        JNIString::from("getSpecifier"),
+        RuntimeMethodSignature::from_str("()Ljava/net/URL;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getSpecifier");
     let method_is_capture_ast = env
       .get_method_id(
         &class,
-        "isCaptureAst",
-        "()Z",
+        JNIString::from("isCaptureAst"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isCaptureAst");
     let method_is_capture_comments = env
       .get_method_id(
         &class,
-        "isCaptureComments",
-        "()Z",
+        JNIString::from("isCaptureComments"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isCaptureComments");
     let method_is_capture_tokens = env
       .get_method_id(
         &class,
-        "isCaptureTokens",
-        "()Z",
+        JNIString::from("isCaptureTokens"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isCaptureTokens");
     let method_is_inline_sources = env
       .get_method_id(
         &class,
-        "isInlineSources",
-        "()Z",
+        JNIString::from("isInlineSources"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isInlineSources");
     let method_is_keep_comments = env
       .get_method_id(
         &class,
-        "isKeepComments",
-        "()Z",
+        JNIString::from("isKeepComments"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isKeepComments");
     let method_is_scope_analysis = env
       .get_method_id(
         &class,
-        "isScopeAnalysis",
-        "()Z",
+        JNIString::from("isScopeAnalysis"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isScopeAnalysis");
     let method_is_var_decl_imports = env
       .get_method_id(
         &class,
-        "isVarDeclImports",
-        "()Z",
+        JNIString::from("isVarDeclImports"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isVarDeclImports");
     let method_is_verbatim_module_syntax = env
       .get_method_id(
         &class,
-        "isVerbatimModuleSyntax",
-        "()Z",
+        JNIString::from("isVerbatimModuleSyntax"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isVerbatimModuleSyntax");
     JavaSwc4jTranspileOptions {
@@ -783,7 +779,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn get_decorators<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -801,7 +797,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn get_imports_not_used_as_values<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -819,7 +815,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn get_jsx<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<Option<JObject<'a>>>
   where
@@ -842,7 +838,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn get_media_type<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -860,7 +856,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn get_module_kind<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -878,7 +874,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn get_parse_mode<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -896,7 +892,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn get_plugin_host<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<Option<JObject<'a>>>
   where
@@ -919,7 +915,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn get_source_map<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -937,7 +933,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn get_specifier<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -955,7 +951,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn is_capture_ast<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -971,7 +967,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn is_capture_comments<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -987,7 +983,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn is_capture_tokens<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -1003,7 +999,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn is_inline_sources<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -1019,7 +1015,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn is_keep_comments<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -1035,7 +1031,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn is_scope_analysis<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -1051,7 +1047,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn is_var_decl_imports<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -1067,7 +1063,7 @@ impl JavaSwc4jTranspileOptions {
 
   pub fn is_verbatim_module_syntax<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -1086,16 +1082,14 @@ impl JavaSwc4jTranspileOptions {
 /* JavaSwc4jDecoratorsTranspileOptionNone Begin */
 #[allow(dead_code)]
 struct JavaSwc4jDecoratorsTranspileOptionNone {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
 }
-unsafe impl Send for JavaSwc4jDecoratorsTranspileOptionNone {}
-unsafe impl Sync for JavaSwc4jDecoratorsTranspileOptionNone {}
 
 #[allow(dead_code)]
 impl JavaSwc4jDecoratorsTranspileOptionNone {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/options/Swc4jDecoratorsTranspileOptionNone")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/options/Swc4jDecoratorsTranspileOptionNone"))
       .expect("Couldn't find class Swc4jDecoratorsTranspileOptionNone");
     let class = env
       .new_global_ref(class)
@@ -1110,16 +1104,14 @@ impl JavaSwc4jDecoratorsTranspileOptionNone {
 /* JavaSwc4jDecoratorsTranspileOptionEcma Begin */
 #[allow(dead_code)]
 struct JavaSwc4jDecoratorsTranspileOptionEcma {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
 }
-unsafe impl Send for JavaSwc4jDecoratorsTranspileOptionEcma {}
-unsafe impl Sync for JavaSwc4jDecoratorsTranspileOptionEcma {}
 
 #[allow(dead_code)]
 impl JavaSwc4jDecoratorsTranspileOptionEcma {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/options/Swc4jDecoratorsTranspileOptionEcma")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/options/Swc4jDecoratorsTranspileOptionEcma"))
       .expect("Couldn't find class Swc4jDecoratorsTranspileOptionEcma");
     let class = env
       .new_global_ref(class)
@@ -1134,17 +1126,15 @@ impl JavaSwc4jDecoratorsTranspileOptionEcma {
 /* JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript Begin */
 #[allow(dead_code)]
 struct JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_is_emit_metadata: JMethodID,
 }
-unsafe impl Send for JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {}
-unsafe impl Sync for JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {}
 
 #[allow(dead_code)]
 impl JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/options/Swc4jDecoratorsTranspileOptionLegacyTypeScript")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/options/Swc4jDecoratorsTranspileOptionLegacyTypeScript"))
       .expect("Couldn't find class Swc4jDecoratorsTranspileOptionLegacyTypeScript");
     let class = env
       .new_global_ref(class)
@@ -1152,8 +1142,8 @@ impl JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {
     let method_is_emit_metadata = env
       .get_method_id(
         &class,
-        "isEmitMetadata",
-        "()Z",
+        JNIString::from("isEmitMetadata"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jDecoratorsTranspileOptionLegacyTypeScript.isEmitMetadata");
     JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {
@@ -1164,7 +1154,7 @@ impl JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {
 
   pub fn is_emit_metadata<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -1183,18 +1173,16 @@ impl JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {
 /* JavaSwc4jJsxRuntimeOptionAutomatic Begin */
 #[allow(dead_code)]
 struct JavaSwc4jJsxRuntimeOptionAutomatic {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_get_import_source: JMethodID,
   method_is_development: JMethodID,
 }
-unsafe impl Send for JavaSwc4jJsxRuntimeOptionAutomatic {}
-unsafe impl Sync for JavaSwc4jJsxRuntimeOptionAutomatic {}
 
 #[allow(dead_code)]
 impl JavaSwc4jJsxRuntimeOptionAutomatic {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOptionAutomatic")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOptionAutomatic"))
       .expect("Couldn't find class Swc4jJsxRuntimeOptionAutomatic");
     let class = env
       .new_global_ref(class)
@@ -1202,15 +1190,15 @@ impl JavaSwc4jJsxRuntimeOptionAutomatic {
     let method_get_import_source = env
       .get_method_id(
         &class,
-        "getImportSource",
-        "()Ljava/lang/String;",
+        JNIString::from("getImportSource"),
+        RuntimeMethodSignature::from_str("()Ljava/lang/String;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jJsxRuntimeOptionAutomatic.getImportSource");
     let method_is_development = env
       .get_method_id(
         &class,
-        "isDevelopment",
-        "()Z",
+        JNIString::from("isDevelopment"),
+        RuntimeMethodSignature::from_str("()Z").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jJsxRuntimeOptionAutomatic.isDevelopment");
     JavaSwc4jJsxRuntimeOptionAutomatic {
@@ -1222,7 +1210,7 @@ impl JavaSwc4jJsxRuntimeOptionAutomatic {
 
   pub fn get_import_source<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<Option<String>>
   {
@@ -1241,7 +1229,7 @@ impl JavaSwc4jJsxRuntimeOptionAutomatic {
 
   pub fn is_development<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<bool>
   {
@@ -1260,18 +1248,16 @@ impl JavaSwc4jJsxRuntimeOptionAutomatic {
 /* JavaSwc4jJsxRuntimeOptionClassic Begin */
 #[allow(dead_code)]
 struct JavaSwc4jJsxRuntimeOptionClassic {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_get_factory: JMethodID,
   method_get_fragment_factory: JMethodID,
 }
-unsafe impl Send for JavaSwc4jJsxRuntimeOptionClassic {}
-unsafe impl Sync for JavaSwc4jJsxRuntimeOptionClassic {}
 
 #[allow(dead_code)]
 impl JavaSwc4jJsxRuntimeOptionClassic {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOptionClassic")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOptionClassic"))
       .expect("Couldn't find class Swc4jJsxRuntimeOptionClassic");
     let class = env
       .new_global_ref(class)
@@ -1279,15 +1265,15 @@ impl JavaSwc4jJsxRuntimeOptionClassic {
     let method_get_factory = env
       .get_method_id(
         &class,
-        "getFactory",
-        "()Ljava/lang/String;",
+        JNIString::from("getFactory"),
+        RuntimeMethodSignature::from_str("()Ljava/lang/String;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jJsxRuntimeOptionClassic.getFactory");
     let method_get_fragment_factory = env
       .get_method_id(
         &class,
-        "getFragmentFactory",
-        "()Ljava/lang/String;",
+        JNIString::from("getFragmentFactory"),
+        RuntimeMethodSignature::from_str("()Ljava/lang/String;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jJsxRuntimeOptionClassic.getFragmentFactory");
     JavaSwc4jJsxRuntimeOptionClassic {
@@ -1299,7 +1285,7 @@ impl JavaSwc4jJsxRuntimeOptionClassic {
 
   pub fn get_factory<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<String>
   {
@@ -1319,7 +1305,7 @@ impl JavaSwc4jJsxRuntimeOptionClassic {
 
   pub fn get_fragment_factory<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<String>
   {
@@ -1342,19 +1328,17 @@ impl JavaSwc4jJsxRuntimeOptionClassic {
 /* JavaSwc4jJsxRuntimeOptionPrecompile Begin */
 #[allow(dead_code)]
 struct JavaSwc4jJsxRuntimeOptionPrecompile {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_get_automatic: JMethodID,
   method_get_dynamic_props: JMethodID,
   method_get_skip_elements: JMethodID,
 }
-unsafe impl Send for JavaSwc4jJsxRuntimeOptionPrecompile {}
-unsafe impl Sync for JavaSwc4jJsxRuntimeOptionPrecompile {}
 
 #[allow(dead_code)]
 impl JavaSwc4jJsxRuntimeOptionPrecompile {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOptionPrecompile")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOptionPrecompile"))
       .expect("Couldn't find class Swc4jJsxRuntimeOptionPrecompile");
     let class = env
       .new_global_ref(class)
@@ -1362,22 +1346,22 @@ impl JavaSwc4jJsxRuntimeOptionPrecompile {
     let method_get_automatic = env
       .get_method_id(
         &class,
-        "getAutomatic",
-        "()Lcom/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOptionAutomatic;",
+        JNIString::from("getAutomatic"),
+        RuntimeMethodSignature::from_str("()Lcom/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOptionAutomatic;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jJsxRuntimeOptionPrecompile.getAutomatic");
     let method_get_dynamic_props = env
       .get_method_id(
         &class,
-        "getDynamicProps",
-        "()Ljava/util/List;",
+        JNIString::from("getDynamicProps"),
+        RuntimeMethodSignature::from_str("()Ljava/util/List;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jJsxRuntimeOptionPrecompile.getDynamicProps");
     let method_get_skip_elements = env
       .get_method_id(
         &class,
-        "getSkipElements",
-        "()Ljava/util/List;",
+        JNIString::from("getSkipElements"),
+        RuntimeMethodSignature::from_str("()Ljava/util/List;").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jJsxRuntimeOptionPrecompile.getSkipElements");
     JavaSwc4jJsxRuntimeOptionPrecompile {
@@ -1390,7 +1374,7 @@ impl JavaSwc4jJsxRuntimeOptionPrecompile {
 
   pub fn get_automatic<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -1408,7 +1392,7 @@ impl JavaSwc4jJsxRuntimeOptionPrecompile {
 
   pub fn get_dynamic_props<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<Option<JObject<'a>>>
   where
@@ -1431,7 +1415,7 @@ impl JavaSwc4jJsxRuntimeOptionPrecompile {
 
   pub fn get_skip_elements<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<Option<JObject<'a>>>
   where
@@ -1466,7 +1450,7 @@ static JAVA_JSX_RUNTIME_OPTION_AUTOMATIC: OnceLock<JavaSwc4jJsxRuntimeOptionAuto
 static JAVA_JSX_RUNTIME_OPTION_CLASSIC: OnceLock<JavaSwc4jJsxRuntimeOptionClassic> = OnceLock::new();
 static JAVA_JSX_RUNTIME_OPTION_PRECOMPILE: OnceLock<JavaSwc4jJsxRuntimeOptionPrecompile> = OnceLock::new();
 
-pub fn init<'local>(env: &mut JNIEnv<'local>) {
+pub fn init<'local>(env: &mut Env<'local>) {
   log::debug!("init()");
   unsafe {
     JAVA_PARSE_OPTIONS
@@ -1500,7 +1484,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 }
 
 #[derive(Debug)]
-pub struct ParseOptions<'a> {
+pub struct ParseOptions {
   /// Whether to capture ast or not.
   pub capture_ast: bool,
   /// Whether to capture comments or not.
@@ -1512,20 +1496,20 @@ pub struct ParseOptions<'a> {
   /// Should the code to be parsed as Module or Script.
   pub parse_mode: ParseMode,
   /// AST plugin host.
-  pub plugin_host: Option<PluginHost<'a>>,
+  pub plugin_host: Option<PluginHost>,
   /// Whether to apply swc's scope analysis.
   pub scope_analysis: bool,
   /// Specifier of the source text.
   pub specifier: String,
 }
 
-impl<'a> ParseOptions<'a> {
+impl ParseOptions {
   pub fn get_specifier(&self) -> Result<ModuleSpecifier> {
     ModuleSpecifier::parse(self.specifier.as_str()).map_err(Error::msg)
   }
 }
 
-impl<'a> Default for ParseOptions<'a> {
+impl Default for ParseOptions {
   fn default() -> Self {
     ParseOptions {
       capture_ast: false,
@@ -1540,8 +1524,8 @@ impl<'a> Default for ParseOptions<'a> {
   }
 }
 
-impl<'local> FromJava<'local> for ParseOptions<'local> {
-  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<ParseOptions<'local>>> {
+impl<'local> FromJava<'local> for ParseOptions {
+  fn from_java(env: &mut Env<'local>, obj: &JObject<'_>) -> Result<Box<ParseOptions>> {
     let java_parse_options = JAVA_PARSE_OPTIONS.get().unwrap();
     let capture_ast = java_parse_options.is_capture_ast(env, obj)?;
     let capture_comments = java_parse_options.is_capture_comments(env, obj)?;
@@ -1556,7 +1540,7 @@ impl<'local> FromJava<'local> for ParseOptions<'local> {
       let host = env
         .new_global_ref(host)
         .expect("Failed to create global reference for plugin host");
-      PluginHost::new(env, host)
+      PluginHost::new(host)
     });
     let java_parse_mode = java_parse_options.get_parse_mode(env, obj)?;
     let parse_mode = *ParseMode::from_java(env, &java_parse_mode)?;
@@ -1576,7 +1560,7 @@ impl<'local> FromJava<'local> for ParseOptions<'local> {
 }
 
 #[derive(Debug)]
-pub struct TransformOptions<'a> {
+pub struct TransformOptions {
   /// Forces the code generator to use only ascii characters.
   ///
   /// This is useful for environments that do not support unicode.
@@ -1598,7 +1582,7 @@ pub struct TransformOptions<'a> {
   /// Should the code to be parsed as Module or Script.
   pub parse_mode: ParseMode,
   /// AST plugin host.
-  pub plugin_host: Option<PluginHost<'a>>,
+  pub plugin_host: Option<PluginHost>,
   /// How and if source maps should be generated.
   pub source_map: SourceMapOption,
   /// Specifier of the source text.
@@ -1615,13 +1599,13 @@ pub struct TransformOptions<'a> {
   pub target: EsVersion,
 }
 
-impl<'a> TransformOptions<'a> {
+impl TransformOptions {
   pub fn get_specifier(&self) -> Result<ModuleSpecifier> {
     ModuleSpecifier::parse(self.specifier.as_str()).map_err(Error::msg)
   }
 }
 
-impl<'a> Default for TransformOptions<'a> {
+impl Default for TransformOptions {
   fn default() -> Self {
     TransformOptions {
       ascii_only: false,
@@ -1640,8 +1624,8 @@ impl<'a> Default for TransformOptions<'a> {
   }
 }
 
-impl<'local> FromJava<'local> for TransformOptions<'local> {
-  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<TransformOptions<'local>>> {
+impl<'local> FromJava<'local> for TransformOptions {
+  fn from_java(env: &mut Env<'local>, obj: &JObject<'_>) -> Result<Box<TransformOptions>> {
     let java_transform_options = JAVA_TRANSFORM_OPTIONS.get().unwrap();
     let ascii_only = java_transform_options.is_ascii_only(env, obj)?;
     let emit_assert_for_import_attributes = java_transform_options.is_emit_assert_for_import_attributes(env, obj)?;
@@ -1660,7 +1644,7 @@ impl<'local> FromJava<'local> for TransformOptions<'local> {
       let host = env
         .new_global_ref(host)
         .expect("Failed to create global reference for plugin host");
-      PluginHost::new(env, host)
+      PluginHost::new(host)
     });
     let specifier = java_transform_options.get_specifier(env, obj)?;
     let specifier = url_to_string(env, &specifier)?;
@@ -1688,7 +1672,7 @@ impl<'local> FromJava<'local> for TransformOptions<'local> {
 }
 
 #[derive(Debug)]
-pub struct TranspileOptions<'a> {
+pub struct TranspileOptions {
   /// Whether to capture ast or not.
   pub capture_ast: bool,
   /// Whether to capture comments or not.
@@ -1714,7 +1698,7 @@ pub struct TranspileOptions<'a> {
   /// Should the code to be parsed as Module or Script,
   pub parse_mode: ParseMode,
   /// AST plugin host.
-  pub plugin_host: Option<PluginHost<'a>>,
+  pub plugin_host: Option<PluginHost>,
   /// Whether to apply swc's scope analysis.
   pub scope_analysis: bool,
   /// How and if source maps should be generated.
@@ -1730,13 +1714,13 @@ pub struct TranspileOptions<'a> {
   pub verbatim_module_syntax: bool,
 }
 
-impl<'a> TranspileOptions<'a> {
+impl TranspileOptions {
   pub fn get_specifier(&self) -> Result<ModuleSpecifier> {
     ModuleSpecifier::parse(self.specifier.as_str()).map_err(Error::msg)
   }
 }
 
-impl<'a> Default for TranspileOptions<'a> {
+impl Default for TranspileOptions {
   fn default() -> Self {
     TranspileOptions {
       capture_ast: false,
@@ -1760,8 +1744,8 @@ impl<'a> Default for TranspileOptions<'a> {
   }
 }
 
-impl<'local> FromJava<'local> for TranspileOptions<'local> {
-  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<TranspileOptions<'local>>> {
+impl<'local> FromJava<'local> for TranspileOptions {
+  fn from_java(env: &mut Env<'local>, obj: &JObject<'_>) -> Result<Box<TranspileOptions>> {
     let java_transpile_options = JAVA_TRANSPILE_OPTIONS.get().unwrap();
     let java_decorators = java_transpile_options.get_decorators(env, obj)?;
     let java_decorators_transpile_option_ecma = JAVA_DECORATORS_TRANSPILE_OPTION_ECMA.get().unwrap();
@@ -1873,7 +1857,7 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
       let host = env
         .new_global_ref(host)
         .expect("Failed to create global reference for plugin host");
-      PluginHost::new(env, host)
+      PluginHost::new(host)
     });
     delete_local_optional_ref!(env, java_optional_plugin_host);
     let scope_analysis = java_transpile_options.is_scope_analysis(env, obj)?;

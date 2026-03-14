@@ -21,8 +21,10 @@ use std::sync::OnceLock;
 use anyhow::Result;
 use deno_ast::swc::common::source_map::SmallPos;
 use deno_ast::swc::common::{BytePos, Span};
-use jni::objects::{GlobalRef, JMethodID, JObject};
-use jni::JNIEnv;
+use jni::objects::{Global, JClass, JMethodID, JObject};
+use jni::signature::RuntimeMethodSignature;
+use jni::strings::JNIString;
+use jni::Env;
 
 use crate::jni_utils::*;
 
@@ -46,7 +48,7 @@ impl Default for SpanEx {
 }
 
 impl ToJava for SpanEx {
-  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> Result<JObject<'a>>
+  fn to_java<'local, 'a>(&self, env: &mut Env<'local>) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -65,7 +67,7 @@ pub trait RegisterWithMap<Map> {
 }
 
 pub trait ToJavaWithMap<Map> {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ Map) -> Result<JObject<'a>>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut Env<'local>, map: &'_ Map) -> Result<JObject<'a>>
   where
     'local: 'a;
 }
@@ -144,21 +146,19 @@ impl ByteToIndexMap {
 /* JavaSwc4jSpan Begin */
 #[allow(dead_code)]
 struct JavaSwc4jSpan {
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_construct: JMethodID,
   method_get_column: JMethodID,
   method_get_end: JMethodID,
   method_get_line: JMethodID,
   method_get_start: JMethodID,
 }
-unsafe impl Send for JavaSwc4jSpan {}
-unsafe impl Sync for JavaSwc4jSpan {}
 
 #[allow(dead_code)]
 impl JavaSwc4jSpan {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/span/Swc4jSpan")
+      .find_class(JNIString::from("com/caoccao/javet/swc4j/span/Swc4jSpan"))
       .expect("Couldn't find class Swc4jSpan");
     let class = env
       .new_global_ref(class)
@@ -166,36 +166,36 @@ impl JavaSwc4jSpan {
     let method_construct = env
       .get_method_id(
         &class,
-        "<init>",
-        "(IIII)V",
+        JNIString::from("<init>"),
+        RuntimeMethodSignature::from_str("(IIII)V").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jSpan::new");
     let method_get_column = env
       .get_method_id(
         &class,
-        "getColumn",
-        "()I",
+        JNIString::from("getColumn"),
+        RuntimeMethodSignature::from_str("()I").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jSpan.getColumn");
     let method_get_end = env
       .get_method_id(
         &class,
-        "getEnd",
-        "()I",
+        JNIString::from("getEnd"),
+        RuntimeMethodSignature::from_str("()I").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jSpan.getEnd");
     let method_get_line = env
       .get_method_id(
         &class,
-        "getLine",
-        "()I",
+        JNIString::from("getLine"),
+        RuntimeMethodSignature::from_str("()I").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jSpan.getLine");
     let method_get_start = env
       .get_method_id(
         &class,
-        "getStart",
-        "()I",
+        JNIString::from("getStart"),
+        RuntimeMethodSignature::from_str("()I").unwrap().method_signature(),
       )
       .expect("Couldn't find method Swc4jSpan.getStart");
     JavaSwc4jSpan {
@@ -210,7 +210,7 @@ impl JavaSwc4jSpan {
 
   pub fn construct<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     start: i32,
     end: i32,
     line: i32,
@@ -235,7 +235,7 @@ impl JavaSwc4jSpan {
 
   pub fn get_column<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<i32>
   {
@@ -251,7 +251,7 @@ impl JavaSwc4jSpan {
 
   pub fn get_end<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<i32>
   {
@@ -267,7 +267,7 @@ impl JavaSwc4jSpan {
 
   pub fn get_line<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<i32>
   {
@@ -283,7 +283,7 @@ impl JavaSwc4jSpan {
 
   pub fn get_start<'local>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
   ) -> Result<i32>
   {
@@ -301,7 +301,7 @@ impl JavaSwc4jSpan {
 
 static JAVA_CLASS_SPAN: OnceLock<JavaSwc4jSpan> = OnceLock::new();
 
-pub fn init<'local>(env: &mut JNIEnv<'local>) {
+pub fn init<'local>(env: &mut Env<'local>) {
   log::debug!("init()");
   unsafe {
     JAVA_CLASS_SPAN.set(JavaSwc4jSpan::new(env)).unwrap_unchecked();

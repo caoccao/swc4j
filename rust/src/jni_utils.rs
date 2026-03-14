@@ -18,8 +18,10 @@
 use std::sync::OnceLock;
 
 use anyhow::Result;
-use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID, JString};
-use jni::JNIEnv;
+use jni::objects::{Global, JClass, JMethodID, JObject, JStaticMethodID, JString};
+use jni::strings::JNIString;
+use jni::signature::RuntimeMethodSignature;
+use jni::Env;
 
 macro_rules! call_as_boolean {
   ($env: ident, $obj: expr, $method: expr, $args: expr, $name: literal) => {
@@ -154,20 +156,14 @@ pub(crate) use call_static_as_object;
 
 macro_rules! delete_local_optional_ref {
   ($env: expr, $name: expr) => {
-    $name.map(|j| match $env.delete_local_ref(j) {
-      Ok(_) => {}
-      Err(err) => panic!("Couldn't delete local {} because {}", stringify!($name), err),
-    });
+    $name.map(|j| $env.delete_local_ref(j));
   };
 }
 pub(crate) use delete_local_optional_ref;
 
 macro_rules! delete_local_ref {
   ($env: expr, $name: expr) => {
-    match $env.delete_local_ref($name) {
-      Ok(_) => {}
-      Err(err) => panic!("Couldn't delete local {} because {}", stringify!($name), err),
-    }
+    $env.delete_local_ref($name);
   };
 }
 pub(crate) use delete_local_ref;
@@ -178,8 +174,9 @@ macro_rules! jstring_to_optional_string {
       Ok(None)
     } else {
       unsafe {
-        match $env.get_string(&JString::from_raw($s)) {
-          Ok(s) => Ok(Some(s.into())),
+        let jstring = JString::from_raw(&*$env, $s);
+        match jstring.try_to_string(&*$env) {
+          Ok(s) => Ok(Some(s)),
           Err(err) => Err(anyhow::Error::msg(err)),
         }
       }
@@ -220,7 +217,7 @@ pub(crate) use string_to_jstring;
 
 macro_rules! boolean_to_jvalue {
   ($object: expr) => {
-    jni::sys::jvalue { z: $object as u8 }
+    jni::sys::jvalue { z: $object }
   };
 }
 pub(crate) use boolean_to_jvalue;
@@ -304,43 +301,41 @@ macro_rules! short_to_jvalue {
 pub(crate) use short_to_jvalue;
 
 pub trait FromJava<'local> {
-  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<Self>>;
+  fn from_java(env: &mut Env<'local>, obj: &JObject<'_>) -> Result<Box<Self>>;
 }
 
 pub trait ToJava {
-  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> Result<JObject<'a>>
+  fn to_java<'local, 'a>(&self, env: &mut Env<'local>) -> Result<JObject<'a>>
   where
     'local: 'a;
 }
 
 pub struct JavaArrayList {
   #[allow(dead_code)]
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_construct: JMethodID,
   method_add: JMethodID,
   method_get: JMethodID,
   method_size: JMethodID,
 }
-unsafe impl Send for JavaArrayList {}
-unsafe impl Sync for JavaArrayList {}
 
 impl JavaArrayList {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("java/util/ArrayList")
+      .find_class(JNIString::from("java/util/ArrayList"))
       .expect("Couldn't find class ArrayList");
     let class = env.new_global_ref(class).expect("Couldn't globalize class ArrayList");
     let method_construct = env
-      .get_method_id(&class, "<init>", "(I)V")
+      .get_method_id(&class, JNIString::from("<init>"), RuntimeMethodSignature::from_str("(I)V").unwrap().method_signature())
       .expect("Couldn't find method ArrayList::new");
     let method_add = env
-      .get_method_id(&class, "add", "(Ljava/lang/Object;)Z")
+      .get_method_id(&class, JNIString::from("add"), RuntimeMethodSignature::from_str("(Ljava/lang/Object;)Z").unwrap().method_signature())
       .expect("Couldn't find method ArrayList.add");
     let method_get = env
-      .get_method_id(&class, "get", "(I)Ljava/lang/Object;")
+      .get_method_id(&class, JNIString::from("get"), RuntimeMethodSignature::from_str("(I)Ljava/lang/Object;").unwrap().method_signature())
       .expect("Couldn't find method ArrayList.get");
     let method_size = env
-      .get_method_id(&class, "size", "()I")
+      .get_method_id(&class, JNIString::from("size"), RuntimeMethodSignature::from_str("()I").unwrap().method_signature())
       .expect("Couldn't find method ArrayList.size");
     JavaArrayList {
       class,
@@ -351,7 +346,7 @@ impl JavaArrayList {
     }
   }
 
-  pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, initial_capacity: usize) -> Result<JObject<'a>>
+  pub fn construct<'local, 'a>(&self, env: &mut Env<'local>, initial_capacity: usize) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -365,12 +360,12 @@ impl JavaArrayList {
     )
   }
 
-  pub fn add<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> Result<bool> {
+  pub fn add<'local>(&self, env: &mut Env<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> Result<bool> {
     let element = object_to_jvalue!(element);
     call_as_boolean!(env, obj, &self.method_add, &[element], "add()")
   }
 
-  pub fn get<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>, index: usize) -> Result<JObject<'a>>
+  pub fn get<'local, 'a>(&self, env: &mut Env<'local>, obj: &JObject<'_>, index: usize) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -378,34 +373,32 @@ impl JavaArrayList {
     call_as_object!(env, obj, &self.method_get, &[index], "get()")
   }
 
-  pub fn size<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<usize> {
+  pub fn size<'local>(&self, env: &mut Env<'local>, obj: &JObject<'_>) -> Result<usize> {
     call_as_int!(env, obj, &self.method_size, &[], "size()").map(|size| size as usize)
   }
 }
 
 pub struct JavaHashMap {
   #[allow(dead_code)]
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_construct: JMethodID,
   method_put: JMethodID,
 }
-unsafe impl Send for JavaHashMap {}
-unsafe impl Sync for JavaHashMap {}
 
 impl JavaHashMap {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("java/util/HashMap")
+      .find_class(JNIString::from("java/util/HashMap"))
       .expect("Couldn't find class HashMap");
     let class = env.new_global_ref(class).expect("Couldn't globalize class HashMap");
     let method_construct = env
-      .get_method_id(&class, "<init>", "(I)V")
+      .get_method_id(&class, JNIString::from("<init>"), RuntimeMethodSignature::from_str("(I)V").unwrap().method_signature())
       .expect("Couldn't find method HashMap::new");
     let method_put = env
       .get_method_id(
         &class,
-        "put",
-        "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+        JNIString::from("put"),
+        RuntimeMethodSignature::from_str("(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;").unwrap().method_signature(),
       )
       .expect("Couldn't find method HashMap.put");
     JavaHashMap {
@@ -415,7 +408,7 @@ impl JavaHashMap {
     }
   }
 
-  pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, initial_capacity: usize) -> Result<JObject<'a>>
+  pub fn construct<'local, 'a>(&self, env: &mut Env<'local>, initial_capacity: usize) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -425,7 +418,7 @@ impl JavaHashMap {
 
   pub fn put<'local, 'a>(
     &self,
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     obj: &JObject<'_>,
     key: &JObject<'_>,
     value: &JObject<'_>,
@@ -441,25 +434,23 @@ impl JavaHashMap {
 
 pub struct JavaInteger {
   #[allow(dead_code)]
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_value_of: JStaticMethodID,
 }
-unsafe impl Send for JavaInteger {}
-unsafe impl Sync for JavaInteger {}
 
 impl JavaInteger {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
     let class = env
-      .find_class("java/lang/Integer")
+      .find_class(JNIString::from("java/lang/Integer"))
       .expect("Couldn't find class Integer");
     let class = env.new_global_ref(class).expect("Couldn't globalize class Integer");
     let method_value_of = env
-      .get_static_method_id(&class, "valueOf", "(I)Ljava/lang/Integer;")
+      .get_static_method_id(&class, JNIString::from("valueOf"), RuntimeMethodSignature::from_str("(I)Ljava/lang/Integer;").unwrap().method_signature())
       .expect("Couldn't find method Integer.valueOf");
     JavaInteger { class, method_value_of }
   }
 
-  pub fn value_of<'local, 'a>(&self, env: &mut JNIEnv<'local>, i: i32) -> Result<JObject<'a>>
+  pub fn value_of<'local, 'a>(&self, env: &mut Env<'local>, i: i32) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -470,28 +461,26 @@ impl JavaInteger {
 
 pub struct JavaOptional {
   #[allow(dead_code)]
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_get: JMethodID,
   method_is_present: JMethodID,
 }
-unsafe impl Send for JavaOptional {}
-unsafe impl Sync for JavaOptional {}
 
 impl JavaOptional {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
-    let class = if let Ok(class) = env.find_class("java/util/Optional") {
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
+    let class = if let Ok(class) = env.find_class(JNIString::from("java/util/Optional")) {
       class
     } else {
       env
-        .find_class("j$/util/Optional")
+        .find_class(JNIString::from("j$/util/Optional"))
         .expect("Couldn't find class Optional")
     };
     let class = env.new_global_ref(class).expect("Couldn't globalize class Optional");
     let method_get = env
-      .get_method_id(&class, "get", "()Ljava/lang/Object;")
+      .get_method_id(&class, JNIString::from("get"), RuntimeMethodSignature::from_str("()Ljava/lang/Object;").unwrap().method_signature())
       .expect("Couldn't find method Optional.get");
     let method_is_empty = env
-      .get_method_id(&class, "isPresent", "()Z")
+      .get_method_id(&class, JNIString::from("isPresent"), RuntimeMethodSignature::from_str("()Z").unwrap().method_signature())
       .expect("Couldn't find method Optional.isPresent");
     JavaOptional {
       class,
@@ -500,32 +489,30 @@ impl JavaOptional {
     }
   }
 
-  pub fn get<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<JObject<'a>>
+  pub fn get<'local, 'a>(&self, env: &mut Env<'local>, obj: &JObject<'_>) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
     call_as_object!(env, obj, &self.method_get, &[], "get()")
   }
 
-  pub fn is_present<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<bool> {
+  pub fn is_present<'local>(&self, env: &mut Env<'local>, obj: &JObject<'_>) -> Result<bool> {
     call_as_boolean!(env, obj, &self.method_is_present, &[], "isPresent()")
   }
 }
 
 struct JavaURL {
   #[allow(dead_code)]
-  class: GlobalRef,
+  class: Global<JClass<'static>>,
   method_to_string: JMethodID,
 }
-unsafe impl Send for JavaURL {}
-unsafe impl Sync for JavaURL {}
 
 impl JavaURL {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
-    let class = env.find_class("java/net/URL").expect("Couldn't find class URL");
+  pub fn new<'local>(env: &mut Env<'local>) -> Self {
+    let class = env.find_class(JNIString::from("java/net/URL")).expect("Couldn't find class URL");
     let class = env.new_global_ref(class).expect("Couldn't globalize class URL");
     let method_to_string = env
-      .get_method_id(&class, "toString", "()Ljava/lang/String;")
+      .get_method_id(&class, JNIString::from("toString"), RuntimeMethodSignature::from_str("()Ljava/lang/String;").unwrap().method_signature())
       .expect("Couldn't find method URL.toString");
     JavaURL {
       class,
@@ -533,7 +520,7 @@ impl JavaURL {
     }
   }
 
-  pub fn to_string<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<String> {
+  pub fn to_string<'local>(&self, env: &mut Env<'local>, obj: &JObject<'_>) -> Result<String> {
     let url_string = call_as_object!(env, obj, &self.method_to_string, &[], "toString()")?;
     jstring_to_string!(env, *url_string)
   }
@@ -545,7 +532,7 @@ static JAVA_INTEGER: OnceLock<JavaInteger> = OnceLock::new();
 static JAVA_OPTIONAL: OnceLock<JavaOptional> = OnceLock::new();
 static JAVA_URL: OnceLock<JavaURL> = OnceLock::new();
 
-pub fn init<'local>(env: &mut JNIEnv<'local>) {
+pub fn init<'local>(env: &mut Env<'local>) {
   log::debug!("init()");
   unsafe {
     JAVA_ARRAY_LIST.set(JavaArrayList::new(env)).unwrap_unchecked();
@@ -556,36 +543,36 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
   }
 }
 
-pub fn integer_value_of<'local, 'a>(env: &mut JNIEnv<'local>, i: i32) -> Result<JObject<'a>>
+pub fn integer_value_of<'local, 'a>(env: &mut Env<'local>, i: i32) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
   JAVA_INTEGER.get().unwrap().value_of(env, i)
 }
 
-pub fn list_add<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> Result<bool> {
+pub fn list_add<'local>(env: &mut Env<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> Result<bool> {
   JAVA_ARRAY_LIST.get().unwrap().add(env, obj, element)
 }
 
-pub fn list_get<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, index: usize) -> Result<JObject<'a>>
+pub fn list_get<'local, 'a>(env: &mut Env<'local>, obj: &JObject<'_>, index: usize) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
   JAVA_ARRAY_LIST.get().unwrap().get(env, obj, index)
 }
 
-pub fn list_new<'local, 'a>(env: &mut JNIEnv<'local>, initial_capacity: usize) -> Result<JObject<'a>>
+pub fn list_new<'local, 'a>(env: &mut Env<'local>, initial_capacity: usize) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
   JAVA_ARRAY_LIST.get().unwrap().construct(env, initial_capacity)
 }
 
-pub fn list_size<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<usize> {
+pub fn list_size<'local>(env: &mut Env<'local>, obj: &JObject<'_>) -> Result<usize> {
   JAVA_ARRAY_LIST.get().unwrap().size(env, obj)
 }
 
-pub fn map_new<'local, 'a>(env: &mut JNIEnv<'local>, initial_capacity: usize) -> Result<JObject<'a>>
+pub fn map_new<'local, 'a>(env: &mut Env<'local>, initial_capacity: usize) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
@@ -593,7 +580,7 @@ where
 }
 
 pub fn map_put<'local, 'a>(
-  env: &mut JNIEnv<'local>,
+  env: &mut Env<'local>,
   obj: &JObject<'_>,
   key: &JObject<'_>,
   value: &JObject<'_>,
@@ -604,17 +591,17 @@ where
   JAVA_HASH_MAP.get().unwrap().put(env, obj, key, value)
 }
 
-pub fn url_to_string<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<String> {
+pub fn url_to_string<'local>(env: &mut Env<'local>, obj: &JObject<'_>) -> Result<String> {
   JAVA_URL.get().unwrap().to_string(env, obj)
 }
 
-pub fn optional_get<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<JObject<'a>>
+pub fn optional_get<'local, 'a>(env: &mut Env<'local>, obj: &JObject<'_>) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
   JAVA_OPTIONAL.get().unwrap().get(env, obj)
 }
 
-pub fn optional_is_present<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<bool> {
+pub fn optional_is_present<'local>(env: &mut Env<'local>, obj: &JObject<'_>) -> Result<bool> {
   JAVA_OPTIONAL.get().unwrap().is_present(env, obj)
 }
