@@ -121,6 +121,16 @@ public class TestJsonUtilsStringify {
     }
 
     @Test
+    public void testEdgeCase10ReplacerArrayListKeepsOrder() {
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
+        ArrayList<Object> replacer = new ArrayList<>(List.of("c", "a", "c", "b"));
+        assertThat(JsonUtils.stringify(map, replacer, null)).isEqualTo("{\"c\":3,\"a\":1,\"b\":2}");
+    }
+
+    @Test
     public void testEdgeCase10ReplacerAsArrayList() {
         // #10: Replacer as ArrayList property whitelist
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
@@ -131,16 +141,6 @@ public class TestJsonUtilsStringify {
         replacer.add("a");
         replacer.add("c");
         assertThat(JsonUtils.stringify(map, replacer, null)).isEqualTo("{\"a\":1,\"c\":3}");
-    }
-
-    @Test
-    public void testEdgeCase10ReplacerArrayListKeepsOrder() {
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        map.put("c", 3);
-        ArrayList<Object> replacer = new ArrayList<>(List.of("c", "a", "c", "b"));
-        assertThat(JsonUtils.stringify(map, replacer, null)).isEqualTo("{\"c\":3,\"a\":1,\"b\":2}");
     }
 
     @Test
@@ -246,6 +246,191 @@ public class TestJsonUtilsStringify {
     }
 
     @Test
+    public void testFunctionReplacerAllKeysFiltered() {
+        // All keys filtered → empty object
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        BiFunction<String, Object, Object> replacer = (key, value) -> {
+            if (!key.isEmpty()) return JsonUtils.UNDEFINED;
+            return value;
+        };
+        assertThat(JsonUtils.stringify(map, replacer, null)).isEqualTo("{}");
+    }
+
+    @Test
+    public void testFunctionReplacerArrayWithObjects() {
+        // Replacer filters keys from objects inside arrays
+        LinkedHashMap<String, Object> obj1 = new LinkedHashMap<>();
+        obj1.put("id", 1);
+        obj1.put("secret", "x");
+        LinkedHashMap<String, Object> obj2 = new LinkedHashMap<>();
+        obj2.put("id", 2);
+        obj2.put("secret", "y");
+        ArrayList<Object> list = new ArrayList<>();
+        list.add(obj1);
+        list.add(obj2);
+        BiFunction<String, Object, Object> replacer = (key, value) -> {
+            if ("secret".equals(key)) return JsonUtils.UNDEFINED;
+            return value;
+        };
+        assertThat(JsonUtils.stringify(list, replacer, null))
+                .isEqualTo("[{\"id\":1},{\"id\":2}]");
+    }
+
+    @Test
+    public void testFunctionReplacerFilterKeys() {
+        // BiFunction replacer: return UNDEFINED to omit properties
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        map.put("name", "Alice");
+        map.put("password", "secret");
+        map.put("age", 30);
+        BiFunction<String, Object, Object> replacer = (key, value) -> {
+            if ("password".equals(key)) return JsonUtils.UNDEFINED;
+            return value;
+        };
+        assertThat(JsonUtils.stringify(map, replacer, null))
+                .isEqualTo("{\"name\":\"Alice\",\"age\":30}");
+    }
+
+    @Test
+    public void testFunctionReplacerOnArray() {
+        // Replacer on array: called with string index, UNDEFINED → "null"
+        ArrayList<Object> list = new ArrayList<>();
+        list.add("keep");
+        list.add("remove");
+        list.add("keep");
+        BiFunction<String, Object, Object> replacer = (key, value) -> {
+            if ("remove".equals(value)) return JsonUtils.UNDEFINED;
+            return value;
+        };
+        assertThat(JsonUtils.stringify(list, replacer, null))
+                .isEqualTo("[\"keep\",null,\"keep\"]");
+    }
+
+    @Test
+    public void testFunctionReplacerOnEmptyObject() {
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        BiFunction<String, Object, Object> replacer = (key, value) -> value;
+        assertThat(JsonUtils.stringify(map, replacer, null)).isEqualTo("{}");
+    }
+
+    @Test
+    public void testFunctionReplacerOnNestedObject() {
+        // Replacer applies recursively to nested objects
+        LinkedHashMap<String, Object> inner = new LinkedHashMap<>();
+        inner.put("x", 1);
+        inner.put("secret", "hidden");
+        LinkedHashMap<String, Object> outer = new LinkedHashMap<>();
+        outer.put("data", inner);
+        outer.put("secret", "also hidden");
+        BiFunction<String, Object, Object> replacer = (key, value) -> {
+            if ("secret".equals(key)) return JsonUtils.UNDEFINED;
+            return value;
+        };
+        assertThat(JsonUtils.stringify(outer, replacer, null))
+                .isEqualTo("{\"data\":{\"x\":1}}");
+    }
+
+    @Test
+    public void testFunctionReplacerOnPrimitive() {
+        // Root call transforms primitive, replacer doesn't recurse further
+        BiFunction<String, Object, Object> replacer = (key, value) -> value;
+        assertThat(JsonUtils.stringify(42, replacer, null)).isEqualTo("42");
+        assertThat(JsonUtils.stringify("hello", replacer, null)).isEqualTo("\"hello\"");
+        assertThat(JsonUtils.stringify(true, replacer, null)).isEqualTo("true");
+        assertThat(JsonUtils.stringify(null, replacer, null)).isEqualTo("null");
+    }
+
+    @Test
+    public void testFunctionReplacerPassthrough() {
+        // BiFunction replacer that returns all values unchanged
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", null);
+        map.put("c", "text");
+        BiFunction<String, Object, Object> replacer = (key, value) -> value;
+        assertThat(JsonUtils.stringify(map, replacer, null))
+                .isEqualTo("{\"a\":1,\"b\":null,\"c\":\"text\"}");
+    }
+
+    @Test
+    public void testFunctionReplacerReplaceNullWithValue() {
+        // Replace null values with a default
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        map.put("a", null);
+        map.put("b", 1);
+        BiFunction<String, Object, Object> replacer = (key, value) -> {
+            if (value == null && !key.isEmpty()) return "default";
+            return value;
+        };
+        assertThat(JsonUtils.stringify(map, replacer, null))
+                .isEqualTo("{\"a\":\"default\",\"b\":1}");
+    }
+
+    @Test
+    public void testFunctionReplacerReplaceWithDifferentType() {
+        // Replace number with string
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        map.put("val", 42);
+        BiFunction<String, Object, Object> replacer = (key, value) -> {
+            if (value instanceof Integer) return "number:" + value;
+            return value;
+        };
+        assertThat(JsonUtils.stringify(map, replacer, null))
+                .isEqualTo("{\"val\":\"number:42\"}");
+    }
+
+    @Test
+    public void testFunctionReplacerRootCall() {
+        // BiFunction replacer is called with key="" for the root value
+        BiFunction<String, Object, Object> replacer = (key, value) -> {
+            if (key.isEmpty()) return "replaced";
+            return value;
+        };
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        assertThat(JsonUtils.stringify(map, replacer, null)).isEqualTo("\"replaced\"");
+    }
+
+    @Test
+    public void testFunctionReplacerRootUndefined() {
+        // BiFunction replacer returning UNDEFINED for root → "undefined"
+        BiFunction<String, Object, Object> replacer = (key, value) -> JsonUtils.UNDEFINED;
+        assertThat(JsonUtils.stringify(42, replacer, null)).isEqualTo("undefined");
+    }
+
+    @Test
+    public void testFunctionReplacerTransformValues() {
+        // BiFunction replacer: transform string values to uppercase
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        map.put("name", "alice");
+        map.put("city", "paris");
+        map.put("count", 5);
+        BiFunction<String, Object, Object> replacer = (key, value) -> {
+            if (value instanceof String && !key.isEmpty()) return ((String) value).toUpperCase();
+            return value;
+        };
+        assertThat(JsonUtils.stringify(map, replacer, null))
+                .isEqualTo("{\"name\":\"ALICE\",\"city\":\"PARIS\",\"count\":5}");
+    }
+
+    @Test
+    public void testFunctionReplacerWithSpace() {
+        // Function replacer combined with indentation
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
+        BiFunction<String, Object, Object> replacer = (key, value) -> {
+            if ("b".equals(key)) return JsonUtils.UNDEFINED;
+            return value;
+        };
+        assertThat(JsonUtils.stringify(map, replacer, 2))
+                .isEqualTo("{\n  \"a\": 1,\n  \"c\": 3\n}");
+    }
+
+    @Test
     public void testPrimitiveTypes() {
         // Boolean
         assertThat(JsonUtils.stringify(true)).isEqualTo("true");
@@ -275,191 +460,6 @@ public class TestJsonUtilsStringify {
         assertThat(JsonUtils.stringify("\r\b\f")).isEqualTo("\"\\r\\b\\f\"");
         assertThat(JsonUtils.stringify("\u0000")).isEqualTo("\"\\u0000\"");
         assertThat(JsonUtils.stringify("\u001f")).isEqualTo("\"\\u001f\"");
-    }
-
-    @Test
-    public void testFunctionReplacerFilterKeys() {
-        // BiFunction replacer: return UNDEFINED to omit properties
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("name", "Alice");
-        map.put("password", "secret");
-        map.put("age", 30);
-        BiFunction<String, Object, Object> replacer = (key, value) -> {
-            if ("password".equals(key)) return JsonUtils.UNDEFINED;
-            return value;
-        };
-        assertThat(JsonUtils.stringify(map, replacer, null))
-                .isEqualTo("{\"name\":\"Alice\",\"age\":30}");
-    }
-
-    @Test
-    public void testFunctionReplacerTransformValues() {
-        // BiFunction replacer: transform string values to uppercase
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("name", "alice");
-        map.put("city", "paris");
-        map.put("count", 5);
-        BiFunction<String, Object, Object> replacer = (key, value) -> {
-            if (value instanceof String && !key.isEmpty()) return ((String) value).toUpperCase();
-            return value;
-        };
-        assertThat(JsonUtils.stringify(map, replacer, null))
-                .isEqualTo("{\"name\":\"ALICE\",\"city\":\"PARIS\",\"count\":5}");
-    }
-
-    @Test
-    public void testFunctionReplacerPassthrough() {
-        // BiFunction replacer that returns all values unchanged
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", null);
-        map.put("c", "text");
-        BiFunction<String, Object, Object> replacer = (key, value) -> value;
-        assertThat(JsonUtils.stringify(map, replacer, null))
-                .isEqualTo("{\"a\":1,\"b\":null,\"c\":\"text\"}");
-    }
-
-    @Test
-    public void testFunctionReplacerRootCall() {
-        // BiFunction replacer is called with key="" for the root value
-        BiFunction<String, Object, Object> replacer = (key, value) -> {
-            if (key.isEmpty()) return "replaced";
-            return value;
-        };
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        assertThat(JsonUtils.stringify(map, replacer, null)).isEqualTo("\"replaced\"");
-    }
-
-    @Test
-    public void testFunctionReplacerRootUndefined() {
-        // BiFunction replacer returning UNDEFINED for root → "undefined"
-        BiFunction<String, Object, Object> replacer = (key, value) -> JsonUtils.UNDEFINED;
-        assertThat(JsonUtils.stringify(42, replacer, null)).isEqualTo("undefined");
-    }
-
-    @Test
-    public void testFunctionReplacerOnNestedObject() {
-        // Replacer applies recursively to nested objects
-        LinkedHashMap<String, Object> inner = new LinkedHashMap<>();
-        inner.put("x", 1);
-        inner.put("secret", "hidden");
-        LinkedHashMap<String, Object> outer = new LinkedHashMap<>();
-        outer.put("data", inner);
-        outer.put("secret", "also hidden");
-        BiFunction<String, Object, Object> replacer = (key, value) -> {
-            if ("secret".equals(key)) return JsonUtils.UNDEFINED;
-            return value;
-        };
-        assertThat(JsonUtils.stringify(outer, replacer, null))
-                .isEqualTo("{\"data\":{\"x\":1}}");
-    }
-
-    @Test
-    public void testFunctionReplacerOnArray() {
-        // Replacer on array: called with string index, UNDEFINED → "null"
-        ArrayList<Object> list = new ArrayList<>();
-        list.add("keep");
-        list.add("remove");
-        list.add("keep");
-        BiFunction<String, Object, Object> replacer = (key, value) -> {
-            if ("remove".equals(value)) return JsonUtils.UNDEFINED;
-            return value;
-        };
-        assertThat(JsonUtils.stringify(list, replacer, null))
-                .isEqualTo("[\"keep\",null,\"keep\"]");
-    }
-
-    @Test
-    public void testFunctionReplacerWithSpace() {
-        // Function replacer combined with indentation
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        map.put("c", 3);
-        BiFunction<String, Object, Object> replacer = (key, value) -> {
-            if ("b".equals(key)) return JsonUtils.UNDEFINED;
-            return value;
-        };
-        assertThat(JsonUtils.stringify(map, replacer, 2))
-                .isEqualTo("{\n  \"a\": 1,\n  \"c\": 3\n}");
-    }
-
-    @Test
-    public void testFunctionReplacerReplaceWithDifferentType() {
-        // Replace number with string
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("val", 42);
-        BiFunction<String, Object, Object> replacer = (key, value) -> {
-            if (value instanceof Integer) return "number:" + value;
-            return value;
-        };
-        assertThat(JsonUtils.stringify(map, replacer, null))
-                .isEqualTo("{\"val\":\"number:42\"}");
-    }
-
-    @Test
-    public void testFunctionReplacerOnEmptyObject() {
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        BiFunction<String, Object, Object> replacer = (key, value) -> value;
-        assertThat(JsonUtils.stringify(map, replacer, null)).isEqualTo("{}");
-    }
-
-    @Test
-    public void testFunctionReplacerAllKeysFiltered() {
-        // All keys filtered → empty object
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        BiFunction<String, Object, Object> replacer = (key, value) -> {
-            if (!key.isEmpty()) return JsonUtils.UNDEFINED;
-            return value;
-        };
-        assertThat(JsonUtils.stringify(map, replacer, null)).isEqualTo("{}");
-    }
-
-    @Test
-    public void testFunctionReplacerOnPrimitive() {
-        // Root call transforms primitive, replacer doesn't recurse further
-        BiFunction<String, Object, Object> replacer = (key, value) -> value;
-        assertThat(JsonUtils.stringify(42, replacer, null)).isEqualTo("42");
-        assertThat(JsonUtils.stringify("hello", replacer, null)).isEqualTo("\"hello\"");
-        assertThat(JsonUtils.stringify(true, replacer, null)).isEqualTo("true");
-        assertThat(JsonUtils.stringify(null, replacer, null)).isEqualTo("null");
-    }
-
-    @Test
-    public void testFunctionReplacerArrayWithObjects() {
-        // Replacer filters keys from objects inside arrays
-        LinkedHashMap<String, Object> obj1 = new LinkedHashMap<>();
-        obj1.put("id", 1);
-        obj1.put("secret", "x");
-        LinkedHashMap<String, Object> obj2 = new LinkedHashMap<>();
-        obj2.put("id", 2);
-        obj2.put("secret", "y");
-        ArrayList<Object> list = new ArrayList<>();
-        list.add(obj1);
-        list.add(obj2);
-        BiFunction<String, Object, Object> replacer = (key, value) -> {
-            if ("secret".equals(key)) return JsonUtils.UNDEFINED;
-            return value;
-        };
-        assertThat(JsonUtils.stringify(list, replacer, null))
-                .isEqualTo("[{\"id\":1},{\"id\":2}]");
-    }
-
-    @Test
-    public void testFunctionReplacerReplaceNullWithValue() {
-        // Replace null values with a default
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("a", null);
-        map.put("b", 1);
-        BiFunction<String, Object, Object> replacer = (key, value) -> {
-            if (value == null && !key.isEmpty()) return "default";
-            return value;
-        };
-        assertThat(JsonUtils.stringify(map, replacer, null))
-                .isEqualTo("{\"a\":\"default\",\"b\":1}");
     }
 
     @Test

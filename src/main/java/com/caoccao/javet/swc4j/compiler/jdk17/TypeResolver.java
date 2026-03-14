@@ -1632,6 +1632,14 @@ public final class TypeResolver {
                         if (returnType != null) {
                             return returnType;
                         }
+                        // Try resolving via full method descriptor on the class hierarchy.
+                        // This handles inherited methods where call-site arg types differ
+                        // from the declared param types in the parent Java class.
+                        String fullDescriptor = compiler.getMemory().getScopedJavaTypeRegistry()
+                                .resolveFullMethodDescriptor(qualifiedClassName, methodName, paramDescriptor);
+                        if (fullDescriptor != null) {
+                            return fullDescriptor.substring(fullDescriptor.indexOf(')') + 1);
+                        }
                         // For non-Java types, require explicit annotation
                         if (!objType.startsWith(ConstantJavaType.LJAVA_) && !objType.startsWith(ConstantJavaType.LJAVAX_)) {
                             throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,

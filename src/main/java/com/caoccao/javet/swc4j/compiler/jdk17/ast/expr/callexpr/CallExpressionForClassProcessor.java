@@ -110,7 +110,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
         }
 
         String internalClassName;
-        String methodDescriptor;
+        String methodDescriptor = null;
         String returnType;
 
         if (isJavaStaticCall) {
@@ -249,26 +249,34 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             internalClassName = TypeConversionUtils.descriptorToInternalName(objType);
             String qualifiedClassName = TypeConversionUtils.descriptorToQualifiedName(objType);
 
-            // Look up method return type
+            // Look up method return type and descriptor
             String paramDescriptor = "(" + paramDescriptors + ")";
             returnType = compiler.getMemory().getScopedJavaTypeRegistry()
                     .resolveClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
-            if (returnType == null) {
-                if (returnTypeInfo != null && returnTypeInfo.descriptor() != null) {
-                    returnType = returnTypeInfo.descriptor();
+            if (returnType != null) {
+                // Found in registry — call-site param types match the declared types
+                methodDescriptor = paramDescriptor + returnType;
+            } else if (returnTypeInfo != null && returnTypeInfo.descriptor() != null) {
+                returnType = returnTypeInfo.descriptor();
+                methodDescriptor = paramDescriptor + returnType;
+            } else {
+                // Resolve the full method descriptor via reflection on the class hierarchy.
+                // This handles inherited methods where call-site arg types (e.g., String) differ
+                // from the declared param types (e.g., Object) in the parent Java class.
+                // The full descriptor uses the formal param types from the resolved method,
+                // not the call-site arg types.
+                String fullDescriptor = compiler.getMemory().getScopedJavaTypeRegistry()
+                        .resolveFullMethodDescriptor(qualifiedClassName, methodName, paramDescriptor);
+                if (fullDescriptor != null) {
+                    methodDescriptor = fullDescriptor;
+                    returnType = fullDescriptor.substring(fullDescriptor.indexOf(')') + 1);
                 } else {
-                    returnType = resolveReturnTypeViaReflection(qualifiedClassName, methodName, paramDescriptor);
-                }
-                if (returnType == null) {
                     throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
                             "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
                                     ". Please add explicit return type annotation to the method.");
-                } else {
-                    returnType = ConstantJavaType.LJAVA_LANG_OBJECT;
                 }
             }
 
-            methodDescriptor = paramDescriptor + returnType;
 
             // Check if this is a private method call (ES2022 #method)
             boolean isPrivate = isPrivateMethod(memberExpr.getProp());
@@ -432,9 +440,33 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             for (int i = 0; i < paramTypes.size(); i++) {
                 params[i] = toClass(paramTypes.get(i));
             }
-            Method method = clazz.getMethod(methodName, params);
-            return getDescriptor(method.getReturnType());
-        } catch (ClassNotFoundException | NoSuchMethodException e) {
+
+            // Try exact match first
+            try {
+                Method method = clazz.getMethod(methodName, params);
+                return getDescriptor(method.getReturnType());
+            } catch (NoSuchMethodException e) {
+                // Exact match failed (e.g., calling add(String) on ArrayList which expects add(Object)).
+                // Fall back to finding a method with compatible parameter types.
+            }
+
+            for (Method method : clazz.getMethods()) {
+                if (!method.getName().equals(methodName)) continue;
+                Class<?>[] formalTypes = method.getParameterTypes();
+                if (formalTypes.length != params.length) continue;
+                boolean compatible = true;
+                for (int i = 0; i < formalTypes.length; i++) {
+                    if (params[i] != null && !formalTypes[i].isAssignableFrom(params[i])) {
+                        compatible = false;
+                        break;
+                    }
+                }
+                if (compatible) {
+                    return getDescriptor(method.getReturnType());
+                }
+            }
+            return null;
+        } catch (ClassNotFoundException e) {
             return null;
         }
     }

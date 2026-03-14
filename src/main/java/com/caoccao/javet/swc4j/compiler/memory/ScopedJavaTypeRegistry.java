@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.memory;
 
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -41,6 +42,16 @@ public final class ScopedJavaTypeRegistry {
         // Push global scope
         scopeStack.push(new HashMap<>());
         classMethodToReturnTypeMap.push(new HashMap<>());
+    }
+
+    private String buildMethodDescriptor(Method method) {
+        StringBuilder sb = new StringBuilder("(");
+        for (Class<?> paramType : method.getParameterTypes()) {
+            sb.append(getDescriptor(paramType));
+        }
+        sb.append(")");
+        sb.append(getDescriptor(method.getReturnType()));
+        return sb.toString();
     }
 
     /**
@@ -373,9 +384,86 @@ public final class ScopedJavaTypeRegistry {
             }
         }
 
-        // Fallback: Use reflection to look up method return type for Java classes
-        // This enables calling methods on standard Java interfaces like IntUnaryOperator
+        // Fallback: Use reflection to look up method return type for Java classes.
+        // Only return the return type if the param types match exactly, so the caller
+        // can safely build the descriptor from call-site param types.
+        // If param types don't match (e.g., calling add(String) on ArrayList.add(Object)),
+        // return null so the caller uses resolveFullMethodDescriptor instead.
         return resolveMethodReturnTypeViaReflection(qualifiedClassName, methodName, paramDescriptor);
+    }
+
+    /**
+     * Resolves the full method descriptor by walking the parent class hierarchy and using reflection.
+     *
+     * @param qualifiedClassName fully qualified class name
+     * @param methodName         method name
+     * @param paramDescriptor    parameter descriptor with call-site types
+     * @return full method descriptor, or null if not found
+     */
+    public String resolveFullMethodDescriptor(String qualifiedClassName, String methodName, String paramDescriptor) {
+        // Try reflection directly on this class
+        String result = resolveMethodDescriptorViaReflection(qualifiedClassName, methodName, paramDescriptor);
+        if (result != null) return result;
+
+        // Walk parent classes
+        JavaTypeInfo typeInfo = resolve(qualifiedClassName);
+        if (typeInfo == null) {
+            int lastDot = qualifiedClassName.lastIndexOf('.');
+            String simpleName = lastDot >= 0 ? qualifiedClassName.substring(lastDot + 1) : qualifiedClassName;
+            typeInfo = resolve(simpleName);
+        }
+        if (typeInfo != null) {
+            for (JavaTypeInfo parentInfo : typeInfo.getParentTypeInfos()) {
+                String parentQualifiedName = parentInfo.getInternalName().replace('/', '.');
+                result = resolveFullMethodDescriptor(parentQualifiedName, methodName, paramDescriptor);
+                if (result != null) return result;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolves the full method descriptor (including formal parameter types and return type) via reflection.
+     * This is needed when calling inherited methods where the call-site argument types (e.g., String)
+     * differ from the declared parameter types (e.g., Object).
+     *
+     * @param qualifiedClassName fully qualified class name
+     * @param methodName         method name
+     * @param paramDescriptor    parameter descriptor with call-site types (e.g., "(Ljava/lang/String;)")
+     * @return full method descriptor (e.g., "(Ljava/lang/Object;)Z"), or null if not found
+     */
+    public String resolveMethodDescriptorViaReflection(String qualifiedClassName, String methodName, String paramDescriptor) {
+        try {
+            Class<?> clazz = Class.forName(qualifiedClassName);
+            Class<?>[] paramTypes = parseParameterTypes(paramDescriptor);
+
+            // Try exact match first
+            try {
+                Method method = clazz.getMethod(methodName, paramTypes);
+                return buildMethodDescriptor(method);
+            } catch (NoSuchMethodException e) {
+                // Fall through to compatible match
+            }
+
+            for (Method method : clazz.getMethods()) {
+                if (!method.getName().equals(methodName)) continue;
+                Class<?>[] formalTypes = method.getParameterTypes();
+                if (formalTypes.length != paramTypes.length) continue;
+                boolean compatible = true;
+                for (int i = 0; i < formalTypes.length; i++) {
+                    if (paramTypes[i] != null && !formalTypes[i].isAssignableFrom(paramTypes[i])) {
+                        compatible = false;
+                        break;
+                    }
+                }
+                if (compatible) {
+                    return buildMethodDescriptor(method);
+                }
+            }
+            return null;
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
     }
 
     /**
@@ -391,12 +479,9 @@ public final class ScopedJavaTypeRegistry {
         try {
             Class<?> clazz = Class.forName(qualifiedClassName);
             Class<?>[] paramTypes = parseParameterTypes(paramDescriptor);
-
-            // Find the method
-            java.lang.reflect.Method method = clazz.getMethod(methodName, paramTypes);
+            Method method = clazz.getMethod(methodName, paramTypes);
             return getDescriptor(method.getReturnType());
         } catch (ClassNotFoundException | NoSuchMethodException e) {
-            // Class or method not found - return null
             return null;
         }
     }

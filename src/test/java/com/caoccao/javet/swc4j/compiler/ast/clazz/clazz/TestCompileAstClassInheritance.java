@@ -325,6 +325,49 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testInheritedMethodCallReturnTypeInference(JdkVersion jdkVersion) throws Exception {
+        // Regression test: calling inherited Java methods (e.g. ArrayList.add) from compiled code
+        // should infer the return type correctly without explicit annotation.
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class NameList extends java.util.ArrayList<Object> {
+                    addName(name: String): void {
+                      this.add(name)
+                    }
+                    getCount(): int {
+                      return this.size()
+                    }
+                  }
+                }""");
+        var instanceRunner = runner.createInstanceRunner("com.NameList");
+        instanceRunner.invoke("addName", "Alice");
+        instanceRunner.invoke("addName", "Bob");
+        assertThat((int) instanceRunner.invoke("getCount")).isEqualTo(2);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testInheritedMethodCallReturnValueUsed(JdkVersion jdkVersion) throws Exception {
+        // Regression test: using the return value of an inherited Java method in an expression.
+        var runner = getCompiler(jdkVersion).compile("""
+                import { HashMap } from "java.util"
+                namespace com {
+                  export class Registry extends HashMap<Object, Object> {
+                    register(key: String, value: String): void {
+                      this.put(key, value)
+                    }
+                    lookup(key: String): String {
+                      return this.get(key) as String
+                    }
+                  }
+                }""");
+        var instanceRunner = runner.createInstanceRunner("com.Registry");
+        instanceRunner.invoke("register", "name", "Alice");
+        assertThat((String) instanceRunner.invoke("lookup", "name")).isEqualTo("Alice");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testMethodOverride(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
