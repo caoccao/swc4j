@@ -44,7 +44,7 @@ fn test_parse_jsx_with_default_options() {
     media_type: MediaType::Jsx,
     ..Default::default()
   };
-  let output = core::parse(None, code.to_owned(), &options, &mut None);
+  let output = core::parse(code.to_owned(), &options, &mut None);
   assert!(output.is_ok());
   let output = output.unwrap();
   assert!(matches!(output.parse_mode, ParseMode::Module));
@@ -59,7 +59,7 @@ fn test_parse_typescript_with_capture_tokens() {
     media_type: MediaType::TypeScript,
     ..Default::default()
   };
-  let output = core::parse(None, code.to_owned(), &options, &mut None);
+  let output = core::parse(code.to_owned(), &options, &mut None);
   assert!(output.is_ok());
   let output = output.unwrap();
   assert!(matches!(output.parse_mode, ParseMode::Script));
@@ -111,7 +111,7 @@ fn test_parse_typescript_with_default_options() {
     media_type: MediaType::TypeScript,
     ..Default::default()
   };
-  let output = core::parse(None, code.to_owned(), &options, &mut None);
+  let output = core::parse(code.to_owned(), &options, &mut None);
   assert!(output.is_ok());
   let output = output.unwrap();
   assert!(matches!(output.parse_mode, ParseMode::Script));
@@ -126,7 +126,7 @@ fn test_parse_typescript_with_comments() {
     capture_comments: true,
     ..Default::default()
   };
-  let output = core::parse(None, code.to_owned(), &options, &mut None);
+  let output = core::parse(code.to_owned(), &options, &mut None);
   assert!(output.is_ok());
   let output = output.unwrap();
   let comments = output.comments.unwrap();
@@ -169,7 +169,7 @@ fn test_parse_wrong_media_type() {
     media_type: MediaType::JavaScript,
     ..Default::default()
   };
-  let output = core::parse(None, code.to_owned(), &options, &mut None);
+  let output = core::parse(code.to_owned(), &options, &mut None);
   assert!(output.is_err());
   let err = output.err().unwrap();
   let output_message = err.to_string();
@@ -185,7 +185,7 @@ fn test_transform_with_default_options() {
     media_type: MediaType::TypeScript,
     ..Default::default()
   };
-  let output = core::transform(None, code.to_owned(), &options, &mut None);
+  let output = core::transform(code.to_owned(), &options, &mut None);
   assert!(output.is_ok());
   let output = output.unwrap();
   assert_eq!(MediaType::TypeScript, output.media_type);
@@ -220,7 +220,7 @@ fn test_transpile_jsx_with_custom_jsx_factory() {
     media_type: MediaType::Jsx,
     ..Default::default()
   };
-  let output = core::transpile(None, code.to_owned(), &options, &mut None);
+  let output = core::transpile(code.to_owned(), &options, &mut None);
   assert!(output.is_ok());
   let output = output.unwrap();
   assert!(matches!(output.parse_output.parse_mode, ParseMode::Module));
@@ -251,7 +251,7 @@ fn test_transpile_jsx_with_default_options() {
     jsx: Some(JsxRuntime::default()),
     ..Default::default()
   };
-  let output = core::transpile(None, code.to_owned(), &options, &mut None);
+  let output = core::transpile(code.to_owned(), &options, &mut None);
   assert!(output.is_ok());
   let output = output.unwrap();
   assert!(matches!(output.parse_output.parse_mode, ParseMode::Module));
@@ -267,7 +267,7 @@ fn test_transpile_type_script_with_inline_source_map() {
   let expected_code = "function add(a, b) {\n  return a + b;\n}\n";
   let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
   let options = options::TranspileOptions::default();
-  let output = core::transpile(None, code.to_owned(), &options, &mut None);
+  let output = core::transpile(code.to_owned(), &options, &mut None);
   assert!(output.is_ok());
   let output = output.unwrap();
   assert!(matches!(output.parse_output.parse_mode, ParseMode::Script));
@@ -289,7 +289,7 @@ fn test_transpile_type_script_without_inline_source_map() {
         specifier: "file:///main.ts".to_owned(),
         ..Default::default()
       };
-      let output = core::transpile(None, code.to_owned(), &options, &mut None);
+      let output = core::transpile(code.to_owned(), &options, &mut None);
       assert!(output.is_ok());
       let output = output.unwrap();
       let output_code = output.code;
@@ -309,7 +309,7 @@ fn test_transpile_wrong_media_type() {
     media_type: MediaType::JavaScript,
     ..Default::default()
   };
-  let output = core::transpile(None, code.to_owned(), &options, &mut None);
+  let output = core::transpile(code.to_owned(), &options, &mut None);
   assert!(output.is_err());
   let err = output.err().unwrap();
   let output_message = err.to_string();

@@ -22,23 +22,41 @@ use deno_ast::swc::ast::{Module, Program, Script};
 use jni::objects::{Global, JClass, JMethodID, JObject};
 use jni::signature::RuntimeMethodSignature;
 use jni::strings::JNIString;
-use jni::Env;
+use jni::{AttachGuard, Env};
 
 use crate::jni_utils::*;
 use crate::span_utils::{ByteToIndexMap, RegisterWithMap, ToJavaWithMap};
 
 #[derive(Debug)]
 pub struct PluginHost {
+  env: *mut jni::sys::JNIEnv,
   host: Global<JObject<'static>>,
 }
+unsafe impl Send for PluginHost {}
+unsafe impl Sync for PluginHost {}
 
 impl PluginHost {
-  pub fn new(host: Global<JObject<'static>>) -> Self {
-    PluginHost { host }
+  pub fn new(env: &Env<'_>, host: Global<JObject<'static>>) -> Self {
+    PluginHost {
+      env: env.get_raw(),
+      host,
+    }
   }
 
-  pub fn process_module(&mut self, env: &mut Env<'_>, s: &str, module: Module) -> Result<Module> {
+  /// Reconstructs a JNI `Env` from the stored raw pointer.
+  ///
+  /// # Safety
+  /// This is safe as long as the raw pointer is still valid (i.e., we are
+  /// on the same JNI-attached thread that created this PluginHost). This is
+  /// the jni 0.22 equivalent of the removed `JNIEnv::unsafe_clone()`.
+  fn guard(&self) -> AttachGuard<'_> {
+    unsafe { AttachGuard::from_unowned(self.env) }
+  }
+
+  pub fn process_module(&mut self, s: &str, module: Module) -> Result<Module> {
     log::debug!("process_module()");
+    let mut guard = self.guard();
+    let env = guard.borrow_env_mut();
     let java_class = JAVA_CLASS_I_PLUGIN_HOST.get().unwrap();
     let mut map = ByteToIndexMap::new();
     module.register_with_map(&mut map);
@@ -62,8 +80,10 @@ impl PluginHost {
     }
   }
 
-  pub fn process_program(&mut self, env: &mut Env<'_>, s: &str, program: Program) -> Result<Program> {
+  pub fn process_program(&mut self, s: &str, program: Program) -> Result<Program> {
     log::debug!("process_program()");
+    let mut guard = self.guard();
+    let env = guard.borrow_env_mut();
     let java_class = JAVA_CLASS_I_PLUGIN_HOST.get().unwrap();
     let mut map = ByteToIndexMap::new();
     program.register_with_map(&mut map);
@@ -87,8 +107,10 @@ impl PluginHost {
     }
   }
 
-  pub fn process_script(&mut self, env: &mut Env<'_>, s: &str, script: Script) -> Result<Script> {
+  pub fn process_script(&mut self, s: &str, script: Script) -> Result<Script> {
     log::debug!("process_script()");
+    let mut guard = self.guard();
+    let env = guard.borrow_env_mut();
     let java_class = JAVA_CLASS_I_PLUGIN_HOST.get().unwrap();
     let mut map = ByteToIndexMap::new();
     script.register_with_map(&mut map);

@@ -1540,7 +1540,7 @@ impl<'local> FromJava<'local> for ParseOptions {
       let host = env
         .new_global_ref(host)
         .expect("Failed to create global reference for plugin host");
-      PluginHost::new(host)
+      PluginHost::new(env, host)
     });
     let java_parse_mode = java_parse_options.get_parse_mode(env, obj)?;
     let parse_mode = *ParseMode::from_java(env, &java_parse_mode)?;
@@ -1644,7 +1644,7 @@ impl<'local> FromJava<'local> for TransformOptions {
       let host = env
         .new_global_ref(host)
         .expect("Failed to create global reference for plugin host");
-      PluginHost::new(host)
+      PluginHost::new(env, host)
     });
     let specifier = java_transform_options.get_specifier(env, obj)?;
     let specifier = url_to_string(env, &specifier)?;
@@ -1857,7 +1857,7 @@ impl<'local> FromJava<'local> for TranspileOptions {
       let host = env
         .new_global_ref(host)
         .expect("Failed to create global reference for plugin host");
-      PluginHost::new(host)
+      PluginHost::new(env, host)
     });
     delete_local_optional_ref!(env, java_optional_plugin_host);
     let scope_analysis = java_transpile_options.is_scope_analysis(env, obj)?;

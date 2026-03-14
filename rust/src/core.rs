@@ -21,7 +21,6 @@ use deno_ast::swc::ast::{Module, Program, Script};
 use deno_ast::swc::codegen::{text_writer::JsWriter, Config, Emitter};
 use deno_ast::swc::common::{sync::Lrc, FileName, FilePathMapping, SourceMap};
 use deno_ast::*;
-use jni::Env;
 use swc::common::util::take::Take;
 
 use crate::{enums, options, outputs, plugin_utils};
@@ -29,19 +28,17 @@ use crate::{enums, options, outputs, plugin_utils};
 const VERSION: &'static str = "2.1.0";
 
 fn parse_by_mode(
-  env: Option<&mut Env<'_>>,
   parse_params: ParseParams,
   parse_mode: enums::ParseMode,
   plugin_host: &mut Option<plugin_utils::PluginHost>,
 ) -> Result<ParsedSource> {
   log::debug!("parse_by_mode({:?})", parse_mode);
   let result = if let Some(plugin_host) = plugin_host {
-    let env = env.expect("Env is required when plugin_host is present");
     let code: &str = &parse_params.text.to_owned();
     let mut error: Option<Error> = None;
     let result = match parse_mode {
       enums::ParseMode::Module => parse_module_with_post_process(parse_params, |module, _| {
-        match plugin_host.process_module(env, code, module) {
+        match plugin_host.process_module(code, module) {
           Ok(module) => module,
           Err(err) => {
             error = Some(err);
@@ -50,7 +47,7 @@ fn parse_by_mode(
         }
       }),
       enums::ParseMode::Script => parse_script_with_post_process(parse_params, |script, _| {
-        match plugin_host.process_script(env, code, script) {
+        match plugin_host.process_script(code, script) {
           Ok(script) => script,
           Err(err) => {
             error = Some(err);
@@ -59,7 +56,7 @@ fn parse_by_mode(
         }
       }),
       _ => parse_program_with_post_process(parse_params, |program, _| {
-        match plugin_host.process_program(env, code, program) {
+        match plugin_host.process_program(code, program) {
           Ok(program) => program,
           Err(err) => {
             error = Some(err);
@@ -83,7 +80,7 @@ fn parse_by_mode(
   result.map_err(Error::msg)
 }
 
-pub fn parse<'local>(env: Option<&mut Env<'local>>, code: String, options: &options::ParseOptions, plugin_host: &mut Option<plugin_utils::PluginHost>) -> Result<outputs::ParseOutput> {
+pub fn parse(code: String, options: &options::ParseOptions, plugin_host: &mut Option<plugin_utils::PluginHost>) -> Result<outputs::ParseOutput> {
   log::debug!("parse()");
   log::debug!("{:?}", options);
   let specifier = options.get_specifier()?;
@@ -95,11 +92,11 @@ pub fn parse<'local>(env: Option<&mut Env<'local>>, code: String, options: &opti
     maybe_syntax: None,
     scope_analysis: options.scope_analysis,
   };
-  let parsed_source = parse_by_mode(env, parse_params, options.parse_mode, plugin_host)?;
+  let parsed_source = parse_by_mode(parse_params, options.parse_mode, plugin_host)?;
   Ok(outputs::ParseOutput::new(options, &parsed_source))
 }
 
-pub fn transform<'local>(env: Option<&mut Env<'local>>, code: String, options: &options::TransformOptions, plugin_host: &mut Option<plugin_utils::PluginHost>) -> Result<outputs::TransformOutput> {
+pub fn transform(code: String, options: &options::TransformOptions, plugin_host: &mut Option<plugin_utils::PluginHost>) -> Result<outputs::TransformOutput> {
   log::debug!("transform()");
   log::debug!("{:?}", options);
   let specifier = options.get_specifier()?;
@@ -112,7 +109,7 @@ pub fn transform<'local>(env: Option<&mut Env<'local>>, code: String, options: &
     scope_analysis: false,
   };
   let code: String = parse_params.text.clone().to_string();
-  let parsed_source = parse_by_mode(env, parse_params, options.parse_mode, plugin_host)?;
+  let parsed_source = parse_by_mode(parse_params, options.parse_mode, plugin_host)?;
   let source_map = Lrc::new(SourceMap::new(FilePathMapping::empty()));
   let filename = Lrc::new(FileName::Url(specifier));
   source_map.new_source_file(filename, code);
@@ -175,7 +172,7 @@ pub fn transform<'local>(env: Option<&mut Env<'local>>, code: String, options: &
   Ok(outputs::TransformOutput::new(&parsed_source, code, source_map))
 }
 
-pub fn transpile<'local>(env: Option<&mut Env<'local>>, code: String, options: &options::TranspileOptions, plugin_host: &mut Option<plugin_utils::PluginHost>) -> Result<outputs::TranspileOutput> {
+pub fn transpile(code: String, options: &options::TranspileOptions, plugin_host: &mut Option<plugin_utils::PluginHost>) -> Result<outputs::TranspileOutput> {
   log::debug!("transpile()");
   log::debug!("{:?}", options);
   let specifier = options.get_specifier()?;
@@ -187,7 +184,7 @@ pub fn transpile<'local>(env: Option<&mut Env<'local>>, code: String, options: &
     maybe_syntax: None,
     scope_analysis: options.scope_analysis,
   };
-  let parsed_source = parse_by_mode(env, parse_params, options.parse_mode, plugin_host)?;
+  let parsed_source = parse_by_mode(parse_params, options.parse_mode, plugin_host)?;
   let transpile_options = TranspileOptions {
     decorators: options.decorators.clone(),
     imports_not_used_as_values: options.imports_not_used_as_values.clone(),

@@ -139,7 +139,7 @@ fn core_parse<'local>(env: &mut Env<'local>, code: jstring, options: jobject) ->
   let options = unsafe { JObject::from_raw(env, options) };
   let mut options = *options::ParseOptions::from_java(env, &options)?;
   let mut plugin_host = options.plugin_host.take();
-  let output = core::parse(Some(env), code, &options, &mut plugin_host)?;
+  let output = core::parse(code, &options, &mut plugin_host)?;
   let output = output.to_java(env)?;
   Ok(output.as_raw())
 }
@@ -150,7 +150,7 @@ fn core_transform<'local>(env: &mut Env<'local>, code: jstring, options: jobject
   let options = unsafe { JObject::from_raw(env, options) };
   let mut options = *options::TransformOptions::from_java(env, &options)?;
   let mut plugin_host = options.plugin_host.take();
-  let output = core::transform(Some(env), code, &options, &mut plugin_host)?;
+  let output = core::transform(code, &options, &mut plugin_host)?;
   let output = output.to_java(env)?;
   Ok(output.as_raw())
 }
@@ -161,7 +161,7 @@ fn core_transpile<'local>(env: &mut Env<'local>, code: jstring, options: jobject
   let options = unsafe { JObject::from_raw(env, options) };
   let mut options = *options::TranspileOptions::from_java(env, &options)?;
   let mut plugin_host = options.plugin_host.take();
-  let output = core::transpile(Some(env), code, &options, &mut plugin_host)?;
+  let output = core::transpile(code, &options, &mut plugin_host)?;
   let output = output.to_java(env)?;
   Ok(output.as_raw())
 }
