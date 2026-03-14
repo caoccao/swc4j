@@ -18,6 +18,7 @@
 * [Tutorial Compiler 03: Strings and Type Inference](tutorial_compiler_03_strings_and_type_inference.md)
 * [Tutorial Compiler 04: Control Flow](tutorial_compiler_04_control_flow.md)
 * [Tutorial Compiler 05: Multiple Classes](tutorial_compiler_05_multiple_classes.md)
+* [Tutorial Compiler 06: Class Inheritance](tutorial_compiler_06_class_inheritance.md)
 
 ## Sanitizer
 

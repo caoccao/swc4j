@@ -35,7 +35,7 @@
   * [Identifier Deletion](docs/features/identifier_deletion.md)
   * [Identifier Freeze](docs/features/identifier_freeze.md)
   * [Identifier Naming Convention](docs/features/identifier_naming_convention.md)
-* [TypeScript to JVM Bytecode (Preview)](docs/typescript_to_jvm_bytecode.md)
+* [TypeScript to JVM Bytecode](docs/typescript_to_jvm_bytecode.md)
 
 ## Quick Start
 
@@ -196,6 +196,33 @@ try {
 1. const a = 1; // Valid.
 2. var a = 1; // Invalid: Keyword var is not allowed.
 3. Object = {}; // Invalid: Identifier Object is not allowed.
+```
+
+### TypeScript to JVM Bytecode
+
+* Run the following Java code to compile TypeScript to JVM bytecode and execute it directly — no JavaScript runtime needed.
+
+```java
+// Create a compiler targeting JDK 17.
+ByteCodeCompiler compiler = ByteCodeCompiler.of(
+        ByteCodeCompilerOptions.builder()
+                .jdkVersion(JdkVersion.JDK_17)
+                .build());
+// Compile a TypeScript function to JVM bytecode.
+ByteCodeRunner runner = compiler.compile("""
+        export function add(a: int, b: int): int {
+          return a + b
+        }""");
+// Invoke the compiled function.
+ByteCodeClassRunner classRunner = runner.createStaticRunner("$");
+int result = classRunner.invoke("add", 1, 2);
+System.out.println("1 + 2 = " + result);
+```
+
+* The output is as follows.
+
+```js
+1 + 2 = 3
 ```
 
 ## Docs
