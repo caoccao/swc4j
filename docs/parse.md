@@ -33,6 +33,7 @@ Media type of the source text contains the following values:
 | Jsonc      | .jsonc    |
 | Json5      | .json5    |
 | Html       | .html     |
+| Markdown   | .md       |
 | Sql        | .sql      |
 | Wasm       | .wasm     |
 | SourceMap  | .map      |

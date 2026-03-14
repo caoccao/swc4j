@@ -91,21 +91,25 @@ public enum Swc4jMediaType implements ISwc4jEnumId {
      */
     Html(15),
     /**
+     * Markdown swc4j media type.
+     */
+    Markdown(16),
+    /**
      * Sql swc4j media type.
      */
-    Sql(16),
+    Sql(17),
     /**
      * Wasm swc4j media type.
      */
-    Wasm(17),
+    Wasm(18),
     /**
      * Source map swc4j media type.
      */
-    SourceMap(18),
+    SourceMap(19),
     /**
      * Unknown swc4j media type.
      */
-    Unknown(19),
+    Unknown(20),
     ;
 
     private static final int LENGTH = values().length;

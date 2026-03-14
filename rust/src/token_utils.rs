@@ -774,6 +774,7 @@ where
             line_break_ahead,
           ),
           Token::Str { value, raw } => {
+            let value = value.to_string_lossy();
             java_token_factory.create_string(env, &raw, &value, &java_span_ex, line_break_ahead)
           }
           Token::Num { value, raw } => {
@@ -787,7 +788,7 @@ where
           }
           Token::Template { raw, cooked } => {
             let cooked = match &cooked {
-              Ok(atom) => Some(atom.as_str().to_owned()),
+              Ok(atom) => Some(atom.to_string_lossy().into_owned()),
               Err(_) => None,
             };
             java_token_factory.create_template(env, &raw, &cooked, &java_span_ex, line_break_ahead)

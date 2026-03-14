@@ -54,11 +54,19 @@ public class Jni2RustFieldUtils {
         return optionalJni2RustField.map(Jni2RustField::componentBox).orElse(false);
     }
 
+    public boolean isComponentWtf8Atom() {
+        return optionalJni2RustField.map(Jni2RustField::componentWtf8Atom).orElse(false);
+    }
+
     public boolean isIgnore() {
         return optionalJni2RustField.map(Jni2RustField::ignore).orElse(false);
     }
 
     public boolean isSyntaxContext() {
         return optionalJni2RustField.map(Jni2RustField::syntaxContext).orElse(false);
+    }
+
+    public boolean isWtf8Atom() {
+        return optionalJni2RustField.map(Jni2RustField::wtf8Atom).orElse(false);
     }
 }

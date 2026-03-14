@@ -383,9 +383,15 @@ public class TestCodeGen {
                                                 } else if (innerClass == String.class) {
                                                     String optionalVar = String.format("optional_%s", arg);
                                                     args.add("&" + optionalVar);
-                                                    lines.add(String.format("    let %s = self.%s.as_ref().map(|node| node.to_string());",
-                                                            optionalVar,
-                                                            arg));
+                                                    if (jni2RustFieldUtils.isComponentWtf8Atom()) {
+                                                        lines.add(String.format("    let %s = self.%s.as_ref().map(|node| node.to_string_lossy().into_owned());",
+                                                                optionalVar,
+                                                                arg));
+                                                    } else {
+                                                        lines.add(String.format("    let %s = self.%s.as_ref().map(|node| node.to_string());",
+                                                                optionalVar,
+                                                                arg));
+                                                    }
                                                 } else if (innerClass.isEnum()) {
                                                     String javaOptionalVar = String.format("java_optional_%s", arg);
                                                     args.add("&" + javaOptionalVar);
@@ -482,8 +488,13 @@ public class TestCodeGen {
                                         args.add(arg);
                                         lines.add(String.format("    let %s = self.%s;", arg, arg));
                                     } else if (fieldType == String.class) {
-                                        args.add(arg);
-                                        lines.add(String.format("    let %s = self.%s.as_str();", arg, arg));
+                                        if (jni2RustFieldUtils.isWtf8Atom()) {
+                                            args.add("&" + arg);
+                                            lines.add(String.format("    let %s = self.%s.to_string_lossy();", arg, arg));
+                                        } else {
+                                            args.add(arg);
+                                            lines.add(String.format("    let %s = self.%s.as_str();", arg, arg));
+                                        }
                                     } else if (fieldType.isEnum()) {
                                         String javaVar = String.format("java_%s", arg);
                                         args.add("&" + javaVar);
@@ -615,12 +626,18 @@ public class TestCodeGen {
                                     if (jni2RustFieldUtils.isComponentAtom()) {
                                         processLines.add(String.format("    let %s = %s.map(|%s| Box::new(%s.into()));",
                                                 arg, arg, arg, arg));
+                                    } else if (jni2RustFieldUtils.isComponentWtf8Atom()) {
+                                        processLines.add(String.format("    let %s = %s.map(|%s| Box::new(Wtf8Atom::new(%s)));",
+                                                arg, arg, arg, arg));
                                     } else {
                                         processLines.add(String.format("    let %s = %s.map(|%s| Box::new(%s));",
                                                 arg, arg, arg, arg));
                                     }
                                 } else if (jni2RustFieldUtils.isComponentAtom()) {
                                     processLines.add(String.format("    let %s = %s.map(|%s| %s.into());",
+                                            arg, arg, arg, arg));
+                                } else if (jni2RustFieldUtils.isComponentWtf8Atom()) {
+                                    processLines.add(String.format("    let %s = %s.map(|%s| Wtf8Atom::new(%s));",
                                             arg, arg, arg, arg));
                                 }
                             } else if (List.class.isAssignableFrom(fieldType)) {
@@ -679,12 +696,18 @@ public class TestCodeGen {
                                         if (jni2RustFieldUtils.isComponentAtom()) {
                                             processLines.add(String.format("    let %s = %s.into_iter().map(|%s| Box::new(%s.into())).collect();",
                                                     arg, arg, arg, arg));
+                                        } else if (jni2RustFieldUtils.isComponentWtf8Atom()) {
+                                            processLines.add(String.format("    let %s = %s.into_iter().map(|%s| Box::new(Wtf8Atom::new(%s))).collect();",
+                                                    arg, arg, arg, arg));
                                         } else {
                                             processLines.add(String.format("    let %s = %s.into_iter().map(|%s| Box::new(%s)).collect();",
                                                     arg, arg, arg, arg));
                                         }
                                     } else if (jni2RustFieldUtils.isComponentAtom()) {
                                         processLines.add(String.format("    let %s = %s.into_iter().map(|%s| %s.into()).collect();",
+                                                arg, arg, arg, arg));
+                                    } else if (jni2RustFieldUtils.isComponentWtf8Atom()) {
+                                        processLines.add(String.format("    let %s = %s.into_iter().map(|%s| Wtf8Atom::new(%s)).collect();",
                                                 arg, arg, arg, arg));
                                     }
                                 } else {
@@ -723,11 +746,15 @@ public class TestCodeGen {
                             if (jni2RustFieldUtils.isBox()) {
                                 if (jni2RustFieldUtils.isAtom()) {
                                     processLines.add(String.format("    let %s = Box::new(%s.into());", arg, arg));
+                                } else if (jni2RustFieldUtils.isWtf8Atom()) {
+                                    processLines.add(String.format("    let %s = Box::new(Wtf8Atom::new(%s));", arg, arg));
                                 } else {
                                     processLines.add(String.format("    let %s = Box::new(%s);", arg, arg));
                                 }
                             } else if (jni2RustFieldUtils.isAtom()) {
                                 processLines.add(String.format("    let %s = %s.into();", arg, arg));
+                            } else if (jni2RustFieldUtils.isWtf8Atom()) {
+                                processLines.add(String.format("    let %s = Wtf8Atom::new(%s);", arg, arg));
                             }
                             initLines.add(String.format("      %s,", arg));
                         });

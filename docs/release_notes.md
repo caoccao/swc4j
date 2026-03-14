@@ -2,7 +2,10 @@
 
 ## 2.1.0
 
+* Upgraded deno_ast to v0.53.1
 * Added bytecode compiler
+* Added `Markdown` to `Swc4jMediaType`
+* Changed `JSXAttrValue::Lit` to `JSXAttrValue::Str`
 
 ## 2.0.0
 

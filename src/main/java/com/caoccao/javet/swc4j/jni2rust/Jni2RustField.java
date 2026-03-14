@@ -55,6 +55,13 @@ public @interface Jni2RustField {
     boolean componentBox() default false;
 
     /**
+     * Whether the component is a wtf8 atom.
+     *
+     * @return true if component is wtf8 atom
+     */
+    boolean componentWtf8Atom() default false;
+
+    /**
      * Whether to ignore this field during code generation.
      *
      * @return true if ignored
@@ -74,4 +81,11 @@ public @interface Jni2RustField {
      * @return true if has syntax context
      */
     boolean syntaxContext() default false;
+
+    /**
+     * Whether this field is a wtf8 atom.
+     *
+     * @return true if wtf8 atom
+     */
+    boolean wtf8Atom() default false;
 }

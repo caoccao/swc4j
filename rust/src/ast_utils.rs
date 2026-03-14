@@ -29,6 +29,7 @@ use crate::jni_utils::*;
 use crate::span_utils::{ByteToIndexMap, RegisterWithMap, ToJavaWithMap};
 
 use deno_ast::swc::ast::*;
+use deno_ast::swc::atoms::Wtf8Atom;
 use deno_ast::swc::common::{Span, Spanned, SyntaxContext, DUMMY_SP};
 use num_bigint::{BigInt as BigIntValue, BigUint, Sign};
 
@@ -24140,7 +24141,7 @@ impl RegisterWithMap<ByteToIndexMap> for JSXAttrValue {
       JSXAttrValue::JSXElement(node) => node.register_with_map(map),
       JSXAttrValue::JSXExprContainer(node) => node.register_with_map(map),
       JSXAttrValue::JSXFragment(node) => node.register_with_map(map),
-      JSXAttrValue::Lit(node) => node.register_with_map(map),
+      JSXAttrValue::Str(node) => node.register_with_map(map),
     }
   }
 }
@@ -24154,7 +24155,7 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXAttrValue {
       JSXAttrValue::JSXElement(node) => node.to_java_with_map(env, map),
       JSXAttrValue::JSXExprContainer(node) => node.to_java_with_map(env, map),
       JSXAttrValue::JSXFragment(node) => node.to_java_with_map(env, map),
-      JSXAttrValue::Lit(node) => node.to_java_with_map(env, map),
+      JSXAttrValue::Str(node) => node.to_java_with_map(env, map),
     }
   }
 }
@@ -24169,8 +24170,8 @@ impl<'local> FromJava<'local> for JSXAttrValue {
         JSXAttrValue::JSXExprContainer(*JSXExprContainer::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(JAVA_CLASS_JSX_FRAGMENT.get().unwrap().class)).unwrap_or(false) {
         JSXAttrValue::JSXFragment(*JSXFragment::from_java(env, jobj)?)
-      } else if env.is_instance_of(jobj, &(JAVA_CLASS_LIT.get().unwrap().class)).unwrap_or(false) {
-        JSXAttrValue::Lit(*Lit::from_java(env, jobj)?)
+      } else if env.is_instance_of(jobj, &(JAVA_CLASS_STR.get().unwrap().class)).unwrap_or(false) {
+        JSXAttrValue::Str(*Str::from_java(env, jobj)?)
       } else {
         let java_ast_type = JAVA_CLASS_.get().unwrap().get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
@@ -31209,10 +31210,10 @@ impl ToJavaWithMap<ByteToIndexMap> for Str {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
-    let value = self.value.as_str();
+    let value = self.value.to_string_lossy();
     let optional_raw = self.raw.as_ref().map(|node| node.to_string());
     let return_value = JAVA_CLASS_STR.get().unwrap()
-      .construct(env, value, &optional_raw, &java_span_ex)?;
+      .construct(env, &value, &optional_raw, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
     Ok(return_value)
   }
@@ -31224,7 +31225,7 @@ impl<'local> FromJava<'local> for Str {
     let java_class = JAVA_CLASS_STR.get().unwrap();
     let span = DUMMY_SP;
     let value = java_class.get_value(env, jobj)?;
-    let value = value.into();
+    let value = Wtf8Atom::new(value);
     let java_optional_raw = java_class.get_raw(env, jobj)?;
     let raw = if optional_is_present(env, &java_optional_raw)? {
       let java_raw = optional_get(env, &java_optional_raw)?;
@@ -31663,7 +31664,7 @@ impl ToJavaWithMap<ByteToIndexMap> for TplElement {
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let tail = self.tail;
-    let optional_cooked = self.cooked.as_ref().map(|node| node.to_string());
+    let optional_cooked = self.cooked.as_ref().map(|node| node.to_string_lossy().into_owned());
     let raw = self.raw.as_str();
     let return_value = JAVA_CLASS_TPL_ELEMENT.get().unwrap()
       .construct(env, tail, &optional_cooked, raw, &java_span_ex)?;
@@ -31689,7 +31690,7 @@ impl<'local> FromJava<'local> for TplElement {
       None
     };
     delete_local_ref!(env, java_optional_cooked);
-    let cooked = cooked.map(|cooked| cooked.into());
+    let cooked = cooked.map(|cooked| Wtf8Atom::new(cooked));
     let raw = java_class.get_raw(env, jobj)?;
     let raw = raw.into();
     Ok(Box::new(TplElement {

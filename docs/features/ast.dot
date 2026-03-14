@@ -16,7 +16,7 @@ digraph {
   ImportSpecifier -> { ImportDefaultSpecifier ImportNamedSpecifier ImportStarAsSpecifier }
   JSXAttrName -> { IdentName JSXNamespacedName }
   JSXAttrOrSpread -> { JSXAttr SpreadElement }
-  JSXAttrValue -> { JSXElement JSXExprContainer JSXFragment Lit }
+  JSXAttrValue -> { JSXElement JSXExprContainer JSXFragment Str }
   JSXElementChild -> { JSXElement JSXExprContainer JSXFragment JSXSpreadChild JSXText }
   JSXElementName -> { Ident JSXMemberExpr JSXNamespacedName }
   JSXExpr -> { Expr JSXEmptyExpr }

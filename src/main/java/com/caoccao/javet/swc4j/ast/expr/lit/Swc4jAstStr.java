@@ -45,7 +45,7 @@ public class Swc4jAstStr
     /**
      * The Value.
      */
-    @Jni2RustField(atom = true)
+    @Jni2RustField(wtf8Atom = true)
     protected String value;
 
     /**

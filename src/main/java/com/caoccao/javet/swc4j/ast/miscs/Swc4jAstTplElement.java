@@ -37,7 +37,7 @@ public class Swc4jAstTplElement
     /**
      * The Cooked.
      */
-    @Jni2RustField(componentAtom = true)
+    @Jni2RustField(componentWtf8Atom = true)
     protected Optional<String> cooked;
     /**
      * The Raw.
