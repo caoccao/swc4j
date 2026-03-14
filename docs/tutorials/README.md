@@ -14,6 +14,7 @@
 ## Bytecode Compiler
 
 * [Tutorial Compiler 01: Hello Bytecode](tutorial_compiler_01_hello_bytecode.md)
+* [Tutorial Compiler 02: Variables and Arithmetic](tutorial_compiler_02_variables_and_arithmetic.md)
 
 ## Sanitizer
 
