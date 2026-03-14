@@ -53,7 +53,7 @@ public final class Swc4jLibLoader {
     private static final String LIB_FILE_NAME_FORMAT = "libswc4j-{0}-{1}.v.{2}.{3}";
     private static final String LIB_FILE_NAME_PREFIX = "lib";
     private static final String LIB_NAME = "swc4j";
-    private static final String LIB_VERSION = "2.0.0";
+    private static final String LIB_VERSION = "2.1.0";
     private static final ISwc4jLogger LOGGER = new Swc4jDefaultLogger(Swc4jLibLoader.class.getName());
     private static final long MIN_LAST_MODIFIED_GAP_IN_MILLIS = 60L * 1000L; // 1 minute
     private static final String OS_ANDROID = "android";

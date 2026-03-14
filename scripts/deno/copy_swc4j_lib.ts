@@ -36,7 +36,7 @@ interface Config {
 }
 
 const NAME = "swc4j";
-const VERSION = "2.0.0";
+const VERSION = "2.1.0";
 const OS_CONFIG_MAP: Record<string, Config> = {
   windows: {
     sourceName: NAME,

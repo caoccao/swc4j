@@ -23,6 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TestSwc4jNative {
     @Test
     public void testGetVersion() {
-        assertThat(Swc4jNative.coreGetVersion()).isEqualTo("2.0.0");
+        assertThat(Swc4jNative.coreGetVersion()).isEqualTo("2.1.0");
     }
 }

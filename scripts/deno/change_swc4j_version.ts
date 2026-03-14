@@ -104,13 +104,13 @@ class ChangeSwc4jVersion {
       /LIB_VERSION = "(?<version>\d+\.\d+\.\d+)"/ig,
     ])
     this._change('src/test/java/com/caoccao/javet/swc4j/TestSwc4j.java', [
-      /assertEquals\("(?<version>\d+\.\d+\.\d+)"/ig,
+      /isEqualTo\("(?<version>\d+\.\d+\.\d+)"/ig,
     ])
     this._change('src/test/java/com/caoccao/javet/swc4j/TestSwc4jNative.java', [
-      /assertEquals\("(?<version>\d+\.\d+\.\d+)"/ig,
+      /isEqualTo\("(?<version>\d+\.\d+\.\d+)"/ig,
     ])
   }
 }
 
-const changeSwc4jVersion = new ChangeSwc4jVersion('2.0.0', '2.0.0');
+const changeSwc4jVersion = new ChangeSwc4jVersion('2.1.0', '2.1.0');
 changeSwc4jVersion.change()

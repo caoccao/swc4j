@@ -1,5 +1,9 @@
 # Release Notes
 
+## 2.1.0
+
+* Added bytecode compiler
+
 ## 2.0.0
 
 * Upgraded JDK to v17
