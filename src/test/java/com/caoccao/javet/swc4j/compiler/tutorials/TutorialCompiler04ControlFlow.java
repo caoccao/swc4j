@@ -18,57 +18,68 @@ package com.caoccao.javet.swc4j.compiler.tutorials;
 
 import com.caoccao.javet.swc4j.compiler.*;
 
-public class TutorialCompiler03StringsAndTypeInference {
+public class TutorialCompiler04ControlFlow {
     public static void main(String[] args) throws Exception {
         // Create a compiler targeting JDK 17.
         ByteCodeCompiler compiler = ByteCodeCompiler.of(
                 ByteCodeCompilerOptions.builder()
                         .jdkVersion(JdkVersion.JDK_17)
                         .build());
-        // Prepare a function that concatenates two strings.
-        String code = "export function greet(): String {\n"
-                + "  const first: String = \"Hello, \"\n"
-                + "  const second: String = \"World!\"\n"
-                + "  return first + second\n"
+        // Prepare a function with if/else branching.
+        String code = "export function classify(n: int): String {\n"
+                + "  if (n > 0) {\n"
+                + "    return \"positive\"\n"
+                + "  } else if (n < 0) {\n"
+                + "    return \"negative\"\n"
+                + "  } else {\n"
+                + "    return \"zero\"\n"
+                + "  }\n"
                 + "}";
-        // Compile and run.
+        // Compile and run with different arguments.
         ByteCodeRunner runner = compiler.compile(code);
         ByteCodeClassRunner classRunner = runner.createStaticRunner("$");
-        String result = classRunner.invoke("greet");
-        // Print the result.
+        // Print the results.
         System.out.println("/*********************************************");
-        System.out.println("     String concatenation.");
+        System.out.println("     If-Else branching.");
         System.out.println("*********************************************/");
-        System.out.println(result);
-        // Prepare a function that relies on type inference.
-        code = "export function compute(): String {\n"
-                + "  const x = 5\n"
-                + "  const y = 10\n"
-                + "  const label = \"sum\"\n"
-                + "  return label + \": \" + (x + y)\n"
+        System.out.println("classify(42)  = " + classRunner.invoke("classify", 42));
+        System.out.println("classify(-7)  = " + classRunner.invoke("classify", -7));
+        System.out.println("classify(0)   = " + classRunner.invoke("classify", 0));
+        // Prepare a function with a while loop.
+        code = "export function sumUpTo(n: int): int {\n"
+                + "  let sum: int = 0\n"
+                + "  let i: int = 1\n"
+                + "  while (i <= n) {\n"
+                + "    sum = sum + i\n"
+                + "    i = i + 1\n"
+                + "  }\n"
+                + "  return sum\n"
                 + "}";
         // Compile and run.
         runner = compiler.compile(code);
         classRunner = runner.createStaticRunner("$");
-        result = classRunner.invoke("compute");
+        int sum = classRunner.invoke("sumUpTo", 10);
         // Print the result.
         System.out.println("/*********************************************");
-        System.out.println("     Type inference.");
+        System.out.println("     While loop.");
         System.out.println("*********************************************/");
-        System.out.println(result);
-        // Prepare a function that concatenates a string with a number.
-        code = "export function format(): String {\n"
-                + "  const value: int = 42\n"
-                + "  return \"value: \" + value\n"
+        System.out.println("sumUpTo(10) = " + sum);
+        // Prepare a function with a for loop.
+        code = "export function factorial(n: int): int {\n"
+                + "  let result: int = 1\n"
+                + "  for (let i: int = 2; i <= n; i = i + 1) {\n"
+                + "    result = result * i\n"
+                + "  }\n"
+                + "  return result\n"
                 + "}";
         // Compile and run.
         runner = compiler.compile(code);
         classRunner = runner.createStaticRunner("$");
-        result = classRunner.invoke("format");
+        int fact = classRunner.invoke("factorial", 5);
         // Print the result.
         System.out.println("/*********************************************");
-        System.out.println("     String and number concatenation.");
+        System.out.println("     For loop.");
         System.out.println("*********************************************/");
-        System.out.println(result);
+        System.out.println("factorial(5) = " + fact);
     }
 }

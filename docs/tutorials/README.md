@@ -16,6 +16,7 @@
 * [Tutorial Compiler 01: Hello Bytecode](tutorial_compiler_01_hello_bytecode.md)
 * [Tutorial Compiler 02: Variables and Arithmetic](tutorial_compiler_02_variables_and_arithmetic.md)
 * [Tutorial Compiler 03: Strings and Type Inference](tutorial_compiler_03_strings_and_type_inference.md)
+* [Tutorial Compiler 04: Control Flow](tutorial_compiler_04_control_flow.md)
 
 ## Sanitizer
 
