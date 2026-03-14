@@ -19,6 +19,7 @@
 * [Tutorial Compiler 04: Control Flow](tutorial_compiler_04_control_flow.md)
 * [Tutorial Compiler 05: Multiple Classes](tutorial_compiler_05_multiple_classes.md)
 * [Tutorial Compiler 06: Class Inheritance](tutorial_compiler_06_class_inheritance.md)
+* [Tutorial Compiler 07: Interfaces and Abstract Classes](tutorial_compiler_07_interfaces_and_abstract_classes.md)
 
 ## Sanitizer
 
