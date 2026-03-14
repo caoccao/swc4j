@@ -20,6 +20,7 @@
 * [Tutorial Compiler 05: Multiple Classes](tutorial_compiler_05_multiple_classes.md)
 * [Tutorial Compiler 06: Class Inheritance](tutorial_compiler_06_class_inheritance.md)
 * [Tutorial Compiler 07: Interfaces and Abstract Classes](tutorial_compiler_07_interfaces_and_abstract_classes.md)
+* [Tutorial Compiler 08: Functions and Recursion](tutorial_compiler_08_functions_and_recursion.md)
 
 ## Sanitizer
 
