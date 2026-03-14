@@ -26,11 +26,12 @@ public class TutorialCompiler02VariablesAndArithmetic {
                         .jdkVersion(JdkVersion.JDK_17)
                         .build());
         // Prepare a function that adds two integers.
-        String code = "export function add(): int {\n"
-                + "  const a: int = 5\n"
-                + "  const b: int = 10\n"
-                + "  return a + b\n"
-                + "}";
+        String code = """
+                export function add(): int {
+                  const a: int = 5
+                  const b: int = 10
+                  return a + b
+                }""";
         // Compile and run.
         ByteCodeRunner runner = compiler.compile(code);
         ByteCodeClassRunner classRunner = runner.createStaticRunner("$");
@@ -41,11 +42,12 @@ public class TutorialCompiler02VariablesAndArithmetic {
         System.out.println("*********************************************/");
         System.out.println("5 + 10 = " + result);
         // Prepare a function that multiplies two doubles.
-        code = "export function multiply(): double {\n"
-                + "  const x: double = 3.14\n"
-                + "  const y: double = 2.0\n"
-                + "  return x * y\n"
-                + "}";
+        code = """
+                export function multiply(): double {
+                  const x: double = 3.14
+                  const y: double = 2.0
+                  return x * y
+                }""";
         // Compile and run.
         runner = compiler.compile(code);
         classRunner = runner.createStaticRunner("$");
@@ -56,14 +58,15 @@ public class TutorialCompiler02VariablesAndArithmetic {
         System.out.println("*********************************************/");
         System.out.println("3.14 * 2.0 = " + doubleResult);
         // Prepare a function with a mixed expression.
-        code = "export function compute(): int {\n"
-                + "  const a: int = 10\n"
-                + "  const b: int = 3\n"
-                + "  const c: int = 4\n"
-                + "  const d: int = 20\n"
-                + "  const e: int = 5\n"
-                + "  return a + b * c - d / e\n"
-                + "}";
+        code = """
+                export function compute(): int {
+                  const a: int = 10
+                  const b: int = 3
+                  const c: int = 4
+                  const d: int = 20
+                  const e: int = 5
+                  return a + b * c - d / e
+                }""";
         // Compile and run.
         runner = compiler.compile(code);
         classRunner = runner.createStaticRunner("$");

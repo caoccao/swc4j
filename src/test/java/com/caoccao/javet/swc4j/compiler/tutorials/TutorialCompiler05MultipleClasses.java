@@ -18,45 +18,57 @@ package com.caoccao.javet.swc4j.compiler.tutorials;
 
 import com.caoccao.javet.swc4j.compiler.*;
 
-public class TutorialCompiler01HelloBytecode {
+public class TutorialCompiler05MultipleClasses {
     public static void main(String[] args) throws Exception {
         // Create a compiler targeting JDK 17.
         ByteCodeCompiler compiler = ByteCodeCompiler.of(
                 ByteCodeCompilerOptions.builder()
                         .jdkVersion(JdkVersion.JDK_17)
                         .build());
-        // Prepare a simple TypeScript function.
+        // Prepare two classes in the same namespace.
         String code = """
-                export function getAnswer(): int {
-                  return 42
+                namespace com {
+                  export class Calculator {
+                    add(a: int, b: int): int {
+                      return a + b
+                    }
+                  }
+                  export class App {
+                    test(): int {
+                      const calc = new Calculator()
+                      return calc.add(10, 20)
+                    }
+                  }
                 }""";
-        // Compile the code to JVM bytecode.
+        // Compile and run.
         ByteCodeRunner runner = compiler.compile(code);
-        // Invoke the compiled function as a static method.
-        ByteCodeClassRunner classRunner = runner.createStaticRunner("$");
-        int result = classRunner.invoke("getAnswer");
+        ByteCodeClassRunner classRunner = runner.createInstanceRunner("com.App");
+        int result = classRunner.invoke("test");
         // Print the result.
         System.out.println("/*********************************************");
-        System.out.println("     Compile and run a function.");
+        System.out.println("     Two classes interacting.");
         System.out.println("*********************************************/");
-        System.out.println("The answer is: " + result);
-        // Prepare a TypeScript code snippet that returns a string.
+        System.out.println("App.test() = " + result);
+        // Prepare a class that calls its own method via this.
         code = """
                 namespace com {
-                  export class Greeter {
-                    greet(): String {
-                      return "Hello, JVM!"
+                  export class MathHelper {
+                    square(x: int): int {
+                      return x * x
+                    }
+                    sumOfSquares(a: int, b: int): int {
+                      return this.square(a) + this.square(b)
                     }
                   }
                 }""";
         // Compile and run.
         runner = compiler.compile(code);
-        classRunner = runner.createInstanceRunner("com.Greeter");
-        String greeting = classRunner.invoke("greet");
+        classRunner = runner.createInstanceRunner("com.MathHelper");
+        result = classRunner.invoke("sumOfSquares", 3, 4);
         // Print the result.
         System.out.println("/*********************************************");
-        System.out.println("     Compile and run a string return.");
+        System.out.println("     This reference.");
         System.out.println("*********************************************/");
-        System.out.println(greeting);
+        System.out.println("sumOfSquares(3, 4) = " + result);
     }
 }

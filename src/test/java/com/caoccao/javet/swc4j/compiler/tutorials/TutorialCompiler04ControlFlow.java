@@ -26,15 +26,16 @@ public class TutorialCompiler04ControlFlow {
                         .jdkVersion(JdkVersion.JDK_17)
                         .build());
         // Prepare a function with if/else branching.
-        String code = "export function classify(n: int): String {\n"
-                + "  if (n > 0) {\n"
-                + "    return \"positive\"\n"
-                + "  } else if (n < 0) {\n"
-                + "    return \"negative\"\n"
-                + "  } else {\n"
-                + "    return \"zero\"\n"
-                + "  }\n"
-                + "}";
+        String code = """
+                export function classify(n: int): String {
+                  if (n > 0) {
+                    return "positive"
+                  } else if (n < 0) {
+                    return "negative"
+                  } else {
+                    return "zero"
+                  }
+                }""";
         // Compile and run with different arguments.
         ByteCodeRunner runner = compiler.compile(code);
         ByteCodeClassRunner classRunner = runner.createStaticRunner("$");
@@ -46,15 +47,16 @@ public class TutorialCompiler04ControlFlow {
         System.out.println("classify(-7)  = " + classRunner.invoke("classify", -7));
         System.out.println("classify(0)   = " + classRunner.invoke("classify", 0));
         // Prepare a function with a while loop.
-        code = "export function sumUpTo(n: int): int {\n"
-                + "  let sum: int = 0\n"
-                + "  let i: int = 1\n"
-                + "  while (i <= n) {\n"
-                + "    sum = sum + i\n"
-                + "    i = i + 1\n"
-                + "  }\n"
-                + "  return sum\n"
-                + "}";
+        code = """
+                export function sumUpTo(n: int): int {
+                  let sum: int = 0
+                  let i: int = 1
+                  while (i <= n) {
+                    sum = sum + i
+                    i = i + 1
+                  }
+                  return sum
+                }""";
         // Compile and run.
         runner = compiler.compile(code);
         classRunner = runner.createStaticRunner("$");
@@ -65,13 +67,14 @@ public class TutorialCompiler04ControlFlow {
         System.out.println("*********************************************/");
         System.out.println("sumUpTo(10) = " + sum);
         // Prepare a function with a for loop.
-        code = "export function factorial(n: int): int {\n"
-                + "  let result: int = 1\n"
-                + "  for (let i: int = 2; i <= n; i = i + 1) {\n"
-                + "    result = result * i\n"
-                + "  }\n"
-                + "  return result\n"
-                + "}";
+        code = """
+                export function factorial(n: int): int {
+                  let result: int = 1
+                  for (let i: int = 2; i <= n; i = i + 1) {
+                    result = result * i
+                  }
+                  return result
+                }""";
         // Compile and run.
         runner = compiler.compile(code);
         classRunner = runner.createStaticRunner("$");

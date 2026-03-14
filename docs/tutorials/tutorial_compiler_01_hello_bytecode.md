@@ -26,9 +26,10 @@ ByteCodeCompiler compiler = ByteCodeCompiler.of(
                 .jdkVersion(JdkVersion.JDK_17)
                 .build());
 // Prepare a simple TypeScript function.
-String code = "export function getAnswer(): int {\n"
-        + "  return 42\n"
-        + "}";
+String code = """
+        export function getAnswer(): int {
+          return 42
+        }""";
 // Compile the code to JVM bytecode.
 ByteCodeRunner runner = compiler.compile(code);
 // Invoke the compiled function as a static method.
@@ -43,7 +44,7 @@ System.out.println("The answer is: " + result);
 
 * The output is as follows. As we can see, the TypeScript function is compiled to JVM bytecode and returns the integer 42 directly on the JVM.
 
-```
+```java
 /*********************************************
      Compile and run a function.
 *********************************************/
@@ -58,13 +59,14 @@ The compiler supports string literals. Let's compile a class that returns a gree
 
 ```java
 // Prepare a TypeScript code snippet that returns a string.
-code = "namespace com {\n"
-        + "  export class Greeter {\n"
-        + "    greet(): String {\n"
-        + "      return \"Hello, JVM!\"\n"
-        + "    }\n"
-        + "  }\n"
-        + "}";
+code = """
+        namespace com {
+          export class Greeter {
+            greet(): String {
+              return "Hello, JVM!"
+            }
+          }
+        }""";
 // Compile and run.
 runner = compiler.compile(code);
 classRunner = runner.createInstanceRunner("com.Greeter");
@@ -78,7 +80,7 @@ System.out.println(greeting);
 
 * The output is as follows. The compiled method returns a standard Java `String` object.
 
-```
+```java
 /*********************************************
      Compile and run a string return.
 *********************************************/

@@ -26,11 +26,12 @@ public class TutorialCompiler03StringsAndTypeInference {
                         .jdkVersion(JdkVersion.JDK_17)
                         .build());
         // Prepare a function that concatenates two strings.
-        String code = "export function greet(): String {\n"
-                + "  const first: String = \"Hello, \"\n"
-                + "  const second: String = \"World!\"\n"
-                + "  return first + second\n"
-                + "}";
+        String code = """
+                export function greet(): String {
+                  const first: String = "Hello, "
+                  const second: String = "World!"
+                  return first + second
+                }""";
         // Compile and run.
         ByteCodeRunner runner = compiler.compile(code);
         ByteCodeClassRunner classRunner = runner.createStaticRunner("$");
@@ -41,12 +42,13 @@ public class TutorialCompiler03StringsAndTypeInference {
         System.out.println("*********************************************/");
         System.out.println(result);
         // Prepare a function that relies on type inference.
-        code = "export function compute(): String {\n"
-                + "  const x = 5\n"
-                + "  const y = 10\n"
-                + "  const label = \"sum\"\n"
-                + "  return label + \": \" + (x + y)\n"
-                + "}";
+        code = """
+                export function compute(): String {
+                  const x = 5
+                  const y = 10
+                  const label = "sum"
+                  return label + ": " + (x + y)
+                }""";
         // Compile and run.
         runner = compiler.compile(code);
         classRunner = runner.createStaticRunner("$");
@@ -57,10 +59,11 @@ public class TutorialCompiler03StringsAndTypeInference {
         System.out.println("*********************************************/");
         System.out.println(result);
         // Prepare a function that concatenates a string with a number.
-        code = "export function format(): String {\n"
-                + "  const value: int = 42\n"
-                + "  return \"value: \" + value\n"
-                + "}";
+        code = """
+                export function format(): String {
+                  const value: int = 42
+                  return "value: " + value
+                }""";
         // Compile and run.
         runner = compiler.compile(code);
         classRunner = runner.createStaticRunner("$");
