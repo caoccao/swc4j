@@ -325,6 +325,32 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testInheritedMethodCallOverrideWithSuper(JdkVersion jdkVersion) throws Exception {
+        // Regression test: overriding an inherited Java method and calling super.
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class LoggingList extends java.util.ArrayList<Object> {
+                    count: int = 0
+                    add(item: Object): boolean {
+                      this.count = this.count + 1
+                      return super.add(item)
+                    }
+                    getCount(): int {
+                      return this.count
+                    }
+                  }
+                }""");
+        var instanceRunner = runner.createInstanceRunner("com.LoggingList");
+        instanceRunner.invoke("add", "A");
+        instanceRunner.invoke("add", "B");
+        assertThat((int) instanceRunner.invoke("getCount")).isEqualTo(2);
+        @SuppressWarnings("unchecked")
+        ArrayList<Object> list = (ArrayList<Object>) instanceRunner.getInstance();
+        assertThat(list).containsExactly("A", "B");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testInheritedMethodCallReturnTypeInference(JdkVersion jdkVersion) throws Exception {
         // Regression test: calling inherited Java methods (e.g. ArrayList.add) from compiled code
         // should infer the return type correctly without explicit annotation.
@@ -368,6 +394,31 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testInheritedOverloadedMethods(JdkVersion jdkVersion) throws Exception {
+        // Regression test: calling different overloaded inherited methods from a parent Java class.
+        // ArrayList has add(Object) and add(int, Object).
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class SmartList extends java.util.ArrayList<Object> {
+                    addItem(item: Object): void {
+                      this.add(item)
+                    }
+                    addItemAt(index: int, item: Object): void {
+                      this.add(index, item)
+                    }
+                  }
+                }""");
+        var instanceRunner = runner.createInstanceRunner("com.SmartList");
+        instanceRunner.invoke("addItem", "B");
+        instanceRunner.invoke("addItem", "C");
+        instanceRunner.invoke("addItemAt", 0, "A");
+        @SuppressWarnings("unchecked")
+        ArrayList<Object> list = (ArrayList<Object>) instanceRunner.getInstance();
+        assertThat(list).containsExactly("A", "B", "C");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testMethodOverride(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -390,6 +441,110 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
         ).isEqualTo(
                 Map.of("A", 100, "B", 200)
         );
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testInheritedOverloadedConstructorsCallingSuperOverloads(JdkVersion jdkVersion) throws Exception {
+        // Overloaded constructors each calling a different super(...) overload.
+        // RuntimeException has RuntimeException(), RuntimeException(String), RuntimeException(String, Throwable).
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class AppException extends java.lang.RuntimeException {
+                    code: int = 0
+                    constructor() {
+                      super()
+                    }
+                    constructor(message: String) {
+                      super(message)
+                    }
+                    constructor(message: String, code: int) {
+                      super(message)
+                      this.code = code
+                    }
+                    getCode(): int { return this.code }
+                  }
+                }""");
+        Class<?> clazz = runner.getClass("com.AppException");
+
+        // No-arg constructor
+        var ex1 = (RuntimeException) clazz.getConstructor().newInstance();
+        assertThat(ex1.getMessage()).isNull();
+
+        // Single-arg constructor
+        var ex2 = (RuntimeException) clazz.getConstructor(String.class).newInstance("oops");
+        assertThat(ex2.getMessage()).isEqualTo("oops");
+
+        // Two-arg constructor
+        var ex3 = clazz.getConstructor(String.class, int.class).newInstance("fail", 500);
+        assertThat(((RuntimeException) ex3).getMessage()).isEqualTo("fail");
+        assertThat((int) clazz.getMethod("getCode").invoke(ex3)).isEqualTo(500);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testInheritedOverloadedConstructorsWithThisChaining(JdkVersion jdkVersion) throws Exception {
+        // Overloaded constructors using this(...) chaining on a class extending a Java class.
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class NamedList extends java.util.ArrayList<Object> {
+                    label: String = ""
+                    constructor() {
+                      this("default")
+                    }
+                    constructor(label: String) {
+                      super()
+                      this.label = label
+                    }
+                    getLabel(): String { return this.label }
+                  }
+                }""");
+        Class<?> clazz = runner.getClass("com.NamedList");
+
+        // No-arg constructor chains to single-arg
+        var list1 = runner.createInstanceRunner("com.NamedList");
+        assertThat((String) list1.invoke("getLabel")).isEqualTo("default");
+
+        // Single-arg constructor
+        var list2 = runner.createInstanceRunner("com.NamedList", "items");
+        assertThat((String) list2.invoke("getLabel")).isEqualTo("items");
+
+        // Inherited add still works
+        @SuppressWarnings("unchecked")
+        ArrayList<Object> raw = (ArrayList<Object>) list2.getInstance();
+        raw.add("X");
+        assertThat(raw.size()).isEqualTo(1);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testInheritedOverloadedMethodsCalledFromOverloadedTsMethods(JdkVersion jdkVersion) throws Exception {
+        // Regression test: overloaded TS methods calling overloaded inherited Java methods.
+        // ArrayList has add(Object):boolean and add(int, Object):void.
+        // The TS class defines overloaded insert() methods that delegate to each overload.
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class FlexList extends java.util.ArrayList<Object> {
+                    insert(item: Object): void {
+                      this.add(item)
+                    }
+                    insert(index: int, item: Object): void {
+                      this.add(index, item)
+                    }
+                  }
+                }""");
+        Class<?> clazz = runner.getClass("com.FlexList");
+        var instance = clazz.getConstructor().newInstance();
+
+        // Call insert(Object)
+        clazz.getMethod("insert", Object.class).invoke(instance, "B");
+        clazz.getMethod("insert", Object.class).invoke(instance, "C");
+        // Call insert(int, Object)
+        clazz.getMethod("insert", int.class, Object.class).invoke(instance, 0, "A");
+
+        @SuppressWarnings("unchecked")
+        ArrayList<Object> list = (ArrayList<Object>) instance;
+        assertThat(list).containsExactly("A", "B", "C");
     }
 
     @ParameterizedTest
