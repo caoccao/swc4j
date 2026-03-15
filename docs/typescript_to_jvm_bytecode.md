@@ -239,22 +239,7 @@ ByteCodeCompiler compiler = ByteCodeCompiler.of(
 
 The compiler follows a **multi-phase compilation pipeline**:
 
-```mermaid
-flowchart TD
-    A[TypeScript Source Code] --> B[SWC Parser]
-    B --> C[AST]
-    C --> D["Import Processing<br/><i>Resolve import { X } from 'java.pkg'</i>"]
-    D --> E["Type Alias Collection<br/><i>Collect type aliases (type MyInt = int)</i>"]
-    E --> F["Class Collection<br/><i>Register classes, enums, interfaces</i>"]
-    F --> G["Interface Collection<br/><i>Process TypeScript interface declarations</i>"]
-    G --> H["AST Processing<br/><i>Walk AST and generate code for each construct</i>"]
-    H --> I["Variable Analysis<br/><i>Analyze variables and infer types</i>"]
-    I --> J["Type Resolution<br/><i>Resolve types from annotations/inference</i>"]
-    J --> K["Code Generation<br/><i>Generate JVM bytecode instructions</i>"]
-    K --> L["JVM Bytecode<br/><i>Map&lt;String, byte[]&gt;</i>"]
-    L --> M["ByteArrayClassLoader<br/><i>Load classes into JVM</i>"]
-    M --> N[Executable Classes]
-```
+![Bytecode Compiler Architecture](images/bytecode-compiler-architecture.jpg)
 
 ### Core Components
 
