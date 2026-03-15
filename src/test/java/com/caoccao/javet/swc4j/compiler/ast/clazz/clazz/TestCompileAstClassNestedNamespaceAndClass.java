@@ -79,6 +79,119 @@ public class TestCompileAstClassNestedNamespaceAndClass extends BaseTestCompileS
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testDeeplyNestedClasses(JdkVersion jdkVersion) throws Exception {
+        // Three levels of nested classes via namespaces
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  namespace a {
+                    namespace b {
+                      export class Deep {
+                        depth(): int { return 3 }
+                      }
+                    }
+                    export class Mid {
+                      depth(): int { return 2 }
+                    }
+                  }
+                  export class Top {
+                    depth(): int { return 1 }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.Top").invoke("depth")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("com.a.Mid").invoke("depth")).isEqualTo(2);
+        assertThat((int) runner.createInstanceRunner("com.a.b.Deep").invoke("depth")).isEqualTo(3);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMultipleNestedClasses(JdkVersion jdkVersion) throws Exception {
+        // Multiple classes inside a nested namespace
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  namespace shapes {
+                    export class Circle {
+                      name(): String { return "circle" }
+                    }
+                    export class Square {
+                      name(): String { return "square" }
+                    }
+                  }
+                }""");
+        assertThat((String) runner.createInstanceRunner("com.shapes.Circle").invoke("name")).isEqualTo("circle");
+        assertThat((String) runner.createInstanceRunner("com.shapes.Square").invoke("name")).isEqualTo("square");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedClassExtendsOuterClass(JdkVersion jdkVersion) throws Exception {
+        // A nested class extends a class from the parent namespace
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class Base {
+                    getBase(): int { return 10 }
+                  }
+                  namespace Base {
+                    export class Extended extends com.Base {
+                      getExtended(): int { return this.getBase() + 5 }
+                    }
+                  }
+                }""");
+        var instanceRunner = runner.createInstanceRunner("com.Base.Extended");
+        assertThat((int) instanceRunner.invoke("getBase")).isEqualTo(10);
+        assertThat((int) instanceRunner.invoke("getExtended")).isEqualTo(15);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedClassInstantiatedFromOuter(JdkVersion jdkVersion) throws Exception {
+        // Outer class creates an instance of its nested class
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  namespace Types {
+                    export class Point {
+                      x: int
+                      y: int
+                      constructor(x: int, y: int) { this.x = x; this.y = y }
+                      getX(): int { return this.x }
+                      getY(): int { return this.y }
+                    }
+                  }
+                  export class Factory {
+                    create(): int {
+                      const p = new com.Types.Point(3, 4)
+                      return p.getX() + p.getY()
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.Factory").invoke("create")).isEqualTo(7);
+    }
+
+    /*
+     * TypeScript doesn't support class declarations inside a class body,
+     * but a namespace with the same name as a class creates a "companion namespace"
+     * whose classes behave like Java static nested classes (Outer.Inner).
+     */
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedClassViaCompanionNamespace(JdkVersion jdkVersion) throws Exception {
+        // A class and a companion namespace produce Outer and Outer.Inner
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class Outer {
+                    getValue(): int { return 1 }
+                  }
+                  namespace Outer {
+                    export class Inner {
+                      getValue(): int { return 2 }
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.Outer").invoke("getValue")).isEqualTo(1);
+        assertThat((int) runner.createInstanceRunner("com.Outer.Inner").invoke("getValue")).isEqualTo(2);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testNestedNamespace(JdkVersion jdkVersion) throws Exception {
         // Nested namespaces produce dotted package names: com.example
         var runner = getCompiler(jdkVersion).compile("""

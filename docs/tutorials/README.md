@@ -25,6 +25,7 @@
 * [Tutorial Compiler 10: Extending Java Classes](tutorial_compiler_10_extending_java_classes.md)
 * [Tutorial Compiler 11: Overloaded Constructors and Methods](tutorial_compiler_11_overloaded_constructors_and_methods.md)
 * [Tutorial Compiler 12: TypeScript Interfaces](tutorial_compiler_12_typescript_interfaces.md)
+* [Tutorial Compiler 13: Nested Namespaces and Classes](tutorial_compiler_13_nested_namespaces_and_classes.md)
 
 ## Sanitizer
 
