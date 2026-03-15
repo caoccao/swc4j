@@ -289,22 +289,20 @@ impl ParseOutput {
   pub fn get_byte_to_index_map(&self) -> ByteToIndexMap {
     // Register the keys
     let mut map = ByteToIndexMap::new();
-    self.comments.as_ref().map(|comments| {
+    if let Some(comments) = self.comments.as_ref() {
       comments.leading_map().iter().for_each(|(key, value)| {
-        map.register_by_byte_pos(&key);
+        map.register_by_byte_pos(key);
         value.iter().for_each(|comment| map.register_by_span(&comment.span));
       });
       comments.trailing_map().iter().for_each(|(key, value)| {
-        map.register_by_byte_pos(&key);
+        map.register_by_byte_pos(key);
         value.iter().for_each(|comment| map.register_by_span(&comment.span));
       });
-    });
-    self.program.as_ref().map(|program| program.register_with_map(&mut map));
-    self.tokens.as_ref().map(|token_and_spans| {
-      token_and_spans.iter().for_each(|token_and_span| {
+    }
+    if let Some(program) = self.program.as_ref() { program.register_with_map(&mut map) }
+    if let Some(token_and_spans) = self.tokens.as_ref() { token_and_spans.iter().for_each(|token_and_span| {
         map.register_by_span(&token_and_span.span);
-      })
-    });
+      }) }
     map.update_by_str(self.source_text.as_str());
     map
   }
@@ -323,7 +321,7 @@ impl ToJava for ParseOutput {
     let java_parse_mode = self.parse_mode.to_java(env)?;
     let source_text = self.source_text.as_str();
     let java_tokens =
-      token_utils::token_and_spans_to_java_list(env, &byte_to_index_map, &source_text, self.tokens.clone())?;
+      token_utils::token_and_spans_to_java_list(env, &byte_to_index_map, source_text, self.tokens.clone())?;
     let java_comments = self.comments.as_ref().map_or(Ok(Default::default()), |comments| {
       comments_new(env, comments, &byte_to_index_map)
     })?;
@@ -384,7 +382,7 @@ impl ToJava for TransformOutput {
       code,
       &java_media_type,
       &java_parse_mode,
-      &optional_source_map,
+      optional_source_map,
     );
     delete_local_ref!(env, java_media_type);
     delete_local_ref!(env, java_parse_mode);
@@ -467,7 +465,7 @@ impl ToJava for TranspileOutput {
     let java_tokens = token_utils::token_and_spans_to_java_list(
       env,
       &byte_to_index_map,
-      &source_text,
+      source_text,
       self.parse_output.tokens.clone(),
     )?;
     let java_comments = self
@@ -483,7 +481,7 @@ impl ToJava for TranspileOutput {
       code,
       &java_media_type,
       &java_parse_mode,
-      &optional_source_map,
+      optional_source_map,
       source_text,
       &java_tokens,
       &java_comments,

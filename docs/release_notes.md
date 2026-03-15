@@ -3,6 +3,7 @@
 ## 2.1.0
 
 * Upgraded deno_ast to v0.53.1
+* Upgraded rust toolchain to v1.94.0
 * Added bytecode compiler
 * Added `Markdown` to `Swc4jMediaType`
 * Changed `JSXAttrValue::Lit` to `JSXAttrValue::Str`

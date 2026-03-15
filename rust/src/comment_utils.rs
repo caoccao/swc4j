@@ -56,7 +56,7 @@ impl ToJavaWithMap<ByteToIndexMap> for MultiThreadedComments {
     let trailing = self.trailing_map();
     let java_leading = map_new(env, leading.len())?;
     for (position, comments) in leading.iter() {
-      let key_span_ex = map.get_span_ex_by_byte_pos(&position);
+      let key_span_ex = map.get_span_ex_by_byte_pos(position);
       let java_position = integer_value_of(env, key_span_ex.start as i32)?;
       let java_comments = list_new(env, comments.len())?;
       for comment in comments.iter() {
@@ -71,7 +71,7 @@ impl ToJavaWithMap<ByteToIndexMap> for MultiThreadedComments {
     }
     let java_trailing = map_new(env, trailing.len())?;
     for (position, comments) in trailing.iter() {
-      let key_span_ex = map.get_span_ex_by_byte_pos(&position);
+      let key_span_ex = map.get_span_ex_by_byte_pos(position);
       let java_position = integer_value_of(env, key_span_ex.start as i32)?;
       let java_comments = list_new(env, comments.len())?;
       for comment in comments.iter() {

@@ -29,6 +29,7 @@ use jni::Env;
 use crate::jni_utils::*;
 
 #[derive(Debug, Copy, Clone)]
+#[derive(Default)]
 pub struct SpanEx {
   pub start: u32,
   pub end: u32,
@@ -36,16 +37,6 @@ pub struct SpanEx {
   pub column: u32,
 }
 
-impl Default for SpanEx {
-  fn default() -> Self {
-    SpanEx {
-      start: 0,
-      end: 0,
-      line: 0,
-      column: 0,
-    }
-  }
-}
 
 impl ToJava for SpanEx {
   fn to_java<'local, 'a>(&self, env: &mut Env<'local>) -> Result<JObject<'a>>
@@ -63,7 +54,7 @@ impl ToJava for SpanEx {
 }
 
 pub trait RegisterWithMap<Map> {
-  fn register_with_map<'local>(&self, map: &'_ mut Map);
+  fn register_with_map(&self, map: &'_ mut Map);
 }
 
 pub trait ToJavaWithMap<Map> {
@@ -77,17 +68,22 @@ pub struct ByteToIndexMap {
   map: BTreeMap<usize, SpanEx>,
 }
 
+impl Default for ByteToIndexMap {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ByteToIndexMap {
   pub fn new() -> Self {
     ByteToIndexMap { map: BTreeMap::new() }
   }
 
   pub fn get_span_ex_by_byte_pos(&self, byte_pos: &BytePos) -> SpanEx {
-    self
+    *self
       .map
       .get(&(byte_pos.to_usize() - 1))
-      .expect(format!("Couldn't find {}", byte_pos.to_usize() - 1).as_str())
-      .clone()
+      .unwrap_or_else(|| panic!("Couldn't find {}", byte_pos.to_usize() - 1))
   }
 
   pub fn get_span_ex_by_span(&self, span: &Span) -> SpanEx {
@@ -103,9 +99,7 @@ impl ByteToIndexMap {
 
   pub fn register_by_byte_pos(&mut self, byte_pos: &BytePos) {
     let position = byte_pos.to_usize() - 1;
-    if !self.map.contains_key(&position) {
-      self.map.insert(position, Default::default());
-    }
+    self.map.entry(position).or_default();
   }
 
   pub fn register_by_span(&mut self, span: &Span) {
@@ -114,12 +108,12 @@ impl ByteToIndexMap {
   }
 
   pub fn update(&mut self, key: &usize, position: u32, line: u32, column: u32) {
-    self.map.get_mut(&key).map(|v| {
+    if let Some(v) = self.map.get_mut(key) {
       v.start = position;
       v.end = position;
       v.line = line;
       v.column = column;
-    });
+    }
   }
 
   pub fn update_by_str(&mut self, s: &str) {

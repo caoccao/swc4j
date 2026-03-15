@@ -59,11 +59,11 @@ impl<'local> FromJava<'local> for BigInt {
   fn from_java(env: &mut Env<'local>, obj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = JAVA_CLASS_BIG_INT.get().unwrap();
     let span = DUMMY_SP;
-    let java_sign = java_class.get_sign(env, &obj)?;
+    let java_sign = java_class.get_sign(env, obj)?;
     let sign = Sign::from_java(env, &java_sign)?;
     let sign = *sign;
     delete_local_ref!(env, java_sign);
-    let java_optional_raw = java_class.get_raw(env, &obj)?;
+    let java_optional_raw = java_class.get_raw(env, obj)?;
     let optional_raw = if optional_is_present(env, &java_optional_raw)? {
       let java_raw = optional_get(env, &java_optional_raw)?;
       let raw: Result<String> = jstring_to_string!(env, java_raw.as_raw());
@@ -76,16 +76,16 @@ impl<'local> FromJava<'local> for BigInt {
     let data: BigUint = optional_raw
       .as_ref()
       .map_or_else(
-        || Default::default(),
+        Default::default,
         |raw| {
           let mut raw = raw.to_owned();
           while raw.ends_with("n") {
             raw.truncate(raw.len() - 1);
           }
-          BigUint::parse_bytes(&raw.as_bytes(), 10)
+          BigUint::parse_bytes(raw.as_bytes(), 10)
         },
       )
-      .unwrap_or_else(|| Default::default());
+      .unwrap_or_else(Default::default);
     delete_local_ref!(env, java_optional_raw);
     let value = BigIntValue::from_biguint(sign, data);
     let value = Box::new(value);
@@ -23409,7 +23409,7 @@ pub fn init<'local>(env: &mut Env<'local>) {
 
 /* Enum Begin */
 impl RegisterWithMap<ByteToIndexMap> for AssignTarget {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       AssignTarget::Pat(node) => node.register_with_map(map),
       AssignTarget::Simple(node) => node.register_with_map(map),
@@ -23448,7 +23448,7 @@ impl<'local> FromJava<'local> for AssignTarget {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for AssignTargetPat {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       AssignTargetPat::Array(node) => node.register_with_map(map),
       AssignTargetPat::Invalid(node) => node.register_with_map(map),
@@ -23491,7 +23491,7 @@ impl<'local> FromJava<'local> for AssignTargetPat {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for BlockStmtOrExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       BlockStmtOrExpr::BlockStmt(node) => node.register_with_map(map),
       BlockStmtOrExpr::Expr(node) => node.register_with_map(map),
@@ -23530,7 +23530,7 @@ impl<'local> FromJava<'local> for BlockStmtOrExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Callee {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       Callee::Expr(node) => node.register_with_map(map),
       Callee::Import(node) => node.register_with_map(map),
@@ -23573,7 +23573,7 @@ impl<'local> FromJava<'local> for Callee {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ClassMember {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       ClassMember::AutoAccessor(node) => node.register_with_map(map),
       ClassMember::ClassProp(node) => node.register_with_map(map),
@@ -23640,7 +23640,7 @@ impl<'local> FromJava<'local> for ClassMember {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Decl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       Decl::Class(node) => node.register_with_map(map),
       Decl::Fn(node) => node.register_with_map(map),
@@ -23703,7 +23703,7 @@ impl<'local> FromJava<'local> for Decl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for DefaultDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       DefaultDecl::Class(node) => node.register_with_map(map),
       DefaultDecl::Fn(node) => node.register_with_map(map),
@@ -23746,7 +23746,7 @@ impl<'local> FromJava<'local> for DefaultDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ExportSpecifier {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       ExportSpecifier::Default(node) => node.register_with_map(map),
       ExportSpecifier::Named(node) => node.register_with_map(map),
@@ -23789,7 +23789,7 @@ impl<'local> FromJava<'local> for ExportSpecifier {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Expr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       Expr::Array(node) => node.register_with_map(map),
       Expr::Arrow(node) => node.register_with_map(map),
@@ -23972,7 +23972,7 @@ impl<'local> FromJava<'local> for Expr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ForHead {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       ForHead::Pat(node) => node.register_with_map(map),
       ForHead::UsingDecl(node) => node.register_with_map(map),
@@ -24015,7 +24015,7 @@ impl<'local> FromJava<'local> for ForHead {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ImportSpecifier {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       ImportSpecifier::Default(node) => node.register_with_map(map),
       ImportSpecifier::Named(node) => node.register_with_map(map),
@@ -24058,7 +24058,7 @@ impl<'local> FromJava<'local> for ImportSpecifier {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXAttrName {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       JSXAttrName::Ident(node) => node.register_with_map(map),
       JSXAttrName::JSXNamespacedName(node) => node.register_with_map(map),
@@ -24097,7 +24097,7 @@ impl<'local> FromJava<'local> for JSXAttrName {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXAttrOrSpread {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       JSXAttrOrSpread::JSXAttr(node) => node.register_with_map(map),
       JSXAttrOrSpread::SpreadElement(node) => node.register_with_map(map),
@@ -24136,7 +24136,7 @@ impl<'local> FromJava<'local> for JSXAttrOrSpread {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXAttrValue {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       JSXAttrValue::JSXElement(node) => node.register_with_map(map),
       JSXAttrValue::JSXExprContainer(node) => node.register_with_map(map),
@@ -24183,7 +24183,7 @@ impl<'local> FromJava<'local> for JSXAttrValue {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXElementChild {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       JSXElementChild::JSXElement(node) => node.register_with_map(map),
       JSXElementChild::JSXExprContainer(node) => node.register_with_map(map),
@@ -24234,7 +24234,7 @@ impl<'local> FromJava<'local> for JSXElementChild {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXElementName {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       JSXElementName::Ident(node) => node.register_with_map(map),
       JSXElementName::JSXMemberExpr(node) => node.register_with_map(map),
@@ -24277,7 +24277,7 @@ impl<'local> FromJava<'local> for JSXElementName {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       JSXExpr::Expr(node) => node.register_with_map(map),
       JSXExpr::JSXEmptyExpr(node) => node.register_with_map(map),
@@ -24316,7 +24316,7 @@ impl<'local> FromJava<'local> for JSXExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXObject {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       JSXObject::Ident(node) => node.register_with_map(map),
       JSXObject::JSXMemberExpr(node) => node.register_with_map(map),
@@ -24355,7 +24355,7 @@ impl<'local> FromJava<'local> for JSXObject {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Key {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       Key::Private(node) => node.register_with_map(map),
       Key::Public(node) => node.register_with_map(map),
@@ -24394,7 +24394,7 @@ impl<'local> FromJava<'local> for Key {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Lit {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       Lit::BigInt(node) => node.register_with_map(map),
       Lit::Bool(node) => node.register_with_map(map),
@@ -24453,7 +24453,7 @@ impl<'local> FromJava<'local> for Lit {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for MemberProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       MemberProp::Computed(node) => node.register_with_map(map),
       MemberProp::Ident(node) => node.register_with_map(map),
@@ -24496,7 +24496,7 @@ impl<'local> FromJava<'local> for MemberProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ModuleDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       ModuleDecl::ExportAll(node) => node.register_with_map(map),
       ModuleDecl::ExportDecl(node) => node.register_with_map(map),
@@ -24563,7 +24563,7 @@ impl<'local> FromJava<'local> for ModuleDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ModuleExportName {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       ModuleExportName::Ident(node) => node.register_with_map(map),
       ModuleExportName::Str(node) => node.register_with_map(map),
@@ -24602,7 +24602,7 @@ impl<'local> FromJava<'local> for ModuleExportName {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ModuleItem {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       ModuleItem::ModuleDecl(node) => node.register_with_map(map),
       ModuleItem::Stmt(node) => node.register_with_map(map),
@@ -24641,7 +24641,7 @@ impl<'local> FromJava<'local> for ModuleItem {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ObjectPatProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       ObjectPatProp::Assign(node) => node.register_with_map(map),
       ObjectPatProp::KeyValue(node) => node.register_with_map(map),
@@ -24684,7 +24684,7 @@ impl<'local> FromJava<'local> for ObjectPatProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for OptChainBase {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       OptChainBase::Call(node) => node.register_with_map(map),
       OptChainBase::Member(node) => node.register_with_map(map),
@@ -24723,7 +24723,7 @@ impl<'local> FromJava<'local> for OptChainBase {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ParamOrTsParamProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       ParamOrTsParamProp::Param(node) => node.register_with_map(map),
       ParamOrTsParamProp::TsParamProp(node) => node.register_with_map(map),
@@ -24762,7 +24762,7 @@ impl<'local> FromJava<'local> for ParamOrTsParamProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Pat {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       Pat::Array(node) => node.register_with_map(map),
       Pat::Assign(node) => node.register_with_map(map),
@@ -24821,7 +24821,7 @@ impl<'local> FromJava<'local> for Pat {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Program {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       Program::Module(node) => node.register_with_map(map),
       Program::Script(node) => node.register_with_map(map),
@@ -24860,7 +24860,7 @@ impl<'local> FromJava<'local> for Program {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Prop {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       Prop::Assign(node) => node.register_with_map(map),
       Prop::Getter(node) => node.register_with_map(map),
@@ -24915,7 +24915,7 @@ impl<'local> FromJava<'local> for Prop {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for PropName {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       PropName::BigInt(node) => node.register_with_map(map),
       PropName::Computed(node) => node.register_with_map(map),
@@ -24966,7 +24966,7 @@ impl<'local> FromJava<'local> for PropName {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for PropOrSpread {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       PropOrSpread::Prop(node) => node.register_with_map(map),
       PropOrSpread::Spread(node) => node.register_with_map(map),
@@ -25005,7 +25005,7 @@ impl<'local> FromJava<'local> for PropOrSpread {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for SimpleAssignTarget {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       SimpleAssignTarget::Ident(node) => node.register_with_map(map),
       SimpleAssignTarget::Invalid(node) => node.register_with_map(map),
@@ -25080,7 +25080,7 @@ impl<'local> FromJava<'local> for SimpleAssignTarget {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Stmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       Stmt::Block(node) => node.register_with_map(map),
       Stmt::Break(node) => node.register_with_map(map),
@@ -25187,7 +25187,7 @@ impl<'local> FromJava<'local> for Stmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for SuperProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       SuperProp::Computed(node) => node.register_with_map(map),
       SuperProp::Ident(node) => node.register_with_map(map),
@@ -25226,7 +25226,7 @@ impl<'local> FromJava<'local> for SuperProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsEntityName {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsEntityName::Ident(node) => node.register_with_map(map),
       TsEntityName::TsQualifiedName(node) => node.register_with_map(map),
@@ -25265,7 +25265,7 @@ impl<'local> FromJava<'local> for TsEntityName {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsEnumMemberId {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsEnumMemberId::Ident(node) => node.register_with_map(map),
       TsEnumMemberId::Str(node) => node.register_with_map(map),
@@ -25304,7 +25304,7 @@ impl<'local> FromJava<'local> for TsEnumMemberId {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsFnOrConstructorType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsFnOrConstructorType::TsConstructorType(node) => node.register_with_map(map),
       TsFnOrConstructorType::TsFnType(node) => node.register_with_map(map),
@@ -25343,7 +25343,7 @@ impl<'local> FromJava<'local> for TsFnOrConstructorType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsFnParam {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsFnParam::Array(node) => node.register_with_map(map),
       TsFnParam::Ident(node) => node.register_with_map(map),
@@ -25390,7 +25390,7 @@ impl<'local> FromJava<'local> for TsFnParam {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsLit {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsLit::BigInt(node) => node.register_with_map(map),
       TsLit::Bool(node) => node.register_with_map(map),
@@ -25441,7 +25441,7 @@ impl<'local> FromJava<'local> for TsLit {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsModuleName {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsModuleName::Ident(node) => node.register_with_map(map),
       TsModuleName::Str(node) => node.register_with_map(map),
@@ -25480,7 +25480,7 @@ impl<'local> FromJava<'local> for TsModuleName {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsModuleRef {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsModuleRef::TsEntityName(node) => node.register_with_map(map),
       TsModuleRef::TsExternalModuleRef(node) => node.register_with_map(map),
@@ -25519,7 +25519,7 @@ impl<'local> FromJava<'local> for TsModuleRef {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsNamespaceBody {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsNamespaceBody::TsModuleBlock(node) => node.register_with_map(map),
       TsNamespaceBody::TsNamespaceDecl(node) => node.register_with_map(map),
@@ -25558,7 +25558,7 @@ impl<'local> FromJava<'local> for TsNamespaceBody {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsParamPropParam {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsParamPropParam::Assign(node) => node.register_with_map(map),
       TsParamPropParam::Ident(node) => node.register_with_map(map),
@@ -25597,7 +25597,7 @@ impl<'local> FromJava<'local> for TsParamPropParam {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsThisTypeOrIdent {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsThisTypeOrIdent::Ident(node) => node.register_with_map(map),
       TsThisTypeOrIdent::TsThisType(node) => node.register_with_map(map),
@@ -25636,7 +25636,7 @@ impl<'local> FromJava<'local> for TsThisTypeOrIdent {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsType::TsArrayType(node) => node.register_with_map(map),
       TsType::TsConditionalType(node) => node.register_with_map(map),
@@ -25747,7 +25747,7 @@ impl<'local> FromJava<'local> for TsType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeElement {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsTypeElement::TsCallSignatureDecl(node) => node.register_with_map(map),
       TsTypeElement::TsConstructSignatureDecl(node) => node.register_with_map(map),
@@ -25806,7 +25806,7 @@ impl<'local> FromJava<'local> for TsTypeElement {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeQueryExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsTypeQueryExpr::Import(node) => node.register_with_map(map),
       TsTypeQueryExpr::TsEntityName(node) => node.register_with_map(map),
@@ -25845,7 +25845,7 @@ impl<'local> FromJava<'local> for TsTypeQueryExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsUnionOrIntersectionType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       TsUnionOrIntersectionType::TsIntersectionType(node) => node.register_with_map(map),
       TsUnionOrIntersectionType::TsUnionType(node) => node.register_with_map(map),
@@ -25884,7 +25884,7 @@ impl<'local> FromJava<'local> for TsUnionOrIntersectionType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for VarDeclOrExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     match self {
       VarDeclOrExpr::Expr(node) => node.register_with_map(map),
       VarDeclOrExpr::VarDecl(node) => node.register_with_map(map),
@@ -25925,10 +25925,10 @@ impl<'local> FromJava<'local> for VarDeclOrExpr {
 
 /* AST Begin */
 impl RegisterWithMap<ByteToIndexMap> for ArrayLit {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.elems.iter() {
-      node.as_ref().map(|node| node.register_with_map(map));
+      if let Some(node) = node.as_ref() { node.register_with_map(map) }
     }
   }
 }
@@ -25985,12 +25985,12 @@ impl<'local> FromJava<'local> for ArrayLit {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ArrayPat {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.elems.iter() {
-      node.as_ref().map(|node| node.register_with_map(map));
+      if let Some(node) = node.as_ref() { node.register_with_map(map) }
     }
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -26055,7 +26055,7 @@ impl<'local> FromJava<'local> for ArrayPat {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     Ok(Box::new(ArrayPat {
       span,
       elems,
@@ -26066,14 +26066,14 @@ impl<'local> FromJava<'local> for ArrayPat {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ArrowExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.params.iter() {
       node.register_with_map(map);
     }
     self.body.register_with_map(map);
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
-    self.return_type.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_params.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.return_type.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -26144,7 +26144,7 @@ impl<'local> FromJava<'local> for ArrowExpr {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
+    let type_params = type_params.map(Box::new);
     let java_optional_return_type = java_class.get_return_type(env, jobj)?;
     let return_type = if optional_is_present(env, &java_optional_return_type)? {
       let java_return_type = optional_get(env, &java_optional_return_type)?;
@@ -26155,7 +26155,7 @@ impl<'local> FromJava<'local> for ArrowExpr {
       None
     };
     delete_local_ref!(env, java_optional_return_type);
-    let return_type = return_type.map(|return_type| Box::new(return_type));
+    let return_type = return_type.map(Box::new);
     Ok(Box::new(ArrowExpr {
       span,
       ctxt,
@@ -26170,7 +26170,7 @@ impl<'local> FromJava<'local> for ArrowExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for AssignExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.left.register_with_map(map);
     self.right.register_with_map(map);
@@ -26221,7 +26221,7 @@ impl<'local> FromJava<'local> for AssignExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for AssignPat {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.left.register_with_map(map);
     self.right.register_with_map(map);
@@ -26267,10 +26267,10 @@ impl<'local> FromJava<'local> for AssignPat {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for AssignPatProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
-    self.value.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.value.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -26312,7 +26312,7 @@ impl<'local> FromJava<'local> for AssignPatProp {
       None
     };
     delete_local_ref!(env, java_optional_value);
-    let value = value.map(|value| Box::new(value));
+    let value = value.map(Box::new);
     Ok(Box::new(AssignPatProp {
       span,
       key,
@@ -26322,7 +26322,7 @@ impl<'local> FromJava<'local> for AssignPatProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for AssignProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
     self.value.register_with_map(map);
@@ -26367,11 +26367,11 @@ impl<'local> FromJava<'local> for AssignProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for AutoAccessor {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
-    self.value.as_ref().map(|node| node.register_with_map(map));
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.value.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
     for node in self.decorators.iter() {
       node.register_with_map(map);
     }
@@ -26437,7 +26437,7 @@ impl<'local> FromJava<'local> for AutoAccessor {
       None
     };
     delete_local_ref!(env, java_optional_value);
-    let value = value.map(|value| Box::new(value));
+    let value = value.map(Box::new);
     let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
     let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
       let java_type_ann = optional_get(env, &java_optional_type_ann)?;
@@ -26448,7 +26448,7 @@ impl<'local> FromJava<'local> for AutoAccessor {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     let is_static = java_class.is_static(env, jobj)?;
     let java_decorators = java_class.get_decorators(env, jobj)?;
     let length = list_size(env, &java_decorators)?;
@@ -26488,7 +26488,7 @@ impl<'local> FromJava<'local> for AutoAccessor {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for AwaitExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.arg.register_with_map(map);
   }
@@ -26526,13 +26526,13 @@ impl<'local> FromJava<'local> for AwaitExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for BigInt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for BinExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.left.register_with_map(map);
     self.right.register_with_map(map);
@@ -26584,10 +26584,10 @@ impl<'local> FromJava<'local> for BinExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for BindingIdent {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span());
     self.id.register_with_map(map);
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -26608,7 +26608,7 @@ impl<'local> FromJava<'local> for BindingIdent {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     Ok(Box::new(BindingIdent {
       id,
       type_ann,
@@ -26617,7 +26617,7 @@ impl<'local> FromJava<'local> for BindingIdent {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for BlockStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.stmts.iter() {
       node.register_with_map(map);
@@ -26671,7 +26671,7 @@ impl<'local> FromJava<'local> for BlockStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Bool {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -26704,9 +26704,9 @@ impl<'local> FromJava<'local> for Bool {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for BreakStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.label.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.label.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -26751,13 +26751,13 @@ impl<'local> FromJava<'local> for BreakStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for CallExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.callee.register_with_map(map);
     for node in self.args.iter() {
       node.register_with_map(map);
     }
-    self.type_args.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_args.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -26818,7 +26818,7 @@ impl<'local> FromJava<'local> for CallExpr {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
-    let type_args = type_args.map(|type_args| Box::new(type_args));
+    let type_args = type_args.map(Box::new);
     Ok(Box::new(CallExpr {
       span,
       ctxt,
@@ -26830,9 +26830,9 @@ impl<'local> FromJava<'local> for CallExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for CatchClause {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.param.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.param.as_ref() { node.register_with_map(map) }
     self.body.register_with_map(map);
   }
 }
@@ -26884,7 +26884,7 @@ impl<'local> FromJava<'local> for CatchClause {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Class {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.decorators.iter() {
       node.register_with_map(map);
@@ -26892,9 +26892,9 @@ impl RegisterWithMap<ByteToIndexMap> for Class {
     for node in self.body.iter() {
       node.register_with_map(map);
     }
-    self.super_class.as_ref().map(|node| node.register_with_map(map));
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
-    self.super_type_params.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.super_class.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.type_params.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.super_type_params.as_ref() { node.register_with_map(map) }
     for node in self.implements.iter() {
       node.register_with_map(map);
     }
@@ -26987,7 +26987,7 @@ impl<'local> FromJava<'local> for Class {
       None
     };
     delete_local_ref!(env, java_optional_super_class);
-    let super_class = super_class.map(|super_class| Box::new(super_class));
+    let super_class = super_class.map(Box::new);
     let is_abstract = java_class.is_abstract(env, jobj)?;
     let java_optional_type_params = java_class.get_type_params(env, jobj)?;
     let type_params = if optional_is_present(env, &java_optional_type_params)? {
@@ -26999,7 +26999,7 @@ impl<'local> FromJava<'local> for Class {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
+    let type_params = type_params.map(Box::new);
     let java_optional_super_type_params = java_class.get_super_type_params(env, jobj)?;
     let super_type_params = if optional_is_present(env, &java_optional_super_type_params)? {
       let java_super_type_params = optional_get(env, &java_optional_super_type_params)?;
@@ -27010,7 +27010,7 @@ impl<'local> FromJava<'local> for Class {
       None
     };
     delete_local_ref!(env, java_optional_super_type_params);
-    let super_type_params = super_type_params.map(|super_type_params| Box::new(super_type_params));
+    let super_type_params = super_type_params.map(Box::new);
     let java_implements = java_class.get_implements(env, jobj)?;
     let length = list_size(env, &java_implements)?;
     let mut implements: Vec<TsExprWithTypeArgs> = Vec::with_capacity(length);
@@ -27035,7 +27035,7 @@ impl<'local> FromJava<'local> for Class {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ClassDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span());
     self.ident.register_with_map(map);
     self.class.register_with_map(map);
@@ -27081,9 +27081,9 @@ impl<'local> FromJava<'local> for ClassDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ClassExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span());
-    self.ident.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.ident.as_ref() { node.register_with_map(map) }
     self.class.register_with_map(map);
   }
 }
@@ -27134,7 +27134,7 @@ impl<'local> FromJava<'local> for ClassExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ClassMethod {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
     self.function.register_with_map(map);
@@ -27213,11 +27213,11 @@ impl<'local> FromJava<'local> for ClassMethod {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ClassProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
-    self.value.as_ref().map(|node| node.register_with_map(map));
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.value.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
     for node in self.decorators.iter() {
       node.register_with_map(map);
     }
@@ -27286,7 +27286,7 @@ impl<'local> FromJava<'local> for ClassProp {
       None
     };
     delete_local_ref!(env, java_optional_value);
-    let value = value.map(|value| Box::new(value));
+    let value = value.map(Box::new);
     let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
     let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
       let java_type_ann = optional_get(env, &java_optional_type_ann)?;
@@ -27297,7 +27297,7 @@ impl<'local> FromJava<'local> for ClassProp {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     let is_static = java_class.is_static(env, jobj)?;
     let java_decorators = java_class.get_decorators(env, jobj)?;
     let length = list_size(env, &java_decorators)?;
@@ -27343,7 +27343,7 @@ impl<'local> FromJava<'local> for ClassProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ComputedPropName {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
   }
@@ -27381,7 +27381,7 @@ impl<'local> FromJava<'local> for ComputedPropName {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for CondExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.test.register_with_map(map);
     self.cons.register_with_map(map);
@@ -27435,13 +27435,13 @@ impl<'local> FromJava<'local> for CondExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Constructor {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
     for node in self.params.iter() {
       node.register_with_map(map);
     }
-    self.body.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.body.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -27532,9 +27532,9 @@ impl<'local> FromJava<'local> for Constructor {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ContinueStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.label.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.label.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -27579,7 +27579,7 @@ impl<'local> FromJava<'local> for ContinueStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for DebuggerStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -27608,7 +27608,7 @@ impl<'local> FromJava<'local> for DebuggerStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Decorator {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
   }
@@ -27646,7 +27646,7 @@ impl<'local> FromJava<'local> for Decorator {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for DoWhileStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.test.register_with_map(map);
     self.body.register_with_map(map);
@@ -27692,7 +27692,7 @@ impl<'local> FromJava<'local> for DoWhileStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for EmptyStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -27721,10 +27721,10 @@ impl<'local> FromJava<'local> for EmptyStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ExportAll {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.src.register_with_map(map);
-    self.with.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.with.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -27769,7 +27769,7 @@ impl<'local> FromJava<'local> for ExportAll {
       None
     };
     delete_local_ref!(env, java_optional_with);
-    let with = with.map(|with| Box::new(with));
+    let with = with.map(Box::new);
     Ok(Box::new(ExportAll {
       span,
       src,
@@ -27780,7 +27780,7 @@ impl<'local> FromJava<'local> for ExportAll {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ExportDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.decl.register_with_map(map);
   }
@@ -27817,7 +27817,7 @@ impl<'local> FromJava<'local> for ExportDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ExportDefaultDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.decl.register_with_map(map);
   }
@@ -27854,7 +27854,7 @@ impl<'local> FromJava<'local> for ExportDefaultDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ExportDefaultExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
   }
@@ -27892,7 +27892,7 @@ impl<'local> FromJava<'local> for ExportDefaultExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ExportDefaultSpecifier {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span());
     self.exported.register_with_map(map);
   }
@@ -27927,10 +27927,10 @@ impl<'local> FromJava<'local> for ExportDefaultSpecifier {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ExportNamedSpecifier {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.orig.register_with_map(map);
-    self.exported.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.exported.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -27984,7 +27984,7 @@ impl<'local> FromJava<'local> for ExportNamedSpecifier {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ExportNamespaceSpecifier {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.name.register_with_map(map);
   }
@@ -28021,7 +28021,7 @@ impl<'local> FromJava<'local> for ExportNamespaceSpecifier {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ExprOrSpread {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span());
     self.expr.register_with_map(map);
   }
@@ -28070,7 +28070,7 @@ impl<'local> FromJava<'local> for ExprOrSpread {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ExprStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
   }
@@ -28108,7 +28108,7 @@ impl<'local> FromJava<'local> for ExprStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for FnDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span());
     self.ident.register_with_map(map);
     self.function.register_with_map(map);
@@ -28154,9 +28154,9 @@ impl<'local> FromJava<'local> for FnDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for FnExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span());
-    self.ident.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.ident.as_ref() { node.register_with_map(map) }
     self.function.register_with_map(map);
   }
 }
@@ -28207,7 +28207,7 @@ impl<'local> FromJava<'local> for FnExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ForInStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.left.register_with_map(map);
     self.right.register_with_map(map);
@@ -28260,7 +28260,7 @@ impl<'local> FromJava<'local> for ForInStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ForOfStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.left.register_with_map(map);
     self.right.register_with_map(map);
@@ -28316,11 +28316,11 @@ impl<'local> FromJava<'local> for ForOfStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ForStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.init.as_ref().map(|node| node.register_with_map(map));
-    self.test.as_ref().map(|node| node.register_with_map(map));
-    self.update.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.init.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.test.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.update.as_ref() { node.register_with_map(map) }
     self.body.register_with_map(map);
   }
 }
@@ -28380,7 +28380,7 @@ impl<'local> FromJava<'local> for ForStmt {
       None
     };
     delete_local_ref!(env, java_optional_test);
-    let test = test.map(|test| Box::new(test));
+    let test = test.map(Box::new);
     let java_optional_update = java_class.get_update(env, jobj)?;
     let update = if optional_is_present(env, &java_optional_update)? {
       let java_update = optional_get(env, &java_optional_update)?;
@@ -28391,7 +28391,7 @@ impl<'local> FromJava<'local> for ForStmt {
       None
     };
     delete_local_ref!(env, java_optional_update);
-    let update = update.map(|update| Box::new(update));
+    let update = update.map(Box::new);
     let java_body = java_class.get_body(env, jobj)?;
     let body = *Stmt::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
@@ -28407,7 +28407,7 @@ impl<'local> FromJava<'local> for ForStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Function {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.params.iter() {
       node.register_with_map(map);
@@ -28415,9 +28415,9 @@ impl RegisterWithMap<ByteToIndexMap> for Function {
     for node in self.decorators.iter() {
       node.register_with_map(map);
     }
-    self.body.as_ref().map(|node| node.register_with_map(map));
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
-    self.return_type.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.body.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.type_params.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.return_type.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -28513,7 +28513,7 @@ impl<'local> FromJava<'local> for Function {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
+    let type_params = type_params.map(Box::new);
     let java_optional_return_type = java_class.get_return_type(env, jobj)?;
     let return_type = if optional_is_present(env, &java_optional_return_type)? {
       let java_return_type = optional_get(env, &java_optional_return_type)?;
@@ -28524,7 +28524,7 @@ impl<'local> FromJava<'local> for Function {
       None
     };
     delete_local_ref!(env, java_optional_return_type);
-    let return_type = return_type.map(|return_type| Box::new(return_type));
+    let return_type = return_type.map(Box::new);
     Ok(Box::new(Function {
       span,
       ctxt,
@@ -28540,11 +28540,11 @@ impl<'local> FromJava<'local> for Function {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for GetterProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
-    self.body.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.body.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -28591,7 +28591,7 @@ impl<'local> FromJava<'local> for GetterProp {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     let java_optional_body = java_class.get_body(env, jobj)?;
     let body = if optional_is_present(env, &java_optional_body)? {
       let java_body = optional_get(env, &java_optional_body)?;
@@ -28612,7 +28612,7 @@ impl<'local> FromJava<'local> for GetterProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Ident {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -28653,7 +28653,7 @@ impl<'local> FromJava<'local> for Ident {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for IdentName {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -28687,11 +28687,11 @@ impl<'local> FromJava<'local> for IdentName {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for IfStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.test.register_with_map(map);
     self.cons.register_with_map(map);
-    self.alt.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.alt.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -28740,7 +28740,7 @@ impl<'local> FromJava<'local> for IfStmt {
       None
     };
     delete_local_ref!(env, java_optional_alt);
-    let alt = alt.map(|alt| Box::new(alt));
+    let alt = alt.map(Box::new);
     Ok(Box::new(IfStmt {
       span,
       test,
@@ -28751,7 +28751,7 @@ impl<'local> FromJava<'local> for IfStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Import {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -28787,13 +28787,13 @@ impl<'local> FromJava<'local> for Import {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ImportDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.specifiers.iter() {
       node.register_with_map(map);
     }
     self.src.register_with_map(map);
-    self.with.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.with.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -28856,7 +28856,7 @@ impl<'local> FromJava<'local> for ImportDecl {
       None
     };
     delete_local_ref!(env, java_optional_with);
-    let with = with.map(|with| Box::new(with));
+    let with = with.map(Box::new);
     let java_phase = java_class.get_phase(env, jobj)?;
     let phase = *ImportPhase::from_java(env, &java_phase)?;
     delete_local_ref!(env, java_phase);
@@ -28872,7 +28872,7 @@ impl<'local> FromJava<'local> for ImportDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ImportDefaultSpecifier {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.local.register_with_map(map);
   }
@@ -28909,10 +28909,10 @@ impl<'local> FromJava<'local> for ImportDefaultSpecifier {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ImportNamedSpecifier {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.local.register_with_map(map);
-    self.imported.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.imported.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -28966,7 +28966,7 @@ impl<'local> FromJava<'local> for ImportNamedSpecifier {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ImportStarAsSpecifier {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.local.register_with_map(map);
   }
@@ -29003,7 +29003,7 @@ impl<'local> FromJava<'local> for ImportStarAsSpecifier {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Invalid {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -29032,10 +29032,10 @@ impl<'local> FromJava<'local> for Invalid {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXAttr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.name.register_with_map(map);
-    self.value.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.value.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -29086,7 +29086,7 @@ impl<'local> FromJava<'local> for JSXAttr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXClosingElement {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.name.register_with_map(map);
   }
@@ -29123,7 +29123,7 @@ impl<'local> FromJava<'local> for JSXClosingElement {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXClosingFragment {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -29152,13 +29152,13 @@ impl<'local> FromJava<'local> for JSXClosingFragment {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXElement {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.opening.register_with_map(map);
     for node in self.children.iter() {
       node.register_with_map(map);
     }
-    self.closing.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.closing.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -29226,7 +29226,7 @@ impl<'local> FromJava<'local> for JSXElement {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXEmptyExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -29255,7 +29255,7 @@ impl<'local> FromJava<'local> for JSXEmptyExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXExprContainer {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
   }
@@ -29292,7 +29292,7 @@ impl<'local> FromJava<'local> for JSXExprContainer {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXFragment {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.opening.register_with_map(map);
     for node in self.children.iter() {
@@ -29356,7 +29356,7 @@ impl<'local> FromJava<'local> for JSXFragment {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXMemberExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.obj.register_with_map(map);
     self.prop.register_with_map(map);
@@ -29400,7 +29400,7 @@ impl<'local> FromJava<'local> for JSXMemberExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXNamespacedName {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.ns.register_with_map(map);
     self.name.register_with_map(map);
@@ -29444,13 +29444,13 @@ impl<'local> FromJava<'local> for JSXNamespacedName {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXOpeningElement {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.name.register_with_map(map);
     for node in self.attrs.iter() {
       node.register_with_map(map);
     }
-    self.type_args.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_args.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -29510,7 +29510,7 @@ impl<'local> FromJava<'local> for JSXOpeningElement {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
-    let type_args = type_args.map(|type_args| Box::new(type_args));
+    let type_args = type_args.map(Box::new);
     Ok(Box::new(JSXOpeningElement {
       span,
       name,
@@ -29522,7 +29522,7 @@ impl<'local> FromJava<'local> for JSXOpeningElement {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXOpeningFragment {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -29551,7 +29551,7 @@ impl<'local> FromJava<'local> for JSXOpeningFragment {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXSpreadChild {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
   }
@@ -29589,7 +29589,7 @@ impl<'local> FromJava<'local> for JSXSpreadChild {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for JSXText {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -29627,7 +29627,7 @@ impl<'local> FromJava<'local> for JSXText {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for KeyValuePatProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span());
     self.key.register_with_map(map);
     self.value.register_with_map(map);
@@ -29670,7 +29670,7 @@ impl<'local> FromJava<'local> for KeyValuePatProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for KeyValueProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span());
     self.key.register_with_map(map);
     self.value.register_with_map(map);
@@ -29713,7 +29713,7 @@ impl<'local> FromJava<'local> for KeyValueProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for LabeledStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.label.register_with_map(map);
     self.body.register_with_map(map);
@@ -29758,7 +29758,7 @@ impl<'local> FromJava<'local> for LabeledStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for MemberExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.obj.register_with_map(map);
     self.prop.register_with_map(map);
@@ -29803,7 +29803,7 @@ impl<'local> FromJava<'local> for MemberExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for MetaPropExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -29839,7 +29839,7 @@ impl<'local> FromJava<'local> for MetaPropExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for MethodProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span());
     self.key.register_with_map(map);
     self.function.register_with_map(map);
@@ -29882,7 +29882,7 @@ impl<'local> FromJava<'local> for MethodProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Module {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.body.iter() {
       node.register_with_map(map);
@@ -29946,13 +29946,13 @@ impl<'local> FromJava<'local> for Module {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for NamedExport {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.specifiers.iter() {
       node.register_with_map(map);
     }
-    self.src.as_ref().map(|node| node.register_with_map(map));
-    self.with.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.src.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.with.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -30011,7 +30011,7 @@ impl<'local> FromJava<'local> for NamedExport {
       None
     };
     delete_local_ref!(env, java_optional_src);
-    let src = src.map(|src| Box::new(src));
+    let src = src.map(Box::new);
     let type_only = java_class.is_type_only(env, jobj)?;
     let java_optional_with = java_class.get_with(env, jobj)?;
     let with = if optional_is_present(env, &java_optional_with)? {
@@ -30023,7 +30023,7 @@ impl<'local> FromJava<'local> for NamedExport {
       None
     };
     delete_local_ref!(env, java_optional_with);
-    let with = with.map(|with| Box::new(with));
+    let with = with.map(Box::new);
     Ok(Box::new(NamedExport {
       span,
       specifiers,
@@ -30035,11 +30035,11 @@ impl<'local> FromJava<'local> for NamedExport {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for NewExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.callee.register_with_map(map);
-    self.args.as_ref().map(|nodes| nodes.iter().for_each(|node| node.register_with_map(map)));
-    self.type_args.as_ref().map(|node| node.register_with_map(map));
+    if let Some(nodes) = self.args.as_ref() { nodes.iter().for_each(|node| node.register_with_map(map)) }
+    if let Some(node) = self.type_args.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -30114,7 +30114,7 @@ impl<'local> FromJava<'local> for NewExpr {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
-    let type_args = type_args.map(|type_args| Box::new(type_args));
+    let type_args = type_args.map(Box::new);
     Ok(Box::new(NewExpr {
       span,
       ctxt,
@@ -30126,7 +30126,7 @@ impl<'local> FromJava<'local> for NewExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Null {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -30155,7 +30155,7 @@ impl<'local> FromJava<'local> for Null {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Number {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -30202,7 +30202,7 @@ impl<'local> FromJava<'local> for Number {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ObjectLit {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.props.iter() {
       node.register_with_map(map);
@@ -30252,12 +30252,12 @@ impl<'local> FromJava<'local> for ObjectLit {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ObjectPat {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.props.iter() {
       node.register_with_map(map);
     }
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -30312,7 +30312,7 @@ impl<'local> FromJava<'local> for ObjectPat {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     Ok(Box::new(ObjectPat {
       span,
       props,
@@ -30323,13 +30323,13 @@ impl<'local> FromJava<'local> for ObjectPat {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for OptCall {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.callee.register_with_map(map);
     for node in self.args.iter() {
       node.register_with_map(map);
     }
-    self.type_args.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_args.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -30391,7 +30391,7 @@ impl<'local> FromJava<'local> for OptCall {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
-    let type_args = type_args.map(|type_args| Box::new(type_args));
+    let type_args = type_args.map(Box::new);
     Ok(Box::new(OptCall {
       span,
       ctxt,
@@ -30403,7 +30403,7 @@ impl<'local> FromJava<'local> for OptCall {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for OptChainExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.base.register_with_map(map);
   }
@@ -30444,7 +30444,7 @@ impl<'local> FromJava<'local> for OptChainExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Param {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.decorators.iter() {
       node.register_with_map(map);
@@ -30501,7 +30501,7 @@ impl<'local> FromJava<'local> for Param {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ParenExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
   }
@@ -30539,7 +30539,7 @@ impl<'local> FromJava<'local> for ParenExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for PrivateMethod {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
     self.function.register_with_map(map);
@@ -30618,7 +30618,7 @@ impl<'local> FromJava<'local> for PrivateMethod {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for PrivateName {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -30652,11 +30652,11 @@ impl<'local> FromJava<'local> for PrivateName {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for PrivateProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
-    self.value.as_ref().map(|node| node.register_with_map(map));
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.value.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
     for node in self.decorators.iter() {
       node.register_with_map(map);
     }
@@ -30726,7 +30726,7 @@ impl<'local> FromJava<'local> for PrivateProp {
       None
     };
     delete_local_ref!(env, java_optional_value);
-    let value = value.map(|value| Box::new(value));
+    let value = value.map(Box::new);
     let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
     let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
       let java_type_ann = optional_get(env, &java_optional_type_ann)?;
@@ -30737,7 +30737,7 @@ impl<'local> FromJava<'local> for PrivateProp {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     let is_static = java_class.is_static(env, jobj)?;
     let java_decorators = java_class.get_decorators(env, jobj)?;
     let length = list_size(env, &java_decorators)?;
@@ -30780,7 +30780,7 @@ impl<'local> FromJava<'local> for PrivateProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Regex {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -30818,11 +30818,11 @@ impl<'local> FromJava<'local> for Regex {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for RestPat {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     map.register_by_span(&self.dot3_token);
     self.arg.register_with_map(map);
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -30868,7 +30868,7 @@ impl<'local> FromJava<'local> for RestPat {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     Ok(Box::new(RestPat {
       span,
       dot3_token,
@@ -30879,9 +30879,9 @@ impl<'local> FromJava<'local> for RestPat {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ReturnStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.arg.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.arg.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -30918,7 +30918,7 @@ impl<'local> FromJava<'local> for ReturnStmt {
       None
     };
     delete_local_ref!(env, java_optional_arg);
-    let arg = arg.map(|arg| Box::new(arg));
+    let arg = arg.map(Box::new);
     Ok(Box::new(ReturnStmt {
       span,
       arg,
@@ -30927,7 +30927,7 @@ impl<'local> FromJava<'local> for ReturnStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Script {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.body.iter() {
       node.register_with_map(map);
@@ -30991,7 +30991,7 @@ impl<'local> FromJava<'local> for Script {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for SeqExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.exprs.iter() {
       node.register_with_map(map);
@@ -31033,7 +31033,7 @@ impl<'local> FromJava<'local> for SeqExpr {
       delete_local_ref!(env, java_item);
       exprs.push(element)
     }
-    let exprs = exprs.into_iter().map(|exprs| Box::new(exprs)).collect();
+    let exprs = exprs.into_iter().map(Box::new).collect();
     Ok(Box::new(SeqExpr {
       span,
       exprs,
@@ -31042,12 +31042,12 @@ impl<'local> FromJava<'local> for SeqExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for SetterProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
-    self.this_param.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.this_param.as_ref() { node.register_with_map(map) }
     self.param.register_with_map(map);
-    self.body.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.body.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -31121,7 +31121,7 @@ impl<'local> FromJava<'local> for SetterProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for SpreadElement {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span());
     map.register_by_span(&self.dot3_token);
     self.expr.register_with_map(map);
@@ -31162,7 +31162,7 @@ impl<'local> FromJava<'local> for SpreadElement {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for StaticBlock {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.body.register_with_map(map);
   }
@@ -31199,7 +31199,7 @@ impl<'local> FromJava<'local> for StaticBlock {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Str {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -31247,7 +31247,7 @@ impl<'local> FromJava<'local> for Str {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Super {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -31276,7 +31276,7 @@ impl<'local> FromJava<'local> for Super {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for SuperPropExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.obj.register_with_map(map);
     self.prop.register_with_map(map);
@@ -31320,9 +31320,9 @@ impl<'local> FromJava<'local> for SuperPropExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for SwitchCase {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.test.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.test.as_ref() { node.register_with_map(map) }
     for node in self.cons.iter() {
       node.register_with_map(map);
     }
@@ -31369,7 +31369,7 @@ impl<'local> FromJava<'local> for SwitchCase {
       None
     };
     delete_local_ref!(env, java_optional_test);
-    let test = test.map(|test| Box::new(test));
+    let test = test.map(Box::new);
     let java_cons = java_class.get_cons(env, jobj)?;
     let length = list_size(env, &java_cons)?;
     let mut cons: Vec<Stmt> = Vec::with_capacity(length);
@@ -31388,7 +31388,7 @@ impl<'local> FromJava<'local> for SwitchCase {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for SwitchStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.discriminant.register_with_map(map);
     for node in self.cases.iter() {
@@ -31446,10 +31446,10 @@ impl<'local> FromJava<'local> for SwitchStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TaggedTpl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.tag.register_with_map(map);
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_params.as_ref() { node.register_with_map(map) }
     self.tpl.register_with_map(map);
   }
 }
@@ -31498,7 +31498,7 @@ impl<'local> FromJava<'local> for TaggedTpl {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
+    let type_params = type_params.map(Box::new);
     let java_tpl = java_class.get_tpl(env, jobj)?;
     let tpl = *Tpl::from_java(env, &java_tpl)?;
     delete_local_ref!(env, java_tpl);
@@ -31514,7 +31514,7 @@ impl<'local> FromJava<'local> for TaggedTpl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ThisExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -31543,7 +31543,7 @@ impl<'local> FromJava<'local> for ThisExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ThrowStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.arg.register_with_map(map);
   }
@@ -31581,7 +31581,7 @@ impl<'local> FromJava<'local> for ThrowStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Tpl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.exprs.iter() {
       node.register_with_map(map);
@@ -31633,7 +31633,7 @@ impl<'local> FromJava<'local> for Tpl {
       delete_local_ref!(env, java_item);
       exprs.push(element)
     }
-    let exprs = exprs.into_iter().map(|exprs| Box::new(exprs)).collect();
+    let exprs = exprs.into_iter().map(Box::new).collect();
     let java_quasis = java_class.get_quasis(env, jobj)?;
     let length = list_size(env, &java_quasis)?;
     let mut quasis: Vec<TplElement> = Vec::with_capacity(length);
@@ -31652,7 +31652,7 @@ impl<'local> FromJava<'local> for Tpl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TplElement {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -31703,11 +31703,11 @@ impl<'local> FromJava<'local> for TplElement {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TryStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.block.register_with_map(map);
-    self.handler.as_ref().map(|node| node.register_with_map(map));
-    self.finalizer.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.handler.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.finalizer.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -31774,7 +31774,7 @@ impl<'local> FromJava<'local> for TryStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsArrayType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.elem_type.register_with_map(map);
   }
@@ -31812,7 +31812,7 @@ impl<'local> FromJava<'local> for TsArrayType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsAsExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
     self.type_ann.register_with_map(map);
@@ -31858,13 +31858,13 @@ impl<'local> FromJava<'local> for TsAsExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsCallSignatureDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.params.iter() {
       node.register_with_map(map);
     }
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.type_params.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -31922,7 +31922,7 @@ impl<'local> FromJava<'local> for TsCallSignatureDecl {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     let java_optional_type_params = java_class.get_type_params(env, jobj)?;
     let type_params = if optional_is_present(env, &java_optional_type_params)? {
       let java_type_params = optional_get(env, &java_optional_type_params)?;
@@ -31933,7 +31933,7 @@ impl<'local> FromJava<'local> for TsCallSignatureDecl {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
+    let type_params = type_params.map(Box::new);
     Ok(Box::new(TsCallSignatureDecl {
       span,
       params,
@@ -31944,7 +31944,7 @@ impl<'local> FromJava<'local> for TsCallSignatureDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsConditionalType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.check_type.register_with_map(map);
     self.extends_type.register_with_map(map);
@@ -32006,7 +32006,7 @@ impl<'local> FromJava<'local> for TsConditionalType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsConstAssertion {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
   }
@@ -32044,13 +32044,13 @@ impl<'local> FromJava<'local> for TsConstAssertion {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsConstructSignatureDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.params.iter() {
       node.register_with_map(map);
     }
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.type_params.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -32108,7 +32108,7 @@ impl<'local> FromJava<'local> for TsConstructSignatureDecl {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     let java_optional_type_params = java_class.get_type_params(env, jobj)?;
     let type_params = if optional_is_present(env, &java_optional_type_params)? {
       let java_type_params = optional_get(env, &java_optional_type_params)?;
@@ -32119,7 +32119,7 @@ impl<'local> FromJava<'local> for TsConstructSignatureDecl {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
+    let type_params = type_params.map(Box::new);
     Ok(Box::new(TsConstructSignatureDecl {
       span,
       params,
@@ -32130,12 +32130,12 @@ impl<'local> FromJava<'local> for TsConstructSignatureDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsConstructorType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.params.iter() {
       node.register_with_map(map);
     }
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_params.as_ref() { node.register_with_map(map) }
     self.type_ann.register_with_map(map);
   }
 }
@@ -32192,7 +32192,7 @@ impl<'local> FromJava<'local> for TsConstructorType {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
+    let type_params = type_params.map(Box::new);
     let java_type_ann = java_class.get_type_ann(env, jobj)?;
     let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
@@ -32209,7 +32209,7 @@ impl<'local> FromJava<'local> for TsConstructorType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsEnumDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.id.register_with_map(map);
     for node in self.members.iter() {
@@ -32272,10 +32272,10 @@ impl<'local> FromJava<'local> for TsEnumDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsEnumMember {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.id.register_with_map(map);
-    self.init.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.init.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -32317,7 +32317,7 @@ impl<'local> FromJava<'local> for TsEnumMember {
       None
     };
     delete_local_ref!(env, java_optional_init);
-    let init = init.map(|init| Box::new(init));
+    let init = init.map(Box::new);
     Ok(Box::new(TsEnumMember {
       span,
       id,
@@ -32327,7 +32327,7 @@ impl<'local> FromJava<'local> for TsEnumMember {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsExportAssignment {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
   }
@@ -32365,10 +32365,10 @@ impl<'local> FromJava<'local> for TsExportAssignment {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsExprWithTypeArgs {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
-    self.type_args.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_args.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -32411,7 +32411,7 @@ impl<'local> FromJava<'local> for TsExprWithTypeArgs {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
-    let type_args = type_args.map(|type_args| Box::new(type_args));
+    let type_args = type_args.map(Box::new);
     Ok(Box::new(TsExprWithTypeArgs {
       span,
       expr,
@@ -32421,7 +32421,7 @@ impl<'local> FromJava<'local> for TsExprWithTypeArgs {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsExternalModuleRef {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
   }
@@ -32458,12 +32458,12 @@ impl<'local> FromJava<'local> for TsExternalModuleRef {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsFnType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.params.iter() {
       node.register_with_map(map);
     }
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_params.as_ref() { node.register_with_map(map) }
     self.type_ann.register_with_map(map);
   }
 }
@@ -32519,7 +32519,7 @@ impl<'local> FromJava<'local> for TsFnType {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
+    let type_params = type_params.map(Box::new);
     let java_type_ann = java_class.get_type_ann(env, jobj)?;
     let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
@@ -32534,10 +32534,10 @@ impl<'local> FromJava<'local> for TsFnType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsGetterSignature {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -32582,7 +32582,7 @@ impl<'local> FromJava<'local> for TsGetterSignature {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     Ok(Box::new(TsGetterSignature {
       span,
       key,
@@ -32593,7 +32593,7 @@ impl<'local> FromJava<'local> for TsGetterSignature {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsImportCallOptions {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.with.register_with_map(map);
   }
@@ -32631,7 +32631,7 @@ impl<'local> FromJava<'local> for TsImportCallOptions {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsImportEqualsDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.id.register_with_map(map);
     self.module_ref.register_with_map(map);
@@ -32681,12 +32681,12 @@ impl<'local> FromJava<'local> for TsImportEqualsDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsImportType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.arg.register_with_map(map);
-    self.qualifier.as_ref().map(|node| node.register_with_map(map));
-    self.type_args.as_ref().map(|node| node.register_with_map(map));
-    self.attributes.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.qualifier.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.type_args.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.attributes.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -32748,7 +32748,7 @@ impl<'local> FromJava<'local> for TsImportType {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
-    let type_args = type_args.map(|type_args| Box::new(type_args));
+    let type_args = type_args.map(Box::new);
     let java_optional_attributes = java_class.get_attributes(env, jobj)?;
     let attributes = if optional_is_present(env, &java_optional_attributes)? {
       let java_attributes = optional_get(env, &java_optional_attributes)?;
@@ -32770,12 +32770,12 @@ impl<'local> FromJava<'local> for TsImportType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsIndexSignature {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.params.iter() {
       node.register_with_map(map);
     }
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -32830,7 +32830,7 @@ impl<'local> FromJava<'local> for TsIndexSignature {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     let readonly = java_class.is_readonly(env, jobj)?;
     let is_static = java_class.is_static(env, jobj)?;
     Ok(Box::new(TsIndexSignature {
@@ -32844,7 +32844,7 @@ impl<'local> FromJava<'local> for TsIndexSignature {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsIndexedAccessType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.obj_type.register_with_map(map);
     self.index_type.register_with_map(map);
@@ -32893,7 +32893,7 @@ impl<'local> FromJava<'local> for TsIndexedAccessType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsInferType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.type_param.register_with_map(map);
   }
@@ -32930,7 +32930,7 @@ impl<'local> FromJava<'local> for TsInferType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsInstantiation {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
     self.type_args.register_with_map(map);
@@ -32976,7 +32976,7 @@ impl<'local> FromJava<'local> for TsInstantiation {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsInterfaceBody {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.body.iter() {
       node.register_with_map(map);
@@ -33026,10 +33026,10 @@ impl<'local> FromJava<'local> for TsInterfaceBody {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsInterfaceDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.id.register_with_map(map);
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_params.as_ref() { node.register_with_map(map) }
     for node in self.extends.iter() {
       node.register_with_map(map);
     }
@@ -33086,7 +33086,7 @@ impl<'local> FromJava<'local> for TsInterfaceDecl {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
+    let type_params = type_params.map(Box::new);
     let java_extends = java_class.get_extends(env, jobj)?;
     let length = list_size(env, &java_extends)?;
     let mut extends: Vec<TsExprWithTypeArgs> = Vec::with_capacity(length);
@@ -33111,7 +33111,7 @@ impl<'local> FromJava<'local> for TsInterfaceDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsIntersectionType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.types.iter() {
       node.register_with_map(map);
@@ -33153,7 +33153,7 @@ impl<'local> FromJava<'local> for TsIntersectionType {
       delete_local_ref!(env, java_item);
       types.push(element)
     }
-    let types = types.into_iter().map(|types| Box::new(types)).collect();
+    let types = types.into_iter().map(Box::new).collect();
     Ok(Box::new(TsIntersectionType {
       span,
       types,
@@ -33162,7 +33162,7 @@ impl<'local> FromJava<'local> for TsIntersectionType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsKeywordType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -33198,7 +33198,7 @@ impl<'local> FromJava<'local> for TsKeywordType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsLitType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.lit.register_with_map(map);
   }
@@ -33235,11 +33235,11 @@ impl<'local> FromJava<'local> for TsLitType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsMappedType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.type_param.register_with_map(map);
-    self.name_type.as_ref().map(|node| node.register_with_map(map));
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.name_type.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -33306,7 +33306,7 @@ impl<'local> FromJava<'local> for TsMappedType {
       None
     };
     delete_local_ref!(env, java_optional_name_type);
-    let name_type = name_type.map(|name_type| Box::new(name_type));
+    let name_type = name_type.map(Box::new);
     let java_optional_optional = java_class.get_optional(env, jobj)?;
     let optional = if optional_is_present(env, &java_optional_optional)? {
       let java_optional = optional_get(env, &java_optional_optional)?;
@@ -33327,7 +33327,7 @@ impl<'local> FromJava<'local> for TsMappedType {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     Ok(Box::new(TsMappedType {
       span,
       readonly,
@@ -33340,14 +33340,14 @@ impl<'local> FromJava<'local> for TsMappedType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsMethodSignature {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
     for node in self.params.iter() {
       node.register_with_map(map);
     }
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.type_params.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -33415,7 +33415,7 @@ impl<'local> FromJava<'local> for TsMethodSignature {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     let java_optional_type_params = java_class.get_type_params(env, jobj)?;
     let type_params = if optional_is_present(env, &java_optional_type_params)? {
       let java_type_params = optional_get(env, &java_optional_type_params)?;
@@ -33426,7 +33426,7 @@ impl<'local> FromJava<'local> for TsMethodSignature {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
+    let type_params = type_params.map(Box::new);
     Ok(Box::new(TsMethodSignature {
       span,
       key,
@@ -33440,7 +33440,7 @@ impl<'local> FromJava<'local> for TsMethodSignature {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsModuleBlock {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.body.iter() {
       node.register_with_map(map);
@@ -33490,10 +33490,10 @@ impl<'local> FromJava<'local> for TsModuleBlock {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsModuleDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.id.register_with_map(map);
-    self.body.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.body.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -33553,7 +33553,7 @@ impl<'local> FromJava<'local> for TsModuleDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsNamespaceDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.id.register_with_map(map);
     self.body.register_with_map(map);
@@ -33604,7 +33604,7 @@ impl<'local> FromJava<'local> for TsNamespaceDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsNamespaceExportDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.id.register_with_map(map);
   }
@@ -33641,7 +33641,7 @@ impl<'local> FromJava<'local> for TsNamespaceExportDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsNonNullExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
   }
@@ -33679,7 +33679,7 @@ impl<'local> FromJava<'local> for TsNonNullExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsOptionalType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.type_ann.register_with_map(map);
   }
@@ -33717,7 +33717,7 @@ impl<'local> FromJava<'local> for TsOptionalType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsParamProp {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.decorators.iter() {
       node.register_with_map(map);
@@ -33796,7 +33796,7 @@ impl<'local> FromJava<'local> for TsParamProp {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsParenthesizedType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.type_ann.register_with_map(map);
   }
@@ -33834,10 +33834,10 @@ impl<'local> FromJava<'local> for TsParenthesizedType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsPropertySignature {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -33886,7 +33886,7 @@ impl<'local> FromJava<'local> for TsPropertySignature {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     Ok(Box::new(TsPropertySignature {
       span,
       readonly,
@@ -33899,7 +33899,7 @@ impl<'local> FromJava<'local> for TsPropertySignature {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsQualifiedName {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.left.register_with_map(map);
     self.right.register_with_map(map);
@@ -33943,7 +33943,7 @@ impl<'local> FromJava<'local> for TsQualifiedName {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsRestType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.type_ann.register_with_map(map);
   }
@@ -33981,7 +33981,7 @@ impl<'local> FromJava<'local> for TsRestType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsSatisfiesExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
     self.type_ann.register_with_map(map);
@@ -34027,7 +34027,7 @@ impl<'local> FromJava<'local> for TsSatisfiesExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsSetterSignature {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
     self.param.register_with_map(map);
@@ -34075,7 +34075,7 @@ impl<'local> FromJava<'local> for TsSetterSignature {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsThisType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
   }
 }
@@ -34104,7 +34104,7 @@ impl<'local> FromJava<'local> for TsThisType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTplLitType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.types.iter() {
       node.register_with_map(map);
@@ -34156,7 +34156,7 @@ impl<'local> FromJava<'local> for TsTplLitType {
       delete_local_ref!(env, java_item);
       types.push(element)
     }
-    let types = types.into_iter().map(|types| Box::new(types)).collect();
+    let types = types.into_iter().map(Box::new).collect();
     let java_quasis = java_class.get_quasis(env, jobj)?;
     let length = list_size(env, &java_quasis)?;
     let mut quasis: Vec<TplElement> = Vec::with_capacity(length);
@@ -34175,9 +34175,9 @@ impl<'local> FromJava<'local> for TsTplLitType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTupleElement {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.label.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.label.as_ref() { node.register_with_map(map) }
     self.ty.register_with_map(map);
   }
 }
@@ -34230,7 +34230,7 @@ impl<'local> FromJava<'local> for TsTupleElement {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTupleType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.elem_types.iter() {
       node.register_with_map(map);
@@ -34280,10 +34280,10 @@ impl<'local> FromJava<'local> for TsTupleType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeAliasDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.id.register_with_map(map);
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_params.as_ref() { node.register_with_map(map) }
     self.type_ann.register_with_map(map);
   }
 }
@@ -34330,7 +34330,7 @@ impl<'local> FromJava<'local> for TsTypeAliasDecl {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
+    let type_params = type_params.map(Box::new);
     let java_type_ann = java_class.get_type_ann(env, jobj)?;
     let type_ann = *TsType::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
@@ -34346,7 +34346,7 @@ impl<'local> FromJava<'local> for TsTypeAliasDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeAnn {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.type_ann.register_with_map(map);
   }
@@ -34384,7 +34384,7 @@ impl<'local> FromJava<'local> for TsTypeAnn {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeAssertion {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr.register_with_map(map);
     self.type_ann.register_with_map(map);
@@ -34430,7 +34430,7 @@ impl<'local> FromJava<'local> for TsTypeAssertion {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeLit {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.members.iter() {
       node.register_with_map(map);
@@ -34480,7 +34480,7 @@ impl<'local> FromJava<'local> for TsTypeLit {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeOperator {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.type_ann.register_with_map(map);
   }
@@ -34524,11 +34524,11 @@ impl<'local> FromJava<'local> for TsTypeOperator {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeParam {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.name.register_with_map(map);
-    self.constraint.as_ref().map(|node| node.register_with_map(map));
-    self.default.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.constraint.as_ref() { node.register_with_map(map) }
+    if let Some(node) = self.default.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -34581,7 +34581,7 @@ impl<'local> FromJava<'local> for TsTypeParam {
       None
     };
     delete_local_ref!(env, java_optional_constraint);
-    let constraint = constraint.map(|constraint| Box::new(constraint));
+    let constraint = constraint.map(Box::new);
     let java_optional_default = java_class.get_default(env, jobj)?;
     let default = if optional_is_present(env, &java_optional_default)? {
       let java_default = optional_get(env, &java_optional_default)?;
@@ -34592,7 +34592,7 @@ impl<'local> FromJava<'local> for TsTypeParam {
       None
     };
     delete_local_ref!(env, java_optional_default);
-    let default = default.map(|default| Box::new(default));
+    let default = default.map(Box::new);
     Ok(Box::new(TsTypeParam {
       span,
       name,
@@ -34606,7 +34606,7 @@ impl<'local> FromJava<'local> for TsTypeParam {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeParamDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.params.iter() {
       node.register_with_map(map);
@@ -34656,7 +34656,7 @@ impl<'local> FromJava<'local> for TsTypeParamDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeParamInstantiation {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.params.iter() {
       node.register_with_map(map);
@@ -34698,7 +34698,7 @@ impl<'local> FromJava<'local> for TsTypeParamInstantiation {
       delete_local_ref!(env, java_item);
       params.push(element)
     }
-    let params = params.into_iter().map(|params| Box::new(params)).collect();
+    let params = params.into_iter().map(Box::new).collect();
     Ok(Box::new(TsTypeParamInstantiation {
       span,
       params,
@@ -34707,10 +34707,10 @@ impl<'local> FromJava<'local> for TsTypeParamInstantiation {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypePredicate {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.param_name.register_with_map(map);
-    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_ann.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -34754,7 +34754,7 @@ impl<'local> FromJava<'local> for TsTypePredicate {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
-    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
+    let type_ann = type_ann.map(Box::new);
     Ok(Box::new(TsTypePredicate {
       span,
       asserts,
@@ -34765,10 +34765,10 @@ impl<'local> FromJava<'local> for TsTypePredicate {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeQuery {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.expr_name.register_with_map(map);
-    self.type_args.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_args.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -34810,7 +34810,7 @@ impl<'local> FromJava<'local> for TsTypeQuery {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
-    let type_args = type_args.map(|type_args| Box::new(type_args));
+    let type_args = type_args.map(Box::new);
     Ok(Box::new(TsTypeQuery {
       span,
       expr_name,
@@ -34820,10 +34820,10 @@ impl<'local> FromJava<'local> for TsTypeQuery {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeRef {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.type_name.register_with_map(map);
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.type_params.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -34865,7 +34865,7 @@ impl<'local> FromJava<'local> for TsTypeRef {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
+    let type_params = type_params.map(Box::new);
     Ok(Box::new(TsTypeRef {
       span,
       type_name,
@@ -34875,7 +34875,7 @@ impl<'local> FromJava<'local> for TsTypeRef {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsUnionType {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.types.iter() {
       node.register_with_map(map);
@@ -34917,7 +34917,7 @@ impl<'local> FromJava<'local> for TsUnionType {
       delete_local_ref!(env, java_item);
       types.push(element)
     }
-    let types = types.into_iter().map(|types| Box::new(types)).collect();
+    let types = types.into_iter().map(Box::new).collect();
     Ok(Box::new(TsUnionType {
       span,
       types,
@@ -34926,7 +34926,7 @@ impl<'local> FromJava<'local> for TsUnionType {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for UnaryExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.arg.register_with_map(map);
   }
@@ -34970,7 +34970,7 @@ impl<'local> FromJava<'local> for UnaryExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for UpdateExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.arg.register_with_map(map);
   }
@@ -35017,7 +35017,7 @@ impl<'local> FromJava<'local> for UpdateExpr {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for UsingDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.decls.iter() {
       node.register_with_map(map);
@@ -35070,7 +35070,7 @@ impl<'local> FromJava<'local> for UsingDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for VarDecl {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     for node in self.decls.iter() {
       node.register_with_map(map);
@@ -35133,10 +35133,10 @@ impl<'local> FromJava<'local> for VarDecl {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for VarDeclarator {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.name.register_with_map(map);
-    self.init.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.init.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -35179,7 +35179,7 @@ impl<'local> FromJava<'local> for VarDeclarator {
       None
     };
     delete_local_ref!(env, java_optional_init);
-    let init = init.map(|init| Box::new(init));
+    let init = init.map(Box::new);
     let definite = java_class.is_definite(env, jobj)?;
     Ok(Box::new(VarDeclarator {
       span,
@@ -35191,7 +35191,7 @@ impl<'local> FromJava<'local> for VarDeclarator {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for WhileStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.test.register_with_map(map);
     self.body.register_with_map(map);
@@ -35237,7 +35237,7 @@ impl<'local> FromJava<'local> for WhileStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for WithStmt {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.obj.register_with_map(map);
     self.body.register_with_map(map);
@@ -35283,9 +35283,9 @@ impl<'local> FromJava<'local> for WithStmt {
 }
 
 impl RegisterWithMap<ByteToIndexMap> for YieldExpr {
-  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.arg.as_ref().map(|node| node.register_with_map(map));
+    if let Some(node) = self.arg.as_ref() { node.register_with_map(map) }
   }
 }
 
@@ -35323,7 +35323,7 @@ impl<'local> FromJava<'local> for YieldExpr {
       None
     };
     delete_local_ref!(env, java_optional_arg);
-    let arg = arg.map(|arg| Box::new(arg));
+    let arg = arg.map(Box::new);
     let delegate = java_class.is_delegate(env, jobj)?;
     Ok(Box::new(YieldExpr {
       span,

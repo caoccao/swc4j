@@ -25,7 +25,7 @@ use swc::common::util::take::Take;
 
 use crate::{enums, options, outputs, plugin_utils};
 
-const VERSION: &'static str = "2.1.0";
+const VERSION: &str = "2.1.0";
 
 fn parse_by_mode(
   parse_params: ParseParams,
@@ -158,7 +158,7 @@ pub fn transform(code: String, options: &options::TransformOptions, plugin_host:
       .to_writer(&mut buffer)?;
     if options.source_map == SourceMapOption::Inline {
       if !code.ends_with("\n") {
-        code.push_str("\n");
+        code.push('\n');
       }
       code.push_str("//# sourceMappingURL=data:application/json;base64,");
       base64::prelude::BASE64_STANDARD.encode_string(buffer, &mut code);
@@ -187,7 +187,7 @@ pub fn transpile(code: String, options: &options::TranspileOptions, plugin_host:
   let parsed_source = parse_by_mode(parse_params, options.parse_mode, plugin_host)?;
   let transpile_options = TranspileOptions {
     decorators: options.decorators.clone(),
-    imports_not_used_as_values: options.imports_not_used_as_values.clone(),
+    imports_not_used_as_values: options.imports_not_used_as_values,
     jsx: options.jsx.clone(),
     var_decl_imports: options.var_decl_imports,
     verbatim_module_syntax: options.verbatim_module_syntax,

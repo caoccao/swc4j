@@ -78,7 +78,7 @@ public class TestCodeGen {
                     final List<String> toJavaLines = new ArrayList<>();
                     final List<String> fromJavaLines = new ArrayList<>();
                     registrationLines.add(String.format("impl RegisterWithMap<ByteToIndexMap> for %s {", enumName));
-                    registrationLines.add("  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {");
+                    registrationLines.add("  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {");
                     registrationLines.add("    match self {");
                     toJavaLines.add(String.format("impl ToJavaWithMap<ByteToIndexMap> for %s {", enumName));
                     toJavaLines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut Env<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>");
@@ -279,7 +279,7 @@ public class TestCodeGen {
                     String spanCall = jni2RustClassUtils.isSpan() ? "" : "()";
                     // Registration
                     lines.add(String.format("impl RegisterWithMap<ByteToIndexMap> for %s {", className));
-                    lines.add("  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {");
+                    lines.add("  fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {");
                     lines.add(String.format("    map.register_by_span(&self.span%s);", spanCall));
                     ReflectionUtils.getDeclaredFields(clazz).values().stream()
                             .filter(field -> !Modifier.isStatic(field.getModifiers()))
@@ -295,14 +295,14 @@ public class TestCodeGen {
                                         Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                                         if (innerType instanceof Class) {
                                             if (ISwc4jAst.class.isAssignableFrom((Class<?>) innerType)) {
-                                                lines.add(String.format("    self.%s.as_ref().map(|node| node.register_with_map(map));",
+                                                lines.add(String.format("    if let Some(node) = self.%s.as_ref() { node.register_with_map(map) }",
                                                         arg));
                                             }
                                         } else if (innerType instanceof ParameterizedType) {
                                             assertThat(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType())).isTrue();
                                             Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
                                             assertThat(innerType2).isInstanceOf(Class.class);
-                                            lines.add(String.format("    self.%s.as_ref().map(|nodes| nodes.iter().for_each(|node| node.register_with_map(map)));",
+                                            lines.add(String.format("    if let Some(nodes) = self.%s.as_ref() { nodes.iter().for_each(|node| node.register_with_map(map)) }",
                                                     arg));
                                         } else {
                                             fail(field.getGenericType().getTypeName() + " is not expected");
@@ -320,7 +320,7 @@ public class TestCodeGen {
                                             assertThat(Optional.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType())).isTrue();
                                             Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
                                             assertThat(innerType2).isInstanceOf(Class.class);
-                                            lines.add("      node.as_ref().map(|node| node.register_with_map(map));");
+                                            lines.add("      if let Some(node) = node.as_ref() { node.register_with_map(map) }");
                                         } else {
                                             fail(innerType.getTypeName() + " is not expected");
                                         }
@@ -630,8 +630,8 @@ public class TestCodeGen {
                                         processLines.add(String.format("    let %s = %s.map(|%s| Box::new(Wtf8Atom::new(%s)));",
                                                 arg, arg, arg, arg));
                                     } else {
-                                        processLines.add(String.format("    let %s = %s.map(|%s| Box::new(%s));",
-                                                arg, arg, arg, arg));
+                                        processLines.add(String.format("    let %s = %s.map(Box::new);",
+                                                arg, arg));
                                     }
                                 } else if (jni2RustFieldUtils.isComponentAtom()) {
                                     processLines.add(String.format("    let %s = %s.map(|%s| %s.into());",
@@ -700,8 +700,8 @@ public class TestCodeGen {
                                             processLines.add(String.format("    let %s = %s.into_iter().map(|%s| Box::new(Wtf8Atom::new(%s))).collect();",
                                                     arg, arg, arg, arg));
                                         } else {
-                                            processLines.add(String.format("    let %s = %s.into_iter().map(|%s| Box::new(%s)).collect();",
-                                                    arg, arg, arg, arg));
+                                            processLines.add(String.format("    let %s = %s.into_iter().map(Box::new).collect();",
+                                                    arg, arg));
                                         }
                                     } else if (jni2RustFieldUtils.isComponentAtom()) {
                                         processLines.add(String.format("    let %s = %s.into_iter().map(|%s| %s.into()).collect();",
