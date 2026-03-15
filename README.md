@@ -236,6 +236,7 @@ System.out.println("1 + 2 = " + result);
 * [Hello Swc4j, Goodbye Antlr](https://blog.caoccao.com/hello-swc4j-goodbye-antlr-f9a63e45a3d4)
 * [How to Compromise V8 on JVM](https://blog.caoccao.com/how-to-compromise-v8-on-jvm-ceb385572461)
 * Write SWC Plugins in Java: [Part 1](https://blog.caoccao.com/write-swc-plugins-in-java-part-1-d48139c6c675), [Part 2](https://blog.caoccao.com/write-swc-plugins-in-java-part-2-039d54611863), [Part 3](https://blog.caoccao.com/write-swc-plugins-in-java-part-3-b82c8bea4069)
+* [Compile TypeScript to JVM Bytecode with swc4j](https://blog.caoccao.com/compile-typescript-to-jvm-bytecode-with-swc4j-45dd05561028)
 
 ## License
 

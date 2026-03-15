@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compile TypeScript to JVM Bytecode with swc4j</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #0a0e27;
+  color: #e0e6ed;
+  overflow: hidden;
+  height: 100vh;
+}
+
+.deck {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 100px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+h1 {
+  font-size: 3.2em;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #3178c6, #00d4aa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+h2 {
+  font-size: 2.4em;
+  font-weight: 600;
+  margin-bottom: 32px;
+  color: #fff;
+}
+
+h3 {
+  font-size: 1.3em;
+  font-weight: 400;
+  color: #8892a4;
+  margin-bottom: 40px;
+}
+
+.subtitle {
+  font-size: 1.4em;
+  color: #8892a4;
+  margin-bottom: 40px;
+}
+
+ul {
+  list-style: none;
+  font-size: 1.35em;
+  line-height: 2;
+}
+
+ul li::before {
+  content: '→';
+  color: #00d4aa;
+  margin-right: 16px;
+  font-weight: 600;
+}
+
+ul.checks li::before {
+  content: '✓';
+  color: #00d4aa;
+}
+
+ul.bullets li::before {
+  content: '•';
+  color: #3178c6;
+}
+
+pre {
+  background: #131832;
+  border: 1px solid #1e2a4a;
+  border-radius: 12px;
+  padding: 28px 32px;
+  font-family: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.95em;
+  line-height: 1.6;
+  overflow-x: auto;
+  margin: 20px 0;
+}
+
+.code-label {
+  font-size: 0.85em;
+  color: #5a6a8a;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+
+.kw { color: #c678dd; }
+.str { color: #98c379; }
+.num { color: #d19a66; }
+.typ { color: #e5c07b; }
+.cmt { color: #5c6370; font-style: italic; }
+.fn { color: #61afef; }
+.op { color: #56b6c2; }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.output {
+  background: #0d1117;
+  border: 1px solid #1e2a4a;
+  border-radius: 12px;
+  padding: 20px 24px;
+  font-family: 'Cascadia Code', monospace;
+  font-size: 1em;
+  color: #7ee787;
+  margin-top: 16px;
+}
+
+.output-label {
+  font-size: 0.8em;
+  color: #5a6a8a;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 600;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.badge-green { background: rgba(0,212,170,0.15); color: #00d4aa; }
+.badge-blue { background: rgba(49,120,198,0.15); color: #3178c6; }
+.badge-orange { background: rgba(209,154,102,0.15); color: #d19a66; }
+
+.big-icon {
+  font-size: 4em;
+  margin-bottom: 16px;
+}
+
+.flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 32px 0;
+  flex-wrap: wrap;
+}
+
+.flow-box {
+  background: #131832;
+  border: 1px solid #1e2a4a;
+  border-radius: 12px;
+  padding: 20px 28px;
+  text-align: center;
+  min-width: 140px;
+}
+
+.flow-box .icon { font-size: 2em; margin-bottom: 8px; }
+.flow-box .label { font-size: 0.95em; color: #e0e6ed; }
+.flow-arrow { font-size: 1.6em; color: #3178c6; }
+
+.flow-bracket {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 1.1em;
+  color: #00d4aa;
+  font-weight: 600;
+}
+
+.highlight-box {
+  background: linear-gradient(135deg, rgba(49,120,198,0.1), rgba(0,212,170,0.1));
+  border: 1px solid rgba(0,212,170,0.3);
+  border-radius: 16px;
+  padding: 32px;
+  margin: 20px 0;
+}
+
+.center { text-align: center; }
+
+.progress {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3178c6, #00d4aa);
+  transition: width 0.3s ease;
+  z-index: 100;
+}
+
+.nav {
+  position: fixed;
+  bottom: 20px;
+  right: 24px;
+  display: flex;
+  gap: 8px;
+  z-index: 100;
+}
+
+.nav button {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #e0e6ed;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background 0.2s;
+}
+
+.nav button:hover { background: rgba(255,255,255,0.15); }
+
+.slide-num {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  font-size: 0.85em;
+  color: #5a6a8a;
+  z-index: 100;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.75em;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: rgba(49,120,198,0.15);
+  color: #3178c6;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+<!-- Slide 1: Title -->
+<div class="slide active">
+  <div class="center">
+    <div class="big-icon">⚡</div>
+    <h1>Compile TypeScript to<br>JVM Bytecode</h1>
+    <h3>with swc4j</h3>
+    <div style="margin-top:32px">
+      <span class="badge badge-green">No V8</span>
+      <span class="badge badge-blue">Native JVM Speed</span>
+      <span class="badge badge-orange">Full Java Interop</span>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 2: The Problem -->
+<div class="slide">
+  <span class="tag">Motivation</span>
+  <h2>The Problem</h2>
+  <ul>
+    <li>Running TypeScript on JVM requires a JavaScript runtime</li>
+    <li>V8 (via Javet), GraalJS, Node.js — all bring native dependencies</li>
+    <li>Runtime startup overhead, memory cost, version management</li>
+    <li>Gap between script world and Java world — no shared type system</li>
+  </ul>
+</div>
+
+<!-- Slide 3: The Idea -->
+<div class="slide">
+  <span class="tag">Motivation</span>
+  <h2>The Idea</h2>
+  <div class="highlight-box">
+    <p style="font-size:1.4em;text-align:center;line-height:1.6">
+      TypeScript's syntax is close to Java —<br>
+      classes, interfaces, type annotations, inheritance.<br><br>
+      <strong style="color:#00d4aa">What if we compile it directly to JVM bytecode?</strong>
+    </p>
+  </div>
+</div>
+
+<!-- Slide 4: Architecture -->
+<div class="slide">
+  <span class="tag">Architecture</span>
+  <h2>How It Works</h2>
+  <div class="flow">
+    <div class="flow-box"><div class="icon">📝</div><div class="label">TypeScript<br>Source</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="icon">⚙️</div><div class="label">SWC<br>Parser</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="icon">🌳</div><div class="label">AST</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="icon">🔧</div><div class="label">Bytecode<br>Compiler</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="icon">☕</div><div class="label">JVM<br>Classes</div></div>
+  </div>
+  <div class="flow-bracket">── swc4j ──</div>
+  <ul style="margin-top:32px">
+    <li>SWC parses TypeScript into a typed AST (via JNI)</li>
+    <li>Bytecode compiler walks the AST, emits Java 17 bytecode</li>
+    <li>Custom ClassLoader loads bytecode into the JVM</li>
+  </ul>
+</div>
+
+<!-- Slide 5: Hello Bytecode -->
+<div class="slide">
+  <span class="tag">Demo</span>
+  <h2>Hello Bytecode</h2>
+  <div class="two-col">
+    <div>
+      <div class="code-label">Java</div>
+      <pre><span class="typ">ByteCodeCompiler</span> compiler = <span class="typ">ByteCodeCompiler</span>.of(
+    <span class="typ">ByteCodeCompilerOptions</span>.builder()
+        .jdkVersion(<span class="typ">JdkVersion</span>.JDK_17)
+        .build());
+
+<span class="typ">ByteCodeRunner</span> runner = compiler.compile(<span class="str">"""
+    export function add(a: int, b: int): int {
+      return a + b
+    }"""</span>);
+
+<span class="kw">int</span> result = runner
+    .createStaticRunner(<span class="str">"$"</span>)
+    .invoke(<span class="str">"add"</span>, <span class="num">1</span>, <span class="num">2</span>);</pre>
+    </div>
+    <div>
+      <div class="output-label">Output</div>
+      <div class="output">1 + 2 = 3</div>
+      <div style="margin-top:24px">
+        <ul class="checks">
+          <li>No V8 involved</li>
+          <li>Pure JVM execution</li>
+          <li>Top-level function → static method</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6: Classes -->
+<div class="slide">
+  <span class="tag">Demo</span>
+  <h2>Classes and Namespaces</h2>
+  <div class="two-col">
+    <div>
+      <div class="code-label">TypeScript</div>
+      <pre><span class="kw">namespace</span> com {
+  <span class="kw">export class</span> <span class="typ">Calculator</span> {
+    <span class="fn">add</span>(a: <span class="typ">int</span>, b: <span class="typ">int</span>): <span class="typ">int</span> {
+      <span class="kw">return</span> a + b
+    }
+    <span class="fn">multiply</span>(a: <span class="typ">double</span>, b: <span class="typ">double</span>): <span class="typ">double</span> {
+      <span class="kw">return</span> a * b
+    }
+  }
+}</pre>
+    </div>
+    <div>
+      <div class="code-label">Java invocation</div>
+      <pre>runner.createInstanceRunner(<span class="str">"com.Calculator"</span>);
+classRunner.invoke(<span class="str">"add"</span>, <span class="num">3</span>, <span class="num">4</span>);
+classRunner.invoke(<span class="str">"multiply"</span>, <span class="num">2.5</span>, <span class="num">4.0</span>);</pre>
+      <div class="output-label" style="margin-top:16px">Output</div>
+      <div class="output">add(3, 4) = 7<br>multiply(2.5, 4.0) = 10.0</div>
+      <p style="margin-top:16px;color:#8892a4"><code>namespace</code> → Java package<br><code>export class</code> → public JVM class</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7: Type System -->
+<div class="slide">
+  <span class="tag">Demo</span>
+  <h2>Type System &amp; Inference</h2>
+  <div class="two-col">
+    <div>
+      <div class="code-label">TypeScript</div>
+      <pre><span class="kw">export function</span> <span class="fn">demo</span>(): <span class="typ">String</span> {
+  <span class="kw">const</span> x = <span class="num">5</span>          <span class="cmt">// inferred: int</span>
+  <span class="kw">const</span> y = <span class="num">10</span>         <span class="cmt">// inferred: int</span>
+  <span class="kw">const</span> label = <span class="str">"sum"</span>  <span class="cmt">// inferred: String</span>
+  <span class="kw">return</span> label + <span class="str">": "</span> + (x + y)
+}</pre>
+      <div class="output-label" style="margin-top:16px">Output</div>
+      <div class="output">sum: 15</div>
+    </div>
+    <div>
+      <h3 style="margin-bottom:20px;color:#fff;font-size:1.2em">Type Mapping</h3>
+      <ul class="bullets" style="font-size:1.1em">
+        <li><code>int</code>, <code>long</code>, <code>float</code>, <code>double</code> → JVM primitives</li>
+        <li><code>String</code> → <code>java.lang.String</code></li>
+        <li><code>Integer</code>, <code>Long</code> → auto boxing/unboxing</li>
+        <li>Literals inferred: <code>5</code> → int, <code>3.14</code> → double</li>
+        <li>String <code>+</code> → <code>StringBuilder</code> chain</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8: Control Flow -->
+<div class="slide">
+  <span class="tag">Demo</span>
+  <h2>Control Flow</h2>
+  <div class="two-col">
+    <div>
+      <div class="code-label">TypeScript</div>
+      <pre><span class="kw">export function</span> <span class="fn">classify</span>(n: <span class="typ">int</span>): <span class="typ">String</span> {
+  <span class="kw">if</span> (n > <span class="num">0</span>) <span class="kw">return</span> <span class="str">"positive"</span>
+  <span class="kw">else if</span> (n < <span class="num">0</span>) <span class="kw">return</span> <span class="str">"negative"</span>
+  <span class="kw">else</span> <span class="kw">return</span> <span class="str">"zero"</span>
+}
+
+<span class="kw">export function</span> <span class="fn">factorial</span>(n: <span class="typ">int</span>): <span class="typ">int</span> {
+  <span class="kw">let</span> result: <span class="typ">int</span> = <span class="num">1</span>
+  <span class="kw">for</span> (<span class="kw">let</span> i: <span class="typ">int</span> = <span class="num">2</span>; i <= n; i = i + <span class="num">1</span>)
+    result = result * i
+  <span class="kw">return</span> result
+}</pre>
+    </div>
+    <div>
+      <div class="output-label">Output</div>
+      <div class="output">classify(42)  = positive<br>classify(-7)  = negative<br>classify(0)   = zero<br>factorial(5)  = 120</div>
+      <div style="margin-top:24px">
+        <ul class="checks" style="font-size:1.1em">
+          <li>if / else if / else</li>
+          <li>while, for, do-while</li>
+          <li>switch, try/catch/finally</li>
+          <li>Recursion</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9: Java Interop -->
+<div class="slide">
+  <span class="tag">Killer Feature</span>
+  <h2>Java Interop</h2>
+  <div class="two-col">
+    <div>
+      <div class="code-label">TypeScript</div>
+      <pre><span class="kw">namespace</span> com {
+  <span class="kw">export class</span> <span class="typ">MyList</span>
+      <span class="kw">extends</span> java.util.<span class="typ">ArrayList</span>&lt;<span class="typ">Object</span>&gt; {
+    label: <span class="typ">String</span> = <span class="str">"my-list"</span>
+    <span class="fn">getLabel</span>(): <span class="typ">String</span> {
+      <span class="kw">return</span> <span class="kw">this</span>.label
+    }
+  }
+}</pre>
+      <div class="code-label" style="margin-top:16px">Java</div>
+      <pre><span class="typ">ArrayList</span>&lt;<span class="typ">Object</span>&gt; list =
+    (<span class="typ">ArrayList</span>&lt;<span class="typ">Object</span>&gt;) classRunner.getInstance();
+list.add(<span class="str">"Hello"</span>);
+list.add(<span class="str">"World"</span>);</pre>
+    </div>
+    <div>
+      <div class="output-label">Output</div>
+      <div class="output">label = my-list<br>size  = 2<br>items = [Hello, World]</div>
+      <div class="highlight-box" style="margin-top:20px">
+        <ul class="checks" style="font-size:1.05em">
+          <li>Real JVM subclass of ArrayList</li>
+          <li>Cast, instanceof, reflection all work</li>
+          <li>Inherited methods: add(), size()</li>
+          <li>Custom fields and methods</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10: Interfaces -->
+<div class="slide">
+  <span class="tag">Demo</span>
+  <h2>TypeScript Interfaces → Java Interfaces</h2>
+  <div class="two-col">
+    <div>
+      <div class="code-label">TypeScript</div>
+      <pre><span class="kw">export interface</span> <span class="typ">Greeter</span> {
+  name: <span class="typ">String</span>
+  <span class="fn">greet</span>(): <span class="typ">String</span>
+}
+<span class="kw">export class</span> <span class="typ">SimpleGreeter</span>
+    <span class="kw">implements</span> <span class="typ">Greeter</span> {
+  name: <span class="typ">String</span> = <span class="str">""</span>
+  <span class="kw">constructor</span>(name: <span class="typ">String</span>) {
+    <span class="kw">this</span>.name = name
+  }
+  <span class="fn">getName</span>(): <span class="typ">String</span> { <span class="kw">return this</span>.name }
+  <span class="fn">setName</span>(name: <span class="typ">String</span>): <span class="typ">void</span> { <span class="kw">this</span>.name = name }
+  <span class="fn">greet</span>(): <span class="typ">String</span> { <span class="kw">return</span> <span class="str">"Hello, "</span> + <span class="kw">this</span>.name }
+}</pre>
+    </div>
+    <div>
+      <div class="output-label">Output</div>
+      <div class="output">Greeter is interface: true<br>SimpleGreeter implements Greeter: true<br>greeting = Hello, Alice</div>
+      <div style="margin-top:24px">
+        <ul class="bullets" style="font-size:1.05em">
+          <li>Properties → abstract getter/setter</li>
+          <li>Interface extends (single + multiple)</li>
+          <li>Standard Java reflection confirms it</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11: Feature Summary -->
+<div class="slide">
+  <span class="tag">Summary</span>
+  <h2>What's Supported</h2>
+  <div class="two-col">
+    <div>
+      <ul class="checks" style="font-size:1.1em">
+        <li>Classes, fields, constructors</li>
+        <li>Inheritance (extends, super)</li>
+        <li>Interfaces (implements)</li>
+        <li>Abstract classes</li>
+        <li>Method overloading</li>
+        <li>Constructor overloading + chaining</li>
+        <li>Default parameters</li>
+        <li>Static fields and methods</li>
+      </ul>
+    </div>
+    <div>
+      <ul class="checks" style="font-size:1.1em">
+        <li>Control flow (if/while/for/switch/try)</li>
+        <li>Type inference</li>
+        <li>Java interop (extend ArrayList, etc.)</li>
+        <li>TypeScript interfaces → Java interfaces</li>
+        <li>TypeScript enums → Java enums</li>
+        <li>Nested namespaces</li>
+        <li>Arrow functions</li>
+        <li>Template literals</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 12: Get Started -->
+<div class="slide">
+  <div class="center">
+    <div class="big-icon">🚀</div>
+    <h1>Get Started</h1>
+    <div style="margin-top:32px;font-size:1.3em;line-height:2">
+      <p><a href="https://github.com/caoccao/swc4j" style="color:#00d4aa">github.com/caoccao/swc4j</a></p>
+      <p style="color:#8892a4;margin-top:16px">Progressive tutorials · Comprehensive docs</p>
+      <div style="margin-top:40px">
+        <span class="badge badge-green">No V8</span>
+        <span class="badge badge-blue">Native JVM Speed</span>
+        <span class="badge badge-orange">Full Java Interop</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="slide-num" id="slideNum"></div>
+<div class="nav">
+  <button onclick="prev()">← Prev</button>
+  <button onclick="next()">Next →</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let current = 0;
+
+function show(n) {
+  if (n < 0 || n >= slides.length) return;
+  slides[current].classList.remove('active');
+  current = n;
+  slides[current].classList.add('active');
+  document.getElementById('progress').style.width = ((current + 1) / slides.length * 100) + '%';
+  document.getElementById('slideNum').textContent = (current + 1) + ' / ' + slides.length;
+}
+
+function next() { show(current + 1); }
+function prev() { show(current - 1); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); next(); }
+  if (e.key === 'ArrowLeft' || e.key === 'Backspace') { e.preventDefault(); prev(); }
+  if (e.key === 'Home') { e.preventDefault(); show(0); }
+  if (e.key === 'End') { e.preventDefault(); show(slides.length - 1); }
+});
+
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 50) { dx < 0 ? next() : prev(); }
+});
+
+show(0);
+</script>
+</body>
+</html>
