@@ -2,7 +2,7 @@
 
 ## Overview
 
-The TypeScript to JVM Bytecode Compiler is an experimental feature in swc4j that compiles TypeScript-like code directly into Java bytecode. This allows you to write TypeScript-style code that executes as native Java classes on the JVM, combining TypeScript's syntax with Java's type system and performance.
+The TypeScript to JVM Bytecode Compiler is an experimental feature in swc4j that compiles TypeScript-like code directly into Java 17 bytecode. This allows you to write TypeScript-style code that executes as native Java classes on the JVM, combining TypeScript's syntax with Java's type system and performance.
 
 ## What is This Feature?
 
@@ -11,29 +11,227 @@ This feature provides a compiler that:
 - **Parses TypeScript-like syntax** using SWC's parser
 - **Performs type inference** on variables and expressions
 - **Generates JVM bytecode** that can be loaded and executed directly
-- **Supports Java primitive types** (int, long, float, double, char, short) and their wrapper types (Integer, Long, Float, Double, Character, Short)
+- **Supports Java primitive types** (`int`, `long`, `float`, `double`, `char`, `short`, `byte`, `boolean`) and their wrapper types (`Integer`, `Long`, `Float`, `Double`, `Character`, `Short`, `Byte`, `Boolean`)
 - **Enables type annotations** on variables, parameters, and return types
-- **Compiles classes, methods, and expressions** into executable Java classes
+- **Compiles classes, methods, constructors, fields, and expressions** into executable Java classes
 
 ### Key Capabilities
 
-- ✅ Compile TypeScript namespaces to Java packages
-- ✅ Compile TypeScript classes to Java classes
-- ✅ Type inference for variables and expressions
-- ✅ Explicit type annotations with Java types
-- ✅ Numeric operations (addition, subtraction, negation)
-- ✅ String concatenation
-- ✅ Primitive types and wrapper types (boxing/unboxing)
-- ✅ Return type annotations
-- ✅ Type aliases
+**Classes and Objects:**
+- Compile TypeScript namespaces to Java packages (including nested namespaces)
+- Compile TypeScript classes to Java classes
+- Class inheritance (`extends`) with method overriding and `super` calls
+- Implement Java interfaces (`implements`) via `import { Runnable } from 'java.lang'` or type alias maps
+- Abstract classes and methods
+- Constructors with parameter properties (`constructor(public x: int)`)
+- Constructor overloading and chaining (`this(...)`)
+- Method overloading (same name, different parameter types/arity)
+- Static fields, methods, and static initialization blocks
+- Private methods and fields (ES2022 `#method` syntax)
+- Class fields with initializers
+- Access modifiers (`public`, `private`, `protected`)
+- Generics (basic support)
+- Extend Java standard library classes (e.g., `java.util.ArrayList`, `java.lang.Exception`)
+- Cross-namespace class instantiation with qualified names (`new com.math.Adder()`)
+
+**Functions:**
+- Standalone functions (compiled to static methods in a default `$` class)
+- Method parameters with type annotations
+- Default parameter values (compiled to method overloads)
+- Varargs parameters
+- Recursion and mutual recursion
+- Arrow functions and closures
+
+**Type System:**
+- Type inference for variables and expressions
+- Explicit type annotations with Java types
+- Primitive types and wrapper types (boxing/unboxing)
+- Type aliases (`type MyInt = int` or via `typeAliasMap`)
+- Import Java types with `import { ArrayList } from 'java.util'`
+- `as` type assertions
+
+**Control Flow:**
+- `if` / `else if` / `else`
+- `while` and `do-while` loops
+- `for` loops (C-style, `for-in`, `for-of`)
+- `switch` statements
+- `try` / `catch` / `finally`
+- `break` and `continue`
+- `throw`
+
+**Expressions:**
+- Arithmetic operators (`+`, `-`, `*`, `/`, `%`)
+- Comparison operators (`==`, `!=`, `<`, `>`, `<=`, `>=`, `===`, `!==`)
+- Logical operators (`&&`, `||`, `!`)
+- Bitwise operators (`&`, `|`, `^`, `~`, `<<`, `>>`, `>>>`)
+- Unary operators (`-`, `+`, `!`, `~`, `++`, `--`)
+- Assignment operators (`=`, `+=`, `-=`, `*=`, `/=`, etc.)
+- Conditional (ternary) operator (`? :`)
+- String concatenation
+- Template literals
+- Tagged template literals
+- Optional chaining (`?.`)
+- `new` expressions with qualified names
+- Member expressions and method calls
+
+**Literals:**
+- Numbers (`int`, `long`, `float`, `double`)
+- Strings (basic, escape sequences, character literals)
+- Booleans (`true`, `false`)
+- `null`
+- BigInt
+- Regular expressions
+- Arrays
+- Objects
+- Template literals
+
+**TypeScript-Specific:**
+- TypeScript interfaces compiled to Java interfaces
+- Interface property declarations generate abstract getter/setter methods
+- Interface extends (single and multiple)
+- TypeScript enums compiled to Java enums
+- `using` declarations (resource management)
+- Destructuring patterns (array, object, rest)
 
 ### Current Limitations
 
-- ⚠️ **Experimental**: This is an early-stage feature
-- ⚠️ **Limited TypeScript support**: Not all TypeScript features are supported
-- ⚠️ **No function parameters yet**: Only parameterless methods
-- ⚠️ **JDK 17 only**: Currently targets Java 17 bytecode
-- ⚠️ **Limited expressions**: Only basic operations supported
+- **Experimental**: This is an active development feature
+- **JDK 17 only**: Currently targets Java 17 bytecode
+- No async/await
+- Limited generic type parameter support at runtime (type erasure)
+
+## Usage
+
+### Quick Start
+
+```java
+import com.caoccao.javet.swc4j.compiler.*;
+
+// Create a compiler targeting JDK 17
+ByteCodeCompiler compiler = ByteCodeCompiler.of(
+        ByteCodeCompilerOptions.builder()
+                .jdkVersion(JdkVersion.JDK_17)
+                .build());
+
+// Compile a TypeScript function
+ByteCodeRunner runner = compiler.compile("""
+        export function add(a: int, b: int): int {
+          return a + b
+        }""");
+
+// Invoke the compiled function
+ByteCodeClassRunner classRunner = runner.createStaticRunner("$");
+int result = classRunner.invoke("add", 1, 2);
+// result == 3
+```
+
+### Classes and Namespaces
+
+```typescript
+namespace com {
+  export class Calculator {
+    add(a: int, b: int): int { return a + b }
+    multiply(a: double, b: double): double { return a * b }
+  }
+}
+```
+
+```java
+ByteCodeRunner runner = compiler.compile(code);
+ByteCodeClassRunner classRunner = runner.createInstanceRunner("com.Calculator");
+int sum = classRunner.invoke("add", 3, 4);       // 7
+double product = classRunner.invoke("multiply", 2.5, 4.0);  // 10.0
+```
+
+### Inheritance and Interfaces
+
+```typescript
+import { Runnable } from 'java.lang'
+
+namespace com {
+  export abstract class Shape {
+    abstract area(): double
+  }
+  export class Circle extends Shape implements Runnable {
+    radius: double
+    constructor(r: double) {
+      this.radius = r
+    }
+    area(): double { return 3.14159 * this.radius * this.radius }
+    run(): void { }
+  }
+}
+```
+
+### TypeScript Interfaces
+
+```typescript
+namespace com {
+  export interface Named {
+    name: String
+  }
+  export interface Aged {
+    age: int
+  }
+  export interface Person extends Named, Aged {
+    greet(): String
+  }
+  export class Student implements Person {
+    name: String = ""
+    age: int = 0
+    constructor(name: String, age: int) {
+      this.name = name
+      this.age = age
+    }
+    getName(): String { return this.name }
+    setName(name: String): void { this.name = name }
+    getAge(): int { return this.age }
+    setAge(age: int): void { this.age = age }
+    greet(): String { return this.name + " (" + this.age + ")" }
+  }
+}
+```
+
+### Extending Java Classes
+
+```typescript
+namespace com {
+  export class MyList extends java.util.ArrayList<Object> {
+    addItem(item: String): void {
+      this.add(item)
+    }
+    getCount(): int {
+      return this.size()
+    }
+  }
+}
+```
+
+### Type Alias Map
+
+```java
+ByteCodeCompiler compiler = ByteCodeCompiler.of(
+        ByteCodeCompilerOptions.builder()
+                .jdkVersion(JdkVersion.JDK_17)
+                .typeAliasMap(Map.of(
+                        "int", "int",
+                        "void", "void",
+                        "String", "java.lang.String",
+                        "Runnable", "java.lang.Runnable"))
+                .build());
+```
+
+Note: calling `typeAliasMap()` on the builder **replaces** the default aliases (which include primitives, `String`, `Object`, etc.), so include all types the code needs.
+
+### Package Prefix
+
+```java
+ByteCodeCompiler compiler = ByteCodeCompiler.of(
+        ByteCodeCompilerOptions.builder()
+                .jdkVersion(JdkVersion.JDK_17)
+                .packagePrefix("com.mycompany")
+                .build());
+```
 
 ## Technical Design
 
@@ -41,455 +239,151 @@ This feature provides a compiler that:
 
 The compiler follows a **multi-phase compilation pipeline**:
 
-```
-TypeScript Source Code
-         ↓
-    [SWC Parser]
-         ↓
-    AST (Abstract Syntax Tree)
-         ↓
-  [Type Alias Collection]  ← Collect type aliases (type MyInt = int)
-         ↓
-   [AST Processing]        ← Walk AST and identify classes/methods
-         ↓
-  [Variable Analysis]      ← Analyze variables and infer types
-         ↓
-  [Type Resolution]        ← Resolve return types from annotations/inference
-         ↓
-  [Code Generation]        ← Generate JVM bytecode instructions
-         ↓
-   JVM Class Files
+```mermaid
+flowchart TD
+    A[TypeScript Source Code] --> B[SWC Parser]
+    B --> C[AST]
+    C --> D["Import Processing<br/><i>Resolve import { X } from 'java.pkg'</i>"]
+    D --> E["Type Alias Collection<br/><i>Collect type aliases (type MyInt = int)</i>"]
+    E --> F["Class Collection<br/><i>Register classes, enums, interfaces</i>"]
+    F --> G["Interface Collection<br/><i>Process TypeScript interface declarations</i>"]
+    G --> H["AST Processing<br/><i>Walk AST and generate code for each construct</i>"]
+    H --> I["Variable Analysis<br/><i>Analyze variables and infer types</i>"]
+    I --> J["Type Resolution<br/><i>Resolve types from annotations/inference</i>"]
+    J --> K["Code Generation<br/><i>Generate JVM bytecode instructions</i>"]
+    K --> L["JVM Bytecode<br/><i>Map&lt;String, byte[]&gt;</i>"]
+    L --> M["ByteArrayClassLoader<br/><i>Load classes into JVM</i>"]
+    M --> N[Executable Classes]
 ```
 
 ### Core Components
 
-#### 1. **ByteCodeCompiler** (`com.caoccao.javet.swc4j.compiler`)
+#### ByteCodeCompiler
 
-The main entry point for compilation:
+The main entry point:
 
 - `ByteCodeCompiler.of(options)`: Factory method to create a compiler
-- `compile(String code)`: Compiles TypeScript code to bytecode
-- Returns `Map<String, byte[]>`: Map of fully-qualified class names to bytecode
+- `compile(String code)`: Compiles TypeScript code, returns `ByteCodeRunner`
 
-#### 2. **ASM Layer** (`com.caoccao.javet.swc4j.asm`)
+#### ByteCodeRunner
+
+Wraps the compiled bytecode and provides class loading:
+
+- `createInstanceRunner(className, constructorArgs...)`: Create an instance and invoke methods
+- `createStaticRunner(className)`: Invoke static methods
+- `getClass(className)`: Get the loaded `Class<?>` object
+- `getDefaultClass()`: Get the default `$` class
+
+#### ByteCodeClassRunner
+
+Wraps a loaded class for method invocation:
+
+- `invoke(methodName, args...)`: Invoke a method with automatic parameter matching
+- `getInstance()`: Get the underlying object instance
+
+#### ASM Layer
 
 Low-level bytecode generation:
 
-- **ClassWriter**: Generates JVM class file structure
-  - Handles constant pool, methods, attributes
-  - Writes class bytecode following JVM spec
-- **CodeBuilder**: Builds method bytecode instructions
-  - Provides fluent API for JVM instructions (iload, istore, iadd, etc.)
-  - Handles instruction encoding and operands
+- **ClassWriter**: Generates JVM class file structure (constant pool, methods, fields, attributes)
+- **CodeBuilder**: Fluent API for JVM bytecode instructions
 
-#### 3. **JDK 17 Compiler** (`com.caoccao.javet.swc4j.compiler.jdk17`)
+#### Processors (50+)
 
-The actual compilation logic:
+Specialized processors for each AST node type:
 
-- **AstProcessor**: Walks the AST and processes TypeScript constructs
-  - Processes modules, namespaces, classes, methods
-  - Builds package structure from namespaces
+- **Expression Processors**: ArrayLiteral, Arrow, Assign, Binary, Call, Conditional, Function, Member, New, Unary, Update, OptionalChain, etc.
+- **Statement Processors**: If, For, ForIn, ForOf, While, DoWhile, Switch, Try, Throw, Break, Continue, VarDecl, Using, etc.
+- **Class Processors**: Class, ClassDecl, ClassMethod, ClassExpr, PrivateMethod, Constructor
+- **Module Processors**: ImportDecl, ExportDecl, TsModuleDecl
+- **Type Processors**: TypeResolver, VariableAnalyzer, TypeAliasCollector, ClassCollector, EnumCollector, TsInterfaceCollector
 
-- **TypeResolver**: Resolves types from annotations and infers types
-  - Maps TypeScript type names to JVM descriptors (int → I, String → Ljava/lang/String;)
-  - Infers types from expressions (numbers, strings, identifiers)
-  - Analyzes return types from method bodies or annotations
-
-- **VariableAnalyzer**: Analyzes variable declarations and builds local variable table
-  - Extracts type information from type annotations
-  - Assigns local variable slots
-  - Tracks variable types for code generation
-
-- **CodeGenerator**: Generates JVM bytecode for expressions and statements
-  - Handles literals (numbers, strings)
-  - Generates binary operations (addition, concatenation)
-  - Generates unary operations (negation)
-  - Handles type conversions (boxing, unboxing, primitive conversions)
-
-- **CompilationContext**: Maintains compilation state
-  - Local variable table
-  - Inferred types map
-  - Scoping information
-
-#### 4. **Type System**
-
-The compiler supports:
+### Type System
 
 **Primitive Types:**
-- `int` (I) - 32-bit integer
-- `short` (S) - 16-bit integer
-- `long` (J) - 64-bit integer
-- `char` (C) - 16-bit character
-- `float` (F) - 32-bit floating point
-- `double` (D) - 64-bit floating point
 
-**Wrapper Types:**
-- `Integer` (Ljava/lang/Integer;)
-- `Short` (Ljava/lang/Short;)
-- `Long` (Ljava/lang/Long;)
-- `Character` (Ljava/lang/Character;)
-- `Float` (Ljava/lang/Float;)
-- `Double` (Ljava/lang/Double;)
-- `String` (Ljava/lang/String;)
+| Type | JVM Descriptor | Size |
+|------|---------------|------|
+| `boolean` | Z | 1 byte |
+| `byte` | B | 1 byte |
+| `char` | C | 2 bytes |
+| `short` | S | 2 bytes |
+| `int` | I | 4 bytes |
+| `long` | J | 8 bytes (2 slots) |
+| `float` | F | 4 bytes |
+| `double` | D | 8 bytes (2 slots) |
+
+**Wrapper Types:** `Boolean`, `Byte`, `Character`, `Short`, `Integer`, `Long`, `Float`, `Double`, `String`, `Object`, `Number`
 
 **Type Inference:**
-- Numbers without decimals → `int`
-- Numbers with decimals → `double`
+- Integer literals → `int`
+- Decimal literals → `double`
 - String literals → `String`
+- Boolean literals → `boolean`
+- `null` → `Object`
 - Variables → lookup in inferred types map
+- `new` expressions → class type
+- Method calls → return type from registry or reflection
 
 **Type Conversions:**
 - Explicit annotations override inference (e.g., `const a: float = 123.456`)
 - Automatic boxing/unboxing for wrapper types
-- Primitive conversions (int → long, float → double)
-
-### Bytecode Generation Strategy
-
-#### Constants
-
-- **Small integers** (-1 to 5): Use iconst_m1 through iconst_5
-- **Byte/short integers**: Use bipush/sipush
-- **Large integers**: Use ldc with integer constant pool entry
-- **Float/double**: Use ldc/ldc2_w with constant pool entries
-- **Strings**: Use ldc with string constant pool entry
-
-#### Variables
-
-- **Local variables**: Stored in local variable table with slot index
-- **Load**: iload, fload, lload, dload, aload (based on type)
-- **Store**: istore, fstore, lstore, dstore, astore (based on type)
-
-#### Operations
-
-- **Numeric addition**: iadd, ladd, fadd, dadd
-- **Numeric negation**: ineg, lneg, fneg, dneg
-- **String concatenation**: StringBuilder with append() and toString()
-
-#### Return
-
-- **Primitive returns**: ireturn, lreturn, freturn, dreturn
-- **Object returns**: areturn
-- **Void methods**: return
-
-## Usage
-
-### Basic Example
-
-```java
-import com.caoccao.javet.swc4j.compiler.*;
-
-// Create compiler
-ByteCodeCompilerOptions options = new ByteCodeCompilerOptions(JdkVersion.JDK_17);
-ByteCodeCompiler compiler = ByteCodeCompiler.of(options);
-
-// Compile TypeScript code
-String code = """
-    namespace com {
-      export class Calculator {
-        add(): int {
-          return 5 + 10
-        }
-      }
-    }
-    """;
-
-Map<String, byte[]> bytecodeMap = compiler.compile(code);
-
-// Load and execute
-byte[] bytecode = bytecodeMap.get("com.Calculator");
-Class<?> calculatorClass = new ByteArrayClassLoader().loadClassFromBytes(bytecode);
-Object calculator = calculatorClass.getConstructor().newInstance();
-int result = (int) calculatorClass.getMethod("add").invoke(calculator);
-```
-
-### Examples from Tests
-
-#### 1. **Integer Addition**
-
-```typescript
-namespace com {
-  export class A {
-    test() {
-      const a: int = 5
-      const b: int = 10
-      const c = a + b  // Type inferred as int
-      return c
-    }
-  }
-}
-```
-Result: Returns `15`
-
-#### 2. **Float with Type Annotation**
-
-```typescript
-namespace com {
-  export class A {
-    test(): float {
-      return 123.456  // Converted to float
-    }
-  }
-}
-```
-Result: Returns `123.456F`
-
-#### 3. **Type Inference from Variable**
-
-```typescript
-namespace com {
-  export class A {
-    test() {
-      var a: double = 123.456  // Explicit type
-      return a                  // Return type inferred as double
-    }
-  }
-}
-```
-Result: Returns `123.456D`
-
-#### 4. **String Concatenation**
-
-```typescript
-namespace com {
-  export class A {
-    test() {
-      const a: String = 'hello'
-      const b: String = 'world'
-      const c = a + b  // String concatenation
-      return c
-    }
-  }
-}
-```
-Result: Returns `"helloworld"`
-
-#### 5. **Wrapper Types (Boxing/Unboxing)**
-
-```typescript
-namespace com {
-  export class A {
-    test() {
-      const a: Integer = 5    // Boxed
-      const b: Integer = 10   // Boxed
-      const c = a + b         // Unboxed, added, result is int
-      return c
-    }
-  }
-}
-```
-Result: Returns `15`
-
-#### 6. **Character to String**
-
-```typescript
-namespace com {
-  export class A {
-    test() {
-      const a: char = 'X'
-      const b: String = 'YZ'
-      const c = a + b  // String concatenation
-      return c
-    }
-  }
-}
-```
-Result: Returns `"XYZ"`
-
-#### 7. **Unary Negation**
-
-```typescript
-namespace com {
-  export class A {
-    test(): long {
-      return -100
-    }
-  }
-}
-```
-Result: Returns `-100L`
-
-#### 8. **Type Aliases**
-
-```typescript
-export type MyString = String;
-
-namespace com {
-  export class A {
-    test() {
-      const a: MyString = 'test'
-      return a
-    }
-  }
-}
-```
-Result: Returns `"test"`
-
-### Advanced Usage
-
-#### Custom Type Aliases
-
-```java
-Map<String, String> typeAliasMap = new HashMap<>();
-typeAliasMap.put("MyInt", "java.lang.Integer");
-typeAliasMap.put("MyString", "java.lang.String");
-
-ByteCodeCompilerOptions options = new ByteCodeCompilerOptions(
-    JdkVersion.JDK_17,
-    typeAliasMap
-);
-```
-
-#### Package Prefix
-
-```java
-ByteCodeCompilerOptions options = new ByteCodeCompilerOptions(
-    JdkVersion.JDK_17,
-    new HashMap<>(),
-    "com.mycompany"  // Package prefix
-);
-```
+- Primitive widening conversions (int → long, float → double)
+- String concatenation via `StringBuilder`
 
 ## Testing
 
-The compiler is thoroughly tested with unit tests in:
+The compiler has 259 test files covering:
 
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/` - Literal tests (numbers, strings)
-- `src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/` - Expression tests (binary operations)
+| Category | Count | Covers |
+|----------|-------|--------|
+| Class tests | 15+ | Basic, inheritance, constructors, fields, static, private, abstract, generics, implements, nested |
+| Function tests | 9 | Basic, params, return types, inference, overloading, default params, varargs, without class |
+| Arrow functions | 16 | Basic, body, closure, params, destructuring, generic, IIFE, nested, type inference |
+| Binary expressions | 28 | Add, Sub, Mul, Div, Mod, bitwise, logical, comparison, shifts |
+| Statements | 55+ | If/else, while, do-while, for, for-in, for-of, switch, try-catch, using, debugger |
+| Literals | 30+ | Numbers, strings, booleans, null, BigInt, regex, arrays, objects, templates |
+| TypeScript | 15+ | Interfaces, enums, type coverage, expressions |
+| Other | 20+ | Patterns, optional chaining, super props, class expressions, conditional, unary, update |
 
-Example test structure:
+## Tutorials
 
-```java
-@ParameterizedTest
-@EnumSource(JdkVersion.class)
-public void testReturnDouble(JdkVersion jdkVersion) throws Exception {
-    var runner = getCompiler(jdkVersion).compile("""
-        namespace com {
-          export class A {
-            test(): double {
-              return 123.456
-            }
-          }
-        }""");
-    Class<?> classA = runner.getClass("com.A");
-    var instance = classA.getConstructor().newInstance();
-    assertEquals(123.456D, (double) classA.getMethod("test").invoke(instance), 0.00001D);
-}
-```
-
-## Implementation Details
-
-### Constant Pool Management
-
-The ClassWriter manages a constant pool that stores:
-
-- UTF-8 strings (method names, descriptors, class names)
-- Class references
-- Method references
-- String constants
-- Numeric constants (int, long, float, double)
-
-Constants are cached to avoid duplicates and referenced by index in bytecode instructions.
-
-### Local Variable Table
-
-Variables are assigned slots in the local variable table:
-
-- Slot 0: `this` reference (for instance methods)
-- Slots 1+: Method parameters (not yet supported)
-- Remaining slots: Local variables
-
-**Type-specific slots:**
-
-- `int`, `float`, `char`, `short`, references: 1 slot
-- `long`, `double`: 2 slots (long/double take two slots in JVM)
-
-### Type Conversion
-
-**Explicit conversions** (when type annotation differs from literal):
-
-```typescript
-const a: float = 123.456  // double → float conversion
-const b: Character = 'x'  // char → Character boxing
-```
-
-**Implicit inference** (no annotation):
-
-```typescript
-const c = 123      // inferred as int
-const d = 123.456  // inferred as double
-const e = 'hello'  // inferred as String
-```
-
-### String Concatenation
-
-String concatenation uses `StringBuilder`:
-
-```
-new StringBuilder
-dup
-invokespecial StringBuilder.<init>()V
-[generate left operand]
-invokevirtual StringBuilder.append(...)Ljava/lang/StringBuilder;
-[generate right operand]
-invokevirtual StringBuilder.append(...)Ljava/lang/StringBuilder;
-invokevirtual StringBuilder.toString()Ljava/lang/String;
-```
-
-The compiler optimizes nested string concatenations by flattening them into a single StringBuilder chain.
-
-## Future Enhancements
-
-Planned features:
-- [ ] Method parameters
-- [ ] Field declarations
-- [ ] Control flow (if/else, while, for)
-- [ ] Arrays
-- [ ] Method calls
-- [ ] Object instantiation
-- [ ] Inheritance
-- [ ] Interfaces
-- [ ] Generics
-- [ ] Lambda expressions
-- [ ] More TypeScript features
+See the [Bytecode Compiler tutorials](tutorials/README.md) for a progressive guide from basics to advanced features.
 
 ## Troubleshooting
 
+### Swc4jByteCodeCompilerException
+
+If you get a compilation exception:
+- **"Unresolved type"**: Import the type with `import { X } from 'java.pkg'` or register it in `typeAliasMap`
+- **"Cannot infer return type"**: Add an explicit return type annotation to the method
+- **"Method not found"**: Check parameter types match the method signature
+
 ### VerifyError
 
-If you get a `VerifyError` at runtime, this usually means:
+If you get a `VerifyError` at runtime:
 - Incorrect bytecode generation (wrong instruction sequence)
-- Type mismatch (e.g., trying to freturn when method returns int)
+- Type mismatch (e.g., trying to `freturn` when method returns `int`)
 - Stack imbalance (wrong max stack size)
-
-Solution: Check the method descriptor matches the actual return type.
 
 ### ClassCastException
 
 If you get a `ClassCastException` when invoking methods:
-- Method returns wrong type (e.g., int instead of float)
-- Missing type conversion
+- Method returns wrong type — ensure type annotations match expected types
 
-Solution: Ensure type annotations match expected types.
-
-### UnsupportedOperationException
-
-If a TypeScript feature is not yet implemented, you'll get a compilation error or exception.
-
-Solution: Check the current limitations section and use only supported features.
-
-## Performance Considerations
+## Performance
 
 - **Compilation time**: Parsing and bytecode generation add overhead
 - **Runtime performance**: Generated bytecode runs at native JVM speed (same as compiled Java)
 - **Memory**: Each compiled class consumes memory for bytecode and loaded class metadata
 
 For production use, consider:
-- Caching compiled classes
-- Using a custom ClassLoader with class unloading
+- Caching compiled `ByteCodeRunner` instances
+- Using a custom parent ClassLoader for class unloading
 - Monitoring memory usage
 
 ## Conclusion
 
-The TypeScript to JVM Bytecode Compiler is an experimental bridge between TypeScript syntax and JVM execution. While still in early stages, it demonstrates the potential for polyglot programming on the JVM and provides a foundation for future enhancements.
+The TypeScript to JVM Bytecode Compiler bridges TypeScript syntax and JVM execution. It supports classes, inheritance, interfaces, control flow, constructors, fields, generics, enums, and interoperability with Java standard library classes.
 
 For questions or contributions, please visit the [swc4j GitHub repository](https://github.com/caoccao/swc4j).

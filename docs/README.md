@@ -69,6 +69,10 @@ swc4j provides comprehensive security features to create safe JavaScript executi
 - **[Keyword Restriction](features/keyword_restriction.md)** - Limit JavaScript keywords usage
 - **[Naming Convention](features/identifier_naming_convention.md)** - Enforce identifier naming rules
 
+### 🚀 TypeScript to JVM Bytecode
+
+- **[Bytecode Compiler](typescript_to_jvm_bytecode.md)** - Compile TypeScript directly to JVM bytecode without a JavaScript runtime. Supports classes, inheritance, interfaces, control flow, constructors, generics, and Java interop.
+
 ### ⚙️ Configuration & Deployment
 
 - **[Custom Library Loading](features/custom_library_loading.md)** - Control native library deployment
