@@ -928,6 +928,11 @@ public final class TypeResolver {
                 // If not found in type alias registry, assume it's a class in the current package
                 return mapTypeNameToDescriptor(className);
             }
+            // Handle qualified names like new com.math.Adder()
+            String qualifiedName = AstUtils.extractQualifiedName(callee);
+            if (qualifiedName != null) {
+                return "L" + qualifiedName.replace('.', '/') + ";";
+            }
             // If we can't determine the constructor type, return Object
             return ConstantJavaType.LJAVA_LANG_OBJECT;
         } else if (expr instanceof Swc4jAstNumber number) {

@@ -26,6 +26,7 @@ import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ClassExprUtils;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
@@ -93,7 +94,15 @@ public final class NewExpressionProcessor extends BaseAstProcessor<Swc4jAstNewEx
             // Convert qualified name to internal name: com.example.Foo -> com/example/Foo
             internalClassName = resolvedType.replace('.', '/');
         } else {
-            throw new Swc4jByteCodeCompilerException(getSourceCode(), newExpr, "Only simple class names or class expressions supported in new expressions");
+            // Handle qualified names like com.math.Adder (member expressions)
+            String qualifiedName = AstUtils.extractQualifiedName(callee);
+            if (qualifiedName != null) {
+                int lastDot = qualifiedName.lastIndexOf('.');
+                className = lastDot >= 0 ? qualifiedName.substring(lastDot + 1) : qualifiedName;
+                internalClassName = qualifiedName.replace('.', '/');
+            } else {
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), newExpr, "Only simple class names, qualified names, or class expressions supported in new expressions");
+            }
         }
 
         // Generate: new <class>
