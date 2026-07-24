@@ -27,7 +27,7 @@ use swc4j::*;
 
 #[test]
 fn test_get_version() {
-  assert_eq!(core::get_version(), "2.1.0");
+  assert_eq!(core::get_version(), "2.2.0");
 }
 
 #[test]
@@ -161,10 +161,11 @@ fn test_parse_typescript_with_comments() {
 #[test]
 fn test_parse_wrong_media_type() {
   let code = "function add(a:number, b:number) { return a+b; }";
-  let expected_message = String::from("Expected ',', got ':' at file:///main.js:1:15\n")
-    + "\n"
-    + "  function add(a:number, b:number) { return a+b; }\n"
-    + "                ~";
+  let expected_message = String::from("SyntaxError: Expected ',', got ':'\n")
+    + "  |\n"
+    + "1 | function add(a:number, b:number) { return a+b; }\n"
+    + "  |               ~\n"
+    + "    at file:///main.js:1:15";
   let options = options::ParseOptions {
     media_type: MediaType::JavaScript,
     ..Default::default()
@@ -301,10 +302,11 @@ fn test_transpile_type_script_without_inline_source_map() {
 #[test]
 fn test_transpile_wrong_media_type() {
   let code = "function add(a:number, b:number) { return a+b; }";
-  let expected_message = String::from("Expected ',', got ':' at file:///main.js:1:15\n")
-    + "\n"
-    + "  function add(a:number, b:number) { return a+b; }\n"
-    + "                ~";
+  let expected_message = String::from("SyntaxError: Expected ',', got ':'\n")
+    + "  |\n"
+    + "1 | function add(a:number, b:number) { return a+b; }\n"
+    + "  |               ~\n"
+    + "    at file:///main.js:1:15";
   let options = options::TranspileOptions {
     media_type: MediaType::JavaScript,
     ..Default::default()

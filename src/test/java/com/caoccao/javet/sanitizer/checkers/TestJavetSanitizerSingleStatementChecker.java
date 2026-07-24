@@ -46,26 +46,29 @@ public class TestJavetSanitizerSingleStatementChecker extends BaseTestSuiteCheck
                 "a?.b.?.c",
                 JavetSanitizerError.ParsingError,
                 """
-                        Expected ident at file:///main.js:1:6
-                        
-                          a?.b.?.c
-                               ~""");
+                        SyntaxError: Expected ident
+                          |
+                        1 | a?.b.?.c
+                          |      ~
+                            at file:///main.js:1:6""");
         assertException(
                 "1 +",
                 JavetSanitizerError.ParsingError,
                 """
-                        Expression expected at file:///main.js:1:4
-                        
-                          1 +
-                             ~""");
+                        SyntaxError: Expression expected
+                          |
+                        1 | 1 +
+                          |    ~
+                            at file:///main.js:1:4""");
         assertException(
                 "{ a: 1, b: 2 }",
                 JavetSanitizerError.ParsingError,
                 """
-                        Expected ';', '}' or <eof> at file:///main.js:1:10
-                        
-                          { a: 1, b: 2 }
-                                   ~""");
+                        SyntaxError: Expected ';', '}' or <eof>
+                          |
+                        1 | { a: 1, b: 2 }
+                          |          ~
+                            at file:///main.js:1:10""");
         assertException(
                 ";;;",
                 JavetSanitizerError.NodeCountTooLarge,

@@ -1,5 +1,9 @@
 # Release Notes
 
+## 2.2.0
+
+* Upgraded deno_ast to v0.53.3
+
 ## 2.1.0
 
 * Upgraded deno_ast to v0.53.1

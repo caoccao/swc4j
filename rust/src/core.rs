@@ -25,7 +25,7 @@ use swc::common::util::take::Take;
 
 use crate::{enums, options, outputs, plugin_utils};
 
-const VERSION: &str = "2.1.0";
+const VERSION: &str = "2.2.0";
 
 fn parse_by_mode(
   parse_params: ParseParams,
