@@ -42,18 +42,20 @@ public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteChe
                 "function() {}",
                 JavetSanitizerError.ParsingError,
                 """
-                        Expected ident at file:///main.js:1:9
-                        
-                          function() {}
-                                  ~""");
+                        SyntaxError: Expected ident
+                          |
+                        1 | function() {}
+                          |         ~
+                            at file:///main.js:1:9""");
         assertException(
                 "function(a, b) {}",
                 JavetSanitizerError.ParsingError,
                 """
-                        Expected ident at file:///main.js:1:9
-                        
-                          function(a, b) {}
-                                  ~""");
+                        SyntaxError: Expected ident
+                          |
+                        1 | function(a, b) {}
+                          |         ~
+                            at file:///main.js:1:9""");
         assertException(
                 "function a() {}",
                 JavetSanitizerError.InvalidNode,

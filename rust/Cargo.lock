@@ -356,9 +356,9 @@ dependencies = [
 
 [[package]]
 name = "deno_ast"
-version = "0.53.1"
+version = "0.53.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "292b1ce21933ce7cea00c69b8de023a6a29707e9b6cb2052ca27499710ddd133"
+checksum = "6f7c1384d87fc0a6439a065312fbef8f6ac6128689dbc2831b28b3a1d4f3a4e6"
 dependencies = [
  "base64",
  "capacity_builder",
@@ -1370,7 +1370,7 @@ dependencies = [
 
 [[package]]
 name = "swc4j"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "anyhow",
  "base64",
