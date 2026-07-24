@@ -49,7 +49,7 @@ jobs:
         git config --global core.eol lf
 
     - name: Checkout the code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Setup Rust
       uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -86,7 +86,7 @@ jobs:
         gradle build test generatePomFileForGeneratePomPublication --debug
 
     - name: Upload the Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: swc4j-${{ matrix.os }}-${{ matrix.arch }}-${{ env.SWC4J_VERSION }}
         path: |
@@ -121,7 +121,7 @@ jobs:
         git config --global core.eol lf
 
     - name: Checkout the code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Setup Rust
       uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -159,7 +159,7 @@ jobs:
         gradle build generatePomFileForGeneratePomPublication -x test --debug
 
     - name: Upload the Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: swc4j-${{ matrix.os }}-${{ matrix.arch }}-${{ env.SWC4J_VERSION }}
         path: |
@@ -177,7 +177,7 @@ jobs:
         git config --global core.eol lf
 
     - name: Checkout the code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Setup Rust
       uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -236,7 +236,7 @@ jobs:
         gradle build generatePomFileForGeneratePomPublication -x test --debug
 
     - name: Upload the Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: swc4j-android-${{ env.SWC4J_VERSION }}
         path: |
