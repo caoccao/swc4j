@@ -3,6 +3,7 @@
 ## 2.2.0
 
 * Upgraded deno_ast to v0.53.3
+* Upgraded rust toolchain to v1.97.1
 
 ## 2.1.0
 
