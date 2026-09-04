@@ -23,9 +23,17 @@ import java.util.Map;
  */
 public class ByteCodeRunner {
     /**
+     * The name of the default class generated for code outside of any class.
+     */
+    private static final String DEFAULT_CLASS_NAME = "$";
+    /**
      * The class loader for loading bytecode.
      */
     protected final ByteArrayClassLoader classLoader;
+    /**
+     * The package prefix of the generated classes, empty when there is none.
+     */
+    protected final String packagePrefix;
 
     /**
      * Constructs a ByteCodeRunner with the provided bytecode map and parent class loader.
@@ -34,7 +42,20 @@ public class ByteCodeRunner {
      * @param parentClassLoader the parent class loader
      */
     public ByteCodeRunner(Map<String, byte[]> byteCodeMap, ClassLoader parentClassLoader) {
+        this(byteCodeMap, parentClassLoader, "");
+    }
+
+    /**
+     * Constructs a ByteCodeRunner with the provided bytecode map, parent class loader and package
+     * prefix.
+     *
+     * @param byteCodeMap       the map of class names to bytecode
+     * @param parentClassLoader the parent class loader
+     * @param packagePrefix     the package prefix of the generated classes
+     */
+    public ByteCodeRunner(Map<String, byte[]> byteCodeMap, ClassLoader parentClassLoader, String packagePrefix) {
         this.classLoader = new ByteArrayClassLoader(byteCodeMap, parentClassLoader);
+        this.packagePrefix = packagePrefix == null ? "" : packagePrefix;
     }
 
     /**
@@ -78,6 +99,6 @@ public class ByteCodeRunner {
      * @throws ClassNotFoundException if the default class cannot be found
      */
     public Class<?> getDefaultClass() throws ClassNotFoundException {
-        return getClass("$");
+        return getClass(packagePrefix.isEmpty() ? DEFAULT_CLASS_NAME : packagePrefix + "." + DEFAULT_CLASS_NAME);
     }
 }

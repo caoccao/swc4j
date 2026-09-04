@@ -32,6 +32,29 @@ public class TestCompileAstWhileStmtInfinite extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testWhileOneIsInfinite(JdkVersion jdkVersion) throws Exception {
+        // while (1) is an infinite loop, as while (true) is
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let n: int = 0
+                      while (1) {
+                        n++
+                        if (n > 3) {
+                          break
+                        }
+                      }
+                      return n
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(4);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testWhileTrueBreakInMiddle(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

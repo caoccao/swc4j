@@ -16,7 +16,10 @@
 
 package com.caoccao.javet.swc4j.compiler.tutorials;
 
-import com.caoccao.javet.swc4j.compiler.*;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeRunner;
+import com.caoccao.javet.swc4j.compiler.JdkVersion;
 
 public class TutorialCompiler13NestedNamespacesAndClasses {
     public static void main(String[] args) throws Exception {

@@ -60,6 +60,37 @@ public class TestCompileAstTryStmtCatchFinally extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testFinallyThatThrowsRunsOnce(JdkVersion jdkVersion) throws Exception {
+        // The catch-all handler must not cover the normal path copy of the finally block
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let n: int = 0
+                      try {
+                        try {
+                          n = 0
+                        } catch (e1) {
+                          n = 100
+                        } finally {
+                          n++
+                          if (n == 1) {
+                            throw new Error("boom")
+                          }
+                        }
+                      } catch (e2) {
+                        n = n + 1000
+                      }
+                      return n
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1001);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testNestedTryCatchFinally(JdkVersion jdkVersion) throws Exception {
         // Nested try-catch-finally
         var runner = getCompiler(jdkVersion).compile("""

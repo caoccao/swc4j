@@ -111,10 +111,12 @@ public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMe
                     }
                 }
 
-                int maxStack = Math.max(returnTypeInfo.maxStack(), returnTypeInfo.type().getMinStack());
-                // Increase max stack to handle complex expressions like array literals with boxing
-                maxStack = Math.max(maxStack, 10);
                 int maxLocals = context.getLocalVariableTable().getMaxLocals();
+                boolean isStatic = (accessFlags & 0x0008) != 0;
+                // Derive the operand stack depth from the emitted bytecode.
+                int maxStack = Math.max(
+                        Math.max(returnTypeInfo.maxStack(), returnTypeInfo.type().getMinStack()),
+                        code.computeMaxStack(maxLocals, isStatic, classWriter.getClassName(), descriptor, classWriter.getConstantPool()));
 
                 // Add debug information if enabled
                 if (compiler.getOptions().debug()) {
@@ -134,13 +136,11 @@ public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMe
                     }
 
                     // Generate stack map table for methods with branches (required for Java 7+)
-                    boolean isStatic = (accessFlags & 0x0008) != 0;
                     var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName(), descriptor, classWriter.getConstantPool());
                     var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
                     classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
                             lineNumbers, localVariableTable, stackMapTable, exceptionTable);
                 } else {
-                    boolean isStatic = (accessFlags & 0x0008) != 0;
                     var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName(), descriptor, classWriter.getConstantPool());
                     var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
                     classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
@@ -149,6 +149,9 @@ public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMe
 
                 // Generate overloaded methods for default parameters
                 generateDefaultParameterOverloads(classWriter, classMethod, methodName, function, returnTypeInfo, accessFlags);
+            } catch (Swc4jByteCodeCompilerException e) {
+                // Preserve the original location and message of the compiler error.
+                throw e;
             } catch (Exception e) {
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), classMethod, "Failed to generate method: " + methodName, e);
             } finally {
@@ -370,7 +373,7 @@ public final class ClassMethodProcessor extends BaseAstProcessor<Swc4jAstClassMe
         }
 
         classWriter.addMethod(baseAccessFlags, methodName, overloadDescriptor, code.toByteArray(),
-                10, // max stack
+                code.computeMaxStack(maxLocals, isStatic, classWriter.getClassName(), overloadDescriptor, cp),
                 maxLocals);
     }
 

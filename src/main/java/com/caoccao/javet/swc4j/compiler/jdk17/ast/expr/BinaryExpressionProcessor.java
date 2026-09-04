@@ -1696,20 +1696,11 @@ public final class BinaryExpressionProcessor extends BaseAstProcessor<Swc4jAstBi
      * <p>
      * Algorithm:
      * <pre>
-     *   int index = (int) floatValue;
-     *   float reconstructed = (float) index;
-     *   int cmp = Float.compare(floatValue, reconstructed);
-     *   // cmp is 0 if equal, non-zero otherwise
-     *   // We want: if cmp != 0, return Integer.MIN_VALUE
-     *   // Using: Integer.MIN_VALUE | (((cmp | -cmp) >> 31) & (index ^ Integer.MIN_VALUE))
-     *   // When cmp == 0: (0 | 0) >> 31 = 0, result = MIN_VALUE | (0 & x) = MIN_VALUE | 0... wait that's wrong
-     *   // Let me use a different approach: just convert and let bounds check handle it
+     *   int index = (int) floatValue;                  // f2i truncates
+     *   int cmp = Float.compare(floatValue, index);    // 0 when the value was whole
+     *   int mask = -((cmp | -cmp) >>> 31);             // 0 when whole, -1 otherwise
+     *   return (index &amp; ~mask) | (Integer.MIN_VALUE &amp; mask);
      * </pre>
-     * <p>
-     * Actually, for simplicity, we use f2i directly. Non-whole floats will truncate,
-     * but we do a separate check: we convert back to float and compare.
-     * If not equal, we know it wasn't a whole number.
-     * We set index = index - (cmp != 0 ? index + 1 : 0) which gives -1 for non-whole.
      */
     private void generateFloatToIntWithWholeCheck(CodeBuilder code, ClassWriter classWriter) {
         var cp = classWriter.getConstantPool();

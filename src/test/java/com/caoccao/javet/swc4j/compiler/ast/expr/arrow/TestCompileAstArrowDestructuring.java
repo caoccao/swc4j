@@ -141,6 +141,44 @@ public class TestCompileAstArrowDestructuring extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testArrayDestructuringWithDefaults(JdkVersion jdkVersion) throws Exception {
+        // A default does not shift the elements that follow it
+        var runner = getCompiler(jdkVersion).compile("""
+                import { List } from 'java.util'
+                import { ToIntFunction } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const fn: ToIntFunction = ([a = 1, b = 2]: List<int>) => a * 100 + b
+                      return fn([10, 20])
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1020);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayDestructuringWithDefaultsForMissingElements(JdkVersion jdkVersion) throws Exception {
+        // A missing element is undefined, so the default applies to it
+        var runner = getCompiler(jdkVersion).compile("""
+                import { List } from 'java.util'
+                import { ToIntFunction } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const fn: ToIntFunction = ([a = 7, b = 8]: List<int>) => a * 100 + b
+                      return fn([])
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(708);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testDestructuringObjectStrings(JdkVersion jdkVersion) throws Exception {
         // Object destructuring with strings
         var runner = getCompiler(jdkVersion).compile("""

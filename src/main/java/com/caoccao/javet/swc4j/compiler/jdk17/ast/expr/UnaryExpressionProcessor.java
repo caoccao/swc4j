@@ -235,9 +235,10 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                         }
                         int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.D__LJAVA_LANG_DOUBLE);
                         code.invokestatic(valueOfRef);
-                    } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
+                    } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)
+                            && -value >= Integer.MIN_VALUE && -value <= Integer.MAX_VALUE) {
                         // Integer value
-                        int intValue = value == 2147483648.0 ? Integer.MIN_VALUE : -(int) value;
+                        int intValue = (int) -value;
                         // Check if value fits in the range supported by iconst/bipush/sipush
                         if (intValue >= Short.MIN_VALUE && intValue <= Short.MAX_VALUE) {
                             code.iconst(intValue);
@@ -246,6 +247,12 @@ public final class UnaryExpressionProcessor extends BaseAstProcessor<Swc4jAstUna
                             int intIndex = cp.addInteger(intValue);
                             code.ldc(intIndex);
                         }
+                    } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
+                        // An integral value that does not fit an int is emitted as a long, which is
+                        // the type that TypeResolver infers for it
+                        long longValue = value == 9223372036854775808.0 ? Long.MIN_VALUE : -(long) value;
+                        int longIndex = cp.addLong(longValue);
+                        code.ldc2_w(longIndex);
                     } else {
                         // Floating point value - need to determine if it's float or double
                         // Check context to infer the type

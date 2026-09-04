@@ -339,7 +339,10 @@ public final class ArrayApiUtils {
             if (i > 0) {
                 sb.append(sep);
             }
-            sb.append(array[i]);
+            // JavaScript renders null and undefined as an empty string
+            if (array[i] != null) {
+                sb.append(array[i]);
+            }
         }
         return sb.toString();
     }

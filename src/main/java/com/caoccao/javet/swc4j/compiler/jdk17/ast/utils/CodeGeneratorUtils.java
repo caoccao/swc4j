@@ -53,17 +53,8 @@ public final class CodeGeneratorUtils {
      * @param returnTypeInfo the return type information
      */
     public static void addReturnIfNeeded(CodeBuilder code, ReturnTypeInfo returnTypeInfo) {
-        byte[] bytecode = code.toByteArray();
-        if (bytecode.length == 0) {
+        if (!code.isLastInstructionTerminal() && returnTypeInfo.type() == ReturnType.VOID) {
             code.returnVoid();
-            return;
-        }
-
-        int lastByte = bytecode[bytecode.length - 1] & 0xFF;
-        if (!isTerminalBytecode(lastByte)) {
-            if (returnTypeInfo.type() == ReturnType.VOID) {
-                code.returnVoid();
-            }
         }
     }
 
@@ -165,17 +156,7 @@ public final class CodeGeneratorUtils {
             compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
             String argType = argTypes.get(startIndex + i);
             TypeConversionUtils.convertType(code, classWriter, argType, componentType);
-
-            switch (componentType) {
-                case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
-                case ConstantJavaType.ABBR_CHARACTER -> code.castore();
-                case ConstantJavaType.ABBR_SHORT -> code.sastore();
-                case ConstantJavaType.ABBR_INTEGER -> code.iastore();
-                case ConstantJavaType.ABBR_LONG -> code.lastore();
-                case ConstantJavaType.ABBR_FLOAT -> code.fastore();
-                case ConstantJavaType.ABBR_DOUBLE -> code.dastore();
-                default -> code.aastore();
-            }
+            storeArrayElement(code, componentType);
         }
     }
 
@@ -269,6 +250,25 @@ public final class CodeGeneratorUtils {
         for (PatchInfo patchInfo : label.getPatchPositions()) {
             int offset = targetOffset - patchInfo.opcodePos();
             code.patchInt(patchInfo.offsetPos(), offset);
+        }
+    }
+
+    /**
+     * Emits the array store instruction for the given component type.
+     *
+     * @param code          the code builder
+     * @param componentType the descriptor of the array component type
+     */
+    public static void storeArrayElement(CodeBuilder code, String componentType) {
+        switch (componentType) {
+            case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
+            case ConstantJavaType.ABBR_CHARACTER -> code.castore();
+            case ConstantJavaType.ABBR_SHORT -> code.sastore();
+            case ConstantJavaType.ABBR_INTEGER -> code.iastore();
+            case ConstantJavaType.ABBR_LONG -> code.lastore();
+            case ConstantJavaType.ABBR_FLOAT -> code.fastore();
+            case ConstantJavaType.ABBR_DOUBLE -> code.dastore();
+            default -> code.aastore();
         }
     }
 

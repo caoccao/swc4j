@@ -67,6 +67,23 @@ public class TestCompileAstClassFields extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testFieldDeeplyNestedInitializer(JdkVersion jdkVersion) throws Exception {
+        // The operand stack of the constructor is deeper than the reserved minimum
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    x: int = 1 + (2 + (3 + (4 + (5 + (6 + (7 + (8 + (9 + (10 + (11 + (12 + 13)))))))))))
+                    test(): int {
+                      return this.x
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(91);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testFieldTypes(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

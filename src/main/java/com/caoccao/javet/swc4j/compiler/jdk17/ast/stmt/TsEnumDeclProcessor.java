@@ -35,6 +35,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.compiler.jdk17.EnumCollector;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -68,7 +69,7 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         for (Swc4jAstTsEnumMember member : members) {
             ISwc4jAstTsEnumMemberId memberId = member.getId();
             String tsName = memberId instanceof Swc4jAstIdent ident ? ident.getSym() : memberId.toString();
-            String javaName = convertMemberNameToJavaConvention(tsName);
+            String javaName = EnumCollector.toJavaConstantName(tsName);
 
             var initOpt = member.getInit();
             EnumMemberInfo memberInfo;
@@ -119,12 +120,6 @@ public final class TsEnumDeclProcessor extends BaseAstProcessor<Swc4jAstTsEnumDe
         }
 
         return new EnumInfo(memberInfos, Boolean.TRUE.equals(isStringEnum));
-    }
-
-    private String convertMemberNameToJavaConvention(String tsName) {
-        // Convert TypeScript enum member names to Java enum constant naming convention
-        // TypeScript: Up, Down → Java: UP, DOWN
-        return tsName.toUpperCase();
     }
 
     private int evaluateBinaryExpression(Swc4jAstBinExpr binExpr, Map<String, Integer> definedMembers)

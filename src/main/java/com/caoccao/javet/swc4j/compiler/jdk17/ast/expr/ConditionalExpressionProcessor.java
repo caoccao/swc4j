@@ -51,27 +51,45 @@ public final class ConditionalExpressionProcessor extends BaseAstProcessor<Swc4j
             String targetType) throws Swc4jByteCodeCompilerException {
 
         if (sourceType == null || targetType == null) {
-            return; // No conversion needed for null
+            // A null source type is the null literal, which is assignable to any reference type,
+            // and a null target type means both branches are the null literal.
+            return;
         }
 
         if (sourceType.equals(targetType)) {
             return; // No conversion needed
         }
 
-        // Unbox if source is a wrapper type
-        TypeConversionUtils.unboxWrapperType(code, classWriter, sourceType);
-        String primitiveSource = TypeConversionUtils.getPrimitiveType(sourceType);
+        boolean sourceIsPrimitive = TypeConversionUtils.isPrimitiveType(sourceType);
+        boolean targetIsPrimitive = TypeConversionUtils.isPrimitiveType(targetType);
 
-        // Unbox if target is a wrapper type
+        if (sourceIsPrimitive && targetIsPrimitive) {
+            TypeConversionUtils.convertPrimitiveType(code, sourceType, targetType);
+            return;
+        }
+
+        if (sourceIsPrimitive) {
+            // The branches meet at a reference type, so the primitive branch has to be boxed;
+            // otherwise the two edges into the join carry different stack types.
+            String wrapperType = TypeConversionUtils.getWrapperType(sourceType);
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, sourceType, wrapperType);
+            return;
+        }
+
+        // Unbox if source is a wrapper type
+        String primitiveSource = TypeConversionUtils.getPrimitiveType(sourceType);
         String primitiveTarget = TypeConversionUtils.getPrimitiveType(targetType);
+        if (!primitiveSource.equals(sourceType)) {
+            TypeConversionUtils.unboxWrapperType(code, classWriter, sourceType);
+        }
 
         // Convert between primitive types
-        if (primitiveSource != null && primitiveTarget != null) {
+        if (!primitiveSource.equals(sourceType) || targetIsPrimitive) {
             TypeConversionUtils.convertPrimitiveType(code, primitiveSource, primitiveTarget);
         }
 
         // Box if target is a wrapper type
-        if (!targetType.equals(primitiveTarget) && primitiveTarget != null) {
+        if (!targetType.equals(primitiveTarget)) {
             TypeConversionUtils.boxPrimitiveType(code, classWriter, primitiveTarget, targetType);
         }
     }
@@ -82,15 +100,16 @@ public final class ConditionalExpressionProcessor extends BaseAstProcessor<Swc4j
      * Future phases will add type coercion and widening.
      */
     private String findCommonType(String type1, String type2) throws Swc4jByteCodeCompilerException {
-        // Handle null types
+        // Handle null types. A null type is the null literal, which only meets a reference type,
+        // so a primitive on the other side widens to its wrapper.
         if (type1 == null && type2 == null) {
             return null; // Both null
         }
         if (type1 == null) {
-            return type2; // One is null, use non-null type
+            return TypeConversionUtils.getWrapperType(type2);
         }
         if (type2 == null) {
-            return type1; // One is null, use non-null type
+            return TypeConversionUtils.getWrapperType(type1);
         }
 
         // Phase 1: Simple same-type check

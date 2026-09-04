@@ -129,14 +129,14 @@ public final class ImportDeclProcessor {
                 Class<?> javaClass = null;
                 try {
                     // Load the Java class using reflection
-                    javaClass = Class.forName(fullyQualifiedName);
+                    javaClass = compiler.getMemory().getClassResolver().resolve(fullyQualifiedName);
                 } catch (ClassNotFoundException e) {
                     // Try as an inner class (replace last dot with $)
                     int lastDotIndex = fullyQualifiedName.lastIndexOf('.');
                     if (lastDotIndex > 0) {
                         String innerClassName = fullyQualifiedName.substring(0, lastDotIndex) + "$" + fullyQualifiedName.substring(lastDotIndex + 1);
                         try {
-                            javaClass = Class.forName(innerClassName);
+                            javaClass = compiler.getMemory().getClassResolver().resolve(innerClassName);
                             fullyQualifiedName = innerClassName;
                         } catch (ClassNotFoundException ignored) {
                             // Not an inner class either, will be handled below

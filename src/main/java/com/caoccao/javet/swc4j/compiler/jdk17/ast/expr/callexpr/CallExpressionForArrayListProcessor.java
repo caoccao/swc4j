@@ -688,12 +688,13 @@ public final class CallExpressionForArrayListProcessor extends BaseAstProcessor<
     }
 
     private void generateSort(CodeBuilder code, ClassWriter classWriter) {
-        // arr.sort() -> Collections.sort(arr); returns void but we keep arr on stack
-        // JavaScript's sort() returns the array itself (for chaining)
+        // arr.sort() -> ArrayListApiUtils.sort(arr); returns void but we keep arr on stack
+        // JavaScript's sort() returns the array itself (for chaining) and compares as strings
         code.dup(); // Duplicate array reference for return
 
         var cp = classWriter.getConstantPool();
-        int sortMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_COLLECTIONS, ConstantJavaMethod.METHOD_SORT, ConstantJavaDescriptor.LJAVA_UTIL_LIST__V);
+        int sortMethod = cp.addMethodRef(ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAYLIST_API_UTILS,
+                ConstantJavaMethod.METHOD_SORT, ConstantJavaDescriptor.LJAVA_UTIL_LIST__V);
         code.invokestatic(sortMethod); // Sort in place
 
         // The duplicated array reference is now on top of stack, ready to return

@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.compiler.memory;
 
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.compiler.utils.ClassResolver;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 
 import java.lang.reflect.Method;
@@ -32,6 +33,11 @@ import java.util.*;
  */
 public final class ScopedFunctionalInterfaceRegistry {
     private final Stack<Map<String, SamMethodInfo>> scopeStack;
+    /**
+     * The class resolver used for reflective lookups, replaced by the compiler with one that
+     * resolves through the class loader configured in the options.
+     */
+    private ClassResolver classResolver;
 
     /**
      * Instantiates a new Scoped functional interface registry.
@@ -40,6 +46,7 @@ public final class ScopedFunctionalInterfaceRegistry {
         scopeStack = new Stack<>();
         // Push global scope
         scopeStack.push(new HashMap<>());
+        classResolver = new ClassResolver(null);
     }
 
     /**
@@ -249,7 +256,7 @@ public final class ScopedFunctionalInterfaceRegistry {
     private SamMethodInfo resolveSamMethodInfo(String interfaceInternalName) {
         try {
             String className = interfaceInternalName.replace('/', '.');
-            Class<?> clazz = Class.forName(className);
+            Class<?> clazz = classResolver.resolve(className);
 
             if (!clazz.isInterface()) {
                 return null;
@@ -282,6 +289,15 @@ public final class ScopedFunctionalInterfaceRegistry {
     }
 
     /**
+     * Sets the class resolver used for reflective lookups.
+     *
+     * @param classResolver the class resolver
+     */
+    public void setClassResolver(ClassResolver classResolver) {
+        this.classResolver = classResolver;
+    }
+
+    /**
      * Record containing SAM method information for a functional interface.
      *
      * @param methodName       the SAM method name (e.g., "applyAsInt")
@@ -292,4 +308,5 @@ public final class ScopedFunctionalInterfaceRegistry {
     public record SamMethodInfo(String methodName, List<String> paramTypes, String returnType,
                                 String methodDescriptor) {
     }
+
 }

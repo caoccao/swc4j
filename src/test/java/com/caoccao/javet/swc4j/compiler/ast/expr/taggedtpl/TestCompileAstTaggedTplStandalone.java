@@ -159,6 +159,26 @@ public class TestCompileAstTaggedTplStandalone extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testStandaloneTagWithRestParameter(JdkVersion jdkVersion) throws Exception {
+        // The interpolated values are packed into the array of the rest parameter
+        var runner = getCompiler(jdkVersion).compile("""
+                import { TemplateStringsArray } from 'com.caoccao.javet.swc4j.compiler.jdk17.ast.utils'
+                namespace com {
+                  export function tag(strings: TemplateStringsArray, ...values: Object[]): int {
+                    return values.length * 10 + strings.length
+                  }
+                  export class A {
+                    test(): int {
+                      return tag`a ${1} b ${2} c`
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(23);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testStandaloneTagWithVariable(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

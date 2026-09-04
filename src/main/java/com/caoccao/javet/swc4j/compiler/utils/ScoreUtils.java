@@ -364,8 +364,14 @@ public final class ScoreUtils {
         // Boxing: primitive -> wrapper
         if (TypeConversionUtils.isPrimitiveType(argType) && !TypeConversionUtils.isPrimitiveType(paramType)) {
             String wrapperType = TypeConversionUtils.getWrapperType(argType);
-            if (!wrapperType.equals(argType) && wrapperType.equals(paramType)) {
-                return 0.7; // Boxing with exact match
+            if (!wrapperType.equals(argType)) {
+                if (wrapperType.equals(paramType)) {
+                    return 0.7; // Boxing with exact match
+                }
+                if (paramType.equals(ConstantJavaType.LJAVA_LANG_OBJECT)) {
+                    // Boxing and then widening to Object, which is what an erased type parameter is
+                    return 0.4;
+                }
             }
             return 0.0;
         }

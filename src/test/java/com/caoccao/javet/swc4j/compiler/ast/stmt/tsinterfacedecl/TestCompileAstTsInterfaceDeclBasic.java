@@ -205,6 +205,31 @@ public class TestCompileAstTsInterfaceDeclBasic extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testInterfaceMethodCallThroughInterfaceType(JdkVersion jdkVersion) throws Exception {
+        // The call is emitted as invokeinterface even though the interface is not loadable yet
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export interface Box {
+                    get(): Integer
+                  }
+                  export class IntBox implements Box {
+                    get(): Integer {
+                      return 42
+                    }
+                  }
+                  export class A {
+                    test(): Object {
+                      const b: Box = new IntBox()
+                      return b.get()
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(42);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testInterfaceMultiplePropertiesWithImplementation(JdkVersion jdkVersion) throws Exception {
         // Test: Interface with multiple properties and implementing class
         var runner = getCompiler(jdkVersion).compile("""

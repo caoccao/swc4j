@@ -511,6 +511,10 @@ public class CompilationContext {
         tempIdCounter = 0;
         inlineExecutingFinallyBlocks.clear();
         usingResourceMap.clear();
+        // A label or a captured this left behind by a method that failed to compile must not leak
+        // into the next method of the same class
+        pendingLabelNames.clear();
+        captureThisOverrides.clear();
         // Note: classStack and typeParameterScopes are NOT cleared - class context persists across method resets
     }
 

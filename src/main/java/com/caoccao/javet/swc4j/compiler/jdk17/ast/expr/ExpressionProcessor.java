@@ -32,7 +32,6 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * Main processor for expression AST nodes, delegates to specialized processors.
  */
 public final class ExpressionProcessor extends BaseAstProcessor<ISwc4jAstExpr> {
-    private final int classExprCounter = 0;
 
     /**
      * Constructs a processor with the specified compiler.

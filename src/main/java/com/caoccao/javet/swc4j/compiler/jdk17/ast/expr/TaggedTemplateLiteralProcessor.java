@@ -17,9 +17,11 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstTplElement;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstFnDecl;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -27,6 +29,7 @@ import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -186,16 +189,81 @@ public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4j
         code.invokevirtual(methodRef);
 
         // Handle return type conversion if needed
-        if (returnTypeInfo != null && returnTypeInfo.descriptor() != null
-                && !methodReturnType.equals(returnTypeInfo.descriptor())) {
-            if (TypeConversionUtils.isPrimitiveType(methodReturnType)
-                    && !TypeConversionUtils.isPrimitiveType(returnTypeInfo.descriptor())) {
-                String wrapperType = TypeConversionUtils.getWrapperType(methodReturnType);
-                TypeConversionUtils.boxPrimitiveType(code, classWriter, methodReturnType, wrapperType);
-            } else if (!TypeConversionUtils.isPrimitiveType(methodReturnType)
-                    && TypeConversionUtils.isPrimitiveType(returnTypeInfo.descriptor())) {
-                TypeConversionUtils.unboxWrapperType(code, classWriter, "L" + methodReturnType + ";");
+        generateReturnTypeConversion(code, classWriter, methodReturnType, returnTypeInfo);
+    }
+
+    /**
+     * Packs the interpolated values from the given index on into an array, which is how a rest
+     * parameter of the tag function is passed.
+     *
+     * @param code          the code builder
+     * @param classWriter   the class writer
+     * @param exprs         the interpolated expressions
+     * @param startIndex    the index of the first expression that goes into the array
+     * @param componentType the descriptor of the array component type
+     * @throws Swc4jByteCodeCompilerException if bytecode generation fails
+     */
+    private void generateRestArgumentArray(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            List<ISwc4jAstExpr> exprs,
+            int startIndex,
+            String componentType) throws Swc4jByteCodeCompilerException {
+        var cp = classWriter.getConstantPool();
+        int count = Math.max(0, exprs.size() - startIndex);
+        code.iconst(count);
+        if (TypeConversionUtils.isPrimitiveType(componentType)) {
+            code.newarray(TypeConversionUtils.getNewarrayTypeCode(componentType));
+        } else {
+            code.anewarray(cp.addClass(TypeConversionUtils.descriptorToInternalName(componentType)));
+        }
+        for (int i = 0; i < count; i++) {
+            ISwc4jAstExpr expr = exprs.get(startIndex + i);
+            code.dup();
+            code.iconst(i);
+            String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
+            compiler.getExpressionProcessor().generate(code, classWriter, expr, null);
+            if (exprType == null) {
+                exprType = ConstantJavaType.LJAVA_LANG_OBJECT;
             }
+            TypeConversionUtils.convertType(code, classWriter, exprType, componentType);
+            CodeGeneratorUtils.storeArrayElement(code, componentType);
+        }
+    }
+
+    /**
+     * Converts the value left on the stack by the tag function to the type expected by the caller.
+     * The expected type is taken from the return type info, whose descriptor is null for primitive
+     * types, so the descriptor has to be resolved through {@link TypeConversionUtils#getReturnDescriptor}.
+     *
+     * @param code             the code builder
+     * @param classWriter      the class writer
+     * @param methodReturnType the descriptor of the tag function return type
+     * @param returnTypeInfo   the return type info of the caller
+     */
+    private void generateReturnTypeConversion(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            String methodReturnType,
+            ReturnTypeInfo returnTypeInfo) {
+        if (returnTypeInfo == null || methodReturnType == null) {
+            return;
+        }
+        String expectedType = TypeConversionUtils.getReturnDescriptor(returnTypeInfo);
+        if (expectedType == null
+                || ConstantJavaType.ABBR_VOID.equals(expectedType)
+                || methodReturnType.equals(expectedType)) {
+            return;
+        }
+        if (TypeConversionUtils.isPrimitiveType(methodReturnType)
+                && !TypeConversionUtils.isPrimitiveType(expectedType)) {
+            String wrapperType = TypeConversionUtils.getWrapperType(methodReturnType);
+            TypeConversionUtils.boxPrimitiveType(code, classWriter, methodReturnType, wrapperType);
+        } else if (!TypeConversionUtils.isPrimitiveType(methodReturnType)
+                && TypeConversionUtils.isPrimitiveType(expectedType)) {
+            TypeConversionUtils.unboxWrapperType(code, classWriter, methodReturnType);
+            TypeConversionUtils.convertPrimitiveType(
+                    code, TypeConversionUtils.getPrimitiveType(methodReturnType), expectedType);
         }
     }
 
@@ -244,18 +312,49 @@ public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4j
             loadCachedStringArray(code, classWriter, quasis);
         }
 
-        // Build method descriptor: first param is String[] or TemplateStringsArray, rest are expression types
+        // Build the method descriptor from the declared parameters, so that the call site matches
+        // the generated method even when the tag function widens its arguments or takes a rest
+        // parameter, which is compiled to a trailing array.
+        List<Swc4jAstParam> params = fnDecl.getFunction().getParams();
+        List<String> declaredTypes = new ArrayList<>();
+        for (int i = 1; i < params.size(); i++) {
+            declaredTypes.add(compiler.getTypeResolver().extractParameterType(params.get(i).getPat()));
+        }
+        boolean hasRestParameter = params.size() > 1
+                && params.get(params.size() - 1).getPat() instanceof Swc4jAstRestPat;
+
         StringBuilder paramDescriptors = new StringBuilder();
         paramDescriptors.append(firstParamDescriptor);
+        for (String declaredType : declaredTypes) {
+            paramDescriptors.append(declaredType);
+        }
 
-        // Remaining arguments: interpolated expressions
-        for (ISwc4jAstExpr expr : exprs) {
+        int fixedCount = hasRestParameter ? declaredTypes.size() - 1 : declaredTypes.size();
+        for (int i = 0; i < exprs.size(); i++) {
+            if (i == fixedCount && hasRestParameter) {
+                break;
+            }
+            ISwc4jAstExpr expr = exprs.get(i);
             String exprType = compiler.getTypeResolver().inferTypeFromExpr(expr);
             compiler.getExpressionProcessor().generate(code, classWriter, expr, null);
             if (exprType == null) {
                 exprType = ConstantJavaType.LJAVA_LANG_OBJECT;
             }
-            paramDescriptors.append(exprType);
+            if (i < declaredTypes.size()) {
+                TypeConversionUtils.convertType(code, classWriter, exprType, declaredTypes.get(i));
+            } else if (!hasRestParameter) {
+                // More interpolations than declared parameters; the call cannot be resolved
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), taggedTpl,
+                        "Tag function " + functionName + " takes " + declaredTypes.size() +
+                                " interpolated value(s), but the template has " + exprs.size());
+            }
+        }
+        if (hasRestParameter) {
+            String arrayType = declaredTypes.get(declaredTypes.size() - 1);
+            String componentType = arrayType.startsWith(ConstantJavaType.ARRAY_PREFIX)
+                    ? arrayType.substring(1)
+                    : ConstantJavaType.LJAVA_LANG_OBJECT;
+            generateRestArgumentArray(code, classWriter, exprs, fixedCount, componentType);
         }
 
         // Resolve the return type from the function declaration
@@ -269,17 +368,7 @@ public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4j
         code.invokestatic(methodRef);
 
         // Handle return type conversion if needed
-        if (returnTypeInfo != null && returnTypeInfo.descriptor() != null
-                && !methodReturnType.equals(returnTypeInfo.descriptor())) {
-            if (TypeConversionUtils.isPrimitiveType(methodReturnType)
-                    && !TypeConversionUtils.isPrimitiveType(returnTypeInfo.descriptor())) {
-                String wrapperType = TypeConversionUtils.getWrapperType(methodReturnType);
-                TypeConversionUtils.boxPrimitiveType(code, classWriter, methodReturnType, wrapperType);
-            } else if (!TypeConversionUtils.isPrimitiveType(methodReturnType)
-                    && TypeConversionUtils.isPrimitiveType(returnTypeInfo.descriptor())) {
-                TypeConversionUtils.unboxWrapperType(code, classWriter, "L" + methodReturnType + ";");
-            }
-        }
+        generateReturnTypeConversion(code, classWriter, methodReturnType, returnTypeInfo);
     }
 
     /**
@@ -353,7 +442,9 @@ public final class TaggedTemplateLiteralProcessor extends BaseAstProcessor<Swc4j
         if (returnTypeAnn.isPresent()) {
             return compiler.getTypeResolver().mapTsTypeToDescriptor(returnTypeAnn.get().getTypeAnn());
         }
-        // Default to String return type for tag functions
-        return ConstantJavaType.LJAVA_LANG_STRING;
+        // Without an annotation, infer the same return type the generated method declares
+        return TypeConversionUtils.getReturnDescriptor(
+                compiler.getTypeResolver().analyzeReturnType(function, function.getBody().orElse(null)));
     }
+
 }

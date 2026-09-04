@@ -61,6 +61,25 @@ public class TestCompileAstBoolBoxed extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testBooleanBoxedAsMethodArgument(JdkVersion jdkVersion) throws Exception {
+        // A Boolean argument is unboxed to match a boolean parameter
+        var runner = getCompiler(jdkVersion).compile("""
+                import { Boolean } from 'java.lang'
+                namespace com {
+                  export class A {
+                    test(): boolean {
+                      const a: Boolean = true
+                      const b: Boolean = false
+                      return Boolean.logicalOr(a, b)
+                    }
+                  }
+                }""");
+        assertThat((boolean) runner.createInstanceRunner("com.A").invoke("test")).isTrue();
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testBooleanBoxedConstFalse(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

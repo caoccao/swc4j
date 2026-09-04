@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayCopyWithinAllNegative(JdkVersion jdkVersion) throws Exception {
@@ -47,7 +46,6 @@ public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 3, 4, 4, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -65,7 +63,6 @@ public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(4, 5, 3, 4, 5));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayCopyWithinEmptyArray(JdkVersion jdkVersion) throws Exception {
@@ -82,7 +79,6 @@ public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of());
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayCopyWithinMethodChaining(JdkVersion jdkVersion) throws Exception {
@@ -97,7 +93,6 @@ public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(5, 4, 3, 5, 4));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -115,7 +110,6 @@ public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(2, 3, 4, 4, 5));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayCopyWithinNegativeStart(JdkVersion jdkVersion) throws Exception {
@@ -131,7 +125,6 @@ public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(4, 5, 3, 4, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -149,7 +142,6 @@ public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 1, 2));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayCopyWithinOutOfBoundsStart(JdkVersion jdkVersion) throws Exception {
@@ -165,7 +157,6 @@ public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -183,7 +174,6 @@ public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayCopyWithinOverlapping(JdkVersion jdkVersion) throws Exception {
@@ -200,7 +190,6 @@ public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 1, 2, 3, 4));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayCopyWithinReturnsArray(JdkVersion jdkVersion) throws Exception {
@@ -215,7 +204,6 @@ public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(4, 5, 3, 4, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -232,7 +220,6 @@ public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 1));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

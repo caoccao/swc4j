@@ -50,6 +50,24 @@ public class TestCompileAstObjectLitComputed extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testComputedKeyAssignmentAsExpression(JdkVersion jdkVersion) throws Exception {
+        // The assignment evaluates to the assigned value, not to the value it replaced
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const o = { a: 1 }
+                      const v: int = (o["b"] = 7)
+                      return v
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(7);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testComputedKeyOverwritesDuplicate(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

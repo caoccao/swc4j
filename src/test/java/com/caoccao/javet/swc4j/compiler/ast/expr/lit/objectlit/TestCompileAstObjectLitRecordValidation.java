@@ -47,8 +47,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected nested key type mismatch error, got: " + causeMessage).contains("Key 'a'").contains("String");
     }
 
@@ -69,8 +68,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected nested type mismatch error, got: " + causeMessage).contains("Property 'inner'").contains("String");
     }
 
@@ -92,8 +90,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected computed key type mismatch error, got: " + causeMessage).contains("Key").contains("String");
     }
 
@@ -117,8 +114,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected computed key type mismatch error, got: " + causeMessage).contains("Key").contains("double");
     }
 
@@ -139,8 +135,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected key type mismatch error, got: " + causeMessage).contains("Key 'a'").contains("String");
     }
 
@@ -161,8 +156,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected key type mismatch error, got: " + causeMessage).contains("Key 'a'").contains("String");
     }
 
@@ -186,8 +180,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
         });
         assertThat(exception).isInstanceOf(Exception.class);
         // Check the cause contains the validation error
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected type mismatch error for property 'c', got: " + causeMessage).contains("Property 'c'").contains("String");
     }
 
@@ -209,8 +202,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
         });
         assertThat(exception).isInstanceOf(Exception.class);
         // Check the cause contains the validation error
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected key type mismatch error, got: " + causeMessage).contains("Key 'a'").contains("String");
     }
 
@@ -234,8 +226,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
         });
         assertThat(exception).isInstanceOf(Exception.class);
         // Check the cause contains the validation error
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected value type mismatch error, got: " + causeMessage).contains("Property '1'").contains("String");
     }
 
@@ -256,8 +247,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected shorthand key type mismatch error, got: " + causeMessage).contains("Key 'a'").contains("String");
     }
 
@@ -277,8 +267,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected shorthand value type mismatch error, got: " + causeMessage).contains("Property 'a'").contains("String");
     }
 
@@ -298,8 +287,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected spread key type mismatch error, got: " + causeMessage).contains("incompatible key type");
     }
 
@@ -323,8 +311,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected nested spread value type mismatch error, got: " + causeMessage).contains("incompatible value type");
     }
 
@@ -344,8 +331,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected spread value type mismatch error, got: " + causeMessage).contains("incompatible value type");
     }
 
@@ -366,8 +352,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected key type mismatch error, got: " + causeMessage).contains("Key '1'").contains("Integer");
     }
 
@@ -391,8 +376,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
         });
         assertThat(exception).isInstanceOf(Exception.class);
         // Check the cause contains the validation error
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage)
                 .as("Expected type mismatch error for boolean value, got: " + causeMessage)
                 .contains("Property 'flag'")
@@ -420,8 +404,7 @@ public class TestCompileAstObjectLitRecordValidation extends BaseTestCompileSuit
         });
         assertThat(exception).isInstanceOf(Exception.class);
         // Check the cause contains the validation error
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected type mismatch error for value type, got: " + causeMessage).contains("Property 'a' has type String").contains("but Record requires");
     }
 

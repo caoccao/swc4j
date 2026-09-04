@@ -136,9 +136,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }""");
         });
         assertThat(exception).isInstanceOf(Swc4jByteCodeCompilerException.class);
-        // Check the root cause message
-        assertThat(exception.getCause()).isNotNull();
-        assertThat(exception.getCause().getMessage().contains("Indices flag 'd' is not supported")).isTrue();
+        assertThat(exception.getMessage().contains("Indices flag 'd' is not supported")).isTrue();
     }
 
     @ParameterizedTest
@@ -191,9 +189,7 @@ public class TestCompileAstRegexFlags extends BaseTestCompileSuite {
                     }""");
         });
         assertThat(exception).isInstanceOf(Swc4jByteCodeCompilerException.class);
-        // Check the root cause message
-        assertThat(exception.getCause()).isNotNull();
-        assertThat(exception.getCause().getMessage().contains("Sticky flag 'y' is not supported")).isTrue();
+        assertThat(exception.getMessage().contains("Sticky flag 'y' is not supported")).isTrue();
     }
 
     @ParameterizedTest

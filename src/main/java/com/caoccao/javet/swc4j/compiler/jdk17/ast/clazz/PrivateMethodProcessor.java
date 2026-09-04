@@ -108,9 +108,12 @@ public final class PrivateMethodProcessor extends BaseAstProcessor<Swc4jAstPriva
                     }
                 }
 
-                int maxStack = Math.max(returnTypeInfo.maxStack(), returnTypeInfo.type().getMinStack());
-                maxStack = Math.max(maxStack, 10);
                 int maxLocals = context.getLocalVariableTable().getMaxLocals();
+                boolean isStatic = (accessFlags & 0x0008) != 0;
+                // Derive the operand stack depth from the emitted bytecode.
+                int maxStack = Math.max(
+                        Math.max(returnTypeInfo.maxStack(), returnTypeInfo.type().getMinStack()),
+                        code.computeMaxStack(maxLocals, isStatic, classWriter.getClassName(), descriptor, classWriter.getConstantPool()));
 
                 // Add debug information if enabled
                 if (compiler.getOptions().debug()) {
@@ -124,13 +127,11 @@ public final class PrivateMethodProcessor extends BaseAstProcessor<Swc4jAstPriva
                         ));
                     }
 
-                    boolean isStatic = (accessFlags & 0x0008) != 0;
                     var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName(), descriptor, classWriter.getConstantPool());
                     var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
                     classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
                             lineNumbers, localVariableTable, stackMapTable, exceptionTable);
                 } else {
-                    boolean isStatic = (accessFlags & 0x0008) != 0;
                     var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName(), descriptor, classWriter.getConstantPool());
                     var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
                     classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
@@ -139,6 +140,9 @@ public final class PrivateMethodProcessor extends BaseAstProcessor<Swc4jAstPriva
 
                 // Generate overloaded methods for default parameters
                 generateDefaultParameterOverloadsForPrivateMethod(classWriter, privateMethod, methodName, function, returnTypeInfo, accessFlags);
+            } catch (Swc4jByteCodeCompilerException e) {
+                // Preserve the original location and message of the compiler error.
+                throw e;
             } catch (Exception e) {
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), privateMethod, "Failed to generate private method: " + methodName, e);
             } finally {
@@ -328,7 +332,8 @@ public final class PrivateMethodProcessor extends BaseAstProcessor<Swc4jAstPriva
         }
 
         classWriter.addMethod(baseAccessFlags, methodName, overloadDescriptor, code.toByteArray(),
-                10, maxLocals);
+                code.computeMaxStack(maxLocals, isStatic, classWriter.getClassName(), overloadDescriptor, cp),
+                maxLocals);
     }
 
     private void validateDefaultParameterOrder(List<Swc4jAstParam> params) throws Swc4jByteCodeCompilerException {

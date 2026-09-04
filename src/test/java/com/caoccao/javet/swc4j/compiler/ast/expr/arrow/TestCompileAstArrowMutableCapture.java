@@ -55,6 +55,27 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testMutableCaptureDecrement(JdkVersion jdkVersion) throws Exception {
+        // The -- operator goes through the holder array, prefix and postfix alike
+        var runner = getCompiler(jdkVersion).compile("""
+                import { IntSupplier } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let count: int = 10
+                      const fn: IntSupplier = () => count
+                      const a = count--
+                      const b = --count
+                      return a * 100 + b * 10 + fn()
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1088);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testMutableCaptureInLoop(JdkVersion jdkVersion) throws Exception {
         // Edge case 35: Capture Loop Variable
         // Tests that mutable loop variable is captured correctly through holder
@@ -78,6 +99,45 @@ public class TestCompileAstArrowMutableCapture extends BaseTestCompileSuite {
         var result = runner.createInstanceRunner("com.A").invoke("test");
         assertThat((int) result).isEqualTo(60);  // 10 + 20 + 30 = 60
     }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMutableCaptureIncrementInsideLambda(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                import { Runnable } from 'java.lang'
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let count: int = 0
+                      const fn: Runnable = () => { count++ }
+                      fn()
+                      fn()
+                      return count
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(2);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMutableCaptureIncrementOutsideLambda(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                import { IntSupplier } from 'java.util.function'
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let count: int = 0
+                      const fn: IntSupplier = () => count
+                      count++
+                      return fn()
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1);
+    }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

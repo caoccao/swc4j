@@ -80,7 +80,7 @@ public class TestJsonUtilsBytecode extends BaseTestCompileSuite {
                   }
                 }""");
         // Each parse returns Integer (boxed), stored in ArrayList
-        Object result = runner.createInstanceRunner("com.A").<Object>invoke("test");
+        Object result = runner.createInstanceRunner("com.A").invoke("test");
         assertThat(result).isEqualTo(List.of(1, 2, 3));
     }
 
@@ -533,7 +533,7 @@ public class TestJsonUtilsBytecode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Object result = runner.createInstanceRunner("com.A").<Object>invoke("test");
+        Object result = runner.createInstanceRunner("com.A").invoke("test");
         assertThat(result).isInstanceOf(Long.class);
         assertThat(result).isEqualTo(2147483648L);
     }
@@ -800,7 +800,7 @@ public class TestJsonUtilsBytecode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Object result = runner.createInstanceRunner("com.A").<Object>invoke("test");
+        Object result = runner.createInstanceRunner("com.A").invoke("test");
         assertThat(result).isInstanceOf(ArrayList.class);
         assertThat(result).isEqualTo(List.of(1, 2, 3));
     }
@@ -1912,6 +1912,22 @@ public class TestJsonUtilsBytecode extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testStringifyJavaArray(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Object {
+                      const arr: int[] = [1, 2, 3]
+                      return JSON.stringify(arr)
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("[1,2,3]");
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testStringifyLargeInteger(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -2419,7 +2435,7 @@ public class TestJsonUtilsBytecode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        String result = (String) runner.createInstanceRunner("com.A").<Object>invoke("test");
+        String result = runner.createInstanceRunner("com.A").invoke("test");
         assertThat(result).contains("\"0\":\"zero\"");
         assertThat(result).contains("\"1\":\"one\"");
     }
@@ -2644,7 +2660,7 @@ public class TestJsonUtilsBytecode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        String result = (String) runner.createInstanceRunner("com.A").<Object>invoke("test");
+        String result = runner.createInstanceRunner("com.A").invoke("test");
         assertThat(result).contains("\"name\":\"test\"");
         assertThat(result).contains("\"id\":1");
         assertThat(result).doesNotContain("secret");
@@ -2663,7 +2679,7 @@ public class TestJsonUtilsBytecode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        String result = (String) runner.createInstanceRunner("com.A").<Object>invoke("test");
+        String result = runner.createInstanceRunner("com.A").invoke("test");
         assertThat(result).contains("\"id\"");
         assertThat(result).contains("\"name\"");
         assertThat(result).doesNotContain("extra");
@@ -2753,7 +2769,7 @@ public class TestJsonUtilsBytecode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        String result = (String) runner.createInstanceRunner("com.A").<Object>invoke("test");
+        String result = runner.createInstanceRunner("com.A").invoke("test");
         // Replacer keeps "a" at top level, "x" at nested level
         assertThat(result).contains("\"a\"");
         assertThat(result).contains("\"x\": 1");
@@ -2790,7 +2806,7 @@ public class TestJsonUtilsBytecode extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        Object result = runner.createInstanceRunner("com.A").<Object>invoke("test");
+        Object result = runner.createInstanceRunner("com.A").invoke("test");
         assertThat(result).isInstanceOf(String.class);
         assertThat(result).isEqualTo("{\"a\":1}");
     }

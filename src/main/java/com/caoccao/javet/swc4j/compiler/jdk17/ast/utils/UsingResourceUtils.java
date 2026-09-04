@@ -323,7 +323,8 @@ public final class UsingResourceUtils {
         }
         // Not in registry — try Java reflection as fallback for standard library types
         try {
-            Class<?> clazz = Class.forName(TypeConversionUtils.descriptorToQualifiedName(varType));
+            Class<?> clazz = compiler.getMemory().getClassResolver()
+                    .resolve(TypeConversionUtils.descriptorToQualifiedName(varType));
             if (!AutoCloseable.class.isAssignableFrom(clazz)) {
                 throw new Swc4jByteCodeCompilerException(sourceCode, declarator,
                         "Resource type '" + TypeConversionUtils.descriptorToQualifiedName(varType)

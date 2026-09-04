@@ -170,9 +170,10 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
                 instanceJavaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolveByInternalName(internalName);
             }
 
-            // Only handle as Java class if it has methods (populated via reflection for imported Java classes)
-            // TypeScript classes are registered but have empty methods map, so they fall through to TS handling below
-            if (instanceJavaTypeInfo != null && !instanceJavaTypeInfo.getMethods().isEmpty()) {
+            // Only handle as Java class if it was populated via reflection for an imported Java class.
+            // TypeScript classes are registered too and fall through to the TS handling below.
+            if (instanceJavaTypeInfo != null && !instanceJavaTypeInfo.isDeclaredInTypeScript()
+                    && !instanceJavaTypeInfo.getMethods().isEmpty()) {
                 MethodInfo methodInfo = instanceJavaTypeInfo.getMethod(methodName, argTypes);
                 if (methodInfo == null) {
                     throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
@@ -209,8 +210,8 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
                     // Check if the return type is assignable to the class type
                     // If so, cast to the class type for proper method chaining
                     try {
-                        Class<?> returnClass = Class.forName(TypeConversionUtils.descriptorToQualifiedName(returnType));
-                        Class<?> expectedClass = Class.forName(qualifiedClassName);
+                        Class<?> returnClass = compiler.getMemory().getClassResolver().resolve(TypeConversionUtils.descriptorToQualifiedName(returnType));
+                        Class<?> expectedClass = compiler.getMemory().getClassResolver().resolve(qualifiedClassName);
                         if (returnClass.isAssignableFrom(expectedClass)) {
                             // Return type is a parent of the expected type, cast down
                             int classIndex = cp.addClass(internalClassName);
@@ -232,48 +233,62 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
                 throw new Swc4jByteCodeCompilerException(getSourceCode(), memberExpr, "Invalid object type for TS class method call: " + objType);
             }
 
+            // Get internal and qualified class names
+            internalClassName = TypeConversionUtils.descriptorToInternalName(objType);
+            String qualifiedClassName = TypeConversionUtils.descriptorToQualifiedName(objType);
+
+            // Resolve the declared method first, so that the arguments can be widened or boxed to
+            // the declared parameter types instead of dictating the descriptor themselves.
+            JavaTypeInfo declaringTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry()
+                    .resolveByInternalName(internalClassName);
+            MethodInfo declaredMethodInfo = declaringTypeInfo == null
+                    ? null
+                    : declaringTypeInfo.getMethod(methodName, argTypes);
+
             // Generate the object reference for instance calls
             if (!isStaticCall) {
                 loadObjectReference(code, classWriter, memberExpr.getObj());
             }
 
-            // Generate arguments
-            StringBuilder paramDescriptors = new StringBuilder();
-            for (int i = 0; i < args.size(); i++) {
-                var arg = args.get(i);
-                compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
-                paramDescriptors.append(argTypes.get(i));
-            }
-
-            // Get internal and qualified class names
-            internalClassName = TypeConversionUtils.descriptorToInternalName(objType);
-            String qualifiedClassName = TypeConversionUtils.descriptorToQualifiedName(objType);
-
-            // Look up method return type and descriptor
-            String paramDescriptor = "(" + paramDescriptors + ")";
-            returnType = compiler.getMemory().getScopedJavaTypeRegistry()
-                    .resolveClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
-            if (returnType != null) {
-                // Found in registry — call-site param types match the declared types
-                methodDescriptor = paramDescriptor + returnType;
-            } else if (returnTypeInfo != null && returnTypeInfo.descriptor() != null) {
-                returnType = returnTypeInfo.descriptor();
-                methodDescriptor = paramDescriptor + returnType;
+            if (declaredMethodInfo != null) {
+                generateArgumentsWithVarargs(code, classWriter, args, argTypes, declaredMethodInfo);
+                methodDescriptor = declaredMethodInfo.descriptor();
+                returnType = declaredMethodInfo.returnType();
             } else {
-                // Resolve the full method descriptor via reflection on the class hierarchy.
-                // This handles inherited methods where call-site arg types (e.g., String) differ
-                // from the declared param types (e.g., Object) in the parent Java class.
-                // The full descriptor uses the formal param types from the resolved method,
-                // not the call-site arg types.
-                String fullDescriptor = compiler.getMemory().getScopedJavaTypeRegistry()
-                        .resolveFullMethodDescriptor(qualifiedClassName, methodName, paramDescriptor);
-                if (fullDescriptor != null) {
-                    methodDescriptor = fullDescriptor;
-                    returnType = fullDescriptor.substring(fullDescriptor.indexOf(')') + 1);
+                // Generate arguments
+                StringBuilder paramDescriptors = new StringBuilder();
+                for (int i = 0; i < args.size(); i++) {
+                    var arg = args.get(i);
+                    compiler.getExpressionProcessor().generate(code, classWriter, arg.getExpr(), null);
+                    paramDescriptors.append(argTypes.get(i));
+                }
+
+                // Look up method return type and descriptor
+                String paramDescriptor = "(" + paramDescriptors + ")";
+                returnType = compiler.getMemory().getScopedJavaTypeRegistry()
+                        .resolveClassMethodReturnType(qualifiedClassName, methodName, paramDescriptor);
+                if (returnType != null) {
+                    // Found in registry — call-site param types match the declared types
+                    methodDescriptor = paramDescriptor + returnType;
+                } else if (returnTypeInfo != null && returnTypeInfo.descriptor() != null) {
+                    returnType = returnTypeInfo.descriptor();
+                    methodDescriptor = paramDescriptor + returnType;
                 } else {
-                    throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
-                            "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
-                                    ". Please add explicit return type annotation to the method.");
+                    // Resolve the full method descriptor via reflection on the class hierarchy.
+                    // This handles inherited methods where call-site arg types (e.g., String) differ
+                    // from the declared param types (e.g., Object) in the parent Java class.
+                    // The full descriptor uses the formal param types from the resolved method,
+                    // not the call-site arg types.
+                    String fullDescriptor = compiler.getMemory().getScopedJavaTypeRegistry()
+                            .resolveFullMethodDescriptor(qualifiedClassName, methodName, paramDescriptor);
+                    if (fullDescriptor != null) {
+                        methodDescriptor = fullDescriptor;
+                        returnType = fullDescriptor.substring(fullDescriptor.indexOf(')') + 1);
+                    } else {
+                        throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
+                                "Cannot infer return type for method call " + qualifiedClassName + "." + methodName +
+                                        ". Please add explicit return type annotation to the method.");
+                    }
                 }
             }
 
@@ -401,12 +416,19 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
      * @return true if the class is an interface, false otherwise
      */
     private boolean isInterface(String qualifiedClassName) {
+        // An interface declared in the compiled source is not loadable yet, so the registry is
+        // consulted first; otherwise the call would be emitted as invokevirtual and fail with an
+        // IncompatibleClassChangeError.
+        JavaTypeInfo typeInfo = compiler.getMemory().resolveJavaType(qualifiedClassName);
+        if (typeInfo != null && typeInfo.isDeclaredInTypeScript()) {
+            return typeInfo.isInterface();
+        }
         try {
-            Class<?> clazz = Class.forName(qualifiedClassName);
+            Class<?> clazz = compiler.getMemory().getClassResolver().resolve(qualifiedClassName);
             return clazz.isInterface();
         } catch (ClassNotFoundException e) {
-            // If class not found, assume it's not an interface (could be a TS class)
-            return false;
+            // The class cannot be resolved; fall back to the registry
+            return typeInfo != null && typeInfo.isInterface();
         }
     }
 
@@ -434,7 +456,7 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
 
     private String resolveReturnTypeViaReflection(String qualifiedClassName, String methodName, String paramDescriptor) {
         try {
-            Class<?> clazz = Class.forName(qualifiedClassName);
+            Class<?> clazz = compiler.getMemory().getClassResolver().resolve(qualifiedClassName);
             List<String> paramTypes = ScoreUtils.parseParameterDescriptors(paramDescriptor + ConstantJavaType.ABBR_VOID);
             Class<?>[] params = new Class<?>[paramTypes.size()];
             for (int i = 0; i < paramTypes.size(); i++) {
@@ -484,12 +506,12 @@ public final class CallExpressionForClassProcessor extends BaseAstProcessor<Swc4
             case ConstantJavaType.ABBR_VOID -> void.class;
             default -> {
                 if (descriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
-                    yield Class.forName(descriptor.replace('/', '.'));
+                    yield compiler.getMemory().getClassResolver().resolve(descriptor.replace('/', '.'));
                 }
                 if (TypeConversionUtils.isObjectDescriptor(descriptor)) {
-                    yield Class.forName(TypeConversionUtils.descriptorToQualifiedName(descriptor));
+                    yield compiler.getMemory().getClassResolver().resolve(TypeConversionUtils.descriptorToQualifiedName(descriptor));
                 }
-                yield Class.forName(descriptor.replace('/', '.'));
+                yield compiler.getMemory().getClassResolver().resolve(descriptor.replace('/', '.'));
             }
         };
     }

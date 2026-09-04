@@ -211,6 +211,32 @@ public class TestCompileAstClassGenerics extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testGenericConstructorArgument(JdkVersion jdkVersion) throws Exception {
+        // The argument is boxed to match the erased type parameter
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class B<T> {
+                    v: T
+                    constructor(x: T) {
+                      this.v = x
+                    }
+                    getV(): T {
+                      return this.v
+                    }
+                  }
+                  export class A {
+                    test(): Object {
+                      const b = new B<Integer>(5)
+                      return b.getV()
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(5);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testGenericInstanceMethodBasic(JdkVersion jdkVersion) throws Exception {
         // Generic instance method
         var runner = getCompiler(jdkVersion).compile("""

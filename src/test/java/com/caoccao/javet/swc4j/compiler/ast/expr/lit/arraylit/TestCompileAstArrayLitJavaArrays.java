@@ -18,11 +18,11 @@ package com.caoccao.javet.swc4j.compiler.ast.expr.lit.arraylit;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
+import static org.assertj.core.api.Assertions.*;
 
 
 /**
@@ -412,5 +412,22 @@ public class TestCompileAstArrayLitJavaArrays extends BaseTestCompileSuite {
                   }
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testUnsupportedElementTypeForArrayMethod(JdkVersion jdkVersion) {
+        // The array API is implemented for int, double, boolean and reference element types
+        assertThatThrownBy(() -> getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Object {
+                      const arr: long[] = [1, 2, 3]
+                      return arr.join(",")
+                    }
+                  }
+                }"""))
+                .isInstanceOf(Swc4jByteCodeCompilerException.class)
+                .hasMessageContaining("is not supported on arrays of long[]");
     }
 }

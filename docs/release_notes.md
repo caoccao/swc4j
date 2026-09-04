@@ -1,5 +1,41 @@
 # Release Notes
 
+## 2.3.0
+
+* Fixed bytecode compiler errors
+  * Fixed the source code being out of scope so that errors carry the line, column and source line
+  * Stopped wrapping compiler errors in `Failed to generate method: <name>`
+  * Reported unresolved identifiers and enum member name collisions at compile time
+  * Reported array methods on unsupported element types at compile time
+* Fixed bytecode compiler code generation
+  * Fixed `max_stack` being hard coded to 10
+  * Fixed the stack map frames of shift, `dup_x*` and `long`/`double` argument instructions
+  * Fixed local variable indexes above 255 by emitting the `wide` form
+  * Fixed the exception handler range so that a `finally` that throws runs once
+  * Fixed the boxing of ternary branches of mixed types
+  * Fixed `++` and `--` on a variable captured by a lambda
+  * Fixed `++` and `--` on a list element of a non `Integer` type
+  * Fixed list and map element assignment to evaluate to the assigned value
+  * Fixed calls to a TypeScript interface method to use `invokeinterface`
+* Fixed bytecode compiler type resolution
+  * Fixed constructors and methods of TypeScript classes being linked with the raw argument types
+  * Fixed enum member access
+  * Fixed return type inference to consider returns in loops, switches and try statements
+  * Fixed integer literals outside the `int` range to be inferred as `long`
+  * Fixed `Boolean` arguments not matching `boolean` parameters
+  * Fixed destructuring parameter defaults and the element index that follows them
+  * Fixed labeled blocks and labels that leaked to the next loop
+  * Fixed tagged templates with a rest parameter or a wrapper return type
+  * Fixed classes visible only through the configured parent class loader not being importable
+* Fixed bytecode compiler JavaScript semantics
+  * Fixed `split()` dropping trailing empty strings
+  * Fixed `join()` rendering `null` as `"null"`
+  * Fixed `sort()` and `toSorted()` on an array to compare elements as strings
+  * Fixed numeric object literal keys being truncated to integers
+  * Fixed `JSON.stringify()` of a Java array, a `Map` or a `Collection`
+* Fixed `ByteCodeRunner.getDefaultClass()` ignoring the package prefix
+* Fixed `ByteArrayClassLoader` to delegate to its parent and to be parallel capable
+
 ## 2.2.0
 
 * Upgraded deno_ast to v0.53.3

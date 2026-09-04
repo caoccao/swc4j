@@ -23,16 +23,20 @@ import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsParamProp;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaDescriptor;
+import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaMethod;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.AstUtils;
 import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
 import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
+import com.caoccao.javet.swc4j.compiler.memory.MethodInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
@@ -107,6 +111,16 @@ public final class ClassCollector {
         }
     }
 
+    /**
+     * Extracts the pattern of a constructor parameter property.
+     *
+     * @param tsParamProp the parameter property
+     * @return the pattern, or null when the shape is not supported
+     */
+    private ISwc4jAstPat extractParameterPropertyPattern(Swc4jAstTsParamProp tsParamProp) {
+        return tsParamProp.getParam() instanceof ISwc4jAstPat pat ? pat : null;
+    }
+
     private String getModuleName(Swc4jAstTsModuleDecl moduleDecl) {
         return moduleDecl.getId().toString();
     }
@@ -129,6 +143,7 @@ public final class ClassCollector {
 
         // Create JavaTypeInfo for this class
         JavaTypeInfo typeInfo = new JavaTypeInfo(className, currentPackage, internalName);
+        typeInfo.setDeclaredInTypeScript(true);
 
         // Process extends (superClass)
         Swc4jAstClass clazz = classDecl.getClazz();
@@ -182,6 +197,7 @@ public final class ClassCollector {
         compiler.getMemory().getScopedJavaTypeRegistry().registerClass(className, typeInfo);
 
         // Analyze fields and register their types
+        boolean hasExplicitConstructor = false;
         for (ISwc4jAstClassMember member : clazz.getBody()) {
             if (member instanceof Swc4jAstClassProp prop) {
                 processFieldProp(prop, typeInfo);
@@ -189,7 +205,16 @@ public final class ClassCollector {
                 processPrivateFieldProp(privateProp, typeInfo);
             } else if (member instanceof Swc4jAstConstructor constructor) {
                 processConstructorParamProps(constructor, typeInfo);
+                registerConstructor(constructor, typeInfo);
+                hasExplicitConstructor = true;
             }
+        }
+        if (!hasExplicitConstructor) {
+            // ClassProcessor generates an implicit no argument constructor
+            typeInfo.addMethod(
+                    ConstantJavaMethod.METHOD_INIT,
+                    new MethodInfo(ConstantJavaMethod.METHOD_INIT, ConstantJavaDescriptor.__V,
+                            ConstantJavaType.ABBR_VOID, false, false));
         }
 
         // Analyze methods and register their return types
@@ -204,10 +229,13 @@ public final class ClassCollector {
                         Swc4jAstBlockStmt blockStmt = bodyOpt.get();
                         ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, blockStmt);
 
-                        registerMethodSignatures(qualifiedName, methodName, function, returnTypeInfo);
+                        registerMethodSignatures(qualifiedName, methodName, function, returnTypeInfo, typeInfo, method.isStatic());
                     }
                 } catch (Swc4jByteCodeCompilerException e) {
-                    // Ignore methods that can't be analyzed
+                    // The collector runs before every class, enum and interface of the compilation
+                    // unit is known, so a return type that depends on one of those cannot be
+                    // analyzed yet. Such a method is left unregistered here and analyzed again
+                    // when its own bytecode is generated, which is where the error is reported.
                 }
             } else if (member instanceof Swc4jAstPrivateMethod privateMethod) {
                 // ES2022 private methods (#method)
@@ -219,10 +247,14 @@ public final class ClassCollector {
                         Swc4jAstBlockStmt blockStmt = bodyOpt.get();
                         ReturnTypeInfo returnTypeInfo = compiler.getTypeResolver().analyzeReturnType(function, blockStmt);
 
-                        registerMethodSignatures(qualifiedName, methodName, function, returnTypeInfo);
+                        registerMethodSignatures(
+                                qualifiedName, methodName, function, returnTypeInfo, typeInfo, privateMethod.isStatic());
                     }
                 } catch (Swc4jByteCodeCompilerException e) {
-                    // Ignore methods that can't be analyzed
+                    // The collector runs before every class, enum and interface of the compilation
+                    // unit is known, so a return type that depends on one of those cannot be
+                    // analyzed yet. Such a method is left unregistered here and analyzed again
+                    // when its own bytecode is generated, which is where the error is reported.
                 }
             }
         }
@@ -323,21 +355,73 @@ public final class ClassCollector {
         processClassDecl(classDecl, currentPackage);
     }
 
+    /**
+     * Registers a constructor so that a {@code new} expression resolves the declared parameter
+     * types and converts its arguments to them, instead of building a descriptor out of the raw
+     * argument types.
+     *
+     * @param constructor the constructor AST node
+     * @param typeInfo    the type info of the declaring class
+     * @throws Swc4jByteCodeCompilerException if a parameter cannot be analyzed
+     */
+    private void registerConstructor(Swc4jAstConstructor constructor, JavaTypeInfo typeInfo)
+            throws Swc4jByteCodeCompilerException {
+        StringBuilder paramDescriptors = new StringBuilder();
+        for (ISwc4jAstParamOrTsParamProp paramOrProp : constructor.getParams()) {
+            ISwc4jAstPat pat;
+            if (paramOrProp instanceof Swc4jAstParam param) {
+                pat = param.getPat();
+            } else if (paramOrProp instanceof Swc4jAstTsParamProp tsParamProp) {
+                pat = extractParameterPropertyPattern(tsParamProp);
+                if (pat == null) {
+                    return; // Unsupported parameter property; leave the constructor unregistered
+                }
+            } else {
+                return;
+            }
+            paramDescriptors.append(compiler.getTypeResolver().extractParameterType(pat));
+        }
+        String descriptor = "(" + paramDescriptors + ")" + ConstantJavaType.ABBR_VOID;
+        typeInfo.addMethod(
+                ConstantJavaMethod.METHOD_INIT,
+                new MethodInfo(ConstantJavaMethod.METHOD_INIT, descriptor, ConstantJavaType.ABBR_VOID, false, false));
+    }
+
+    /**
+     * Registers one method signature, both in the return type map used to resolve a call whose
+     * argument types match the declared ones exactly, and in the type info, which is what allows a
+     * call site to widen or box its arguments to the declared parameter types.
+     */
+    private void registerMethodSignature(
+            String qualifiedName,
+            String methodName,
+            String descriptor,
+            String returnDescriptor,
+            JavaTypeInfo typeInfo,
+            boolean isStatic,
+            boolean isVarArgs) {
+        compiler.getMemory().getScopedJavaTypeRegistry().registerClassMethod(qualifiedName, methodName, descriptor);
+        typeInfo.addMethod(methodName, new MethodInfo(methodName, descriptor, returnDescriptor, isStatic, isVarArgs));
+    }
+
     private void registerMethodSignatures(
             String qualifiedName,
             String methodName,
             Swc4jAstFunction function,
-            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
+            ReturnTypeInfo returnTypeInfo,
+            JavaTypeInfo typeInfo,
+            boolean isStatic) throws Swc4jByteCodeCompilerException {
         List<Swc4jAstParam> params = function.getParams();
         String returnDescriptor = getReturnDescriptor(returnTypeInfo);
+        boolean isVarArgs = !params.isEmpty()
+                && params.get(params.size() - 1).getPat() instanceof Swc4jAstRestPat;
         StringBuilder fullParamDescriptors = new StringBuilder();
         for (Swc4jAstParam param : params) {
             fullParamDescriptors.append(compiler.getTypeResolver().extractParameterType(param.getPat()));
         }
-        compiler.getMemory().getScopedJavaTypeRegistry().registerClassMethod(
-                qualifiedName,
-                methodName,
-                "(" + fullParamDescriptors + ")" + returnDescriptor);
+        registerMethodSignature(
+                qualifiedName, methodName, "(" + fullParamDescriptors + ")" + returnDescriptor,
+                returnDescriptor, typeInfo, isStatic, isVarArgs);
         int firstDefaultIndex = -1;
         for (int i = 0; i < params.size(); i++) {
             if (compiler.getTypeResolver().hasDefaultValue(params.get(i).getPat())) {
@@ -353,10 +437,9 @@ public final class ClassCollector {
             for (int j = 0; j < i; j++) {
                 overloadParamDescriptors.append(compiler.getTypeResolver().extractParameterType(params.get(j).getPat()));
             }
-            compiler.getMemory().getScopedJavaTypeRegistry().registerClassMethod(
-                    qualifiedName,
-                    methodName,
-                    "(" + overloadParamDescriptors + ")" + returnDescriptor);
+            registerMethodSignature(
+                    qualifiedName, methodName, "(" + overloadParamDescriptors + ")" + returnDescriptor,
+                    returnDescriptor, typeInfo, isStatic, false);
         }
     }
 
@@ -400,4 +483,5 @@ public final class ClassCollector {
 
         return new JavaTypeInfo(simpleName, packageName, internalName);
     }
+
 }

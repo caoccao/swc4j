@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
@@ -199,6 +200,11 @@ public final class PatternExtractionUtils {
                 String varName = bindingIdent.getId().getSym();
                 allocateVariableIfNeeded(context, varName, elementType);
                 restStartIndex++;
+            } else if (elem instanceof Swc4jAstAssignPat assignPat
+                    && assignPat.getLeft() instanceof Swc4jAstBindingIdent defaultIdent) {
+                // Element with a default value, for example [a = 1, b]
+                allocateVariableIfNeeded(context, defaultIdent.getId().getSym(), elementType);
+                restStartIndex++;
             } else if (elem instanceof Swc4jAstArrayPat || elem instanceof Swc4jAstObjectPat) {
                 // Nested pattern - allocate variables recursively
                 allocateNestedPatternVariables(context, elem, elementType);
@@ -231,6 +237,25 @@ public final class PatternExtractionUtils {
                 CodeGeneratorUtils.storeVariable(code, localVar.index(), elementType);
                 currentIndex++;
 
+            } else if (elem instanceof Swc4jAstAssignPat assignPat
+                    && assignPat.getLeft() instanceof Swc4jAstBindingIdent defaultIdent) {
+                // Element with a default value, for example [a = 1, b]
+                String varName = defaultIdent.getId().getSym();
+                LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
+
+                // A missing element is undefined in JavaScript, so the default applies to it too
+                code.aload(tempListSlot);
+                code.iconst(currentIndex);
+                int elementAtRef = cp.addMethodRef(
+                        ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAYLIST_API_UTILS,
+                        "elementAt",
+                        "(Ljava/util/List;I)Ljava/lang/Object;");
+                code.invokestatic(elementAtRef);
+
+                generateElementWithDefault(compiler, code, classWriter, assignPat.getRight(), elementType);
+                CodeGeneratorUtils.storeVariable(code, localVar.index(), elementType);
+                currentIndex++;
+
             } else if (elem instanceof Swc4jAstArrayPat nestedArrayPat) {
                 // Nested array pattern: [a, [b, ...inner], ...outer]
                 code.aload(tempListSlot);
@@ -253,6 +278,47 @@ public final class PatternExtractionUtils {
                 generateRestPatternExtraction(compiler, code, classWriter, context, restPat, tempListSlot, restStartIndex, true, listGetRef, listSizeRef, listAddRef);
             }
         }
+    }
+
+    /**
+     * Converts the element that sits on the stack as an Object to the element type, applying the
+     * default value when the element is absent.
+     * <p>
+     * JavaScript applies a destructuring default when the element is undefined, which is a missing
+     * element or a null one here.
+     *
+     * @param compiler    the bytecode compiler
+     * @param code        the code builder
+     * @param classWriter the class writer
+     * @param defaultExpr the default value expression, or null when the pattern has no default
+     * @param elementType the descriptor of the element type
+     * @throws Swc4jByteCodeCompilerException if bytecode generation fails
+     */
+    private static void generateElementWithDefault(
+            ByteCodeCompiler compiler,
+            CodeBuilder code,
+            ClassWriter classWriter,
+            ISwc4jAstExpr defaultExpr,
+            String elementType) throws Swc4jByteCodeCompilerException {
+        if (defaultExpr == null) {
+            generateUnboxingIfNeeded(code, classWriter, elementType);
+            return;
+        }
+        code.dup();          // [Object, Object]
+        code.ifnonnull(0);   // placeholder, jumps to the present branch
+        int ifnonnullOffsetPos = code.getCurrentOffset() - 2;
+        int ifnonnullOpcodePos = code.getCurrentOffset() - 3;
+        code.pop();          // []
+        compiler.getExpressionProcessor().generate(
+                code, classWriter, defaultExpr, CodeGeneratorUtils.createReturnTypeInfoFromDescriptor(elementType));
+        code.gotoLabel(0);   // placeholder, jumps past the present branch
+        int gotoOffsetPos = code.getCurrentOffset() - 2;
+        int gotoOpcodePos = code.getCurrentOffset() - 3;
+        int presentLabel = code.getCurrentOffset();
+        generateUnboxingIfNeeded(code, classWriter, elementType);
+        int endLabel = code.getCurrentOffset();
+        code.patchShort(ifnonnullOffsetPos, presentLabel - ifnonnullOpcodePos);
+        code.patchShort(gotoOffsetPos, endLabel - gotoOpcodePos);
     }
 
     /**
@@ -319,8 +385,9 @@ public final class PatternExtractionUtils {
                 code.ldc(keyRef);
                 code.invokeinterface(mapGetRef, 2);
 
-                // Add type conversion/unboxing if needed
-                generateUnboxingIfNeeded(code, classWriter, valueType);
+                // Add type conversion/unboxing if needed, applying the default value when present
+                generateElementWithDefault(
+                        compiler, code, classWriter, assignProp.getValue().orElse(null), valueType);
                 CodeGeneratorUtils.storeVariable(code, localVar.index(), valueType);
 
             } else if (prop instanceof Swc4jAstKeyValuePatProp keyValueProp) {
@@ -606,4 +673,5 @@ public final class PatternExtractionUtils {
             }
         }
     }
+
 }

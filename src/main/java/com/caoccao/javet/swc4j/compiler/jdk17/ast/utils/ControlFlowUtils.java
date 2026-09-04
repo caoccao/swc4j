@@ -82,7 +82,8 @@ public final class ControlFlowUtils {
             return bool.isValue();
         }
         if (testExpr instanceof Swc4jAstNumber number) {
-            return number.getRaw().equals("1");
+            // getRaw returns an Optional, so comparing it with a String is always false
+            return number.getValue() != 0;
         }
         return false;
     }

@@ -37,6 +37,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.utils.JsNumberUtils;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -296,8 +297,8 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
                 // Phase 2.1: Record<T, V> where T is a wrapper type - generate boxed key
                 generateNumericKey(code, classWriter, num, expectedKeyType);
             } else {
-                // Phase 1: Default behavior - convert to String
-                String keyStr = String.valueOf((int) num.getValue());
+                // Phase 1: Default behavior - convert to String the way JavaScript does
+                String keyStr = JsNumberUtils.toString(num.getValue());
                 int keyIndex = cp.addString(keyStr);
                 code.ldc(keyIndex);
             }
@@ -479,7 +480,7 @@ public final class ObjectLiteralProcessor extends BaseAstProcessor<Swc4jAstObjec
         } else if (key instanceof Swc4jAstStr str) {
             return str.getValue();
         } else if (key instanceof Swc4jAstNumber num) {
-            return String.valueOf((int) num.getValue());
+            return JsNumberUtils.toString(num.getValue());
         } else if (key instanceof Swc4jAstComputedPropName) {
             return "<computed>";
         }

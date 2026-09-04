@@ -223,6 +223,7 @@ public final class TsInterfaceCollector {
 
         // Create JavaTypeInfo for this interface
         JavaTypeInfo typeInfo = new JavaTypeInfo(interfaceName, currentPackage, internalName, JavaType.INTERFACE);
+        typeInfo.setDeclaredInTypeScript(true);
 
         // Process extends clause
         for (Swc4jAstTsExprWithTypeArgs extendsExpr : interfaceDecl.getExtends()) {
@@ -232,18 +233,38 @@ public final class TsInterfaceCollector {
             }
         }
 
-        // Process body members and register methods
-        for (ISwc4jAstTsTypeElement element : interfaceDecl.getBody().getBody()) {
-            if (element instanceof Swc4jAstTsPropertySignature prop) {
-                processPropertySignature(prop, typeInfo);
-            } else if (element instanceof Swc4jAstTsMethodSignature method) {
-                processMethodSignature(method, typeInfo);
-            } else if (element instanceof Swc4jAstTsGetterSignature getter) {
-                processGetterSignature(getter, typeInfo);
-            } else if (element instanceof Swc4jAstTsSetterSignature setter) {
-                processSetterSignature(setter, typeInfo);
-            } else if (element instanceof Swc4jAstTsIndexSignature indexSig) {
-                processIndexSignature(indexSig, typeInfo);
+        // Push the type parameters so that a bare type parameter erases the same way it does when
+        // the interface bytecode is generated, instead of being mapped to a class named after it.
+        // TsInterfaceDeclProcessor erases every type parameter to Object, bounds included, so the
+        // scope is built without constraints to stay in sync with it.
+        TypeParameterScope typeParamScope = null;
+        if (interfaceDecl.getTypeParams().isPresent()) {
+            typeParamScope = new TypeParameterScope();
+            for (Swc4jAstTsTypeParam typeParam : interfaceDecl.getTypeParams().get().getParams()) {
+                typeParamScope.addTypeParameter(typeParam.getName().getSym(), null);
+            }
+        }
+        if (typeParamScope != null) {
+            compiler.getMemory().getCompilationContext().pushTypeParameterScope(typeParamScope);
+        }
+        try {
+            // Process body members and register methods
+            for (ISwc4jAstTsTypeElement element : interfaceDecl.getBody().getBody()) {
+                if (element instanceof Swc4jAstTsPropertySignature prop) {
+                    processPropertySignature(prop, typeInfo);
+                } else if (element instanceof Swc4jAstTsMethodSignature method) {
+                    processMethodSignature(method, typeInfo);
+                } else if (element instanceof Swc4jAstTsGetterSignature getter) {
+                    processGetterSignature(getter, typeInfo);
+                } else if (element instanceof Swc4jAstTsSetterSignature setter) {
+                    processSetterSignature(setter, typeInfo);
+                } else if (element instanceof Swc4jAstTsIndexSignature indexSig) {
+                    processIndexSignature(indexSig, typeInfo);
+                }
+            }
+        } finally {
+            if (typeParamScope != null) {
+                compiler.getMemory().getCompilationContext().popTypeParameterScope();
             }
         }
 

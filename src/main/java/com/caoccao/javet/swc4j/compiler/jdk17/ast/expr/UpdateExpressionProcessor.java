@@ -63,11 +63,58 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
     }
 
+    /**
+     * Emits the array load instruction for the given element type.
+     */
+    private void arrayLoad(CodeBuilder code, String elementType) {
+        switch (elementType) {
+            case ConstantJavaType.ABBR_INTEGER -> code.iaload();
+            case ConstantJavaType.ABBR_LONG -> code.laload();
+            case ConstantJavaType.ABBR_FLOAT -> code.faload();
+            case ConstantJavaType.ABBR_DOUBLE -> code.daload();
+            case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.baload();
+            case ConstantJavaType.ABBR_CHARACTER -> code.caload();
+            case ConstantJavaType.ABBR_SHORT -> code.saload();
+            default -> code.aaload();
+        }
+    }
+
+    /**
+     * Emits the array store instruction for the given element type.
+     */
+    private void arrayStore(CodeBuilder code, String elementType) {
+        switch (elementType) {
+            case ConstantJavaType.ABBR_INTEGER -> code.iastore();
+            case ConstantJavaType.ABBR_LONG -> code.lastore();
+            case ConstantJavaType.ABBR_FLOAT -> code.fastore();
+            case ConstantJavaType.ABBR_DOUBLE -> code.dastore();
+            case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.ABBR_BYTE -> code.bastore();
+            case ConstantJavaType.ABBR_CHARACTER -> code.castore();
+            case ConstantJavaType.ABBR_SHORT -> code.sastore();
+            default -> code.aastore();
+        }
+    }
+
     private void duplicatePrimitive(CodeBuilder code, String primitiveType) {
         switch (primitiveType) {
             case ConstantJavaType.ABBR_LONG, ConstantJavaType.ABBR_DOUBLE ->
                     code.dup2(); // long and double take 2 stack slots
             default -> code.dup();         // all others take 1 slot
+        }
+    }
+
+    /**
+     * Duplicates the value on top of the stack below the array reference and the index that sit
+     * underneath it.
+     *
+     * @param code        the code builder
+     * @param isCategory2 whether the value occupies two stack slots
+     */
+    private void duplicateUnder(CodeBuilder code, boolean isCategory2) {
+        if (isCategory2) {
+            code.dup2_x2();
+        } else {
+            code.dup_x2();
         }
     }
 
@@ -195,6 +242,59 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
     }
 
     /**
+     * Generates an update of a value held in the first slot of a holder array, whose reference is
+     * already on the stack. The expression value (the new value for a prefix operator, the old one
+     * for a postfix operator) is left on the stack.
+     *
+     * @param code        the code builder
+     * @param classWriter the class writer
+     * @param elementType the descriptor of the holder element type
+     * @param isIncrement whether the operator is ++
+     * @param isPrefix    whether the operator is a prefix operator
+     */
+    private void generateHolderUpdate(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            String elementType,
+            boolean isIncrement,
+            boolean isPrefix) {
+        boolean isWrapper = elementType.startsWith("L");
+        String primitiveType = isWrapper ? unwrapType(elementType) : elementType;
+        // A wrapper is a reference, so it always occupies a single stack slot
+        boolean isCategory2 = !isWrapper
+                && (ConstantJavaType.ABBR_LONG.equals(primitiveType) || ConstantJavaType.ABBR_DOUBLE.equals(primitiveType));
+        String storedType = isWrapper ? ConstantJavaType.LJAVA_LANG_OBJECT : primitiveType;
+
+        code.iconst(0);                 // [array, 0]
+        code.dup2();                    // [array, 0, array, 0]
+        arrayLoad(code, storedType);    // [array, 0, value]
+
+        if (!isPrefix) {
+            // The old value is the value of the expression, so park a copy below the array
+            duplicateUnder(code, isCategory2);
+        }
+        if (isWrapper) {
+            generateUnbox(code, classWriter, elementType, primitiveType);
+        }
+
+        loadOne(code, primitiveType);
+        if (isIncrement) {
+            addPrimitive(code, primitiveType);
+        } else {
+            subtractPrimitive(code, primitiveType);
+        }
+        if (isWrapper) {
+            generateBox(code, classWriter, primitiveType, elementType);
+        }
+
+        if (isPrefix) {
+            // The new value is the value of the expression
+            duplicateUnder(code, isCategory2);
+        }
+        arrayStore(code, storedType);
+    }
+
+    /**
      * Optimized code generation for int variables using iinc instruction.
      * Always leaves a value on the stack (either old value for postfix or new value for prefix).
      */
@@ -244,96 +344,47 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
             Swc4jAstMemberExpr memberExpr,
             Swc4jAstComputedPropName computedProp,
             boolean isIncrement,
-            boolean isPrefix) throws Swc4jByteCodeCompilerException {
+            boolean isPrefix,
+            ReturnTypeInfo returnTypeInfo) throws Swc4jByteCodeCompilerException {
         var cp = classWriter.getConstantPool();
 
-        // Step 1: Get current value from ArrayList
-        compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // [ArrayList]
-        compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null); // [ArrayList, index]
+        // The element type of a list is not known at compile time, and a list may even hold
+        // elements of different numeric types, so the update is delegated to a runtime helper that
+        // preserves the type of the element it updates.
+        compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null); // [List]
+        compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null); // [List, index]
 
         // Convert index to int if needed
         String indexType = compiler.getTypeResolver().inferTypeFromExpr(computedProp.getExpr());
-        if (indexType != null && !ConstantJavaType.ABBR_INTEGER.equals(indexType)) {
+        if (ConstantJavaType.LJAVA_LANG_STRING.equals(indexType)) {
+            int parseIntMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_PARSE_INT, ConstantJavaDescriptor.LJAVA_LANG_STRING__I);
+            code.invokestatic(parseIntMethod); // [List, int]
+        } else if (indexType != null && !ConstantJavaType.ABBR_INTEGER.equals(indexType)) {
             TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), ConstantJavaType.ABBR_INTEGER);
         }
 
-        // Call ArrayList.get(int)
-        int getMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_GET, ConstantJavaDescriptor.I__LJAVA_LANG_OBJECT);
-        code.invokevirtual(getMethod); // [Object]
+        code.iconst(isIncrement ? 1 : 0); // [List, index, increment]
+        code.iconst(isPrefix ? 1 : 0);    // [List, index, increment, prefix]
 
-        // Assume Integer type for now
-        int integerClass = cp.addClass(ConstantJavaType.JAVA_LANG_INTEGER);
-        code.checkcast(integerClass); // [Integer]
+        int updateMethod = cp.addMethodRef(
+                ConstantJavaType.COM_CAOCCAO_JAVET_SWC4J_COMPILER_JDK17_AST_UTILS_ARRAYLIST_API_UTILS,
+                "update",
+                "(Ljava/util/List;IZZ)Ljava/lang/Object;");
+        code.invokestatic(updateMethod); // [Object]
 
-        // Unbox to primitive
-        int intValueMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_INT_VALUE, ConstantJavaDescriptor.__I);
-        code.invokevirtual(intValueMethod); // [int] - old value
-
-        // Step 2: Increment/decrement to get new value
-        code.iconst(1); // [int, 1]
-        if (isIncrement) {
-            code.iadd();
-        } else {
-            code.isub();
-        } // [new_int]
-
-        // Step 3: Box the new value
-        int valueOfMethod = cp.addMethodRef(ConstantJavaType.JAVA_LANG_INTEGER, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.I__LJAVA_LANG_INTEGER);
-        code.invokestatic(valueOfMethod); // [new_Integer]
-
-        // Step 4: For postfix, we need to return the old value, so get it from ArrayList.set()'s return
-        // For prefix, we duplicate the new value to return it
-        if (isPrefix) {
-            code.dup(); // [new_Integer, new_Integer] - one to store, one to return
+        // Convert the boxed result to whatever the caller expects
+        if (returnTypeInfo != null) {
+            String expectedType = TypeConversionUtils.getReturnDescriptor(returnTypeInfo);
+            if (expectedType != null
+                    && !ConstantJavaType.ABBR_VOID.equals(expectedType)
+                    && !ConstantJavaType.LJAVA_LANG_OBJECT.equals(expectedType)) {
+                String wrapperType = TypeConversionUtils.getWrapperType(expectedType);
+                code.checkcast(cp.addClass(TypeConversionUtils.descriptorToInternalName(wrapperType)));
+                if (TypeConversionUtils.isPrimitiveType(expectedType)) {
+                    TypeConversionUtils.unboxWrapperType(code, classWriter, wrapperType);
+                }
+            }
         }
-
-        // Step 5: Store back to ArrayList
-        // Stack is now: [new_Integer] (postfix) or [new_Integer, new_Integer] (prefix)
-
-        // Generate ArrayList reference
-        compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null);
-        // Stack: [new_Integer, ArrayList] or [new_Integer, new_Integer, ArrayList]
-
-        // Load index
-        compiler.getExpressionProcessor().generate(code, classWriter, computedProp.getExpr(), null);
-
-        // Convert index to int if needed
-        if (indexType != null && !ConstantJavaType.ABBR_INTEGER.equals(indexType)) {
-            TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), ConstantJavaType.ABBR_INTEGER);
-        }
-        // Stack: [new_Integer, ArrayList, index] or [new_Integer, new_Integer, ArrayList, index]
-
-        // For prefix: need to rearrange [new_Integer, new_Integer, ArrayList, index] to [new_Integer, ArrayList, index, new_Integer]
-        // For postfix: need to rearrange [new_Integer, ArrayList, index] to [ArrayList, index, new_Integer]
-        if (isPrefix) {
-            // Stack: [return_value, value_to_store, ArrayList, index]
-            code.dup_x2(); // [return_value, index, value_to_store, ArrayList, index]
-            code.pop(); // [return_value, index, value_to_store, ArrayList]
-            code.swap(); // [return_value, index, ArrayList, value_to_store]
-            code.dup_x2(); // [return_value, value_to_store, index, ArrayList, value_to_store]
-            code.pop(); // [return_value, value_to_store, index, ArrayList]
-            code.dup_x2(); // [return_value, ArrayList, value_to_store, index, ArrayList]
-            code.pop(); // [return_value, ArrayList, value_to_store, index]
-            code.swap(); // [return_value, ArrayList, index, value_to_store]
-        } else {
-            // Stack: [value_to_store, ArrayList, index]
-            // Rearrange to: [ArrayList, index, value_to_store]
-            code.dup_x2(); // [index, value_to_store, ArrayList, index]
-            code.pop(); // [index, value_to_store, ArrayList]
-            code.dup_x2(); // [ArrayList, index, value_to_store, ArrayList]
-            code.pop(); // [ArrayList, index, value_to_store]
-        }
-
-        // Call ArrayList.set(int, Object)
-        int setMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_ARRAYLIST, ConstantJavaMethod.METHOD_SET, ConstantJavaDescriptor.I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-        code.invokevirtual(setMethod); // [return_value, old_value_from_set] or [old_value_from_set]
-
-        // For prefix, we already have the return value on stack, pop the set result
-        // For postfix, the set result IS the old value we want to return
-        if (isPrefix) {
-            code.pop(); // [return_value=new_Integer]
-        }
-        // For postfix: [old_Integer] from set's return value
     }
 
     private void handleInstanceFieldUpdate(
@@ -563,6 +614,28 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         CompilationContext context = compiler.getMemory().getCompilationContext();
 
         String varName = ident.getSym();
+        boolean isIncrement = updateExpr.getOp() == Swc4jAstUpdateOp.PlusPlus;
+        boolean isPrefix = updateExpr.isPrefix();
+
+        // A variable captured by a lambda lives in a one element holder array, either reachable
+        // through the lambda field (inside the lambda) or through a local slot (outside of it).
+        var capturedVar = context.getCapturedVariable(varName);
+        if (capturedVar != null) {
+            if (!capturedVar.isHolder()) {
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
+                        "Cannot apply " + updateExpr.getOp().getName() + " operator to the captured variable '" +
+                                varName + "' because it is not mutable");
+            }
+            String capturedType = capturedVar.originalType();
+            validateUpdatableType(updateExpr, capturedType);
+            var cp = classWriter.getConstantPool();
+            String currentClass = context.getCurrentClassInternalName();
+            code.aload(0); // the lambda instance
+            code.getfield(cp.addFieldRef(currentClass, capturedVar.fieldName(), capturedVar.type()));
+            generateHolderUpdate(code, classWriter, capturedType, isIncrement, isPrefix);
+            return;
+        }
+
         LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
 
         if (localVar == null) {
@@ -571,28 +644,15 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
 
         String varType = localVar.type();
         int varIndex = localVar.index();
-        boolean isIncrement = updateExpr.getOp() == Swc4jAstUpdateOp.PlusPlus;
-        boolean isPrefix = updateExpr.isPrefix();
 
         // Validate type - only numeric types can be incremented/decremented
-        switch (varType) {
-            case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BYTE, ConstantJavaType.ABBR_SHORT,
-                 ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_LONG, ConstantJavaType.ABBR_FLOAT,
-                 ConstantJavaType.ABBR_DOUBLE,
-                 ConstantJavaType.LJAVA_LANG_INTEGER, ConstantJavaType.LJAVA_LANG_LONG,
-                 ConstantJavaType.LJAVA_LANG_FLOAT,
-                 ConstantJavaType.LJAVA_LANG_DOUBLE, ConstantJavaType.LJAVA_LANG_BYTE,
-                 ConstantJavaType.LJAVA_LANG_SHORT -> {
-                // Valid numeric type
-            }
-            case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.LJAVA_LANG_BOOLEAN ->
-                    throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
-                            "Cannot apply " + updateExpr.getOp().getName() + " operator to boolean type");
-            case ConstantJavaType.LJAVA_LANG_STRING ->
-                    throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
-                            "Cannot apply " + updateExpr.getOp().getName() + " operator to string type");
-            default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
-                    "Cannot apply " + updateExpr.getOp().getName() + " operator to type: " + varType);
+        validateUpdatableType(updateExpr, varType);
+
+        // A mutable capture stores the variable in a one element holder array
+        if (localVar.needsHolder()) {
+            code.aload(localVar.holderIndex());
+            generateHolderUpdate(code, classWriter, varType, isIncrement, isPrefix);
+            return;
         }
 
         // Optimization: Use iinc instruction for int local variables
@@ -638,10 +698,10 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
             return;
         }
 
-        // Handle ArrayList: arr[index]++
-        if (ConstantJavaType.LJAVA_UTIL_ARRAYLIST.equals(objType)) {
+        // Handle ArrayList and List: arr[index]++
+        if (ConstantJavaType.LJAVA_UTIL_ARRAYLIST.equals(objType) || ConstantJavaType.LJAVA_UTIL_LIST.equals(objType)) {
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
-                handleArrayListUpdate(code, classWriter, memberExpr, computedProp, isIncrement, isPrefix);
+                handleArrayListUpdate(code, classWriter, memberExpr, computedProp, isIncrement, isPrefix, returnTypeInfo);
                 return;
             }
         }
@@ -913,7 +973,6 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
         }
     }
 
-
     private void storePrimitive(CodeBuilder code, String primitiveType, int varIndex) {
         switch (primitiveType) {
             case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BYTE, ConstantJavaType.ABBR_SHORT,
@@ -1097,6 +1156,36 @@ public final class UpdateExpressionProcessor extends BaseAstProcessor<Swc4jAstUp
             if (!isPrefix) {
                 loadPrimitive(code, primitiveType, tempSlot);
             }
+        }
+    }
+
+    /**
+     * Validates that the ++ and -- operators can be applied to the given type.
+     *
+     * @param updateExpr the update expression, used for error reporting
+     * @param varType    the descriptor of the operand type
+     * @throws Swc4jByteCodeCompilerException if the operator cannot be applied
+     */
+    private void validateUpdatableType(Swc4jAstUpdateExpr updateExpr, String varType)
+            throws Swc4jByteCodeCompilerException {
+        switch (varType) {
+            case ConstantJavaType.ABBR_INTEGER, ConstantJavaType.ABBR_BYTE, ConstantJavaType.ABBR_SHORT,
+                 ConstantJavaType.ABBR_CHARACTER, ConstantJavaType.ABBR_LONG, ConstantJavaType.ABBR_FLOAT,
+                 ConstantJavaType.ABBR_DOUBLE,
+                 ConstantJavaType.LJAVA_LANG_INTEGER, ConstantJavaType.LJAVA_LANG_LONG,
+                 ConstantJavaType.LJAVA_LANG_FLOAT,
+                 ConstantJavaType.LJAVA_LANG_DOUBLE, ConstantJavaType.LJAVA_LANG_BYTE,
+                 ConstantJavaType.LJAVA_LANG_SHORT -> {
+                // Valid numeric type
+            }
+            case ConstantJavaType.ABBR_BOOLEAN, ConstantJavaType.LJAVA_LANG_BOOLEAN ->
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
+                            "Cannot apply " + updateExpr.getOp().getName() + " operator to boolean type");
+            case ConstantJavaType.LJAVA_LANG_STRING ->
+                    throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
+                            "Cannot apply " + updateExpr.getOp().getName() + " operator to string type");
+            default -> throw new Swc4jByteCodeCompilerException(getSourceCode(), updateExpr,
+                    "Cannot apply " + updateExpr.getOp().getName() + " operator to type: " + varType);
         }
     }
 

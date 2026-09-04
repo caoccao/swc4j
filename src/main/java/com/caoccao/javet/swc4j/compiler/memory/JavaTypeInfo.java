@@ -18,6 +18,7 @@
 package com.caoccao.javet.swc4j.compiler.memory;
 
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.compiler.utils.ClassResolver;
 import com.caoccao.javet.swc4j.compiler.utils.ScoreUtils;
 import com.caoccao.javet.swc4j.compiler.utils.TypeConversionUtils;
 
@@ -54,6 +55,12 @@ public final class JavaTypeInfo {
     private final String packageName;
     private final List<JavaTypeInfo> parentTypeInfos;
     private final JavaType type;
+    /**
+     * The class resolver used for reflective lookups, replaced by the registry with one that
+     * resolves through the class loader configured in the options.
+     */
+    private ClassResolver classResolver;
+    private boolean declaredInTypeScript;
 
     /**
      * Constructs a JavaTypeInfo for a class type.
@@ -83,6 +90,7 @@ public final class JavaTypeInfo {
         this.fields = new HashMap<>();
         this.parentTypeInfos = new ArrayList<>();
         this.enumValues = new HashMap<>();
+        this.classResolver = new ClassResolver(null);
     }
 
     /**
@@ -259,7 +267,7 @@ public final class JavaTypeInfo {
      */
     public boolean isAssignableTo(String typeDescriptor) {
         try {
-            return isAssignableTo(Class.forName(TypeConversionUtils.descriptorToQualifiedName(typeDescriptor)));
+            return isAssignableTo(classResolver.resolve(TypeConversionUtils.descriptorToQualifiedName(typeDescriptor)));
         } catch (ClassNotFoundException e) {
             return isAssignableTo(typeDescriptor, true);
         }
@@ -273,7 +281,7 @@ public final class JavaTypeInfo {
      */
     public boolean isAssignableTo(Class<?> clazz) {
         try {
-            return clazz.isAssignableFrom(Class.forName(internalName.replace('/', '.')));
+            return clazz.isAssignableFrom(classResolver.resolve(internalName.replace('/', '.')));
         } catch (ClassNotFoundException e) {
             // Check direct match
             if (internalName.equals(clazz.getName().replace(".", "/"))) {
@@ -312,12 +320,34 @@ public final class JavaTypeInfo {
     }
 
     /**
+     * Checks whether this type was declared in the compiled TypeScript source rather than imported
+     * from a Java class through reflection.
+     * <p>
+     * Call sites use this to tell a class whose members were discovered by reflection, and whose
+     * descriptors are therefore complete, from a class that is being compiled right now.
+     *
+     * @return true if the type was declared in TypeScript
+     */
+    public boolean isDeclaredInTypeScript() {
+        return declaredInTypeScript;
+    }
+
+    /**
      * Checks if this type is an enum.
      *
      * @return true if this is an enum type
      */
     public boolean isEnum() {
         return type == JavaType.ENUM;
+    }
+
+    /**
+     * Checks if this type is an interface.
+     *
+     * @return true if this is an interface type
+     */
+    public boolean isInterface() {
+        return type == JavaType.INTERFACE;
     }
 
     /**
@@ -387,6 +417,24 @@ public final class JavaTypeInfo {
     }
 
     /**
+     * Sets the class resolver used for reflective lookups.
+     *
+     * @param classResolver the class resolver
+     */
+    public void setClassResolver(ClassResolver classResolver) {
+        this.classResolver = classResolver;
+    }
+
+    /**
+     * Marks this type as declared in the compiled TypeScript source.
+     *
+     * @param declaredInTypeScript whether the type was declared in TypeScript
+     */
+    public void setDeclaredInTypeScript(boolean declaredInTypeScript) {
+        this.declaredInTypeScript = declaredInTypeScript;
+    }
+
+    /**
      * Sets enum values for this type.
      *
      * @param memberOrdinals map of member name to ordinal value
@@ -395,4 +443,5 @@ public final class JavaTypeInfo {
         enumValues.clear();
         enumValues.putAll(memberOrdinals);
     }
+
 }

@@ -27,6 +27,8 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsEnumDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsEnumMember;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
+import com.caoccao.javet.swc4j.compiler.memory.FieldInfo;
+import com.caoccao.javet.swc4j.compiler.memory.JavaTypeInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.LinkedHashMap;
@@ -46,6 +48,18 @@ public final class EnumCollector {
      */
     public EnumCollector(ByteCodeCompiler compiler) {
         this.compiler = compiler;
+    }
+
+    /**
+     * Converts a TypeScript enum member name to the Java enum constant naming convention.
+     * <p>
+     * TypeScript {@code Up, Down} becomes Java {@code UP, DOWN}.
+     *
+     * @param tsName the TypeScript enum member name
+     * @return the Java enum constant name
+     */
+    public static String toJavaConstantName(String tsName) {
+        return tsName.toUpperCase();
     }
 
     /**
@@ -133,10 +147,29 @@ public final class EnumCollector {
         }
 
         // Register in the scoped Java class registry as an enum type
-        compiler.getMemory().getScopedJavaTypeRegistry().registerEnum(qualifiedName, memberOrdinals);
+        JavaTypeInfo enumTypeInfo =
+                compiler.getMemory().getScopedJavaTypeRegistry().registerEnum(qualifiedName, memberOrdinals);
+
+        // Register every enum member as a public static field so that Color.Green resolves to the
+        // generated constant. The field is keyed by the TypeScript name and carries the Java name.
+        String enumDescriptor = "L" + qualifiedName.replace('.', '/') + ";";
+        Map<String, String> javaConstantNames = new LinkedHashMap<>();
+        for (String memberName : memberOrdinals.keySet()) {
+            String javaConstantName = toJavaConstantName(memberName);
+            String conflictingName = javaConstantNames.put(javaConstantName, memberName);
+            if (conflictingName != null) {
+                throw new Swc4jByteCodeCompilerException(
+                        compiler.getMemory().getScopedSourceCode().getSourceCode(),
+                        enumDecl,
+                        "Enum members '" + conflictingName + "' and '" + memberName + "' of enum " + enumName +
+                                " both map to the Java constant " + javaConstantName);
+            }
+            enumTypeInfo.addField(memberName, new FieldInfo(javaConstantName, enumDescriptor, true));
+        }
 
         // Register the simple name as an alias in the scoped type registry
         // This allows the enum to be referenced by its simple name within its declaration scope
         compiler.getMemory().getScopedTypeAliasRegistry().registerAlias(enumName, qualifiedName);
     }
+
 }

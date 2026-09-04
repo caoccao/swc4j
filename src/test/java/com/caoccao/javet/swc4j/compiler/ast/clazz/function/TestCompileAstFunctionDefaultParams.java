@@ -118,7 +118,7 @@ public class TestCompileAstFunctionDefaultParams extends BaseTestCompileSuite {
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .hasRootCauseMessage("Default parameters must come after all required parameters");
+                .hasMessage("Default parameters must come after all required parameters");
     }
 
     @ParameterizedTest

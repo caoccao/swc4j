@@ -314,6 +314,23 @@ public class TestCompileBinExprLShift extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testLShiftFollowedByConditional(JdkVersion jdkVersion) throws Exception {
+        // The shift result stays on the simulated stack across the branch of the conditional
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const a: int = 3
+                      return (a << 2) + (a > 0 ? 1 : 0)
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(13);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testLargeIntLeftShift(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

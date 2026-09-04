@@ -78,7 +78,6 @@ public class LocalVariableTable {
         }
 
         // Allocate holder array slot
-        String holderType = existing.getHolderType();
         int holderIndex = nextIndex;
         nextIndex += 1; // arrays always take 1 slot
 
@@ -205,9 +204,11 @@ public class LocalVariableTable {
      * @param updated the updated LocalVariable
      */
     public void updateVariable(String name, LocalVariable updated) {
-        // Update in scopes
+        // Update in scopes. The slot has to match as well, otherwise an outer variable that is
+        // shadowed by an inner one of the same name would be replaced by the inner one.
         for (Map<String, LocalVariable> scope : scopes) {
-            if (scope.containsKey(name)) {
+            LocalVariable existing = scope.get(name);
+            if (existing != null && existing.index() == updated.index()) {
                 scope.put(name, updated);
             }
         }

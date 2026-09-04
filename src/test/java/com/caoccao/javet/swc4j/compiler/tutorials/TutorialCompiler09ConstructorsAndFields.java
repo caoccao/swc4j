@@ -46,7 +46,7 @@ public class TutorialCompiler09ConstructorsAndFields {
         System.out.println("/*********************************************");
         System.out.println("     Class fields.");
         System.out.println("*********************************************/");
-        System.out.println("name = " + (String) classRunner.invoke("getName"));
+        System.out.println("name = " + classRunner.invoke("getName"));
         System.out.println("age  = " + (int) classRunner.invoke("getAge"));
         // Prepare a class with parameter properties.
         code = """

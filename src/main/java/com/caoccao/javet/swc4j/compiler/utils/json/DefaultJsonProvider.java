@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.utils.json;
 
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -339,7 +340,7 @@ public final class DefaultJsonProvider implements JsonProvider {
 
     @SuppressWarnings("unchecked")
     private static void writeArray(
-            StringBuilder sb, ArrayList<?> list, String indent, String currentIndent,
+            StringBuilder sb, List<?> list, String indent, String currentIndent,
             Object resolvedReplacer, IdentityHashMap<Object, Boolean> visited, int depth) {
         if (depth > MAX_DEPTH) {
             throw new RuntimeException("Maximum nesting depth exceeded");
@@ -377,7 +378,7 @@ public final class DefaultJsonProvider implements JsonProvider {
 
     @SuppressWarnings("unchecked")
     private static void writeObject(
-            StringBuilder sb, LinkedHashMap<?, ?> map, String indent, String currentIndent,
+            StringBuilder sb, Map<?, ?> map, String indent, String currentIndent,
             Object resolvedReplacer, IdentityHashMap<Object, Boolean> visited, int depth) {
         if (depth > MAX_DEPTH) {
             throw new RuntimeException("Maximum nesting depth exceeded");
@@ -493,7 +494,7 @@ public final class DefaultJsonProvider implements JsonProvider {
             return;
         }
         if (value instanceof Boolean bool) {
-            sb.append(bool ? "true" : "false");
+            sb.append(bool.toString());
             return;
         }
         if (value instanceof Integer intVal) {
@@ -557,16 +558,30 @@ public final class DefaultJsonProvider implements JsonProvider {
             sb.append(bigInt);
             return;
         }
-        if (value instanceof LinkedHashMap<?, ?> map) {
+        if (value instanceof Map<?, ?> map) {
             if (visited.containsKey(map)) {
                 throw new RuntimeException("Converting circular structure to JSON");
             }
             writeObject(sb, map, indent, currentIndent, resolvedReplacer, visited, depth);
             return;
         }
-        if (value instanceof ArrayList<?> list) {
-            if (visited.containsKey(list)) {
+        if (value instanceof Collection<?> collection) {
+            if (visited.containsKey(collection)) {
                 throw new RuntimeException("Converting circular structure to JSON");
+            }
+            List<?> list = collection instanceof List<?> asList ? asList : new ArrayList<>(collection);
+            writeArray(sb, list, indent, currentIndent, resolvedReplacer, visited, depth);
+            return;
+        }
+        if (value.getClass().isArray()) {
+            if (visited.containsKey(value)) {
+                throw new RuntimeException("Converting circular structure to JSON");
+            }
+            // A Java array serializes like a JavaScript array
+            int length = Array.getLength(value);
+            List<Object> list = new ArrayList<>(length);
+            for (int i = 0; i < length; i++) {
+                list.add(Array.get(value, i));
             }
             writeArray(sb, list, indent, currentIndent, resolvedReplacer, visited, depth);
             return;

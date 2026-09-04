@@ -16,12 +16,16 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstLabeledStmt;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
+import com.caoccao.javet.swc4j.compiler.memory.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.memory.LoopLabelInfo;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
@@ -49,6 +53,23 @@ public final class LabeledStatementProcessor extends BaseAstProcessor<Swc4jAstLa
     }
 
     /**
+     * Checks whether the labeled statement is one that consumes the pending label itself, which is
+     * the case for every loop and for a switch statement. Every other statement, a labeled block in
+     * particular, is handled here instead.
+     *
+     * @param body the labeled statement body
+     * @return true if the body consumes the pending label
+     */
+    private boolean consumesPendingLabel(ISwc4jAstStmt body) {
+        return body instanceof Swc4jAstForStmt
+                || body instanceof Swc4jAstForInStmt
+                || body instanceof Swc4jAstForOfStmt
+                || body instanceof Swc4jAstWhileStmt
+                || body instanceof Swc4jAstDoWhileStmt
+                || body instanceof Swc4jAstSwitchStmt;
+    }
+
+    /**
      * Generate bytecode for a labeled statement.
      *
      * @param code           the code builder
@@ -66,11 +87,31 @@ public final class LabeledStatementProcessor extends BaseAstProcessor<Swc4jAstLa
         // Extract label name
         String labelName = labeledStmt.getLabel().getSym();
         var body = labeledStmt.getBody();
+        CompilationContext context = compiler.getMemory().getCompilationContext();
 
-        // Set pending label on context for loop/switch processors to consume
-        compiler.getMemory().getCompilationContext().pushPendingLabelName(labelName);
+        if (consumesPendingLabel(body)) {
+            // Set pending label on context for loop/switch processors to consume
+            context.pushPendingLabelName(labelName);
+            try {
+                // Generate the body - loop/switch processors will consume the label
+                compiler.getStatementProcessor().generate(code, classWriter, body, returnTypeInfo);
+            } finally {
+                // The processor normally consumes the label; drop it if it did not, so that the
+                // label cannot attach itself to whatever loop comes next
+                context.popPendingLabelName();
+            }
+            return;
+        }
 
-        // Generate the body - loop/switch processors will consume the label
-        compiler.getStatementProcessor().generate(code, classWriter, body, returnTypeInfo);
+        // Any other labeled statement, a labeled block in particular, is only a break target.
+        // Push a break-only label, generate the body, and patch the breaks to the statement end.
+        LoopLabelInfo breakLabel = new LoopLabelInfo(labelName);
+        context.pushBreakLabel(breakLabel);
+        try {
+            compiler.getStatementProcessor().generate(code, classWriter, body, returnTypeInfo);
+        } finally {
+            context.popBreakLabel();
+        }
+        CodeGeneratorUtils.patchLabelPositions(code, breakLabel, code.getCurrentOffset());
     }
 }

@@ -37,8 +37,6 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
 
     @Override
     void compileProgram(String code, ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException {
-        // Store source code for error reporting
-        memory.getScopedSourceCode().setSourceCode(code);
         // Initialize package scope with package prefix if present
         String packagePrefix = options.packagePrefix();
         if (packagePrefix != null && !packagePrefix.isEmpty()) {
@@ -46,6 +44,9 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
         }
         // Enter a new scope for this file
         memory.enterScope();
+        // Store source code for error reporting (after entering the scope so that the
+        // source code is visible to the scope in which the compilation happens)
+        memory.getScopedSourceCode().setSourceCode(code);
         try {
             if (program instanceof Swc4jAstModule module) {
                 // First pass: process imports

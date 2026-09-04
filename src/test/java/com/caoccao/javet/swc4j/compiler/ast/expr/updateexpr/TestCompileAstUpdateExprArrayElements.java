@@ -32,6 +32,24 @@ public class TestCompileAstUpdateExprArrayElements extends BaseTestCompileSuite 
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testArrayElementDoubleKeepsElementType(JdkVersion jdkVersion) throws Exception {
+        // The element keeps its own numeric type instead of being assumed to be an Integer
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Object {
+                      const arr = [1.5]
+                      arr[0]++
+                      return arr[0]
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(2.5);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testArrayElementModifiesValue(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

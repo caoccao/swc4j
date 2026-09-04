@@ -260,6 +260,9 @@ public class ClassWriter {
                 // Add debug attribute names if present
                 if (method.stackMapTable != null && !method.stackMapTable.isEmpty()) {
                     constantPool.addUtf8("StackMapTable");
+                    // An OBJECT verification type without a class name is written as
+                    // java/lang/Object, so its entry has to exist before the pool is serialized
+                    constantPool.addClass(ConstantJavaType.JAVA_LANG_OBJECT);
                     // Pre-add class names from StackMapTable entries to constant pool
                     for (StackMapEntry entry : method.stackMapTable) {
                         if (entry.localClassNames != null) {

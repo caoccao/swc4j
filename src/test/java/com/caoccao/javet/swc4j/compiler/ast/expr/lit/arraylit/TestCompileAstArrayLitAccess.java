@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TestCompileAstArrayLitAccess extends BaseTestCompileSuite {
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayClear(JdkVersion jdkVersion) throws Exception {
@@ -45,7 +44,6 @@ public class TestCompileAstArrayLitAccess extends BaseTestCompileSuite {
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(0);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -63,7 +61,6 @@ public class TestCompileAstArrayLitAccess extends BaseTestCompileSuite {
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(2);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayIndexGet(JdkVersion jdkVersion) throws Exception {
@@ -78,7 +75,6 @@ public class TestCompileAstArrayLitAccess extends BaseTestCompileSuite {
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(20);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -96,6 +92,22 @@ public class TestCompileAstArrayLitAccess extends BaseTestCompileSuite {
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(99);
     }
 
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayIndexSetAsExpression(JdkVersion jdkVersion) throws Exception {
+        // The assignment evaluates to the assigned value, not to the element it replaced
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const arr = [1, 2, 3]
+                      const v: int = (arr[0] = 5)
+                      return v
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(5);
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

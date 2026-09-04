@@ -115,6 +115,22 @@ public class TestCompileAstTsEnumDeclUsage extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testEnumMemberAccess(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export enum Color { Red, Green, Blue }
+                  export class A {
+                    test(): Object {
+                      return Color.Green
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).hasToString("GREEN");
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testEnumReverseMapping(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

@@ -107,6 +107,24 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testEnumMemberNameCollision(JdkVersion jdkVersion) {
+        // Up and up both map to the Java constant UP
+        assertThatThrownBy(() -> getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export enum Dir { Up, up }
+                  export class A {
+                    test(): Object {
+                      return Dir.Up
+                    }
+                  }
+                }"""))
+                .isInstanceOf(Swc4jByteCodeCompilerException.class)
+                .hasMessageContaining("both map to the Java constant UP");
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testEnumValueOfNotFound(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

@@ -96,6 +96,23 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testIntAndNullBranches(JdkVersion jdkVersion) throws Exception {
+        // The int branch is boxed so that both edges into the join carry a reference
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Object {
+                      const c: boolean = false
+                      return c ? 1 : null
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isNull();
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testLongBranches(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -110,6 +127,23 @@ public class TestCompileAstCondExprTypes extends BaseTestCompileSuite {
                 }""");
         assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(200L);
     }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testStringAndIntBranches(JdkVersion jdkVersion) throws Exception {
+        // The branches meet at a reference type, so the int branch is boxed
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Object {
+                      const c: boolean = false
+                      return c ? "a" : 1
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(1);
+    }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayIndexOf(JdkVersion jdkVersion) throws Exception {
@@ -44,7 +43,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(2);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -63,7 +61,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayIndexOfDuplicates(JdkVersion jdkVersion) throws Exception {
@@ -78,7 +75,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -95,7 +91,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(0);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayIndexOfLastElement(JdkVersion jdkVersion) throws Exception {
@@ -110,7 +105,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -127,7 +121,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-1);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayIndexOfOnEmptyArray(JdkVersion jdkVersion) throws Exception {
@@ -142,7 +135,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-1);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -159,7 +151,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(2);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayIndexOfStringNotFound(JdkVersion jdkVersion) throws Exception {
@@ -174,7 +165,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-1);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -191,7 +181,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(2);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayLastIndexOf(JdkVersion jdkVersion) throws Exception {
@@ -206,7 +195,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(2);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -225,7 +213,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayLastIndexOfDuplicates(JdkVersion jdkVersion) throws Exception {
@@ -240,7 +227,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(5);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -257,7 +243,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(0);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayLastIndexOfLastElement(JdkVersion jdkVersion) throws Exception {
@@ -272,7 +257,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -289,7 +273,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(5);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayLastIndexOfNotFound(JdkVersion jdkVersion) throws Exception {
@@ -304,7 +287,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-1);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -321,7 +303,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-1);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayLastIndexOfString(JdkVersion jdkVersion) throws Exception {
@@ -337,7 +318,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(2);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayLastIndexOfStringNotFound(JdkVersion jdkVersion) throws Exception {
@@ -352,7 +332,6 @@ public class TestCompileAstArrayLitIndexOf extends BaseTestCompileSuite {
                 }""");
         assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(-1);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

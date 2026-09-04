@@ -65,6 +65,26 @@ public class TestCompileAstCondExprEdgeCases extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testConditionalAfterLongArgumentCall(JdkVersion jdkVersion) throws Exception {
+        // A long argument occupies one value on the simulated stack, not two
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    f(a: long, b: int): long {
+                      return a + b
+                    }
+                    test(): int {
+                      const a: long = 5
+                      return 100 + (this.f(a, 1) > 3 ? 1 : 2)
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(101);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testInBinaryExpression(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

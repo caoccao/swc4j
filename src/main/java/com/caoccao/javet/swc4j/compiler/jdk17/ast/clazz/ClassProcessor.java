@@ -426,7 +426,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
                 "<clinit>",
                 ConstantJavaDescriptor.__V,
                 code.toByteArray(),
-                10, // max stack
+                code.computeMaxStack(Math.max(maxLocals, 1), true, internalClassName, ConstantJavaDescriptor.__V, cp),
                 Math.max(maxLocals, 1), // max locals (at least 1 for static blocks with local vars)
                 null, // line numbers
                 null, // local variable table
@@ -460,7 +460,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
                 ConstantJavaMethod.METHOD_INIT,
                 ConstantJavaDescriptor.__V,
                 code.toByteArray(),
-                10, // max stack (increased for field initialization)
+                code.computeMaxStack(1, false, internalClassName, ConstantJavaDescriptor.__V, cp),
                 1   // max locals (this)
         );
     }
@@ -567,8 +567,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
         }
 
         // Add return if not already present
-        byte[] bytecode = code.toByteArray();
-        if (bytecode.length == 0 || bytecode[bytecode.length - 1] != (byte) 0xB1) {
+        if (!code.isLastInstructionTerminal()) {
             code.returnVoid();
         }
 
@@ -579,7 +578,7 @@ public final class ClassProcessor extends BaseAstProcessor<Swc4jAstClass> {
                 ConstantJavaMethod.METHOD_INIT,
                 descriptor,
                 code.toByteArray(),
-                10, // max stack
+                code.computeMaxStack(maxLocals, false, internalClassName, descriptor, cp),
                 maxLocals
         );
     }

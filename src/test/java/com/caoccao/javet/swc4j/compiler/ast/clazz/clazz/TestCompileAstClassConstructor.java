@@ -33,6 +33,32 @@ public class TestCompileAstClassConstructor extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testConstructorArgumentWidening(JdkVersion jdkVersion) throws Exception {
+        // The argument is widened to the declared parameter type instead of dictating the descriptor
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class Foo {
+                    v: double = 0
+                    constructor(x: double) {
+                      this.v = x
+                    }
+                    getV(): double {
+                      return this.v
+                    }
+                  }
+                  export class A {
+                    test(): double {
+                      const f = new Foo(1)
+                      return f.getV()
+                    }
+                  }
+                }""");
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(1.0);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testConstructorCallingSuperWithArgs(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

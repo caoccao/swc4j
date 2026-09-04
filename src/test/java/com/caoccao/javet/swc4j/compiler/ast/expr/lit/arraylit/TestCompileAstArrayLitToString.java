@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToLocaleStringAfterModification(JdkVersion jdkVersion) throws Exception {
@@ -47,7 +46,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("5,10,20,30,40");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToLocaleStringBasic(JdkVersion jdkVersion) throws Exception {
@@ -62,7 +60,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -79,7 +76,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToLocaleStringMethodChaining(JdkVersion jdkVersion) throws Exception {
@@ -95,7 +91,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToLocaleStringMixedTypes(JdkVersion jdkVersion) throws Exception {
@@ -110,7 +105,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,hello,true");
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -129,7 +123,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToLocaleStringSingleElement(JdkVersion jdkVersion) throws Exception {
@@ -145,7 +138,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("42");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToLocaleStringWithStrings(JdkVersion jdkVersion) throws Exception {
@@ -160,7 +152,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("hello,world");
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -179,7 +170,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("0,1,2,3,4");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToStringBasic(JdkVersion jdkVersion) throws Exception {
@@ -194,7 +184,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -211,7 +200,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToStringMethodChaining(JdkVersion jdkVersion) throws Exception {
@@ -227,7 +215,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToStringMixedTypes(JdkVersion jdkVersion) throws Exception {
@@ -242,7 +229,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,hello,true");
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -261,7 +247,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToStringSingleElement(JdkVersion jdkVersion) throws Exception {
@@ -276,7 +261,6 @@ public class TestCompileAstArrayLitToString extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("42");
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

@@ -166,6 +166,23 @@ public class TestCompileAstObjectLitBasic extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testNumericKeyWithFraction(JdkVersion jdkVersion) throws Exception {
+        // The key is converted with JavaScript number semantics, not truncated to an int
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Object {
+                      const o = { 1.5: "x" }
+                      return o
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).hasToString("{1.5=x}");
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testNumericKeys(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

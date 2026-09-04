@@ -141,7 +141,8 @@ public final class CallExpressionProcessor extends BaseAstProcessor<Swc4jAstCall
             if (objType != null && objType.startsWith("L") && objType.endsWith(";")) {
                 String internalName = TypeConversionUtils.descriptorToInternalName(objType);
                 var javaTypeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolveByInternalName(internalName);
-                if (javaTypeInfo != null && !javaTypeInfo.getMethods().isEmpty()) {
+                if (javaTypeInfo != null && !javaTypeInfo.isDeclaredInTypeScript()
+                        && !javaTypeInfo.getMethods().isEmpty()) {
                     isImportedJavaClass = true;
                 }
             }

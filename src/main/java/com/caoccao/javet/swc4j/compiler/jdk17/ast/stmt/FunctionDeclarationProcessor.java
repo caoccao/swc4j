@@ -314,8 +314,9 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
             var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, internalClassName, descriptor, classWriter.getConstantPool());
             var exceptionTable = code.getExceptionTable().isEmpty() ? null : code.getExceptionTable();
 
-            classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), 10, maxLocals,
-                    null, null, stackMapTable, exceptionTable);
+            classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(),
+                    code.computeMaxStack(maxLocals, isStatic, internalClassName, descriptor, classWriter.getConstantPool()),
+                    maxLocals, null, null, stackMapTable, exceptionTable);
             generateDefaultParameterOverloadsForStaticMethod(
                     classWriter,
                     fnDecl,
@@ -384,7 +385,8 @@ public final class FunctionDeclarationProcessor extends BaseAstProcessor<Swc4jAs
             maxLocals += CodeGeneratorUtils.getSlotSize(paramType);
         }
 
-        classWriter.addMethod(baseAccessFlags, methodName, overloadDescriptor, code.toByteArray(), 10, maxLocals);
+        classWriter.addMethod(baseAccessFlags, methodName, overloadDescriptor, code.toByteArray(),
+                code.computeMaxStack(maxLocals, true, internalClassName, overloadDescriptor, cp), maxLocals);
     }
 
     private ScopedStandaloneFunctionRegistry getRegistry() {

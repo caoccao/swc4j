@@ -563,9 +563,14 @@ public final class TryStatementProcessor extends BaseAstProcessor<Swc4jAstTryStm
             int catchClassIndex = cp.addClass(catchClassName);
             code.addExceptionHandler(tryStartPc, tryEndPc, catchStartPc, catchClassIndex);
         }
-        if (tryStartPc < catchEndPc) {
-            // Finally handler catches any exception (type 0)
-            code.addExceptionHandler(tryStartPc, catchEndPc, finallyHandlerPc, 0);
+        // The finally handler catches any exception (type 0) thrown by the try block or by the
+        // catch block. It must not cover the normal path copy of the finally block that sits
+        // between them, otherwise a finally block that throws would run twice.
+        if (tryStartPc < tryEndPc) {
+            code.addExceptionHandler(tryStartPc, tryEndPc, finallyHandlerPc, 0);
+        }
+        if (catchStartPc < catchEndPc) {
+            code.addExceptionHandler(catchStartPc, catchEndPc, finallyHandlerPc, 0);
         }
     }
 

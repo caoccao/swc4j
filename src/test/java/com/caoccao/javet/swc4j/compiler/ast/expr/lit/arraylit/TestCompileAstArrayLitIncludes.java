@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayIncludes(JdkVersion jdkVersion) throws Exception {
@@ -44,7 +43,6 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -63,7 +61,6 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayIncludesFirstElement(JdkVersion jdkVersion) throws Exception {
@@ -78,7 +75,6 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -95,7 +91,6 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayIncludesNotFound(JdkVersion jdkVersion) throws Exception {
@@ -110,7 +105,6 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -127,7 +121,6 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayIncludesReturnsFalseForDifferentType(JdkVersion jdkVersion) throws Exception {
@@ -142,7 +135,6 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -159,7 +151,6 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isTrue();
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayIncludesStringNotFound(JdkVersion jdkVersion) throws Exception {
@@ -174,7 +165,6 @@ public class TestCompileAstArrayLitIncludes extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Boolean>invoke("test")).isFalse();
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

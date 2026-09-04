@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.*;
 
@@ -40,24 +41,8 @@ public final class ArrayListApiUtils {
      * @return the locale-specific string representation (comma-separated values)
      */
     public static String arrayToLocaleString(List<?> list) {
-        if (list == null || list.isEmpty()) {
-            return "";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < list.size(); i++) {
-            if (i > 0) {
-                sb.append(",");
-            }
-            Object element = list.get(i);
-            if (element != null) {
-                // Use String.valueOf for basic conversion
-                // Future enhancement: Use locale-specific formatting for numbers/dates
-                sb.append(element);
-            }
-        }
-
-        return sb.toString();
+        // Future enhancement: use locale-specific formatting for numbers and dates
+        return join(list, ",");
     }
 
     /**
@@ -152,6 +137,49 @@ public final class ArrayListApiUtils {
         }
 
         return list;
+    }
+
+    /**
+     * The default comparator of {@code Array.prototype.sort}: elements are compared as strings,
+     * and undefined (null here) sorts last.
+     * <p>
+     * This is what JavaScript does for a plain array, which is why {@code [10, 9, 1].sort()}
+     * evaluates to {@code [1, 10, 9]}. Java arrays of a primitive element type behave like a
+     * JavaScript TypedArray instead and are sorted numerically by
+     * {@link ArrayApiUtils#sort(int[])} and its siblings.
+     *
+     * @return the default JavaScript sort comparator
+     */
+    public static Comparator<Object> defaultComparator() {
+        return (o1, o2) -> {
+            if (o1 == null && o2 == null) {
+                return 0;
+            }
+            if (o1 == null) {
+                return 1;
+            }
+            if (o2 == null) {
+                return -1;
+            }
+            return o1.toString().compareTo(o2.toString());
+        };
+    }
+
+    /**
+     * Returns the element at the given index, or null when the index is out of range.
+     * <p>
+     * Destructuring treats a missing element as undefined, which is what the null stands for here,
+     * so that a pattern default can be applied.
+     *
+     * @param list  the list
+     * @param index the index of the element
+     * @return the element, or null when there is none
+     */
+    public static Object elementAt(List<?> list, int index) {
+        if (list == null || index < 0 || index >= list.size()) {
+            return null;
+        }
+        return list.get(index);
     }
 
     /**
@@ -845,8 +873,11 @@ public final class ArrayListApiUtils {
             if (i > 0) {
                 sb.append(sep);
             }
-            // Convert element to string (null becomes "null" in JavaScript)
-            sb.append(list.get(i));
+            // JavaScript renders null and undefined as an empty string
+            Object element = list.get(i);
+            if (element != null) {
+                sb.append(element);
+            }
         }
 
         return sb.toString();
@@ -1478,6 +1509,18 @@ public final class ArrayListApiUtils {
     }
 
     /**
+     * Sort an ArrayList in place the way JavaScript sorts an array.
+     * JavaScript equivalent: arr.sort()
+     *
+     * @param list the ArrayList to sort in place
+     */
+    public static void sort(List<Object> list) {
+        if (list != null) {
+            list.sort(defaultComparator());
+        }
+    }
+
+    /**
      * Remove and/or insert elements at a specific position in an ArrayList.
      * JavaScript equivalent: arr.splice(start, deleteCount, ...items)
      *
@@ -1598,13 +1641,9 @@ public final class ArrayListApiUtils {
             return new ArrayList<>();
         }
 
-        // Create a copy of the list
+        // Create a copy of the list and sort the copy the way JavaScript does
         ArrayList<Object> result = new ArrayList<>(list);
-
-        // Sort the copy (requires elements to be Comparable)
-        // Using raw type to avoid compilation error
-        Collections.sort((List) result);
-
+        result.sort(defaultComparator());
         return result;
     }
 
@@ -1633,6 +1672,48 @@ public final class ArrayListApiUtils {
 
         // Return the modified copy (not the removed elements)
         return result;
+    }
+
+    /**
+     * Applies the ++ or -- operator to a list element, in place.
+     * <p>
+     * The element keeps its own numeric type, so incrementing an element of a list of doubles
+     * yields a double, not an int.
+     *
+     * @param list      the list holding the element
+     * @param index     the index of the element
+     * @param increment true for ++, false for --
+     * @param prefix    true for a prefix operator, which evaluates to the new value, false for a
+     *                  postfix operator, which evaluates to the old value
+     * @return the value of the update expression
+     */
+    public static Object update(List<Object> list, int index, boolean increment, boolean prefix) {
+        Object oldValue = list.get(index);
+        int delta = increment ? 1 : -1;
+        Object newValue;
+        if (oldValue instanceof Integer value) {
+            newValue = value + delta;
+        } else if (oldValue instanceof Double value) {
+            newValue = value + delta;
+        } else if (oldValue instanceof Long value) {
+            newValue = value + delta;
+        } else if (oldValue instanceof Float value) {
+            newValue = value + delta;
+        } else if (oldValue instanceof Short value) {
+            newValue = (short) (value + delta);
+        } else if (oldValue instanceof Byte value) {
+            newValue = (byte) (value + delta);
+        } else if (oldValue instanceof Character value) {
+            newValue = (char) (value + delta);
+        } else if (oldValue instanceof Number value) {
+            newValue = value.doubleValue() + delta;
+        } else {
+            throw new IllegalArgumentException(
+                    "Cannot apply " + (increment ? "++" : "--") + " to element " + index + " of type " +
+                            (oldValue == null ? "null" : oldValue.getClass().getName()));
+        }
+        list.set(index, newValue);
+        return prefix ? newValue : oldValue;
     }
 
     /**

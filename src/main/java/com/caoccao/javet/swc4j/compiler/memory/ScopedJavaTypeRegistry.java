@@ -18,6 +18,7 @@
 package com.caoccao.javet.swc4j.compiler.memory;
 
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
+import com.caoccao.javet.swc4j.compiler.utils.ClassResolver;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -32,6 +33,11 @@ public final class ScopedJavaTypeRegistry {
     // Example: "com.example.MyClass.test()" -> "I"
     private final Stack<Map<String, String>> classMethodToReturnTypeMap;
     private final Stack<Map<String, JavaTypeInfo>> scopeStack;
+    /**
+     * The class resolver used for reflective lookups, replaced by the compiler with one that
+     * resolves through the class loader configured in the options.
+     */
+    private ClassResolver classResolver;
 
     /**
      * Instantiates a new Scoped java type registry.
@@ -42,6 +48,7 @@ public final class ScopedJavaTypeRegistry {
         // Push global scope
         scopeStack.push(new HashMap<>());
         classMethodToReturnTypeMap.push(new HashMap<>());
+        classResolver = new ClassResolver(null);
     }
 
     private String buildMethodDescriptor(Method method) {
@@ -166,6 +173,13 @@ public final class ScopedJavaTypeRegistry {
      * @param paramDescriptor parameter descriptor only (e.g., "()", "(I)", "(ILjava/lang/String;)")
      * @return array of parameter types
      */
+    /**
+     * Parses a parameter descriptor into the parameter classes.
+     *
+     * @param paramDescriptor the parameter descriptor, with or without the enclosing parentheses
+     * @return the parameter classes, or null when the descriptor is malformed or names a class
+     * that is not on the compiler classpath
+     */
     private Class<?>[] parseParameterTypes(String paramDescriptor) {
         List<Class<?>> params = new ArrayList<>();
 
@@ -217,12 +231,18 @@ public final class ScopedJavaTypeRegistry {
                 case ConstantJavaType.CHAR_REFERENCE -> {
                     // Object type
                     int semicolon = inner.indexOf(';', i);
-                    if (semicolon == -1) break;
+                    if (semicolon == -1) {
+                        // Malformed descriptor: an L type without a terminating semicolon
+                        return null;
+                    }
                     String className = inner.substring(i + 1, semicolon).replace('/', '.');
                     try {
-                        params.add(Class.forName(className));
+                        params.add(classResolver.resolve(className));
                     } catch (ClassNotFoundException e) {
-                        // Skip unknown class
+                        // The class is not on the compiler classpath, so the parameter list cannot
+                        // be built. Reporting that is better than dropping the parameter, which
+                        // would shift every parameter after it.
+                        return null;
                     }
                     i = semicolon + 1;
                 }
@@ -241,12 +261,17 @@ public final class ScopedJavaTypeRegistry {
                     }
                     String arrayDesc = inner.substring(start, i);
                     try {
-                        params.add(Class.forName(arrayDesc.replace('/', '.')));
+                        params.add(classResolver.resolve(arrayDesc.replace('/', '.')));
                     } catch (ClassNotFoundException e) {
-                        // Skip unknown class
+                        // See the comment above: a parameter that cannot be resolved makes the
+                        // whole parameter list unusable.
+                        return null;
                     }
                 }
-                default -> i++;
+                default -> {
+                    // Unknown descriptor character
+                    return null;
+                }
             }
         }
 
@@ -260,6 +285,7 @@ public final class ScopedJavaTypeRegistry {
      * @param javaTypeInfo the Java type metadata
      */
     public void registerClass(String alias, JavaTypeInfo javaTypeInfo) {
+        javaTypeInfo.setClassResolver(classResolver);
         scopeStack.peek().put(alias, javaTypeInfo);
     }
 
@@ -285,8 +311,9 @@ public final class ScopedJavaTypeRegistry {
      *
      * @param enumName       the qualified enum name
      * @param memberOrdinals map of member name to ordinal value
+     * @return the registered JavaTypeInfo
      */
-    public void registerEnum(String enumName, Map<String, Integer> memberOrdinals) {
+    public JavaTypeInfo registerEnum(String enumName, Map<String, Integer> memberOrdinals) {
         // Extract simple name and package
         int lastDot = enumName.lastIndexOf('.');
         String simpleName = lastDot >= 0 ? enumName.substring(lastDot + 1) : enumName;
@@ -294,8 +321,11 @@ public final class ScopedJavaTypeRegistry {
         String internalName = enumName.replace('.', '/');
 
         JavaTypeInfo enumInfo = new JavaTypeInfo(simpleName, packageName, internalName, JavaType.ENUM);
+        enumInfo.setClassResolver(classResolver);
+        enumInfo.setDeclaredInTypeScript(true);
         enumInfo.setEnumValues(memberOrdinals);
         scopeStack.peek().put(enumName, enumInfo);
+        return enumInfo;
     }
 
     /**
@@ -305,6 +335,7 @@ public final class ScopedJavaTypeRegistry {
      * @param typeInfo      the JavaTypeInfo for the interface
      */
     public void registerInterface(String interfaceName, JavaTypeInfo typeInfo) {
+        typeInfo.setClassResolver(classResolver);
         scopeStack.peek().put(interfaceName, typeInfo);
     }
 
@@ -434,8 +465,11 @@ public final class ScopedJavaTypeRegistry {
      */
     public String resolveMethodDescriptorViaReflection(String qualifiedClassName, String methodName, String paramDescriptor) {
         try {
-            Class<?> clazz = Class.forName(qualifiedClassName);
+            Class<?> clazz = classResolver.resolve(qualifiedClassName);
             Class<?>[] paramTypes = parseParameterTypes(paramDescriptor);
+            if (paramTypes == null) {
+                return null;
+            }
 
             // Try exact match first
             try {
@@ -477,8 +511,11 @@ public final class ScopedJavaTypeRegistry {
      */
     private String resolveMethodReturnTypeViaReflection(String qualifiedClassName, String methodName, String paramDescriptor) {
         try {
-            Class<?> clazz = Class.forName(qualifiedClassName);
+            Class<?> clazz = classResolver.resolve(qualifiedClassName);
             Class<?>[] paramTypes = parseParameterTypes(paramDescriptor);
+            if (paramTypes == null) {
+                return null;
+            }
             Method method = clazz.getMethod(methodName, paramTypes);
             return getDescriptor(method.getReturnType());
         } catch (ClassNotFoundException | NoSuchMethodException e) {
@@ -503,4 +540,14 @@ public final class ScopedJavaTypeRegistry {
         }
         return null;
     }
+
+    /**
+     * Sets the class resolver used for reflective lookups.
+     *
+     * @param classResolver the class resolver
+     */
+    public void setClassResolver(ClassResolver classResolver) {
+        this.classResolver = classResolver;
+    }
+
 }

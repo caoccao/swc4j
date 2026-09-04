@@ -24,11 +24,18 @@ import java.util.List;
  * Helper class to build method bytecode.
  */
 public class CodeBuilder {
+    /**
+     * The minimum operand stack depth reserved for every generated method.
+     * <p>
+     * It keeps a margin for opcodes that the stack map data flow analysis may not model.
+     */
+    public static final int MIN_MAX_STACK = 10;
     private final List<Byte> code = new ArrayList<>(4096);
     private final List<ClassWriter.ExceptionTableEntry> exceptionTable = new ArrayList<>();
     private final List<ClassWriter.LineNumberEntry> lineNumbers = new ArrayList<>(1024);
     private int currentLine = -1;
     private int lastPopPosition = -1;
+    private int lastTerminalPosition = -1;
 
     /**
      * Constructs a new CodeBuilder.
@@ -90,10 +97,7 @@ public class CodeBuilder {
             case 1 -> code.add((byte) (0x2B)); // aload_1
             case 2 -> code.add((byte) (0x2C)); // aload_2
             case 3 -> code.add((byte) (0x2D)); // aload_3
-            default -> {
-                code.add((byte) (0x19)); // aload
-                code.add((byte) (index));
-            }
+            default -> emitLocalVariableInstruction(0x19, index); // aload
         }
         return this;
     }
@@ -129,6 +133,7 @@ public class CodeBuilder {
      * @return this CodeBuilder
      */
     public CodeBuilder areturn() {
+        lastTerminalPosition = code.size();
         code.add((byte) (0xB0)); // areturn
         return this;
     }
@@ -159,10 +164,7 @@ public class CodeBuilder {
             // astore_2
             case 3 -> code.add((byte) (0x4E));
             // astore_3
-            default -> {
-                code.add((byte) (0x3A)); // astore
-                code.add((byte) (index));
-            }
+            default -> emitLocalVariableInstruction(0x3A, index); // astore
         }
         return this;
     }
@@ -173,6 +175,7 @@ public class CodeBuilder {
      * @return this CodeBuilder
      */
     public CodeBuilder athrow() {
+        lastTerminalPosition = code.size();
         code.add((byte) (0xBF)); // athrow
         return this;
     }
@@ -243,6 +246,26 @@ public class CodeBuilder {
         code.add((byte) (classRefIndex >> 8)); // high byte
         code.add((byte) (classRefIndex & 0xFF)); // low byte
         return this;
+    }
+
+    /**
+     * Computes the maximum operand stack depth required by the emitted bytecode.
+     * <p>
+     * The depth is derived from the same data flow analysis that computes the stack map frames,
+     * so it stays in sync with what the verifier sees. The result is never lower than
+     * {@link #MIN_MAX_STACK}, which keeps a small margin for opcodes the analysis may not model.
+     *
+     * @param maxLocals    the maximum number of local variables
+     * @param isStatic     whether the method is static
+     * @param className    the class name for 'this' reference type
+     * @param descriptor   the method descriptor
+     * @param constantPool the constant pool for resolving types
+     * @return the maximum operand stack depth in JVM slots
+     */
+    public int computeMaxStack(int maxLocals, boolean isStatic, String className, String descriptor, ClassWriter.ConstantPool constantPool) {
+        byte[] bytecode = toByteArray();
+        StackMapProcessor generator = new StackMapProcessor(bytecode, maxLocals, isStatic, className, descriptor, constantPool, exceptionTable);
+        return Math.max(MIN_MAX_STACK, generator.computeMaxStack());
     }
 
     /**
@@ -354,10 +377,7 @@ public class CodeBuilder {
             case 1 -> code.add((byte) (0x27)); // dload_1
             case 2 -> code.add((byte) (0x28)); // dload_2
             case 3 -> code.add((byte) (0x29)); // dload_3
-            default -> {
-                code.add((byte) (0x18)); // dload
-                code.add((byte) (index));
-            }
+            default -> emitLocalVariableInstruction(0x18, index); // dload
         }
         return this;
     }
@@ -398,6 +418,7 @@ public class CodeBuilder {
      * @return this CodeBuilder
      */
     public CodeBuilder dreturn() {
+        lastTerminalPosition = code.size();
         code.add((byte) (0xAF)); // dreturn
         return this;
     }
@@ -414,10 +435,7 @@ public class CodeBuilder {
             case 1 -> code.add((byte) (0x48)); // dstore_1
             case 2 -> code.add((byte) (0x49)); // dstore_2
             case 3 -> code.add((byte) (0x4A)); // dstore_3
-            default -> {
-                code.add((byte) (0x39)); // dstore
-                code.add((byte) (index));
-            }
+            default -> emitLocalVariableInstruction(0x39, index); // dstore
         }
         return this;
     }
@@ -501,6 +519,23 @@ public class CodeBuilder {
     public CodeBuilder emitByte(int value) {
         code.add((byte) value);
         return this;
+    }
+
+    /**
+     * Emits a local variable instruction, using the wide form when the index does not fit a byte.
+     *
+     * @param opcode the opcode of the instruction
+     * @param index  the local variable index
+     */
+    private void emitLocalVariableInstruction(int opcode, int index) {
+        if (index > 0xFF) {
+            code.add((byte) (0xC4)); // wide
+            code.add((byte) (opcode));
+            writeShort(index);
+            return;
+        }
+        code.add((byte) (opcode));
+        code.add((byte) (index));
     }
 
     /**
@@ -618,10 +653,7 @@ public class CodeBuilder {
             // fload_2
             case 3 -> code.add((byte) (0x25));
             // fload_3
-            default -> {
-                code.add((byte) (0x17)); // fload
-                code.add((byte) (index));
-            }
+            default -> emitLocalVariableInstruction(0x17, index); // fload
         }
         return this;
     }
@@ -662,6 +694,7 @@ public class CodeBuilder {
      * @return this CodeBuilder
      */
     public CodeBuilder freturn() {
+        lastTerminalPosition = code.size();
         code.add((byte) (0xAE)); // freturn
         return this;
     }
@@ -682,10 +715,7 @@ public class CodeBuilder {
             // fstore_2
             case 3 -> code.add((byte) (0x46));
             // fstore_3
-            default -> {
-                code.add((byte) (0x38)); // fstore
-                code.add((byte) (index));
-            }
+            default -> emitLocalVariableInstruction(0x38, index); // fstore
         }
         return this;
     }
@@ -1181,6 +1211,14 @@ public class CodeBuilder {
      * @return this CodeBuilder
      */
     public CodeBuilder iinc(int index, int delta) {
+        if (index > 0xFF || delta < Byte.MIN_VALUE || delta > Byte.MAX_VALUE) {
+            // The wide form takes a two byte index and a two byte signed delta
+            code.add((byte) (0xC4)); // wide
+            code.add((byte) (0x84)); // iinc
+            writeShort(index);
+            writeShort(delta);
+            return this;
+        }
         code.add((byte) (0x84)); // iinc
         code.add((byte) (index));
         code.add((byte) (delta));
@@ -1203,10 +1241,7 @@ public class CodeBuilder {
             // iload_2
             case 3 -> code.add((byte) (0x1D));
             // iload_3
-            default -> {
-                code.add((byte) (0x15)); // iload
-                code.add((byte) (index));
-            }
+            default -> emitLocalVariableInstruction(0x15, index); // iload
         }
         return this;
     }
@@ -1321,6 +1356,7 @@ public class CodeBuilder {
      * @return this CodeBuilder
      */
     public CodeBuilder ireturn() {
+        lastTerminalPosition = code.size();
         code.add((byte) (0xAC)); // ireturn
         return this;
     }
@@ -1332,6 +1368,18 @@ public class CodeBuilder {
      */
     public boolean isLastInstructionPop() {
         return !code.isEmpty() && lastPopPosition == code.size() - 1;
+    }
+
+    /**
+     * Checks if the last instruction emitted was a return or an athrow.
+     * <p>
+     * The position is tracked rather than derived from the last byte, which may well be the operand
+     * of another instruction that happens to have the value of a return opcode.
+     *
+     * @return true if the most recently emitted instruction ends the method
+     */
+    public boolean isLastInstructionTerminal() {
+        return !code.isEmpty() && lastTerminalPosition == code.size() - 1;
     }
 
     /**
@@ -1370,10 +1418,7 @@ public class CodeBuilder {
             // istore_2
             case 3 -> code.add((byte) (0x3E));
             // istore_3
-            default -> {
-                code.add((byte) (0x36)); // istore
-                code.add((byte) (index));
-            }
+            default -> emitLocalVariableInstruction(0x36, index); // istore
         }
         return this;
     }
@@ -1560,10 +1605,7 @@ public class CodeBuilder {
             // lload_2
             case 3 -> code.add((byte) (0x21));
             // lload_3
-            default -> {
-                code.add((byte) (0x16)); // lload
-                code.add((byte) (index));
-            }
+            default -> emitLocalVariableInstruction(0x16, index); // lload
         }
         return this;
     }
@@ -1649,6 +1691,7 @@ public class CodeBuilder {
      * @return this CodeBuilder
      */
     public CodeBuilder lreturn() {
+        lastTerminalPosition = code.size();
         code.add((byte) (0xAD)); // lreturn
         return this;
     }
@@ -1689,10 +1732,7 @@ public class CodeBuilder {
             // lstore_2
             case 3 -> code.add((byte) (0x42));
             // lstore_3
-            default -> {
-                code.add((byte) (0x37)); // lstore
-                code.add((byte) (index));
-            }
+            default -> emitLocalVariableInstruction(0x37, index); // lstore
         }
         return this;
     }
@@ -1855,6 +1895,7 @@ public class CodeBuilder {
      * @return this CodeBuilder
      */
     public CodeBuilder returnVoid() {
+        lastTerminalPosition = code.size();
         code.add((byte) (0xB1)); // return
         return this;
     }

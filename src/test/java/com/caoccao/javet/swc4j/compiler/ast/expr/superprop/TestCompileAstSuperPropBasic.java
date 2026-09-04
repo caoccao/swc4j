@@ -76,7 +76,7 @@ public class TestCompileAstSuperPropBasic extends BaseTestCompileSuite {
                                 instanceRunner.invoke("readThis"))
                 )
         ).isEqualTo(
-                SimpleMap.<String, Object>of(
+                SimpleMap.of(
                         "initial", List.of(9, 9, 9),
                         "assignResult", 21,
                         "afterAssign", List.of(21, 21))
@@ -98,8 +98,7 @@ public class TestCompileAstSuperPropBasic extends BaseTestCompileSuite {
                     }
                   }
                 }"""))
-                .hasMessageContaining("Failed to generate method: test")
-                .hasRootCauseMessage("Computed super property expressions not yet supported");
+                .hasMessage("Computed super property expressions not yet supported");
     }
 
     @ParameterizedTest

@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToReversedAfterModification(JdkVersion jdkVersion) throws Exception {
@@ -49,7 +48,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(4, 3, 2, 1, 0));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToReversedBasic(JdkVersion jdkVersion) throws Exception {
@@ -64,7 +62,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(5, 4, 3, 2, 1));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -82,7 +79,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToReversedEmpty(JdkVersion jdkVersion) throws Exception {
@@ -97,7 +93,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of());
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -114,7 +109,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToReversedMixedTypes(JdkVersion jdkVersion) throws Exception {
@@ -129,7 +123,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(true, "hello", 1));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -146,7 +139,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(30, 20, 10));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToReversedSingleElement(JdkVersion jdkVersion) throws Exception {
@@ -161,7 +153,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(42));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -178,7 +169,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of("test", "world", "hello"));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToSortedAlreadySorted(JdkVersion jdkVersion) throws Exception {
@@ -193,7 +183,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -210,6 +199,21 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
 
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayToSortedComparesAsStrings(JdkVersion jdkVersion) throws Exception {
+        // Array.prototype.sort compares elements as strings, so 10 sorts between 1 and 9
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Object {
+                      const arr = [10, 9, 1]
+                      return arr.toSorted()
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 10, 9));
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -227,7 +231,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(3, 1, 2));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToSortedEmpty(JdkVersion jdkVersion) throws Exception {
@@ -242,7 +245,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of());
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -259,7 +261,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(3, 2, 1));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToSortedReturnsNewArray(JdkVersion jdkVersion) throws Exception {
@@ -274,7 +275,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -291,7 +291,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToSortedSingleElement(JdkVersion jdkVersion) throws Exception {
@@ -306,7 +305,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(42));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -323,7 +321,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of("apple", "banana", "cherry"));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToSortedWithDuplicates(JdkVersion jdkVersion) throws Exception {
@@ -339,7 +336,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 1, 2, 3, 4, 5, 5, 6, 9));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToSplicedBasic(JdkVersion jdkVersion) throws Exception {
@@ -354,7 +350,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -372,7 +367,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToSplicedEmpty(JdkVersion jdkVersion) throws Exception {
@@ -387,7 +381,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of());
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -404,7 +397,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToSplicedInsertWhileDeleting(JdkVersion jdkVersion) throws Exception {
@@ -419,7 +411,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 99, 100, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -436,7 +427,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(2, 3, 5));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToSplicedNegativeStart(JdkVersion jdkVersion) throws Exception {
@@ -451,7 +441,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -468,7 +457,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToSplicedOnlyStart(JdkVersion jdkVersion) throws Exception {
@@ -483,7 +471,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -500,7 +487,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToSplicedReturnsNewArray(JdkVersion jdkVersion) throws Exception {
@@ -515,7 +501,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(10, 99, 40));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -532,7 +517,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(99));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayToSplicedStrings(JdkVersion jdkVersion) throws Exception {
@@ -548,7 +532,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of("hello", "beautiful", "test"));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayWithBasic(JdkVersion jdkVersion) throws Exception {
@@ -563,7 +546,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 99, 4, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -581,7 +563,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayWithEmpty(JdkVersion jdkVersion) throws Exception {
@@ -596,7 +577,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of());
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -613,7 +593,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(99, 20, 30));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayWithLastElement(JdkVersion jdkVersion) throws Exception {
@@ -629,7 +608,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(10, 20, 30, 99));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayWithMethodChaining(JdkVersion jdkVersion) throws Exception {
@@ -642,9 +620,9 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                     }
                   }
                 }""");
-        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 10));
+        // Array.prototype.sort compares elements as strings, so 10 sorts between 1 and 2
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 10, 2));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -661,7 +639,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, "world", true));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayWithNegativeIndex(JdkVersion jdkVersion) throws Exception {
@@ -676,7 +653,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 99, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -693,7 +669,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(10, 20, 99));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayWithOutOfBounds(JdkVersion jdkVersion) throws Exception {
@@ -708,7 +683,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -725,7 +699,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(10, 99, 30));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayWithSingleElement(JdkVersion jdkVersion) throws Exception {
@@ -740,7 +713,6 @@ public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(99));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

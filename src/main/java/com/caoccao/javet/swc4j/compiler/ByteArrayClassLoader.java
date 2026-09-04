@@ -18,11 +18,16 @@ package com.caoccao.javet.swc4j.compiler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Custom class loader that loads classes from in-memory bytecode.
  */
 public class ByteArrayClassLoader extends ClassLoader {
+    static {
+        registerAsParallelCapable();
+    }
+
     /**
      * Map of class names to bytecode.
      */
@@ -45,7 +50,9 @@ public class ByteArrayClassLoader extends ClassLoader {
     public ByteArrayClassLoader(Map<String, byte[]> byteCodeMap, ClassLoader parent) {
         super(parent);
         this.byteCodeMap = new HashMap<>(byteCodeMap);
-        classMap = new HashMap<>();
+        // A concurrent map, so that a class defined by one thread is visible to the next reader
+        // without holding the lock
+        classMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -57,24 +64,22 @@ public class ByteArrayClassLoader extends ClassLoader {
      */
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
-        if (classMap.containsKey(name)) {
-            return classMap.get(name);
+        Class<?> cached = classMap.get(name);
+        if (cached != null) {
+            return cached;
         }
-        Class<?> clazz;
         synchronized (lock) {
-            if (classMap.containsKey(name)) {
-                clazz = classMap.get(name);
-            } else {
-                byte[] bytes = byteCodeMap.get(name);
-                if (bytes != null) {
-                    clazz = defineClass(name, bytes, 0, bytes.length);
-                } else {
-                    clazz = super.findClass(name);
-                }
-                classMap.put(name, clazz);
+            cached = classMap.get(name);
+            if (cached != null) {
+                return cached;
             }
+            byte[] bytes = byteCodeMap.get(name);
+            Class<?> clazz = bytes != null
+                    ? defineClass(name, bytes, 0, bytes.length)
+                    : super.findClass(name);
+            classMap.put(name, clazz);
+            return clazz;
         }
-        return clazz;
     }
 
     /**
@@ -85,6 +90,11 @@ public class ByteArrayClassLoader extends ClassLoader {
      * @throws ClassNotFoundException if the class cannot be found
      */
     public Class<?> getClass(String name) throws ClassNotFoundException {
-        return findClass(name);
+        if (byteCodeMap.containsKey(name) || classMap.containsKey(name)) {
+            // A generated class takes precedence over one of the same name on the parent classpath
+            return findClass(name);
+        }
+        // Everything else goes through the normal parent delegation
+        return loadClass(name);
     }
 }

@@ -212,6 +212,11 @@ public final class IdentifierProcessor extends BaseAstProcessor<Swc4jAstIdent> {
                     }
                 }
             }
+        } else {
+            // Nothing matched. Emitting no bytecode here would surface much later as a
+            // VerifyError, so report the unresolved identifier at its own location.
+            throw new Swc4jByteCodeCompilerException(
+                    getSourceCode(), ident, "Unresolved identifier: " + varName);
         }
     }
 }

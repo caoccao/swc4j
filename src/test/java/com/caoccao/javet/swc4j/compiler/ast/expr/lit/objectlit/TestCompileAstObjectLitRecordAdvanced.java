@@ -732,8 +732,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected deepest level key type mismatch error, got: " + causeMessage).contains("Key 'a'").contains("String");
     }
 
@@ -758,8 +757,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected deepest level type mismatch error, got: " + causeMessage).contains("Property 'level3'").contains("String");
     }
 
@@ -782,8 +780,7 @@ public class TestCompileAstObjectLitRecordAdvanced extends BaseTestCompileSuite 
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected middle level type mismatch error, got: " + causeMessage).contains("Property 'level2'").contains("String");
     }
 

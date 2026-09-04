@@ -133,6 +133,12 @@ public final class NumberLiteralProcessor extends BaseAstProcessor<Swc4jAstNumbe
             }
             int valueOfRef = cp.addMethodRef(ConstantJavaType.JAVA_LANG_DOUBLE, ConstantJavaMethod.METHOD_VALUE_OF, ConstantJavaDescriptor.D__LJAVA_LANG_DOUBLE);
             code.invokestatic(valueOfRef);
+        } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)
+                && (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE)) {
+            // An integral literal that does not fit an int is emitted as a long, which is the type
+            // that TypeResolver infers for it
+            int longIndex = cp.addLong((long) value);
+            code.ldc2_w(longIndex);
         } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
             // Integer value - check if it fits in iconst/bipush/sipush range
             int intValue = (int) value;

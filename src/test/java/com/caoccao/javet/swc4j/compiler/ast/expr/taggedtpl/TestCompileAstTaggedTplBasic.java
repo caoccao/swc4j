@@ -32,6 +32,27 @@ public class TestCompileAstTaggedTplBasic extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testTagWithWrapperReturnType(JdkVersion jdkVersion) throws Exception {
+        // The wrapper the tag function returns is unboxed for the primitive it is assigned to
+        var runner = getCompiler(jdkVersion).compile("""
+                import { TemplateStringsArray } from 'com.caoccao.javet.swc4j.compiler.jdk17.ast.utils'
+                namespace com {
+                  export class A {
+                    tag(strings: TemplateStringsArray): Integer {
+                      return 42
+                    }
+                    test(): int {
+                      const v: int = this.tag`hello`
+                      return v
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(42);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testTaggedTemplateBasic(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

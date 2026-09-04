@@ -27,9 +27,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstIfStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
+import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.ast.ts.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -382,6 +380,30 @@ public final class TypeResolver {
         var tsType = typeAnn.getTypeAnn();
         String descriptor = mapTsTypeToDescriptor(tsType);
         return ReturnTypeInfo.of(getSourceCode(), tsType, descriptor);
+    }
+
+    /**
+     * Collects every return statement of a node, without descending into a nested function, arrow
+     * function or class, whose returns belong to that inner body instead.
+     *
+     * @param node        the node to walk
+     * @param returnStmts the collected return statements
+     */
+    private void collectReturnStmts(ISwc4jAst node, List<Swc4jAstReturnStmt> returnStmts) {
+        if (node instanceof Swc4jAstReturnStmt returnStmt) {
+            returnStmts.add(returnStmt);
+            return;
+        }
+        if (node instanceof Swc4jAstArrowExpr
+                || node instanceof Swc4jAstFnExpr
+                || node instanceof Swc4jAstFnDecl
+                || node instanceof Swc4jAstClassExpr
+                || node instanceof Swc4jAstClassDecl) {
+            return;
+        }
+        for (ISwc4jAst child : node.getChildNodes()) {
+            collectReturnStmts(child, returnStmts);
+        }
     }
 
     /**
@@ -860,13 +882,31 @@ public final class TypeResolver {
      */
     private String inferReturnTypeFromBlock(Swc4jAstBlockStmt blockStmt)
             throws Swc4jByteCodeCompilerException {
-        for (var stmt : blockStmt.getStmts()) {
-            String returnType = findReturnTypeInStmt(stmt);
-            if (returnType != null) {
-                return returnType;
+        // Every return statement of the block counts, wherever it sits: inside a loop, a switch, a
+        // try or a labeled statement. Their types are unified, so a method that returns an int on
+        // one path and a double on another is inferred as double rather than as whatever the first
+        // return happens to be.
+        List<Swc4jAstReturnStmt> returnStmts = new ArrayList<>();
+        collectReturnStmts(blockStmt, returnStmts);
+        String returnType = null;
+        boolean hasValueReturn = false;
+        for (Swc4jAstReturnStmt returnStmt : returnStmts) {
+            if (returnStmt.getArg().isEmpty()) {
+                if (!hasValueReturn && returnType == null) {
+                    returnType = ConstantJavaType.ABBR_VOID;
+                }
+                continue;
             }
+            String type = inferTypeFromExpr(returnStmt.getArg().get());
+            // If inferTypeFromExpr returns null (e.g., for null literals),
+            // default to Object type since null is compatible with any reference type
+            if (type == null) {
+                type = ConstantJavaType.LJAVA_LANG_OBJECT;
+            }
+            returnType = hasValueReturn ? findCommonType(returnType, type) : type;
+            hasValueReturn = true;
         }
-        return null;
+        return returnType;
     }
 
     /**
@@ -938,7 +978,11 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstNumber number) {
             double value = number.getValue();
             if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
-                return ConstantJavaType.ABBR_INTEGER;
+                // An integral literal that does not fit an int is a long, otherwise the value would
+                // silently be truncated
+                return value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE
+                        ? ConstantJavaType.ABBR_INTEGER
+                        : ConstantJavaType.ABBR_LONG;
             }
             return ConstantJavaType.ABBR_DOUBLE;
         } else if (expr instanceof Swc4jAstBool) {
@@ -1035,13 +1079,13 @@ public final class TypeResolver {
                 }
             }
 
-            // Handle ClassName.staticField access
+            // Handle ClassName.staticField access (this covers enum member access such as Color.Green)
             if (memberExpr.getObj() instanceof Swc4jAstIdent classIdent && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                 String className = classIdent.getSym();
                 String fieldName = propIdent.getSym();
 
                 // Try to resolve the class
-                JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
+                JavaTypeInfo typeInfo = compiler.getMemory().resolveJavaType(className);
                 if (typeInfo != null) {
                     FieldInfo fieldInfo = typeInfo.getField(fieldName);
                     if (fieldInfo != null && fieldInfo.isStatic()) {
@@ -1373,6 +1417,20 @@ public final class TypeResolver {
                 }
                 case Void -> {
                     return ConstantJavaType.LJAVA_LANG_OBJECT;
+                }
+                case Minus -> {
+                    // -2147483648 parses as the negation of the literal 2147483648, which does not
+                    // fit an int on its own, so the negated value is what decides the type
+                    if (unaryExpr.getArg() instanceof Swc4jAstNumber number) {
+                        double negated = -number.getValue();
+                        if (negated == Math.floor(negated) && !Double.isInfinite(negated) && !Double.isNaN(negated)) {
+                            return negated >= Integer.MIN_VALUE && negated <= Integer.MAX_VALUE
+                                    ? ConstantJavaType.ABBR_INTEGER
+                                    : ConstantJavaType.ABBR_LONG;
+                        }
+                        return ConstantJavaType.ABBR_DOUBLE;
+                    }
+                    return inferTypeFromExpr(unaryExpr.getArg());
                 }
                 default -> {
                     // For unary expressions, infer type from the argument

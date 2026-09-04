@@ -154,18 +154,19 @@ public final class MemberExpressionProcessor extends BaseAstProcessor<Swc4jAstMe
             }
         }
 
-        // Handle ClassName.staticField access
+        // Handle ClassName.staticField access (this covers enum member access such as Color.Green)
         if (memberExpr.getObj() instanceof Swc4jAstIdent classIdent && memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
             String className = classIdent.getSym();
             String fieldName = propIdent.getSym();
 
             // Try to resolve the class
-            JavaTypeInfo typeInfo = compiler.getMemory().getScopedJavaTypeRegistry().resolve(className);
+            JavaTypeInfo typeInfo = compiler.getMemory().resolveJavaType(className);
             if (typeInfo != null) {
                 FieldInfo fieldInfo = typeInfo.getField(fieldName);
                 if (fieldInfo != null && fieldInfo.isStatic()) {
-                    // Generate getstatic instruction
-                    int fieldRef = cp.addFieldRef(typeInfo.getInternalName(), fieldName, fieldInfo.descriptor());
+                    // Generate getstatic instruction; the field may be named differently in Java
+                    // than in TypeScript, as is the case for enum members.
+                    int fieldRef = cp.addFieldRef(typeInfo.getInternalName(), fieldInfo.name(), fieldInfo.descriptor());
                     code.getstatic(fieldRef);
                     return;
                 }

@@ -401,8 +401,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
                     }""");
         });
         assertThat(exception).isInstanceOf(Exception.class);
-        assertThat(exception.getCause()).as("Expected wrapped exception").isNotNull();
-        String causeMessage = exception.getCause().getMessage();
+        String causeMessage = exception.getMessage();
         assertThat(causeMessage).as("Expected key type mismatch for string key '2', got: " + causeMessage).contains("Key").contains("String");
     }
 
@@ -429,8 +428,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
             assertThat(result).isEqualTo(SimpleMap.of("a", "hello", "b", null));
         } catch (Exception e) {
             // If compilation fails, it means null validation is strict
-            assertThat(e.getCause()).as("Expected wrapped exception").isNotNull();
-            String causeMessage = e.getCause().getMessage();
+            String causeMessage = e.getMessage();
             assertThat(causeMessage.contains("null") || causeMessage.contains("Property 'b'")).as("Expected null-related error, got: " + causeMessage).isTrue();
         }
     }
@@ -661,7 +659,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
         });
         assertThat(exception).isInstanceOf(Exception.class);
         // Should fail - compiler rejects type mismatch during bytecode generation
-        assertThat(exception.getMessage()).as("Error message should indicate generation failure: " + exception.getMessage()).contains("Failed to generate method");
+        assertThat(exception.getMessage()).as("Error message should indicate the key type mismatch: " + exception.getMessage()).contains("Record requires");
     }
 
     @ParameterizedTest
@@ -682,7 +680,7 @@ public class TestCompileAstObjectLitEdgeCases extends BaseTestCompileSuite {
         });
         assertThat(exception).isInstanceOf(Exception.class);
         // Should fail - compiler rejects type mismatch during bytecode generation
-        assertThat(exception.getMessage()).as("Error message should indicate generation failure: " + exception.getMessage()).contains("Failed to generate method");
+        assertThat(exception.getMessage()).as("Error message should indicate the key type mismatch: " + exception.getMessage()).contains("Record requires");
     }
 
 }

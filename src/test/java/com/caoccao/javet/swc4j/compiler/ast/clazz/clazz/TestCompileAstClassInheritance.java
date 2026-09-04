@@ -394,57 +394,6 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testInheritedOverloadedMethods(JdkVersion jdkVersion) throws Exception {
-        // Regression test: calling different overloaded inherited methods from a parent Java class.
-        // ArrayList has add(Object) and add(int, Object).
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class SmartList extends java.util.ArrayList<Object> {
-                    addItem(item: Object): void {
-                      this.add(item)
-                    }
-                    addItemAt(index: int, item: Object): void {
-                      this.add(index, item)
-                    }
-                  }
-                }""");
-        var instanceRunner = runner.createInstanceRunner("com.SmartList");
-        instanceRunner.invoke("addItem", "B");
-        instanceRunner.invoke("addItem", "C");
-        instanceRunner.invoke("addItemAt", 0, "A");
-        @SuppressWarnings("unchecked")
-        ArrayList<Object> list = (ArrayList<Object>) instanceRunner.getInstance();
-        assertThat(list).containsExactly("A", "B", "C");
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testMethodOverride(JdkVersion jdkVersion) throws Exception {
-        var runner = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    getValue(): int {
-                      return 100
-                    }
-                  }
-                  export class B extends A {
-                    getValue(): int {
-                      return 200
-                    }
-                  }
-                }""");
-        assertThat(
-                Map.of(
-                        "A", runner.createInstanceRunner("com.A").invoke("getValue"),
-                        "B", (int) runner.createInstanceRunner("com.B").invoke("getValue")
-                )
-        ).isEqualTo(
-                Map.of("A", 100, "B", 200)
-        );
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testInheritedOverloadedConstructorsCallingSuperOverloads(JdkVersion jdkVersion) throws Exception {
         // Overloaded constructors each calling a different super(...) overload.
         // RuntimeException has RuntimeException(), RuntimeException(String), RuntimeException(String, Throwable).
@@ -518,6 +467,31 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testInheritedOverloadedMethods(JdkVersion jdkVersion) throws Exception {
+        // Regression test: calling different overloaded inherited methods from a parent Java class.
+        // ArrayList has add(Object) and add(int, Object).
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class SmartList extends java.util.ArrayList<Object> {
+                    addItem(item: Object): void {
+                      this.add(item)
+                    }
+                    addItemAt(index: int, item: Object): void {
+                      this.add(index, item)
+                    }
+                  }
+                }""");
+        var instanceRunner = runner.createInstanceRunner("com.SmartList");
+        instanceRunner.invoke("addItem", "B");
+        instanceRunner.invoke("addItem", "C");
+        instanceRunner.invoke("addItemAt", 0, "A");
+        @SuppressWarnings("unchecked")
+        ArrayList<Object> list = (ArrayList<Object>) instanceRunner.getInstance();
+        assertThat(list).containsExactly("A", "B", "C");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testInheritedOverloadedMethodsCalledFromOverloadedTsMethods(JdkVersion jdkVersion) throws Exception {
         // Regression test: overloaded TS methods calling overloaded inherited Java methods.
         // ArrayList has add(Object):boolean and add(int, Object):void.
@@ -545,6 +519,32 @@ public class TestCompileAstClassInheritance extends BaseTestCompileSuite {
         @SuppressWarnings("unchecked")
         ArrayList<Object> list = (ArrayList<Object>) instance;
         assertThat(list).containsExactly("A", "B", "C");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMethodOverride(JdkVersion jdkVersion) throws Exception {
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    getValue(): int {
+                      return 100
+                    }
+                  }
+                  export class B extends A {
+                    getValue(): int {
+                      return 200
+                    }
+                  }
+                }""");
+        assertThat(
+                Map.of(
+                        "A", runner.createInstanceRunner("com.A").invoke("getValue"),
+                        "B", (int) runner.createInstanceRunner("com.B").invoke("getValue")
+                )
+        ).isEqualTo(
+                Map.of("A", 100, "B", 200)
+        );
     }
 
     @ParameterizedTest

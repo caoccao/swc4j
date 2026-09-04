@@ -29,6 +29,7 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.constants.ConstantJavaType;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.BaseAstProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.ControlFlowUtils;
@@ -250,6 +251,7 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
             // Generate the return value expression
             compiler.getExpressionProcessor().generate(code, classWriter, returnStmt.getArg().get(),
                     returnTypeInfo);
+            generateReturnValueBoxing(code, classWriter, returnStmt.getArg().get(), returnTypeInfo);
 
             // If there are pending finally blocks, save return value and execute them
             if (!pendingFinallyBlocks.isEmpty()) {
@@ -322,6 +324,48 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
     }
 
     /**
+     * Boxes the value of a return statement when the method returns a reference type that the
+     * expression processors do not box for, such as Object or Number.
+     * <p>
+     * An expression processor boxes on its own when the expected type is the wrapper of the value,
+     * so those are left alone.
+     *
+     * @param code           the code builder
+     * @param classWriter    the class writer
+     * @param expr           the returned expression
+     * @param returnTypeInfo the declared return type
+     */
+    private void generateReturnValueBoxing(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            ISwc4jAstExpr expr,
+            ReturnTypeInfo returnTypeInfo) {
+        if (returnTypeInfo == null || returnTypeInfo.type() != ReturnType.OBJECT) {
+            return;
+        }
+        String expectedType = returnTypeInfo.descriptor();
+        if (!TypeConversionUtils.isObjectDescriptor(expectedType)) {
+            return;
+        }
+        String valueType;
+        try {
+            valueType = compiler.getTypeResolver().inferTypeFromExpr(expr);
+        } catch (Swc4jByteCodeCompilerException e) {
+            // The type of the expression cannot be inferred, so it is not a primitive literal and
+            // there is nothing to box here
+            return;
+        }
+        if (valueType == null || !TypeConversionUtils.isPrimitiveType(valueType)) {
+            return;
+        }
+        if (!TypeConversionUtils.getPrimitiveType(expectedType).equals(expectedType)) {
+            // The expected type is a wrapper, which the expression processor boxes for itself
+            return;
+        }
+        TypeConversionUtils.boxPrimitiveType(code, classWriter, valueType, TypeConversionUtils.getWrapperType(valueType));
+    }
+
+    /**
      * Load a value based on its type.
      */
     private void loadByType(CodeBuilder code, ReturnTypeInfo returnTypeInfo, int index) {
@@ -354,4 +398,5 @@ public final class StatementProcessor extends BaseAstProcessor<ISwc4jAstStmt> {
             default -> code.astore(index);
         }
     }
+
 }

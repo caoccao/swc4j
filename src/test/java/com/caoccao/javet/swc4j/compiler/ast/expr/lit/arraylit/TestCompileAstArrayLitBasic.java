@@ -33,7 +33,6 @@ import static org.assertj.core.api.Assertions.within;
  */
 public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayAnnotation(JdkVersion jdkVersion) throws Exception {
@@ -48,7 +47,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                 }""");
         assertThat((int[]) runner.createInstanceRunner("com.A").invoke("test")).containsExactly(1, 2, 3);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -65,7 +63,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1.5, 2.5, 3.5));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayListOfStrings(JdkVersion jdkVersion) throws Exception {
@@ -80,7 +77,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of("foo", "bar", "baz"));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -97,7 +93,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
         assertThat((boolean[]) runner.createInstanceRunner("com.A").invoke("test")).containsExactly(true, false, true);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testDoubleArray(JdkVersion jdkVersion) throws Exception {
@@ -112,7 +107,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                 }""");
         assertThat((double[]) runner.createInstanceRunner("com.A").invoke("test")).containsExactly(1.5, 2.5, 3.5);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -130,7 +124,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Double>invoke("test")).isCloseTo(10.5, within(0.001));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testEmptyIntArray(JdkVersion jdkVersion) throws Exception {
@@ -145,7 +138,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(new int[]{});
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -162,7 +154,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
         assertThat((float[]) runner.createInstanceRunner("com.A").invoke("test")).containsExactly(1.0f, 2.0f, 3.0f);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testListAnnotation(JdkVersion jdkVersion) throws Exception {
@@ -178,7 +169,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLongArray(JdkVersion jdkVersion) throws Exception {
@@ -193,7 +183,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                 }""");
         assertThat((long[]) runner.createInstanceRunner("com.A").invoke("test")).containsExactly(100L, 200L, 300L);
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -214,7 +203,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
         assertThat(list.get(2)).isEqualTo(3);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testReturnEmptyArray(JdkVersion jdkVersion) throws Exception {
@@ -232,7 +220,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
         assertThat(((ArrayList<?>) result).size()).isEqualTo(0);
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStringArray(JdkVersion jdkVersion) throws Exception {
@@ -247,7 +234,6 @@ public class TestCompileAstArrayLitBasic extends BaseTestCompileSuite {
                 }""");
         assertThat((String[]) runner.createInstanceRunner("com.A").invoke("test")).containsExactly("hello", "world");
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

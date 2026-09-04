@@ -145,6 +145,23 @@ public class TestCompileAstStrExtract extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testSplitTrailingEmptyStrings(JdkVersion jdkVersion) throws Exception {
+        // JavaScript keeps the trailing empty strings that Java's split drops
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const s = "a,b,,"
+                      return s.split(",").length
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(4);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testSplitWithLimit(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

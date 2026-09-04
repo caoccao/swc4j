@@ -320,6 +320,7 @@ public final class TypeConversionUtils {
             case ConstantJavaType.LJAVA_LANG_FLOAT -> ConstantJavaType.ABBR_FLOAT;
             case ConstantJavaType.LJAVA_LANG_DOUBLE -> ConstantJavaType.ABBR_DOUBLE;
             case ConstantJavaType.LJAVA_LANG_CHARACTER -> ConstantJavaType.ABBR_CHARACTER;
+            case ConstantJavaType.LJAVA_LANG_BOOLEAN -> ConstantJavaType.ABBR_BOOLEAN;
             default -> type;
         };
     }

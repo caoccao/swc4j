@@ -52,6 +52,25 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
         super(compiler);
     }
 
+    /**
+     * Checks whether the JavaScript array API is implemented for the given element type.
+     *
+     * @param elementType the descriptor of the array element type
+     * @return true if the element type is supported
+     */
+    private static boolean isSupportedElementType(String elementType) {
+        if (elementType == null) {
+            return false;
+        }
+        if (!TypeConversionUtils.isPrimitiveType(elementType)) {
+            // Reference element types are handled through the Object[] overloads
+            return true;
+        }
+        return ConstantJavaType.ABBR_INTEGER.equals(elementType)
+                || ConstantJavaType.ABBR_DOUBLE.equals(elementType)
+                || ConstantJavaType.ABBR_BOOLEAN.equals(elementType);
+    }
+
     @Override
     public void generate(
             CodeBuilder code,
@@ -70,6 +89,16 @@ public final class CallExpressionForArrayProcessor extends BaseAstProcessor<Swc4
             String arrayType = compiler.getTypeResolver().inferTypeFromExpr(memberExpr.getObj());
             String elementType = TypeConversionUtils.getArrayElementType(arrayType);
             String arrayTypeName = getArrayTypeName(arrayType);
+
+            // The JavaScript array API is implemented for int, double, boolean and reference
+            // element types only. Any other element type would link against a method that does not
+            // exist, which used to surface as a NoSuchMethodError at run time.
+            if (!isSupportedElementType(elementType)) {
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), callExpr,
+                        "Method '" + methodName + "()' is not supported on arrays of " + arrayTypeName +
+                                ". The array methods are implemented for int, double, boolean and " +
+                                "reference element types; convert the array or use a List instead.");
+            }
 
             // Generate code for the array object
             compiler.getExpressionProcessor().generate(code, classWriter, memberExpr.getObj(), null);

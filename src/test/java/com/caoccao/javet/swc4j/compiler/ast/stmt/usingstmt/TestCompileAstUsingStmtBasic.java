@@ -209,7 +209,6 @@ public class TestCompileAstUsingStmtBasic extends BaseTestCompileAstUsingStmt {
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
                 .hasMessageContaining("AutoCloseable");
     }
@@ -229,7 +228,6 @@ public class TestCompileAstUsingStmtBasic extends BaseTestCompileAstUsingStmt {
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
                 .hasMessageContaining("AutoCloseable");
     }

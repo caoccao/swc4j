@@ -60,6 +60,18 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
         super(compiler);
     }
 
+    /**
+     * Returns the descriptor of a value after it has been boxed for storage in a collection.
+     *
+     * @param valueType the descriptor of the value
+     * @return the descriptor of the boxed value
+     */
+    private static String boxedValueType(String valueType) {
+        return valueType == null
+                ? ConstantJavaType.LJAVA_LANG_OBJECT
+                : TypeConversionUtils.getWrapperType(valueType);
+    }
+
     private void coerceAssignmentValue(
             CodeBuilder code,
             ClassWriter classWriter,
@@ -115,6 +127,31 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
             }
             TypeConversionUtils.boxPrimitiveType(code, classWriter, toPrimitive, targetType);
         }
+    }
+
+    /**
+     * Converts the value of the assignment expression to the type the caller expects, which is
+     * needed when a boxed collection element is assigned to a primitive, as in
+     * {@code const v: int = (arr[0] = 5)}.
+     *
+     * @param code           the code builder
+     * @param classWriter    the class writer
+     * @param valueType      the descriptor of the value on the stack
+     * @param returnTypeInfo the type the caller expects, may be null
+     */
+    private void convertExpressionValue(
+            CodeBuilder code,
+            ClassWriter classWriter,
+            String valueType,
+            ReturnTypeInfo returnTypeInfo) {
+        if (returnTypeInfo == null || valueType == null) {
+            return;
+        }
+        String expectedType = TypeConversionUtils.getReturnDescriptor(returnTypeInfo);
+        if (expectedType == null || ConstantJavaType.ABBR_VOID.equals(expectedType)) {
+            return;
+        }
+        TypeConversionUtils.convertType(code, classWriter, valueType, expectedType);
     }
 
     /**
@@ -374,10 +411,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                         code.invokestatic(valueOfRef); // Stack: [ArrayList/List, index, boxedValue]
                     }
 
+                    // The value of an assignment expression is the assigned value, not the value
+                    // that List.set returns, which is the element that was replaced.
+                    code.dup_x2(); // Stack: [value, List, index, value]
+
                     // Call List.set(int, Object) via interface method
                     int setMethod = cp.addInterfaceMethodRef(ConstantJavaType.JAVA_UTIL_LIST, ConstantJavaMethod.METHOD_SET, ConstantJavaDescriptor.I_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-                    code.invokeinterface(setMethod, 3); // Stack: [oldValue] - the return value of set() is the previous value
-                    // Leave the value on stack for expression statements to pop
+                    code.invokeinterface(setMethod, 3); // Stack: [value, oldValue]
+                    code.pop(); // Stack: [value]
+                    convertExpressionValue(code, classWriter, boxedValueType(valueType), returnTypeInfo);
                     return;
                 }
 
@@ -453,10 +495,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                         TypeConversionUtils.boxPrimitiveType(code, classWriter, valueType, wrapperType);
                     }
 
+                    // The value of an assignment expression is the assigned value, not the value
+                    // that Map.put returns, which is the value that was replaced.
+                    code.dup_x2(); // Stack: [value, LinkedHashMap, key, value]
+
                     // Call LinkedHashMap.put(Object, Object)
                     int putMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, "put", ConstantJavaDescriptor.LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-                    code.invokevirtual(putMethod); // Stack: [oldValue] - the return value is the previous value (or null)
-                    // Leave the value on stack for expression statements to pop
+                    code.invokevirtual(putMethod); // Stack: [value, oldValue]
+                    code.pop(); // Stack: [value]
+                    convertExpressionValue(code, classWriter, boxedValueType(valueType), returnTypeInfo);
                     return;
                 }
 
@@ -477,10 +524,15 @@ public final class AssignExpressionProcessor extends BaseAstProcessor<Swc4jAstAs
                         TypeConversionUtils.boxPrimitiveType(code, classWriter, valueType, wrapperType);
                     }
 
+                    // The value of an assignment expression is the assigned value, not the value
+                    // that Map.put returns, which is the value that was replaced.
+                    code.dup_x2(); // Stack: [value, LinkedHashMap, "prop", value]
+
                     // Call LinkedHashMap.put(Object, Object)
                     int putMethod = cp.addMethodRef(ConstantJavaType.JAVA_UTIL_LINKEDHASHMAP, "put", ConstantJavaDescriptor.LJAVA_LANG_OBJECT_LJAVA_LANG_OBJECT__LJAVA_LANG_OBJECT);
-                    code.invokevirtual(putMethod); // Stack: [oldValue]
-                    // Leave the value on stack for expression statements to pop
+                    code.invokevirtual(putMethod); // Stack: [value, oldValue]
+                    code.pop(); // Stack: [value]
+                    convertExpressionValue(code, classWriter, boxedValueType(valueType), returnTypeInfo);
                     return;
                 }
             }

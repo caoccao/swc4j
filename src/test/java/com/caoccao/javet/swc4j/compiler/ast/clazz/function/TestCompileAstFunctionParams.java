@@ -171,4 +171,27 @@ public class TestCompileAstFunctionParams extends BaseTestCompileSuite {
                 }""");
         assertThat((long) runner.createInstanceRunner("com.A").invoke("test", 100L, 3.14, 10)).isEqualTo(110L);
     }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testWideningArgumentForDoubleParameter(JdkVersion jdkVersion) throws Exception {
+        // The argument is widened to the declared parameter type instead of dictating the descriptor
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class B {
+                    m(x: double): double {
+                      return x * 2
+                    }
+                  }
+                  export class A {
+                    test(): double {
+                      const b = new B()
+                      return b.m(3)
+                    }
+                  }
+                }""");
+        assertThat((double) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(6.0);
+    }
+
+
 }

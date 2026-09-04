@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillBothNegative(JdkVersion jdkVersion) throws Exception {
@@ -47,7 +46,6 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 0, 0, 0, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -65,7 +63,6 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of());
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillEntireArray(JdkVersion jdkVersion) throws Exception {
@@ -82,7 +79,6 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(0, 0, 0, 0, 0));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillMethodChaining(JdkVersion jdkVersion) throws Exception {
@@ -97,7 +93,6 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(5, 4, 0, 0, 1));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -115,7 +110,6 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 0, 0, 0, 5));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillNegativeStart(JdkVersion jdkVersion) throws Exception {
@@ -131,7 +125,6 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 0, 0, 0));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -149,7 +142,6 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillReturnsArray(JdkVersion jdkVersion) throws Exception {
@@ -164,7 +156,6 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 0, 0, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -182,7 +173,6 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillWithStart(JdkVersion jdkVersion) throws Exception {
@@ -199,7 +189,6 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 0, 0, 0));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayFillWithStartAndEnd(JdkVersion jdkVersion) throws Exception {
@@ -215,7 +204,6 @@ public class TestCompileAstArrayLitFill extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 0, 0, 0, 5));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

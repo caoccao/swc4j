@@ -89,131 +89,125 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
             TypeParameterScope typeScope = TypeParameterScope.fromDecl(typeParamDecl);
             context.pushTypeParameterScope(typeScope);
         }
+        try {
 
-        // Try to get parameter types from target functional interface
-        List<String> targetParamTypes = null;
-        if (targetTypeInfo != null && targetTypeInfo.descriptor() != null) {
-            targetParamTypes = getTargetInterfaceParamTypes(targetTypeInfo.descriptor());
-        }
-
-        // Build parameter types
-        List<String> paramTypes = new ArrayList<>();
-        List<String> paramNames = new ArrayList<>();
-        for (int i = 0; i < params.size(); i++) {
-            ISwc4jAstPat param = params.get(i);
-            String paramType = compiler.getTypeResolver().extractParameterType(param);
-            String paramName = AstUtils.extractParamName(param);
-
-            // If parameter type is Object and we have target type info, try to infer from target
-            if (ConstantJavaType.LJAVA_LANG_OBJECT.equals(paramType) && targetParamTypes != null && i < targetParamTypes.size()) {
-                paramType = targetParamTypes.get(i);
+            // Try to get parameter types from target functional interface
+            List<String> targetParamTypes = null;
+            if (targetTypeInfo != null && targetTypeInfo.descriptor() != null) {
+                targetParamTypes = getTargetInterfaceParamTypes(targetTypeInfo.descriptor());
             }
 
-            paramTypes.add(paramType);
-            paramNames.add(paramName != null ? paramName : "arg" + paramTypes.size());
-        }
+            // Build parameter types
+            List<String> paramTypes = new ArrayList<>();
+            List<String> paramNames = new ArrayList<>();
+            for (int i = 0; i < params.size(); i++) {
+                ISwc4jAstPat param = params.get(i);
+                String paramType = compiler.getTypeResolver().extractParameterType(param);
+                String paramName = AstUtils.extractParamName(param);
 
-        // Push a new scope for parameter types to enable return type inference
-        // This allows inferTypeFromExpr to correctly infer types like x * 2 when x is a long
-        Map<String, String> paramScope = context.pushInferredTypesScope();
-        for (int i = 0; i < paramNames.size(); i++) {
-            paramScope.put(paramNames.get(i), paramTypes.get(i));
-        }
+                // If parameter type is Object and we have target type info, try to infer from target
+                if (ConstantJavaType.LJAVA_LANG_OBJECT.equals(paramType) && targetParamTypes != null && i < targetParamTypes.size()) {
+                    paramType = targetParamTypes.get(i);
+                }
 
-        // Determine return type
-        ReturnTypeInfo returnInfo = ArrowExprUtils.analyzeReturnType(compiler, arrowExpr, body);
+                paramTypes.add(paramType);
+                paramNames.add(paramName != null ? paramName : "arg" + paramTypes.size());
+            }
 
-        // Pop the parameter types scope
-        context.popInferredTypesScope();
+            // Push a new scope for parameter types to enable return type inference
+            // This allows inferTypeFromExpr to correctly infer types like x * 2 when x is a long
+            Map<String, String> paramScope = context.pushInferredTypesScope();
+            for (int i = 0; i < paramNames.size(); i++) {
+                paramScope.put(paramNames.get(i), paramTypes.get(i));
+            }
 
-        // Determine which functional interface to use
-        String interfaceName;
-        String methodName;
-        String methodDescriptor;
+            // Determine return type
+            ReturnTypeInfo returnInfo = ArrowExprUtils.analyzeReturnType(compiler, arrowExpr, body);
 
-        // First check if target type info specifies a functional interface directly
-        // This is needed for generic arrows like <T>(x: T): T => x assigned to UnaryOperator<Object>
-        if (targetTypeInfo != null && targetTypeInfo.descriptor() != null) {
-            String targetDesc = targetTypeInfo.descriptor();
-            // Extract interface name from descriptor (e.g., "Ljava/util/function/UnaryOperator;" -> "java/util/function/UnaryOperator")
-            if (targetDesc.startsWith("L") && targetDesc.endsWith(";")) {
-                String targetInterface = TypeConversionUtils.descriptorToInternalName(targetDesc);
-                FunctionalInterfaceInfo info = getFunctionalInterfaceInfo(targetInterface, paramTypes, returnInfo);
-                if (info != null) {
-                    interfaceName = info.interfaceName;
-                    methodName = info.methodName;
-                    methodDescriptor = info.methodDescriptor;
+            // Pop the parameter types scope
+            context.popInferredTypesScope();
 
-                    // Pop type parameter scope before returning
-                    if (hasTypeParams) {
-                        context.popTypeParameterScope();
+            // Determine which functional interface to use
+            String interfaceName;
+            String methodName;
+            String methodDescriptor;
+
+            // First check if target type info specifies a functional interface directly
+            // This is needed for generic arrows like <T>(x: T): T => x assigned to UnaryOperator<Object>
+            if (targetTypeInfo != null && targetTypeInfo.descriptor() != null) {
+                String targetDesc = targetTypeInfo.descriptor();
+                // Extract interface name from descriptor (e.g., "Ljava/util/function/UnaryOperator;" -> "java/util/function/UnaryOperator")
+                if (targetDesc.startsWith("L") && targetDesc.endsWith(";")) {
+                    String targetInterface = TypeConversionUtils.descriptorToInternalName(targetDesc);
+                    FunctionalInterfaceInfo info = getFunctionalInterfaceInfo(targetInterface, paramTypes, returnInfo);
+                    if (info != null) {
+                        interfaceName = info.interfaceName;
+                        methodName = info.methodName;
+                        methodDescriptor = info.methodDescriptor;
+
+                        return new ArrowTypeInfo(interfaceName, methodName, methodDescriptor, paramTypes, paramNames, returnInfo);
                     }
-
-                    return new ArrowTypeInfo(interfaceName, methodName, methodDescriptor, paramTypes, paramNames, returnInfo);
                 }
             }
-        }
 
-        if (params.isEmpty() && returnInfo.type() == ReturnType.VOID) {
-            // () => void -> Runnable
-            interfaceName = ConstantJavaType.JAVA_LANG_RUNNABLE;
-            methodName = "run";
-            methodDescriptor = ConstantJavaDescriptor.__V;
-        } else if (params.isEmpty()) {
-            // () => T -> Supplier<T>
-            interfaceName = getSupplierInterface(returnInfo);
-            methodName = getSupplierMethodName(returnInfo);
-            // For generic Supplier<T>, the method returns Object due to type erasure
-            methodDescriptor = "()" + getErasedSupplierReturnDescriptor(returnInfo);
-        } else if (params.size() == 1 && returnInfo.type() == ReturnType.VOID) {
-            // (T) => void -> Consumer<T>
-            interfaceName = getConsumerInterface(paramTypes.get(0));
-            methodName = getConsumerMethodName(paramTypes.get(0));
-            methodDescriptor = "(" + paramTypes.get(0) + ")V";
-        } else if (params.size() == 1) {
-            // (T) => R -> Function<T, R> or primitive specialization
-            interfaceName = getFunctionInterface(paramTypes.get(0), returnInfo);
-            methodName = getFunctionMethodName(paramTypes.get(0), returnInfo);
-            if (isErasedFunctionInterface(interfaceName)) {
-                methodDescriptor = getErasedFunctionDescriptor(interfaceName);
-            } else {
-                methodDescriptor = "(" + paramTypes.get(0) + ")" + TypeConversionUtils.getReturnDescriptor(returnInfo);
-            }
-        } else if (params.size() == 2) {
-            // Check for primitive binary operators first
-            String binaryOperatorInfo = getBinaryOperatorInfo(paramTypes.get(0), paramTypes.get(1), returnInfo);
-            if (binaryOperatorInfo != null) {
-                String[] parts = binaryOperatorInfo.split("\\|");
-                interfaceName = parts[0];
-                methodName = parts[1];
-                methodDescriptor = parts[2];
-            } else {
-                // (T, U) => R -> BiFunction<T, U, R>
-                interfaceName = ConstantJavaType.JAVA_UTIL_FUNCTION_BI_FUNCTION;
-                methodName = ConstantJavaMethod.METHOD_APPLY;
-                StringBuilder desc = new StringBuilder("(");
-                for (String pt : paramTypes) {
-                    desc.append(boxedDescriptor(pt));
+            if (params.isEmpty() && returnInfo.type() == ReturnType.VOID) {
+                // () => void -> Runnable
+                interfaceName = ConstantJavaType.JAVA_LANG_RUNNABLE;
+                methodName = "run";
+                methodDescriptor = ConstantJavaDescriptor.__V;
+            } else if (params.isEmpty()) {
+                // () => T -> Supplier<T>
+                interfaceName = getSupplierInterface(returnInfo);
+                methodName = getSupplierMethodName(returnInfo);
+                // For generic Supplier<T>, the method returns Object due to type erasure
+                methodDescriptor = "()" + getErasedSupplierReturnDescriptor(returnInfo);
+            } else if (params.size() == 1 && returnInfo.type() == ReturnType.VOID) {
+                // (T) => void -> Consumer<T>
+                interfaceName = getConsumerInterface(paramTypes.get(0));
+                methodName = getConsumerMethodName(paramTypes.get(0));
+                methodDescriptor = "(" + paramTypes.get(0) + ")V";
+            } else if (params.size() == 1) {
+                // (T) => R -> Function<T, R> or primitive specialization
+                interfaceName = getFunctionInterface(paramTypes.get(0), returnInfo);
+                methodName = getFunctionMethodName(paramTypes.get(0), returnInfo);
+                if (isErasedFunctionInterface(interfaceName)) {
+                    methodDescriptor = getErasedFunctionDescriptor(interfaceName);
+                } else {
+                    methodDescriptor = "(" + paramTypes.get(0) + ")" + TypeConversionUtils.getReturnDescriptor(returnInfo);
                 }
-                desc.append(")").append(boxedDescriptor(TypeConversionUtils.getReturnDescriptor(returnInfo)));
-                methodDescriptor = desc.toString();
+            } else if (params.size() == 2) {
+                // Check for primitive binary operators first
+                String binaryOperatorInfo = getBinaryOperatorInfo(paramTypes.get(0), paramTypes.get(1), returnInfo);
+                if (binaryOperatorInfo != null) {
+                    String[] parts = binaryOperatorInfo.split("\\|");
+                    interfaceName = parts[0];
+                    methodName = parts[1];
+                    methodDescriptor = parts[2];
+                } else {
+                    // (T, U) => R -> BiFunction<T, U, R>
+                    interfaceName = ConstantJavaType.JAVA_UTIL_FUNCTION_BI_FUNCTION;
+                    methodName = ConstantJavaMethod.METHOD_APPLY;
+                    StringBuilder desc = new StringBuilder("(");
+                    for (String pt : paramTypes) {
+                        desc.append(boxedDescriptor(pt));
+                    }
+                    desc.append(")").append(boxedDescriptor(TypeConversionUtils.getReturnDescriptor(returnInfo)));
+                    methodDescriptor = desc.toString();
+                }
+            } else {
+                // For more than 2 parameters, a custom functional interface has to be declared
+                throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr,
+                        "Arrow functions with more than 2 parameters are not yet supported. " +
+                                "Declare a functional interface with the wanted signature and annotate the " +
+                                "arrow function with it.");
             }
-        } else {
-            // For more than 2 parameters, we'll generate a custom interface or use Object varargs
-            // Pop type parameter scope before throwing
+            return new ArrowTypeInfo(interfaceName, methodName, methodDescriptor, paramTypes, paramNames, returnInfo);
+        } finally {
+            // Pop the type parameter scope on every exit path, including an exception
             if (hasTypeParams) {
                 context.popTypeParameterScope();
             }
-            throw new Swc4jByteCodeCompilerException(getSourceCode(), arrowExpr,
-                    "Arrow functions with more than 2 parameters are not yet supported");
         }
-
-        // Pop type parameter scope before returning
-        if (hasTypeParams) {
-            context.popTypeParameterScope();
-        }
-
-        return new ArrowTypeInfo(interfaceName, methodName, methodDescriptor, paramTypes, paramNames, returnInfo);
     }
 
     /**
@@ -496,7 +490,8 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
         descriptor.append(")V");
 
         int maxLocals = slot;
-        classWriter.addMethod(0x0001, ConstantJavaMethod.METHOD_INIT, descriptor.toString(), code.toByteArray(), 10, maxLocals);
+        classWriter.addMethod(0x0001, ConstantJavaMethod.METHOD_INIT, descriptor.toString(), code.toByteArray(),
+                code.computeMaxStack(maxLocals, false, lambdaClassName, descriptor.toString(), cp), maxLocals);
     }
 
     private void generateLambdaMethod(
@@ -645,7 +640,8 @@ public final class ArrowExpressionProcessor extends BaseAstProcessor<Swc4jAstArr
 
         classWriter.addMethod(0x0001, // ACC_PUBLIC
                 typeInfo.methodName(), typeInfo.methodDescriptor(), code.toByteArray(),
-                10, maxLocals, null, null, stackMapTable, exceptionTable);
+                code.computeMaxStack(maxLocals, isStatic, lambdaClassName, typeInfo.methodDescriptor(), cp),
+                maxLocals, null, null, stackMapTable, exceptionTable);
 
         // Pop the lambda compilation context to restore the outer context
         compiler.getMemory().popCompilationContext();

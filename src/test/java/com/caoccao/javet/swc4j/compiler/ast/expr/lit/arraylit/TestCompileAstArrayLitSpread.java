@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSpreadBasic(JdkVersion jdkVersion) throws Exception {
@@ -46,7 +45,6 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -63,7 +61,6 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of());
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSpreadMixedElements(JdkVersion jdkVersion) throws Exception {
@@ -78,7 +75,6 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -96,7 +92,6 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSpreadMultipleWithMixed(JdkVersion jdkVersion) throws Exception {
@@ -113,7 +108,6 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5, 6, 7));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSpreadNested(JdkVersion jdkVersion) throws Exception {
@@ -128,7 +122,6 @@ public class TestCompileAstArrayLitSpread extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

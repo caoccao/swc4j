@@ -296,7 +296,8 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
         descriptor.append(")V");
 
         int maxLocals = slot;
-        classWriter.addMethod(0x0001, ConstantJavaMethod.METHOD_INIT, descriptor.toString(), code.toByteArray(), 10, maxLocals);
+        classWriter.addMethod(0x0001, ConstantJavaMethod.METHOD_INIT, descriptor.toString(), code.toByteArray(),
+                code.computeMaxStack(maxLocals, false, implClassName, descriptor.toString(), cp), maxLocals);
     }
 
     private void generateImplMethod(
@@ -384,7 +385,8 @@ public final class CallExpressionForIIFEProcessor extends BaseAstProcessor<Swc4j
 
         classWriter.addMethod(0x0001, // ACC_PUBLIC
                 typeInfo.methodName(), typeInfo.methodDescriptor(), code.toByteArray(),
-                10, maxLocals, null, null, stackMapTable, exceptionTable);
+                code.computeMaxStack(maxLocals, isStatic, implClassName, typeInfo.methodDescriptor(), cp),
+                maxLocals, null, null, stackMapTable, exceptionTable);
 
         // Pop the method compilation context
         compiler.getMemory().popCompilationContext();

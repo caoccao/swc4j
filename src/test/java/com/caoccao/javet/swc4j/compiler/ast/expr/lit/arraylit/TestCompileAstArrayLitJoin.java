@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayJoin(JdkVersion jdkVersion) throws Exception {
@@ -44,7 +43,6 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3,4,5");
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -63,7 +61,6 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("0-1-2-3");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayJoinCustomSeparator(JdkVersion jdkVersion) throws Exception {
@@ -79,7 +76,6 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("apple - banana - cherry");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayJoinDefaultSeparator(JdkVersion jdkVersion) throws Exception {
@@ -94,7 +90,6 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1,2,3");
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -114,7 +109,6 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayJoinEmptySeparator(JdkVersion jdkVersion) throws Exception {
@@ -129,7 +123,6 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("abc");
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -146,7 +139,6 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("1|hello|true|3.14");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayJoinMultiCharSeparator(JdkVersion jdkVersion) throws Exception {
@@ -161,7 +153,6 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("one and two and three");
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -178,7 +169,6 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("10 20 30 40 50");
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayJoinSingleElement(JdkVersion jdkVersion) throws Exception {
@@ -192,5 +182,21 @@ public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
                   }
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo("42");
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testJoinWithNullElement(JdkVersion jdkVersion) throws Exception {
+        // JavaScript renders null as an empty string
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): string {
+                      const arr = [null, 1]
+                      return arr.join(",")
+                    }
+                  }
+                }""");
+        assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(",1");
     }
 }

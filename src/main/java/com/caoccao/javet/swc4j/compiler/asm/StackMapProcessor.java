@@ -42,6 +42,7 @@ public class StackMapProcessor {
     private final List<ClassWriter.ExceptionTableEntry> exceptionTable;
     private final boolean isStatic;
     private final int maxLocals;
+    private int maxStackSize;
 
     /**
      * Instantiates a new Stack map processor.
@@ -64,10 +65,121 @@ public class StackMapProcessor {
         this.exceptionTable = exceptionTable != null ? exceptionTable : List.of();
     }
 
+    /**
+     * Counts the JVM stack slots occupied by the values of a simulated operand stack.
+     *
+     * @param stack the simulated operand stack
+     * @return the number of JVM stack slots
+     */
+    private static int countStackSlots(List<VerificationType> stack) {
+        int slots = 0;
+        for (VerificationType type : stack) {
+            slots += isCategory2(type) ? 2 : 1;
+        }
+        return slots;
+    }
+
+    private static void ensureLocalSlot(List<VerificationType> locals, int index, VerificationType type) {
+        // Extend locals list to include the specified index
+        while (locals.size() <= index) {
+            locals.add(VerificationType.top()); // Fill gaps with TOP
+        }
+        locals.set(index, type);
+
+        // Long and Double are followed by TOP for the second slot (JVM spec §4.10.1.5)
+        if (type.tag == LONG || type.tag == DOUBLE) {
+            while (locals.size() <= index + 1) {
+                locals.add(VerificationType.top());
+            }
+            // Ensure the next slot is TOP (don't overwrite if already set)
+            if (locals.get(index + 1).tag != TOP) {
+                locals.set(index + 1, VerificationType.top());
+            }
+        }
+    }
+
+    /**
+     * Gets the element type of an array verification type, defaulting to Object when the array
+     * type is not statically known.
+     *
+     * @param arrayType the verification type of the array reference
+     * @return the verification type of an element
+     */
+    private static VerificationType getArrayElementType(VerificationType arrayType) {
+        String name = arrayType.className;
+        if (name != null && name.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
+            String elementDescriptor = name.substring(1);
+            if (elementDescriptor.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
+                return VerificationType.object(elementDescriptor);
+            }
+            if (elementDescriptor.startsWith("L") && elementDescriptor.endsWith(";")) {
+                return VerificationType.object(TypeConversionUtils.descriptorToInternalName(elementDescriptor));
+            }
+        }
+        return VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT);
+    }
+
+    /**
+     * Gets the descriptor of the array created by {@code newarray} for the given atype operand.
+     *
+     * @param aType the atype operand of the newarray instruction
+     * @return the array descriptor
+     */
+    private static String getNewArrayDescriptor(int aType) {
+        return switch (aType) {
+            case 4 -> ConstantJavaType.ARRAY_PREFIX + ConstantJavaType.ABBR_BOOLEAN;
+            case 5 -> ConstantJavaType.ARRAY_PREFIX + ConstantJavaType.ABBR_CHARACTER;
+            case 6 -> ConstantJavaType.ARRAY_PREFIX + ConstantJavaType.ABBR_FLOAT;
+            case 7 -> ConstantJavaType.ARRAY_PREFIX + ConstantJavaType.ABBR_DOUBLE;
+            case 8 -> ConstantJavaType.ARRAY_PREFIX + ConstantJavaType.ABBR_BYTE;
+            case 9 -> ConstantJavaType.ARRAY_PREFIX + ConstantJavaType.ABBR_SHORT;
+            case 11 -> ConstantJavaType.ARRAY_PREFIX + ConstantJavaType.ABBR_LONG;
+            default -> ConstantJavaType.ARRAY_I;
+        };
+    }
+
+    /**
+     * Checks whether the verification type occupies two JVM stack slots.
+     *
+     * @param type the verification type
+     * @return true if the type is a category-2 type
+     */
+    private static boolean isCategory2(VerificationType type) {
+        return type.tag == LONG || type.tag == DOUBLE;
+    }
+
+    /**
+     * Replaces the top of the stack with the given type, doing nothing when the stack is empty.
+     *
+     * @param stack the simulated operand stack
+     * @param type  the replacement type
+     */
+    private static void replaceTop(List<VerificationType> stack, VerificationType type) {
+        if (!stack.isEmpty()) {
+            stack.remove(stack.size() - 1);
+            stack.add(type);
+        }
+    }
+
+    /**
+     * Pops the top of the stack into a local variable slot.
+     *
+     * @param frame the frame being simulated
+     * @param stack the simulated operand stack
+     * @param index the local variable index
+     * @param type  the type to store, or null to store the type of the popped value
+     */
+    private static void storeLocal(Frame frame, List<VerificationType> stack, int index, VerificationType type) {
+        if (stack.isEmpty()) {
+            return;
+        }
+        VerificationType value = stack.remove(stack.size() - 1);
+        ensureLocalSlot(frame.locals, index, type == null ? value : type);
+    }
+
     private Map<Integer, Frame> computeFramesDataFlow() {
         Map<Integer, Frame> frames = new HashMap<>();
         Queue<WorkItem> workQueue = new LinkedList<>();
-        Set<Integer> visitedHandlers = new HashSet<>();
 
         // Start with initial frame at offset 0
         Frame initialFrame = createInitialFrame();
@@ -95,29 +207,31 @@ public class StackMapProcessor {
 
             // Get the current frame at this offset for simulation
             Frame currentFrame = frames.get(pc);
+            maxStackSize = Math.max(maxStackSize, countStackSlots(currentFrame.stack));
 
             // Check if this pc is within any try block, and propagate to handler if so
             for (ClassWriter.ExceptionTableEntry entry : exceptionTable) {
                 if (pc >= entry.startPc() && pc < entry.endPc()) {
                     // This instruction is in a try block - propagate to handler
+                    // Every path into the try block reaches the handler, and the locals may
+                    // differ between them, so the handler frame is queued on every visit and the
+                    // merge at the top of the loop settles it.
                     int handlerPc = entry.handlerPc();
-                    if (!visitedHandlers.contains(handlerPc) || !frames.containsKey(handlerPc)) {
-                        visitedHandlers.add(handlerPc);
-                        Frame handlerFrame = currentFrame.copy();
-                        handlerFrame.stack.clear();
-                        // Determine exception type from catch_type
-                        String exceptionClass;
-                        if (entry.catchType() != 0) {
-                            exceptionClass = constantPool.getClassName(entry.catchType());
-                            if (exceptionClass == null) {
-                                exceptionClass = ConstantJavaType.JAVA_LANG_THROWABLE;
-                            }
-                        } else {
-                            exceptionClass = ConstantJavaType.JAVA_LANG_THROWABLE; // catch-all
+                    Frame handlerFrame = currentFrame.copy();
+                    handlerFrame.stack.clear();
+                    // Determine exception type from catch_type
+                    String exceptionClass;
+                    if (entry.catchType() != 0) {
+                        exceptionClass = constantPool.getClassName(entry.catchType());
+                        if (exceptionClass == null) {
+                            exceptionClass = ConstantJavaType.JAVA_LANG_THROWABLE;
                         }
-                        handlerFrame.stack.add(VerificationType.object(exceptionClass));
-                        workQueue.add(new WorkItem(handlerPc, handlerFrame));
+                    } else {
+                        exceptionClass = ConstantJavaType.JAVA_LANG_THROWABLE; // catch-all
                     }
+                    handlerFrame.stack.add(VerificationType.object(exceptionClass));
+                    maxStackSize = Math.max(maxStackSize, countStackSlots(handlerFrame.stack));
+                    workQueue.add(new WorkItem(handlerPc, handlerFrame));
                 }
             }
 
@@ -125,11 +239,25 @@ public class StackMapProcessor {
             List<Integer> nextOffsets = getNextOffsets(pc);
             for (int nextPc : nextOffsets) {
                 Frame nextFrame = simulateInstruction(currentFrame, pc);
+                maxStackSize = Math.max(maxStackSize, countStackSlots(nextFrame.stack));
                 workQueue.add(new WorkItem(nextPc, nextFrame));
             }
         }
 
         return frames;
+    }
+
+    /**
+     * Computes the maximum operand stack depth, in JVM slots, over every reachable program point.
+     * <p>
+     * Long and double values occupy two slots, every other value occupies one.
+     *
+     * @return the maximum operand stack depth in slots
+     */
+    public int computeMaxStack() {
+        maxStackSize = 0;
+        computeFramesDataFlow();
+        return maxStackSize;
     }
 
     /**
@@ -169,18 +297,17 @@ public class StackMapProcessor {
     }
 
     /**
-     * Count the number of stack slots consumed by method arguments.
-     * Long and double take 2 slots, everything else takes 1.
+     * Count the number of values consumed by method arguments.
+     * <p>
+     * The simulated operand stack holds one entry per value, so a long or a double counts as one
+     * value here even though it occupies two JVM stack slots.
      */
-    private int countMethodArgSlots(String descriptor) {
+    private int countMethodArgValues(String descriptor) {
         int count = 0;
         int i = 1; // Skip opening '('
         while (i < descriptor.length() && descriptor.charAt(i) != ')') {
             char c = descriptor.charAt(i);
-            if (c == ConstantJavaType.CHAR_LONG || c == ConstantJavaType.CHAR_DOUBLE) {
-                count += 2; // Long and double take 2 slots
-                i++;
-            } else if (c == ConstantJavaType.CHAR_REFERENCE) {
+            if (c == ConstantJavaType.CHAR_REFERENCE) {
                 count++;
                 // Skip to ';'
                 while (i < descriptor.length() && descriptor.charAt(i) != ';') {
@@ -275,25 +402,6 @@ public class StackMapProcessor {
         }
 
         return new Frame(locals, new ArrayList<>());
-    }
-
-    private void ensureLocalSlot(List<VerificationType> locals, int index, VerificationType type) {
-        // Extend locals list to include the specified index
-        while (locals.size() <= index) {
-            locals.add(VerificationType.top()); // Fill gaps with TOP
-        }
-        locals.set(index, type);
-
-        // Long and Double are followed by TOP for the second slot (JVM spec §4.10.1.5)
-        if (type.tag == LONG || type.tag == DOUBLE) {
-            while (locals.size() <= index + 1) {
-                locals.add(VerificationType.top());
-            }
-            // Ensure the next slot is TOP (don't overwrite if already set)
-            if (locals.get(index + 1).tag != TOP) {
-                locals.set(index + 1, VerificationType.top());
-            }
-        }
     }
 
     private Set<Integer> findBranchTargets() {
@@ -456,8 +564,10 @@ public class StackMapProcessor {
                  0xBC -> 2;
             case 0x11, 0x13, 0x14, 0x84, 0x99, 0x9A, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F, 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5,
                  0xA6, 0xA7, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, 0xBB, 0xBD, 0xC0, 0xC1, 0xC6, 0xC7 -> 3;
-            case 0xC8 -> 5;
-            case 0xB9 -> 5;
+            case 0xC8, 0xB9, 0xBA -> 5;
+            case 0xC5 -> 4;
+            case 0xC4 -> // wide
+                    ((pc + 1 < bytecode.length) && ((bytecode[pc + 1] & 0xFF) == 0x84)) ? 6 : 4;
             case 0xAA -> getTableSwitchSize(pc);
             case 0xAB -> getLookupSwitchSize(pc);
             default -> 1;
@@ -704,6 +814,19 @@ public class StackMapProcessor {
                 (bytecode[offset + 3] & 0xFF);
     }
 
+    /**
+     * Reads an unsigned two byte value from the bytecode.
+     *
+     * @param offset the offset to read from
+     * @return the value, or 0 when the offset is out of range
+     */
+    private int readUnsignedShort(int offset) {
+        if (offset + 2 > bytecode.length) {
+            return 0;
+        }
+        return ((bytecode[offset] & 0xFF) << 8) | (bytecode[offset + 1] & 0xFF);
+    }
+
     private Frame simulateInstruction(Frame frame, int pc) {
         Frame newFrame = frame.copy();
         int opcode = bytecode[pc] & 0xFF;
@@ -882,12 +1005,119 @@ public class StackMapProcessor {
                     }
                 }
             }
+            case 0x5A -> { // dup_x1
+                if (stack.size() >= 2) {
+                    VerificationType top = stack.get(stack.size() - 1);
+                    stack.add(stack.size() - 2, top);
+                }
+            }
+            case 0x5B -> { // dup_x2
+                if (stack.size() >= 2) {
+                    VerificationType top = stack.get(stack.size() - 1);
+                    VerificationType second = stack.get(stack.size() - 2);
+                    if (isCategory2(second)) {
+                        // Form 2: the value below the top is a category-2 value
+                        stack.add(stack.size() - 2, top);
+                    } else if (stack.size() >= 3) {
+                        stack.add(stack.size() - 3, top);
+                    }
+                }
+            }
+            case 0x5D -> { // dup2_x1
+                if (stack.size() >= 2) {
+                    VerificationType top = stack.get(stack.size() - 1);
+                    if (isCategory2(top)) {
+                        // Form 2: a single category-2 value is duplicated below one category-1 value
+                        stack.add(stack.size() - 2, top);
+                    } else if (stack.size() >= 3) {
+                        VerificationType second = stack.get(stack.size() - 2);
+                        stack.add(stack.size() - 3, top);
+                        stack.add(stack.size() - 4, second);
+                    }
+                }
+            }
+            case 0x5E -> { // dup2_x2
+                if (stack.size() >= 2) {
+                    VerificationType top = stack.get(stack.size() - 1);
+                    VerificationType second = stack.get(stack.size() - 2);
+                    if (isCategory2(top)) {
+                        if (isCategory2(second)) {
+                            // Form 4: category-2 over category-2
+                            stack.add(stack.size() - 2, top);
+                        } else if (stack.size() >= 3) {
+                            // Form 2: category-2 over two category-1 values
+                            stack.add(stack.size() - 3, top);
+                        }
+                    } else if (stack.size() >= 3) {
+                        VerificationType third = stack.get(stack.size() - 3);
+                        if (isCategory2(third)) {
+                            // Form 3: two category-1 values over one category-2 value
+                            stack.add(stack.size() - 3, top);
+                            stack.add(stack.size() - 4, second);
+                        } else if (stack.size() >= 4) {
+                            // Form 1: two category-1 values over two category-1 values
+                            stack.add(stack.size() - 4, top);
+                            stack.add(stack.size() - 5, second);
+                        }
+                    }
+                }
+            }
             case 0x5F -> {
                 if (stack.size() >= 2) {
                     VerificationType top = stack.remove(stack.size() - 1);
                     VerificationType second = stack.remove(stack.size() - 1);
                     stack.add(top);
                     stack.add(second);
+                }
+            }
+            // Shifts - pop value and shift amount, push a value of the shifted type
+            // ishl(0x78), ishr(0x7A), iushr(0x7C)
+            case 0x78, 0x7A, 0x7C -> {
+                if (stack.size() >= 2) {
+                    stack.remove(stack.size() - 1);
+                    stack.remove(stack.size() - 1);
+                    stack.add(VerificationType.integer());
+                }
+            }
+            // lshl(0x79), lshr(0x7B), lushr(0x7D)
+            case 0x79, 0x7B, 0x7D -> {
+                if (stack.size() >= 2) {
+                    stack.remove(stack.size() - 1);
+                    stack.remove(stack.size() - 1);
+                    stack.add(VerificationType.long_());
+                }
+            }
+            // Negations - pop 1, push 1 of the same type
+            case 0x74 -> replaceTop(stack, VerificationType.integer());
+            case 0x75 -> replaceTop(stack, VerificationType.long_());
+            case 0x76 -> replaceTop(stack, VerificationType.float_());
+            case 0x77 -> replaceTop(stack, VerificationType.double_());
+            // i2b(0x91), i2c(0x92), i2s(0x93) - pop int, push int
+            case 0x91, 0x92, 0x93 -> replaceTop(stack, VerificationType.integer());
+            // monitorenter(0xC2), monitorexit(0xC3) - pop objectref
+            case 0xC2, 0xC3 -> {
+                if (!stack.isEmpty()) stack.remove(stack.size() - 1);
+            }
+            // wide - the wrapped instruction with a two byte local variable index
+            case 0xC4 -> {
+                int wideOpcode = (pc + 1 < bytecode.length) ? (bytecode[pc + 1] & 0xFF) : 0;
+                int wideIndex = readUnsignedShort(pc + 2);
+                switch (wideOpcode) {
+                    case 0x15 -> stack.add(VerificationType.integer()); // iload
+                    case 0x16 -> stack.add(VerificationType.long_());   // lload
+                    case 0x17 -> stack.add(VerificationType.float_());  // fload
+                    case 0x18 -> stack.add(VerificationType.double_()); // dload
+                    case 0x19 -> stack.add(wideIndex < newFrame.locals.size()  // aload
+                            ? newFrame.locals.get(wideIndex)
+                            : VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT));
+                    case 0x36 -> storeLocal(newFrame, stack, wideIndex, VerificationType.integer()); // istore
+                    case 0x37 -> storeLocal(newFrame, stack, wideIndex, VerificationType.long_());   // lstore
+                    case 0x38 -> storeLocal(newFrame, stack, wideIndex, VerificationType.float_());  // fstore
+                    case 0x39 -> storeLocal(newFrame, stack, wideIndex, VerificationType.double_()); // dstore
+                    case 0x3A -> storeLocal(newFrame, stack, wideIndex, null);                       // astore
+                    default -> {
+                        // iinc and ret do not change the operand stack
+                    }
                 }
             }
             // Conditional branches - pop operands
@@ -919,7 +1149,7 @@ public class StackMapProcessor {
                 if (methodDescriptor != null) {
                     // Parse descriptor to get argument count and return type
                     // Format: (args)return e.g., ConstantJavaDescriptor.LJAVA_LANG_STRING__LJAVA_LANG_STRING
-                    int argCount = countMethodArgSlots(methodDescriptor);
+                    int argCount = countMethodArgValues(methodDescriptor);
                     String returnType = getReturnType(methodDescriptor);
                     // Pop arguments (and receiver for non-static)
                     int totalPops = argCount;
@@ -956,7 +1186,7 @@ public class StackMapProcessor {
                 String methodDescriptor = (constantPool != null) ? constantPool.getMethodDescriptor(methodIndex) : null;
                 if (methodDescriptor != null) {
                     // Parse descriptor to get argument count and return type
-                    int argCount = countMethodArgSlots(methodDescriptor);
+                    int argCount = countMethodArgValues(methodDescriptor);
                     String returnType = getReturnType(methodDescriptor);
                     // Pop arguments + receiver (interface methods are never static)
                     int totalPops = argCount + 1;
@@ -1097,8 +1327,8 @@ public class StackMapProcessor {
             case 0x32 -> {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1); // index
-                    stack.remove(stack.size() - 1); // arrayref
-                    stack.add(VerificationType.object(ConstantJavaType.JAVA_LANG_OBJECT));
+                    VerificationType arrayType = stack.remove(stack.size() - 1); // arrayref
+                    stack.add(getArrayElementType(arrayType));
                 }
             }
             // Array stores - pop arrayref, index, and value
@@ -1127,15 +1357,24 @@ public class StackMapProcessor {
             case 0xBC -> {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1); // count
-                    // atype byte determines the primitive type, but result is always an array
-                    stack.add(VerificationType.object(ConstantJavaType.ARRAY_I)); // Generic - actual type depends on atype
+                    // The atype operand determines the element type of the new array
+                    int aType = (pc + 1 < bytecode.length) ? (bytecode[pc + 1] & 0xFF) : 10;
+                    stack.add(VerificationType.object(getNewArrayDescriptor(aType)));
                 }
             }
             // anewarray - pop count, push array reference
             case 0xBD -> {
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1); // count
-                    stack.add(VerificationType.object(ConstantJavaType.ARRAY_LJAVA_LANG_OBJECT));
+                    int classIndex = ((bytecode[pc + 1] & 0xFF) << 8) | (bytecode[pc + 2] & 0xFF);
+                    String elementName = (constantPool != null) ? constantPool.getClassName(classIndex) : null;
+                    if (elementName == null) {
+                        stack.add(VerificationType.object(ConstantJavaType.ARRAY_LJAVA_LANG_OBJECT));
+                    } else if (elementName.startsWith(ConstantJavaType.ARRAY_PREFIX)) {
+                        stack.add(VerificationType.object(ConstantJavaType.ARRAY_PREFIX + elementName));
+                    } else {
+                        stack.add(VerificationType.object(ConstantJavaType.ARRAY_PREFIX + "L" + elementName + ";"));
+                    }
                 }
             }
             // Type checking
@@ -1286,9 +1525,6 @@ public class StackMapProcessor {
          *
          * @return the verification type
          */
-        static VerificationType uninitializedThis() {
-            return new VerificationType(UNINITIALIZED_THIS);
-        }
 
         @Override
         public boolean equals(Object o) {
@@ -1322,4 +1558,5 @@ public class StackMapProcessor {
 
     private record WorkItem(int offset, Frame frame) {
     }
+
 }

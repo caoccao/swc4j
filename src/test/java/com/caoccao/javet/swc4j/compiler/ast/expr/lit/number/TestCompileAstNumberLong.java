@@ -62,6 +62,23 @@ public class TestCompileAstNumberLong extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testLongInferredFromLargeLiteral(JdkVersion jdkVersion) throws Exception {
+        // An integral literal outside the int range is a long, not a truncated int
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): long {
+                      const v = 3000000000
+                      return v
+                    }
+                  }
+                }""");
+        assertThat((long) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(3000000000L);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testLongMaxValue(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

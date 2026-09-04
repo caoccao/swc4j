@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TestCompileAstArrayLitConcat extends BaseTestCompileSuite {
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayConcat(JdkVersion jdkVersion) throws Exception {
@@ -47,7 +46,6 @@ public class TestCompileAstArrayLitConcat extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5, 6));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -68,7 +66,6 @@ public class TestCompileAstArrayLitConcat extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayConcatMixedTypes(JdkVersion jdkVersion) throws Exception {
@@ -84,7 +81,6 @@ public class TestCompileAstArrayLitConcat extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, "hello", true, 3.14));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -103,7 +99,6 @@ public class TestCompileAstArrayLitConcat extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4, 5, 6));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayConcatNoArg(JdkVersion jdkVersion) throws Exception {
@@ -120,7 +115,6 @@ public class TestCompileAstArrayLitConcat extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -140,7 +134,6 @@ public class TestCompileAstArrayLitConcat extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2, 3, 4));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayConcatSingleElement(JdkVersion jdkVersion) throws Exception {
@@ -157,7 +150,6 @@ public class TestCompileAstArrayLitConcat extends BaseTestCompileSuite {
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of(1, 2));
     }
 
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testArrayConcatStrings(JdkVersion jdkVersion) throws Exception {
@@ -173,7 +165,6 @@ public class TestCompileAstArrayLitConcat extends BaseTestCompileSuite {
                 }""");
         assertThat(runner.createInstanceRunner("com.A").<Object>invoke("test")).isEqualTo(List.of("a", "b", "c", "d"));
     }
-
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

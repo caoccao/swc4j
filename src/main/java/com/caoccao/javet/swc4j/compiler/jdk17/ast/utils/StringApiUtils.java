@@ -560,8 +560,9 @@ public final class StringApiUtils {
         String escapedSep = java.util.regex.Pattern.quote(separator);
 
         // JavaScript limit is max number of elements, not max splits
-        // So we split without limit, then take only the first 'limit' elements
-        parts = str.split(escapedSep);
+        // So we split without limit, then take only the first 'limit' elements.
+        // A negative Java limit keeps the trailing empty strings, which is what JavaScript does.
+        parts = str.split(escapedSep, -1);
 
         if (limit > 0 && parts.length > limit) {
             // Take only first 'limit' elements

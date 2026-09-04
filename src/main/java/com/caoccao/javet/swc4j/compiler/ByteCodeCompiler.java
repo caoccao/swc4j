@@ -32,6 +32,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ExportDeclProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.module.ImportDeclProcessor;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.ts.*;
+import com.caoccao.javet.swc4j.compiler.utils.ClassResolver;
 import com.caoccao.javet.swc4j.compiler.utils.json.JsonUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -340,10 +341,15 @@ public sealed abstract class ByteCodeCompiler permits
      */
     ByteCodeCompiler(ByteCodeCompilerOptions options) {
         this.options = AssertionUtils.notNull(options, "options");
-        memory = new ByteCodeCompilerMemory();
+        // Every reflective lookup goes through the class loader configured in the options, which is
+        // the loader that will later load the generated classes
+        memory = new ByteCodeCompilerMemory(
+                new ClassResolver(options.optionalParentClassLoader().orElse(getClass().getClassLoader())));
         // Inject type aliases from options into the global scope
         memory.getScopedTypeAliasRegistry().getGlobalScope().putAll(options.typeAliasMap());
         // Initialize JSON provider. Absent provider resets to default.
+        // The provider is process-wide because generated code reads it from a static field at run
+        // time, so the compiler constructed last decides the provider of every generated class.
         JsonUtils.setProvider(options.optionalJsonProvider().orElse(null));
         parseOptions = new Swc4jParseOptions()
                 .setCaptureAst(true);
@@ -443,7 +449,10 @@ public sealed abstract class ByteCodeCompiler permits
     public ByteCodeRunner compile(String code) throws Swc4jCoreException, Swc4jByteCodeCompilerException {
         Swc4jParseOutput output = swc4j.parse(code, parseOptions);
         compileProgram(code, output.getProgram());
-        return new ByteCodeRunner(memory.getByteCodeMap(), options.optionalParentClassLoader().orElse(getClass().getClassLoader()));
+        return new ByteCodeRunner(
+                memory.getByteCodeMap(),
+                options.optionalParentClassLoader().orElse(getClass().getClassLoader()),
+                options.packagePrefix());
     }
 
     /**

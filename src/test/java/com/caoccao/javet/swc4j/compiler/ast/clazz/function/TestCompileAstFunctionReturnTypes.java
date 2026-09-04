@@ -159,6 +159,28 @@ public class TestCompileAstFunctionReturnTypes extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testReturnTypeInferredFromLoopBody(JdkVersion jdkVersion) throws Exception {
+        // Inference considers returns inside loops, switches and try statements
+        var runner = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    g() {
+                      for (let i: int = 0; i < 3; i++) {
+                        return 7
+                      }
+                      return 0
+                    }
+                    test(): int {
+                      return this.g()
+                    }
+                  }
+                }""");
+        assertThat((int) runner.createInstanceRunner("com.A").invoke("test")).isEqualTo(7);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testReturnVoid(JdkVersion jdkVersion) throws Exception {
         var runner = getCompiler(jdkVersion).compile("""
                 namespace com {

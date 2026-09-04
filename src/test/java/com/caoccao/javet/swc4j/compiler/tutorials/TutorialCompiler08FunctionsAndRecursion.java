@@ -122,7 +122,7 @@ public class TutorialCompiler08FunctionsAndRecursion {
         System.out.println("/*********************************************");
         System.out.println("     Type alias map.");
         System.out.println("*********************************************/");
-        System.out.println("Worker.name() = " + (String) classRunner.invoke("name"));
+        System.out.println("Worker.name() = " + classRunner.invoke("name"));
         System.out.println("Worker implements Runnable: "
                 + Runnable.class.isAssignableFrom(runner.getClass("com.Worker")));
     }

@@ -42,7 +42,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Method properties are not supported");
     }
 
@@ -66,7 +65,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("properties are not supported");
     }
 
@@ -87,7 +85,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Getter properties are not supported in object literals")
                 .hasMessageContaining("LinkedHashMap cannot implement property descriptors");
     }
@@ -109,7 +106,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Getter properties are not supported");
     }
 
@@ -130,7 +126,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Method properties are not supported");
     }
 
@@ -151,8 +146,7 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .hasRootCauseInstanceOf(Swc4jByteCodeCompilerException.class)
-                .hasRootCauseMessage("Method properties are not supported in object literals. " +
+                .hasMessage("Method properties are not supported in object literals. " +
                         "Object literals compile to LinkedHashMap which cannot store executable methods. " +
                         "Consider using a class with methods instead.");
     }
@@ -174,7 +168,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Method properties are not supported");
     }
 
@@ -195,7 +188,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Method properties are not supported");
     }
 
@@ -216,7 +208,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Symbol keys are not supported");
     }
 
@@ -239,7 +230,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Getter properties are not supported");
     }
 
@@ -262,7 +252,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Method properties are not supported");
     }
 
@@ -282,7 +271,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Method properties are not supported");
     }
 
@@ -302,7 +290,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Symbol keys are not supported");
     }
 
@@ -325,7 +312,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Method properties are not supported");
     }
 
@@ -346,7 +332,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Setter properties are not supported in object literals")
                 .hasMessageContaining("LinkedHashMap cannot implement property descriptors");
     }
@@ -368,7 +353,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Setter properties are not supported");
     }
 
@@ -387,7 +371,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Symbol keys are not supported in object literals")
                 .hasMessageContaining("Consider using string keys instead");
     }
@@ -407,7 +390,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Symbol keys are not supported in object literals");
     }
 
@@ -428,7 +410,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Symbol keys are not supported");
     }
 
@@ -449,7 +430,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Symbol keys are not supported");
     }
 
@@ -468,7 +448,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Symbol keys are not supported");
     }
 
@@ -490,7 +469,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Symbol keys are not supported in object literals")
                 .hasMessageContaining("JavaScript Symbols have no equivalent in Java");
     }
@@ -510,7 +488,6 @@ public class TestCompileAstObjectLitUnsupportedProps extends BaseTestCompileSuit
                   }
                 }"""))
                 .isInstanceOf(Swc4jByteCodeCompilerException.class)
-                .cause()
                 .hasMessageContaining("Symbol keys are not supported");
     }
 }
