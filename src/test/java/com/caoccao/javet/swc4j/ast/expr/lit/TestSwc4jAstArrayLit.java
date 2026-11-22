@@ -79,6 +79,27 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
     }
 
     @Test
+    public void testSpreadWithWhitespace() throws Swc4jCoreException {
+        String code = "[... a]";
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 7);
+        Swc4jAstArrayLit arrayLit = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstArrayLit.class), Swc4jAstType.ArrayLit, 0, 7);
+        assertThat(arrayLit.getElems().size()).isEqualTo(1);
+        Swc4jAstExprOrSpread exprOrSpread = assertAst(
+                arrayLit, arrayLit.getElems().get(0).get(), Swc4jAstType.ExprOrSpread, 1, 6);
+        assertThat(exprOrSpread.getSpread().isPresent()).isTrue();
+        assertThat(exprOrSpread.getSpread().get().getStart()).isEqualTo(1);
+        assertThat(exprOrSpread.getSpread().get().getEnd()).isEqualTo(4);
+        Swc4jAstIdent ident = assertAst(
+                exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 5, 6);
+        assertThat(ident.getSym()).isEqualTo("a");
+        assertSpan(code, script);
+    }
+
+    @Test
     public void testVisitor() {
         assertVisitor(tsScriptParseOptions, SimpleList.of(
                 new VisitorCase("[]", SimpleMap.of(
