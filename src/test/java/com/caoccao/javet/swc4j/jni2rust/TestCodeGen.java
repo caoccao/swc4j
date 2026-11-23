@@ -297,6 +297,9 @@ public class TestCodeGen {
                                             if (ISwc4jAst.class.isAssignableFrom((Class<?>) innerType)) {
                                                 lines.add(String.format("    if let Some(node) = self.%s.as_ref() { node.register_with_map(map) }",
                                                         arg));
+                                            } else if (Swc4jSpan.class.isAssignableFrom((Class<?>) innerType)) {
+                                                lines.add(String.format("    if let Some(span) = self.%s.as_ref() { map.register_by_span(span) }",
+                                                        arg));
                                             }
                                         } else if (innerType instanceof ParameterizedType) {
                                             assertThat(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType())).isTrue();

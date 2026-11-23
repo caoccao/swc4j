@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -95,6 +96,35 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
         assertThat(exprOrSpread.getSpread().get().getEnd()).isEqualTo(4);
         Swc4jAstIdent ident = assertAst(
                 exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 5, 6);
+        assertThat(ident.getSym()).isEqualTo("a");
+        assertSpan(code, script);
+    }
+
+    @Test
+    public void testNestedSpreadWithWhitespace() throws Swc4jCoreException {
+        String code = "[... [... a]]";
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 13);
+        Swc4jAstArrayLit outerArrayLit = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstArrayLit.class), Swc4jAstType.ArrayLit, 0, 13);
+        assertThat(outerArrayLit.getElems().size()).isEqualTo(1);
+        Swc4jAstExprOrSpread outerExprOrSpread = assertAst(
+                outerArrayLit, outerArrayLit.getElems().get(0).get(), Swc4jAstType.ExprOrSpread, 1, 12);
+        assertThat(outerExprOrSpread.getSpread().isPresent()).isTrue();
+        assertThat(outerExprOrSpread.getSpread().get().getStart()).isEqualTo(1);
+        assertThat(outerExprOrSpread.getSpread().get().getEnd()).isEqualTo(4);
+        Swc4jAstArrayLit innerArrayLit = assertAst(
+                outerExprOrSpread, outerExprOrSpread.getExpr().as(Swc4jAstArrayLit.class), Swc4jAstType.ArrayLit, 5, 12);
+        assertThat(innerArrayLit.getElems().size()).isEqualTo(1);
+        Swc4jAstExprOrSpread innerExprOrSpread = assertAst(
+                innerArrayLit, innerArrayLit.getElems().get(0).get(), Swc4jAstType.ExprOrSpread, 6, 11);
+        assertThat(innerExprOrSpread.getSpread().isPresent()).isTrue();
+        assertThat(innerExprOrSpread.getSpread().get().getStart()).isEqualTo(6);
+        assertThat(innerExprOrSpread.getSpread().get().getEnd()).isEqualTo(9);
+        Swc4jAstIdent ident = assertAst(
+                innerExprOrSpread, innerExprOrSpread.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 10, 11);
         assertThat(ident.getSym()).isEqualTo("a");
         assertSpan(code, script);
     }
