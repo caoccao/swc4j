@@ -28023,6 +28023,7 @@ impl<'local> FromJava<'local> for ExportNamespaceSpecifier {
 impl RegisterWithMap<ByteToIndexMap> for ExprOrSpread {
   fn register_with_map(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span());
+    if let Some(span) = self.spread.as_ref() { map.register_by_span(span) }
     self.expr.register_with_map(map);
   }
 }
