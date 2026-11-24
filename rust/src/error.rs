@@ -92,7 +92,11 @@ impl JavaCoreException {
     )
     .expect("Couldn't call static method Swc4jCoreException.parseError()");
     let exception = unsafe { JThrowable::from_raw(env, exception.as_raw()) };
-    env.throw(exception).expect("Couldn't call throw parse error");
+    if let Err(err) = env.throw(exception) {
+      if !matches!(err, jni::errors::Error::JavaException) {
+        panic!("Couldn't call throw parse error: {err}");
+      }
+    }
   }
 
   pub fn throw_transform_error<'local, 'a>(
@@ -117,7 +121,11 @@ impl JavaCoreException {
     )
     .expect("Couldn't call static method Swc4jCoreException.transformError()");
     let exception = unsafe { JThrowable::from_raw(env, exception.as_raw()) };
-    env.throw(exception).expect("Couldn't call throw transform error");
+    if let Err(err) = env.throw(exception) {
+      if !matches!(err, jni::errors::Error::JavaException) {
+        panic!("Couldn't call throw transform error: {err}");
+      }
+    }
   }
 
   pub fn throw_transpile_error<'local, 'a>(
@@ -142,7 +150,11 @@ impl JavaCoreException {
     )
     .expect("Couldn't call static method Swc4jCoreException.transpileError()");
     let exception = unsafe { JThrowable::from_raw(env, exception.as_raw()) };
-    env.throw(exception).expect("Couldn't call throw transpile error");
+    if let Err(err) = env.throw(exception) {
+      if !matches!(err, jni::errors::Error::JavaException) {
+        panic!("Couldn't call throw transpile error: {err}");
+      }
+    }
   }
 }
 
