@@ -164,6 +164,8 @@ tasks.test {
 
 // Create a separate task for performance tests
 tasks.register<Test>("performanceTest") {
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
     useJUnitPlatform {
         includeTags("performance")
     }
