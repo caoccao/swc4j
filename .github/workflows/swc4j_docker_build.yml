@@ -1,0 +1,56 @@
+name: swc4j Docker Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+
+permissions:
+  contents: read
+
+jobs:
+  build_linux:
+    name: Ubuntu 20.04 / ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            platform: linux/amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    env:
+      ARCH: ${{ matrix.arch }}
+      PLATFORM: ${{ matrix.platform }}
+      IMAGE: swc4j-builder:ubuntu20.04-${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build the image from the checkout
+        run: docker buildx build --platform "$PLATFORM" --load -f docker/Dockerfile -t "$IMAGE" .
+
+      - name: Build, test, and export the library
+        run: |
+          docker run --rm --platform "$PLATFORM" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/workspace,readonly" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/src/main/resources,dst=/out" \
+            --mount "type=volume,src=swc4j-focal-$ARCH-cache,dst=/cache" \
+            "$IMAGE"
+
+      - name: Upload the Linux shared library
+        uses: actions/upload-artifact@v6
+        with:
+          name: swc4j-linux-${{ matrix.arch }}
+          path: src/main/resources/libswc4j-linux-${{ matrix.arch }}.v.*.so
+          if-no-files-found: error
