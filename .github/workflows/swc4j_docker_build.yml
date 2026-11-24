@@ -3,15 +3,16 @@ name: swc4j Docker Build
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
+    paths: &docker_build_paths
+      - "**"
+      - "!**.md"
+      - "!docs/**"
+      - "!.github/workflows/**"
+      - ".github/workflows/swc4j_docker_build.yml"
   push:
     branches:
       - main
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
+    paths: *docker_build_paths
 
 permissions:
   contents: read
