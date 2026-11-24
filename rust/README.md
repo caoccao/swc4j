@@ -78,6 +78,25 @@ cargo ndk --target armv7-linux-androideabi build --release && deno run --allow-a
 cargo ndk --target aarch64-linux-android build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o android -a arm64
 ```
 
+## Linux Runtime Dependencies
+
+The x86_64 and arm64 swc4j shared libraries depend on the GCC runtime, `libgcc_s.so.1`. Both the project's Ubuntu 20.04 builder images and its `gradle:9.9.2-jdk17-corretto` test image include this library on both architectures. Applications using those images can ship the swc4j `.so` without bundling a separate copy of the GCC runtime.
+
+The results below apply to both x86_64 and arm64 unless a row specifies one architecture. To check another glibc-based image, run `ldd` on the matching swc4j shared library inside that image.
+
+| Base image | `libgcc_s.so.1` in the image | swc4j v2.3.0 dependency check |
+| --- | --- | --- |
+| Ubuntu 20.04, 22.04, 24.04, 26.04 | Included (`libgcc-s1`) | All dependencies resolved |
+| Debian 12 and 13 (`slim`) | Included (`libgcc-s1`) | All dependencies resolved |
+| Fedora 45, Rocky Linux 9, AlmaLinux 9, Amazon Linux 2023 | Included (`libgcc`) | All dependencies resolved |
+| Red Hat UBI 9 and 10 (`ubi-minimal`) | Included (`libgcc`) | All dependencies resolved |
+| Red Hat UBI 8 (`ubi-minimal`) | Included (`libgcc`) | glibc 2.28 lacks required symbols, including `GLIBC_2.29` |
+| openSUSE Leap 16.0 | Included (`libgcc_s1`) | All dependencies resolved |
+| Arch Linux (`base`, x86_64) | Included (`libgcc`) | All dependencies resolved |
+| Distroless `java17-debian13` | Included | All dependencies resolved |
+| Distroless `base-debian13` | Absent | Loader reported a missing `libgcc_s.so.1` |
+| Alpine 3.24 | Available via `apk add libgcc` | The base image uses musl and lacks the glibc loader required by these binaries |
+
 ## Logging
 
 The debug log can be turned on as follows.
