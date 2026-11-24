@@ -14,6 +14,7 @@ on:
       - "docs/**"
 
 env:
+  GRADLE_VERSION: 9.9.2
   SWC4J_VERSION: 2.3.0
 
 jobs:
@@ -79,7 +80,7 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
       with:
-        gradle-version: 8.14.3
+        gradle-version: ${{ env.GRADLE_VERSION }}
 
     - name: Build and Test
       run: |
@@ -152,7 +153,7 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
       with:
-        gradle-version: 8.14.3
+        gradle-version: ${{ env.GRADLE_VERSION }}
 
     - name: Build and Test
       run: |
@@ -229,7 +230,7 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
       with:
-        gradle-version: 8.14.3
+        gradle-version: ${{ env.GRADLE_VERSION }}
 
     - name: Build and Test
       run: |

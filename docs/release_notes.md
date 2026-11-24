@@ -36,6 +36,7 @@
 * Fixed `ByteCodeRunner.getDefaultClass()` ignoring the package prefix
 * Fixed `ByteArrayClassLoader` to delegate to its parent and to be parallel capable
 * Fixed native thread panic when throwing Java core exceptions via JNI
+* Fixed panic in `ExprOrSpread` when spread operator has trailing whitespace
 
 ## 2.2.0
 
