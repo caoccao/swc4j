@@ -1,3 +1,10 @@
 **
 !docker/build-native.sh
-!rust/rust-toolchain.toml
+!*.gradle.kts
+!gradle.properties
+!src/**
+src/main/resources/libswc4j-*
+!rust/**
+rust/target
+!scripts/deno/*.ts
+!docs/features/ast.dot
